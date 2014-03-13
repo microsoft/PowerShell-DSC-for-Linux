@@ -1,0 +1,18 @@
+instance of Linux_File
+{
+	Contents = "linux file contents\n";
+	DestinationPath = "/tmp/linux.txt";
+	Ensure = "file";
+	ResourceId = "[Puppet_File]MyFileExample";
+	ModuleName = "PSDesiredStateConfiguration";
+	ModuleVersion = "1.0";
+	
+	
+};
+
+instance of OMI_ConfigurationDocument
+{
+  Version="1.0.0";
+  
+};
+

@@ -1,0 +1,8 @@
+# omireg /home/johnkord/dev/imp/dsc/LCM/output/lib/libdsccore.so
+LIBRARY=dsccore
+EXTRACLASS=MSFT_Credential
+CLASS=MSFT_DSCLocalConfigurationManager
+EXTRACLASS=MSFT_DSCMetaConfiguration
+EXTRACLASS=MSFT_KeyValuePair
+EXTRACLASS=MSFT_LogResource:OMI_BaseResource
+EXTRACLASS=OMI_Error:CIM_Error

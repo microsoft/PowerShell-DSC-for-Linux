@@ -1,0 +1,64 @@
+
+[Abstract, ClassVersion("1.0.0")] 
+class OMI_BaseResource
+{
+  [required] string ResourceId;
+  [write] string SourceInfo;
+  [write] string DependsOn[];
+  [required] string ModuleName;
+  [required] string ModuleVersion;
+};
+
+[Abstract, ClassVersion("1.0.0")]
+class MSFT_KeyValuePair
+{
+	[Key]
+	string Key;
+
+	[write]
+	string Value;
+};
+
+[Abstract, ClassVersion("1.0.0")] 
+class MSFT_BaseConfigurationProviderRegistration
+{
+  [key] String ClassName;
+  String DSCEngineCompatVersion;
+  String DSCModuleVersion;
+};
+
+[ClassVersion("1.0.0")] 
+class MSFT_CimConfigurationProviderRegistration : MSFT_BaseConfigurationProviderRegistration
+{
+  String Namespace;
+};
+
+[ClassVersion("1.0.0")] 
+class MSFT_PSConfigurationProviderRegistration : MSFT_BaseConfigurationProviderRegistration
+{
+  String ModuleName;
+};
+
+[ClassVersion("1.0.0")] 
+class OMI_ConfigurationDocument
+{
+  String Version;
+  String Author;
+  String Copyright;
+  String HelpInfoUri;
+  String ContentType;
+  String GenerationDate;
+  String GenerationHost;
+};
+
+[ClassVersion("1.0.0")]
+class MSFT_Credential 
+{   
+    [MaxLen ( 256 )]
+    string UserName;
+    string Password;
+};
+
+
+
+

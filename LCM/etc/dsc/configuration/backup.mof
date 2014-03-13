@@ -1,0 +1,25 @@
+instance of OMI_nxScriptResource
+{
+	GetScript = "#!/bin/sh
+	whoami; groups; exit 0";
+	SetScript = "#!/bin/sh
+	
+	
+	echo set > /tmp/rootest/set.txt; echo ran set; exit 0";
+	TestScript = "#!/bin/sh
+	echo \"\"
+	echo test > /tmp/rootest/test.txt; echo ran test; exit 0";
+	User = "johnkord";
+	Group = "johnkord";
+	ResourceId = "[OMI_nxScriptResource]Script1";
+	ModuleName = "PSDesiredStateConfiguration";
+	ModuleVersion = "1.0";
+	
+};
+
+instance of OMI_ConfigurationDocument
+{
+  Version="1.0.0";
+  
+};
+ 

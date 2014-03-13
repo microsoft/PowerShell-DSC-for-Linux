@@ -1,0 +1,2 @@
+REM do a build here so that you pull in the correct strings
+generate-localizedmfl -build -path %_nttree%\dsc\dsccore.dll -muipath %_nttree%\loc\src\bin\dsc\dsccore.dll.mui -namespace root/Microsoft/Windows/DesiredStateConfiguration -providername dsccore -HostingModel LocalSystemHost -outpath .\temp

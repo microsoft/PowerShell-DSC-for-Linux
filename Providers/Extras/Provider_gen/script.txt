@@ -1,0 +1,9 @@
+& "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\convert-moftoprovider.exe" -MofFile .\Linux_File.mof -classlist Linux_File -includepath C:\CIM\CIM-2.26.0 C:\CIM\MSFT -outpath .\temp
+
+
+PS C:\Users\jkordic\Documents\test_prov> & "C:\Program Files (x86)\Windows Kits\8.0\bin\x86\convert-moftoprovider.exe" -
+MofFile .\MSFT_File.mof -classlist  MSFT_File -includepath C:\CIM\CIM-2.26.0 C:\CIM\MSFT -outpath .\temp
+
+
+
+ ./output/bin/omicli iv "/dsc" { MSFT_DSCLocalConfigurationManager } GetConfiguration

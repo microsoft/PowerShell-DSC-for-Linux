@@ -1,0 +1,12 @@
+[Abstract,
+	Description(
+	"This represents a key-value pair."),
+	ClassVersion("1.0.0")]
+class MSFT_KeyValuePair
+{
+	[Key]
+	string Key;
+
+	[write]
+	string Value;
+};

@@ -1,0 +1,24 @@
+instance of TEST_Test1
+{
+    ResourceId = "g";
+    ModuleName="TEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "10";
+};
+
+
+
+instance of TEST_Test1
+{
+    ResourceId = "h";
+    ModuleName="TEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "17";
+    DependsOn={"g"};
+};
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

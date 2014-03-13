@@ -1,0 +1,15 @@
+instance of TEST_Test1
+{
+    ResourceId = "Res1";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 ="id1";
+};
+
+
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

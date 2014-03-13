@@ -1,0 +1,4 @@
+# omireg /home/johnkord/dev/imp/dsc/Providers/target/libOMI_nxFileResource.so
+LIBRARY=OMI_nxFileResource
+HOSTING=@requestor@
+CLASS=OMI_nxFileResource:OMI_BaseResource

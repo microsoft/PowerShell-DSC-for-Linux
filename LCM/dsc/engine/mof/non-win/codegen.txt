@@ -1,0 +1,4 @@
+REM copy OMI_error from admin\wmi\winomi\omiutils\mofs\OMI_Errors.mof, remove pragma and cim_error definition
+REM use -OldRcPath to retain old rc resource numbers
+"C:\Program Files (x86)\Windows Kits\8.0\bin\x86\convert-moftoprovider.exe" -moffile ..\OMI_BaseResource.mof ..\MSFT_KeyValuePair.mof ..\MSFT_Credential.mof ..\MSFT_DSCMetaConfiguration.mof MSFT_LogResource.mof MSFT_DSCLocalConfigManager.mof OMI_Errors.mof -classlist MSFT_DSCLocalConfigurationManager -ExtraClass MSFT_DSCMetaConfiguration  OMI_Error MSFT_LogResource -includepath %sdxroot%\admin\wmi\wmiv2\CIM-2.26.0  -OldRcPath %sdxroot%\admin\dsc\engine\lcm\strings.rc -outpath .\temp
+

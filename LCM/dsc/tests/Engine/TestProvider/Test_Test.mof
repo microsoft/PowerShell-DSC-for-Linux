@@ -1,0 +1,352 @@
+#pragma include ("OMI_BaseResource.mof")
+
+[ClassVersion("1.0.0"), Description("TestProvider1")]
+class TEST_Test1 : OMI_BaseResource
+{
+[Key, Description("TestPath")]
+    string Id1;
+
+[static,
+         Description (
+             "Get resource states based on input configuration file." )]
+    uint32 GetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,
+
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,
+            [out,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Current state of Configuration resources specified." )]
+        string OutputResource
+        );
+
+        [static,
+         Description (
+             "Test resource states based on input configuration file." )]
+    uint32 TestTargetResource(
+            [in,
+             EmbeddedInstance("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in, 
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,   
+            [out,
+             Description (
+                "true if same, false otherwise." )]
+        boolean Result,     
+            [out,
+             Description (
+                "Context information provider can use to optimize set, this is optional." )]
+        uint64 ProviderContext
+        );
+
+        [static,
+         Description (
+            "Set resource states based on input configuration file." )]
+        uint32 SetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in,
+             Description (
+                "Context information provider can use to optimize set from TestTargetResource, this is optional." )]
+        uint64 ProviderContext,
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags
+		);
+};
+
+
+[ClassVersion("1.0.0"), Description("TestProvider1")]
+class TEST_Test2 : OMI_BaseResource
+{
+[Key, Description("TestPath")]
+    string Id1;
+
+[ static,
+         Description (
+             "Get resource states based on input configuration file." )]
+    uint32 GetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,
+
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,
+            [out,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Current state of Configuration resources specified." )]
+        string OutputResource
+        );
+
+        [ static,
+         Description (
+             "Test resource states based on input configuration file." )]
+    uint32 TestTargetResource(
+            [in,
+             EmbeddedInstance("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in, 
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,   
+            [out,
+             Description (
+                "true if same, false otherwise." )]
+        boolean Result,     
+            [out,
+             Description (
+                "Context information provider can use to optimize set, this is optional." )]
+        uint64 ProviderContext
+        );
+
+        [static,
+         Description (
+            "Set resource states based on input configuration file." )]
+        uint32 SetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in,
+             Description (
+                "Context information provider can use to optimize set from TestTargetResource, this is optional." )]
+        uint64 ProviderContext,
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags
+		);
+};
+[ClassVersion("1.0.0"), Description("TestProvider3")]
+class TEST_Test3User : OMI_BaseResource
+{
+[Key, Description("TestPath")]
+    string Id1;
+
+[static,
+         Description (
+             "Get resource states based on input configuration file." )]
+    uint32 GetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,
+
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,
+            [out,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Current state of Configuration resources specified." )]
+        string OutputResource
+        );
+
+        [static,
+         Description (
+             "Test resource states based on input configuration file." )]
+    uint32 TestTargetResource(
+            [in,
+             EmbeddedInstance("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in, 
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,   
+            [out,
+             Description (
+                "true if same, false otherwise." )]
+        boolean Result,     
+            [out,
+             Description (
+                "Context information provider can use to optimize set, this is optional." )]
+        uint64 ProviderContext
+        );
+
+        [static,
+         Description (
+            "Set resource states based on input configuration file." )]
+        uint32 SetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in,
+             Description (
+                "Context information provider can use to optimize set from TestTargetResource, this is optional." )]
+        uint64 ProviderContext,
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags
+		);
+};
+
+[ClassVersion("1.0.0"), Description("TestProvider4 doesn't derive OMI")]
+class TEST_Test4NoOMI 
+{
+[Key, Description("TestPath")]
+    string Id1;
+
+[static,
+         Description (
+             "Get resource states based on input configuration file." )]
+    uint32 GetTargetResource(
+            [in,
+             EmbeddedInstance ("TEST_Test4NoOMI"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,
+
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,
+            [out,
+             EmbeddedInstance ("TEST_Test4NoOMI"),
+             Description (
+                "Current state of Configuration resources specified." )]
+        string OutputResource
+        );
+
+        [static,
+         Description (
+             "Test resource states based on input configuration file." )]
+    uint32 TestTargetResource(
+            [in,
+             EmbeddedInstance("TEST_Test4NoOMI"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in, 
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,   
+            [out,
+             Description (
+                "true if same, false otherwise." )]
+        boolean Result,     
+            [out,
+             Description (
+                "Context information provider can use to optimize set, this is optional." )]
+        uint64 ProviderContext
+        );
+
+        [static,
+         Description (
+            "Set resource states based on input configuration file." )]
+        uint32 SetTargetResource(
+            [in,
+             EmbeddedInstance ("TEST_Test4NoOMI"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in,
+             Description (
+                "Context information provider can use to optimize set from TestTargetResource, this is optional." )]
+        uint64 ProviderContext,
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags
+		);
+};
+
+
+[ClassVersion("1.0.0"), Description("StopTestProvider1")]
+class TEST_Stop : OMI_BaseResource
+{
+[Key, Description("TestPath")]
+    string Id1;
+
+[static,
+         Description (
+             "Get resource states based on input configuration file." )]
+    uint32 GetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,
+
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,
+            [out,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Current state of Configuration resources specified." )]
+        string OutputResource
+        );
+
+        [static,
+         Description (
+             "Test resource states based on input configuration file." )]
+    uint32 TestTargetResource(
+            [in,
+             EmbeddedInstance("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in, 
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,   
+            [out,
+             Description (
+                "true if same, false otherwise." )]
+        boolean Result,     
+            [out,
+             Description (
+                "Context information provider can use to optimize set, this is optional." )]
+        uint64 ProviderContext
+        );
+
+        [static,
+         Description (
+            "Set resource states based on input configuration file." )]
+        uint32 SetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_BaseResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in,
+             Description (
+                "Context information provider can use to optimize set from TestTargetResource, this is optional." )]
+        uint64 ProviderContext,
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags
+		);
+};
