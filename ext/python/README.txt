@@ -9,6 +9,9 @@ Building:
      > tar zxvf Python-2.5.tgz
      > cd Python-2.5
      > ./configure --enable-unicode=ucs4 --enable-shared --with-cxx-main=g++
+     <edit Makefile>
+     change: 'CXX= g++ -pthread'
+     to: 'CXX= g++ -pthread -fPIC'
      > make
      > sudo make install
      > sudo ln -s /usr/local/lib/libpython2.5.so.1.0 /usr/lib64/libpython2.5.so.1.0
