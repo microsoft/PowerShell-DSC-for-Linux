@@ -5,19 +5,11 @@
 # 2014-01-17
 #--------------------------------------------------------------------------------
 
-# Please define the variables below for your system!
-PAL_PATH := ../../pal
-
-
-PAL_DIR := $(shell cd $(PAL_PATH); pwd)
 OMI_DIR := $(shell cd ../LCM; pwd)
 BASE_DIR := $(shell pwd)
 TARGET_DIR := $(BASE_DIR)/target
 
-include $(PAL_DIR)/build/config.mak
 include $(BASE_DIR)/config.mak
-
-PAL_OUTPUT_DIR := $(PAL_DIR)/target/$(BUILD_CONFIGURATION)
 
 ifndef ENABLE_DEBUG
 $(error "ENABLE_DEBUG is not set.  Please re-run configure")
