@@ -1,9 +1,13 @@
-instance of Linux_File
+instance of OMI_nxFileResource
 {
 	Contents = "linux file contents\n";
 	DestinationPath = "/tmp/linux.txt";
-	Ensure = "file";
-	ResourceId = "[Puppet_File]MyFileExample";
+	Ensure = "Present";
+	Type = "File";
+	Owner = "johnkord";
+	Group = "johnkord";
+	Mode = "644";
+	ResourceId = "[OMI_nxFileResource]File1";
 	ModuleName = "PSDesiredStateConfiguration";
 	ModuleVersion = "1.0";
 	
