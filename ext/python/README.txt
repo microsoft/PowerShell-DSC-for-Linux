@@ -14,8 +14,6 @@ Building:
      to: 'CXX= g++ -pthread -fPIC'
      > make
      > sudo make install
-     if libpython2.5.so.1.0 does not exists in /usr/local/lib
-         > sudo ln -s /usr/local/lib/libpython2.5.so.1.0 /usr/lib64/libpython2.5.so.1.0
-
+     > sudo ln -s /usr/local/lib/libpython2.5.so.1.0 /usr/lib64/libpython2.5.so.1.0
 Post building:
      Restore '/usr/local/bin/python' if you saved it in the first step.
