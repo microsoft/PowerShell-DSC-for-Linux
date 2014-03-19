@@ -12,6 +12,5 @@ Build instructions:
         to 'using gcc : : : <cxxflags>"-fPIC -DPy_UNICODE_SIZE=4" ;'
     </edit file>
 
-#    > sudo ./b2 --build-dir=/tmp/boost install
     > sudo ./b2 --build-dir=/tmp/boost link=static install
 
