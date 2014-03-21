@@ -8,7 +8,7 @@
 */
 #include <ctype.h>
 #include <MI.h>
-#include "OMI_nxUserResource.h"
+#include "MSFT_nxUserResource.h"
 
 /*
 **==============================================================================
@@ -981,1091 +981,1091 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 /*
 **==============================================================================
 **
-** OMI_nxUserResource
+** MSFT_nxUserResource
 **
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean OMI_nxUserResource_UserName_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_UserName_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_UserName_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_UserName_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_UserName_Key_qual_value
+    &MSFT_nxUserResource_UserName_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_UserName_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_UserName_quals[] =
 {
-    &OMI_nxUserResource_UserName_Key_qual,
+    &MSFT_nxUserResource_UserName_Key_qual,
 };
 
-/* property OMI_nxUserResource.UserName */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_UserName_prop =
+/* property MSFT_nxUserResource.UserName */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_UserName_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
     0x00756508, /* code */
     MI_T("UserName"), /* name */
-    OMI_nxUserResource_UserName_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_UserName_quals), /* numQualifiers */
+    MSFT_nxUserResource_UserName_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_UserName_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, UserName), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, UserName), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_Ensure_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_Ensure_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_Ensure_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_Ensure_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_Ensure_Write_qual_value
+    &MSFT_nxUserResource_Ensure_Write_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_Ensure_ValueMap_qual_data_value[] =
+static MI_CONST MI_Char* MSFT_nxUserResource_Ensure_ValueMap_qual_data_value[] =
 {
     MI_T("Present"),
     MI_T("Absent"),
 };
 
-static MI_CONST MI_ConstStringA OMI_nxUserResource_Ensure_ValueMap_qual_value =
+static MI_CONST MI_ConstStringA MSFT_nxUserResource_Ensure_ValueMap_qual_value =
 {
-    OMI_nxUserResource_Ensure_ValueMap_qual_data_value,
-    MI_COUNT(OMI_nxUserResource_Ensure_ValueMap_qual_data_value),
+    MSFT_nxUserResource_Ensure_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxUserResource_Ensure_ValueMap_qual_data_value),
 };
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_Ensure_ValueMap_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_Ensure_ValueMap_qual =
 {
     MI_T("ValueMap"),
     MI_STRINGA,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_Ensure_ValueMap_qual_value
+    &MSFT_nxUserResource_Ensure_ValueMap_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_Ensure_Values_qual_data_value[] =
+static MI_CONST MI_Char* MSFT_nxUserResource_Ensure_Values_qual_data_value[] =
 {
     MI_T("2"),
     MI_T("3"),
 };
 
-static MI_CONST MI_ConstStringA OMI_nxUserResource_Ensure_Values_qual_value =
+static MI_CONST MI_ConstStringA MSFT_nxUserResource_Ensure_Values_qual_value =
 {
-    OMI_nxUserResource_Ensure_Values_qual_data_value,
-    MI_COUNT(OMI_nxUserResource_Ensure_Values_qual_data_value),
+    MSFT_nxUserResource_Ensure_Values_qual_data_value,
+    MI_COUNT(MSFT_nxUserResource_Ensure_Values_qual_data_value),
 };
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_Ensure_Values_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_Ensure_Values_qual =
 {
     MI_T("Values"),
     MI_STRINGA,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_Ensure_Values_qual_value
+    &MSFT_nxUserResource_Ensure_Values_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_Ensure_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_Ensure_quals[] =
 {
-    &OMI_nxUserResource_Ensure_Write_qual,
-    &OMI_nxUserResource_Ensure_ValueMap_qual,
-    &OMI_nxUserResource_Ensure_Values_qual,
+    &MSFT_nxUserResource_Ensure_Write_qual,
+    &MSFT_nxUserResource_Ensure_ValueMap_qual,
+    &MSFT_nxUserResource_Ensure_Values_qual,
 };
 
-/* property OMI_nxUserResource.Ensure */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_Ensure_prop =
+/* property MSFT_nxUserResource.Ensure */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_Ensure_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00656506, /* code */
     MI_T("Ensure"), /* name */
-    OMI_nxUserResource_Ensure_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_Ensure_quals), /* numQualifiers */
+    MSFT_nxUserResource_Ensure_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_Ensure_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, Ensure), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, Ensure), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_FullName_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_FullName_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_FullName_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_FullName_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_FullName_Write_qual_value
+    &MSFT_nxUserResource_FullName_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_FullName_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_FullName_quals[] =
 {
-    &OMI_nxUserResource_FullName_Write_qual,
+    &MSFT_nxUserResource_FullName_Write_qual,
 };
 
-/* property OMI_nxUserResource.FullName */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_FullName_prop =
+/* property MSFT_nxUserResource.FullName */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_FullName_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00666508, /* code */
     MI_T("FullName"), /* name */
-    OMI_nxUserResource_FullName_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_FullName_quals), /* numQualifiers */
+    MSFT_nxUserResource_FullName_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_FullName_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, FullName), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, FullName), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_Description_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_Description_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_Description_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_Description_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_Description_Write_qual_value
+    &MSFT_nxUserResource_Description_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_Description_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_Description_quals[] =
 {
-    &OMI_nxUserResource_Description_Write_qual,
+    &MSFT_nxUserResource_Description_Write_qual,
 };
 
-/* property OMI_nxUserResource.Description */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_Description_prop =
+/* property MSFT_nxUserResource.Description */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_Description_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00646E0B, /* code */
     MI_T("Description"), /* name */
-    OMI_nxUserResource_Description_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_Description_quals), /* numQualifiers */
+    MSFT_nxUserResource_Description_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_Description_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, Description), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, Description), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_Password_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_Password_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_Password_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_Password_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_Password_Write_qual_value
+    &MSFT_nxUserResource_Password_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_Password_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_Password_quals[] =
 {
-    &OMI_nxUserResource_Password_Write_qual,
+    &MSFT_nxUserResource_Password_Write_qual,
 };
 
-/* property OMI_nxUserResource.Password */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_Password_prop =
+/* property MSFT_nxUserResource.Password */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_Password_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00706408, /* code */
     MI_T("Password"), /* name */
-    OMI_nxUserResource_Password_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_Password_quals), /* numQualifiers */
+    MSFT_nxUserResource_Password_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_Password_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, Password), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, Password), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_Disabled_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_Disabled_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_Disabled_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_Disabled_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_Disabled_Write_qual_value
+    &MSFT_nxUserResource_Disabled_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_Disabled_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_Disabled_quals[] =
 {
-    &OMI_nxUserResource_Disabled_Write_qual,
+    &MSFT_nxUserResource_Disabled_Write_qual,
 };
 
-/* property OMI_nxUserResource.Disabled */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_Disabled_prop =
+/* property MSFT_nxUserResource.Disabled */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_Disabled_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00646408, /* code */
     MI_T("Disabled"), /* name */
-    OMI_nxUserResource_Disabled_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_Disabled_quals), /* numQualifiers */
+    MSFT_nxUserResource_Disabled_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_Disabled_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, Disabled), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, Disabled), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_PasswordChangeRequired_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_PasswordChangeRequired_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_PasswordChangeRequired_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_PasswordChangeRequired_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_PasswordChangeRequired_Write_qual_value
+    &MSFT_nxUserResource_PasswordChangeRequired_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_PasswordChangeRequired_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_PasswordChangeRequired_quals[] =
 {
-    &OMI_nxUserResource_PasswordChangeRequired_Write_qual,
+    &MSFT_nxUserResource_PasswordChangeRequired_Write_qual,
 };
 
-/* property OMI_nxUserResource.PasswordChangeRequired */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_PasswordChangeRequired_prop =
+/* property MSFT_nxUserResource.PasswordChangeRequired */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_PasswordChangeRequired_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00706416, /* code */
     MI_T("PasswordChangeRequired"), /* name */
-    OMI_nxUserResource_PasswordChangeRequired_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_PasswordChangeRequired_quals), /* numQualifiers */
+    MSFT_nxUserResource_PasswordChangeRequired_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_PasswordChangeRequired_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, PasswordChangeRequired), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, PasswordChangeRequired), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_HomeDirectory_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_HomeDirectory_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_HomeDirectory_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_HomeDirectory_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_HomeDirectory_Write_qual_value
+    &MSFT_nxUserResource_HomeDirectory_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_HomeDirectory_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_HomeDirectory_quals[] =
 {
-    &OMI_nxUserResource_HomeDirectory_Write_qual,
+    &MSFT_nxUserResource_HomeDirectory_Write_qual,
 };
 
-/* property OMI_nxUserResource.HomeDirectory */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_HomeDirectory_prop =
+/* property MSFT_nxUserResource.HomeDirectory */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_HomeDirectory_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x0068790D, /* code */
     MI_T("HomeDirectory"), /* name */
-    OMI_nxUserResource_HomeDirectory_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_HomeDirectory_quals), /* numQualifiers */
+    MSFT_nxUserResource_HomeDirectory_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_HomeDirectory_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, HomeDirectory), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, HomeDirectory), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_GroupID_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_GroupID_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GroupID_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GroupID_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_GroupID_Write_qual_value
+    &MSFT_nxUserResource_GroupID_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_GroupID_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_GroupID_quals[] =
 {
-    &OMI_nxUserResource_GroupID_Write_qual,
+    &MSFT_nxUserResource_GroupID_Write_qual,
 };
 
-/* property OMI_nxUserResource.GroupID */
-static MI_CONST MI_PropertyDecl OMI_nxUserResource_GroupID_prop =
+/* property MSFT_nxUserResource.GroupID */
+static MI_CONST MI_PropertyDecl MSFT_nxUserResource_GroupID_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00676407, /* code */
     MI_T("GroupID"), /* name */
-    OMI_nxUserResource_GroupID_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_GroupID_quals), /* numQualifiers */
+    MSFT_nxUserResource_GroupID_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_GroupID_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource, GroupID), /* offset */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    offsetof(MSFT_nxUserResource, GroupID), /* offset */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     NULL,
 };
 
-static MI_PropertyDecl MI_CONST* MI_CONST OMI_nxUserResource_props[] =
+static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxUserResource_props[] =
 {
-    &OMI_nxUserResource_UserName_prop,
-    &OMI_nxUserResource_Ensure_prop,
-    &OMI_nxUserResource_FullName_prop,
-    &OMI_nxUserResource_Description_prop,
-    &OMI_nxUserResource_Password_prop,
-    &OMI_nxUserResource_Disabled_prop,
-    &OMI_nxUserResource_PasswordChangeRequired_prop,
-    &OMI_nxUserResource_HomeDirectory_prop,
-    &OMI_nxUserResource_GroupID_prop,
+    &MSFT_nxUserResource_UserName_prop,
+    &MSFT_nxUserResource_Ensure_prop,
+    &MSFT_nxUserResource_FullName_prop,
+    &MSFT_nxUserResource_Description_prop,
+    &MSFT_nxUserResource_Password_prop,
+    &MSFT_nxUserResource_Disabled_prop,
+    &MSFT_nxUserResource_PasswordChangeRequired_prop,
+    &MSFT_nxUserResource_HomeDirectory_prop,
+    &MSFT_nxUserResource_GroupID_prop,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_GetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_GetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_GetTargetResource_Static_qual_value
+    &MSFT_nxUserResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_GetTargetResource_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxUserResource_GetTargetResource_Description_qual_value = MI_T("4");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_GetTargetResource_Description_qual_value
+    &MSFT_nxUserResource_GetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_GetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_GetTargetResource_quals[] =
 {
-    &OMI_nxUserResource_GetTargetResource_Static_qual,
-    &OMI_nxUserResource_GetTargetResource_Description_qual,
+    &MSFT_nxUserResource_GetTargetResource_Static_qual,
+    &MSFT_nxUserResource_GetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_GetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_GetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_GetTargetResource_InputResource_In_qual_value
+    &MSFT_nxUserResource_GetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxUserResource");
+static MI_CONST MI_Char* MSFT_nxUserResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxUserResource");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxUserResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_GetTargetResource_InputResource_Description_qual_value = MI_T("5");
+static MI_CONST MI_Char* MSFT_nxUserResource_GetTargetResource_InputResource_Description_qual_value = MI_T("5");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_GetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxUserResource_GetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_GetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_GetTargetResource_InputResource_quals[] =
 {
-    &OMI_nxUserResource_GetTargetResource_InputResource_In_qual,
-    &OMI_nxUserResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxUserResource_GetTargetResource_InputResource_Description_qual,
+    &MSFT_nxUserResource_GetTargetResource_InputResource_In_qual,
+    &MSFT_nxUserResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxUserResource_GetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.GetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_GetTargetResource_InputResource_param =
+/* parameter MSFT_nxUserResource.GetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_GetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxUserResource_GetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_GetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxUserResource_GetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_GetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxUserResource"), /* className */
+    MI_T("MSFT_nxUserResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_GetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxUserResource_GetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_GetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_GetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_GetTargetResource_Flags_In_qual_value
+    &MSFT_nxUserResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_GetTargetResource_Flags_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxUserResource_GetTargetResource_Flags_Description_qual_value = MI_T("6");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_GetTargetResource_Flags_Description_qual_value
+    &MSFT_nxUserResource_GetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_GetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_GetTargetResource_Flags_quals[] =
 {
-    &OMI_nxUserResource_GetTargetResource_Flags_In_qual,
-    &OMI_nxUserResource_GetTargetResource_Flags_Description_qual,
+    &MSFT_nxUserResource_GetTargetResource_Flags_In_qual,
+    &MSFT_nxUserResource_GetTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.GetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_GetTargetResource_Flags_param =
+/* parameter MSFT_nxUserResource.GetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_GetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxUserResource_GetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_GetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxUserResource_GetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_GetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_GetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxUserResource_GetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_GetTargetResource_OutputResource_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_GetTargetResource_OutputResource_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_OutputResource_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_OutputResource_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_GetTargetResource_OutputResource_Out_qual_value
+    &MSFT_nxUserResource_GetTargetResource_OutputResource_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxUserResource");
+static MI_CONST MI_Char* MSFT_nxUserResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxUserResource");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
+    &MSFT_nxUserResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxUserResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("7");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_OutputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_OutputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_GetTargetResource_OutputResource_Description_qual_value
+    &MSFT_nxUserResource_GetTargetResource_OutputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_GetTargetResource_OutputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_GetTargetResource_OutputResource_quals[] =
 {
-    &OMI_nxUserResource_GetTargetResource_OutputResource_Out_qual,
-    &OMI_nxUserResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
-    &OMI_nxUserResource_GetTargetResource_OutputResource_Description_qual,
+    &MSFT_nxUserResource_GetTargetResource_OutputResource_Out_qual,
+    &MSFT_nxUserResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
+    &MSFT_nxUserResource_GetTargetResource_OutputResource_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.GetTargetResource(): OutputResource */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_GetTargetResource_OutputResource_param =
+/* parameter MSFT_nxUserResource.GetTargetResource(): OutputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_GetTargetResource_OutputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006F650E, /* code */
     MI_T("OutputResource"), /* name */
-    OMI_nxUserResource_GetTargetResource_OutputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
+    MSFT_nxUserResource_GetTargetResource_OutputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxUserResource"), /* className */
+    MI_T("MSFT_nxUserResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_GetTargetResource, OutputResource), /* offset */
+    offsetof(MSFT_nxUserResource_GetTargetResource, OutputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_GetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_GetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_GetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxUserResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxUserResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("4");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_GetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_GetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_GetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxUserResource_GetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_GetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_GetTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxUserResource_GetTargetResource_MIReturn_Static_qual,
-    &OMI_nxUserResource_GetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxUserResource_GetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxUserResource_GetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.GetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_GetTargetResource_MIReturn_param =
+/* parameter MSFT_nxUserResource.GetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_GetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxUserResource_GetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxUserResource_GetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_GetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxUserResource_GetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxUserResource_GetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxUserResource_GetTargetResource_params[] =
 {
-    &OMI_nxUserResource_GetTargetResource_MIReturn_param,
-    &OMI_nxUserResource_GetTargetResource_InputResource_param,
-    &OMI_nxUserResource_GetTargetResource_Flags_param,
-    &OMI_nxUserResource_GetTargetResource_OutputResource_param,
+    &MSFT_nxUserResource_GetTargetResource_MIReturn_param,
+    &MSFT_nxUserResource_GetTargetResource_InputResource_param,
+    &MSFT_nxUserResource_GetTargetResource_Flags_param,
+    &MSFT_nxUserResource_GetTargetResource_OutputResource_param,
 };
 
-/* method OMI_nxUserResource.GetTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxUserResource_GetTargetResource_rtti =
+/* method MSFT_nxUserResource.GetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxUserResource_GetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00676511, /* code */
     MI_T("GetTargetResource"), /* name */
-    OMI_nxUserResource_GetTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_GetTargetResource_quals), /* numQualifiers */
-    OMI_nxUserResource_GetTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxUserResource_GetTargetResource_params), /* numParameters */
-    sizeof(OMI_nxUserResource_GetTargetResource), /* size */
+    MSFT_nxUserResource_GetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_GetTargetResource_quals), /* numQualifiers */
+    MSFT_nxUserResource_GetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxUserResource_GetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxUserResource_GetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxUserResource_Invoke_GetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxUserResource_Invoke_GetTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_TestTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_TestTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_TestTargetResource_Static_qual_value
+    &MSFT_nxUserResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_TestTargetResource_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxUserResource_TestTargetResource_Description_qual_value = MI_T("8");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_TestTargetResource_Description_qual_value
+    &MSFT_nxUserResource_TestTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_TestTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_TestTargetResource_quals[] =
 {
-    &OMI_nxUserResource_TestTargetResource_Static_qual,
-    &OMI_nxUserResource_TestTargetResource_Description_qual,
+    &MSFT_nxUserResource_TestTargetResource_Static_qual,
+    &MSFT_nxUserResource_TestTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_TestTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_TestTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_TestTargetResource_InputResource_In_qual_value
+    &MSFT_nxUserResource_TestTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxUserResource");
+static MI_CONST MI_Char* MSFT_nxUserResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxUserResource");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxUserResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_TestTargetResource_InputResource_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxUserResource_TestTargetResource_InputResource_Description_qual_value = MI_T("9");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_TestTargetResource_InputResource_Description_qual_value
+    &MSFT_nxUserResource_TestTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_TestTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_TestTargetResource_InputResource_quals[] =
 {
-    &OMI_nxUserResource_TestTargetResource_InputResource_In_qual,
-    &OMI_nxUserResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxUserResource_TestTargetResource_InputResource_Description_qual,
+    &MSFT_nxUserResource_TestTargetResource_InputResource_In_qual,
+    &MSFT_nxUserResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxUserResource_TestTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.TestTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_TestTargetResource_InputResource_param =
+/* parameter MSFT_nxUserResource.TestTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_TestTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxUserResource_TestTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_TestTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxUserResource_TestTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_TestTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxUserResource"), /* className */
+    MI_T("MSFT_nxUserResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_TestTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxUserResource_TestTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_TestTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_TestTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_TestTargetResource_Flags_In_qual_value
+    &MSFT_nxUserResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_TestTargetResource_Flags_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxUserResource_TestTargetResource_Flags_Description_qual_value = MI_T("10");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_TestTargetResource_Flags_Description_qual_value
+    &MSFT_nxUserResource_TestTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_TestTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_TestTargetResource_Flags_quals[] =
 {
-    &OMI_nxUserResource_TestTargetResource_Flags_In_qual,
-    &OMI_nxUserResource_TestTargetResource_Flags_Description_qual,
+    &MSFT_nxUserResource_TestTargetResource_Flags_In_qual,
+    &MSFT_nxUserResource_TestTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.TestTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_TestTargetResource_Flags_param =
+/* parameter MSFT_nxUserResource.TestTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_TestTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxUserResource_TestTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_TestTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxUserResource_TestTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_TestTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_TestTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxUserResource_TestTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_TestTargetResource_Result_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_TestTargetResource_Result_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_Result_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_Result_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_TestTargetResource_Result_Out_qual_value
+    &MSFT_nxUserResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_TestTargetResource_Result_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxUserResource_TestTargetResource_Result_Description_qual_value = MI_T("11");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_Result_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_Result_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_TestTargetResource_Result_Description_qual_value
+    &MSFT_nxUserResource_TestTargetResource_Result_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_TestTargetResource_Result_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_TestTargetResource_Result_quals[] =
 {
-    &OMI_nxUserResource_TestTargetResource_Result_Out_qual,
-    &OMI_nxUserResource_TestTargetResource_Result_Description_qual,
+    &MSFT_nxUserResource_TestTargetResource_Result_Out_qual,
+    &MSFT_nxUserResource_TestTargetResource_Result_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.TestTargetResource(): Result */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_TestTargetResource_Result_param =
+/* parameter MSFT_nxUserResource.TestTargetResource(): Result */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_TestTargetResource_Result_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x00727406, /* code */
     MI_T("Result"), /* name */
-    OMI_nxUserResource_TestTargetResource_Result_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_TestTargetResource_Result_quals), /* numQualifiers */
+    MSFT_nxUserResource_TestTargetResource_Result_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_TestTargetResource_Result_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_TestTargetResource, Result), /* offset */
+    offsetof(MSFT_nxUserResource_TestTargetResource, Result), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_ProviderContext_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_ProviderContext_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_TestTargetResource_ProviderContext_Out_qual_value
+    &MSFT_nxUserResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxUserResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("12");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_TestTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxUserResource_TestTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_TestTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_TestTargetResource_ProviderContext_quals[] =
 {
-    &OMI_nxUserResource_TestTargetResource_ProviderContext_Out_qual,
-    &OMI_nxUserResource_TestTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxUserResource_TestTargetResource_ProviderContext_Out_qual,
+    &MSFT_nxUserResource_TestTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.TestTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_TestTargetResource_ProviderContext_param =
+/* parameter MSFT_nxUserResource.TestTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_TestTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    OMI_nxUserResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxUserResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_TestTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxUserResource_TestTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_TestTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_TestTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_TestTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxUserResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxUserResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("8");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_TestTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_TestTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_TestTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxUserResource_TestTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_TestTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_TestTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxUserResource_TestTargetResource_MIReturn_Static_qual,
-    &OMI_nxUserResource_TestTargetResource_MIReturn_Description_qual,
+    &MSFT_nxUserResource_TestTargetResource_MIReturn_Static_qual,
+    &MSFT_nxUserResource_TestTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.TestTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_TestTargetResource_MIReturn_param =
+/* parameter MSFT_nxUserResource.TestTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_TestTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxUserResource_TestTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxUserResource_TestTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_TestTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxUserResource_TestTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxUserResource_TestTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxUserResource_TestTargetResource_params[] =
 {
-    &OMI_nxUserResource_TestTargetResource_MIReturn_param,
-    &OMI_nxUserResource_TestTargetResource_InputResource_param,
-    &OMI_nxUserResource_TestTargetResource_Flags_param,
-    &OMI_nxUserResource_TestTargetResource_Result_param,
-    &OMI_nxUserResource_TestTargetResource_ProviderContext_param,
+    &MSFT_nxUserResource_TestTargetResource_MIReturn_param,
+    &MSFT_nxUserResource_TestTargetResource_InputResource_param,
+    &MSFT_nxUserResource_TestTargetResource_Flags_param,
+    &MSFT_nxUserResource_TestTargetResource_Result_param,
+    &MSFT_nxUserResource_TestTargetResource_ProviderContext_param,
 };
 
-/* method OMI_nxUserResource.TestTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxUserResource_TestTargetResource_rtti =
+/* method MSFT_nxUserResource.TestTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxUserResource_TestTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00746512, /* code */
     MI_T("TestTargetResource"), /* name */
-    OMI_nxUserResource_TestTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_TestTargetResource_quals), /* numQualifiers */
-    OMI_nxUserResource_TestTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxUserResource_TestTargetResource_params), /* numParameters */
-    sizeof(OMI_nxUserResource_TestTargetResource), /* size */
+    MSFT_nxUserResource_TestTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_TestTargetResource_quals), /* numQualifiers */
+    MSFT_nxUserResource_TestTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxUserResource_TestTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxUserResource_TestTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxUserResource_Invoke_TestTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxUserResource_Invoke_TestTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_SetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_SetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_SetTargetResource_Static_qual_value
+    &MSFT_nxUserResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_SetTargetResource_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxUserResource_SetTargetResource_Description_qual_value = MI_T("13");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_SetTargetResource_Description_qual_value
+    &MSFT_nxUserResource_SetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_SetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_SetTargetResource_quals[] =
 {
-    &OMI_nxUserResource_SetTargetResource_Static_qual,
-    &OMI_nxUserResource_SetTargetResource_Description_qual,
+    &MSFT_nxUserResource_SetTargetResource_Static_qual,
+    &MSFT_nxUserResource_SetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_SetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_SetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_SetTargetResource_InputResource_In_qual_value
+    &MSFT_nxUserResource_SetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxUserResource");
+static MI_CONST MI_Char* MSFT_nxUserResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxUserResource");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxUserResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_SetTargetResource_InputResource_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxUserResource_SetTargetResource_InputResource_Description_qual_value = MI_T("9");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_SetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxUserResource_SetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_SetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_SetTargetResource_InputResource_quals[] =
 {
-    &OMI_nxUserResource_SetTargetResource_InputResource_In_qual,
-    &OMI_nxUserResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxUserResource_SetTargetResource_InputResource_Description_qual,
+    &MSFT_nxUserResource_SetTargetResource_InputResource_In_qual,
+    &MSFT_nxUserResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxUserResource_SetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.SetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_SetTargetResource_InputResource_param =
+/* parameter MSFT_nxUserResource.SetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_SetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxUserResource_SetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_SetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxUserResource_SetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_SetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxUserResource"), /* className */
+    MI_T("MSFT_nxUserResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_SetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxUserResource_SetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_SetTargetResource_ProviderContext_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_SetTargetResource_ProviderContext_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_ProviderContext_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_ProviderContext_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_SetTargetResource_ProviderContext_In_qual_value
+    &MSFT_nxUserResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("14");
+static MI_CONST MI_Char* MSFT_nxUserResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("14");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_SetTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxUserResource_SetTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_SetTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_SetTargetResource_ProviderContext_quals[] =
 {
-    &OMI_nxUserResource_SetTargetResource_ProviderContext_In_qual,
-    &OMI_nxUserResource_SetTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxUserResource_SetTargetResource_ProviderContext_In_qual,
+    &MSFT_nxUserResource_SetTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.SetTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_SetTargetResource_ProviderContext_param =
+/* parameter MSFT_nxUserResource.SetTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_SetTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    OMI_nxUserResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxUserResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_SetTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxUserResource_SetTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_SetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_SetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_SetTargetResource_Flags_In_qual_value
+    &MSFT_nxUserResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_SetTargetResource_Flags_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxUserResource_SetTargetResource_Flags_Description_qual_value = MI_T("10");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_SetTargetResource_Flags_Description_qual_value
+    &MSFT_nxUserResource_SetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_SetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_SetTargetResource_Flags_quals[] =
 {
-    &OMI_nxUserResource_SetTargetResource_Flags_In_qual,
-    &OMI_nxUserResource_SetTargetResource_Flags_Description_qual,
+    &MSFT_nxUserResource_SetTargetResource_Flags_In_qual,
+    &MSFT_nxUserResource_SetTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.SetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_SetTargetResource_Flags_param =
+/* parameter MSFT_nxUserResource.SetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_SetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxUserResource_SetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_SetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxUserResource_SetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_SetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_SetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxUserResource_SetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxUserResource_SetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxUserResource_SetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxUserResource_SetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxUserResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxUserResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("13");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_SetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_SetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_SetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxUserResource_SetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_SetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_SetTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxUserResource_SetTargetResource_MIReturn_Static_qual,
-    &OMI_nxUserResource_SetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxUserResource_SetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxUserResource_SetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxUserResource.SetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxUserResource_SetTargetResource_MIReturn_param =
+/* parameter MSFT_nxUserResource.SetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxUserResource_SetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxUserResource_SetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxUserResource_SetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxUserResource_SetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxUserResource_SetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxUserResource_SetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxUserResource_SetTargetResource_params[] =
 {
-    &OMI_nxUserResource_SetTargetResource_MIReturn_param,
-    &OMI_nxUserResource_SetTargetResource_InputResource_param,
-    &OMI_nxUserResource_SetTargetResource_ProviderContext_param,
-    &OMI_nxUserResource_SetTargetResource_Flags_param,
+    &MSFT_nxUserResource_SetTargetResource_MIReturn_param,
+    &MSFT_nxUserResource_SetTargetResource_InputResource_param,
+    &MSFT_nxUserResource_SetTargetResource_ProviderContext_param,
+    &MSFT_nxUserResource_SetTargetResource_Flags_param,
 };
 
-/* method OMI_nxUserResource.SetTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxUserResource_SetTargetResource_rtti =
+/* method MSFT_nxUserResource.SetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxUserResource_SetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00736511, /* code */
     MI_T("SetTargetResource"), /* name */
-    OMI_nxUserResource_SetTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_SetTargetResource_quals), /* numQualifiers */
-    OMI_nxUserResource_SetTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxUserResource_SetTargetResource_params), /* numParameters */
-    sizeof(OMI_nxUserResource_SetTargetResource), /* size */
+    MSFT_nxUserResource_SetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_SetTargetResource_quals), /* numQualifiers */
+    MSFT_nxUserResource_SetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxUserResource_SetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxUserResource_SetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxUserResource"), /* origin */
-    MI_T("OMI_nxUserResource"), /* propagator */
+    MI_T("MSFT_nxUserResource"), /* origin */
+    MI_T("MSFT_nxUserResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxUserResource_Invoke_SetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxUserResource_Invoke_SetTargetResource, /* method */
 };
 
-static MI_MethodDecl MI_CONST* MI_CONST OMI_nxUserResource_meths[] =
+static MI_MethodDecl MI_CONST* MI_CONST MSFT_nxUserResource_meths[] =
 {
-    &OMI_nxUserResource_GetTargetResource_rtti,
-    &OMI_nxUserResource_TestTargetResource_rtti,
-    &OMI_nxUserResource_SetTargetResource_rtti,
+    &MSFT_nxUserResource_GetTargetResource_rtti,
+    &MSFT_nxUserResource_TestTargetResource_rtti,
+    &MSFT_nxUserResource_SetTargetResource_rtti,
 };
 
-static MI_CONST MI_ProviderFT OMI_nxUserResource_funcs =
+static MI_CONST MI_ProviderFT MSFT_nxUserResource_funcs =
 {
-  (MI_ProviderFT_Load)OMI_nxUserResource_Load,
-  (MI_ProviderFT_Unload)OMI_nxUserResource_Unload,
-  (MI_ProviderFT_GetInstance)OMI_nxUserResource_GetInstance,
-  (MI_ProviderFT_EnumerateInstances)OMI_nxUserResource_EnumerateInstances,
-  (MI_ProviderFT_CreateInstance)OMI_nxUserResource_CreateInstance,
-  (MI_ProviderFT_ModifyInstance)OMI_nxUserResource_ModifyInstance,
-  (MI_ProviderFT_DeleteInstance)OMI_nxUserResource_DeleteInstance,
+  (MI_ProviderFT_Load)MSFT_nxUserResource_Load,
+  (MI_ProviderFT_Unload)MSFT_nxUserResource_Unload,
+  (MI_ProviderFT_GetInstance)MSFT_nxUserResource_GetInstance,
+  (MI_ProviderFT_EnumerateInstances)MSFT_nxUserResource_EnumerateInstances,
+  (MI_ProviderFT_CreateInstance)MSFT_nxUserResource_CreateInstance,
+  (MI_ProviderFT_ModifyInstance)MSFT_nxUserResource_ModifyInstance,
+  (MI_ProviderFT_DeleteInstance)MSFT_nxUserResource_DeleteInstance,
   (MI_ProviderFT_AssociatorInstances)NULL,
   (MI_ProviderFT_ReferenceInstances)NULL,
   (MI_ProviderFT_EnableIndications)NULL,
@@ -2075,60 +2075,60 @@ static MI_CONST MI_ProviderFT OMI_nxUserResource_funcs =
   (MI_ProviderFT_Invoke)NULL,
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_Description_qual_value = MI_T("1");
+static MI_CONST MI_Char* MSFT_nxUserResource_Description_qual_value = MI_T("1");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxUserResource_Description_qual_value
+    &MSFT_nxUserResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxUserResource_ClassVersion_qual_value = MI_T("1.0.0");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_ClassVersion_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_ClassVersion_qual =
 {
     MI_T("ClassVersion"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &OMI_nxUserResource_ClassVersion_qual_value
+    &MSFT_nxUserResource_ClassVersion_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxUserResource_FriendlyName_qual_value = MI_T("nxUser");
+static MI_CONST MI_Char* MSFT_nxUserResource_FriendlyName_qual_value = MI_T("nxUser");
 
-static MI_CONST MI_Qualifier OMI_nxUserResource_FriendlyName_qual =
+static MI_CONST MI_Qualifier MSFT_nxUserResource_FriendlyName_qual =
 {
     MI_T("FriendlyName"),
     MI_STRING,
     MI_FLAG_RESTRICTED,
-    &OMI_nxUserResource_FriendlyName_qual_value
+    &MSFT_nxUserResource_FriendlyName_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxUserResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxUserResource_quals[] =
 {
-    &OMI_nxUserResource_Description_qual,
-    &OMI_nxUserResource_ClassVersion_qual,
-    &OMI_nxUserResource_FriendlyName_qual,
+    &MSFT_nxUserResource_Description_qual,
+    &MSFT_nxUserResource_ClassVersion_qual,
+    &MSFT_nxUserResource_FriendlyName_qual,
 };
 
-/* class OMI_nxUserResource */
-MI_CONST MI_ClassDecl OMI_nxUserResource_rtti =
+/* class MSFT_nxUserResource */
+MI_CONST MI_ClassDecl MSFT_nxUserResource_rtti =
 {
     MI_FLAG_CLASS, /* flags */
-    0x006F6512, /* code */
-    MI_T("OMI_nxUserResource"), /* name */
-    OMI_nxUserResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxUserResource_quals), /* numQualifiers */
-    OMI_nxUserResource_props, /* properties */
-    MI_COUNT(OMI_nxUserResource_props), /* numProperties */
-    sizeof(OMI_nxUserResource), /* size */
+    0x006D6513, /* code */
+    MI_T("MSFT_nxUserResource"), /* name */
+    MSFT_nxUserResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxUserResource_quals), /* numQualifiers */
+    MSFT_nxUserResource_props, /* properties */
+    MI_COUNT(MSFT_nxUserResource_props), /* numProperties */
+    sizeof(MSFT_nxUserResource), /* size */
     MI_T("OMI_BaseResource"), /* superClass */
     &OMI_BaseResource_rtti, /* superClassDecl */
-    OMI_nxUserResource_meths, /* methods */
-    MI_COUNT(OMI_nxUserResource_meths), /* numMethods */
+    MSFT_nxUserResource_meths, /* methods */
+    MI_COUNT(MSFT_nxUserResource_meths), /* numMethods */
     &schemaDecl, /* schema */
-    &OMI_nxUserResource_funcs, /* functions */
+    &MSFT_nxUserResource_funcs, /* functions */
     NULL /* owningClass */
 };
 
@@ -2151,8 +2151,8 @@ MI_Server* __mi_server;
 
 static MI_ClassDecl MI_CONST* MI_CONST classes[] =
 {
+    &MSFT_nxUserResource_rtti,
     &OMI_BaseResource_rtti,
-    &OMI_nxUserResource_rtti,
 };
 
 MI_SchemaDecl schemaDecl =

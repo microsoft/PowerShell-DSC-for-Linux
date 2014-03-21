@@ -20,13 +20,13 @@ SOURCES= \
         Test_Test3User.c \
 
 INCLUDES= \
-	$(TOP) \
-	$(TOP)/common \
-	$(TOP)/common/inc \
+	$(OMI) \
+	$(OMI)/common \
+	$(OMI)/common/inc \
 
 DEFINES= TEST_BUILD
 
 LIBRARIES = mi  pal 
 
-include $(TOP)/mak/rules.mak
+include $(OMI)/mak/rules.mak
 

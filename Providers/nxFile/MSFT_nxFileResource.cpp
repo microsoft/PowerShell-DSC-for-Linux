@@ -1,7 +1,7 @@
 /* @migen@ */
 #include "PythonHelper.hpp"
 #include <MI.h>
-#include "OMI_nxScriptResource.h"
+#include "MSFT_nxFileResource.h"
 
 #include <cstdlib>
 #include <string>
@@ -14,7 +14,7 @@
 #include <iostream>
 
 
-struct _OMI_nxScriptResource_Self
+struct _MSFT_nxFileResource_Self
 {
 public:
     PyObjPtr pModule;
@@ -22,10 +22,10 @@ public:
     PyObjPtr pTestFn;
     PyObjPtr pGetFn;
 
-    static int create (_OMI_nxScriptResource_Self** const ppInstance);
+    static int create (_MSFT_nxFileResource_Self** const ppInstance);
 
 private:
-    /*ctor*/ _OMI_nxScriptResource_Self (
+    /*ctor*/ _MSFT_nxFileResource_Self (
         PyObjPtr const& _pModule,
         PyObjPtr const& _pSetFn,
         PyObjPtr const& _pTestFn,
@@ -40,14 +40,14 @@ private:
 
 };
 
-typedef _OMI_nxScriptResource_Self OMI_nxScriptResource_Self;
+typedef _MSFT_nxFileResource_Self MSFT_nxFileResource_Self;
 
 
 
 /*static*/
 int
-_OMI_nxScriptResource_Self::create (
-    _OMI_nxScriptResource_Self** const ppInstance)
+_MSFT_nxFileResource_Self::create (
+    _MSFT_nxFileResource_Self** const ppInstance)
 {
     int rval = EXIT_SUCCESS;
     PyObjPtr pModule;
@@ -57,9 +57,9 @@ _OMI_nxScriptResource_Self::create (
     if (ppInstance &&
         !*ppInstance)
     {
-        if (EXIT_SUCCESS == (rval = initPython ("do'h", "/home/johnkord/dev/sandbox/dsc_providers/nxScript")))
+        if (EXIT_SUCCESS == (rval = initPython ("do'h", "/home/johnkord/dev/imp/dsc/Providers/Scripts")))
         {
-            pModule = loadModule ("nxScript");
+            pModule = loadModule ("nxFile");
             if (pModule)
             {
                 pSetFn = loadFunctionFromModule (pModule, "Set_Marshall");
@@ -67,7 +67,7 @@ _OMI_nxScriptResource_Self::create (
                 pGetFn = loadFunctionFromModule (pModule, "Get_Marshall");
                 if (pSetFn && pTestFn && pGetFn)
                 {
-                    *ppInstance = new _OMI_nxScriptResource_Self (
+                    *ppInstance = new _MSFT_nxFileResource_Self (
                         pModule, pSetFn, pTestFn, pGetFn);
                 }
                 else
@@ -104,14 +104,14 @@ static const MI_Char* PassString(const MI_ConstStringField& field)
     }
 }
 
-void MI_CALL OMI_nxScriptResource_Load(
-    _Outptr_result_maybenull_ OMI_nxScriptResource_Self** self,
+void MI_CALL MSFT_nxFileResource_Load(
+    _Outptr_result_maybenull_ MSFT_nxFileResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
-    if (EXIT_SUCCESS != OMI_nxScriptResource_Self::create (self))
+    if (EXIT_SUCCESS != MSFT_nxFileResource_Self::create (self))
     {
         res = MI_RESULT_FAILED;
     
@@ -121,8 +121,8 @@ void MI_CALL OMI_nxScriptResource_Load(
     MI_Context_PostResult(context, res);
 }
 
-void MI_CALL OMI_nxScriptResource_Unload(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_Unload(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context)
 {
     if (self)
@@ -133,8 +133,8 @@ void MI_CALL OMI_nxScriptResource_Unload(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL OMI_nxScriptResource_EnumerateInstances(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_EnumerateInstances(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
@@ -152,12 +152,12 @@ void MI_CALL OMI_nxScriptResource_EnumerateInstances(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL OMI_nxScriptResource_GetInstance(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_GetInstance(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const OMI_nxScriptResource* instanceName,
+    _In_ const MSFT_nxFileResource* instanceName,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -169,12 +169,12 @@ void MI_CALL OMI_nxScriptResource_GetInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL OMI_nxScriptResource_CreateInstance(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_CreateInstance(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const OMI_nxScriptResource* newInstance)
+    _In_ const MSFT_nxFileResource* newInstance)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -184,12 +184,12 @@ void MI_CALL OMI_nxScriptResource_CreateInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL OMI_nxScriptResource_ModifyInstance(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_ModifyInstance(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const OMI_nxScriptResource* modifiedInstance,
+    _In_ const MSFT_nxFileResource* modifiedInstance,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -201,12 +201,12 @@ void MI_CALL OMI_nxScriptResource_ModifyInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL OMI_nxScriptResource_DeleteInstance(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_DeleteInstance(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const OMI_nxScriptResource* instanceName)
+    _In_ const MSFT_nxFileResource* instanceName)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -254,43 +254,51 @@ int SetElement(
     return 0;
 }
 
-void MI_CALL OMI_nxScriptResource_Invoke_GetTargetResource(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_Invoke_GetTargetResource(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const OMI_nxScriptResource* instanceName,
-    _In_opt_ const OMI_nxScriptResource_GetTargetResource* in)
+    _In_ const MSFT_nxFileResource* instanceName,
+    _In_opt_ const MSFT_nxFileResource_GetTargetResource* in)
 {
-    std::cerr << "Get" << std::endl;
+
+    std::cout << "Get" << std::endl;
 
     MI_Result r = MI_RESULT_OK;
     MI_Boolean res = MI_TRUE;
-    OMI_nxScriptResource_GetTargetResource out;
+    MSFT_nxFileResource_GetTargetResource out;
     MI_Instance *newInstance;
     MI_Value value;
 
-    r = OMI_nxScriptResource_GetTargetResource_Construct(&out, context);
-    r = OMI_nxScriptResource_GetTargetResource_Set_MIReturn(&out, 0);
+    r = MSFT_nxFileResource_GetTargetResource_Construct(&out, context);
+    r = MSFT_nxFileResource_GetTargetResource_Set_MIReturn(&out, 0);
 
-    const OMI_nxScriptResource * script = in->InputResource.value;
-    r = MI_Instance_Clone(&script->__instance, &newInstance);
+    const MSFT_nxFileResource * file = in->InputResource.value;
+    r = MI_Instance_Clone(&file->__instance, &newInstance);
 
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pGetFn,
-        5,
-        PassString(script->GetScript),
-        PassString(script->SetScript),
-        PassString(script->TestScript),
-        PassString(script->User),
-        PassString(script->Group));
+        12,
+        PassString(file->DestinationPath),
+        PassString(file->SourcePath),
+        PassString(file->Ensure),
+        PassString(file->Type),
+        PassString(file->Force),
+        PassString(file->Contents),
+        PassString(file->Checksum),
+        PassString(file->Recurse),
+        PassString(file->Links),
+        PassString(file->Owner),
+        PassString(file->Group),
+        PassString(file->Mode));
     
-    // Expecting 5+1 parameters in return
-    if (ret_strings.size() == (5+1) && exit_code == 0)
+    // 12+2 represents: the 12 normal fields, the 2 'read' fields
+    if (ret_strings.size() == (12+2) && exit_code == 0)
     {
         res = MI_TRUE;
     }
@@ -300,12 +308,20 @@ void MI_CALL OMI_nxScriptResource_Invoke_GetTargetResource(
         return;
     }
 
-    if (SetElement(newInstance, "GetScript", ret_strings[0], MI_STRING)  != 0 ||
-        SetElement(newInstance, "SetScript", ret_strings[1], MI_STRING)  != 0 ||
-        SetElement(newInstance, "TestScript", ret_strings[2], MI_STRING) != 0 ||
-        SetElement(newInstance, "User", ret_strings[3], MI_STRING)       != 0 ||
-        SetElement(newInstance, "Group", ret_strings[4], MI_STRING)      != 0 ||
-        SetElement(newInstance, "Result", ret_strings[5], MI_STRING)     != 0)
+    if (SetElement(newInstance, "DestinationPath", ret_strings[0], MI_STRING)  != 0 ||
+        SetElement(newInstance, "SourcePath", ret_strings[1], MI_STRING)       != 0 ||
+        SetElement(newInstance, "Ensure", ret_strings[2], MI_STRING)           != 0 ||
+        SetElement(newInstance, "Type", ret_strings[3], MI_STRING)             != 0 ||
+        SetElement(newInstance, "Force", ret_strings[4], MI_STRING)            != 0 ||
+        SetElement(newInstance, "Contents", ret_strings[5], MI_STRING)         != 0 ||
+        SetElement(newInstance, "Checksum", ret_strings[6], MI_STRING)         != 0 ||
+        SetElement(newInstance, "Recurse", ret_strings[7], MI_STRING)          != 0 ||
+        SetElement(newInstance, "Links", ret_strings[8], MI_STRING)            != 0 ||
+        SetElement(newInstance, "Owner", ret_strings[9], MI_STRING)            != 0 ||
+        SetElement(newInstance, "Group", ret_strings[10], MI_STRING)           != 0 ||
+        SetElement(newInstance, "Mode", ret_strings[11], MI_STRING)            != 0 ||
+        SetElement(newInstance, "CreatedDate", ret_strings[12], MI_DATETIME)   != 0 ||
+        SetElement(newInstance, "ModifiedDate", ret_strings[13], MI_DATETIME)  != 0)
     {
         MI_Context_PostResult(context, MI_RESULT_FAILED);
         return;
@@ -320,14 +336,14 @@ void MI_CALL OMI_nxScriptResource_Invoke_GetTargetResource(
     }
 
     MI_Instance_Delete(newInstance);
-    r = OMI_nxScriptResource_GetTargetResource_Post(&out, context);
+    r = MSFT_nxFileResource_GetTargetResource_Post(&out, context);
     if ( r != MI_RESULT_OK )
     {
         MI_Context_PostResult(context, r);
         return;
     }
 
-    r = OMI_nxScriptResource_GetTargetResource_Destruct(&out);
+    r = MSFT_nxFileResource_GetTargetResource_Destruct(&out);
     if ( r != MI_RESULT_OK )
     {
         MI_Context_PostResult(context, r);
@@ -337,16 +353,16 @@ void MI_CALL OMI_nxScriptResource_Invoke_GetTargetResource(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL OMI_nxScriptResource_Invoke_TestTargetResource(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_Invoke_TestTargetResource(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const OMI_nxScriptResource* instanceName,
-    _In_opt_ const OMI_nxScriptResource_TestTargetResource* in)
+    _In_ const MSFT_nxFileResource* instanceName,
+    _In_opt_ const MSFT_nxFileResource_TestTargetResource* in)
 {
-    std::cerr << "Test" << std::endl;
+    std::cout << "Test" << std::endl;
 
     if (!self)
     {
@@ -356,20 +372,27 @@ void MI_CALL OMI_nxScriptResource_Invoke_TestTargetResource(
 
     MI_Result r = MI_RESULT_OK;
     MI_Boolean res = MI_TRUE;
-    OMI_nxScriptResource_TestTargetResource out;
-    const OMI_nxScriptResource * script = in->InputResource.value;
+    MSFT_nxFileResource_TestTargetResource out;
+    const MSFT_nxFileResource * file = in->InputResource.value;
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pTestFn,
-        5,
-        PassString(script->GetScript),
-        PassString(script->SetScript),
-        PassString(script->TestScript),
-        PassString(script->User),
-        PassString(script->Group));
-    
+        12,
+        PassString(file->DestinationPath),
+        PassString(file->SourcePath),
+        PassString(file->Ensure),
+        PassString(file->Type),
+        PassString(file->Force),
+        PassString(file->Contents),
+        PassString(file->Checksum),
+        PassString(file->Recurse),
+        PassString(file->Links),
+        PassString(file->Owner),
+        PassString(file->Group),
+        PassString(file->Mode));
+
     if (ret_strings.size() == 0 && exit_code == 0)
     {
         res = MI_TRUE;
@@ -379,24 +402,24 @@ void MI_CALL OMI_nxScriptResource_Invoke_TestTargetResource(
         res = MI_FALSE;
     }
 
-    r = OMI_nxScriptResource_TestTargetResource_Construct(&out, context);
-    r = OMI_nxScriptResource_TestTargetResource_Set_Result(&out, res);
-    r = OMI_nxScriptResource_TestTargetResource_Set_MIReturn(&out, 0);
-    r = OMI_nxScriptResource_TestTargetResource_Post(&out, context);
-    r = OMI_nxScriptResource_TestTargetResource_Destruct(&out);
+    r = MSFT_nxFileResource_TestTargetResource_Construct(&out, context);
+    r = MSFT_nxFileResource_TestTargetResource_Set_Result(&out, res);
+    r = MSFT_nxFileResource_TestTargetResource_Set_MIReturn(&out, 0);
+    r = MSFT_nxFileResource_TestTargetResource_Post(&out, context);
+    r = MSFT_nxFileResource_TestTargetResource_Destruct(&out);
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL OMI_nxScriptResource_Invoke_SetTargetResource(
-    _In_opt_ OMI_nxScriptResource_Self* self,
+void MI_CALL MSFT_nxFileResource_Invoke_SetTargetResource(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const OMI_nxScriptResource* instanceName,
-    _In_opt_ const OMI_nxScriptResource_SetTargetResource* in)
+    _In_ const MSFT_nxFileResource* instanceName,
+    _In_opt_ const MSFT_nxFileResource_SetTargetResource* in)
 {
-    std::cerr << "Set" << std::endl;
+    std::cout << "Set" << std::endl;
 
     if (!self)
     {
@@ -405,20 +428,27 @@ void MI_CALL OMI_nxScriptResource_Invoke_SetTargetResource(
     }
 
     MI_Result r = MI_RESULT_OK;
-    OMI_nxScriptResource_SetTargetResource out;
-    const OMI_nxScriptResource * script = in->InputResource.value;
+    MSFT_nxFileResource_SetTargetResource out;
+    const MSFT_nxFileResource * file = in->InputResource.value;
     MI_Result res = MI_RESULT_OK;
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pSetFn,
-        5,
-        PassString(script->GetScript),
-        PassString(script->SetScript),
-        PassString(script->TestScript),
-        PassString(script->User),
-        PassString(script->Group));
+        12,
+        PassString(file->DestinationPath),
+        PassString(file->SourcePath),
+        PassString(file->Ensure),
+        PassString(file->Type),
+        PassString(file->Force),
+        PassString(file->Contents),
+        PassString(file->Checksum),
+        PassString(file->Recurse),
+        PassString(file->Links),
+        PassString(file->Owner),
+        PassString(file->Group),
+        PassString(file->Mode));
 
     if (ret_strings.size() == 0 && exit_code == 0)
     {
@@ -429,9 +459,9 @@ void MI_CALL OMI_nxScriptResource_Invoke_SetTargetResource(
         res = MI_RESULT_FAILED;
     }
 
-    r = OMI_nxScriptResource_SetTargetResource_Construct(&out, context);
-    r = OMI_nxScriptResource_SetTargetResource_Set_MIReturn(&out, res);
-    r = OMI_nxScriptResource_SetTargetResource_Post(&out, context);
-    r = OMI_nxScriptResource_SetTargetResource_Destruct(&out);
+    r = MSFT_nxFileResource_SetTargetResource_Construct(&out, context);
+    r = MSFT_nxFileResource_SetTargetResource_Set_MIReturn(&out, res);
+    r = MSFT_nxFileResource_SetTargetResource_Post(&out, context);
+    r = MSFT_nxFileResource_SetTargetResource_Destruct(&out);
     MI_Context_PostResult(context, res);
 }

@@ -8,7 +8,7 @@
 */
 #include <ctype.h>
 #include <MI.h>
-#include "OMI_nxScriptResource.h"
+#include "MSFT_nxScriptResource.h"
 
 /*
 **==============================================================================
@@ -981,950 +981,950 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 /*
 **==============================================================================
 **
-** OMI_nxScriptResource
+** MSFT_nxScriptResource
 **
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_GetScript_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_GetScript_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetScript_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetScript_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_GetScript_Key_qual_value
+    &MSFT_nxScriptResource_GetScript_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_GetScript_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_GetScript_quals[] =
 {
-    &OMI_nxScriptResource_GetScript_Key_qual,
+    &MSFT_nxScriptResource_GetScript_Key_qual,
 };
 
-/* property OMI_nxScriptResource.GetScript */
-static MI_CONST MI_PropertyDecl OMI_nxScriptResource_GetScript_prop =
+/* property MSFT_nxScriptResource.GetScript */
+static MI_CONST MI_PropertyDecl MSFT_nxScriptResource_GetScript_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
     0x00677409, /* code */
     MI_T("GetScript"), /* name */
-    OMI_nxScriptResource_GetScript_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_GetScript_quals), /* numQualifiers */
+    MSFT_nxScriptResource_GetScript_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_GetScript_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource, GetScript), /* offset */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    offsetof(MSFT_nxScriptResource, GetScript), /* offset */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_SetScript_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_SetScript_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetScript_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetScript_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_SetScript_Key_qual_value
+    &MSFT_nxScriptResource_SetScript_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_SetScript_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_SetScript_quals[] =
 {
-    &OMI_nxScriptResource_SetScript_Key_qual,
+    &MSFT_nxScriptResource_SetScript_Key_qual,
 };
 
-/* property OMI_nxScriptResource.SetScript */
-static MI_CONST MI_PropertyDecl OMI_nxScriptResource_SetScript_prop =
+/* property MSFT_nxScriptResource.SetScript */
+static MI_CONST MI_PropertyDecl MSFT_nxScriptResource_SetScript_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
     0x00737409, /* code */
     MI_T("SetScript"), /* name */
-    OMI_nxScriptResource_SetScript_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_SetScript_quals), /* numQualifiers */
+    MSFT_nxScriptResource_SetScript_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_SetScript_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource, SetScript), /* offset */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    offsetof(MSFT_nxScriptResource, SetScript), /* offset */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_TestScript_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_TestScript_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestScript_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestScript_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_TestScript_Key_qual_value
+    &MSFT_nxScriptResource_TestScript_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_TestScript_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_TestScript_quals[] =
 {
-    &OMI_nxScriptResource_TestScript_Key_qual,
+    &MSFT_nxScriptResource_TestScript_Key_qual,
 };
 
-/* property OMI_nxScriptResource.TestScript */
-static MI_CONST MI_PropertyDecl OMI_nxScriptResource_TestScript_prop =
+/* property MSFT_nxScriptResource.TestScript */
+static MI_CONST MI_PropertyDecl MSFT_nxScriptResource_TestScript_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
     0x0074740A, /* code */
     MI_T("TestScript"), /* name */
-    OMI_nxScriptResource_TestScript_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_TestScript_quals), /* numQualifiers */
+    MSFT_nxScriptResource_TestScript_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_TestScript_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource, TestScript), /* offset */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    offsetof(MSFT_nxScriptResource, TestScript), /* offset */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_User_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_User_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_User_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_User_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_User_Write_qual_value
+    &MSFT_nxScriptResource_User_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_User_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_User_quals[] =
 {
-    &OMI_nxScriptResource_User_Write_qual,
+    &MSFT_nxScriptResource_User_Write_qual,
 };
 
-/* property OMI_nxScriptResource.User */
-static MI_CONST MI_PropertyDecl OMI_nxScriptResource_User_prop =
+/* property MSFT_nxScriptResource.User */
+static MI_CONST MI_PropertyDecl MSFT_nxScriptResource_User_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00757204, /* code */
     MI_T("User"), /* name */
-    OMI_nxScriptResource_User_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_User_quals), /* numQualifiers */
+    MSFT_nxScriptResource_User_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_User_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource, User), /* offset */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    offsetof(MSFT_nxScriptResource, User), /* offset */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_Group_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_Group_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_Group_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_Group_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_Group_Write_qual_value
+    &MSFT_nxScriptResource_Group_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_Group_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_Group_quals[] =
 {
-    &OMI_nxScriptResource_Group_Write_qual,
+    &MSFT_nxScriptResource_Group_Write_qual,
 };
 
-/* property OMI_nxScriptResource.Group */
-static MI_CONST MI_PropertyDecl OMI_nxScriptResource_Group_prop =
+/* property MSFT_nxScriptResource.Group */
+static MI_CONST MI_PropertyDecl MSFT_nxScriptResource_Group_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00677005, /* code */
     MI_T("Group"), /* name */
-    OMI_nxScriptResource_Group_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_Group_quals), /* numQualifiers */
+    MSFT_nxScriptResource_Group_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_Group_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource, Group), /* offset */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    offsetof(MSFT_nxScriptResource, Group), /* offset */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_Result_Read_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_Result_Read_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_Result_Read_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_Result_Read_qual =
 {
     MI_T("Read"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_Result_Read_qual_value
+    &MSFT_nxScriptResource_Result_Read_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_Result_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_Result_quals[] =
 {
-    &OMI_nxScriptResource_Result_Read_qual,
+    &MSFT_nxScriptResource_Result_Read_qual,
 };
 
-/* property OMI_nxScriptResource.Result */
-static MI_CONST MI_PropertyDecl OMI_nxScriptResource_Result_prop =
+/* property MSFT_nxScriptResource.Result */
+static MI_CONST MI_PropertyDecl MSFT_nxScriptResource_Result_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x00727406, /* code */
     MI_T("Result"), /* name */
-    OMI_nxScriptResource_Result_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_Result_quals), /* numQualifiers */
+    MSFT_nxScriptResource_Result_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_Result_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource, Result), /* offset */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    offsetof(MSFT_nxScriptResource, Result), /* offset */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     NULL,
 };
 
-static MI_PropertyDecl MI_CONST* MI_CONST OMI_nxScriptResource_props[] =
+static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxScriptResource_props[] =
 {
-    &OMI_nxScriptResource_GetScript_prop,
-    &OMI_nxScriptResource_SetScript_prop,
-    &OMI_nxScriptResource_TestScript_prop,
-    &OMI_nxScriptResource_User_prop,
-    &OMI_nxScriptResource_Group_prop,
-    &OMI_nxScriptResource_Result_prop,
+    &MSFT_nxScriptResource_GetScript_prop,
+    &MSFT_nxScriptResource_SetScript_prop,
+    &MSFT_nxScriptResource_TestScript_prop,
+    &MSFT_nxScriptResource_User_prop,
+    &MSFT_nxScriptResource_Group_prop,
+    &MSFT_nxScriptResource_Result_prop,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_GetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_GetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_GetTargetResource_Static_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_GetTargetResource_Description_qual_value = MI_T("2");
+static MI_CONST MI_Char* MSFT_nxScriptResource_GetTargetResource_Description_qual_value = MI_T("2");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_GetTargetResource_Description_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_GetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_GetTargetResource_quals[] =
 {
-    &OMI_nxScriptResource_GetTargetResource_Static_qual,
-    &OMI_nxScriptResource_GetTargetResource_Description_qual,
+    &MSFT_nxScriptResource_GetTargetResource_Static_qual,
+    &MSFT_nxScriptResource_GetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_GetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_GetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_GetTargetResource_InputResource_In_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxScriptResource");
+static MI_CONST MI_Char* MSFT_nxScriptResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxScriptResource");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_GetTargetResource_InputResource_Description_qual_value = MI_T("3");
+static MI_CONST MI_Char* MSFT_nxScriptResource_GetTargetResource_InputResource_Description_qual_value = MI_T("3");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_GetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_GetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_GetTargetResource_InputResource_quals[] =
 {
-    &OMI_nxScriptResource_GetTargetResource_InputResource_In_qual,
-    &OMI_nxScriptResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxScriptResource_GetTargetResource_InputResource_Description_qual,
+    &MSFT_nxScriptResource_GetTargetResource_InputResource_In_qual,
+    &MSFT_nxScriptResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxScriptResource_GetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.GetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_GetTargetResource_InputResource_param =
+/* parameter MSFT_nxScriptResource.GetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_GetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxScriptResource_GetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_GetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxScriptResource_GetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_GetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxScriptResource"), /* className */
+    MI_T("MSFT_nxScriptResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_GetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxScriptResource_GetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_GetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_GetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_GetTargetResource_Flags_In_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_GetTargetResource_Flags_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxScriptResource_GetTargetResource_Flags_Description_qual_value = MI_T("4");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_GetTargetResource_Flags_Description_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_GetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_GetTargetResource_Flags_quals[] =
 {
-    &OMI_nxScriptResource_GetTargetResource_Flags_In_qual,
-    &OMI_nxScriptResource_GetTargetResource_Flags_Description_qual,
+    &MSFT_nxScriptResource_GetTargetResource_Flags_In_qual,
+    &MSFT_nxScriptResource_GetTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.GetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_GetTargetResource_Flags_param =
+/* parameter MSFT_nxScriptResource.GetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_GetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxScriptResource_GetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_GetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxScriptResource_GetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_GetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_GetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxScriptResource_GetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_GetTargetResource_OutputResource_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_GetTargetResource_OutputResource_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_OutputResource_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_OutputResource_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_GetTargetResource_OutputResource_Out_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_OutputResource_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxScriptResource");
+static MI_CONST MI_Char* MSFT_nxScriptResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxScriptResource");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("5");
+static MI_CONST MI_Char* MSFT_nxScriptResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("5");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_OutputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_OutputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_GetTargetResource_OutputResource_Description_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_OutputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_GetTargetResource_OutputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_GetTargetResource_OutputResource_quals[] =
 {
-    &OMI_nxScriptResource_GetTargetResource_OutputResource_Out_qual,
-    &OMI_nxScriptResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
-    &OMI_nxScriptResource_GetTargetResource_OutputResource_Description_qual,
+    &MSFT_nxScriptResource_GetTargetResource_OutputResource_Out_qual,
+    &MSFT_nxScriptResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
+    &MSFT_nxScriptResource_GetTargetResource_OutputResource_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.GetTargetResource(): OutputResource */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_GetTargetResource_OutputResource_param =
+/* parameter MSFT_nxScriptResource.GetTargetResource(): OutputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_GetTargetResource_OutputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006F650E, /* code */
     MI_T("OutputResource"), /* name */
-    OMI_nxScriptResource_GetTargetResource_OutputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
+    MSFT_nxScriptResource_GetTargetResource_OutputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxScriptResource"), /* className */
+    MI_T("MSFT_nxScriptResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_GetTargetResource, OutputResource), /* offset */
+    offsetof(MSFT_nxScriptResource_GetTargetResource, OutputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_GetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_GetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_GetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("2");
+static MI_CONST MI_Char* MSFT_nxScriptResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("2");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_GetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_GetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_GetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxScriptResource_GetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_GetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_GetTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxScriptResource_GetTargetResource_MIReturn_Static_qual,
-    &OMI_nxScriptResource_GetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxScriptResource_GetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxScriptResource_GetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.GetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_GetTargetResource_MIReturn_param =
+/* parameter MSFT_nxScriptResource.GetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_GetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxScriptResource_GetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxScriptResource_GetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_GetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxScriptResource_GetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxScriptResource_GetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxScriptResource_GetTargetResource_params[] =
 {
-    &OMI_nxScriptResource_GetTargetResource_MIReturn_param,
-    &OMI_nxScriptResource_GetTargetResource_InputResource_param,
-    &OMI_nxScriptResource_GetTargetResource_Flags_param,
-    &OMI_nxScriptResource_GetTargetResource_OutputResource_param,
+    &MSFT_nxScriptResource_GetTargetResource_MIReturn_param,
+    &MSFT_nxScriptResource_GetTargetResource_InputResource_param,
+    &MSFT_nxScriptResource_GetTargetResource_Flags_param,
+    &MSFT_nxScriptResource_GetTargetResource_OutputResource_param,
 };
 
-/* method OMI_nxScriptResource.GetTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxScriptResource_GetTargetResource_rtti =
+/* method MSFT_nxScriptResource.GetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxScriptResource_GetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00676511, /* code */
     MI_T("GetTargetResource"), /* name */
-    OMI_nxScriptResource_GetTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_GetTargetResource_quals), /* numQualifiers */
-    OMI_nxScriptResource_GetTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxScriptResource_GetTargetResource_params), /* numParameters */
-    sizeof(OMI_nxScriptResource_GetTargetResource), /* size */
+    MSFT_nxScriptResource_GetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_GetTargetResource_quals), /* numQualifiers */
+    MSFT_nxScriptResource_GetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxScriptResource_GetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxScriptResource_GetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxScriptResource_Invoke_GetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxScriptResource_Invoke_GetTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_TestTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_TestTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_TestTargetResource_Static_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_TestTargetResource_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxScriptResource_TestTargetResource_Description_qual_value = MI_T("6");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_TestTargetResource_Description_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_TestTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_TestTargetResource_quals[] =
 {
-    &OMI_nxScriptResource_TestTargetResource_Static_qual,
-    &OMI_nxScriptResource_TestTargetResource_Description_qual,
+    &MSFT_nxScriptResource_TestTargetResource_Static_qual,
+    &MSFT_nxScriptResource_TestTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_TestTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_TestTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_TestTargetResource_InputResource_In_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxScriptResource");
+static MI_CONST MI_Char* MSFT_nxScriptResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxScriptResource");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_TestTargetResource_InputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxScriptResource_TestTargetResource_InputResource_Description_qual_value = MI_T("7");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_TestTargetResource_InputResource_Description_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_TestTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_TestTargetResource_InputResource_quals[] =
 {
-    &OMI_nxScriptResource_TestTargetResource_InputResource_In_qual,
-    &OMI_nxScriptResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxScriptResource_TestTargetResource_InputResource_Description_qual,
+    &MSFT_nxScriptResource_TestTargetResource_InputResource_In_qual,
+    &MSFT_nxScriptResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxScriptResource_TestTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.TestTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_TestTargetResource_InputResource_param =
+/* parameter MSFT_nxScriptResource.TestTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_TestTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxScriptResource_TestTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_TestTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxScriptResource_TestTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_TestTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxScriptResource"), /* className */
+    MI_T("MSFT_nxScriptResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_TestTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxScriptResource_TestTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_TestTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_TestTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_TestTargetResource_Flags_In_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_TestTargetResource_Flags_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxScriptResource_TestTargetResource_Flags_Description_qual_value = MI_T("8");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_TestTargetResource_Flags_Description_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_TestTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_TestTargetResource_Flags_quals[] =
 {
-    &OMI_nxScriptResource_TestTargetResource_Flags_In_qual,
-    &OMI_nxScriptResource_TestTargetResource_Flags_Description_qual,
+    &MSFT_nxScriptResource_TestTargetResource_Flags_In_qual,
+    &MSFT_nxScriptResource_TestTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.TestTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_TestTargetResource_Flags_param =
+/* parameter MSFT_nxScriptResource.TestTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_TestTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxScriptResource_TestTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_TestTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxScriptResource_TestTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_TestTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_TestTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxScriptResource_TestTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_TestTargetResource_Result_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_TestTargetResource_Result_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_Result_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_Result_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_TestTargetResource_Result_Out_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_TestTargetResource_Result_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxScriptResource_TestTargetResource_Result_Description_qual_value = MI_T("9");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_Result_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_Result_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_TestTargetResource_Result_Description_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_Result_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_TestTargetResource_Result_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_TestTargetResource_Result_quals[] =
 {
-    &OMI_nxScriptResource_TestTargetResource_Result_Out_qual,
-    &OMI_nxScriptResource_TestTargetResource_Result_Description_qual,
+    &MSFT_nxScriptResource_TestTargetResource_Result_Out_qual,
+    &MSFT_nxScriptResource_TestTargetResource_Result_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.TestTargetResource(): Result */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_TestTargetResource_Result_param =
+/* parameter MSFT_nxScriptResource.TestTargetResource(): Result */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_TestTargetResource_Result_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x00727406, /* code */
     MI_T("Result"), /* name */
-    OMI_nxScriptResource_TestTargetResource_Result_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_TestTargetResource_Result_quals), /* numQualifiers */
+    MSFT_nxScriptResource_TestTargetResource_Result_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_TestTargetResource_Result_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_TestTargetResource, Result), /* offset */
+    offsetof(MSFT_nxScriptResource_TestTargetResource, Result), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_ProviderContext_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_ProviderContext_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_TestTargetResource_ProviderContext_Out_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxScriptResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("10");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_TestTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_TestTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_TestTargetResource_ProviderContext_quals[] =
 {
-    &OMI_nxScriptResource_TestTargetResource_ProviderContext_Out_qual,
-    &OMI_nxScriptResource_TestTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxScriptResource_TestTargetResource_ProviderContext_Out_qual,
+    &MSFT_nxScriptResource_TestTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.TestTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_TestTargetResource_ProviderContext_param =
+/* parameter MSFT_nxScriptResource.TestTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_TestTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    OMI_nxScriptResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxScriptResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_TestTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxScriptResource_TestTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_TestTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_TestTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_TestTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxScriptResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("6");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_TestTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_TestTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_TestTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxScriptResource_TestTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_TestTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_TestTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxScriptResource_TestTargetResource_MIReturn_Static_qual,
-    &OMI_nxScriptResource_TestTargetResource_MIReturn_Description_qual,
+    &MSFT_nxScriptResource_TestTargetResource_MIReturn_Static_qual,
+    &MSFT_nxScriptResource_TestTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.TestTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_TestTargetResource_MIReturn_param =
+/* parameter MSFT_nxScriptResource.TestTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_TestTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxScriptResource_TestTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxScriptResource_TestTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_TestTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxScriptResource_TestTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxScriptResource_TestTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxScriptResource_TestTargetResource_params[] =
 {
-    &OMI_nxScriptResource_TestTargetResource_MIReturn_param,
-    &OMI_nxScriptResource_TestTargetResource_InputResource_param,
-    &OMI_nxScriptResource_TestTargetResource_Flags_param,
-    &OMI_nxScriptResource_TestTargetResource_Result_param,
-    &OMI_nxScriptResource_TestTargetResource_ProviderContext_param,
+    &MSFT_nxScriptResource_TestTargetResource_MIReturn_param,
+    &MSFT_nxScriptResource_TestTargetResource_InputResource_param,
+    &MSFT_nxScriptResource_TestTargetResource_Flags_param,
+    &MSFT_nxScriptResource_TestTargetResource_Result_param,
+    &MSFT_nxScriptResource_TestTargetResource_ProviderContext_param,
 };
 
-/* method OMI_nxScriptResource.TestTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxScriptResource_TestTargetResource_rtti =
+/* method MSFT_nxScriptResource.TestTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxScriptResource_TestTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00746512, /* code */
     MI_T("TestTargetResource"), /* name */
-    OMI_nxScriptResource_TestTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_TestTargetResource_quals), /* numQualifiers */
-    OMI_nxScriptResource_TestTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxScriptResource_TestTargetResource_params), /* numParameters */
-    sizeof(OMI_nxScriptResource_TestTargetResource), /* size */
+    MSFT_nxScriptResource_TestTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_TestTargetResource_quals), /* numQualifiers */
+    MSFT_nxScriptResource_TestTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxScriptResource_TestTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxScriptResource_TestTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxScriptResource_Invoke_TestTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxScriptResource_Invoke_TestTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_SetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_SetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_SetTargetResource_Static_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_SetTargetResource_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxScriptResource_SetTargetResource_Description_qual_value = MI_T("11");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_SetTargetResource_Description_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_SetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_SetTargetResource_quals[] =
 {
-    &OMI_nxScriptResource_SetTargetResource_Static_qual,
-    &OMI_nxScriptResource_SetTargetResource_Description_qual,
+    &MSFT_nxScriptResource_SetTargetResource_Static_qual,
+    &MSFT_nxScriptResource_SetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_SetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_SetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_SetTargetResource_InputResource_In_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxScriptResource");
+static MI_CONST MI_Char* MSFT_nxScriptResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxScriptResource");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_SetTargetResource_InputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxScriptResource_SetTargetResource_InputResource_Description_qual_value = MI_T("7");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_SetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_SetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_SetTargetResource_InputResource_quals[] =
 {
-    &OMI_nxScriptResource_SetTargetResource_InputResource_In_qual,
-    &OMI_nxScriptResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxScriptResource_SetTargetResource_InputResource_Description_qual,
+    &MSFT_nxScriptResource_SetTargetResource_InputResource_In_qual,
+    &MSFT_nxScriptResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxScriptResource_SetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.SetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_SetTargetResource_InputResource_param =
+/* parameter MSFT_nxScriptResource.SetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_SetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxScriptResource_SetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_SetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxScriptResource_SetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_SetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxScriptResource"), /* className */
+    MI_T("MSFT_nxScriptResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_SetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxScriptResource_SetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_SetTargetResource_ProviderContext_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_SetTargetResource_ProviderContext_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_ProviderContext_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_ProviderContext_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_SetTargetResource_ProviderContext_In_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxScriptResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("12");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_SetTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_SetTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_SetTargetResource_ProviderContext_quals[] =
 {
-    &OMI_nxScriptResource_SetTargetResource_ProviderContext_In_qual,
-    &OMI_nxScriptResource_SetTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxScriptResource_SetTargetResource_ProviderContext_In_qual,
+    &MSFT_nxScriptResource_SetTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.SetTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_SetTargetResource_ProviderContext_param =
+/* parameter MSFT_nxScriptResource.SetTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_SetTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    OMI_nxScriptResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxScriptResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_SetTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxScriptResource_SetTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_SetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_SetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_SetTargetResource_Flags_In_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_SetTargetResource_Flags_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxScriptResource_SetTargetResource_Flags_Description_qual_value = MI_T("8");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_SetTargetResource_Flags_Description_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_SetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_SetTargetResource_Flags_quals[] =
 {
-    &OMI_nxScriptResource_SetTargetResource_Flags_In_qual,
-    &OMI_nxScriptResource_SetTargetResource_Flags_Description_qual,
+    &MSFT_nxScriptResource_SetTargetResource_Flags_In_qual,
+    &MSFT_nxScriptResource_SetTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.SetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_SetTargetResource_Flags_param =
+/* parameter MSFT_nxScriptResource.SetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_SetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxScriptResource_SetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_SetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxScriptResource_SetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_SetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_SetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxScriptResource_SetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxScriptResource_SetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxScriptResource_SetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxScriptResource_SetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxScriptResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("11");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_SetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_SetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_SetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxScriptResource_SetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_SetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_SetTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxScriptResource_SetTargetResource_MIReturn_Static_qual,
-    &OMI_nxScriptResource_SetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxScriptResource_SetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxScriptResource_SetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxScriptResource.SetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxScriptResource_SetTargetResource_MIReturn_param =
+/* parameter MSFT_nxScriptResource.SetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxScriptResource_SetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxScriptResource_SetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxScriptResource_SetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxScriptResource_SetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxScriptResource_SetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxScriptResource_SetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxScriptResource_SetTargetResource_params[] =
 {
-    &OMI_nxScriptResource_SetTargetResource_MIReturn_param,
-    &OMI_nxScriptResource_SetTargetResource_InputResource_param,
-    &OMI_nxScriptResource_SetTargetResource_ProviderContext_param,
-    &OMI_nxScriptResource_SetTargetResource_Flags_param,
+    &MSFT_nxScriptResource_SetTargetResource_MIReturn_param,
+    &MSFT_nxScriptResource_SetTargetResource_InputResource_param,
+    &MSFT_nxScriptResource_SetTargetResource_ProviderContext_param,
+    &MSFT_nxScriptResource_SetTargetResource_Flags_param,
 };
 
-/* method OMI_nxScriptResource.SetTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxScriptResource_SetTargetResource_rtti =
+/* method MSFT_nxScriptResource.SetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxScriptResource_SetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00736511, /* code */
     MI_T("SetTargetResource"), /* name */
-    OMI_nxScriptResource_SetTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_SetTargetResource_quals), /* numQualifiers */
-    OMI_nxScriptResource_SetTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxScriptResource_SetTargetResource_params), /* numParameters */
-    sizeof(OMI_nxScriptResource_SetTargetResource), /* size */
+    MSFT_nxScriptResource_SetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_SetTargetResource_quals), /* numQualifiers */
+    MSFT_nxScriptResource_SetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxScriptResource_SetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxScriptResource_SetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxScriptResource"), /* origin */
-    MI_T("OMI_nxScriptResource"), /* propagator */
+    MI_T("MSFT_nxScriptResource"), /* origin */
+    MI_T("MSFT_nxScriptResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxScriptResource_Invoke_SetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxScriptResource_Invoke_SetTargetResource, /* method */
 };
 
-static MI_MethodDecl MI_CONST* MI_CONST OMI_nxScriptResource_meths[] =
+static MI_MethodDecl MI_CONST* MI_CONST MSFT_nxScriptResource_meths[] =
 {
-    &OMI_nxScriptResource_GetTargetResource_rtti,
-    &OMI_nxScriptResource_TestTargetResource_rtti,
-    &OMI_nxScriptResource_SetTargetResource_rtti,
+    &MSFT_nxScriptResource_GetTargetResource_rtti,
+    &MSFT_nxScriptResource_TestTargetResource_rtti,
+    &MSFT_nxScriptResource_SetTargetResource_rtti,
 };
 
-static MI_CONST MI_ProviderFT OMI_nxScriptResource_funcs =
+static MI_CONST MI_ProviderFT MSFT_nxScriptResource_funcs =
 {
-  (MI_ProviderFT_Load)OMI_nxScriptResource_Load,
-  (MI_ProviderFT_Unload)OMI_nxScriptResource_Unload,
-  (MI_ProviderFT_GetInstance)OMI_nxScriptResource_GetInstance,
-  (MI_ProviderFT_EnumerateInstances)OMI_nxScriptResource_EnumerateInstances,
-  (MI_ProviderFT_CreateInstance)OMI_nxScriptResource_CreateInstance,
-  (MI_ProviderFT_ModifyInstance)OMI_nxScriptResource_ModifyInstance,
-  (MI_ProviderFT_DeleteInstance)OMI_nxScriptResource_DeleteInstance,
+  (MI_ProviderFT_Load)MSFT_nxScriptResource_Load,
+  (MI_ProviderFT_Unload)MSFT_nxScriptResource_Unload,
+  (MI_ProviderFT_GetInstance)MSFT_nxScriptResource_GetInstance,
+  (MI_ProviderFT_EnumerateInstances)MSFT_nxScriptResource_EnumerateInstances,
+  (MI_ProviderFT_CreateInstance)MSFT_nxScriptResource_CreateInstance,
+  (MI_ProviderFT_ModifyInstance)MSFT_nxScriptResource_ModifyInstance,
+  (MI_ProviderFT_DeleteInstance)MSFT_nxScriptResource_DeleteInstance,
   (MI_ProviderFT_AssociatorInstances)NULL,
   (MI_ProviderFT_ReferenceInstances)NULL,
   (MI_ProviderFT_EnableIndications)NULL,
@@ -1934,60 +1934,60 @@ static MI_CONST MI_ProviderFT OMI_nxScriptResource_funcs =
   (MI_ProviderFT_Invoke)NULL,
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_Description_qual_value = MI_T("1");
+static MI_CONST MI_Char* MSFT_nxScriptResource_Description_qual_value = MI_T("1");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxScriptResource_Description_qual_value
+    &MSFT_nxScriptResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxScriptResource_ClassVersion_qual_value = MI_T("1.0.0");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_ClassVersion_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_ClassVersion_qual =
 {
     MI_T("ClassVersion"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &OMI_nxScriptResource_ClassVersion_qual_value
+    &MSFT_nxScriptResource_ClassVersion_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxScriptResource_FriendlyName_qual_value = MI_T("nxScript");
+static MI_CONST MI_Char* MSFT_nxScriptResource_FriendlyName_qual_value = MI_T("nxScript");
 
-static MI_CONST MI_Qualifier OMI_nxScriptResource_FriendlyName_qual =
+static MI_CONST MI_Qualifier MSFT_nxScriptResource_FriendlyName_qual =
 {
     MI_T("FriendlyName"),
     MI_STRING,
     MI_FLAG_RESTRICTED,
-    &OMI_nxScriptResource_FriendlyName_qual_value
+    &MSFT_nxScriptResource_FriendlyName_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxScriptResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxScriptResource_quals[] =
 {
-    &OMI_nxScriptResource_Description_qual,
-    &OMI_nxScriptResource_ClassVersion_qual,
-    &OMI_nxScriptResource_FriendlyName_qual,
+    &MSFT_nxScriptResource_Description_qual,
+    &MSFT_nxScriptResource_ClassVersion_qual,
+    &MSFT_nxScriptResource_FriendlyName_qual,
 };
 
-/* class OMI_nxScriptResource */
-MI_CONST MI_ClassDecl OMI_nxScriptResource_rtti =
+/* class MSFT_nxScriptResource */
+MI_CONST MI_ClassDecl MSFT_nxScriptResource_rtti =
 {
     MI_FLAG_CLASS, /* flags */
-    0x006F6514, /* code */
-    MI_T("OMI_nxScriptResource"), /* name */
-    OMI_nxScriptResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxScriptResource_quals), /* numQualifiers */
-    OMI_nxScriptResource_props, /* properties */
-    MI_COUNT(OMI_nxScriptResource_props), /* numProperties */
-    sizeof(OMI_nxScriptResource), /* size */
+    0x006D6515, /* code */
+    MI_T("MSFT_nxScriptResource"), /* name */
+    MSFT_nxScriptResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxScriptResource_quals), /* numQualifiers */
+    MSFT_nxScriptResource_props, /* properties */
+    MI_COUNT(MSFT_nxScriptResource_props), /* numProperties */
+    sizeof(MSFT_nxScriptResource), /* size */
     MI_T("OMI_BaseResource"), /* superClass */
     &OMI_BaseResource_rtti, /* superClassDecl */
-    OMI_nxScriptResource_meths, /* methods */
-    MI_COUNT(OMI_nxScriptResource_meths), /* numMethods */
+    MSFT_nxScriptResource_meths, /* methods */
+    MI_COUNT(MSFT_nxScriptResource_meths), /* numMethods */
     &schemaDecl, /* schema */
-    &OMI_nxScriptResource_funcs, /* functions */
+    &MSFT_nxScriptResource_funcs, /* functions */
     NULL /* owningClass */
 };
 
@@ -2010,8 +2010,8 @@ MI_Server* __mi_server;
 
 static MI_ClassDecl MI_CONST* MI_CONST classes[] =
 {
+    &MSFT_nxScriptResource_rtti,
     &OMI_BaseResource_rtti,
-    &OMI_nxScriptResource_rtti,
 };
 
 MI_SchemaDecl schemaDecl =

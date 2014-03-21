@@ -13,9 +13,9 @@ SOURCES = \
 	mofyacc.c \
 	mofhash.c 
 
-INCLUDES = $(TOP)/common  $(TOP) $(TOP)/codec/common $(TOP)/nits/base 
+INCLUDES = $(OMI)/common  $(OMI) $(TOP) $(TOP)/codec/common $(OMI)/nits/base 
 
 DEFINES = MI_CONST= 
 
-include $(TOP)/mak/rules.mak
+include $(OMI)/mak/rules.mak
 

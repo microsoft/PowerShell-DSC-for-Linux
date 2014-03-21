@@ -12,9 +12,9 @@ SOURCES = \
 	buf.c \
 	strset.c
 
-INCLUDES = $(TOP)/common  $(TOP) $(TOP)/codec/common $(TOP)/nits/base  $(TOP)/codec/mof/parser
+INCLUDES = $(OMI)/common  $(OMI) $(TOP) $(TOP)/codec/common $(OMI)/nits/base  $(TOP)/codec/mof/parser
 
 DEFINES = MI_CONST=
 
-include $(TOP)/mak/rules.mak
+include $(OMI)/mak/rules.mak
 

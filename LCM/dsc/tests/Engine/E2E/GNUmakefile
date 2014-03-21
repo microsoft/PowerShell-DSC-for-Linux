@@ -14,11 +14,11 @@ CXXUNITTEST = NITSDSCtestEngineE2E
 SOURCES= test_EngineE2E.cpp
 
 INCLUDES= \
-	$(TOP) \
-	$(TOP)/common \
-	$(TOP)/common/inc \
+	$(OMI) \
+	$(OMI)/common \
+	$(OMI)/common/inc \
 	$(TOP)/codec/common \
-	$(TOP)/nits/base \
+	$(OMI)/nits/base \
 	$(DSCTOP)/common/inc \
 	$(DSCTOP)/engine/EngineHelper \
 	$(DSCTOP)/engine/ModuleLoader/ModuleLibrary \
@@ -30,5 +30,5 @@ DEFINES= TEST_BUILD
 
 LIBRARIES = mi  $(UNITTESTLIBS) pal EngineHelper
 
-include $(TOP)/mak/rules.mak
+include $(OMI)/mak/rules.mak
 

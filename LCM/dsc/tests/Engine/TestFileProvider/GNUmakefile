@@ -17,17 +17,17 @@ SOURCES= \
         MSFT_FileDirectoryConfiguration.c \
 
 INCLUDES= \
-	$(TOP) \
-	$(TOP)/nits/base \
-         $(DSCTOP)/engine/EngineHelper \
-	$(TOP)/common \
-	$(TOP)/common/inc \
+	$(OMI) \
+	$(OMI)/nits/base \
+        $(DSCTOP)/engine/EngineHelper \
+	$(OMI)/common \
+	$(OMI)/common/inc \
 
 DEFINES= TEST_BUILD
 
 LIBRARIES = mi pal 
 
-include $(TOP)/mak/rules.mak
+include $(OMI)/mak/rules.mak
 
 
 regtest:

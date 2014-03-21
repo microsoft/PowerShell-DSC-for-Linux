@@ -6,17 +6,17 @@
 **
 **==============================================================================
 */
-#ifndef _OMI_nxFileResource_h
-#define _OMI_nxFileResource_h
+#ifndef _MSFT_nxFileResource_h
+#define _MSFT_nxFileResource_h
 
 #include <MI.h>
 #include "OMI_BaseResource.h"
-#include "OMI_nxFileResource.h"
+#include "MSFT_nxFileResource.h"
 
 /*
 **==============================================================================
 **
-** OMI_nxFileResource [OMI_nxFileResource]
+** MSFT_nxFileResource [MSFT_nxFileResource]
 **
 ** Keys:
 **    DestinationPath
@@ -24,11 +24,11 @@
 **==============================================================================
 */
 
-typedef struct _OMI_nxFileResource /* extends OMI_BaseResource */
+typedef struct _MSFT_nxFileResource /* extends OMI_BaseResource */
 {
     MI_Instance __instance;
     /* OMI_BaseResource properties */
-    /* OMI_nxFileResource properties */
+    /* MSFT_nxFileResource properties */
     /*KEY*/ MI_ConstStringField DestinationPath;
     MI_ConstStringField SourcePath;
     MI_ConstStringField Ensure;
@@ -44,98 +44,98 @@ typedef struct _OMI_nxFileResource /* extends OMI_BaseResource */
     MI_ConstDatetimeField CreatedDate;
     MI_ConstDatetimeField ModifiedDate;
 }
-OMI_nxFileResource;
+MSFT_nxFileResource;
 
-typedef struct _OMI_nxFileResource_Ref
+typedef struct _MSFT_nxFileResource_Ref
 {
-    OMI_nxFileResource* value;
+    MSFT_nxFileResource* value;
     MI_Boolean exists;
     MI_Uint8 flags;
 }
-OMI_nxFileResource_Ref;
+MSFT_nxFileResource_Ref;
 
-typedef struct _OMI_nxFileResource_ConstRef
+typedef struct _MSFT_nxFileResource_ConstRef
 {
-    MI_CONST OMI_nxFileResource* value;
+    MI_CONST MSFT_nxFileResource* value;
     MI_Boolean exists;
     MI_Uint8 flags;
 }
-OMI_nxFileResource_ConstRef;
+MSFT_nxFileResource_ConstRef;
 
-typedef struct _OMI_nxFileResource_Array
+typedef struct _MSFT_nxFileResource_Array
 {
-    struct _OMI_nxFileResource** data;
+    struct _MSFT_nxFileResource** data;
     MI_Uint32 size;
 }
-OMI_nxFileResource_Array;
+MSFT_nxFileResource_Array;
 
-typedef struct _OMI_nxFileResource_ConstArray
+typedef struct _MSFT_nxFileResource_ConstArray
 {
-    struct _OMI_nxFileResource MI_CONST* MI_CONST* data;
+    struct _MSFT_nxFileResource MI_CONST* MI_CONST* data;
     MI_Uint32 size;
 }
-OMI_nxFileResource_ConstArray;
+MSFT_nxFileResource_ConstArray;
 
-typedef struct _OMI_nxFileResource_ArrayRef
+typedef struct _MSFT_nxFileResource_ArrayRef
 {
-    OMI_nxFileResource_Array value;
+    MSFT_nxFileResource_Array value;
     MI_Boolean exists;
     MI_Uint8 flags;
 }
-OMI_nxFileResource_ArrayRef;
+MSFT_nxFileResource_ArrayRef;
 
-typedef struct _OMI_nxFileResource_ConstArrayRef
+typedef struct _MSFT_nxFileResource_ConstArrayRef
 {
-    OMI_nxFileResource_ConstArray value;
+    MSFT_nxFileResource_ConstArray value;
     MI_Boolean exists;
     MI_Uint8 flags;
 }
-OMI_nxFileResource_ConstArrayRef;
+MSFT_nxFileResource_ConstArrayRef;
 
-MI_EXTERN_C MI_CONST MI_ClassDecl OMI_nxFileResource_rtti;
+MI_EXTERN_C MI_CONST MI_ClassDecl MSFT_nxFileResource_rtti;
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Construct(
-    _Out_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Construct(
+    _Out_ MSFT_nxFileResource* self,
     _In_ MI_Context* context)
 {
-    return MI_Context_ConstructInstance(context, &OMI_nxFileResource_rtti,
+    return MI_Context_ConstructInstance(context, &MSFT_nxFileResource_rtti,
         (MI_Instance*)&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clone(
-    _In_ const OMI_nxFileResource* self,
-    _Outptr_ OMI_nxFileResource** newInstance)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clone(
+    _In_ const MSFT_nxFileResource* self,
+    _Outptr_ MSFT_nxFileResource** newInstance)
 {
     return MI_Instance_Clone(
         &self->__instance, (MI_Instance**)newInstance);
 }
 
-MI_INLINE MI_Boolean MI_CALL OMI_nxFileResource_IsA(
+MI_INLINE MI_Boolean MI_CALL MSFT_nxFileResource_IsA(
     _In_ const MI_Instance* self)
 {
     MI_Boolean res = MI_FALSE;
-    return MI_Instance_IsA(self, &OMI_nxFileResource_rtti, &res) == MI_RESULT_OK && res;
+    return MI_Instance_IsA(self, &MSFT_nxFileResource_rtti, &res) == MI_RESULT_OK && res;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Destruct(_Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Destruct(_Inout_ MSFT_nxFileResource* self)
 {
     return MI_Instance_Destruct(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Delete(_Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Delete(_Inout_ MSFT_nxFileResource* self)
 {
     return MI_Instance_Delete(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Post(
-    _In_ const OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Post(
+    _In_ const MSFT_nxFileResource* self,
     _In_ MI_Context* context)
 {
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_DestinationPath(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_DestinationPath(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -146,8 +146,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_DestinationPath(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_DestinationPath(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_DestinationPath(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -158,16 +158,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_DestinationPath(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_DestinationPath(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_DestinationPath(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_SourcePath(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_SourcePath(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -178,8 +178,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_SourcePath(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_SourcePath(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_SourcePath(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -190,16 +190,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_SourcePath(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_SourcePath(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_SourcePath(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         1);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Ensure(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Ensure(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -210,8 +210,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Ensure(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Ensure(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Ensure(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -222,16 +222,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Ensure(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Ensure(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Ensure(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         2);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Type(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Type(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -242,8 +242,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Type(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Type(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Type(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -254,16 +254,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Type(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Type(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Type(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         3);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Contents(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Contents(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -274,8 +274,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Contents(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Contents(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Contents(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -286,16 +286,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Contents(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Contents(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Contents(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         4);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Checksum(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Checksum(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -306,8 +306,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Checksum(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Checksum(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Checksum(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -318,16 +318,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Checksum(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Checksum(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Checksum(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         5);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Recurse(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Recurse(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -338,8 +338,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Recurse(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Recurse(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Recurse(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -350,16 +350,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Recurse(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Recurse(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Recurse(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         6);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Force(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Force(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -370,8 +370,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Force(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Force(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Force(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -382,16 +382,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Force(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Force(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Force(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         7);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Links(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Links(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -402,8 +402,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Links(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Links(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Links(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -414,16 +414,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Links(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Links(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Links(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         8);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Group(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Group(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -434,8 +434,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Group(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Group(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Group(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -446,16 +446,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Group(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Group(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Group(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         9);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Mode(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Mode(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -466,8 +466,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Mode(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Mode(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Mode(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -478,16 +478,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Mode(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Mode(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Mode(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         10);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Owner(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Owner(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -498,8 +498,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_Owner(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Owner(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Owner(
+    _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
@@ -510,16 +510,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetPtr_Owner(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_Owner(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Owner(
+    _Inout_ MSFT_nxFileResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         11);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_CreatedDate(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_CreatedDate(
+    _Inout_ MSFT_nxFileResource* self,
     _In_ MI_Datetime x)
 {
     ((MI_DatetimeField*)&self->CreatedDate)->value = x;
@@ -527,15 +527,15 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_CreatedDate(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_CreatedDate(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_CreatedDate(
+    _Inout_ MSFT_nxFileResource* self)
 {
     memset((void*)&self->CreatedDate, 0, sizeof(self->CreatedDate));
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_ModifiedDate(
-    _Inout_ OMI_nxFileResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_ModifiedDate(
+    _Inout_ MSFT_nxFileResource* self,
     _In_ MI_Datetime x)
 {
     ((MI_DatetimeField*)&self->ModifiedDate)->value = x;
@@ -543,8 +543,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Set_ModifiedDate(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_ModifiedDate(
-    _Inout_ OMI_nxFileResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_ModifiedDate(
+    _Inout_ MSFT_nxFileResource* self)
 {
     memset((void*)&self->ModifiedDate, 0, sizeof(self->ModifiedDate));
     return MI_RESULT_OK;
@@ -553,60 +553,60 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_Clear_ModifiedDate(
 /*
 **==============================================================================
 **
-** OMI_nxFileResource.GetTargetResource()
+** MSFT_nxFileResource.GetTargetResource()
 **
 **==============================================================================
 */
 
-typedef struct _OMI_nxFileResource_GetTargetResource
+typedef struct _MSFT_nxFileResource_GetTargetResource
 {
     MI_Instance __instance;
     /*OUT*/ MI_ConstUint32Field MIReturn;
-    /*IN*/ OMI_nxFileResource_ConstRef InputResource;
+    /*IN*/ MSFT_nxFileResource_ConstRef InputResource;
     /*IN*/ MI_ConstUint32Field Flags;
-    /*OUT*/ OMI_nxFileResource_ConstRef OutputResource;
+    /*OUT*/ MSFT_nxFileResource_ConstRef OutputResource;
 }
-OMI_nxFileResource_GetTargetResource;
+MSFT_nxFileResource_GetTargetResource;
 
-MI_EXTERN_C MI_CONST MI_MethodDecl OMI_nxFileResource_GetTargetResource_rtti;
+MI_EXTERN_C MI_CONST MI_MethodDecl MSFT_nxFileResource_GetTargetResource_rtti;
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Construct(
-    _Out_ OMI_nxFileResource_GetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Construct(
+    _Out_ MSFT_nxFileResource_GetTargetResource* self,
     _In_ MI_Context* context)
 {
-    return MI_Context_ConstructParameters(context, &OMI_nxFileResource_GetTargetResource_rtti,
+    return MI_Context_ConstructParameters(context, &MSFT_nxFileResource_GetTargetResource_rtti,
         (MI_Instance*)&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Clone(
-    _In_ const OMI_nxFileResource_GetTargetResource* self,
-    _Outptr_ OMI_nxFileResource_GetTargetResource** newInstance)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Clone(
+    _In_ const MSFT_nxFileResource_GetTargetResource* self,
+    _Outptr_ MSFT_nxFileResource_GetTargetResource** newInstance)
 {
     return MI_Instance_Clone(
         &self->__instance, (MI_Instance**)newInstance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Destruct(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Destruct(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self)
 {
     return MI_Instance_Destruct(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Delete(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Delete(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self)
 {
     return MI_Instance_Delete(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Post(
-    _In_ const OMI_nxFileResource_GetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Post(
+    _In_ const MSFT_nxFileResource_GetTargetResource* self,
     _In_ MI_Context* context)
 {
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Set_MIReturn(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Set_MIReturn(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self,
     _In_ MI_Uint32 x)
 {
     ((MI_Uint32Field*)&self->MIReturn)->value = x;
@@ -614,16 +614,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Set_MIReturn(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Clear_MIReturn(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Clear_MIReturn(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self)
 {
     memset((void*)&self->MIReturn, 0, sizeof(self->MIReturn));
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Set_InputResource(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self,
-    _In_ const OMI_nxFileResource* x)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Set_InputResource(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self,
+    _In_ const MSFT_nxFileResource* x)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
@@ -633,9 +633,9 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Set_InputResour
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_SetPtr_InputResource(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self,
-    _In_ const OMI_nxFileResource* x)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_SetPtr_InputResource(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self,
+    _In_ const MSFT_nxFileResource* x)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
@@ -645,16 +645,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_SetPtr_InputRes
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Clear_InputResource(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Clear_InputResource(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         1);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Set_Flags(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Set_Flags(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self,
     _In_ MI_Uint32 x)
 {
     ((MI_Uint32Field*)&self->Flags)->value = x;
@@ -662,16 +662,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Set_Flags(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Clear_Flags(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Clear_Flags(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self)
 {
     memset((void*)&self->Flags, 0, sizeof(self->Flags));
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Set_OutputResource(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self,
-    _In_ const OMI_nxFileResource* x)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Set_OutputResource(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self,
+    _In_ const MSFT_nxFileResource* x)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
@@ -681,9 +681,9 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Set_OutputResou
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_SetPtr_OutputResource(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self,
-    _In_ const OMI_nxFileResource* x)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_SetPtr_OutputResource(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self,
+    _In_ const MSFT_nxFileResource* x)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
@@ -693,8 +693,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_SetPtr_OutputRe
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Clear_OutputResource(
-    _Inout_ OMI_nxFileResource_GetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_GetTargetResource_Clear_OutputResource(
+    _Inout_ MSFT_nxFileResource_GetTargetResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
@@ -704,61 +704,61 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_GetTargetResource_Clear_OutputRes
 /*
 **==============================================================================
 **
-** OMI_nxFileResource.TestTargetResource()
+** MSFT_nxFileResource.TestTargetResource()
 **
 **==============================================================================
 */
 
-typedef struct _OMI_nxFileResource_TestTargetResource
+typedef struct _MSFT_nxFileResource_TestTargetResource
 {
     MI_Instance __instance;
     /*OUT*/ MI_ConstUint32Field MIReturn;
-    /*IN*/ OMI_nxFileResource_ConstRef InputResource;
+    /*IN*/ MSFT_nxFileResource_ConstRef InputResource;
     /*IN*/ MI_ConstUint32Field Flags;
     /*OUT*/ MI_ConstBooleanField Result;
     /*OUT*/ MI_ConstUint64Field ProviderContext;
 }
-OMI_nxFileResource_TestTargetResource;
+MSFT_nxFileResource_TestTargetResource;
 
-MI_EXTERN_C MI_CONST MI_MethodDecl OMI_nxFileResource_TestTargetResource_rtti;
+MI_EXTERN_C MI_CONST MI_MethodDecl MSFT_nxFileResource_TestTargetResource_rtti;
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Construct(
-    _Out_ OMI_nxFileResource_TestTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Construct(
+    _Out_ MSFT_nxFileResource_TestTargetResource* self,
     _In_ MI_Context* context)
 {
-    return MI_Context_ConstructParameters(context, &OMI_nxFileResource_TestTargetResource_rtti,
+    return MI_Context_ConstructParameters(context, &MSFT_nxFileResource_TestTargetResource_rtti,
         (MI_Instance*)&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Clone(
-    _In_ const OMI_nxFileResource_TestTargetResource* self,
-    _Outptr_ OMI_nxFileResource_TestTargetResource** newInstance)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Clone(
+    _In_ const MSFT_nxFileResource_TestTargetResource* self,
+    _Outptr_ MSFT_nxFileResource_TestTargetResource** newInstance)
 {
     return MI_Instance_Clone(
         &self->__instance, (MI_Instance**)newInstance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Destruct(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Destruct(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self)
 {
     return MI_Instance_Destruct(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Delete(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Delete(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self)
 {
     return MI_Instance_Delete(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Post(
-    _In_ const OMI_nxFileResource_TestTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Post(
+    _In_ const MSFT_nxFileResource_TestTargetResource* self,
     _In_ MI_Context* context)
 {
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_MIReturn(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Set_MIReturn(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self,
     _In_ MI_Uint32 x)
 {
     ((MI_Uint32Field*)&self->MIReturn)->value = x;
@@ -766,16 +766,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_MIReturn(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Clear_MIReturn(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Clear_MIReturn(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self)
 {
     memset((void*)&self->MIReturn, 0, sizeof(self->MIReturn));
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_InputResource(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self,
-    _In_ const OMI_nxFileResource* x)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Set_InputResource(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self,
+    _In_ const MSFT_nxFileResource* x)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
@@ -785,9 +785,9 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_InputResou
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_SetPtr_InputResource(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self,
-    _In_ const OMI_nxFileResource* x)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_SetPtr_InputResource(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self,
+    _In_ const MSFT_nxFileResource* x)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
@@ -797,16 +797,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_SetPtr_InputRe
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Clear_InputResource(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Clear_InputResource(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         1);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_Flags(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Set_Flags(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self,
     _In_ MI_Uint32 x)
 {
     ((MI_Uint32Field*)&self->Flags)->value = x;
@@ -814,15 +814,15 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_Flags(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Clear_Flags(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Clear_Flags(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self)
 {
     memset((void*)&self->Flags, 0, sizeof(self->Flags));
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_Result(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Set_Result(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self,
     _In_ MI_Boolean x)
 {
     ((MI_BooleanField*)&self->Result)->value = x;
@@ -830,15 +830,15 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_Result(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Clear_Result(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Clear_Result(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self)
 {
     memset((void*)&self->Result, 0, sizeof(self->Result));
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_ProviderContext(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Set_ProviderContext(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self,
     _In_ MI_Uint64 x)
 {
     ((MI_Uint64Field*)&self->ProviderContext)->value = x;
@@ -846,8 +846,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Set_ProviderCo
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Clear_ProviderContext(
-    _Inout_ OMI_nxFileResource_TestTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_TestTargetResource_Clear_ProviderContext(
+    _Inout_ MSFT_nxFileResource_TestTargetResource* self)
 {
     memset((void*)&self->ProviderContext, 0, sizeof(self->ProviderContext));
     return MI_RESULT_OK;
@@ -856,60 +856,60 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_TestTargetResource_Clear_Provider
 /*
 **==============================================================================
 **
-** OMI_nxFileResource.SetTargetResource()
+** MSFT_nxFileResource.SetTargetResource()
 **
 **==============================================================================
 */
 
-typedef struct _OMI_nxFileResource_SetTargetResource
+typedef struct _MSFT_nxFileResource_SetTargetResource
 {
     MI_Instance __instance;
     /*OUT*/ MI_ConstUint32Field MIReturn;
-    /*IN*/ OMI_nxFileResource_ConstRef InputResource;
+    /*IN*/ MSFT_nxFileResource_ConstRef InputResource;
     /*IN*/ MI_ConstUint64Field ProviderContext;
     /*IN*/ MI_ConstUint32Field Flags;
 }
-OMI_nxFileResource_SetTargetResource;
+MSFT_nxFileResource_SetTargetResource;
 
-MI_EXTERN_C MI_CONST MI_MethodDecl OMI_nxFileResource_SetTargetResource_rtti;
+MI_EXTERN_C MI_CONST MI_MethodDecl MSFT_nxFileResource_SetTargetResource_rtti;
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Construct(
-    _Out_ OMI_nxFileResource_SetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Construct(
+    _Out_ MSFT_nxFileResource_SetTargetResource* self,
     _In_ MI_Context* context)
 {
-    return MI_Context_ConstructParameters(context, &OMI_nxFileResource_SetTargetResource_rtti,
+    return MI_Context_ConstructParameters(context, &MSFT_nxFileResource_SetTargetResource_rtti,
         (MI_Instance*)&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Clone(
-    _In_ const OMI_nxFileResource_SetTargetResource* self,
-    _Outptr_ OMI_nxFileResource_SetTargetResource** newInstance)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Clone(
+    _In_ const MSFT_nxFileResource_SetTargetResource* self,
+    _Outptr_ MSFT_nxFileResource_SetTargetResource** newInstance)
 {
     return MI_Instance_Clone(
         &self->__instance, (MI_Instance**)newInstance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Destruct(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Destruct(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self)
 {
     return MI_Instance_Destruct(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Delete(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Delete(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self)
 {
     return MI_Instance_Delete(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Post(
-    _In_ const OMI_nxFileResource_SetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Post(
+    _In_ const MSFT_nxFileResource_SetTargetResource* self,
     _In_ MI_Context* context)
 {
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Set_MIReturn(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Set_MIReturn(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self,
     _In_ MI_Uint32 x)
 {
     ((MI_Uint32Field*)&self->MIReturn)->value = x;
@@ -917,16 +917,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Set_MIReturn(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Clear_MIReturn(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Clear_MIReturn(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self)
 {
     memset((void*)&self->MIReturn, 0, sizeof(self->MIReturn));
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Set_InputResource(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self,
-    _In_ const OMI_nxFileResource* x)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Set_InputResource(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self,
+    _In_ const MSFT_nxFileResource* x)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
@@ -936,9 +936,9 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Set_InputResour
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_SetPtr_InputResource(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self,
-    _In_ const OMI_nxFileResource* x)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_SetPtr_InputResource(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self,
+    _In_ const MSFT_nxFileResource* x)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
@@ -948,16 +948,16 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_SetPtr_InputRes
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Clear_InputResource(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Clear_InputResource(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         1);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Set_ProviderContext(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Set_ProviderContext(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self,
     _In_ MI_Uint64 x)
 {
     ((MI_Uint64Field*)&self->ProviderContext)->value = x;
@@ -965,15 +965,15 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Set_ProviderCon
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Clear_ProviderContext(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Clear_ProviderContext(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self)
 {
     memset((void*)&self->ProviderContext, 0, sizeof(self->ProviderContext));
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Set_Flags(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self,
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Set_Flags(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self,
     _In_ MI_Uint32 x)
 {
     ((MI_Uint32Field*)&self->Flags)->value = x;
@@ -981,8 +981,8 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Set_Flags(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Clear_Flags(
-    _Inout_ OMI_nxFileResource_SetTargetResource* self)
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetTargetResource_Clear_Flags(
+    _Inout_ MSFT_nxFileResource_SetTargetResource* self)
 {
     memset((void*)&self->Flags, 0, sizeof(self->Flags));
     return MI_RESULT_OK;
@@ -991,25 +991,25 @@ MI_INLINE MI_Result MI_CALL OMI_nxFileResource_SetTargetResource_Clear_Flags(
 /*
 **==============================================================================
 **
-** OMI_nxFileResource provider function prototypes
+** MSFT_nxFileResource provider function prototypes
 **
 **==============================================================================
 */
 
 /* The developer may optionally define this structure */
-typedef struct _OMI_nxFileResource_Self OMI_nxFileResource_Self;
+typedef struct _MSFT_nxFileResource_Self MSFT_nxFileResource_Self;
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_Load(
-    _Outptr_result_maybenull_ OMI_nxFileResource_Self** self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_Load(
+    _Outptr_result_maybenull_ MSFT_nxFileResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context);
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_Unload(
-    _In_opt_ OMI_nxFileResource_Self* self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_Unload(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context);
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_EnumerateInstances(
-    _In_opt_ OMI_nxFileResource_Self* self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_EnumerateInstances(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
@@ -1017,62 +1017,62 @@ MI_EXTERN_C void MI_CALL OMI_nxFileResource_EnumerateInstances(
     _In_ MI_Boolean keysOnly,
     _In_opt_ const MI_Filter* filter);
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_GetInstance(
-    _In_opt_ OMI_nxFileResource_Self* self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_GetInstance(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const OMI_nxFileResource* instanceName,
+    _In_ const MSFT_nxFileResource* instanceName,
     _In_opt_ const MI_PropertySet* propertySet);
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_CreateInstance(
-    _In_opt_ OMI_nxFileResource_Self* self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_CreateInstance(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const OMI_nxFileResource* newInstance);
+    _In_ const MSFT_nxFileResource* newInstance);
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_ModifyInstance(
-    _In_opt_ OMI_nxFileResource_Self* self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_ModifyInstance(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const OMI_nxFileResource* modifiedInstance,
+    _In_ const MSFT_nxFileResource* modifiedInstance,
     _In_opt_ const MI_PropertySet* propertySet);
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_DeleteInstance(
-    _In_opt_ OMI_nxFileResource_Self* self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_DeleteInstance(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const OMI_nxFileResource* instanceName);
+    _In_ const MSFT_nxFileResource* instanceName);
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_Invoke_GetTargetResource(
-    _In_opt_ OMI_nxFileResource_Self* self,
-    _In_ MI_Context* context,
-    _In_opt_z_ const MI_Char* nameSpace,
-    _In_opt_z_ const MI_Char* className,
-    _In_opt_z_ const MI_Char* methodName,
-    _In_ const OMI_nxFileResource* instanceName,
-    _In_opt_ const OMI_nxFileResource_GetTargetResource* in);
-
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_Invoke_TestTargetResource(
-    _In_opt_ OMI_nxFileResource_Self* self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_Invoke_GetTargetResource(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const OMI_nxFileResource* instanceName,
-    _In_opt_ const OMI_nxFileResource_TestTargetResource* in);
+    _In_ const MSFT_nxFileResource* instanceName,
+    _In_opt_ const MSFT_nxFileResource_GetTargetResource* in);
 
-MI_EXTERN_C void MI_CALL OMI_nxFileResource_Invoke_SetTargetResource(
-    _In_opt_ OMI_nxFileResource_Self* self,
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_Invoke_TestTargetResource(
+    _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const OMI_nxFileResource* instanceName,
-    _In_opt_ const OMI_nxFileResource_SetTargetResource* in);
+    _In_ const MSFT_nxFileResource* instanceName,
+    _In_opt_ const MSFT_nxFileResource_TestTargetResource* in);
+
+MI_EXTERN_C void MI_CALL MSFT_nxFileResource_Invoke_SetTargetResource(
+    _In_opt_ MSFT_nxFileResource_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_nxFileResource* instanceName,
+    _In_opt_ const MSFT_nxFileResource_SetTargetResource* in);
 
 
-#endif /* _OMI_nxFileResource_h */
+#endif /* _MSFT_nxFileResource_h */
