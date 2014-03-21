@@ -11,7 +11,7 @@ instance of MSFT_nxScriptResource
 	echo test > /tmp/rootest/test.txt; echo ran test; exit 0";
 	User = "johnkord";
 	Group = "johnkord";
-	ResourceId = "[OMI_nxScriptResource]Script1";
+	ResourceId = "[MSFT_nxScriptResource]Script1";
 	ModuleName = "PSDesiredStateConfiguration";
 	ModuleVersion = "1.0";
 	

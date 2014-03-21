@@ -10,7 +10,7 @@ instance of MSFT_nxUserResource
 	GroupID = "0";
 	FullName = "Dr. Test User";
 	
-	ResourceId = "[OMI_nxUserResource]Test";
+	ResourceId = "[MSFT_nxUserResource]Test";
 	ModuleName = "PSDesiredStateConfiguration";
 	ModuleVersion = "1.0";
 	
