@@ -1,5 +1,5 @@
-#ifndef INCLUDED_PYTHONIOHELPERS_HPP
-#define INCLUDED_PYTHONIOHELPERS_HPP
+#ifndef INCLUDED_PYTHON_IO_HELPERS_HPP
+#define INCLUDED_PYTHON_IO_HELPERS_HPP
 
 
 #include <boost/filesystem.hpp>
@@ -7,9 +7,8 @@
 #include <iosfwd>
 
 
-namespace SCX
+namespace scx
 {
-
 
 template<typename charT>
 class PythonTextConstants
@@ -30,6 +29,10 @@ public:
     static charT const CLOSE_BRACE;
     static charT const COLON;
     static charT const DOUBLE_QUOTE;
+    static charT const PY_UNICODE_SIZE[];
+    static charT const PY_UNICODE_WIDE[];
+    static charT const IS_DEFINED[];
+    static charT const IS_NOT_DEFINED[];
 };
 
 
@@ -54,50 +57,42 @@ public:
     static charT const CLOSE_BRACE;
     static charT const COLON;
     static charT const DOUBLE_QUOTE;
+    static charT const PY_UNICODE_SIZE[];
+    static charT const PY_UNICODE_WIDE[];
+    static charT const IS_DEFINED[];
+    static charT const IS_NOT_DEFINED[];
 };
 
 
-std::ostream&
-PythonUnicodeInfo (
-    std::ostream& strm)
+template<typename charT,
+         typename traits>
+std::basic_ostream<charT, traits>&
+python_unicode_info (
+    std::basic_ostream<charT, traits>& strm)
 {
-    strm << "Py_UNICODE_SIZE: " << Py_UNICODE_SIZE;
+    typedef scx::PythonTextConstants<charT> Text;
+    strm << Text::PY_UNICODE_SIZE << Text::COLON << Py_UNICODE_SIZE <<
+        Text::DELIMITER << Text::PY_UNICODE_WIDE << Text::COLON;
 #ifdef Py_UNICODE_WIDE
-    strm << " (Py_UNICODE_WIDE is defined)";
+    return strm << Text::IS_DEFINED;
 #else
-    strm << " (Py_UNICODE_WIDE is not defined)";
+    return strm << Text::IS_NOT_DEFINED;
 #endif
-    return strm;
-}
-
-
-std::wostream&
-PythonUnicodeInfo (
-    std::wostream& strm)
-{
-    strm << L"Py_UNICODE_SIZE: " << Py_UNICODE_SIZE;
-#ifdef Py_UNICODE_WIDE
-    strm << L" (Py_UNICODE_WIDE is defined)";
-#else
-    strm << L" (Py_UNICODE_WIDE is not defined)";
-#endif
-    return strm;
 }
 
 
 template<typename charT,
          typename traits>
 std::basic_ostream<charT, traits>&
-PythonPath (
+python_path (
     std::basic_ostream<charT, traits>& strm)
 {
-    typedef SCX::PythonTextConstants<charT> Text;
+    typedef scx::PythonTextConstants<charT> Text;
     boost::python::object sysModule = boost::python::import ("sys");
     boost::python::object path = sysModule.attr ("path");
     boost::python::extract<boost::python::list> getList (path);
     boost::python::list pathList =
         boost::python::extract<boost::python::list>(path);
-
     for (boost::python::ssize_t i = 0, len = boost::python::len (pathList);
          i < len;
          ++i)
@@ -115,128 +110,40 @@ PythonPath (
 }
 
 
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::CALLABLE[] = "callable";
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::UNDEFINED[] = "undefined boost::python::object";
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::NULL_STR[] = "Null";
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::OPEN_LIST = '[';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::CLOSE_LIST = ']';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::OPEN_TUPLE = '(';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::CLOSE_TUPLE = ')';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::OPEN_DICT = '{';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::CLOSE_DICT = '}';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::DELIMITER = ',';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::PATH_INDENT[] = "    ";
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::OPEN_BRACE = '[';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::CLOSE_BRACE = ']';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::COLON = ':';
-
-template<typename charT> /*static*/ charT const
-PythonTextConstants<charT>::DOUBLE_QUOTE = '\"';
-
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::CALLABLE[] = L"callable";
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::UNDEFINED[] = L"undefined boost::python::object";
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::NULL_STR[] = L"Null";
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::OPEN_LIST = L'[';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::CLOSE_LIST = L']';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::OPEN_TUPLE = L'(';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::CLOSE_TUPLE = L')';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::OPEN_DICT = L'{';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::CLOSE_DICT = L'}';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::DELIMITER = L',';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::PATH_INDENT[] = L"    ";
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::OPEN_BRACE = L'[';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::CLOSE_BRACE = L']';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::COLON = L':';
-
-/*static*/ PythonTextConstants<wchar_t>::charT const
-PythonTextConstants<wchar_t>::DOUBLE_QUOTE = L'\"';
-
-
-} // namespace SCX
-
-
 template<typename charT,
          typename traits>
 std::basic_ostream<charT, traits>&
-operator << (
-    std::basic_ostream<charT, traits>& strm,
-    boost::python::object const& obj);
+python_error_parser (
+    std::basic_ostream<charT, traits>& strm)
+{
+    typedef scx::PythonTextConstants<charT> Text;
+    PyObject* pType;
+    PyObject* pValue;
+    PyObject* pBT;
+    PyErr_Fetch (&pType, &pValue, &pBT);
+    PyErr_NormalizeException (&pType, &pValue, &pBT);
+    boost::python::handle<> hType (pType);
+    boost::python::handle<> hValue (boost::python::allow_null (pValue));
+    boost::python::handle<> hBT (boost::python::allow_null (pBT));
+    if (hValue)
+    {
+        boost::python::object traceback(boost::python::import("traceback"));
+        boost::python::object format_exception(
+            traceback.attr("format_exception"));
+        boost::python::object formatted_list (
+            format_exception(hType, hValue, hBT));
+        boost::python::object formatted (
+            boost::python::str ("").join (formatted_list));
+        strm << formatted;
+    }
+    else
+    {
+        strm << boost::python::extract<char const*>(boost::python::str (hType));
+    }
+    return strm;
+}
 
-template<typename charT,
-         typename traits>
-std::basic_ostream<charT, traits>&
-operator << (
-    std::basic_ostream<charT, traits>& strm,
-    boost::python::list const& list);
-
-template<typename charT,
-         typename traits>
-std::basic_ostream<charT, traits>&
-operator << (
-    std::basic_ostream<charT, traits>& strm,
-    boost::python::tuple const& tuple);
-
-template<typename charT,
-         typename traits>
-std::basic_ostream<charT, traits>&
-operator << (
-    std::basic_ostream<charT, traits>& strm,
-    boost::python::dict const& dict);
+} // namespace scx
 
 
 template<typename charT,
@@ -246,37 +153,35 @@ operator << (
     std::basic_ostream<charT, traits>& strm,
     boost::python::object& obj)
 {
-    typedef SCX::PythonTextConstants<charT> Text;
-    using boost::python::extract;
-
+    typedef scx::PythonTextConstants<charT> Text;
     if (obj)
     {
-        extract<long> getInt (obj);
+        boost::python::extract<long> getInt (obj);
         if (getInt.check ())
         {
             return strm << getInt ();
         }
-        extract<double> getDouble (obj);
+        boost::python::extract<double> getDouble (obj);
         if (getDouble.check ())
         {
             return strm << getDouble ();
         }
-        extract<char const*> getStr (obj);
+        boost::python::extract<char const*> getStr (obj);
         if (getStr.check ())
         {
             return strm << getStr ();
         }
-        extract<boost::python::list> getList (obj);
+        boost::python::extract<boost::python::list> getList (obj);
         if (getList.check ())
         {
             return strm << getList ();
         }
-        extract<boost::python::tuple> getTuple (obj);
+        boost::python::extract<boost::python::tuple> getTuple (obj);
         if (getTuple.check ())
         {
             return strm << getTuple ();
         }
-        extract<boost::python::dict> getDict (obj);
+        boost::python::extract<boost::python::dict> getDict (obj);
         if (getDict.check ())
         {
             return strm << getDict ();
@@ -298,7 +203,7 @@ operator << (
     std::basic_ostream<charT, traits>& strm,
     boost::python::list const& list)
 {
-    typedef SCX::PythonTextConstants<charT> Text;
+    typedef scx::PythonTextConstants<charT> Text;
     strm << Text::OPEN_LIST;
     boost::python::ssize_t const len = boost::python::len (list);
     for (boost::python::ssize_t i = 0; i < len; ++i)
@@ -320,7 +225,7 @@ operator << (
     std::basic_ostream<charT, traits>& strm,
     boost::python::tuple const& tuple)
 {
-    typedef SCX::PythonTextConstants<charT> Text;
+    typedef scx::PythonTextConstants<charT> Text;
     strm << Text::OPEN_TUPLE;
     boost::python::ssize_t const len = boost::python::len (tuple);
     for (boost::python::ssize_t i = 0; i < len; ++i)
@@ -343,7 +248,7 @@ operator << (
     std::basic_ostream<charT, traits>& strm,
     boost::python::dict const& dict)
 {
-    typedef SCX::PythonTextConstants<charT> Text;
+    typedef scx::PythonTextConstants<charT> Text;
     boost::python::list items = dict.items ();
     strm << Text::OPEN_DICT;
     boost::python::ssize_t const len = boost::python::len (items);
@@ -360,4 +265,4 @@ operator << (
 }
 
 
-#endif //INCLUDED_PYTHONIOHELPERS_HPP
+#endif //INCLUDED_PYTHON_IO_HELPERS_HPP
