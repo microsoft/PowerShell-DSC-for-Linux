@@ -7,7 +7,7 @@ instance of MSFT_nxFileResource
 	Owner = "johnkord";
 	Group = "johnkord";
 	Mode = "644";
-	ResourceId = "[OMI_nxFileResource]File1";
+	ResourceId = "[MSFT_nxFileResource]File1";
 	ModuleName = "PSDesiredStateConfiguration";
 	ModuleVersion = "1.0";
 	
@@ -24,7 +24,7 @@ instance of MSFT_nxFileResource
 	Group = "johnkord";
 	Mode = "744";
 	Recurse = "True";
-	ResourceId = "[OMI_nxFileResource]File2";
+	ResourceId = "[MSFT_nxFileResource]File2";
 	ModuleName = "PSDesiredStateConfiguration";
 	ModuleVersion = "1.0";
 	
