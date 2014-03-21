@@ -3,7 +3,7 @@ instance of MSFT_nxUserResource
 	UserName = "testuser";
 	Disabled = true;
 	PasswordChangeRequired = true;
-	Password = "\\$abcdef";
+	Password = "$abcdef";
 	Ensure = "Present";
 	Description = "DESCRIBED";
 	HomeDirectory = "/home/testdir";
