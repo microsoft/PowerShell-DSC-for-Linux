@@ -130,7 +130,7 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
             disabled_user_string = "!"
 
         if Password:
-            usermod_string += " -p \"" + disabled_user_string + Password + "\""
+            usermod_string += " -p \"" + disabled_user_string + Password.replace("$", "\$") + "\""
         elif Disabled:
             if Disabled == "True":
                 usermodonly_string += " -L"
@@ -231,9 +231,16 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
             print("GroupID does not match")
             return [-1]
 
-        if Password and shadow_entries[UserName][0] != Password:
-            print("Password does not match")
-            return [-1]
+        if Password:
+            read_password = shadow_entries[UserName][0]
+            if len(read_password) == 0:
+                print("Password does not match")
+                return [-1]
+            if read_password[0] == "!":
+                read_password = read_password[1:]
+            if read_password != Password:
+                print("Password does not match")
+                return [-1]
 
         if PasswordChangeRequired:
             if PasswordChangeRequired == "True" and not PasswordExpired(shadow_entries[UserName]):
