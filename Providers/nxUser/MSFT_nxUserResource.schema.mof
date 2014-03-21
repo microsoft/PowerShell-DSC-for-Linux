@@ -1,5 +1,5 @@
 [ClassVersion("1.0.0"), FriendlyName("nxUser")]
-class OMI_nxUserResource : OMI_BaseResource 
+class MSFT_nxUserResource : OMI_BaseResource 
 {
 	[Key] string UserName;
 	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;

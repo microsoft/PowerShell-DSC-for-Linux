@@ -5,11 +5,11 @@ LIBRARY = mofparsererror
 
 SOURCES = errors.c errorswrap.c omiutils.c
 
-INCLUDES = $(TOP) $(TOP)/common
+INCLUDES = $(OMI) $(OMI)/common
 
 DEFINES =  MI_CONST=
 
 # LIBRARIES = base
 
-include $(TOP)/mak/rules.mak
+include $(OMI)/mak/rules.mak
 

@@ -8,9 +8,9 @@ SOURCES = \
 	ModuleHandler.c \
 	ModuleValidator.c 
 
-INCLUDES = $(TOP) $(TOP)/common $(DSCTOP)/common/inc $(DSCTOP)/engine/EngineHelper $(DSCTOP)/engine $(TOP)/codec/common $(TOP)/nits/base
+INCLUDES = $(OMI) $(OMI)/common $(DSCTOP)/common/inc $(DSCTOP)/engine/EngineHelper $(DSCTOP)/engine $(TOP)/codec/common $(OMI)/nits/base
 
 DEFINES = MI_CONST= HOOK_BUILD
 
-include $(TOP)/mak/rules.mak
+include $(OMI)/mak/rules.mak
 

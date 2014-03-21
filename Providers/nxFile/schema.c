@@ -8,7 +8,7 @@
 */
 #include <ctype.h>
 #include <MI.h>
-#include "OMI_nxFileResource.h"
+#include "MSFT_nxFileResource.h"
 
 /*
 **==============================================================================
@@ -981,225 +981,225 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 /*
 **==============================================================================
 **
-** OMI_nxFileResource
+** MSFT_nxFileResource
 **
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean OMI_nxFileResource_DestinationPath_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_DestinationPath_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_DestinationPath_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_DestinationPath_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_DestinationPath_Key_qual_value
+    &MSFT_nxFileResource_DestinationPath_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_DestinationPath_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_DestinationPath_quals[] =
 {
-    &OMI_nxFileResource_DestinationPath_Key_qual,
+    &MSFT_nxFileResource_DestinationPath_Key_qual,
 };
 
-/* property OMI_nxFileResource.DestinationPath */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_DestinationPath_prop =
+/* property MSFT_nxFileResource.DestinationPath */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_DestinationPath_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
     0x0064680F, /* code */
     MI_T("DestinationPath"), /* name */
-    OMI_nxFileResource_DestinationPath_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_DestinationPath_quals), /* numQualifiers */
+    MSFT_nxFileResource_DestinationPath_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_DestinationPath_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, DestinationPath), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, DestinationPath), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_SourcePath_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_SourcePath_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SourcePath_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SourcePath_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_SourcePath_Write_qual_value
+    &MSFT_nxFileResource_SourcePath_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_SourcePath_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_SourcePath_quals[] =
 {
-    &OMI_nxFileResource_SourcePath_Write_qual,
+    &MSFT_nxFileResource_SourcePath_Write_qual,
 };
 
-/* property OMI_nxFileResource.SourcePath */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_SourcePath_prop =
+/* property MSFT_nxFileResource.SourcePath */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_SourcePath_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x0073680A, /* code */
     MI_T("SourcePath"), /* name */
-    OMI_nxFileResource_SourcePath_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_SourcePath_quals), /* numQualifiers */
+    MSFT_nxFileResource_SourcePath_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_SourcePath_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, SourcePath), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, SourcePath), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Ensure_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Ensure_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Ensure_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Ensure_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Ensure_Write_qual_value
+    &MSFT_nxFileResource_Ensure_Write_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_Ensure_ValueMap_qual_data_value[] =
+static MI_CONST MI_Char* MSFT_nxFileResource_Ensure_ValueMap_qual_data_value[] =
 {
     MI_T("present"),
     MI_T("absent"),
 };
 
-static MI_CONST MI_ConstStringA OMI_nxFileResource_Ensure_ValueMap_qual_value =
+static MI_CONST MI_ConstStringA MSFT_nxFileResource_Ensure_ValueMap_qual_value =
 {
-    OMI_nxFileResource_Ensure_ValueMap_qual_data_value,
-    MI_COUNT(OMI_nxFileResource_Ensure_ValueMap_qual_data_value),
+    MSFT_nxFileResource_Ensure_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxFileResource_Ensure_ValueMap_qual_data_value),
 };
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Ensure_ValueMap_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Ensure_ValueMap_qual =
 {
     MI_T("ValueMap"),
     MI_STRINGA,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Ensure_ValueMap_qual_value
+    &MSFT_nxFileResource_Ensure_ValueMap_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Ensure_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Ensure_quals[] =
 {
-    &OMI_nxFileResource_Ensure_Write_qual,
-    &OMI_nxFileResource_Ensure_ValueMap_qual,
+    &MSFT_nxFileResource_Ensure_Write_qual,
+    &MSFT_nxFileResource_Ensure_ValueMap_qual,
 };
 
-/* property OMI_nxFileResource.Ensure */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Ensure_prop =
+/* property MSFT_nxFileResource.Ensure */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Ensure_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00656506, /* code */
     MI_T("Ensure"), /* name */
-    OMI_nxFileResource_Ensure_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Ensure_quals), /* numQualifiers */
+    MSFT_nxFileResource_Ensure_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Ensure_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Ensure), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Ensure), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Type_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Type_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Type_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Type_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Type_Write_qual_value
+    &MSFT_nxFileResource_Type_Write_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_Type_ValueMap_qual_data_value[] =
+static MI_CONST MI_Char* MSFT_nxFileResource_Type_ValueMap_qual_data_value[] =
 {
     MI_T("file"),
     MI_T("directory"),
     MI_T("link"),
 };
 
-static MI_CONST MI_ConstStringA OMI_nxFileResource_Type_ValueMap_qual_value =
+static MI_CONST MI_ConstStringA MSFT_nxFileResource_Type_ValueMap_qual_value =
 {
-    OMI_nxFileResource_Type_ValueMap_qual_data_value,
-    MI_COUNT(OMI_nxFileResource_Type_ValueMap_qual_data_value),
+    MSFT_nxFileResource_Type_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxFileResource_Type_ValueMap_qual_data_value),
 };
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Type_ValueMap_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Type_ValueMap_qual =
 {
     MI_T("ValueMap"),
     MI_STRINGA,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Type_ValueMap_qual_value
+    &MSFT_nxFileResource_Type_ValueMap_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Type_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Type_quals[] =
 {
-    &OMI_nxFileResource_Type_Write_qual,
-    &OMI_nxFileResource_Type_ValueMap_qual,
+    &MSFT_nxFileResource_Type_Write_qual,
+    &MSFT_nxFileResource_Type_ValueMap_qual,
 };
 
-/* property OMI_nxFileResource.Type */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Type_prop =
+/* property MSFT_nxFileResource.Type */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Type_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00746504, /* code */
     MI_T("Type"), /* name */
-    OMI_nxFileResource_Type_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Type_quals), /* numQualifiers */
+    MSFT_nxFileResource_Type_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Type_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Type), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Type), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Contents_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Contents_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Contents_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Contents_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Contents_Write_qual_value
+    &MSFT_nxFileResource_Contents_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Contents_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Contents_quals[] =
 {
-    &OMI_nxFileResource_Contents_Write_qual,
+    &MSFT_nxFileResource_Contents_Write_qual,
 };
 
-/* property OMI_nxFileResource.Contents */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Contents_prop =
+/* property MSFT_nxFileResource.Contents */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Contents_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00637308, /* code */
     MI_T("Contents"), /* name */
-    OMI_nxFileResource_Contents_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Contents_quals), /* numQualifiers */
+    MSFT_nxFileResource_Contents_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Contents_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Contents), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Contents), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Checksum_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Checksum_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Checksum_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Checksum_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Checksum_Write_qual_value
+    &MSFT_nxFileResource_Checksum_Write_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_Checksum_ValueMap_qual_data_value[] =
+static MI_CONST MI_Char* MSFT_nxFileResource_Checksum_ValueMap_qual_data_value[] =
 {
     MI_T("md5"),
     MI_T("md5lite"),
@@ -1208,107 +1208,107 @@ static MI_CONST MI_Char* OMI_nxFileResource_Checksum_ValueMap_qual_data_value[] 
     MI_T("none"),
 };
 
-static MI_CONST MI_ConstStringA OMI_nxFileResource_Checksum_ValueMap_qual_value =
+static MI_CONST MI_ConstStringA MSFT_nxFileResource_Checksum_ValueMap_qual_value =
 {
-    OMI_nxFileResource_Checksum_ValueMap_qual_data_value,
-    MI_COUNT(OMI_nxFileResource_Checksum_ValueMap_qual_data_value),
+    MSFT_nxFileResource_Checksum_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxFileResource_Checksum_ValueMap_qual_data_value),
 };
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Checksum_ValueMap_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Checksum_ValueMap_qual =
 {
     MI_T("ValueMap"),
     MI_STRINGA,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Checksum_ValueMap_qual_value
+    &MSFT_nxFileResource_Checksum_ValueMap_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Checksum_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Checksum_quals[] =
 {
-    &OMI_nxFileResource_Checksum_Write_qual,
-    &OMI_nxFileResource_Checksum_ValueMap_qual,
+    &MSFT_nxFileResource_Checksum_Write_qual,
+    &MSFT_nxFileResource_Checksum_ValueMap_qual,
 };
 
-/* property OMI_nxFileResource.Checksum */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Checksum_prop =
+/* property MSFT_nxFileResource.Checksum */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Checksum_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00636D08, /* code */
     MI_T("Checksum"), /* name */
-    OMI_nxFileResource_Checksum_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Checksum_quals), /* numQualifiers */
+    MSFT_nxFileResource_Checksum_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Checksum_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Checksum), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Checksum), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Recurse_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Recurse_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Recurse_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Recurse_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Recurse_Write_qual_value
+    &MSFT_nxFileResource_Recurse_Write_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_Recurse_ValueMap_qual_data_value[] =
+static MI_CONST MI_Char* MSFT_nxFileResource_Recurse_ValueMap_qual_data_value[] =
 {
     MI_T("true"),
     MI_T("false"),
 };
 
-static MI_CONST MI_ConstStringA OMI_nxFileResource_Recurse_ValueMap_qual_value =
+static MI_CONST MI_ConstStringA MSFT_nxFileResource_Recurse_ValueMap_qual_value =
 {
-    OMI_nxFileResource_Recurse_ValueMap_qual_data_value,
-    MI_COUNT(OMI_nxFileResource_Recurse_ValueMap_qual_data_value),
+    MSFT_nxFileResource_Recurse_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxFileResource_Recurse_ValueMap_qual_data_value),
 };
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Recurse_ValueMap_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Recurse_ValueMap_qual =
 {
     MI_T("ValueMap"),
     MI_STRINGA,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Recurse_ValueMap_qual_value
+    &MSFT_nxFileResource_Recurse_ValueMap_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Recurse_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Recurse_quals[] =
 {
-    &OMI_nxFileResource_Recurse_Write_qual,
-    &OMI_nxFileResource_Recurse_ValueMap_qual,
+    &MSFT_nxFileResource_Recurse_Write_qual,
+    &MSFT_nxFileResource_Recurse_ValueMap_qual,
 };
 
-/* property OMI_nxFileResource.Recurse */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Recurse_prop =
+/* property MSFT_nxFileResource.Recurse */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Recurse_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00726507, /* code */
     MI_T("Recurse"), /* name */
-    OMI_nxFileResource_Recurse_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Recurse_quals), /* numQualifiers */
+    MSFT_nxFileResource_Recurse_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Recurse_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Recurse), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Recurse), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Force_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Force_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Force_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Force_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Force_Write_qual_value
+    &MSFT_nxFileResource_Force_Write_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_Force_ValueMap_qual_data_value[] =
+static MI_CONST MI_Char* MSFT_nxFileResource_Force_ValueMap_qual_data_value[] =
 {
     MI_T("true"),
     MI_T("false"),
@@ -1316,1011 +1316,1011 @@ static MI_CONST MI_Char* OMI_nxFileResource_Force_ValueMap_qual_data_value[] =
     MI_T("no"),
 };
 
-static MI_CONST MI_ConstStringA OMI_nxFileResource_Force_ValueMap_qual_value =
+static MI_CONST MI_ConstStringA MSFT_nxFileResource_Force_ValueMap_qual_value =
 {
-    OMI_nxFileResource_Force_ValueMap_qual_data_value,
-    MI_COUNT(OMI_nxFileResource_Force_ValueMap_qual_data_value),
+    MSFT_nxFileResource_Force_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxFileResource_Force_ValueMap_qual_data_value),
 };
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Force_ValueMap_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Force_ValueMap_qual =
 {
     MI_T("ValueMap"),
     MI_STRINGA,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Force_ValueMap_qual_value
+    &MSFT_nxFileResource_Force_ValueMap_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Force_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Force_quals[] =
 {
-    &OMI_nxFileResource_Force_Write_qual,
-    &OMI_nxFileResource_Force_ValueMap_qual,
+    &MSFT_nxFileResource_Force_Write_qual,
+    &MSFT_nxFileResource_Force_ValueMap_qual,
 };
 
-/* property OMI_nxFileResource.Force */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Force_prop =
+/* property MSFT_nxFileResource.Force */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Force_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00666505, /* code */
     MI_T("Force"), /* name */
-    OMI_nxFileResource_Force_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Force_quals), /* numQualifiers */
+    MSFT_nxFileResource_Force_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Force_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Force), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Force), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Links_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Links_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Links_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Links_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Links_Write_qual_value
+    &MSFT_nxFileResource_Links_Write_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_Links_ValueMap_qual_data_value[] =
+static MI_CONST MI_Char* MSFT_nxFileResource_Links_ValueMap_qual_data_value[] =
 {
     MI_T("follow"),
     MI_T("manage"),
 };
 
-static MI_CONST MI_ConstStringA OMI_nxFileResource_Links_ValueMap_qual_value =
+static MI_CONST MI_ConstStringA MSFT_nxFileResource_Links_ValueMap_qual_value =
 {
-    OMI_nxFileResource_Links_ValueMap_qual_data_value,
-    MI_COUNT(OMI_nxFileResource_Links_ValueMap_qual_data_value),
+    MSFT_nxFileResource_Links_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxFileResource_Links_ValueMap_qual_data_value),
 };
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Links_ValueMap_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Links_ValueMap_qual =
 {
     MI_T("ValueMap"),
     MI_STRINGA,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Links_ValueMap_qual_value
+    &MSFT_nxFileResource_Links_ValueMap_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Links_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Links_quals[] =
 {
-    &OMI_nxFileResource_Links_Write_qual,
-    &OMI_nxFileResource_Links_ValueMap_qual,
+    &MSFT_nxFileResource_Links_Write_qual,
+    &MSFT_nxFileResource_Links_ValueMap_qual,
 };
 
-/* property OMI_nxFileResource.Links */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Links_prop =
+/* property MSFT_nxFileResource.Links */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Links_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x006C7305, /* code */
     MI_T("Links"), /* name */
-    OMI_nxFileResource_Links_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Links_quals), /* numQualifiers */
+    MSFT_nxFileResource_Links_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Links_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Links), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Links), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Group_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Group_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Group_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Group_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Group_Write_qual_value
+    &MSFT_nxFileResource_Group_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Group_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Group_quals[] =
 {
-    &OMI_nxFileResource_Group_Write_qual,
+    &MSFT_nxFileResource_Group_Write_qual,
 };
 
-/* property OMI_nxFileResource.Group */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Group_prop =
+/* property MSFT_nxFileResource.Group */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Group_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00677005, /* code */
     MI_T("Group"), /* name */
-    OMI_nxFileResource_Group_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Group_quals), /* numQualifiers */
+    MSFT_nxFileResource_Group_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Group_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Group), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Group), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Mode_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Mode_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Mode_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Mode_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Mode_Write_qual_value
+    &MSFT_nxFileResource_Mode_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Mode_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Mode_quals[] =
 {
-    &OMI_nxFileResource_Mode_Write_qual,
+    &MSFT_nxFileResource_Mode_Write_qual,
 };
 
-/* property OMI_nxFileResource.Mode */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Mode_prop =
+/* property MSFT_nxFileResource.Mode */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Mode_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x006D6504, /* code */
     MI_T("Mode"), /* name */
-    OMI_nxFileResource_Mode_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Mode_quals), /* numQualifiers */
+    MSFT_nxFileResource_Mode_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Mode_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Mode), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Mode), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_Owner_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_Owner_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Owner_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Owner_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_Owner_Write_qual_value
+    &MSFT_nxFileResource_Owner_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_Owner_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Owner_quals[] =
 {
-    &OMI_nxFileResource_Owner_Write_qual,
+    &MSFT_nxFileResource_Owner_Write_qual,
 };
 
-/* property OMI_nxFileResource.Owner */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_Owner_prop =
+/* property MSFT_nxFileResource.Owner */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_Owner_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x006F7205, /* code */
     MI_T("Owner"), /* name */
-    OMI_nxFileResource_Owner_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_Owner_quals), /* numQualifiers */
+    MSFT_nxFileResource_Owner_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_Owner_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, Owner), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, Owner), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_CreatedDate_Read_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_CreatedDate_Read_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_CreatedDate_Read_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_CreatedDate_Read_qual =
 {
     MI_T("Read"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_CreatedDate_Read_qual_value
+    &MSFT_nxFileResource_CreatedDate_Read_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_CreatedDate_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_CreatedDate_quals[] =
 {
-    &OMI_nxFileResource_CreatedDate_Read_qual,
+    &MSFT_nxFileResource_CreatedDate_Read_qual,
 };
 
-/* property OMI_nxFileResource.CreatedDate */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_CreatedDate_prop =
+/* property MSFT_nxFileResource.CreatedDate */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_CreatedDate_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x0063650B, /* code */
     MI_T("CreatedDate"), /* name */
-    OMI_nxFileResource_CreatedDate_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_CreatedDate_quals), /* numQualifiers */
+    MSFT_nxFileResource_CreatedDate_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_CreatedDate_quals), /* numQualifiers */
     MI_DATETIME, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, CreatedDate), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, CreatedDate), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_ModifiedDate_Read_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_ModifiedDate_Read_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_ModifiedDate_Read_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_ModifiedDate_Read_qual =
 {
     MI_T("Read"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_ModifiedDate_Read_qual_value
+    &MSFT_nxFileResource_ModifiedDate_Read_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_ModifiedDate_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_ModifiedDate_quals[] =
 {
-    &OMI_nxFileResource_ModifiedDate_Read_qual,
+    &MSFT_nxFileResource_ModifiedDate_Read_qual,
 };
 
-/* property OMI_nxFileResource.ModifiedDate */
-static MI_CONST MI_PropertyDecl OMI_nxFileResource_ModifiedDate_prop =
+/* property MSFT_nxFileResource.ModifiedDate */
+static MI_CONST MI_PropertyDecl MSFT_nxFileResource_ModifiedDate_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x006D650C, /* code */
     MI_T("ModifiedDate"), /* name */
-    OMI_nxFileResource_ModifiedDate_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_ModifiedDate_quals), /* numQualifiers */
+    MSFT_nxFileResource_ModifiedDate_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_ModifiedDate_quals), /* numQualifiers */
     MI_DATETIME, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource, ModifiedDate), /* offset */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    offsetof(MSFT_nxFileResource, ModifiedDate), /* offset */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     NULL,
 };
 
-static MI_PropertyDecl MI_CONST* MI_CONST OMI_nxFileResource_props[] =
+static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxFileResource_props[] =
 {
-    &OMI_nxFileResource_DestinationPath_prop,
-    &OMI_nxFileResource_SourcePath_prop,
-    &OMI_nxFileResource_Ensure_prop,
-    &OMI_nxFileResource_Type_prop,
-    &OMI_nxFileResource_Contents_prop,
-    &OMI_nxFileResource_Checksum_prop,
-    &OMI_nxFileResource_Recurse_prop,
-    &OMI_nxFileResource_Force_prop,
-    &OMI_nxFileResource_Links_prop,
-    &OMI_nxFileResource_Group_prop,
-    &OMI_nxFileResource_Mode_prop,
-    &OMI_nxFileResource_Owner_prop,
-    &OMI_nxFileResource_CreatedDate_prop,
-    &OMI_nxFileResource_ModifiedDate_prop,
+    &MSFT_nxFileResource_DestinationPath_prop,
+    &MSFT_nxFileResource_SourcePath_prop,
+    &MSFT_nxFileResource_Ensure_prop,
+    &MSFT_nxFileResource_Type_prop,
+    &MSFT_nxFileResource_Contents_prop,
+    &MSFT_nxFileResource_Checksum_prop,
+    &MSFT_nxFileResource_Recurse_prop,
+    &MSFT_nxFileResource_Force_prop,
+    &MSFT_nxFileResource_Links_prop,
+    &MSFT_nxFileResource_Group_prop,
+    &MSFT_nxFileResource_Mode_prop,
+    &MSFT_nxFileResource_Owner_prop,
+    &MSFT_nxFileResource_CreatedDate_prop,
+    &MSFT_nxFileResource_ModifiedDate_prop,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_GetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_GetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_GetTargetResource_Static_qual_value
+    &MSFT_nxFileResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_GetTargetResource_Description_qual_value = MI_T("2");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_Description_qual_value = MI_T("2");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_GetTargetResource_Description_qual_value
+    &MSFT_nxFileResource_GetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_GetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_GetTargetResource_quals[] =
 {
-    &OMI_nxFileResource_GetTargetResource_Static_qual,
-    &OMI_nxFileResource_GetTargetResource_Description_qual,
+    &MSFT_nxFileResource_GetTargetResource_Static_qual,
+    &MSFT_nxFileResource_GetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_GetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_GetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_GetTargetResource_InputResource_In_qual_value
+    &MSFT_nxFileResource_GetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxFileResource");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxFileResource");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_GetTargetResource_InputResource_Description_qual_value = MI_T("3");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_InputResource_Description_qual_value = MI_T("3");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_GetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxFileResource_GetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_GetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_GetTargetResource_InputResource_quals[] =
 {
-    &OMI_nxFileResource_GetTargetResource_InputResource_In_qual,
-    &OMI_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxFileResource_GetTargetResource_InputResource_Description_qual,
+    &MSFT_nxFileResource_GetTargetResource_InputResource_In_qual,
+    &MSFT_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxFileResource_GetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.GetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_GetTargetResource_InputResource_param =
+/* parameter MSFT_nxFileResource.GetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_GetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxFileResource_GetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_GetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxFileResource_GetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_GetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxFileResource"), /* className */
+    MI_T("MSFT_nxFileResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_GetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxFileResource_GetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_GetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_GetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_GetTargetResource_Flags_In_qual_value
+    &MSFT_nxFileResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_GetTargetResource_Flags_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_Flags_Description_qual_value = MI_T("4");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_GetTargetResource_Flags_Description_qual_value
+    &MSFT_nxFileResource_GetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_GetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_GetTargetResource_Flags_quals[] =
 {
-    &OMI_nxFileResource_GetTargetResource_Flags_In_qual,
-    &OMI_nxFileResource_GetTargetResource_Flags_Description_qual,
+    &MSFT_nxFileResource_GetTargetResource_Flags_In_qual,
+    &MSFT_nxFileResource_GetTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.GetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_GetTargetResource_Flags_param =
+/* parameter MSFT_nxFileResource.GetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_GetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxFileResource_GetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_GetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxFileResource_GetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_GetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_GetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxFileResource_GetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_GetTargetResource_OutputResource_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_GetTargetResource_OutputResource_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_OutputResource_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_OutputResource_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_GetTargetResource_OutputResource_Out_qual_value
+    &MSFT_nxFileResource_GetTargetResource_OutputResource_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxFileResource");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxFileResource");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
+    &MSFT_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("5");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("5");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_OutputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_OutputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_GetTargetResource_OutputResource_Description_qual_value
+    &MSFT_nxFileResource_GetTargetResource_OutputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_GetTargetResource_OutputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_GetTargetResource_OutputResource_quals[] =
 {
-    &OMI_nxFileResource_GetTargetResource_OutputResource_Out_qual,
-    &OMI_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
-    &OMI_nxFileResource_GetTargetResource_OutputResource_Description_qual,
+    &MSFT_nxFileResource_GetTargetResource_OutputResource_Out_qual,
+    &MSFT_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
+    &MSFT_nxFileResource_GetTargetResource_OutputResource_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.GetTargetResource(): OutputResource */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_GetTargetResource_OutputResource_param =
+/* parameter MSFT_nxFileResource.GetTargetResource(): OutputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_GetTargetResource_OutputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006F650E, /* code */
     MI_T("OutputResource"), /* name */
-    OMI_nxFileResource_GetTargetResource_OutputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
+    MSFT_nxFileResource_GetTargetResource_OutputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxFileResource"), /* className */
+    MI_T("MSFT_nxFileResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_GetTargetResource, OutputResource), /* offset */
+    offsetof(MSFT_nxFileResource_GetTargetResource, OutputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_GetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_GetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_GetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxFileResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("2");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("2");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_GetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_GetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxFileResource_GetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_GetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_GetTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxFileResource_GetTargetResource_MIReturn_Static_qual,
-    &OMI_nxFileResource_GetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxFileResource_GetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxFileResource_GetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.GetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_GetTargetResource_MIReturn_param =
+/* parameter MSFT_nxFileResource.GetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_GetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxFileResource_GetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxFileResource_GetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_GetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxFileResource_GetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxFileResource_GetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxFileResource_GetTargetResource_params[] =
 {
-    &OMI_nxFileResource_GetTargetResource_MIReturn_param,
-    &OMI_nxFileResource_GetTargetResource_InputResource_param,
-    &OMI_nxFileResource_GetTargetResource_Flags_param,
-    &OMI_nxFileResource_GetTargetResource_OutputResource_param,
+    &MSFT_nxFileResource_GetTargetResource_MIReturn_param,
+    &MSFT_nxFileResource_GetTargetResource_InputResource_param,
+    &MSFT_nxFileResource_GetTargetResource_Flags_param,
+    &MSFT_nxFileResource_GetTargetResource_OutputResource_param,
 };
 
-/* method OMI_nxFileResource.GetTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxFileResource_GetTargetResource_rtti =
+/* method MSFT_nxFileResource.GetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxFileResource_GetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00676511, /* code */
     MI_T("GetTargetResource"), /* name */
-    OMI_nxFileResource_GetTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_GetTargetResource_quals), /* numQualifiers */
-    OMI_nxFileResource_GetTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxFileResource_GetTargetResource_params), /* numParameters */
-    sizeof(OMI_nxFileResource_GetTargetResource), /* size */
+    MSFT_nxFileResource_GetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_GetTargetResource_quals), /* numQualifiers */
+    MSFT_nxFileResource_GetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxFileResource_GetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxFileResource_GetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxFileResource_Invoke_GetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxFileResource_Invoke_GetTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_TestTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_TestTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_TestTargetResource_Static_qual_value
+    &MSFT_nxFileResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_TestTargetResource_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Description_qual_value = MI_T("6");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_TestTargetResource_Description_qual_value
+    &MSFT_nxFileResource_TestTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_TestTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_TestTargetResource_quals[] =
 {
-    &OMI_nxFileResource_TestTargetResource_Static_qual,
-    &OMI_nxFileResource_TestTargetResource_Description_qual,
+    &MSFT_nxFileResource_TestTargetResource_Static_qual,
+    &MSFT_nxFileResource_TestTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_TestTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_TestTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_TestTargetResource_InputResource_In_qual_value
+    &MSFT_nxFileResource_TestTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxFileResource");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxFileResource");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_TestTargetResource_InputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_InputResource_Description_qual_value = MI_T("7");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_TestTargetResource_InputResource_Description_qual_value
+    &MSFT_nxFileResource_TestTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_TestTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_TestTargetResource_InputResource_quals[] =
 {
-    &OMI_nxFileResource_TestTargetResource_InputResource_In_qual,
-    &OMI_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxFileResource_TestTargetResource_InputResource_Description_qual,
+    &MSFT_nxFileResource_TestTargetResource_InputResource_In_qual,
+    &MSFT_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxFileResource_TestTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.TestTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_TestTargetResource_InputResource_param =
+/* parameter MSFT_nxFileResource.TestTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_TestTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxFileResource_TestTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_TestTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxFileResource_TestTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_TestTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxFileResource"), /* className */
+    MI_T("MSFT_nxFileResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_TestTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxFileResource_TestTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_TestTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_TestTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_TestTargetResource_Flags_In_qual_value
+    &MSFT_nxFileResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_TestTargetResource_Flags_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Flags_Description_qual_value = MI_T("8");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_TestTargetResource_Flags_Description_qual_value
+    &MSFT_nxFileResource_TestTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_TestTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_TestTargetResource_Flags_quals[] =
 {
-    &OMI_nxFileResource_TestTargetResource_Flags_In_qual,
-    &OMI_nxFileResource_TestTargetResource_Flags_Description_qual,
+    &MSFT_nxFileResource_TestTargetResource_Flags_In_qual,
+    &MSFT_nxFileResource_TestTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.TestTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_TestTargetResource_Flags_param =
+/* parameter MSFT_nxFileResource.TestTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_TestTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxFileResource_TestTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_TestTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxFileResource_TestTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_TestTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_TestTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxFileResource_TestTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_TestTargetResource_Result_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_TestTargetResource_Result_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_Result_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Result_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_TestTargetResource_Result_Out_qual_value
+    &MSFT_nxFileResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_TestTargetResource_Result_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Result_Description_qual_value = MI_T("9");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_Result_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Result_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_TestTargetResource_Result_Description_qual_value
+    &MSFT_nxFileResource_TestTargetResource_Result_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_TestTargetResource_Result_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_TestTargetResource_Result_quals[] =
 {
-    &OMI_nxFileResource_TestTargetResource_Result_Out_qual,
-    &OMI_nxFileResource_TestTargetResource_Result_Description_qual,
+    &MSFT_nxFileResource_TestTargetResource_Result_Out_qual,
+    &MSFT_nxFileResource_TestTargetResource_Result_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.TestTargetResource(): Result */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_TestTargetResource_Result_param =
+/* parameter MSFT_nxFileResource.TestTargetResource(): Result */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_TestTargetResource_Result_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x00727406, /* code */
     MI_T("Result"), /* name */
-    OMI_nxFileResource_TestTargetResource_Result_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_TestTargetResource_Result_quals), /* numQualifiers */
+    MSFT_nxFileResource_TestTargetResource_Result_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_TestTargetResource_Result_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_TestTargetResource, Result), /* offset */
+    offsetof(MSFT_nxFileResource_TestTargetResource, Result), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_ProviderContext_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_ProviderContext_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_TestTargetResource_ProviderContext_Out_qual_value
+    &MSFT_nxFileResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("10");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_TestTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxFileResource_TestTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_TestTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_TestTargetResource_ProviderContext_quals[] =
 {
-    &OMI_nxFileResource_TestTargetResource_ProviderContext_Out_qual,
-    &OMI_nxFileResource_TestTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxFileResource_TestTargetResource_ProviderContext_Out_qual,
+    &MSFT_nxFileResource_TestTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.TestTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_TestTargetResource_ProviderContext_param =
+/* parameter MSFT_nxFileResource.TestTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_TestTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    OMI_nxFileResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxFileResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_TestTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxFileResource_TestTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_TestTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_TestTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_TestTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxFileResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("6");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_TestTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_TestTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxFileResource_TestTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_TestTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_TestTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxFileResource_TestTargetResource_MIReturn_Static_qual,
-    &OMI_nxFileResource_TestTargetResource_MIReturn_Description_qual,
+    &MSFT_nxFileResource_TestTargetResource_MIReturn_Static_qual,
+    &MSFT_nxFileResource_TestTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.TestTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_TestTargetResource_MIReturn_param =
+/* parameter MSFT_nxFileResource.TestTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_TestTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxFileResource_TestTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxFileResource_TestTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_TestTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxFileResource_TestTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxFileResource_TestTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxFileResource_TestTargetResource_params[] =
 {
-    &OMI_nxFileResource_TestTargetResource_MIReturn_param,
-    &OMI_nxFileResource_TestTargetResource_InputResource_param,
-    &OMI_nxFileResource_TestTargetResource_Flags_param,
-    &OMI_nxFileResource_TestTargetResource_Result_param,
-    &OMI_nxFileResource_TestTargetResource_ProviderContext_param,
+    &MSFT_nxFileResource_TestTargetResource_MIReturn_param,
+    &MSFT_nxFileResource_TestTargetResource_InputResource_param,
+    &MSFT_nxFileResource_TestTargetResource_Flags_param,
+    &MSFT_nxFileResource_TestTargetResource_Result_param,
+    &MSFT_nxFileResource_TestTargetResource_ProviderContext_param,
 };
 
-/* method OMI_nxFileResource.TestTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxFileResource_TestTargetResource_rtti =
+/* method MSFT_nxFileResource.TestTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxFileResource_TestTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00746512, /* code */
     MI_T("TestTargetResource"), /* name */
-    OMI_nxFileResource_TestTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_TestTargetResource_quals), /* numQualifiers */
-    OMI_nxFileResource_TestTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxFileResource_TestTargetResource_params), /* numParameters */
-    sizeof(OMI_nxFileResource_TestTargetResource), /* size */
+    MSFT_nxFileResource_TestTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_TestTargetResource_quals), /* numQualifiers */
+    MSFT_nxFileResource_TestTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxFileResource_TestTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxFileResource_TestTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxFileResource_Invoke_TestTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxFileResource_Invoke_TestTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_SetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_SetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_SetTargetResource_Static_qual_value
+    &MSFT_nxFileResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_SetTargetResource_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_Description_qual_value = MI_T("11");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_SetTargetResource_Description_qual_value
+    &MSFT_nxFileResource_SetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_SetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_SetTargetResource_quals[] =
 {
-    &OMI_nxFileResource_SetTargetResource_Static_qual,
-    &OMI_nxFileResource_SetTargetResource_Description_qual,
+    &MSFT_nxFileResource_SetTargetResource_Static_qual,
+    &MSFT_nxFileResource_SetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_SetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_SetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_SetTargetResource_InputResource_In_qual_value
+    &MSFT_nxFileResource_SetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("OMI_nxFileResource");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxFileResource");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_SetTargetResource_InputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_InputResource_Description_qual_value = MI_T("7");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_SetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxFileResource_SetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_SetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_SetTargetResource_InputResource_quals[] =
 {
-    &OMI_nxFileResource_SetTargetResource_InputResource_In_qual,
-    &OMI_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
-    &OMI_nxFileResource_SetTargetResource_InputResource_Description_qual,
+    &MSFT_nxFileResource_SetTargetResource_InputResource_In_qual,
+    &MSFT_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxFileResource_SetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.SetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_SetTargetResource_InputResource_param =
+/* parameter MSFT_nxFileResource.SetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_SetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    OMI_nxFileResource_SetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_SetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxFileResource_SetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_SetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("OMI_nxFileResource"), /* className */
+    MI_T("MSFT_nxFileResource"), /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_SetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxFileResource_SetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_SetTargetResource_ProviderContext_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_SetTargetResource_ProviderContext_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_ProviderContext_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_ProviderContext_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_SetTargetResource_ProviderContext_In_qual_value
+    &MSFT_nxFileResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("12");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_SetTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxFileResource_SetTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_SetTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_SetTargetResource_ProviderContext_quals[] =
 {
-    &OMI_nxFileResource_SetTargetResource_ProviderContext_In_qual,
-    &OMI_nxFileResource_SetTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxFileResource_SetTargetResource_ProviderContext_In_qual,
+    &MSFT_nxFileResource_SetTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.SetTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_SetTargetResource_ProviderContext_param =
+/* parameter MSFT_nxFileResource.SetTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_SetTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    OMI_nxFileResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxFileResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_SetTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxFileResource_SetTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_SetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_SetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_SetTargetResource_Flags_In_qual_value
+    &MSFT_nxFileResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_SetTargetResource_Flags_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_Flags_Description_qual_value = MI_T("8");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_SetTargetResource_Flags_Description_qual_value
+    &MSFT_nxFileResource_SetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_SetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_SetTargetResource_Flags_quals[] =
 {
-    &OMI_nxFileResource_SetTargetResource_Flags_In_qual,
-    &OMI_nxFileResource_SetTargetResource_Flags_Description_qual,
+    &MSFT_nxFileResource_SetTargetResource_Flags_In_qual,
+    &MSFT_nxFileResource_SetTargetResource_Flags_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.SetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_SetTargetResource_Flags_param =
+/* parameter MSFT_nxFileResource.SetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_SetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    OMI_nxFileResource_SetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_SetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxFileResource_SetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_SetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_SetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxFileResource_SetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean OMI_nxFileResource_SetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFileResource_SetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_nxFileResource_SetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxFileResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("11");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_SetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_SetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxFileResource_SetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_SetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_SetTargetResource_MIReturn_quals[] =
 {
-    &OMI_nxFileResource_SetTargetResource_MIReturn_Static_qual,
-    &OMI_nxFileResource_SetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxFileResource_SetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxFileResource_SetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter OMI_nxFileResource.SetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl OMI_nxFileResource_SetTargetResource_MIReturn_param =
+/* parameter MSFT_nxFileResource.SetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxFileResource_SetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    OMI_nxFileResource_SetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxFileResource_SetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_nxFileResource_SetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxFileResource_SetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST OMI_nxFileResource_SetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxFileResource_SetTargetResource_params[] =
 {
-    &OMI_nxFileResource_SetTargetResource_MIReturn_param,
-    &OMI_nxFileResource_SetTargetResource_InputResource_param,
-    &OMI_nxFileResource_SetTargetResource_ProviderContext_param,
-    &OMI_nxFileResource_SetTargetResource_Flags_param,
+    &MSFT_nxFileResource_SetTargetResource_MIReturn_param,
+    &MSFT_nxFileResource_SetTargetResource_InputResource_param,
+    &MSFT_nxFileResource_SetTargetResource_ProviderContext_param,
+    &MSFT_nxFileResource_SetTargetResource_Flags_param,
 };
 
-/* method OMI_nxFileResource.SetTargetResource() */
-MI_CONST MI_MethodDecl OMI_nxFileResource_SetTargetResource_rtti =
+/* method MSFT_nxFileResource.SetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxFileResource_SetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00736511, /* code */
     MI_T("SetTargetResource"), /* name */
-    OMI_nxFileResource_SetTargetResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_SetTargetResource_quals), /* numQualifiers */
-    OMI_nxFileResource_SetTargetResource_params, /* parameters */
-    MI_COUNT(OMI_nxFileResource_SetTargetResource_params), /* numParameters */
-    sizeof(OMI_nxFileResource_SetTargetResource), /* size */
+    MSFT_nxFileResource_SetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_SetTargetResource_quals), /* numQualifiers */
+    MSFT_nxFileResource_SetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxFileResource_SetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxFileResource_SetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("OMI_nxFileResource"), /* origin */
-    MI_T("OMI_nxFileResource"), /* propagator */
+    MI_T("MSFT_nxFileResource"), /* origin */
+    MI_T("MSFT_nxFileResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)OMI_nxFileResource_Invoke_SetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxFileResource_Invoke_SetTargetResource, /* method */
 };
 
-static MI_MethodDecl MI_CONST* MI_CONST OMI_nxFileResource_meths[] =
+static MI_MethodDecl MI_CONST* MI_CONST MSFT_nxFileResource_meths[] =
 {
-    &OMI_nxFileResource_GetTargetResource_rtti,
-    &OMI_nxFileResource_TestTargetResource_rtti,
-    &OMI_nxFileResource_SetTargetResource_rtti,
+    &MSFT_nxFileResource_GetTargetResource_rtti,
+    &MSFT_nxFileResource_TestTargetResource_rtti,
+    &MSFT_nxFileResource_SetTargetResource_rtti,
 };
 
-static MI_CONST MI_ProviderFT OMI_nxFileResource_funcs =
+static MI_CONST MI_ProviderFT MSFT_nxFileResource_funcs =
 {
-  (MI_ProviderFT_Load)OMI_nxFileResource_Load,
-  (MI_ProviderFT_Unload)OMI_nxFileResource_Unload,
-  (MI_ProviderFT_GetInstance)OMI_nxFileResource_GetInstance,
-  (MI_ProviderFT_EnumerateInstances)OMI_nxFileResource_EnumerateInstances,
-  (MI_ProviderFT_CreateInstance)OMI_nxFileResource_CreateInstance,
-  (MI_ProviderFT_ModifyInstance)OMI_nxFileResource_ModifyInstance,
-  (MI_ProviderFT_DeleteInstance)OMI_nxFileResource_DeleteInstance,
+  (MI_ProviderFT_Load)MSFT_nxFileResource_Load,
+  (MI_ProviderFT_Unload)MSFT_nxFileResource_Unload,
+  (MI_ProviderFT_GetInstance)MSFT_nxFileResource_GetInstance,
+  (MI_ProviderFT_EnumerateInstances)MSFT_nxFileResource_EnumerateInstances,
+  (MI_ProviderFT_CreateInstance)MSFT_nxFileResource_CreateInstance,
+  (MI_ProviderFT_ModifyInstance)MSFT_nxFileResource_ModifyInstance,
+  (MI_ProviderFT_DeleteInstance)MSFT_nxFileResource_DeleteInstance,
   (MI_ProviderFT_AssociatorInstances)NULL,
   (MI_ProviderFT_ReferenceInstances)NULL,
   (MI_ProviderFT_EnableIndications)NULL,
@@ -2330,60 +2330,60 @@ static MI_CONST MI_ProviderFT OMI_nxFileResource_funcs =
   (MI_ProviderFT_Invoke)NULL,
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxFileResource_Description_qual_value = MI_T("13");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_nxFileResource_Description_qual_value
+    &MSFT_nxFileResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxFileResource_ClassVersion_qual_value = MI_T("1.0.0");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_ClassVersion_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_ClassVersion_qual =
 {
     MI_T("ClassVersion"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &OMI_nxFileResource_ClassVersion_qual_value
+    &MSFT_nxFileResource_ClassVersion_qual_value
 };
 
-static MI_CONST MI_Char* OMI_nxFileResource_FriendlyName_qual_value = MI_T("nxFile");
+static MI_CONST MI_Char* MSFT_nxFileResource_FriendlyName_qual_value = MI_T("nxFile");
 
-static MI_CONST MI_Qualifier OMI_nxFileResource_FriendlyName_qual =
+static MI_CONST MI_Qualifier MSFT_nxFileResource_FriendlyName_qual =
 {
     MI_T("FriendlyName"),
     MI_STRING,
     MI_FLAG_RESTRICTED,
-    &OMI_nxFileResource_FriendlyName_qual_value
+    &MSFT_nxFileResource_FriendlyName_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_nxFileResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_quals[] =
 {
-    &OMI_nxFileResource_Description_qual,
-    &OMI_nxFileResource_ClassVersion_qual,
-    &OMI_nxFileResource_FriendlyName_qual,
+    &MSFT_nxFileResource_Description_qual,
+    &MSFT_nxFileResource_ClassVersion_qual,
+    &MSFT_nxFileResource_FriendlyName_qual,
 };
 
-/* class OMI_nxFileResource */
-MI_CONST MI_ClassDecl OMI_nxFileResource_rtti =
+/* class MSFT_nxFileResource */
+MI_CONST MI_ClassDecl MSFT_nxFileResource_rtti =
 {
     MI_FLAG_CLASS, /* flags */
-    0x006F6512, /* code */
-    MI_T("OMI_nxFileResource"), /* name */
-    OMI_nxFileResource_quals, /* qualifiers */
-    MI_COUNT(OMI_nxFileResource_quals), /* numQualifiers */
-    OMI_nxFileResource_props, /* properties */
-    MI_COUNT(OMI_nxFileResource_props), /* numProperties */
-    sizeof(OMI_nxFileResource), /* size */
+    0x006D6513, /* code */
+    MI_T("MSFT_nxFileResource"), /* name */
+    MSFT_nxFileResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFileResource_quals), /* numQualifiers */
+    MSFT_nxFileResource_props, /* properties */
+    MI_COUNT(MSFT_nxFileResource_props), /* numProperties */
+    sizeof(MSFT_nxFileResource), /* size */
     MI_T("OMI_BaseResource"), /* superClass */
     &OMI_BaseResource_rtti, /* superClassDecl */
-    OMI_nxFileResource_meths, /* methods */
-    MI_COUNT(OMI_nxFileResource_meths), /* numMethods */
+    MSFT_nxFileResource_meths, /* methods */
+    MI_COUNT(MSFT_nxFileResource_meths), /* numMethods */
     &schemaDecl, /* schema */
-    &OMI_nxFileResource_funcs, /* functions */
+    &MSFT_nxFileResource_funcs, /* functions */
     NULL /* owningClass */
 };
 
@@ -2406,8 +2406,8 @@ MI_Server* __mi_server;
 
 static MI_ClassDecl MI_CONST* MI_CONST classes[] =
 {
+    &MSFT_nxFileResource_rtti,
     &OMI_BaseResource_rtti,
-    &OMI_nxFileResource_rtti,
 };
 
 MI_SchemaDecl schemaDecl =

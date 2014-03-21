@@ -1,5 +1,5 @@
 [ClassVersion("1.0.0"), Description("The configuration provider for files and directories."), FriendlyName("nxFile")]
-class OMI_nxFileResource:OMI_BaseResource
+class MSFT_nxFileResource:OMI_BaseResource
 {
        [Key] string DestinationPath;
        [Write] string SourcePath;
