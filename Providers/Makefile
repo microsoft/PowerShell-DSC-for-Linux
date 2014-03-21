@@ -11,7 +11,6 @@ OMI_DIR := $(shell cd ../OMI; pwd)
 BASE_DIR := $(shell pwd)
 TARGET_DIR := $(BASE_DIR)/target
 
-include $(PAL_DIR)/build/config.mak
 include $(BASE_DIR)/config.mak
 
 PAL_OUTPUT_DIR := $(PAL_DIR)/target/$(BUILD_CONFIGURATION)
