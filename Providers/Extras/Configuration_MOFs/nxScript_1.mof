@@ -1,4 +1,4 @@
-instance of OMI_nxScriptResource
+instance of MSFT_nxScriptResource
 {
 	GetScript = "#!/bin/sh
 	whoami; groups; exit 0";

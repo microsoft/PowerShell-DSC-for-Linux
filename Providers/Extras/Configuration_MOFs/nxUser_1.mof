@@ -1,0 +1,25 @@
+instance of MSFT_nxUserResource
+{
+	UserName = "testuser";
+	Disabled = true;
+	PasswordChangeRequired = true;
+	Password = "\\$abcdef";
+	Ensure = "Present";
+	Description = "DESCRIBED";
+	HomeDirectory = "/home/testdir";
+	GroupID = "0";
+	FullName = "Dr. Test User";
+	
+	ResourceId = "[OMI_nxUserResource]Test";
+	ModuleName = "PSDesiredStateConfiguration";
+	ModuleVersion = "1.0";
+	
+	
+};
+
+instance of OMI_ConfigurationDocument
+{
+  Version="1.0.0";
+  
+};
+
