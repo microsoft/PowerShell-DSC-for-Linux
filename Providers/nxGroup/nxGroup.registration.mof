@@ -1,9 +1,0 @@
-
-Instance of MSFT_CimConfigurationProviderRegistration
-{
-  className = "OMI_nxGroupResource";
-  DSCEngineCompatVersion = "1.0.0";
-  DSCModuleVersion = "1.0.0";
-  Namespace = "dsc";
-};
-
