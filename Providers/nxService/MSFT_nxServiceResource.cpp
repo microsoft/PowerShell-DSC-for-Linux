@@ -1,7 +1,7 @@
 /* @migen@ */
 #include "PythonHelper.hpp"
 #include <MI.h>
-#include "MSFT_nxUserResource.h"
+#include "MSFT_nxServiceResource.h"
 
 #include <cstdlib>
 #include <string>
@@ -14,7 +14,7 @@
 #include <iostream>
 
 
-struct _MSFT_nxUserResource_Self
+struct _MSFT_nxServiceResource_Self
 {
 public:
     PyObjPtr pModule;
@@ -22,10 +22,10 @@ public:
     PyObjPtr pTestFn;
     PyObjPtr pGetFn;
 
-    static int create (_MSFT_nxUserResource_Self** const ppInstance);
+    static int create (_MSFT_nxServiceResource_Self** const ppInstance);
 
 private:
-    /*ctor*/ _MSFT_nxUserResource_Self (
+    /*ctor*/ _MSFT_nxServiceResource_Self (
         PyObjPtr const& _pModule,
         PyObjPtr const& _pSetFn,
         PyObjPtr const& _pTestFn,
@@ -40,14 +40,14 @@ private:
 
 };
 
-typedef _MSFT_nxUserResource_Self MSFT_nxUserResource_Self;
+typedef _MSFT_nxServiceResource_Self MSFT_nxServiceResource_Self;
 
 
 
 /*static*/
 int
-_MSFT_nxUserResource_Self::create (
-    _MSFT_nxUserResource_Self** const ppInstance)
+_MSFT_nxServiceResource_Self::create (
+    _MSFT_nxServiceResource_Self** const ppInstance)
 {
     int rval = EXIT_SUCCESS;
     PyObjPtr pModule;
@@ -59,7 +59,7 @@ _MSFT_nxUserResource_Self::create (
     {
         if (EXIT_SUCCESS == (rval = initPython ("do'h", GetScriptPath().c_str())))
         {
-            pModule = loadModule ("nxUser");
+            pModule = loadModule ("nxService");
             if (pModule)
             {
                 pSetFn = loadFunctionFromModule (pModule, "Set_Marshall");
@@ -67,7 +67,7 @@ _MSFT_nxUserResource_Self::create (
                 pGetFn = loadFunctionFromModule (pModule, "Get_Marshall");
                 if (pSetFn && pTestFn && pGetFn)
                 {
-                    *ppInstance = new _MSFT_nxUserResource_Self (
+                    *ppInstance = new _MSFT_nxServiceResource_Self (
                         pModule, pSetFn, pTestFn, pGetFn);
                 }
                 else
@@ -123,14 +123,14 @@ static const MI_Char* PassBoolean(const MI_ConstBooleanField& field)
     }
 }
 
-void MI_CALL MSFT_nxUserResource_Load(
-    _Outptr_result_maybenull_ MSFT_nxUserResource_Self** self,
+void MI_CALL MSFT_nxServiceResource_Load(
+    _Outptr_result_maybenull_ MSFT_nxServiceResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
-    if (EXIT_SUCCESS != MSFT_nxUserResource_Self::create (self))
+    if (EXIT_SUCCESS != MSFT_nxServiceResource_Self::create (self))
     {
         res = MI_RESULT_FAILED;
     
@@ -140,8 +140,8 @@ void MI_CALL MSFT_nxUserResource_Load(
     MI_Context_PostResult(context, res);
 }
 
-void MI_CALL MSFT_nxUserResource_Unload(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_Unload(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context)
 {
     if (self)
@@ -152,8 +152,8 @@ void MI_CALL MSFT_nxUserResource_Unload(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxUserResource_EnumerateInstances(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_EnumerateInstances(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
@@ -171,12 +171,12 @@ void MI_CALL MSFT_nxUserResource_EnumerateInstances(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxUserResource_GetInstance(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_GetInstance(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxUserResource* instanceName,
+    _In_ const MSFT_nxServiceResource* instanceName,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -188,12 +188,12 @@ void MI_CALL MSFT_nxUserResource_GetInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxUserResource_CreateInstance(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_CreateInstance(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxUserResource* newInstance)
+    _In_ const MSFT_nxServiceResource* newInstance)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -203,12 +203,12 @@ void MI_CALL MSFT_nxUserResource_CreateInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxUserResource_ModifyInstance(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_ModifyInstance(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxUserResource* modifiedInstance,
+    _In_ const MSFT_nxServiceResource* modifiedInstance,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -220,12 +220,12 @@ void MI_CALL MSFT_nxUserResource_ModifyInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxUserResource_DeleteInstance(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_DeleteInstance(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxUserResource* instanceName)
+    _In_ const MSFT_nxServiceResource* instanceName)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -304,47 +304,42 @@ int SetElement(
     return 0;
 }
 
-void MI_CALL MSFT_nxUserResource_Invoke_GetTargetResource(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_Invoke_GetTargetResource(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxUserResource* instanceName,
-    _In_opt_ const MSFT_nxUserResource_GetTargetResource* in)
+    _In_ const MSFT_nxServiceResource* instanceName,
+    _In_opt_ const MSFT_nxServiceResource_GetTargetResource* in)
 {
     std::cerr << "Get" << std::endl;
 
     MI_Result r = MI_RESULT_OK;
     MI_Boolean res = MI_TRUE;
-    MSFT_nxUserResource_GetTargetResource out;
+    MSFT_nxServiceResource_GetTargetResource out;
     MI_Instance *newInstance;
     MI_Value value;
 
-    r = MSFT_nxUserResource_GetTargetResource_Construct(&out, context);
-    r = MSFT_nxUserResource_GetTargetResource_Set_MIReturn(&out, 0);
+    r = MSFT_nxServiceResource_GetTargetResource_Construct(&out, context);
+    r = MSFT_nxServiceResource_GetTargetResource_Set_MIReturn(&out, 0);
 
-    const MSFT_nxUserResource * user = in->InputResource.value;
-    r = MI_Instance_Clone(&user->__instance, &newInstance);
+    const MSFT_nxServiceResource * service = in->InputResource.value;
+    r = MI_Instance_Clone(&service->__instance, &newInstance);
 
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pGetFn,
-        9,
-        PassString(user->UserName),
-        PassString(user->Ensure),
-        PassString(user->FullName),
-        PassString(user->Description),
-        PassString(user->Password),
-        PassBoolean(user->Disabled),
-        PassBoolean(user->PasswordChangeRequired),
-        PassString(user->HomeDirectory),
-        PassString(user->GroupID));
+        4,
+        PassString(service->Name),
+        PassString(service->Controller),
+        PassBoolean(service->Enabled),
+        PassString(service->State));
     
-    // Expecting 9 parameters in return
-    if (ret_strings.size() == (9) && exit_code == 0)
+    // Expecting 4+3 parameters in return
+    if (ret_strings.size() == (4+3) && exit_code == 0)
     {
         res = MI_TRUE;
     }
@@ -354,15 +349,13 @@ void MI_CALL MSFT_nxUserResource_Invoke_GetTargetResource(
         return;
     }
 
-    if (SetElement(newInstance, "UserName", ret_strings[0], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Ensure", ret_strings[1], MI_STRING)  != 0 ||
-        SetElement(newInstance, "FullName", ret_strings[2], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Description", ret_strings[3], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Password", ret_strings[4], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Disabled", ret_strings[5], MI_BOOLEAN)  != 0 ||
-        SetElement(newInstance, "PasswordChangeRequired", ret_strings[6], MI_BOOLEAN)  != 0 ||
-        SetElement(newInstance, "HomeDirectory", ret_strings[7], MI_STRING)  != 0 ||
-        SetElement(newInstance, "GroupID", ret_strings[8], MI_STRING))
+    if (SetElement(newInstance, "Name", ret_strings[0], MI_STRING)  != 0 ||
+        SetElement(newInstance, "Controller", ret_strings[1], MI_STRING)  != 0 ||
+        SetElement(newInstance, "Enabled", ret_strings[2], MI_BOOLEAN)  != 0 ||
+        SetElement(newInstance, "State", ret_strings[3], MI_STRING)  != 0 ||
+        SetElement(newInstance, "IsEnabled", ret_strings[4], MI_BOOLEAN)  != 0 ||
+        SetElement(newInstance, "Status", ret_strings[5], MI_STRING)  != 0 ||
+        SetElement(newInstance, "Path", ret_strings[6], MI_STRING))
     {
         MI_Context_PostResult(context, MI_RESULT_FAILED);
         return;
@@ -377,14 +370,14 @@ void MI_CALL MSFT_nxUserResource_Invoke_GetTargetResource(
     }
 
     MI_Instance_Delete(newInstance);
-    r = MSFT_nxUserResource_GetTargetResource_Post(&out, context);
+    r = MSFT_nxServiceResource_GetTargetResource_Post(&out, context);
     if ( r != MI_RESULT_OK )
     {
         MI_Context_PostResult(context, r);
         return;
     }
 
-    r = MSFT_nxUserResource_GetTargetResource_Destruct(&out);
+    r = MSFT_nxServiceResource_GetTargetResource_Destruct(&out);
     if ( r != MI_RESULT_OK )
     {
         MI_Context_PostResult(context, r);
@@ -394,14 +387,14 @@ void MI_CALL MSFT_nxUserResource_Invoke_GetTargetResource(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxUserResource_Invoke_TestTargetResource(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_Invoke_TestTargetResource(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxUserResource* instanceName,
-    _In_opt_ const MSFT_nxUserResource_TestTargetResource* in)
+    _In_ const MSFT_nxServiceResource* instanceName,
+    _In_opt_ const MSFT_nxServiceResource_TestTargetResource* in)
 {
     std::cerr << "Test" << std::endl;
 
@@ -413,23 +406,18 @@ void MI_CALL MSFT_nxUserResource_Invoke_TestTargetResource(
 
     MI_Result r = MI_RESULT_OK;
     MI_Boolean res = MI_TRUE;
-    MSFT_nxUserResource_TestTargetResource out;
-    const MSFT_nxUserResource * user = in->InputResource.value;
+    MSFT_nxServiceResource_TestTargetResource out;
+    const MSFT_nxServiceResource * service = in->InputResource.value;
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pTestFn,
-        9,
-        PassString(user->UserName),
-        PassString(user->Ensure),
-        PassString(user->FullName),
-        PassString(user->Description),
-        PassString(user->Password),
-        PassBoolean(user->Disabled),
-        PassBoolean(user->PasswordChangeRequired),
-        PassString(user->HomeDirectory),
-        PassString(user->GroupID));
+        4,
+        PassString(service->Name),
+        PassString(service->Controller),
+        PassBoolean(service->Enabled),
+        PassString(service->State));
     
     if (ret_strings.size() == 0 && exit_code == 0)
     {
@@ -440,22 +428,22 @@ void MI_CALL MSFT_nxUserResource_Invoke_TestTargetResource(
         res = MI_FALSE;
     }
 
-    r = MSFT_nxUserResource_TestTargetResource_Construct(&out, context);
-    r = MSFT_nxUserResource_TestTargetResource_Set_Result(&out, res);
-    r = MSFT_nxUserResource_TestTargetResource_Set_MIReturn(&out, 0);
-    r = MSFT_nxUserResource_TestTargetResource_Post(&out, context);
-    r = MSFT_nxUserResource_TestTargetResource_Destruct(&out);
+    r = MSFT_nxServiceResource_TestTargetResource_Construct(&out, context);
+    r = MSFT_nxServiceResource_TestTargetResource_Set_Result(&out, res);
+    r = MSFT_nxServiceResource_TestTargetResource_Set_MIReturn(&out, 0);
+    r = MSFT_nxServiceResource_TestTargetResource_Post(&out, context);
+    r = MSFT_nxServiceResource_TestTargetResource_Destruct(&out);
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxUserResource_Invoke_SetTargetResource(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxServiceResource_Invoke_SetTargetResource(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxUserResource* instanceName,
-    _In_opt_ const MSFT_nxUserResource_SetTargetResource* in)
+    _In_ const MSFT_nxServiceResource* instanceName,
+    _In_opt_ const MSFT_nxServiceResource_SetTargetResource* in)
 {
     std::cerr << "Set" << std::endl;
 
@@ -466,24 +454,19 @@ void MI_CALL MSFT_nxUserResource_Invoke_SetTargetResource(
     }
 
     MI_Result r = MI_RESULT_OK;
-    MSFT_nxUserResource_SetTargetResource out;
-    const MSFT_nxUserResource * user = in->InputResource.value;
+    MSFT_nxServiceResource_SetTargetResource out;
+    const MSFT_nxServiceResource * service = in->InputResource.value;
     MI_Result res = MI_RESULT_OK;
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pSetFn,
-        9,
-        PassString(user->UserName),
-        PassString(user->Ensure),
-        PassString(user->FullName),
-        PassString(user->Description),
-        PassString(user->Password),
-        PassBoolean(user->Disabled),
-        PassBoolean(user->PasswordChangeRequired),
-        PassString(user->HomeDirectory),
-        PassString(user->GroupID));
+        4,
+        PassString(service->Name),
+        PassString(service->Controller),
+        PassBoolean(service->Enabled),
+        PassString(service->State));
 
     if (ret_strings.size() == 0 && exit_code == 0)
     {
@@ -494,10 +477,10 @@ void MI_CALL MSFT_nxUserResource_Invoke_SetTargetResource(
         res = MI_RESULT_FAILED;
     }
 
-    r = MSFT_nxUserResource_SetTargetResource_Construct(&out, context);
-    r = MSFT_nxUserResource_SetTargetResource_Set_MIReturn(&out, res);
-    r = MSFT_nxUserResource_SetTargetResource_Post(&out, context);
-    r = MSFT_nxUserResource_SetTargetResource_Destruct(&out);
+    r = MSFT_nxServiceResource_SetTargetResource_Construct(&out, context);
+    r = MSFT_nxServiceResource_SetTargetResource_Set_MIReturn(&out, res);
+    r = MSFT_nxServiceResource_SetTargetResource_Post(&out, context);
+    r = MSFT_nxServiceResource_SetTargetResource_Destruct(&out);
     MI_Context_PostResult(context, res);
 
 }

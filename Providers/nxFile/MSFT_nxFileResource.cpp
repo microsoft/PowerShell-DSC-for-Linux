@@ -57,7 +57,7 @@ _MSFT_nxFileResource_Self::create (
     if (ppInstance &&
         !*ppInstance)
     {
-        if (EXIT_SUCCESS == (rval = initPython ("do'h", "/home/johnkord/dev/imp/dsc/Providers/Scripts")))
+        if (EXIT_SUCCESS == (rval = initPython ("do'h", GetScriptPath().c_str())))
         {
             pModule = loadModule ("nxFile");
             if (pModule)

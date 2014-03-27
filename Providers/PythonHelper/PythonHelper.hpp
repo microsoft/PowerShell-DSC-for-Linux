@@ -22,6 +22,8 @@ int callPythonFunction(
     int n,
     ...);
 
+std::string GetScriptPath();
+
 inline int
 tupleSetItem (
     PyObjPtr const& pTuple,

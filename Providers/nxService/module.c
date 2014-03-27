@@ -21,7 +21,7 @@ MI_EXTERN_C MI_EXPORT MI_Module* MI_MAIN_CALL MI_Main(_In_ MI_Server* server)
 {
     /* WARNING: THIS FUNCTION AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT. */
     static MI_Module module;
-    MI_EXTERN_C MI_Server* __mi_server;
+    MI_Server* __mi_server;
     __mi_server = server;
     module.flags |= MI_MODULE_FLAG_DESCRIPTIONS;
     module.flags |= MI_MODULE_FLAG_VALUES;

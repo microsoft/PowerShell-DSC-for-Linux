@@ -1,7 +1,7 @@
 /* @migen@ */
 #include "PythonHelper.hpp"
 #include <MI.h>
-#include "MSFT_nxUserResource.h"
+#include "MSFT_nxGroupResource.h"
 
 #include <cstdlib>
 #include <string>
@@ -14,7 +14,7 @@
 #include <iostream>
 
 
-struct _MSFT_nxUserResource_Self
+struct _MSFT_nxGroupResource_Self
 {
 public:
     PyObjPtr pModule;
@@ -22,10 +22,10 @@ public:
     PyObjPtr pTestFn;
     PyObjPtr pGetFn;
 
-    static int create (_MSFT_nxUserResource_Self** const ppInstance);
+    static int create (_MSFT_nxGroupResource_Self** const ppInstance);
 
 private:
-    /*ctor*/ _MSFT_nxUserResource_Self (
+    /*ctor*/ _MSFT_nxGroupResource_Self (
         PyObjPtr const& _pModule,
         PyObjPtr const& _pSetFn,
         PyObjPtr const& _pTestFn,
@@ -40,14 +40,14 @@ private:
 
 };
 
-typedef _MSFT_nxUserResource_Self MSFT_nxUserResource_Self;
+typedef _MSFT_nxGroupResource_Self MSFT_nxGroupResource_Self;
 
 
 
 /*static*/
 int
-_MSFT_nxUserResource_Self::create (
-    _MSFT_nxUserResource_Self** const ppInstance)
+_MSFT_nxGroupResource_Self::create (
+    _MSFT_nxGroupResource_Self** const ppInstance)
 {
     int rval = EXIT_SUCCESS;
     PyObjPtr pModule;
@@ -59,7 +59,7 @@ _MSFT_nxUserResource_Self::create (
     {
         if (EXIT_SUCCESS == (rval = initPython ("do'h", GetScriptPath().c_str())))
         {
-            pModule = loadModule ("nxUser");
+            pModule = loadModule ("nxGroup");
             if (pModule)
             {
                 pSetFn = loadFunctionFromModule (pModule, "Set_Marshall");
@@ -67,7 +67,7 @@ _MSFT_nxUserResource_Self::create (
                 pGetFn = loadFunctionFromModule (pModule, "Get_Marshall");
                 if (pSetFn && pTestFn && pGetFn)
                 {
-                    *ppInstance = new _MSFT_nxUserResource_Self (
+                    *ppInstance = new _MSFT_nxGroupResource_Self (
                         pModule, pSetFn, pTestFn, pGetFn);
                 }
                 else
@@ -104,18 +104,16 @@ static const MI_Char* PassString(const MI_ConstStringField& field)
     }
 }
 
-static const MI_Char* PassBoolean(const MI_ConstBooleanField& field)
+static const std::string PassStringArray(const MI_ConstStringAField& field)
 {
     if (field.exists == MI_TRUE)
     {
-        if (field.value == MI_TRUE)
-        {
-            return (const MI_Char*) "True";
+        // Build a single string out of this string array separated by newlines.
+        std::string result;
+        for (unsigned int i = 0; i < field.value.size; ++i){
+            result += std::string(field.value.data[i]) + "\n";
         }
-        else
-        {
-            return (const MI_Char*) "False";
-        }
+        return result;
     }
     else
     {
@@ -123,14 +121,14 @@ static const MI_Char* PassBoolean(const MI_ConstBooleanField& field)
     }
 }
 
-void MI_CALL MSFT_nxUserResource_Load(
-    _Outptr_result_maybenull_ MSFT_nxUserResource_Self** self,
+void MI_CALL MSFT_nxGroupResource_Load(
+    _Outptr_result_maybenull_ MSFT_nxGroupResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
-    if (EXIT_SUCCESS != MSFT_nxUserResource_Self::create (self))
+    if (EXIT_SUCCESS != MSFT_nxGroupResource_Self::create (self))
     {
         res = MI_RESULT_FAILED;
     
@@ -140,8 +138,8 @@ void MI_CALL MSFT_nxUserResource_Load(
     MI_Context_PostResult(context, res);
 }
 
-void MI_CALL MSFT_nxUserResource_Unload(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_Unload(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context)
 {
     if (self)
@@ -152,8 +150,8 @@ void MI_CALL MSFT_nxUserResource_Unload(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxUserResource_EnumerateInstances(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_EnumerateInstances(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
@@ -171,12 +169,12 @@ void MI_CALL MSFT_nxUserResource_EnumerateInstances(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxUserResource_GetInstance(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_GetInstance(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxUserResource* instanceName,
+    _In_ const MSFT_nxGroupResource* instanceName,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -188,12 +186,12 @@ void MI_CALL MSFT_nxUserResource_GetInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxUserResource_CreateInstance(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_CreateInstance(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxUserResource* newInstance)
+    _In_ const MSFT_nxGroupResource* newInstance)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -203,12 +201,12 @@ void MI_CALL MSFT_nxUserResource_CreateInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxUserResource_ModifyInstance(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_ModifyInstance(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxUserResource* modifiedInstance,
+    _In_ const MSFT_nxGroupResource* modifiedInstance,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -220,12 +218,12 @@ void MI_CALL MSFT_nxUserResource_ModifyInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxUserResource_DeleteInstance(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_DeleteInstance(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxUserResource* instanceName)
+    _In_ const MSFT_nxGroupResource* instanceName)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -270,81 +268,85 @@ int SetElement(
             return -1;
         }
     }
-    else if (type == MI_BOOLEAN)
+    else if (type == MI_STRINGA)
     {
-        bool callSetElement = true;
-        if (newFieldVal == "True")
-        {
-            value.boolean = MI_TRUE;
-        }
-        else if (newFieldVal == "False")
-        {
-            value.boolean = MI_FALSE;
-        }
-        else if (newFieldVal == "")
-        {
-            value.boolean = MI_FALSE;
-            callSetElement = false;
-        }
-        else
-        {
-            std::cerr << "Expecting: True or False" << std::endl;
-            return -1;
-        }
+        std::vector<std::string> string_vector;
+        size_t lastpos = 0;
+        size_t curpos = 0;
 
-        if (callSetElement)
+        // Extract array elements from string.  They're separated by newlines.
+        while (true)
         {
-            r = MI_Instance_SetElement(newInstance, field, &value, MI_BOOLEAN, 0);
-            if ( r != MI_RESULT_OK )
+            curpos = newFieldVal.find_first_of("\n", lastpos);
+            if (curpos != std::string::npos)
             {
-                return -1;
+                string_vector.push_back(newFieldVal.substr(lastpos, curpos-lastpos));
+                lastpos = curpos+1;
+            }
+            else
+            {
+                break;
             }
         }
+        
+        // Get these strings into a format appropriate for OMI
+        std::vector<MI_Char*> data_vector;
+        for (size_t i = 0; i < string_vector.size(); ++i)
+        {
+            data_vector.push_back((MI_Char*)string_vector[i].c_str());
+        }
+
+        value.stringa.data = &data_vector[0];
+        value.stringa.size = data_vector.size();
+        
+        r = MI_Instance_SetElement(newInstance, field, &value, MI_STRINGA, 0);
+        if ( r != MI_RESULT_OK )
+        {
+            std::cerr << "Error on SetElement for MI_STRINGA" << std::endl;
+            return -1;
+        }        
     }
     return 0;
 }
 
-void MI_CALL MSFT_nxUserResource_Invoke_GetTargetResource(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_Invoke_GetTargetResource(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxUserResource* instanceName,
-    _In_opt_ const MSFT_nxUserResource_GetTargetResource* in)
+    _In_ const MSFT_nxGroupResource* instanceName,
+    _In_opt_ const MSFT_nxGroupResource_GetTargetResource* in)
 {
-    std::cerr << "Get" << std::endl;
+
+    std::cout << "Get" << std::endl;
 
     MI_Result r = MI_RESULT_OK;
     MI_Boolean res = MI_TRUE;
-    MSFT_nxUserResource_GetTargetResource out;
+    MSFT_nxGroupResource_GetTargetResource out;
     MI_Instance *newInstance;
     MI_Value value;
 
-    r = MSFT_nxUserResource_GetTargetResource_Construct(&out, context);
-    r = MSFT_nxUserResource_GetTargetResource_Set_MIReturn(&out, 0);
+    r = MSFT_nxGroupResource_GetTargetResource_Construct(&out, context);
+    r = MSFT_nxGroupResource_GetTargetResource_Set_MIReturn(&out, 0);
 
-    const MSFT_nxUserResource * user = in->InputResource.value;
-    r = MI_Instance_Clone(&user->__instance, &newInstance);
+    const MSFT_nxGroupResource * group = in->InputResource.value;
+    r = MI_Instance_Clone(&group->__instance, &newInstance);
 
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pGetFn,
-        9,
-        PassString(user->UserName),
-        PassString(user->Ensure),
-        PassString(user->FullName),
-        PassString(user->Description),
-        PassString(user->Password),
-        PassBoolean(user->Disabled),
-        PassBoolean(user->PasswordChangeRequired),
-        PassString(user->HomeDirectory),
-        PassString(user->GroupID));
+        6,
+        PassString(group->GroupName),
+        PassString(group->Ensure),
+        PassStringArray(group->Members).c_str(),
+        PassStringArray(group->MembersToInclude).c_str(),
+        PassStringArray(group->MembersToExclude).c_str(),
+        PassString(group->PreferredGroupID));
     
-    // Expecting 9 parameters in return
-    if (ret_strings.size() == (9) && exit_code == 0)
+    if (ret_strings.size() == (6) && exit_code == 0)
     {
         res = MI_TRUE;
     }
@@ -354,15 +356,12 @@ void MI_CALL MSFT_nxUserResource_Invoke_GetTargetResource(
         return;
     }
 
-    if (SetElement(newInstance, "UserName", ret_strings[0], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Ensure", ret_strings[1], MI_STRING)  != 0 ||
-        SetElement(newInstance, "FullName", ret_strings[2], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Description", ret_strings[3], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Password", ret_strings[4], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Disabled", ret_strings[5], MI_BOOLEAN)  != 0 ||
-        SetElement(newInstance, "PasswordChangeRequired", ret_strings[6], MI_BOOLEAN)  != 0 ||
-        SetElement(newInstance, "HomeDirectory", ret_strings[7], MI_STRING)  != 0 ||
-        SetElement(newInstance, "GroupID", ret_strings[8], MI_STRING))
+    if (SetElement(newInstance, "GroupName", ret_strings[0], MI_STRING)         != 0 ||
+        SetElement(newInstance, "Ensure", ret_strings[1], MI_STRING)            != 0 ||
+        SetElement(newInstance, "Members", ret_strings[2], MI_STRINGA)          != 0 ||
+        SetElement(newInstance, "MembersToInclude", ret_strings[3], MI_STRINGA) != 0 ||
+        SetElement(newInstance, "MembersToExclude", ret_strings[4], MI_STRINGA) != 0 ||
+        SetElement(newInstance, "PreferredGroupID", ret_strings[5], MI_STRING))
     {
         MI_Context_PostResult(context, MI_RESULT_FAILED);
         return;
@@ -377,14 +376,14 @@ void MI_CALL MSFT_nxUserResource_Invoke_GetTargetResource(
     }
 
     MI_Instance_Delete(newInstance);
-    r = MSFT_nxUserResource_GetTargetResource_Post(&out, context);
+    r = MSFT_nxGroupResource_GetTargetResource_Post(&out, context);
     if ( r != MI_RESULT_OK )
     {
         MI_Context_PostResult(context, r);
         return;
     }
 
-    r = MSFT_nxUserResource_GetTargetResource_Destruct(&out);
+    r = MSFT_nxGroupResource_GetTargetResource_Destruct(&out);
     if ( r != MI_RESULT_OK )
     {
         MI_Context_PostResult(context, r);
@@ -394,16 +393,16 @@ void MI_CALL MSFT_nxUserResource_Invoke_GetTargetResource(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxUserResource_Invoke_TestTargetResource(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_Invoke_TestTargetResource(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxUserResource* instanceName,
-    _In_opt_ const MSFT_nxUserResource_TestTargetResource* in)
+    _In_ const MSFT_nxGroupResource* instanceName,
+    _In_opt_ const MSFT_nxGroupResource_TestTargetResource* in)
 {
-    std::cerr << "Test" << std::endl;
+    std::cout << "Test" << std::endl;
 
     if (!self)
     {
@@ -413,24 +412,21 @@ void MI_CALL MSFT_nxUserResource_Invoke_TestTargetResource(
 
     MI_Result r = MI_RESULT_OK;
     MI_Boolean res = MI_TRUE;
-    MSFT_nxUserResource_TestTargetResource out;
-    const MSFT_nxUserResource * user = in->InputResource.value;
+    MSFT_nxGroupResource_TestTargetResource out;
+    const MSFT_nxGroupResource * group = in->InputResource.value;
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pTestFn,
-        9,
-        PassString(user->UserName),
-        PassString(user->Ensure),
-        PassString(user->FullName),
-        PassString(user->Description),
-        PassString(user->Password),
-        PassBoolean(user->Disabled),
-        PassBoolean(user->PasswordChangeRequired),
-        PassString(user->HomeDirectory),
-        PassString(user->GroupID));
-    
+        6,
+        PassString(group->GroupName),
+        PassString(group->Ensure),
+        PassStringArray(group->Members).c_str(),
+        PassStringArray(group->MembersToInclude).c_str(),
+        PassStringArray(group->MembersToExclude).c_str(),
+        PassString(group->PreferredGroupID));
+
     if (ret_strings.size() == 0 && exit_code == 0)
     {
         res = MI_TRUE;
@@ -440,24 +436,24 @@ void MI_CALL MSFT_nxUserResource_Invoke_TestTargetResource(
         res = MI_FALSE;
     }
 
-    r = MSFT_nxUserResource_TestTargetResource_Construct(&out, context);
-    r = MSFT_nxUserResource_TestTargetResource_Set_Result(&out, res);
-    r = MSFT_nxUserResource_TestTargetResource_Set_MIReturn(&out, 0);
-    r = MSFT_nxUserResource_TestTargetResource_Post(&out, context);
-    r = MSFT_nxUserResource_TestTargetResource_Destruct(&out);
+    r = MSFT_nxGroupResource_TestTargetResource_Construct(&out, context);
+    r = MSFT_nxGroupResource_TestTargetResource_Set_Result(&out, res);
+    r = MSFT_nxGroupResource_TestTargetResource_Set_MIReturn(&out, 0);
+    r = MSFT_nxGroupResource_TestTargetResource_Post(&out, context);
+    r = MSFT_nxGroupResource_TestTargetResource_Destruct(&out);
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxUserResource_Invoke_SetTargetResource(
-    _In_opt_ MSFT_nxUserResource_Self* self,
+void MI_CALL MSFT_nxGroupResource_Invoke_SetTargetResource(
+    _In_opt_ MSFT_nxGroupResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxUserResource* instanceName,
-    _In_opt_ const MSFT_nxUserResource_SetTargetResource* in)
+    _In_ const MSFT_nxGroupResource* instanceName,
+    _In_opt_ const MSFT_nxGroupResource_SetTargetResource* in)
 {
-    std::cerr << "Set" << std::endl;
+    std::cout << "Set" << std::endl;
 
     if (!self)
     {
@@ -466,24 +462,21 @@ void MI_CALL MSFT_nxUserResource_Invoke_SetTargetResource(
     }
 
     MI_Result r = MI_RESULT_OK;
-    MSFT_nxUserResource_SetTargetResource out;
-    const MSFT_nxUserResource * user = in->InputResource.value;
+    MSFT_nxGroupResource_SetTargetResource out;
+    const MSFT_nxGroupResource * group = in->InputResource.value;
     MI_Result res = MI_RESULT_OK;
 
     std::vector<std::string> ret_strings;
     long exit_code = callPythonFunction(
         ret_strings,
         self->pSetFn,
-        9,
-        PassString(user->UserName),
-        PassString(user->Ensure),
-        PassString(user->FullName),
-        PassString(user->Description),
-        PassString(user->Password),
-        PassBoolean(user->Disabled),
-        PassBoolean(user->PasswordChangeRequired),
-        PassString(user->HomeDirectory),
-        PassString(user->GroupID));
+        6,
+        PassString(group->GroupName),
+        PassString(group->Ensure),
+        PassStringArray(group->Members).c_str(),
+        PassStringArray(group->MembersToInclude).c_str(),
+        PassStringArray(group->MembersToExclude).c_str(),
+        PassString(group->PreferredGroupID));
 
     if (ret_strings.size() == 0 && exit_code == 0)
     {
@@ -494,10 +487,9 @@ void MI_CALL MSFT_nxUserResource_Invoke_SetTargetResource(
         res = MI_RESULT_FAILED;
     }
 
-    r = MSFT_nxUserResource_SetTargetResource_Construct(&out, context);
-    r = MSFT_nxUserResource_SetTargetResource_Set_MIReturn(&out, res);
-    r = MSFT_nxUserResource_SetTargetResource_Post(&out, context);
-    r = MSFT_nxUserResource_SetTargetResource_Destruct(&out);
+    r = MSFT_nxGroupResource_SetTargetResource_Construct(&out, context);
+    r = MSFT_nxGroupResource_SetTargetResource_Set_MIReturn(&out, res);
+    r = MSFT_nxGroupResource_SetTargetResource_Post(&out, context);
+    r = MSFT_nxGroupResource_SetTargetResource_Destruct(&out);
     MI_Context_PostResult(context, res);
-
 }
