@@ -30,7 +30,9 @@ BUILD_OBJECT_FILE := g++ -c $(INCLUDE_FLAGS) $(PYTHON_CFLAGS) -fPIC
 
 PROVIDER_LIST := nxFile \
 		 nxScript \
-		 nxUser
+		 nxUser \
+		 nxGroup \
+		 nxService
 
 PROVIDER_LIST_OMI := $(addsuffix Resource,$(addprefix MSFT_,$(PROVIDER_LIST)))
 PROVIDER_LIBRARIES := $(addsuffix Resource.so,$(addprefix libMSFT_,$(PROVIDER_LIST)))
@@ -95,6 +97,33 @@ $(NXUSER_SRC_PATHS): $(TARGET_DIR)
 
 $(TARGET_DIR)/libMSFT_nxUserResource.so: $(NXUSER_SRC_PATHS)
 	$(BUILD_SHARED_LIBRARY) $^ -o $@
+
+# nxGroup
+NXGROUP_SRC := MSFT_nxGroupResource.cpp \
+	        MSFT_nxGroupResource.h \
+		module.c \
+		schema.c
+
+NXGROUP_SRC_PATHS := $(addprefix $(BASE_DIR)/nxGroup/,$(NXGROUP_SRC))
+
+$(NXGROUP_SRC_PATHS): $(TARGET_DIR)
+
+$(TARGET_DIR)/libMSFT_nxGroupResource.so: $(NXGROUP_SRC_PATHS)
+	$(BUILD_SHARED_LIBRARY) $^ -o $@
+
+# nxService
+NXSERVICE_SRC := MSFT_nxServiceResource.cpp \
+	        MSFT_nxServiceResource.h \
+		module.c \
+		schema.c
+
+NXSERVICE_SRC_PATHS := $(addprefix $(BASE_DIR)/nxService/,$(NXSERVICE_SRC))
+
+$(NXSERVICE_SRC_PATHS): $(TARGET_DIR)
+
+$(TARGET_DIR)/libMSFT_nxServiceResource.so: $(NXSERVICE_SRC_PATHS)
+	$(BUILD_SHARED_LIBRARY) $^ -o $@
+
 
 # nxEnvironment
 $(TARGET_DIR)/libMSFT_nxEnvironmentResource.so: $(NXENVIRONMENT_SRC_PATHS)

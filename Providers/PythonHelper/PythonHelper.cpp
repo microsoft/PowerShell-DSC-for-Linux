@@ -32,80 +32,158 @@ initPython (
     char const* const programName,
     char const* const workingPath)
 {
-    // Open python library and get the function pointers for the functions we need.
-    char const* pythonLibLocation = "/home/johnkord/pythonlibs/libpython2.5.so.1.0";
-    DL_PythonLib              = dlopen(pythonLibLocation, RTLD_NOW | RTLD_GLOBAL);
-    if (DL_PythonLib == NULL)
+    std::vector<std::string> supportedPythonLibNames;
+    supportedPythonLibNames.push_back("libpython3.4m.so.1.0");
+    supportedPythonLibNames.push_back("libpython3.3m.so.1.0");
+    supportedPythonLibNames.push_back("libpython3.2m.so.1.0");
+    supportedPythonLibNames.push_back("libpython3.1.so.1.0");
+    supportedPythonLibNames.push_back("libpython3.0.so.1.0");
+    supportedPythonLibNames.push_back("libpython2.7.so.1.0");
+    supportedPythonLibNames.push_back("libpython2.6.so.1.0");
+    supportedPythonLibNames.push_back("libpython2.5.so.1.0");
+    bool fullyLoaded = false;
+
+    for (std::vector<std::string>::const_iterator it = supportedPythonLibNames.begin();
+         it != supportedPythonLibNames.end(); ++it)
     {
-        std::cerr << "Unable to open DL_PythonLib from library:  " << pythonLibLocation << std::endl;
+        // Open python library and get the function pointers for the functions we need.
+        std::cerr << "Trying to open Python library: " << *it << "... ";
+        DL_PythonLib              = dlopen(it->c_str(), RTLD_NOW | RTLD_GLOBAL);
+        if (DL_PythonLib == NULL)
+        {
+            std::cerr << "Failed" << std::endl;
+            continue;
+        }
+        else
+        {
+            std::cerr << "Success!" << std::endl;
+        }
+        
+        DL_PyImport_ImportModule  = (PyObject*  (*)(const char *name))                          dlsym(DL_PythonLib, "PyImport_ImportModule");
+
+        DL_PyString_FromString    = (PyObject*  (*)(const char *v))                             dlsym(DL_PythonLib, "PyString_FromString");
+        DL_PyString_AsString      = (char*      (*)(PyObject *string))                          dlsym(DL_PythonLib, "PyString_AsString");
+        // The two functions above are renamed to PyBytes_ instead of PyString_ in python 3.x.  Let's try to get these symbols if the above fails.
+        if (DL_PyString_FromString == NULL &&  DL_PyString_AsString == NULL)
+        {
+            DL_PyString_FromString    = (PyObject*  (*)(const char *v))                         dlsym(DL_PythonLib, "PyBytes_FromString");
+            DL_PyString_AsString      = (char*      (*)(PyObject *string))                      dlsym(DL_PythonLib, "PyBytes_AsString");
+        }
+        
+        DL_PyLong_AsLong          = (long       (*)(PyObject *io))                              dlsym(DL_PythonLib, "PyLong_AsLong");
+        DL_PyLong_FromLong        = (PyObject*  (*)(long ival))                                 dlsym(DL_PythonLib, "PyLong_FromLong");
+        DL_PyFloat_FromDouble     = (PyObject*  (*)(double v))                                  dlsym(DL_PythonLib, "PyFloat_FromDouble");
+        DL_PyObject_GetAttrString = (PyObject*  (*)(PyObject *o, const char *attr_name))        dlsym(DL_PythonLib, "PyObject_GetAttrString");
+        DL_PyCallable_Check       = (int        (*)(PyObject *o))                               dlsym(DL_PythonLib, "PyCallable_Check");
+        DL_PyObject_CallObject    = (PyObject*  (*)(PyObject *callable_object, PyObject *args)) dlsym(DL_PythonLib, "PyObject_CallObject");
+        DL_Py_Initialize          = (void       (*)())                                          dlsym(DL_PythonLib, "Py_Initialize");
+        DL_Py_Finalize            = (void       (*)())                                          dlsym(DL_PythonLib, "Py_Finalize");
+        DL_PyErr_Occurred         = (PyObject*  (*)())                                          dlsym(DL_PythonLib, "PyErr_Occurred");
+        DL_PyErr_Print            = (void       (*)())                                          dlsym(DL_PythonLib, "PyErr_Print");
+        DL_PyTuple_SetItem        = (int        (*)(PyObject *p, Py_ssize_t pos, PyObject *o))  dlsym(DL_PythonLib, "PyTuple_SetItem");
+        DL_PyTuple_New            = (PyObject*  (*)(Py_ssize_t len))                            dlsym(DL_PythonLib, "PyTuple_New");
+        DL_PyList_Size            = (Py_ssize_t (*)(PyObject *list))                            dlsym(DL_PythonLib, "PyList_Size");
+        DL_PyList_GetItem         = (PyObject*  (*)(PyObject *list, Py_ssize_t index))          dlsym(DL_PythonLib, "PyList_GetItem");
+        
+        if (DL_PyImport_ImportModule == NULL)
+        {
+            std::cerr << "DL_PyImport_ImportModule" << std::endl;
+            continue;
+        }
+        if (DL_PyString_FromString == NULL)
+        {
+            std::cerr << "DL_PyString_FromString" << std::endl;
+            continue;
+        }
+        if (DL_PyString_AsString == NULL)
+        {
+            std::cerr << "DL_PyString_AsString" << std::endl;
+            continue;
+        }
+        if (DL_PyLong_AsLong == NULL)
+        {
+            std::cerr << "DL_PyLong_AsLong" << std::endl;
+            continue;
+        }
+        if (DL_PyLong_FromLong == NULL)
+        {
+            std::cerr << "DL_PyLong_FromLong" << std::endl;
+            continue;
+        }
+        if (DL_PyFloat_FromDouble == NULL)
+        {
+            std::cerr << "DL_PyFloat_FromDouble" << std::endl;
+            continue;
+        }
+        if (DL_PyObject_GetAttrString == NULL)
+        {
+            std::cerr << "DL_PyObject_GetAttrString" << std::endl;
+            continue;
+        }
+        if (DL_PyCallable_Check == NULL)
+        {
+            std::cerr << "DL_PyCallable_Check" << std::endl;
+            continue;
+        }
+        if (DL_PyObject_CallObject == NULL)
+        {
+            std::cerr << "DL_PyObject_CallObject" << std::endl;
+            continue;
+        }
+        if (DL_Py_Initialize == NULL)
+        {
+            std::cerr << "DL_Py_Initialize" << std::endl;
+            continue;
+        }
+        if (DL_Py_Finalize == NULL)
+        {
+            std::cerr << "DL_Py_Finalize" << std::endl;
+            continue;
+        }
+        if (DL_PyErr_Occurred == NULL)
+        {
+            std::cerr << "DL_PyErr_Occurred" << std::endl;
+            continue;
+        }
+        if (DL_PyErr_Print == NULL)
+        {
+            std::cerr << "DL_PyErr_Print" << std::endl;
+            continue;
+        }
+        if (DL_PyTuple_SetItem == NULL)
+        {
+            std::cerr << "DL_PyTuple_SetItem" << std::endl;
+            continue;
+        }
+        if (DL_PyTuple_New == NULL)
+        {
+            std::cerr << "DL_PyTuple_New" << std::endl;
+            continue;
+        }
+        if (DL_PyList_Size == NULL)
+        {
+            std::cerr << "DL_PyList_Size" << std::endl;
+            continue;
+        }
+        if (DL_PyList_GetItem == NULL)
+        {
+            std::cerr << "DL_PyList_GetItem" << std::endl;
+            continue;
+        }
+
+        fullyLoaded = true;
+        break;        
+    }
+
+    if (fullyLoaded == false)
+    {
         return -1;
     }
 
-    DL_PyImport_ImportModule  = (PyObject*  (*)(const char *name))                            dlsym(DL_PythonLib, "PyImport_ImportModule");
-    DL_PyString_FromString    = (PyObject*  (*)(const char *v))                             dlsym(DL_PythonLib, "PyString_FromString");
-    DL_PyString_AsString      = (char*      (*)(PyObject *string))                          dlsym(DL_PythonLib, "PyString_AsString");
-    // The two functions above are renamed to PyBytes_ instead of PyString_ in python 3.x.  Let's try to get these symbols if the above fails.
-    if (DL_PyString_FromString == NULL &&  DL_PyString_AsString == NULL)
-    {
-        DL_PyString_FromString    = (PyObject*  (*)(const char *v))                         dlsym(DL_PythonLib, "PyBytes_FromString");
-        DL_PyString_AsString      = (char*      (*)(PyObject *string))                      dlsym(DL_PythonLib, "PyBytes_AsString");
-    }
-
-    DL_PyLong_AsLong          = (long       (*)(PyObject *io))                              dlsym(DL_PythonLib, "PyLong_AsLong");
-    DL_PyLong_FromLong        = (PyObject*  (*)(long ival))                                 dlsym(DL_PythonLib, "PyLong_FromLong");
-    DL_PyFloat_FromDouble     = (PyObject*  (*)(double v))                                  dlsym(DL_PythonLib, "PyFloat_FromDouble");
-    DL_PyObject_GetAttrString = (PyObject*  (*)(PyObject *o, const char *attr_name))        dlsym(DL_PythonLib, "PyObject_GetAttrString");
-    DL_PyCallable_Check       = (int        (*)(PyObject *o))                               dlsym(DL_PythonLib, "PyCallable_Check");
-    DL_PyObject_CallObject    = (PyObject*  (*)(PyObject *callable_object, PyObject *args)) dlsym(DL_PythonLib, "PyObject_CallObject");
-    DL_Py_Initialize          = (void       (*)())                                          dlsym(DL_PythonLib, "Py_Initialize");
-    DL_Py_Finalize            = (void       (*)())                                          dlsym(DL_PythonLib, "Py_Finalize");
-    DL_PyErr_Occurred         = (PyObject*  (*)())                                          dlsym(DL_PythonLib, "PyErr_Occurred");
-    DL_PyErr_Print            = (void       (*)())                                          dlsym(DL_PythonLib, "PyErr_Print");
-    DL_PyTuple_SetItem        = (int        (*)(PyObject *p, Py_ssize_t pos, PyObject *o))  dlsym(DL_PythonLib, "PyTuple_SetItem");
-    DL_PyTuple_New            = (PyObject*  (*)(Py_ssize_t len))                            dlsym(DL_PythonLib, "PyTuple_New");
-    DL_PyList_Size            = (Py_ssize_t (*)(PyObject *list))                            dlsym(DL_PythonLib, "PyList_Size");
-    DL_PyList_GetItem         = (PyObject*  (*)(PyObject *list, Py_ssize_t index))          dlsym(DL_PythonLib, "PyList_GetItem");
-
-    if (DL_PyImport_ImportModule == NULL)
-        std::cerr << "DL_PyImport_ImportModule" << std::endl;
-    if (DL_PyString_FromString == NULL)
-        std::cerr << "DL_PyString_FromString" << std::endl;
-    if (DL_PyString_AsString == NULL)
-        std::cerr << "DL_PyString_AsString" << std::endl;
-    if (DL_PyLong_AsLong == NULL)
-        std::cerr << "DL_PyLong_AsLong" << std::endl;
-    if (DL_PyLong_FromLong == NULL)
-        std::cerr << "DL_PyLong_FromLong" << std::endl;
-    if (DL_PyFloat_FromDouble == NULL)
-        std::cerr << "DL_PyFloat_FromDouble" << std::endl;
-    if (DL_PyObject_GetAttrString == NULL)
-        std::cerr << "DL_PyObject_GetAttrString" << std::endl;
-    if (DL_PyCallable_Check == NULL)
-        std::cerr << "DL_PyCallable_Check" << std::endl;
-    if (DL_PyObject_CallObject == NULL)
-        std::cerr << "DL_PyObject_CallObject" << std::endl;
-    if (DL_Py_Initialize == NULL)
-        std::cerr << "DL_Py_Initialize" << std::endl;
-    if (DL_Py_Finalize == NULL)
-        std::cerr << "DL_Py_Finalize" << std::endl;
-    if (DL_PyErr_Occurred == NULL)
-        std::cerr << "DL_PyErr_Occurred" << std::endl;
-    if (DL_PyErr_Print == NULL)
-        std::cerr << "DL_PyErr_Print" << std::endl;
-    if (DL_PyTuple_SetItem == NULL)
-        std::cerr << "DL_PyTuple_SetItem" << std::endl;
-    if (DL_PyTuple_New == NULL)
-        std::cerr << "DL_PyTuple_New" << std::endl;
-    if (DL_PyList_Size == NULL)
-        std::cerr << "DL_PyList_Size" << std::endl;
-    if (DL_PyList_GetItem == NULL)
-        std::cerr << "DL_PyList_GetItem" << std::endl;
-
-
+    std::cerr << "Setting Python path to: " << workingPath << std::endl;
     setenv("PYTHONPATH", workingPath, 0); // #include <stdlib.h> to get the prototype
-//    PySys_SetPath (const_cast<char*>(workingPath));
     DL_Py_Initialize ();
-
+    
     return EXIT_SUCCESS;
 }
 
@@ -280,4 +358,20 @@ int callPythonFunction(
     }
 
     return exit_code;
+}
+
+std::string GetScriptPath()
+{
+    char* sPath = getenv("DSC_PATH");
+    std::string scriptPath;
+    if (sPath == NULL)
+    {
+        scriptPath = "~";
+    }
+    else
+    {
+        scriptPath = sPath;
+    }
+    scriptPath += "/Scripts";
+    return scriptPath;
 }
