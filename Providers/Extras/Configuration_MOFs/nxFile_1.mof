@@ -4,10 +4,22 @@ instance of MSFT_nxFileResource
 	DestinationPath = "/tmp/linux.txt";
 	Ensure = "Present";
 	Type = "File";
-	Owner = "johnkord";
-	Group = "johnkord";
+	Owner = "root";
+	Group = "root";
 	Mode = "644";
 	ResourceId = "[MSFT_nxFileResource]File1";
+	ModuleName = "PSDesiredStateConfiguration";
+	ModuleVersion = "1.0";
+	
+	
+};
+
+instance of MSFT_nxFileResource
+{
+	DestinationPath = "/tmp/dsctest_old";
+	Ensure = "Present";
+	Type = "Directory";
+	ResourceId = "[MSFT_nxFileResource]Dir1";
 	ModuleName = "PSDesiredStateConfiguration";
 	ModuleVersion = "1.0";
 	
@@ -20,11 +32,11 @@ instance of MSFT_nxFileResource
 	SourcePath = "/tmp/dsctest_old";
 	Ensure = "Present";
 	Type = "Directory";
-	Owner = "johnkord";
-	Group = "johnkord";
+	Owner = "root";
+	Group = "root";
 	Mode = "744";
 	Recurse = "True";
-	ResourceId = "[MSFT_nxFileResource]File2";
+	ResourceId = "[MSFT_nxFileResource]Dir2";
 	ModuleName = "PSDesiredStateConfiguration";
 	ModuleVersion = "1.0";
 	
