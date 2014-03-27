@@ -1,0 +1,19 @@
+instance of MSFT_nxGroupResource
+{
+	GroupName = "testgroup";
+	PreferredGroupID = "543";
+	MembersToInclude = { "root", "ftp",  "lp", "daemon", "apache", "johnkord" };
+	MembersToExclude = { "johnkord" };
+	ResourceId = "[MSFT_nxGroupResource]Test";
+	ModuleName = "PSDesiredStateConfiguration";
+	ModuleVersion = "1.0";
+	
+	
+};
+
+instance of OMI_ConfigurationDocument
+{
+  Version="1.0.0";
+  
+};
+
