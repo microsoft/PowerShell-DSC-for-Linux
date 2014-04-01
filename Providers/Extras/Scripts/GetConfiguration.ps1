@@ -1,6 +1,12 @@
-$secpass =  ConvertTo-SecureString "OpsMgr2007R2" -AsPlainText -Force
-$cred = New-Object System.Management.Automation.PSCredential("root",$secpass)
-$omiSess = New-CimSession -ComputerName 10.30.69.134 -Authentication Basic -SessionOption (New-CimSessionOption -Protocol Wsman) -Credential $cred -SkipTestConnection
+[CmdletBinding()]
+Param(
+	[Parameter(Mandatory=$True)][string]$ComputerName,
+	[Parameter(Mandatory=$True)][string]$Login,
+	[Parameter(Mandatory=$True)][string]$Password
+)
+
+$secpass =  ConvertTo-SecureString $Password -AsPlainText -Force
+$cred = New-Object System.Management.Automation.PSCredential($Login,$secpass)
+$omiSess = New-CimSession -ComputerName $ComputerName -Authentication Basic -SessionOption (New-CimSessionOption -Protocol Wsman) -Credential $cred -SkipTestConnection
 $r=Invoke-CimMethod -CimSession $omiSess -Namespace "dsc" -ClassName MSFT_DSCLocalConfigurationManager -MethodName GetConfiguration
 echo $r.configurations
-# Get-CimInstance -Namespace "/dsc" -ClassName XYZ_Dog -CimSession $omiSess
