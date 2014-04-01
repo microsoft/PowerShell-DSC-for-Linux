@@ -1,7 +1,13 @@
+[CmdletBinding()]
+Param(
+	[Parameter(Mandatory=$True)][string]$ComputerName,
+	[Parameter(Mandatory=$True)][string]$Login,
+	[Parameter(Mandatory=$True)][string]$Password,
+	[Parameter(Mandatory=$True)][string]$ConfigurationMOF
+)
+
 $options=New-Object -type Microsoft.Management.Infrastructure.Options.CimOperationOptions
-$buf = Get-Content "C:\Users\jkordic\Documents\DSC Work\Configuration MOF Files\File_test2.mof" -Encoding Byte -Raw
-#$buf = Get-Content .\157.59.136.151.mof  -Encoding Byte -Raw
-#$buf = Get-Content .\157.59.138.106_logonly.mof -Encoding Byte -Raw
+$buf = Get-Content $ConfigurationMOF -Encoding Byte -Raw
 $buf2 = @()
 $bufLength = [BitConverter]::GetBytes($buf.Length+4)
 $buf2 = $buf2 + $bufLength[3]
@@ -14,9 +20,9 @@ $forceParam=[Microsoft.Management.Infrastructure.CimMethodParameter]::Create("Fo
 $t=New-Object -type Microsoft.Management.Infrastructure.CimMethodParametersCollection
 $t.Add($configParam)
 $t.Add($forceParam)
-$secpass =  ConvertTo-SecureString "OpsMgr2007R2" -AsPlainText -Force
-$cimCred= new-object -TypeName Microsoft.Management.Infrastructure.Options.CimCredential -ArgumentList @("Basic", "", "johnkord",$secpass)
+$secpass =  ConvertTo-SecureString $Password -AsPlainText -Force
+$cimCred= new-object -TypeName Microsoft.Management.Infrastructure.Options.CimCredential -ArgumentList @("Basic", "", $Login,$secpass)
 $sessionOptions=New-CimSessionOption -Protocol WSMAN 
 $sessionOptions.AddDestinationCredentials($cimCred)
-$cimSession = [Microsoft.Management.Infrastructure.CimSession]::Create("10.30.69.134",$sessionOptions)
+$cimSession = [Microsoft.Management.Infrastructure.CimSession]::Create($ComputerName,$sessionOptions)
 $cimSession.InvokeMethod("dsc","MSFT_DSCLocalConfigurationManager","SendConfigurationApply", $t, $options) 
