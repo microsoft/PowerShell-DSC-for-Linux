@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<varmap xmlns="http://smxinfranet/schemas/mcf/2002/01/varmap"
+        assembly="..\Dsc.dll"
+        dsc="DSC Automation Test"
+        owner="v-mifu" contact="v-mifu">
+
+  <!-- Variables. -->
+  <snippet id="Variables">
+    <!-- Linux Info. -->
+    <rec key="nxHostName">10.199.192.125</rec>
+    <rec key="nxUsername">root</rec>
+    <rec key="nxPassword">OpsMgr2007R2</rec>
+    <rec key="nxPort">22</rec>
+    
+    <!-- DSC Info. -->
+    <rec key="dscHome">/home/scxuser/DSC</rec>
+    <rec key="omiHome">%dscHome%/OMI</rec>
+    <rec key="omiserverHome">%omiHome%/output/bin/omiserver</rec>
+    
+    <!-- Script Info. -->
+    <rec key="scriptLocation">C:\Temp</rec>
+    <rec key="setScript">SendConfigurationApply.ps1</rec>
+    <rec key="getScript">GetConfiguration.ps1</rec>  
+    
+    <!-- Ssh Commands.-->
+    <rec key="getPid">ps -ef | grep omiserver | grep -v grep | awk '{print $2}' | tr -d '\n'</rec>
+    <rec key="kill">kill -9 </rec>
+    <rec key="startOMI">%omiserverHome% &amp;&gt;/dev/null&amp;</rec>
+  </snippet>
+
+  <!-- All Test Cases. -->
+  <section dsc="All tests" cls="DSC.GroupHelper">
+    <snipref id="Variables"/>
+
+    <section sid="0" dsc="nxFile Provider">
+      <var set="0" lvl="1" vid="000001" dsc="[Test Case Title]" cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initil State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">etc</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">file</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;</rec>
+        <rec key="mofPath">%scriptLocation%\nxFile_00001.mof</rec>
+        <rec key="psScript">%scriptLocation%\%setScript% -ConfigurationMof %mofPath% -HostName %nxHostName%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The destination file '%name%' is created under %parentPath% successfully.</rec>
+        <rec key="failedMsg">The destination file '%path%' is not created under %parentPath%.</rec>
+      </var>
+
+      <var set="0" lvl="2" vid="000002" dsc="[Test Case Title]" cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initil State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">etc</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">file</rec>
+        <rec key="initialState">present</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Group:abcdc</rec>
+        <rec key="mofPath">%scriptLocation%\nxFile_00002.mof</rec>
+        <rec key="psScript">%scriptLocation%\%setScript% -ConfigurationMof %mofPath% -HostName %nxHostName%</rec>
+        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid group.</rec>
+        <rec key="failedMsg">PowerShell succeeds unexpceted!</rec>
+      </var>
+    </section>
+
+    <section sid="1" dsc="nxUser Provider">
+      <var set="1" lvl="1" vid="000011" dsc="[Test Case Title]" cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initil State. -->
+        <rec key="username">test_user</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;</rec>
+        <rec key="mofPath">%scriptLocation%\nxUser_00011.mof</rec>
+        <rec key="psScript">%scriptLocation%\%setScript% -ConfigurationMof %mofPath% -HostName %nxHostName%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The user '%username%' is created successfully.</rec>
+        <rec key="failedMsg">The user '%username%' is not created.</rec>
+      </var>
+    </section>
+  </section>
+</varmap>
