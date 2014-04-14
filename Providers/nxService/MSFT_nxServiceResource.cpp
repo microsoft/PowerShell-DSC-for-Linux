@@ -338,8 +338,8 @@ void MI_CALL MSFT_nxServiceResource_Invoke_GetTargetResource(
         PassBoolean(service->Enabled),
         PassString(service->State));
     
-    // Expecting 4+3 parameters in return
-    if (ret_strings.size() == (4+3) && exit_code == 0)
+    // Expecting 4+1 parameters in return
+    if (ret_strings.size() == (4+1) && exit_code == 0)
     {
         res = MI_TRUE;
     }
@@ -353,9 +353,7 @@ void MI_CALL MSFT_nxServiceResource_Invoke_GetTargetResource(
         SetElement(newInstance, "Controller", ret_strings[1], MI_STRING)  != 0 ||
         SetElement(newInstance, "Enabled", ret_strings[2], MI_BOOLEAN)  != 0 ||
         SetElement(newInstance, "State", ret_strings[3], MI_STRING)  != 0 ||
-        SetElement(newInstance, "IsEnabled", ret_strings[4], MI_BOOLEAN)  != 0 ||
-        SetElement(newInstance, "Status", ret_strings[5], MI_STRING)  != 0 ||
-        SetElement(newInstance, "Path", ret_strings[6], MI_STRING))
+        SetElement(newInstance, "Path", ret_strings[4], MI_STRING))
     {
         MI_Context_PostResult(context, MI_RESULT_FAILED);
         return;

@@ -59,7 +59,7 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     Mode = Mode.decode("utf-8")
 
     retval = 0
-    (retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, CreatedDate, ModifiedDate) = Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
+    (retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate) = Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
 
     DestinationPath = DestinationPath.encode("utf-8")
     SourcePath = SourcePath.encode("utf-8")
@@ -73,10 +73,9 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     Owner = Owner.encode("utf-8")
     Group = Group.encode("utf-8")
     Mode = Mode.encode("utf-8")
-    CreatedDate = CreatedDate.encode("utf-8")
     ModifiedDate = ModifiedDate.encode("utf-8")
 
-    return [retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, CreatedDate, ModifiedDate]
+    return [retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
 
 ############################################################
@@ -461,13 +460,13 @@ def Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, R
 def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     if not DestinationPath:
         Ensure = "Absent"
-        SourcePath = Type = Force = Contents = Checksum = Recurse = Links = Owner = Group = Mode = CreatedDate = ModifiedDate = ""
-        return [-1, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, CreatedDate, ModifiedDate]
+        SourcePath = Type = Force = Contents = Checksum = Recurse = Links = Owner = Group = Mode = ModifiedDate = ""
+        return [-1, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
     if not os.path.exists(DestinationPath):
         Ensure = "Absent"
-        SourcePath = Type = Force = Contents = Checksum = Recurse = Links = Owner = Group = Mode = CreatedDate = ModifiedDate = ""
-        return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, CreatedDate, ModifiedDate]
+        SourcePath = Type = Force = Contents = Checksum = Recurse = Links = Owner = Group = Mode = ModifiedDate = ""
+        return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
     Contents = ""
     Checksum = ""
@@ -489,10 +488,7 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         
     ModifiedDate = str(int(stat_info.st_mtime))
 
-    # Linux does not keep track of file creation date
-    CreatedDate = str(int(stat_info.st_mtime))
-
-    return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, CreatedDate, ModifiedDate]
+    return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
 
 #def BasicUnitTests():

@@ -104,6 +104,25 @@ static const MI_Char* PassString(const MI_ConstStringField& field)
     }
 }
 
+static const MI_Char* PassBoolean(const MI_ConstBooleanField& field)
+{
+    if (field.exists == MI_TRUE)
+    {
+        if (field.value == MI_TRUE)
+        {
+            return (const MI_Char*) "True";
+        }
+        else
+        {
+            return (const MI_Char*) "False";
+        }
+    }
+    else
+    {
+        return (const MI_Char*)"";
+    }
+}
+
 void MI_CALL MSFT_nxFileResource_Load(
     _Outptr_result_maybenull_ MSFT_nxFileResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
@@ -251,6 +270,37 @@ int SetElement(
             return -1;
         }
     }
+    else if (type == MI_BOOLEAN)
+    {
+        bool callSetElement = true;
+        if (newFieldVal == "True")
+        {
+            value.boolean = MI_TRUE;
+        }
+        else if (newFieldVal == "False")
+        {
+            value.boolean = MI_FALSE;
+        }
+        else if (newFieldVal == "")
+        {
+            value.boolean = MI_FALSE;
+            callSetElement = false;
+        }
+        else
+        {
+            std::cerr << "Expecting: True or False" << std::endl;
+            return -1;
+        }
+
+        if (callSetElement)
+        {
+            r = MI_Instance_SetElement(newInstance, field, &value, MI_BOOLEAN, 0);
+            if ( r != MI_RESULT_OK )
+            {
+                return -1;
+            }
+        }
+    }
     return 0;
 }
 
@@ -288,17 +338,17 @@ void MI_CALL MSFT_nxFileResource_Invoke_GetTargetResource(
         PassString(file->SourcePath),
         PassString(file->Ensure),
         PassString(file->Type),
-        PassString(file->Force),
+        PassBoolean(file->Force),
         PassString(file->Contents),
         PassString(file->Checksum),
-        PassString(file->Recurse),
+        PassBoolean(file->Recurse),
         PassString(file->Links),
         PassString(file->Owner),
         PassString(file->Group),
         PassString(file->Mode));
     
-    // 12+2 represents: the 12 normal fields, the 2 'read' fields
-    if (ret_strings.size() == (12+2) && exit_code == 0)
+    // 12+1 represents: the 12 normal fields, the 1 'read' fields
+    if (ret_strings.size() == (12+1) && exit_code == 0)
     {
         res = MI_TRUE;
     }
@@ -312,16 +362,15 @@ void MI_CALL MSFT_nxFileResource_Invoke_GetTargetResource(
         SetElement(newInstance, "SourcePath", ret_strings[1], MI_STRING)       != 0 ||
         SetElement(newInstance, "Ensure", ret_strings[2], MI_STRING)           != 0 ||
         SetElement(newInstance, "Type", ret_strings[3], MI_STRING)             != 0 ||
-        SetElement(newInstance, "Force", ret_strings[4], MI_STRING)            != 0 ||
+        SetElement(newInstance, "Force", ret_strings[4], MI_BOOLEAN)           != 0 ||
         SetElement(newInstance, "Contents", ret_strings[5], MI_STRING)         != 0 ||
         SetElement(newInstance, "Checksum", ret_strings[6], MI_STRING)         != 0 ||
-        SetElement(newInstance, "Recurse", ret_strings[7], MI_STRING)          != 0 ||
+        SetElement(newInstance, "Recurse", ret_strings[7], MI_BOOLEAN)         != 0 ||
         SetElement(newInstance, "Links", ret_strings[8], MI_STRING)            != 0 ||
         SetElement(newInstance, "Owner", ret_strings[9], MI_STRING)            != 0 ||
         SetElement(newInstance, "Group", ret_strings[10], MI_STRING)           != 0 ||
         SetElement(newInstance, "Mode", ret_strings[11], MI_STRING)            != 0 ||
-        SetElement(newInstance, "CreatedDate", ret_strings[12], MI_DATETIME)   != 0 ||
-        SetElement(newInstance, "ModifiedDate", ret_strings[13], MI_DATETIME)  != 0)
+        SetElement(newInstance, "ModifiedDate", ret_strings[12], MI_DATETIME)  != 0)
     {
         MI_Context_PostResult(context, MI_RESULT_FAILED);
         return;
@@ -384,10 +433,10 @@ void MI_CALL MSFT_nxFileResource_Invoke_TestTargetResource(
         PassString(file->SourcePath),
         PassString(file->Ensure),
         PassString(file->Type),
-        PassString(file->Force),
+        PassBoolean(file->Force),
         PassString(file->Contents),
         PassString(file->Checksum),
-        PassString(file->Recurse),
+        PassBoolean(file->Recurse),
         PassString(file->Links),
         PassString(file->Owner),
         PassString(file->Group),
@@ -441,10 +490,10 @@ void MI_CALL MSFT_nxFileResource_Invoke_SetTargetResource(
         PassString(file->SourcePath),
         PassString(file->Ensure),
         PassString(file->Type),
-        PassString(file->Force),
+        PassBoolean(file->Force),
         PassString(file->Contents),
         PassString(file->Checksum),
-        PassString(file->Recurse),
+        PassBoolean(file->Recurse),
         PassString(file->Links),
         PassString(file->Owner),
         PassString(file->Group),
