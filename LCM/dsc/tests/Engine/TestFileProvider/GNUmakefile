@@ -33,8 +33,8 @@ include $(OMI)/mak/rules.mak
 regtest:
 	mkdir -p $(CONFIG_SYSCONFDIR)/dsc/configuration/registration/MSFT_FileDirectoryConfiguration
 	mkdir -p $(CONFIG_SYSCONFDIR)/dsc/configuration/schema/MSFT_FileDirectoryConfiguration
-	cp -r $(ROOT)/dsc/tests/Engine/TestFileProvider/MSFT_FileDirectoryConfiguration.schema.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/schema/MSFT_FileDirectoryConfiguration
-	cp -r $(ROOT)/dsc/tests/Engine/TestFileProvider/MSFT_FileDirectoryConfiguration.registration.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/registration/MSFT_FileDirectoryConfiguration
+	cp -r $(TOP)/dsc/tests/Engine/TestFileProvider/MSFT_FileDirectoryConfiguration.schema.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/schema/MSFT_FileDirectoryConfiguration
+	cp -r $(TOP)/dsc/tests/Engine/TestFileProvider/MSFT_FileDirectoryConfiguration.registration.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/registration/MSFT_FileDirectoryConfiguration
 	$(BINDIR)/omireg -n dsc $(TARGET)
 
 
