@@ -540,6 +540,7 @@ def Get(Name, Controller, Enabled, State):
         else:
             Enabled = GetSystemdEnabled(Name)
             State = GetSystemdState(Name)
+            Path = "/usr/lib/systemd/system/" + Name + ".service"
     elif Controller == "upstart":
         if not ServiceExistsInUpstart(Name):
             print("Error: Unable to find service named " + Name + " in upstart.")
@@ -547,6 +548,7 @@ def Get(Name, Controller, Enabled, State):
         else:
             Enabled = GetUpstartEnabled(Name)
             State = GetUpstartState(Name)
+            Path = "/etc/init/" + Name + ".conf"
     elif Controller == "init":
         if not ServiceExistsInInit(Name):
             print("Error: Unable to find service named " + Name + " in init.")
