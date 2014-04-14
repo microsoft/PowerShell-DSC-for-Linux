@@ -1,0 +1,19 @@
+instance of MSFT_nxServiceResource
+{
+	Name = "cgconfig";
+	Controller = "init";
+	Enabled = True;
+	State = "Stopped";
+	
+	ResourceId = "[MSFT_nxServiceResource]TestService";
+	ModuleName = "PSDesiredStateConfiguration";
+	ModuleVersion = "1.0";
+
+};
+
+instance of OMI_ConfigurationDocument
+{
+  Version="1.0.0";
+  
+};
+
