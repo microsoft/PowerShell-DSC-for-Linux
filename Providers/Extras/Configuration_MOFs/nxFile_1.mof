@@ -35,7 +35,7 @@ instance of MSFT_nxFileResource
 	Owner = "root";
 	Group = "root";
 	Mode = "744";
-	Recurse = "True";
+	Recurse = True;
 	ResourceId = "[MSFT_nxFileResource]Dir2";
 	ModuleName = "PSDesiredStateConfiguration";
 	ModuleVersion = "1.0";
