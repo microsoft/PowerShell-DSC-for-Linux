@@ -33,15 +33,14 @@ typedef struct _MSFT_nxFileResource /* extends OMI_BaseResource */
     MI_ConstStringField SourcePath;
     MI_ConstStringField Ensure;
     MI_ConstStringField Type;
+    MI_ConstBooleanField Force;
     MI_ConstStringField Contents;
     MI_ConstStringField Checksum;
-    MI_ConstStringField Recurse;
-    MI_ConstStringField Force;
+    MI_ConstBooleanField Recurse;
     MI_ConstStringField Links;
     MI_ConstStringField Group;
     MI_ConstStringField Mode;
     MI_ConstStringField Owner;
-    MI_ConstDatetimeField CreatedDate;
     MI_ConstDatetimeField ModifiedDate;
 }
 MSFT_nxFileResource;
@@ -262,13 +261,29 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Type(
         3);
 }
 
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Force(
+    _Inout_ MSFT_nxFileResource* self,
+    _In_ MI_Boolean x)
+{
+    ((MI_BooleanField*)&self->Force)->value = x;
+    ((MI_BooleanField*)&self->Force)->exists = 1;
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Force(
+    _Inout_ MSFT_nxFileResource* self)
+{
+    memset((void*)&self->Force, 0, sizeof(self->Force));
+    return MI_RESULT_OK;
+}
+
 MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Contents(
     _Inout_ MSFT_nxFileResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        4,
+        5,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -280,7 +295,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Contents(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        4,
+        5,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -291,7 +306,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Contents(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        4);
+        5);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Checksum(
@@ -300,7 +315,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Checksum(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        5,
+        6,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -312,7 +327,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Checksum(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        5,
+        6,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -323,71 +338,23 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Checksum(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        5);
+        6);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Recurse(
     _Inout_ MSFT_nxFileResource* self,
-    _In_z_ const MI_Char* str)
+    _In_ MI_Boolean x)
 {
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        6,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Recurse(
-    _Inout_ MSFT_nxFileResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        6,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
+    ((MI_BooleanField*)&self->Recurse)->value = x;
+    ((MI_BooleanField*)&self->Recurse)->exists = 1;
+    return MI_RESULT_OK;
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Recurse(
     _Inout_ MSFT_nxFileResource* self)
 {
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        6);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Force(
-    _Inout_ MSFT_nxFileResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        7,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_SetPtr_Force(
-    _Inout_ MSFT_nxFileResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        7,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Force(
-    _Inout_ MSFT_nxFileResource* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        7);
+    memset((void*)&self->Recurse, 0, sizeof(self->Recurse));
+    return MI_RESULT_OK;
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_Links(
@@ -516,22 +483,6 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_Owner(
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         11);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_CreatedDate(
-    _Inout_ MSFT_nxFileResource* self,
-    _In_ MI_Datetime x)
-{
-    ((MI_DatetimeField*)&self->CreatedDate)->value = x;
-    ((MI_DatetimeField*)&self->CreatedDate)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Clear_CreatedDate(
-    _Inout_ MSFT_nxFileResource* self)
-{
-    memset((void*)&self->CreatedDate, 0, sizeof(self->CreatedDate));
-    return MI_RESULT_OK;
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFileResource_Set_ModifiedDate(
