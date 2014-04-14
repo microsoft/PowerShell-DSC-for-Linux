@@ -1,30 +1,22 @@
 #pragma include ("OMI_BaseResource.mof")
 #pragma include ("MSFT_Credential.mof")
 
-[ClassVersion("1.0.0"), Description("The configuration provider for files and directories.")]
-class Linux_File:OMI_BaseResource
+[ClassVersion("1.0.0"),FriendlyName("nxScript")]
+class MSFT_nxScriptResource : OMI_BaseResource 
 {
-       [Key] string DestinationPath;
-       [Write] string SourcePath;
-       [Write, ValueMap{"present", "absent"}] string Ensure;
-       [Write, ValueMap{"file", "directory", "link"}] string Type;
-       [Write] string Contents;
-       [Write, ValueMap{"md5", "md5lite", "mtime", "ctime", "none"}] string Checksum;
-       [Write, ValueMap{"true", "false"}] string Recurse;
-       [Write, ValueMap{"true", "false", "yes", "no"}] string Force;
-       [Write, ValueMap{"follow", "manage"}] string Links;
-       [Write] string Group;
-       [Write] string Mode;
-       [Write] string Owner;
-       [Read] datetime CreatedDate;
-       [Read] datetime ModifiedDate;
-
-		[static,
+	[Key] string GetScript;
+	[Key] string SetScript;
+	[Key] string TestScript;
+	[write] string User;
+	[write] string Group;
+	[Read] string Result;
+	
+	[static,
          Description (
              "Get resource states based on input configuration file." )]
     uint32 GetTargetResource(
             [in,
-             EmbeddedInstance ("Linux_File"),
+             EmbeddedInstance ("MSFT_nxScriptResource"),
              Description (
                 "Configuration document that is to be applied." )]
         string InputResource,
@@ -34,18 +26,18 @@ class Linux_File:OMI_BaseResource
                 "Flags passed to the providers. Reserved for future use." )]
         uint32 Flags,
             [out,
-             EmbeddedInstance ("Linux_File"),
+             EmbeddedInstance ("MSFT_nxScriptResource"),
              Description (
                 "The current state of the specified configuration resources." )]
         string OutputResource
         );
 
-        [static,
+    [static,
          Description (
              "Test resource states based on input configuration file." )]
     uint32 TestTargetResource(
             [in,
-             EmbeddedInstance("Linux_File"),
+             EmbeddedInstance("MSFT_nxScriptResource"),
              Description (
                 "Configuration document that to be applied." )]
         string InputResource,    
@@ -63,12 +55,12 @@ class Linux_File:OMI_BaseResource
         uint64 ProviderContext
         );
 
-        [static,
+    [static,
          Description (
             "Set resource states based on input configuration file." )]
     uint32 SetTargetResource(
             [in,
-             EmbeddedInstance ("Linux_File"),
+             EmbeddedInstance ("MSFT_nxScriptResource"),
              Description (
                 "Configuration document that to be applied." )]
         string InputResource,    
