@@ -33,8 +33,6 @@ typedef struct _MSFT_nxServiceResource /* extends OMI_BaseResource */
     MI_ConstStringField Controller;
     MI_ConstBooleanField Enabled;
     MI_ConstStringField State;
-    MI_ConstBooleanField IsEnabled;
-    MI_ConstStringField Status;
     MI_ConstStringField Path;
 }
 MSFT_nxServiceResource;
@@ -239,61 +237,13 @@ MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Clear_State(
         3);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Set_IsEnabled(
-    _Inout_ MSFT_nxServiceResource* self,
-    _In_ MI_Boolean x)
-{
-    ((MI_BooleanField*)&self->IsEnabled)->value = x;
-    ((MI_BooleanField*)&self->IsEnabled)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Clear_IsEnabled(
-    _Inout_ MSFT_nxServiceResource* self)
-{
-    memset((void*)&self->IsEnabled, 0, sizeof(self->IsEnabled));
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Set_Status(
-    _Inout_ MSFT_nxServiceResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        5,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_SetPtr_Status(
-    _Inout_ MSFT_nxServiceResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        5,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Clear_Status(
-    _Inout_ MSFT_nxServiceResource* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        5);
-}
-
 MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Set_Path(
     _Inout_ MSFT_nxServiceResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        6,
+        4,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -305,7 +255,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_SetPtr_Path(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        6,
+        4,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -316,7 +266,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Clear_Path(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        6);
+        4);
 }
 
 /*

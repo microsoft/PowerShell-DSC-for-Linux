@@ -1028,11 +1028,21 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_Controller_Write_qual =
     &MSFT_nxServiceResource_Controller_Write_qual_value
 };
 
+static MI_CONST MI_Boolean MSFT_nxServiceResource_Controller_Required_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxServiceResource_Controller_Required_qual =
+{
+    MI_T("Required"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxServiceResource_Controller_Required_qual_value
+};
+
 static MI_CONST MI_Char* MSFT_nxServiceResource_Controller_ValueMap_qual_data_value[] =
 {
     MI_T("init"),
     MI_T("upstart"),
-    MI_T("serviced"),
+    MI_T("systemd"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxServiceResource_Controller_ValueMap_qual_value =
@@ -1073,6 +1083,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_Controller_Values_qual =
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_Controller_quals[] =
 {
     &MSFT_nxServiceResource_Controller_Write_qual,
+    &MSFT_nxServiceResource_Controller_Required_qual,
     &MSFT_nxServiceResource_Controller_ValueMap_qual,
     &MSFT_nxServiceResource_Controller_Values_qual,
 };
@@ -1080,7 +1091,7 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_Controller_quals[]
 /* property MSFT_nxServiceResource.Controller */
 static MI_CONST MI_PropertyDecl MSFT_nxServiceResource_Controller_prop =
 {
-    MI_FLAG_PROPERTY, /* flags */
+    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED, /* flags */
     0x0063720A, /* code */
     MI_T("Controller"), /* name */
     MSFT_nxServiceResource_Controller_quals, /* qualifiers */
@@ -1200,70 +1211,6 @@ static MI_CONST MI_PropertyDecl MSFT_nxServiceResource_State_prop =
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxServiceResource_IsEnabled_Read_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_nxServiceResource_IsEnabled_Read_qual =
-{
-    MI_T("Read"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxServiceResource_IsEnabled_Read_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_IsEnabled_quals[] =
-{
-    &MSFT_nxServiceResource_IsEnabled_Read_qual,
-};
-
-/* property MSFT_nxServiceResource.IsEnabled */
-static MI_CONST MI_PropertyDecl MSFT_nxServiceResource_IsEnabled_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
-    0x00696409, /* code */
-    MI_T("IsEnabled"), /* name */
-    MSFT_nxServiceResource_IsEnabled_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxServiceResource_IsEnabled_quals), /* numQualifiers */
-    MI_BOOLEAN, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_nxServiceResource, IsEnabled), /* offset */
-    MI_T("MSFT_nxServiceResource"), /* origin */
-    MI_T("MSFT_nxServiceResource"), /* propagator */
-    NULL,
-};
-
-static MI_CONST MI_Boolean MSFT_nxServiceResource_Status_Read_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_nxServiceResource_Status_Read_qual =
-{
-    MI_T("Read"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxServiceResource_Status_Read_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_Status_quals[] =
-{
-    &MSFT_nxServiceResource_Status_Read_qual,
-};
-
-/* property MSFT_nxServiceResource.Status */
-static MI_CONST MI_PropertyDecl MSFT_nxServiceResource_Status_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
-    0x00737306, /* code */
-    MI_T("Status"), /* name */
-    MSFT_nxServiceResource_Status_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxServiceResource_Status_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_nxServiceResource, Status), /* offset */
-    MI_T("MSFT_nxServiceResource"), /* origin */
-    MI_T("MSFT_nxServiceResource"), /* propagator */
-    NULL,
-};
-
 static MI_CONST MI_Boolean MSFT_nxServiceResource_Path_Read_qual_value = 1;
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_Path_Read_qual =
@@ -1302,8 +1249,6 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxServiceResource_props[] =
     &MSFT_nxServiceResource_Controller_prop,
     &MSFT_nxServiceResource_Enabled_prop,
     &MSFT_nxServiceResource_State_prop,
-    &MSFT_nxServiceResource_IsEnabled_prop,
-    &MSFT_nxServiceResource_Status_prop,
     &MSFT_nxServiceResource_Path_prop,
 };
 
