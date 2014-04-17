@@ -28,7 +28,7 @@ namespace DSC
             type = ctx.Records.GetValue("initialType");
             initialState = ctx.Records.GetValue("initialState");
 
-            initializeCmd = GetInitializeCmd(path, type, initialState);
+            initializeCmd = ctx.Records.GetValue("initialCmd");
             finalizeCmd = GetFinalizeCmd(path);
 
             base.Setup(ctx);

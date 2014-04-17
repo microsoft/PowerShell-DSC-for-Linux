@@ -9,10 +9,6 @@
 namespace DSC
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Infra.Frmwrk;
 
     public class GroupHelper : ISetup, ICleanup
@@ -22,6 +18,7 @@ namespace DSC
         string getPidCommand;
         string killCommand;
         string startOMIcommand;
+        string exportDSCPathCommand;
 
         public void Setup(IContext ctx)
         {
@@ -31,16 +28,17 @@ namespace DSC
             string nxUsername = ctx.Records.GetValue("nxUsername");
             string nxpassword = ctx.Records.GetValue("nxpassword");
             int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
-
+            Console.WriteLine("Newing");
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
-
+            Console.WriteLine("Newed");
             getPidCommand = ctx.Records.GetValue("getPid");
             killCommand = ctx.Records.GetValue("kill");
+            exportDSCPathCommand = ctx.Records.GetValue("exportDSCPath");
             startOMIcommand = ctx.Records.GetValue("startOMI");
             
             // TO-DO: Install DSC Providers.
 
-            // TO-DO: Kill current omiserver process, start omiserver process of DSC.
+            // Kill current omiserver process, start omiserver process of DSC.
             string pid;
             sshHelper.Execute(getPidCommand, out pid);
 
@@ -50,7 +48,8 @@ namespace DSC
                 ctx.Alw(String.Format("Kill old omiserver process '{0}'", pid));
             }
 
-            sshHelper.Execute(startOMIcommand);
+            sshHelper.Execute(String.Format("{0};{1}", exportDSCPathCommand, startOMIcommand));
+            ctx.Alw(String.Format("Export DSC_PATH : '{0}'", exportDSCPathCommand));
             ctx.Alw(String.Format("Start DSC omiserver : '{0}'", startOMIcommand));
 
             ctx.Alw("GroupHelper Setup End");
@@ -60,9 +59,7 @@ namespace DSC
         {
             ctx.Alw("GroupHelper Cleanup Begin");
             
-            // TO-DO: Stop omiserver process of DSC.
-
-            // TO-DO: Uninstall DSC Providers.
+            // Stop omiserver process of DSC.
             string pid;
             sshHelper.Execute(getPidCommand, out pid);
 
@@ -75,6 +72,8 @@ namespace DSC
             sshHelper.Dispose();
 
             ctx.Alw("GroupHelper Cleanup End");
+
+            // TO-DO: Uninstall DSC Providers.
         }
     }
 }

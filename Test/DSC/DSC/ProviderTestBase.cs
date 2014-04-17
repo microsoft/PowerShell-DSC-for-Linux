@@ -8,8 +8,10 @@
 namespace DSC
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Infra.Frmwrk;
-
+    
     public class ProviderTestBase : ISetup, IRun, IVerify, ICleanup
     {
         protected MofHelper mofHelper;
@@ -22,6 +24,7 @@ namespace DSC
 
         protected string propString;
         protected string mofPath;
+        protected string configMofScriptPath;
 
         protected string[] psScripts;
         protected string psErrorMsg;
@@ -31,10 +34,13 @@ namespace DSC
         protected string successfulyMsg;
         protected string failedMsg;
 
+        protected Dictionary<string, string> propMap;
+
         public virtual void Setup(IContext ctx)
         {
             propString = ctx.Records.GetValue("propString");
-            mofPath = ctx.Records.GetValue("mofPath");
+            mofPath = ctx.Records.GetValue("scriptLocation");
+            configMofScriptPath = ctx.Records.GetValue("configMofScriptPath");
             psScripts = ctx.Records.GetValues("psScript");
             psErrorMsg = ctx.Records.GetValue("psErrorMsg");
             verificationCmd = ctx.Records.GetValue("verificationCmd");
@@ -62,9 +68,10 @@ namespace DSC
             }
 
             // Prepare a configuration MOF file.
-            mofHelper.PrepareMof(propString, mofPath);
-            ctx.Alw(String.Format("Prepare a configuration MOF '{0}' has settings '{1}'",
-                mofPath, propString));
+            propMap = ConvertStringToPropMap(propString);
+            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath);
+            ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
+                configMofScriptPath));
         }
 
         public virtual void Run(IContext ctx)
@@ -82,16 +89,44 @@ namespace DSC
         {
             ctx.Alw("Verify Begin.");
 
+            #region Check PowerShell Result
+
             if (String.IsNullOrWhiteSpace(psErrorMsg))
             {
-                psHelper.CheckOutput("ReturnValue", "ReturnValue = 0");
-                ctx.Alw("PowerShell return 0.");
+                // Verify if the PowerShell cmdlets were executed without error.
+                if (String.IsNullOrWhiteSpace(psHelper.ErrorMsg))
+                {
+                    ctx.Alw("PowerShell return 0.");
+                }
+                else
+                {
+                    throw new VarFail(psHelper.ErrorMsg);
+                }
+
+                // Check the result of GetConfiguration.
+                ctx.Alw("The result of Get-DscConfiguration:");
+                foreach (var key in propMap.Keys)
+                {
+                    try
+                    {
+                        psHelper.CheckOutput(key, propMap[key]);
+                        ctx.Alw(String.Format("\t{0} : {1}", key, propMap[key]));
+                    }
+                    catch (VarFail ex)
+                    {
+                        throw new VarFail(ex.Message);
+                    }
+                }
             }
             else
             {
                 psHelper.CheckErrorMessage(psErrorMsg);
-                ctx.Alw(String.Format("PowerShell return error '{0}'.", psErrorMsg));
+                ctx.Alw(String.Format("PowerShell return error message '{0}' as expected!", psErrorMsg));
             }
+
+            #endregion
+
+            #region Check Linux State
 
             // Verify Linux machine state.
             if (!string.IsNullOrWhiteSpace(verificationCmd))
@@ -110,6 +145,8 @@ namespace DSC
                 }
             }
 
+            #endregion
+            
             ctx.Alw("Verify End.");
         }
 
@@ -129,8 +166,8 @@ namespace DSC
             }
             
             // Delete MOF file.
-            ctx.Alw(String.Format("Delete MOF file : '{0}'", mofPath));
-            mofHelper.DeleteMof(mofPath);
+            ctx.Alw(String.Format("Delete MOF generator : '{0}'", configMofScriptPath));
+            mofHelper.DeleteMof(configMofScriptPath);
 
             // Dispose ps runspace.
             psHelper.Dispose();
@@ -140,5 +177,15 @@ namespace DSC
 
             ctx.Alw("Cleanup End.");
         }
+
+        private Dictionary<string, string> ConvertStringToPropMap(string propString)
+        {
+            string[] properties = propString.Split(';');
+
+            return (from property in properties
+                    where !String.IsNullOrWhiteSpace(property)
+                    select property.Split(':'))
+                    .ToDictionary(propertyMap => propertyMap[0], propertyMap => propertyMap[1]);
+        } 
     }
 }

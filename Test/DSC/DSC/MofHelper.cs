@@ -9,17 +9,18 @@
 namespace DSC
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Text;
     
     public class MofHelper
     {
-        #region Template
+        #region Generator
 
-        public static string TemplateFormat =
-            "instance of $ResourceType{$Properties\nResourceId = \"[$ResourceType]$ResourceName\";ModuleName = \"PSDesiredStateConfiguration\";ModuleVersion = \"1.0\";};instance of OMI_ConfigurationDocument{Version=\"1.0.0\";};";
+        public string GeneratorFormat =
+            "Configuration MyTestConfig{Node \"$agentName\"{$ResourceType $ResourceName{$Properties}}};MyTestConfig -outputpath:$mofPath";
 
-        public string MofTemplate
+        public string MofGenerator
         {
             get;
             set;
@@ -27,13 +28,20 @@ namespace DSC
 
         #endregion
 
-        public void PrepareMof(string propString, string path)
+        public void DeleteMof(string path) // Out of date.
         {
-            string content = ConvertStringToMofProperty(propString);
-
             File.Delete(path);
+        }
 
-            FileStream fs = File.OpenWrite(path);
+        public void PrepareMofGenerator(Dictionary<string, string> propString, string generatorPath, string agentName, string mofPath)
+        {
+            string content = ConvertStringToMofProperty(propString)
+                .Replace("$agentName", agentName)
+                .Replace("$mofPath", mofPath);
+
+            File.Delete(generatorPath);
+
+            FileStream fs = File.OpenWrite(generatorPath);
 
             Encoding encoder = new UTF8Encoding();
             byte[] bytes = encoder.GetBytes(content);
@@ -43,30 +51,21 @@ namespace DSC
             fs.Close();
         }
 
-        public void DeleteMof(string path)
-        {
-            File.Delete(path);
-        }
-
-        private string ConvertStringToMofProperty(string propString)
+        private string ConvertStringToMofProperty(Dictionary<string, string> propString)
         {
             StringBuilder text = new StringBuilder();
 
-            string[] properties = propString.Split(';');
-
-            foreach (string property in properties)
+            foreach (string property in propString.Keys)
             {
                 if (!String.IsNullOrWhiteSpace(property))
                 {
-                    string[] propertyMap = property.Split(':');
-
-                    text.Append(String.Format("{0} = \"{1}\";",
-                        propertyMap[0],
-                        propertyMap[1]));
+                    text.Append(String.Format("{0} = \"{1}\"\n",
+                        property,
+                        propString[property]));
                 }
             }
 
-            return MofTemplate.Replace("$Properties", text.ToString());
+            return this.MofGenerator.Replace("$Properties", text.ToString());
         }
     }
 }

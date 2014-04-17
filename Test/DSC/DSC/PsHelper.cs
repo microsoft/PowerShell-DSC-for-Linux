@@ -11,6 +11,7 @@ namespace DSC
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Linq;
     using System.Management.Automation;
     using System.Management.Automation.Runspaces;
     using System.Globalization;
@@ -118,18 +119,9 @@ namespace DSC
                     "Last PowerShell return null object!"));
             }
 
-            bool flag = false;
-            foreach (var obj in LastPowerShellReturnValues)
-            {
-                if (obj.ContainsKey(key))
-                {
-                    if (obj[key].Equals(value, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        flag = true;
-                        break;
-                    }
-                }
-            }
+            bool flag = LastPowerShellReturnValues.Where(
+                obj => obj.ContainsKey(key)).Any(
+                obj => obj[key].Equals(value, StringComparison.InvariantCultureIgnoreCase));
 
             if (!flag)
             {
@@ -137,6 +129,14 @@ namespace DSC
                     CultureInfo.InvariantCulture,
                     "Key-Value '{0}'-'{1}' does not exist in the result",
                     key, value));
+            }
+        }
+
+        public void CheckOutput(Dictionary<string, string> keyValuePairs)
+        {
+            foreach (var key in keyValuePairs.Keys)
+            {
+                CheckOutput(key, keyValuePairs[key]);
             }
         }
 

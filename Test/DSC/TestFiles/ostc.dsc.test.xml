@@ -16,35 +16,51 @@
     <rec key="dscHome">/home/scxuser/DSC</rec>
     <rec key="omiHome">%dscHome%/OMI</rec>
     <rec key="omiserverHome">%omiHome%/output/bin/omiserver</rec>
+    <rec key="dscLog">/tmp/dsc_out.log</rec>
     
     <!-- Script Info. -->
     <rec key="scriptLocation">C:\Temp</rec>
+    <rec key="configMofScriptPath">%scriptLocation%\config_%nxHostName%.ps1</rec>
+    <rec key="dscSender">
+      [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+      Set-ExecutionPolicy unrestricted;
+      [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+      $securePass = ConvertTo-SecureString -string "%nxPassword%" -AsPlainText -Force;
+      $cred= New-Object System.Management.Automation.PSCredential "%nxUsername%", $SecurePass;
+      $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+      $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+      Start-DscConfiguration -CimSession:$demo1 -Path:"%scriptLocation%" -Wait;
+      Get-DscConfiguration -CimSession $demo1;
+    </rec>
     <rec key="setScript">SendConfigurationApply.ps1</rec>
     <rec key="getScript">GetConfiguration.ps1</rec>  
     
     <!-- Ssh Commands.-->
     <rec key="getPid">ps -ef | grep omiserver | grep -v grep | awk '{print $2}' | tr -d '\n'</rec>
     <rec key="kill">kill -9 </rec>
-    <rec key="startOMI">%omiserverHome% &amp;&gt;/dev/null&amp;</rec>
+    <rec key="startOMI">%omiserverHome% &amp;&gt;%dscLog%&amp;</rec>
+    <rec key="exportDSCPath">export DSC_PATH=%dscHome%/Providers</rec>
   </snippet>
 
   <!-- All Test Cases. -->
   <section dsc="All tests" cls="DSC.GroupHelper">
     <snipref id="Variables"/>
 
-    <section sid="0" dsc="nxFile Provider">
-      <var set="0" lvl="1" vid="000001" dsc="[Test Case Title]" cls="DSC.nxFileTest">
+    <section sid="1" dsc="nxFile Provider">
+      <var set="1" lvl="1" vid="661642" 
+           dsc="[nxFile] Verify if specific destination file is created if the file doesn't exist before and enumerated Ensure property is Present" 
+           cls="DSC.nxFileTest">
         <snipref id="Variables" />
-        <!-- Linux Initil State. -->
+        <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">etc</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialType">file</rec>
         <rec key="initialState">absent</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;</rec>
-        <rec key="mofPath">%scriptLocation%\nxFile_00001.mof</rec>
-        <rec key="psScript">%scriptLocation%\%setScript% -ConfigurationMof %mofPath% -HostName %nxHostName%</rec>
+        <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
@@ -52,35 +68,141 @@
         <rec key="failedMsg">The destination file '%path%' is not created under %parentPath%.</rec>
       </var>
 
-      <var set="0" lvl="2" vid="000002" dsc="[Test Case Title]" cls="DSC.nxFileTest">
+      <var set="1" lvl="1" vid="661643"
+           dsc="[nxFile] Verify if specific destination file is removed if the file exists before and enumerated Ensure property is Absent"
+           cls="DSC.nxFileTest">
         <snipref id="Variables" />
-        <!-- Linux Initil State. -->
+        <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">etc</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialType">file</rec>
         <rec key="initialState">present</rec>
+        <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Absent;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The destination file '%name%' is deleted successfully.</rec>
+        <rec key="failedMsg">The destination file '%path%' is not deleted.</rec>
+      </var>
+
+      <var set="1" lvl="1" vid="661649"
+           dsc="[nxFile] Verify if specific destination folder is created if the folder doesn't exist before and enumerated Ensure property is Present"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">directory</rec>
+        <rec key="initialState">absent</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:Directory;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^d' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The destination folder '%name%' is created successfully.</rec>
+        <rec key="failedMsg">The destination folder '%path%' is not created.</rec>
+      </var>
+
+      <var set="1" lvl="1" vid="661650"
+           dsc="[nxFile] Verify if specific destination folder is removed if the folder exists before enumerated Ensure property is Absent"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">directory</rec>
+        <rec key="initialState">present</rec>
+        <rec key="initialCmd">rm -rf %path%;mkdir %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Absent;Type:Directory;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^d' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The destination folder '%name%' is removed successfully.</rec>
+        <rec key="failedMsg">The destination folder '%path%' is not removed.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661652"
+           dsc="[nxFile] Verify if specific path has multiple levels is created successfully"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">directory</rec>
+        <rec key="initialState">absent</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%/a/b/c;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %path%/a/b | grep '^-' | grep -i 'c$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The destination file '%path%/a/b/c' is created successfully.</rec>
+        <rec key="failedMsg">The destination folder '%path%/a/b/c' is not created.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661652"
+           dsc="[nxFile] Verify if specific non-empty directory is removed successfully when Ensure is Absent"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">directory</rec>
+        <rec key="initialState">present</rec>
+        <rec key="initialCmd">rm -rf %path%;mkdir %path%;mkdir %path%/a;mkdir %path%/a/b;mkdir %path%/a/b/c</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Absent;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The destination file '%path%' is removed successfully.</rec>
+        <rec key="failedMsg">The destination folder '%path%' is not removed.</rec>
+      </var>
+
+      <var set="1" lvl="3" vid="661660" 
+           dsc="[nxFile] Verify if error out if the specific Group account doesn't exist on DSC server" 
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">file</rec>
+        <rec key="initialState">present</rec>
+        <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Group:abcdc</rec>
-        <rec key="mofPath">%scriptLocation%\nxFile_00002.mof</rec>
-        <rec key="psScript">%scriptLocation%\%setScript% -ConfigurationMof %mofPath% -HostName %nxHostName%</rec>
+        <rec key="psScript">%dscSender%</rec>
         <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as invalid group.</rec>
-        <rec key="failedMsg">PowerShell succeeds unexpceted!</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
       </var>
     </section>
 
-    <section sid="1" dsc="nxUser Provider">
-      <var set="1" lvl="1" vid="000011" dsc="[Test Case Title]" cls="DSC.nxUserTest">
+    <section sid="2" dsc="nxUser Provider">
+      <var set="2" lvl="1" vid="661686" dsc="[nxUser] Verify a new user is created when provide a new userName and set Ensure to Present" cls="DSC.nxUserTest">
         <snipref id="Variables" />
-        <!-- Linux Initil State. -->
+        <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="initialState">absent</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;</rec>
-        <rec key="mofPath">%scriptLocation%\nxUser_00011.mof</rec>
-        <rec key="psScript">%scriptLocation%\%setScript% -ConfigurationMof %mofPath% -HostName %nxHostName%</rec>
+        <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>

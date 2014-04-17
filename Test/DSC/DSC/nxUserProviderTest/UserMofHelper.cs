@@ -12,8 +12,8 @@ namespace DSC
     {
         public UserMofHelper()
         {
-            MofTemplate = TemplateFormat.
-                    Replace("$ResourceType","MSFT_nxUserResource").
+            MofGenerator = base.GeneratorFormat.
+                    Replace("$ResourceType", "nxUser").
                     Replace("$ResourceName","User");
         }
     }

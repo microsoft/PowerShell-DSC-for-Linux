@@ -12,8 +12,8 @@ namespace DSC
     {
         public FileMofHelper()
         {
-            MofTemplate = TemplateFormat.
-                Replace("$ResourceType","MSFT_nxFileResource").
+            MofGenerator = base.GeneratorFormat.
+                Replace("$ResourceType","nxFile").
                 Replace("$ResourceName","File");
         }
     }
