@@ -105,7 +105,8 @@ namespace DSC
 
                 // Check the result of GetConfiguration.
                 ctx.Alw("The result of Get-DscConfiguration:");
-                foreach (var key in propMap.Keys)
+                var returnedProperties = mofHelper.ReturnedPropertiesOfGetDscConfiguration(propMap);
+                foreach (var key in returnedProperties.Keys)
                 {
                     try
                     {

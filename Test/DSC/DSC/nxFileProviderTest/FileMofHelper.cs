@@ -11,6 +11,7 @@ namespace DSC
     using System;
     using System.Collections.Generic;
     using System.Text;
+    using System.Linq;
     
     public class FileMofHelper : MofHelper
     {
@@ -63,6 +64,21 @@ namespace DSC
             }
 
             return content; ;
+        }
+
+        public override Dictionary<string, string> ReturnedPropertiesOfGetDscConfiguration(Dictionary<string, string> propKeyValuePairs)
+        {
+            string[] forbiddenProp = { "Contents", "Checksum", "Force", "Recurse", "Links", "DependsOn" };
+
+            foreach (var prop in forbiddenProp)
+            {
+                if (propKeyValuePairs.ContainsKey(prop))
+                {
+                    propKeyValuePairs.Remove(prop);
+                }
+            }
+                
+            return propKeyValuePairs;
         }
     }
 }

@@ -465,27 +465,6 @@
         <rec key="failedMsg">The link itself is not copied.</rec>
       </var>
 
-      <var set="1" lvl="2" vid="661669"
-           dsc="[nxFile] Verify if error out if the depended resource configuration does not run firstly"
-           cls="DSC.nxFileTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="parentPath">/tmp</rec>
-        <rec key="name">test</rec>
-        <rec key="path">%parentPath%/%name%</rec>
-        <rec key="initialCmd">rm -rf %path%;</rec>
-        <rec key="finalCmd">rm -rf %path%;</rec>
-        <!-- MOF Info. -->
-        <rec key="propString">DestinationPath:%path%;Ensure:Present;Owner:testuser;DependsOn:[nxUser]user#</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">Last PowerShell return null object!</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
-        <rec key="successfulMsg">PowerShell error as the depended node doesn't run.</rec>
-        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
-      </var>
-
       <var set="1" lvl="2" vid="661671"
            dsc="[nxFile] Verify if file is created properly if the depended resource configuration run firstly"
            cls="DSC.nxFileTest">
@@ -501,7 +480,7 @@
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Owner:%owner%;DependsOn:[nxUser]user</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">f=`ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'`;u=`ls -l %parentPath% | grep '^-' | grep -i '%name%$' | awk '{print $3}' | tr -d '\n'`;echo $f$u</rec>
+        <rec key="verificationCmd">f=`ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'`;u=`ls -l %parentPath% | grep '^-' | grep -i '%name%$' | awk '{print $3}' | tr -d '\n'`;echo $f$u | tr -d '\n'</rec>
         <rec key="expectedValue">1%owner%</rec>
         <rec key="successfulMsg">The file is created by depended new user.</rec>
         <rec key="failedMsg">The file is not created.</rec>
@@ -629,7 +608,7 @@
         <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:ctime</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="verificationCmd">cat %path%/%s_file% | tr -d '\n'</rec>
         <rec key="expectedValue">%s_content%</rec>
         <rec key="successfulMsg">The destination folder '%path%' is copied from '%s_path%' successfully.</rec>
         <rec key="failedMsg">Didn't update.</rec>
@@ -648,13 +627,13 @@
         <rec key="s_file">file</rec>
         <rec key="s_content">mtime is newer but ctime is ealier</rec>
         <!-- The source's mtime is later but ctime is earlier. -->
-        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%content%' &gt; %path%/%s_file%;sleep 1;echo '%s_content%' &gt; %s_path%/%s_file%; sleep 1;chmod a+x %path%</rec> 
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%content%' &gt; %path%/%s_file%;sleep 1;echo '%s_content%' &gt; %s_path%/%s_file%; sleep 1;chmod a+x %path%/%s_file%</rec> 
         <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:ctime</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="verificationCmd">cat %path%/%s_file% | tr -d '\n'</rec>
         <rec key="expectedValue">%content%</rec>
         <rec key="successfulMsg">The destination path didn't update as its ctime is newer.</rec>
         <rec key="failedMsg">The ctime of destination is newer but it was updated.</rec>
@@ -673,13 +652,13 @@
         <rec key="s_file">file</rec>
         <rec key="s_content">mtime is newer but ctime is ealier</rec>
         <!-- The source's mtime is later but ctime is earlier. -->
-        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%content%' &gt; %path%/%s_file%;sleep 1;echo '%s_content%'  &gt; %s_path%/%s_file%; sleep 1;chmod a+x %path%</rec> 
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%content%' &gt; %path%/%s_file%;sleep 1;echo '%s_content%'  &gt; %s_path%/%s_file%; sleep 1;chmod a+x %path%/%s_file%</rec> 
         <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:mtime</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="verificationCmd">cat %path%/%s_file%  | tr -d '\n'</rec>
         <rec key="expectedValue">%s_content%</rec>
         <rec key="successfulMsg">The destination is updated as its mtime is earlier.</rec>
         <rec key="failedMsg">The mtime of destination is earlier but it was not updated.</rec>
@@ -704,8 +683,8 @@
         <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:mtime</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
-        <rec key="expectedValue">%s_content%</rec>
+        <rec key="verificationCmd">cat %path%/%s_file%  | tr -d '\n'</rec>
+        <rec key="expectedValue">%content%</rec>
         <rec key="successfulMsg">The destination is not updated as its mtime is newer.</rec>
         <rec key="failedMsg">The mtime of destination is newer but it was updated.</rec>
       </var>
@@ -728,7 +707,7 @@
         <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:md5</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="verificationCmd">cat %path%/%s_file% | tr -d '\n'</rec>
         <rec key="expectedValue">%s_content%</rec>
         <rec key="successfulMsg">The destination is updated as its md5 value is different than source.</rec>
         <rec key="failedMsg">The md5 value of destination is different than source but it wasn't updated.</rec>
@@ -753,7 +732,7 @@
         <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:md5</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">org=`cat %destinationPathProperty%`;f=`ls -lc %path% | tr -d '\n'`;echo $f  &gt; %destinationPathProperty%;new=`cat %destinationPathProperty%`;if [ $org = $new ]; then echo '1'; else echo '0'; fi | tr -d '\n'</rec>
+        <rec key="verificationCmd">org=`cat %destinationPathProperty%`;f=`ls -lc %path% | tr -d '\n'`;echo $f  &gt; %destinationPathProperty%;new=`cat %destinationPathProperty%`;if [ &quot;$org&quot; = &quot;$new&quot; ]; then echo '1'; else echo '0'; fi | tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The destination is not updated as its md5 value is the same as source.</rec>
         <rec key="failedMsg">The md5 value of destination is the same as source but it was updated.</rec>

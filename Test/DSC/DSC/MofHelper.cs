@@ -74,5 +74,10 @@ namespace DSC
 
             return this.MofGenerator.Replace("$Properties", text.ToString());
         }
+
+        public virtual Dictionary<string, string> ReturnedPropertiesOfGetDscConfiguration(Dictionary<string, string> propKeyValuePairs)
+        {
+            return propKeyValuePairs;
+        }
     }
 }
