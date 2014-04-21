@@ -39,7 +39,7 @@ namespace DSC
         public virtual void Setup(IContext ctx)
         {
             propString = ctx.Records.GetValue("propString");
-            mofPath = ctx.Records.GetValue("scriptLocation");
+            mofPath = ctx.Records.GetValue("mofPath");
             configMofScriptPath = ctx.Records.GetValue("configMofScriptPath");
             psScripts = ctx.Records.GetValues("psScript");
             psErrorMsg = ctx.Records.GetValue("psErrorMsg");
@@ -168,6 +168,8 @@ namespace DSC
             // Delete MOF file.
             ctx.Alw(String.Format("Delete MOF generator : '{0}'", configMofScriptPath));
             mofHelper.DeleteMof(configMofScriptPath);
+            ctx.Alw(String.Format("Delete MOF generator : '{0}'", mofPath));
+            mofHelper.DeleteMof(mofPath);
 
             // Dispose ps runspace.
             psHelper.Dispose();

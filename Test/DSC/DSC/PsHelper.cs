@@ -112,7 +112,7 @@ namespace DSC
 
         public void CheckOutput(string key, string value)
         {
-            if (LastPowerShellReturnValues.Count <= 0)
+            if (LastPowerShellReturnValues == null || LastPowerShellReturnValues.Count <= 0)
             {
                 throw new VarFail(string.Format(
                     CultureInfo.InvariantCulture,
@@ -155,16 +155,7 @@ namespace DSC
         {
             string[] errors = expectedMsg.Split(';');
 
-            bool flag = false;
-
-            foreach (string error in errors)
-            {
-                if (ErrorMsg.Contains(error))
-                {
-                    flag = true;
-                    break;
-                }
-            }
+            bool flag = errors.Any(error => ErrorMsg.Contains(error));
 
             if (!flag)
             {

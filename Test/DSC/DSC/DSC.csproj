@@ -84,6 +84,8 @@
   <PropertyGroup>
     <PostBuildEvent>cd $(SolutionDir)..\
 xcopy /E /Y /I ".\Dependency\MCF\*" "$(TargetDir)MCF"
+xcopy /E /Y /I ".\Dependency\SshcomLib\x64\*" "$(TargetDir)x64"
+xcopy /E /Y /I ".\Dependency\SshcomLib\Interop.sshcomLib.dll" "$(TargetDir)"
 xcopy /E /Y /I ".\DSC\TestFiles\*" "$(TargetDir)TestFiles"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

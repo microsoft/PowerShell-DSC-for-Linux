@@ -15,8 +15,6 @@ namespace DSC
     public class nxFileTest : ProviderTestBase
     {
         private string path;
-        private string type;
-        private string initialState;
 
         public override void Setup(IContext ctx)
         {
@@ -25,11 +23,9 @@ namespace DSC
             mofHelper = new FileMofHelper();
 
             path = ctx.Records.GetValue("path");
-            type = ctx.Records.GetValue("initialType");
-            initialState = ctx.Records.GetValue("initialState");
 
             initializeCmd = ctx.Records.GetValue("initialCmd");
-            finalizeCmd = GetFinalizeCmd(path);
+            finalizeCmd = ctx.Records.GetValue("finalCmd");
 
             base.Setup(ctx);
 

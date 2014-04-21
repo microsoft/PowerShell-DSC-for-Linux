@@ -9,8 +9,9 @@
 namespace DSC
 {
     using System;
+    using System.IO;
     using Infra.Frmwrk;
-
+    
     public class GroupHelper : ISetup, ICleanup
     {
         private SshHelper sshHelper;
@@ -24,13 +25,19 @@ namespace DSC
         {
             ctx.Alw("GroupHelper Setup Begin");
 
+            using (PsHelper psHelper = new PsHelper())
+            {
+                // regsvr32 sshcom.dll.
+                psHelper.Run(new string[] { "regsvr32 /s " + GetSshcomPath() });
+            }
+            
             string nxHostName = ctx.Records.GetValue("nxHostName");
             string nxUsername = ctx.Records.GetValue("nxUsername");
             string nxpassword = ctx.Records.GetValue("nxpassword");
             int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
-            Console.WriteLine("Newing");
+            
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
-            Console.WriteLine("Newed");
+            
             getPidCommand = ctx.Records.GetValue("getPid");
             killCommand = ctx.Records.GetValue("kill");
             exportDSCPathCommand = ctx.Records.GetValue("exportDSCPath");
@@ -74,6 +81,24 @@ namespace DSC
             ctx.Alw("GroupHelper Cleanup End");
 
             // TO-DO: Uninstall DSC Providers.
+        }
+
+        private string GetSshcomPath()
+        {
+            string sshcomPath = "";
+            
+            string mcfLocation = Environment.CommandLine
+                .Split(' ')[0]
+                .Replace("\"", ""); // C:\\DSC_TFS\\DSC\\Test\\DSC\\DSC\\bin\\Debug\\MCF\\MCF3.3-CLR4\\MCF.exe
+
+            string debugPath = Path.GetDirectoryName(
+                Path.GetDirectoryName(
+                Path.GetDirectoryName(mcfLocation))); // C:\\DSC_TFS\\DSC\\Test\\DSC\\DSC\\bin\\Debug
+
+            sshcomPath = Path.Combine(debugPath, "x64", "sshcom.dll");
+
+            // C:\\DSC_TFS\\DSC\\Test\\DSC\\DSC\\bin\\Debug\\x64\\sshcom.dll
+            return sshcomPath;
         }
     }
 }

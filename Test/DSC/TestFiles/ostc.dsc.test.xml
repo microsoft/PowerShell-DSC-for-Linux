@@ -20,6 +20,7 @@
     
     <!-- Script Info. -->
     <rec key="scriptLocation">C:\Temp</rec>
+    <rec key="mofPath">%scriptLocation%\%nxHostName%_MOF</rec>
     <rec key="configMofScriptPath">%scriptLocation%\config_%nxHostName%.ps1</rec>
     <rec key="dscSender">
       [void] (%configMofScriptPath%);    ########### Generate Mof ###########
@@ -29,7 +30,7 @@
       $cred= New-Object System.Management.Automation.PSCredential "%nxUsername%", $SecurePass;
       $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
       $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
-      Start-DscConfiguration -CimSession:$demo1 -Path:"%scriptLocation%" -Wait;
+      Start-DscConfiguration -CimSession:$demo1 -Path:"%mofPath%" -Wait;
       Get-DscConfiguration -CimSession $demo1;
     </rec>
     <rec key="setScript">SendConfigurationApply.ps1</rec>
@@ -55,9 +56,8 @@
         <rec key="parentPath">/tmp</rec>
         <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
-        <rec key="initialType">file</rec>
-        <rec key="initialState">absent</rec>
         <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;</rec>
         <rec key="psScript">%dscSender%</rec>
@@ -76,9 +76,8 @@
         <rec key="parentPath">/tmp</rec>
         <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
-        <rec key="initialType">file</rec>
-        <rec key="initialState">present</rec>
         <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Absent;</rec>
         <rec key="psScript">%dscSender%</rec>
@@ -97,9 +96,8 @@
         <rec key="parentPath">/tmp</rec>
         <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
-        <rec key="initialType">directory</rec>
-        <rec key="initialState">absent</rec>
         <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:Directory;</rec>
         <rec key="psScript">%dscSender%</rec>
@@ -118,9 +116,8 @@
         <rec key="parentPath">/tmp</rec>
         <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
-        <rec key="initialType">directory</rec>
-        <rec key="initialState">present</rec>
         <rec key="initialCmd">rm -rf %path%;mkdir %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Absent;Type:Directory;</rec>
         <rec key="psScript">%dscSender%</rec>
@@ -139,9 +136,8 @@
         <rec key="parentPath">/tmp</rec>
         <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
-        <rec key="initialType">directory</rec>
-        <rec key="initialState">absent</rec>
         <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%/a/b/c;Ensure:Present;</rec>
         <rec key="psScript">%dscSender%</rec>
@@ -152,7 +148,7 @@
         <rec key="failedMsg">The destination folder '%path%/a/b/c' is not created.</rec>
       </var>
 
-      <var set="1" lvl="2" vid="661652"
+      <var set="1" lvl="2" vid="661653"
            dsc="[nxFile] Verify if specific non-empty directory is removed successfully when Ensure is Absent"
            cls="DSC.nxFileTest">
         <snipref id="Variables" />
@@ -160,9 +156,8 @@
         <rec key="parentPath">/tmp</rec>
         <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
-        <rec key="initialType">directory</rec>
-        <rec key="initialState">present</rec>
         <rec key="initialCmd">rm -rf %path%;mkdir %path%;mkdir %path%/a;mkdir %path%/a/b;mkdir %path%/a/b/c</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Absent;</rec>
         <rec key="psScript">%dscSender%</rec>
@@ -171,6 +166,125 @@
         <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">The destination file '%path%' is removed successfully.</rec>
         <rec key="failedMsg">The destination folder '%path%' is not removed.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661654"
+           dsc="[nxFile] Verify if specific contents are filled into empty file successfully"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_jeffrey</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Contents:This is a test file!</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %path%| tr -d '\n'</rec>
+        <rec key="expectedValue">This is a test file!</rec>
+        <rec key="successfulMsg">The specific contents 'This is a test file!' is in file %path%. Successfully.</rec>
+        <rec key="failedMsg">The specific contents 'This is a test file!' isn't in file %path%. Failed.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661655"
+           dsc="[nxFile] Verify if specific file updates the contents successfully"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_jeffrey</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%;touch %path%;echo "Hello World" >> %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Contents:This is a test file! -- updated</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %path% | grep updated | tr -d '\n'</rec>
+        <rec key="expectedValue">This is a test file! -- updated</rec>
+        <rec key="successfulMsg">The specific contents 'This is a test file!-- updated' Successfully updated in file %path%.</rec>
+        <rec key="failedMsg">The specific contents 'This is a test file!-- updated' failed updated in file %path%. Failed.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661656"
+           dsc="[nxFile] Verify if mode is set properly when the value of the specific mode is a 3 charater integer"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_jeffrey</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Mode:777</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">stat --format '%a' %path% | tr -d '\n'</rec>
+        <rec key="expectedValue">777</rec>
+        <rec key="successfulMsg">The specific mode of file %path% successfully set to 777.</rec>
+        <rec key="failedMsg">Set the specific mode of file %path% to 777 failed.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661657"
+           dsc="[nxFile] Verify if mode is set properly when the value of the specific mode is a 3 charater integer"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_jeffrey</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path% ; touch %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Mode:rwxrwxrwx</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">stat --format '%A' %path% | tr -d '\n'</rec>
+        <rec key="expectedValue">-rwxrwxrwx</rec>
+        <rec key="successfulMsg">The specific mode of file %path% successfully set to 777.</rec>
+        <rec key="failedMsg">Set the specific mode of file %path% to 777 failed.</rec>
+      </var>
+
+      <var set="1" lvl="3" vid="661658"
+           dsc="[nxFile] Verify if error out when the value of the specific mode is invalid"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_jeffrey</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Mode:abcabacas</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid Mode.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661659"
+           dsc="[nxFile] Verify if Group property of file is set as correct as specified"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_jeffrey</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Group:scxuser</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cd %parentPath%;ls -al | grep %name% | awk '{print $4}'| tr -d '\n'</rec>
+        <rec key="expectedValue">scxuser</rec>
+        <rec key="successfulMsg">The Group property of file %path% successfully set to scxuser.</rec>
+        <rec key="failedMsg">The Group property of file %path% failed set to scxuser.</rec>
       </var>
 
       <var set="1" lvl="3" vid="661660" 
@@ -184,6 +298,7 @@
         <rec key="initialType">file</rec>
         <rec key="initialState">present</rec>
         <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Group:abcdc</rec>
         <rec key="psScript">%dscSender%</rec>
@@ -192,7 +307,459 @@
         <rec key="successfulMsg">PowerShell error as invalid group.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
       </var>
-    </section>
+
+      <var set="1" lvl="2" vid="661661"
+           dsc="[nxFile] Verify if Owner property of file is set as correct as specified"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_jeffrey</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Owner:scxuser</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cd %parentPath%;ls -al | grep %name% | awk '{print $3}'| tr -d '\n'</rec>
+        <rec key="expectedValue">scxuser</rec>
+        <rec key="successfulMsg">The Owner property of file %path% successfully set to scxuser.</rec>
+        <rec key="failedMsg">The Owner property of file %path% failed set to scxuser.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661662"
+           dsc="[nxFile] Verify if error out if the specific Owner account doesn't exist on DSC server"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_jeffrey</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Owner:abas</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid Owner.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661663"
+           dsc="[nxFile] Verify if destination path is created as well as source path, included all subdirectories if specific Recurse is true"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_folder">subfolder</rec>
+        <rec key="s_file">file</rec>
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;mkdir %s_path%/%s_folder%;touch %s_path%/%s_file%;touch %s_path%/%s_folder%/%s_file%;</rec>
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">null=`diff -r %s_path% %path%`;echo $?  | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The destination folder '%path%' is copied from '%s_path%' successfully.</rec>
+        <rec key="failedMsg">Copied failed.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661664"
+           dsc="[nxFile] Verify if destination path is created as well as source path, not included any subdirectories if specific Recurse is false"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_folder">subfolder</rec>
+        <rec key="s_file">file</rec>
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;mkdir %s_path%/%s_folder%;touch %s_path%/%s_file%;touch %s_path%/%s_folder%/%s_file%;</rec>
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:false;Type:Directory</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">null=`diff -r %s_path% %path%`;r=`echo $?`;null=`diff %s_path% %path%`;nr=`echo $?`;echo $r$nr  | tr -d '\n'</rec>
+        <rec key="expectedValue">10</rec>
+        <rec key="successfulMsg">The destination folder '%path%' is copied from '%s_path%' successfully.</rec>
+        <rec key="failedMsg">Copied failed.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661665"
+           dsc="[nxFile] Verify if the taget of the symbolic link is copied if specific Links property is Follow"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_link">link</rec>
+        <rec key="target">target</rec>
+        <rec key="t_path">%parentPath%/%target%</rec>
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;touch %t_path%;mkdir %s_path%;cd %s_path%;ln -s %t_path% %s_link%;</rec>
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%;rm -rf %t_path%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Type:Directory;Links:Follow</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">t=`ls %path% | grep -i '%target%$' | wc -l | tr -d '\n'`;s=`ls %path% | grep -i '%s_link%$' | wc -l | tr -d '\n'`;echo $t$s | tr -d '\n'</rec>
+        <rec key="expectedValue">10</rec>
+        <rec key="successfulMsg">The taget of the symbolic link is copied .</rec>
+        <rec key="failedMsg">The taget of the symbolic link is not copied.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661667"
+           dsc="[nxFile] Verify if the link itself is copied if specific Links property is Manage"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_link">link</rec>
+        <rec key="target">target</rec>
+        <rec key="t_path">%parentPath%/%target%</rec>
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;touch %t_path%;mkdir %s_path%;cd %s_path%;ln -s %t_path% %s_link%;</rec>
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%;rm -rf %t_path%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Type:Directory;Links:Manage</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">t=`ls %path% | grep -i '%target%$' | wc -l | tr -d '\n'`;s=`ls %path% | grep -i '%s_link%$' | wc -l | tr -d '\n'`;echo $t$s | tr -d '\n'</rec>
+        <rec key="expectedValue">01</rec>
+        <rec key="successfulMsg">The link itself is copied.</rec>
+        <rec key="failedMsg">The link itself is not copied.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661668"
+           dsc="[nxFile] Verify if the symbolic links are ignored if the specific Links property is ignore"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_link">link</rec>
+        <rec key="target">target</rec>
+        <rec key="t_path">%parentPath%/%target%</rec>
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;touch %t_path%;mkdir %s_path%;cd %s_path%;ln -s %t_path% %s_link%;</rec>
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%;rm -rf %t_path%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Type:Directory;Links:Ignore</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">t=`ls %path% | grep -i '%target%$' | wc -l | tr -d '\n'`;s=`ls %path% | grep -i '%s_link%$' | wc -l | tr -d '\n'`;echo $t$s | tr -d '\n'</rec>
+        <rec key="expectedValue">00</rec>
+        <rec key="successfulMsg">The link itself is copied.</rec>
+        <rec key="failedMsg">The link itself is not copied.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661669"
+           dsc="[nxFile] Verify if error out if the depended resource configuration does not run firstly"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%;</rec>
+        <rec key="finalCmd">rm -rf %path%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Owner:testuser;DependsOn:[nxUser]user#</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">Last PowerShell return null object!</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">PowerShell error as the depended node doesn't run.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661671"
+           dsc="[nxFile] Verify if file is created properly if the depended resource configuration run firstly"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="owner">temp_test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%;</rec>
+        <rec key="finalCmd">rm -rf %path%;userdel -f -r %owner%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Owner:%owner%;DependsOn:[nxUser]user</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">f=`ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'`;u=`ls -l %parentPath% | grep '^-' | grep -i '%name%$' | awk '{print $3}' | tr -d '\n'`;echo $f$u</rec>
+        <rec key="expectedValue">1%owner%</rec>
+        <rec key="successfulMsg">The file is created by depended new user.</rec>
+        <rec key="failedMsg">The file is not created.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661672"
+           dsc="[nxFile] Verify if the specific directory which has the same name with existing file is created if configured Force property is true"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">file</rec>
+        <rec key="initialState">absent</rec>
+        <rec key="initialCmd">rm -rf %path%; touch %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:Directory;Force:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^d' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The destination folder '%name%' is created under %parentPath% successfully.</rec>
+        <rec key="failedMsg">The destination folder '%path%' is not created under %parentPath%.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661674"
+           dsc="[nxFile] Verify if the destination path is copied from source path successfully if file of the same name exists and the configured Force property is true"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_folder">subfolder</rec>
+        <rec key="s_file">file</rec>
+        <rec key="initialCmd">rm -rf %path%;touch %path%;rm -rf %s_path%;mkdir %s_path%;mkdir %s_path%/%s_folder%;touch %s_path%/%s_file%;touch %s_path%/%s_folder%/%s_file%;</rec>
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Force:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">null=`diff -r %s_path% %path%`;echo $?  | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The destination folder '%path%' is copied from '%s_path%' successfully.</rec>
+        <rec key="failedMsg">Copied failed.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661675"
+            dsc="[nxFile] Verify if the specific file which has the same name with existing folder is created if configured Force property is true"
+            cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_661675</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%;mkdir %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Force:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The destination file "path" which has the same name with a existing foler is created successfully, if the Force property is set to "true" .</rec>
+        <rec key="failedMsg">The destination file "path" which has the same name with a existing foler is not created, though the Force property has been set to "true".</rec>
+      </var>
+      
+      <var set="1" lvl="3" vid="661676"
+            dsc="[nxFile] Verify if error out without Force property when the specific file which has the same name with existing folder"
+            cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_661676</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%;mkdir %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <!-- Verify Linux State. -->
+        <!--rec key="successfulMsg">PowerShell error as the same name folder existing.</rec-->
+        <!--rec key="failedMsg">PowerShell should error out but it succeeds!</rec-->
+      </var>
+      
+      <var set="1" lvl="3" vid="661677"
+            dsc="[nxFile] Verify if error out when the specific directory which has the same name with existing file is created and configured Force property is false"
+            cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test_661677</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:Directory;Force:false</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <!-- Verify Linux State. -->
+        <!--rec key="successfulMsg">PowerShell error as the same name file existing.</rec-->
+        <!--rec key="failedMsg">PowerShell should error out but it succeeds!</rec-->
+      </var>
+
+      <var set="1" lvl="2" vid="661678"
+           dsc="[nxFile] Verify if destination file is updated if the configured Checksum is ctime and the source is newer than destination file"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="content">mtime is newer but ctime is ealier</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_file">file</rec>
+        <rec key="s_content">mtime is ealier but ctime is newer</rec>
+        <!-- The source's mtime is earlier but ctime is later. -->
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%s_content%' &gt; %s_path%/%s_file%; sleep 1;echo '%content%' &gt; %path%/%s_file%;sleep 1;chmod a+x %s_path%/%s_file%</rec> 
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:ctime</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="expectedValue">%s_content%</rec>
+        <rec key="successfulMsg">The destination folder '%path%' is copied from '%s_path%' successfully.</rec>
+        <rec key="failedMsg">Didn't update.</rec>
+      </var>
+
+      <var set="1" lvl="3" vid="661679"
+           dsc="[nxFile] Verify if destination file is not changed if the configured Checksum is ctime and the source is older than destination file"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="content">mtime is ealier but ctime is newer</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_file">file</rec>
+        <rec key="s_content">mtime is newer but ctime is ealier</rec>
+        <!-- The source's mtime is later but ctime is earlier. -->
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%content%' &gt; %path%/%s_file%;sleep 1;echo '%s_content%' &gt; %s_path%/%s_file%; sleep 1;chmod a+x %path%</rec> 
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:ctime</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="expectedValue">%content%</rec>
+        <rec key="successfulMsg">The destination path didn't update as its ctime is newer.</rec>
+        <rec key="failedMsg">The ctime of destination is newer but it was updated.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661680"
+           dsc="[nxFile] Verify if destination file is not changed if the configured Checksum is ctime and the source is older than destination file"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="content">mtime is ealier but ctime is newer</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_file">file</rec>
+        <rec key="s_content">mtime is newer but ctime is ealier</rec>
+        <!-- The source's mtime is later but ctime is earlier. -->
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%content%' &gt; %path%/%s_file%;sleep 1;echo '%s_content%'  &gt; %s_path%/%s_file%; sleep 1;chmod a+x %path%</rec> 
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:mtime</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="expectedValue">%s_content%</rec>
+        <rec key="successfulMsg">The destination is updated as its mtime is earlier.</rec>
+        <rec key="failedMsg">The mtime of destination is earlier but it was not updated.</rec>
+      </var>
+
+      <var set="1" lvl="3" vid="661681"
+           dsc="[nxFile] Verify if destination file is updated if the configured Checksum is ctime and the source is newer than destination file"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="content">mtime is newer but ctime is ealier</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_file">file</rec>
+        <rec key="s_content">mtime is ealier but ctime is newer</rec>
+        <!-- The source's mtime is earlier but ctime is later. -->
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%s_content%'  &gt; %s_path%/%s_file%; sleep 1;echo '%content%'  &gt; %path%/%s_file%;sleep 1;chmod a+x %s_path%/%s_file%</rec> 
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:mtime</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="expectedValue">%s_content%</rec>
+        <rec key="successfulMsg">The destination is not updated as its mtime is newer.</rec>
+        <rec key="failedMsg">The mtime of destination is newer but it was updated.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="661682"
+           dsc="[nxFile] Verify if destination file is updated if the configured Checksum is md5 and the source is other than destination file"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_file">file</rec>
+        <rec key="s_content">md5 is changed.</rec>
+        <!-- The source's md5 value is changed. -->
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%s_content%'  &gt; %s_path%/%s_file%;</rec> 
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:md5</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %path% | tr -d '\n'</rec>
+        <rec key="expectedValue">%s_content%</rec>
+        <rec key="successfulMsg">The destination is updated as its md5 value is different than source.</rec>
+        <rec key="failedMsg">The md5 value of destination is different than source but it wasn't updated.</rec>
+      </var>
+
+      <var set="1" lvl="3" vid="661683"
+           dsc="[nxFile] Verify if destination file is updated if the configured Checksum is md5 and the source is other than destination file"
+           cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="s_path">/s_tmp</rec>
+        <rec key="s_file">file</rec>
+        <rec key="s_content">md5 is changed.</rec>
+        <rec key="destinationPathProperty">/tmp/dp.prop</rec>
+        <!-- The md5 value is the same, but the ctime is different . -->
+        <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;sleep 1;chmod guoa+rwx %path%;f=`ls -lc %path% | tr -d '\n'`;echo $f  &gt; %destinationPathProperty%</rec> 
+        <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:md5</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">org=`cat %destinationPathProperty%`;f=`ls -lc %path% | tr -d '\n'`;echo $f  &gt; %destinationPathProperty%;new=`cat %destinationPathProperty%`;if [ $org = $new ]; then echo '1'; else echo '0'; fi | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The destination is not updated as its md5 value is the same as source.</rec>
+        <rec key="failedMsg">The md5 value of destination is the same as source but it was updated.</rec>
+      </var>
+
+  </section>
 
     <section sid="2" dsc="nxUser Provider">
       <var set="2" lvl="1" vid="661686" dsc="[nxUser] Verify a new user is created when provide a new userName and set Ensure to Present" cls="DSC.nxUserTest">

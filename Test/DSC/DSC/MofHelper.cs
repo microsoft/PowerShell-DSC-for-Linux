@@ -18,7 +18,7 @@ namespace DSC
         #region Generator
 
         public string GeneratorFormat =
-            "Configuration MyTestConfig{Node \"$agentName\"{$ResourceType $ResourceName{$Properties}}};MyTestConfig -outputpath:$mofPath";
+            "Configuration MyTestConfig{Node \"$agentName\"{\n$ResourceType $ResourceName{$Properties}\n#DependdeResourceType #DependedResourceName{#DependedProperties}\n}};MyTestConfig -outputpath:$mofPath";
 
         public string MofGenerator
         {
@@ -30,12 +30,19 @@ namespace DSC
 
         public void DeleteMof(string path) // Out of date.
         {
-            File.Delete(path);
+            try
+            {
+                File.Delete(path);
+            }
+            catch
+            {
+                Directory.Delete(path, true);
+            }
         }
 
         public void PrepareMofGenerator(Dictionary<string, string> propString, string generatorPath, string agentName, string mofPath)
         {
-            string content = ConvertStringToMofProperty(propString)
+            string content = this.ConvertStringToMofProperty(propString)
                 .Replace("$agentName", agentName)
                 .Replace("$mofPath", mofPath);
 
@@ -51,7 +58,7 @@ namespace DSC
             fs.Close();
         }
 
-        private string ConvertStringToMofProperty(Dictionary<string, string> propString)
+        protected virtual string ConvertStringToMofProperty(Dictionary<string, string> propString)
         {
             StringBuilder text = new StringBuilder();
 

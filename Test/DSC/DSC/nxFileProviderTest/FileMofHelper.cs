@@ -8,6 +8,10 @@
 
 namespace DSC
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    
     public class FileMofHelper : MofHelper
     {
         public FileMofHelper()
@@ -15,6 +19,50 @@ namespace DSC
             MofGenerator = base.GeneratorFormat.
                 Replace("$ResourceType","nxFile").
                 Replace("$ResourceName","File");
+        }
+
+        protected override string ConvertStringToMofProperty(Dictionary<string, string> propString)
+        {
+            string content = string.Empty;
+
+            StringBuilder text = new StringBuilder();
+
+            foreach (string property in propString.Keys)
+            {
+                if (!String.IsNullOrWhiteSpace(property))
+                {
+                    text.Append(String.Format("{0} = \"{1}\"\n",
+                        property,
+                        propString[property]));
+                }
+            }
+
+            content = this.MofGenerator.Replace("$Properties", text.ToString());
+
+            if (propString.ContainsKey("DependsOn") && !propString["DependsOn"].EndsWith("#"))
+            {
+                StringBuilder dependedProp = new StringBuilder();
+                string[] values = propString["DependsOn"].Replace("[", "").Split(']');
+                string dependedType = values[0];
+                string dependedName = values[1];
+                if (dependedType.Equals("nxUser", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    const string keyProp = "UserName";
+                    string username = propString.ContainsKey("Owner") ? propString["Owner"] : "temp_test";
+
+                    dependedProp.Append(String.Format("{0} = \"{1}\"\n",
+                        keyProp,
+                        username));
+
+                    dependedProp.Append("Ensure = \"Present\"");
+                }
+
+                content = content.Replace("#DependdeResourceType", dependedType);
+                content = content.Replace("#DependedResourceName", dependedName);
+                content = content.Replace("#DependedProperties", dependedProp.ToString());
+            }
+
+            return content; ;
         }
     }
 }
