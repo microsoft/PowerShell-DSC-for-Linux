@@ -32,4 +32,5 @@ deploydsc:
 	cp  -r $(TOP)/dsc/mof/MSFT_DSCMetaConfiguration.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/baseregistration/MSFT_DSCMetaConfiguration.mof
 	cp  -r $(TOP)/dsc/mof/MSFT_LogResource.schema.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/schema/MSFT_LogResource
 	cp  -r $(TOP)/dsc/mof/MSFT_LogResource.registration.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/registration/MSFT_LogResource
-	$(BINDIR)/omireg -n "dsc" $(LIBDIR)/libdsccore.so
+	$(BINDIR)/omireg -n "root/Microsoft/DesiredStateConfiguration" $(LIBDIR)/libdsccore.so
+	ln -fs $(CONFIG_SYSCONFDIR)/omiregister/root-Microsoft-DesiredStateConfiguration $(CONFIG_SYSCONFDIR)/omiregister/root-Microsoft-Windows-DesiredStateConfiguration
