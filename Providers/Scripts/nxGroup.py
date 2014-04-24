@@ -53,6 +53,31 @@ def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
 ############################################################
 ### Begin user defined DSC functions
 ############################################################
+
+groupadd_path = "/usr/sbin/groupadd"
+groupdel_path = "/usr/sbin/groupdel"
+groupmod_path = "/usr/sbin/groupmod"
+gpasswd_path = "/usr/bin/gpasswd"
+add_user_to_group_gpasswd = gpasswd_path + " -a "
+delete_user_from_group_gpasswd = gpasswd_path + " -d "
+add_user_to_group_groupmod = groupmod_path + " -A "
+delete_user_from_group_groupmod = groupmod_path + " -R "
+
+add_user_to_group = add_user_to_group_gpasswd
+delete_user_from_group = delete_user_from_group_gpasswd
+
+# If gpasswd fails to let us add/remove users, try groupmod
+def SwapGroupModCommand():
+    global add_user_to_group
+    global delete_user_from_group
+
+    if add_user_to_group == add_user_to_group_gpasswd:
+        add_user_to_group = add_user_to_group_groupmod
+        delete_user_from_group = delete_user_from_group_groupmod
+    else:
+        add_user_to_group = add_user_to_group_gpasswd
+        delete_user_from_group = delete_user_from_group_gpasswd
+
 def ReadPasswd(filename):
     f = open(filename, "r")
     lines = f.read().split("\n")
@@ -71,74 +96,48 @@ def ParseList(s):
 def get_GID(n):
     return int(n[1][1])
 
-def GetClosestGID(group_entries, PreferredGroupID):
-    sorted_gids = sorted(group_entries.iteritems(), key=get_GID)
-    finalGID = -1
+def AddUserToGroup(UserName, GroupName):
+    retval = os.system(add_user_to_group + UserName + " " + GroupName)
+    if retval != 0:
+        SwapGroupModCommand()
+        retval = os.system(add_user_to_group + UserName + " " + GroupName)
+        if retval != 0:
+            print("Error adding user: " + UserName + " to group: " + GroupName)
+            return False
+    return True
 
-    for i in range(0, len(sorted_gids)):
-        currentGID = get_GID(sorted_gids[i])
-        if int(PreferredGroupID) == int(currentGID):
-            # Group exists with preferred GID.  Find next GID that's open.
-            print("Found group with matching GID at: " + str(i))
-            break
-        elif int(PreferredGroupID) < int(currentGID):
-            print("No group with PreferredGroupID.")
-            finalGID = PreferredGroupID
-
-    # If we're here, we found a GroupID that matches our PreferredID.  Now we're going to increment one GID
-    # at a time to find the next available GID.
-    currentGID = get_GID(sorted_gids[i])
-    while finalGID == -1:
-        if i+1 >= len(sorted_gids):
-            finalGID = int(currentGID) + 1
-
-        nextGID = get_GID(sorted_gids[i])
-        if (int(nextGID) - int(currentGID)) != 1:
-            finalGID = int(currentGID) + 1
-
-        currentGID = nextGID
-        
-
-    print("GetClosestGID returning: " + str(finalGID))
-    return str(finalGID)
+def DeleteUserFromGroup(UserName, GroupName):
+    retval = os.system(delete_user_from_group + UserName + " " + GroupName)
+    if retval != 0:
+        SwapGroupModCommand()
+        retval = os.system(delete_user_from_group + UserName + " " + GroupName)
+        if retval != 0:
+            print("Error removing user: " + UserName + " from group: " + GroupName)
+            return False
+    return True
 
 def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     if not Ensure:
-        Ensure = "Present"
+        Ensure = "present"
 
     group_entries = ReadPasswd("/etc/group")
     Members_list = ParseList(Members)
 
-    if Ensure == "Absent":
+    if Ensure.lower() == "absent":
         if GroupName in group_entries:
             # Delete group
             print("Deleting group")
-            retval = os.system("/usr/sbin/groupdel " + GroupName)
-            return [retval]
+            retval = os.system(groupdel_path + " " + GroupName)
+            if retval != 0:
+                print(groupdel_path + " " + GroupName + " failed.")
+                return [-1]
     else:
         if GroupName not in group_entries:
             print("Group does not exist. Creating it.")
-            if PreferredGroupID:
-                # GetClosestGID to PreferredGroupID and set it
-                newGID = GetClosestGID(group_entries, PreferredGroupID)
-                retval = os.system("/usr/sbin/groupadd -g " + newGID + " " + GroupName)
-
-                # Reread group
-                group_entries = ReadPasswd("/etc/group")
-                if retval != 0:
-                    print("/usr/sbin/groupadd -g " + newGID + " " + GroupName + " failed.")
-                    return [-1]
-        else:
-            if PreferredGroupID:
-                # If group's ID is not PreferredGroupID, check if its possible to change to the Preferred.
-                GroupID = group_entries[GroupName][1]
-                if PreferredGroupID != GroupID:
-                    closestGID = GetClosestGID(group_entries, PreferredGroupID)
-                    if GroupID != closestGID:
-                        retval = os.system("/usr/sbin/groupmod -g " + closestGID + " " + GroupName)
-                        if retval != 0:
-                            print("/usr/sbin/groupmod -g " + closestGID + " " + GroupName + " failed.")
-                            return [-1]
+            retval = os.system(groupadd_path + " " + GroupName)
+            if retval != 0:
+                print(groupadd_path + " " + GroupName + " failed.")
+                return [-1]
 
         if Members:
             if MembersToInclude or MembersToExclude:
@@ -149,16 +148,12 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
             for member in Members_list:
                 if member not in group_members:
                     print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.")
-                    retval = os.system("/usr/bin/gpasswd -a " + member + " " + GroupName)
-                    if retval != 0:
-                        print("Error adding user: " + member + " to group: " + GroupName)
+                    if AddUserToGroup(member, GroupName) == False:
                         return [-1]
             for member in group_members:
                 if member not in Members_list:
                     print("Member: " + member + " is in the member list for group: " + GroupName + " but not speficied in Members.  Removing.")
-                    retval = os.system("/usr/bin/gpasswd -d " + member + " " + GroupName)
-                    if retval != 0:
-                        print("Error removing user: " + member + " from group: " + GroupName)
+                    if DeleteUserFromGroup(member, GroupName) == False:
                         return [-1]
                 
 
@@ -169,18 +164,14 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
                 for member in MembersToInclude_list:
                     if member not in group_members:
                         print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.")
-                        retval = os.system("/usr/bin/gpasswd -a " + member + " " + GroupName)
-                        if retval != 0:
-                            print("Error adding user: " + member + " to group: " + GroupName)
+                        if AddUserToGroup(member, GroupName) == False:
                             return [-1]
             if MembersToExclude:
                 MembersToExclude_list = ParseList(MembersToExclude)
                 for member in MembersToExclude_list:
                     if member in group_members:
                         print("Member: " + member + " is in member list for group: " + GroupName + ".  Removing.")
-                        retval = os.system("/usr/bin/gpasswd -d " + member + " " + GroupName)
-                        if retval != 0:
-                            print("Error removing user: " + member + " from group: " + GroupName)
+                        if DeleteUserFromGroup(member, GroupName) == False:
                             return [-1]
     
     return [0]
@@ -188,12 +179,12 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
 
 def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     if not Ensure:
-        Ensure = "Present"
+        Ensure = "present"
 
     group_entries = ReadPasswd("/etc/group")
     Members_list = ParseList(Members)
 
-    if Ensure == "Absent":
+    if Ensure.lower() == "absent":
         if GroupName not in group_entries:
             return [0]
         else:
@@ -219,8 +210,6 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
                     print("Member: " + member + " is in the member list for group: " + GroupName + " but not speficied in Members")
                     return [-1]
                 
-
-
         else:
             group_members = group_entries[GroupName][2].split(",")
             if MembersToInclude:
@@ -236,13 +225,6 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
                         print("Member: " + member + " is in member list for group: " + GroupName)
                         return [-1]
 
-        if PreferredGroupID:
-            # If group's ID is not PreferredGroupID, check if its possible to change to the Preferred.
-            GroupID = group_entries[GroupName][1]
-            if PreferredGroupID != GroupID:
-                if GroupID != GetClosestGID(group_entries, PreferredGroupID):
-                    print("There's a GID closer to the PreferredGroupID available.")
-                    return [-1]
     return [0]
 
 
@@ -251,13 +233,14 @@ def Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
     Members = MembersToInclude = MembersToExclude = ""
 
     if GroupName not in group_entries:
-        Ensure = "Absent"
+        Ensure = "absent"
         PreferredGroupID = ""
     else:
-        Ensure = "Present"
+        Ensure = "present"
         PreferredGroupID = group_entries[GroupName][1]
         group_members = group_entries[GroupName][2].split(",")
         for member in group_members:
             Members += member + "\n"
 
     return [0, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID]
+
