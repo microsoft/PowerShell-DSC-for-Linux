@@ -144,7 +144,7 @@ reg :
 	mkdir -p $(TARGET_DIR)/omi
 	sudo mkdir -p /etc/opt/microsoft/omi/conf/omiregister/dsc
 	for prov in $(PROVIDER_LIST); do \
-		export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); cd $(TARGET_DIR)/omi; $(OMIREG) -n "dsc" -o @requestor@ $(TARGET_DIR)/libMSFT_$${prov}Resource.so; \
+		export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); cd $(TARGET_DIR)/omi; $(OMIREG) -n "root/Microsoft/DesiredStateConfiguration" -o @requestor@ $(TARGET_DIR)/libMSFT_$${prov}Resource.so; \
 		mkdir -p  $(OMI_DIR)/etc/dsc/configuration/{registration,schema}/MSFT_$${prov}Resource; \
 		cp $(BASE_DIR)/$${prov}/MSFT_$${prov}Resource.schema.mof $(OMI_DIR)/etc/dsc/configuration/schema/MSFT_$${prov}Resource/MSFT_$${prov}Resource.schema.mof; \
 		cp $(BASE_DIR)/$${prov}/MSFT_$${prov}Resource.registration.mof $(OMI_DIR)/etc/dsc/configuration/registration/MSFT_$${prov}Resource/MSFT_$${prov}Resource.registration.mof; \

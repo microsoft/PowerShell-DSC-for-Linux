@@ -8,7 +8,7 @@ instance of MSFT_CimConfigurationProviderRegistration
 
     DSCModuleVersion = "1.0.0";
 
-    Namespace = "/dsc";
+    Namespace = "root/Microsoft/DesiredStateConfiguration";
 
 };
 

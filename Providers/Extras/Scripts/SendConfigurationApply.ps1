@@ -25,4 +25,4 @@ $cimCred= new-object -TypeName Microsoft.Management.Infrastructure.Options.CimCr
 $sessionOptions=New-CimSessionOption -Protocol WSMAN 
 $sessionOptions.AddDestinationCredentials($cimCred)
 $cimSession = [Microsoft.Management.Infrastructure.CimSession]::Create($ComputerName,$sessionOptions)
-$cimSession.InvokeMethod("dsc","MSFT_DSCLocalConfigurationManager","SendConfigurationApply", $t, $options) 
+$cimSession.InvokeMethod("root/Microsoft/DesiredStateConfiguration","MSFT_DSCLocalConfigurationManager","SendConfigurationApply", $t, $options) 

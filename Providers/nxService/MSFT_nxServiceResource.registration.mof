@@ -4,6 +4,6 @@ Instance of MSFT_CimConfigurationProviderRegistration
   className = "MSFT_nxServiceResource";
   DSCEngineCompatVersion = "1.0.0";
   DSCModuleVersion = "1.0.0";
-  Namespace = "dsc";
+  Namespace = "root/Microsoft/DesiredStateConfiguration";
 };
 
