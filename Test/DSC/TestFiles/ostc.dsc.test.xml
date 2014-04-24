@@ -741,20 +741,270 @@
   </section>
 
     <section sid="2" dsc="nxUser Provider">
-      <var set="2" lvl="1" vid="661686" dsc="[nxUser] Verify a new user is created when provide a new userName and set Ensure to Present" cls="DSC.nxUserTest">
+      
+      <var set="2" lvl="1" vid="661686" 
+           dsc="[nxUser] Verify a new user is created when provide a new userName and set Ensure to Present" 
+           cls="DSC.nxUserTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
-        <rec key="initialState">absent</rec>
+        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%' | wc -l | tr -d '\n'</rec>
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The user '%username%' is created successfully.</rec>
         <rec key="failedMsg">The user '%username%' is not created.</rec>
       </var>
+      
+      <var set="2" lvl="1" vid="661688" dsc="[nxUser] Verify an existing user is deleted when provide an existing userName and set Ensure to absent" cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user_661688</rec>
+        <rec key="initialCmd">userdel -rf %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="finalCmd">userdel -rf %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Absent;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The user '%username%' is deleted successfully.</rec>
+        <rec key="failedMsg">The user '%username%' is not deleted.</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="661689" dsc="[nxUser] Verify the full name is added to the user information on the target node" cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user_661689</rec>
+        <rec key="fullName">%username%_full</rec>
+        <rec key="initialCmd">userdel -rf %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="finalCmd">userdel -rf %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | grep -i "%fullName%"| wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The full name "%fullName%" is added to the user information.</rec>
+        <rec key="failedMsg">The full name "%fullName%" is not added to the user information.</rec>
+      </var>
+
+      <var set="2" lvl="3" vid="661690" dsc="[nxUser] Verify the  Full Name property can be modified" cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user_661690</rec>
+        <rec key="fullName">Test Hot</rec>
+        <rec key="initialCmd">userdel -rf %username%;useradd -m %username% -c %username%_full; cat /etc/passwd|grep -i "^%username%"|grep -i "%username%_full"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="finalCmd">userdel -rf %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | grep -i "Test Hot"| wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The full name is changed to "%fullName%".</rec>
+        <rec key="failedMsg">The full name is not changed to "%fullName%".</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="661691" dsc="[nxUser] Verify the Description is added to the User information on the target node" cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user_661691</rec>
+        <rec key="fullName">Test Hot</rec>
+        <rec key="description">GoodUser</rec>
+        <rec key="initialCmd">userdel -rf %username%;useradd -m %username% -c "Test Hot"; cat /etc/passwd|grep -i "^%username%"|grep -i "Test Hot"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="finalCmd">userdel -rf %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%' | grep -i "%fullName%,%description%"| wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The description is added to the user information.</rec>
+        <rec key="failedMsg">The description is not added to the user information.</rec>
+      </var>
+
+      <var set="2" lvl="3" vid="661692" dsc="[nxUser] Verify the Description can be modified" cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user_661692</rec>
+        <rec key="fullName">Tester Cool</rec>
+        <rec key="description">GoodUser!</rec>
+        <rec key="initialCmd">userdel -rf %username%;useradd -m %username% -c "Tester Cool,this is the description for this user"; cat /etc/passwd|grep -i "^%username%"|grep -i "Tester Cool,this is the description for this user"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="finalCmd">userdel -rf %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | grep -i "%fullName%,%description%"| wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The description is changed to "%description%".</rec>
+        <rec key="failedMsg">The description is not changed to "%description%".</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="661693" dsc="[nxUser] Verify the PassWord can be added and provided as a salted SHA1 Hash, the User can be loged on with it when the Disabled is set to false." cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user_661693</rec>
+        <rec key="fullName">Tester Cool</rec>
+        <rec key="description">BadUser!</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
+        <rec key="initialCmd">userdel -rf %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="finalCmd">userdel -rf %username%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%BadUser%;Password:%password%;Disabled:false</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/shadow | grep -i '^%username%:' | tr ':'  ' ' | awk '{print $2}' | grep '^!' | wc -l | tr -d '\n'| wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The password is added and provided as a salted SHA1 Hash, the user can login with it when the Disabled is set to false.</rec>
+        <rec key="failedMsg">The password is added and provided as a salted SHA1 Hash, but the user can not login with it when the Disabled is set to false.</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="661694" dsc="[nxUser] Verify the PassWord can be added and provided as a salted SHA1 Hash, the User can't be loged on with it when the Disabled is set to true" cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user_661694</rec>
+        <rec key="fullName">Tester Cool</rec>
+        <rec key="description">BadUser!</rec>
+        <rec key="password">abcde</rec>
+        <rec key="initialCmd">userdel -rf %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="finalCmd">userdel -rf %username%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%;Password:%password%;Disabled:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/shadow | grep -i '^%username%:' | tr ':'  ' ' | awk '{print $2}' | grep '^!' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The password is added and provided as a salted SHA1 Hash, the user can not login with it when the Disabled is set to true.</rec>
+        <rec key="failedMsg">The password is not added as a salted SHA1 Hash, or the user can login with the latest password even the Disabled is set to true </rec>
+      </var>
+
+      <var set="2" lvl="2" vid="661695" 
+           dsc="[nxUser] Verify the User will be required to enter a new password on the next log on when set the PasswordChangeRequired to true" 
+           cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/shadow | grep -i '^%username%:' | tr ':' ' ' | awk '{print $3}' | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The user '%username%' is created successfully, its password must be changed in next login</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="661696" 
+           dsc="[nxUser] Verify the User won't be required to enter a new password on the next log on when set the PasswordChangeRequired to false"
+           cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:false</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">expire=`cat /etc/shadow | grep -i '^%username%:' | tr ':' ' ' | awk '{print $3}' | tr -d '\n'`;expr $expire - 7 | awk '{if ($0 > 0){print &quot;true&quot;} else {print &quot;false&quot;} }' | tr -d '\n'</rec>
+        <rec key="expectedValue">true</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="661698" 
+           dsc="[nxUser] Verify the HomeDirectory is set correctly on the target node"
+           cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="home">/home/testhome</rec>
+        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;HomeDirectory:%home%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | tr ':' ' ' | awk '{print $5}' | tr -d '\n'</rec>
+        <rec key="expectedValue">%home%</rec>
+      </var>
+
+      <var set="2" lvl="3" vid="661699" 
+           dsc="[nxUser] Verify the HomeDirectory can be modified" 
+           cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="home">/home/testhome</rec>
+        <rec key="initialCmd">userdel -f -r %username%;useradd %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;HomeDirectory:%home%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | tr ':' ' ' | awk '{print $5}' | tr -d '\n'</rec>
+        <rec key="expectedValue">%home%</rec>
+        <rec key="successfulMsg">The home for user '%username%' is set successfully.</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="661701" 
+           dsc="[nxUser] Verify the GroupID can be set correctly" 
+           cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="groupID">0</rec>
+        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;GroupID:%groupID%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | tr ':' ' ' | awk '{print $4}' | tr -d '\n'</rec>
+        <rec key="expectedValue">%groupID%</rec>
+        <rec key="successfulMsg">The user '%username%' is created with corrct Group ID '%groupID%' successfully.</rec>
+      </var>
+
+      <var set="2" lvl="3" vid="661703" 
+           dsc="[nxUser] Verify the GroupID can be modified"
+           cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="groupID">0</rec>
+        <rec key="initialCmd">userdel -f -r %username%;useradd %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;GroupID:%groupID%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | tr ':' ' ' | awk '{print $4}' | tr -d '\n'</rec>
+        <rec key="expectedValue">%groupID%</rec>
+        <rec key="successfulMsg">The group id for user '%username%' is set successfully.</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="666927"
+           dsc="[nxUser] Verify PasswordChangeRequired property can be updated for existing user"
+           cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="initialCmd">userdel -f -r %username%;useradd %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/shadow | grep -i '^%username%:' | tr ':' ' ' | awk '{print $3}' | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The user '%username%' is updated successfully, its password must be changed in next login</rec>
+      </var>
+      
     </section>
   </section>
 </varmap>

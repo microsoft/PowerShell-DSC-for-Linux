@@ -26,7 +26,8 @@ namespace DSC
             username = ctx.Records.GetValue("username");
             initialState = ctx.Records.GetValue("initialState");
 
-            initializeCmd = GetInitializeCmd(username, initialState);
+            initializeCmd = ctx.Records.GetValue("initialCmd");
+            finalizeCmd = ctx.Records.GetValue("finalCmd");
 
             base.Setup(ctx);
 

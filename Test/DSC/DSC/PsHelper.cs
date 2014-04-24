@@ -153,10 +153,15 @@ namespace DSC
 
         public void CheckErrorMessage(string expectedMsg)
         {
-            string[] errors = expectedMsg.Split(';');
+            bool flag = false;
 
-            bool flag = errors.Any(error => ErrorMsg.Contains(error));
+            if (ErrorMsg != null)
+            {
+                string[] errors = expectedMsg.Split(';');
 
+                flag = errors.Any(error => ErrorMsg.Contains(error));
+            }
+            
             if (!flag)
             {
                 throw new VarFail(string.Format(

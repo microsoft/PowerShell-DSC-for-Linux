@@ -88,6 +88,10 @@ xcopy /E /Y /I ".\Dependency\SshcomLib\x64\*" "$(TargetDir)x64"
 xcopy /E /Y /I ".\Dependency\SshcomLib\Interop.sshcomLib.dll" "$(TargetDir)"
 xcopy /E /Y /I ".\DSC\TestFiles\*" "$(TargetDir)TestFiles"</PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>cd $(SolutionDir)..\
+regsvr32 /s .\Dependency\SshcomLib\x64\sshcom.dll</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
