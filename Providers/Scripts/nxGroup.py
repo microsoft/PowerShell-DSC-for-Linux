@@ -233,10 +233,10 @@ def Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
     Members = MembersToInclude = MembersToExclude = ""
 
     if GroupName not in group_entries:
-        Ensure = "absent"
+        Ensure = "Absent"
         PreferredGroupID = ""
     else:
-        Ensure = "present"
+        Ensure = "Present"
         PreferredGroupID = group_entries[GroupName][1]
         group_members = group_entries[GroupName][2].split(",")
         for member in group_members:

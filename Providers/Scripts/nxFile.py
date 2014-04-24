@@ -556,12 +556,12 @@ def Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, R
 
 def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     if not DestinationPath:
-        Ensure = "absent"
+        Ensure = "Absent"
         SourcePath = Type = Force = Contents = Checksum = Recurse = Links = Owner = Group = Mode = ModifiedDate = ""
         return [-1, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
     if not os.path.exists(DestinationPath):
-        Ensure = "absent"
+        Ensure = "Absent"
         SourcePath = Type = Force = Contents = Checksum = Recurse = Links = Owner = Group = Mode = ModifiedDate = ""
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
