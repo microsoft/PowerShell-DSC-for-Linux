@@ -60,6 +60,23 @@ lsb_install_initd = "/usr/lib/lsb/install_initd"
 lsb_remove_initd = "/usr/lib/lsb/remove_initd"
 runlevel_path = "/sbin/runlevel"
 
+def WriteFile(path, contents):
+    try:
+        f = open(path, "w")
+        f.write(contents.replace("\r",""))
+        return 0
+    except IOError:
+        return -1
+
+
+def ReadFile(filename):
+    if os.path.isfile(filename):
+        f = open(filename, "r")
+        lines = f.read().split("\n")
+        return lines
+    else:
+        return []
+
 def Process(params):
     process = subprocess.Popen(params, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (process_stdout, process_stderr) = process.communicate()
@@ -164,40 +181,6 @@ def DetermineInitEnabled(stdout, runlevel):
     else:
         return False
 
-def ReadFile(filename):
-    if os.path.isfile(filename):
-        f = open(filename, "r")
-        lines = f.read().split("\n")
-        return lines
-    else:
-        return []
-
-# TODO: Is there a good way to determine this for upstart?  It seems very difficult to determine this and this should probably be rewritten.
-def StartsAtBootForThisRunlevel(Name, runlevel):
-    if os.path.isfile("/etc/init/" + Name + ".conf"):
-        file_lines = ReadFile("/etc/init/" + Name + ".conf")
-        contains_a_start_on = False
-        for line in file_lines:
-            if "start on runlevel [" in line:
-                specified_runlevel_digits = line.split("[")[:-1]
-                if str(runlevel) in specified_runlevel_digits:
-                    return True
-                else:
-                    return False
-            elif "start on" in line:
-                contains_a_start_on = True
-                break
-
-        if contains_a_start_on:
-            return True
-        else:
-            return False
-
-    else:
-        print("conf file does not exist for service named " + Name)
-        return False
-
-
 def GetSystemdState(Name):
     (process_stdout, process_stderr, retval) = Process([systemctl_path, "status", Name])
     if retval == 0:
@@ -249,15 +232,73 @@ def TestUpstartState(Name, State):
     return True
 
 def GetUpstartEnabled(Name):
-    runlevel = GetRunLevel()
-    if StartsAtBootForThisRunlevel(Name, runlevel):
-        return "True"
+    if os.path.isfile("/etc/init/" + Name + ".conf"):
+        file_lines = ReadFile("/etc/init/" + Name + ".conf")
+
+        start_on_exists = False
+        start_on_is_enabled = False
+        stop_on_exists = False
+        stop_on_is_enabled = False
+        for full_line in file_lines:
+            # everything after a '#' character is a comment, so strip it off
+            line = full_line.split("#")[0]  
+            if "start on" in line:
+                start_on_exists = True
+                if ("(" in line) or ("and" in line) or ("or" in line):
+                    return "Complex"
+                elif "start on runlevel [" in line:
+                    runlevel = GetRunLevel()    
+                    specified_runlevel_digits = line.split("[")[:-1]
+                    if str(runlevel) in specified_runlevel_digits:
+                        start_on_is_enabled = True
+                    else:
+                        start_on_is_enabled = False
+                    if "!" in specified_runlevel_digits:
+                        start_on_is_enabled = not start_on_is_enabled
+                else:
+                    return "Complex"
+            if "stop on" in line:
+                stop_on_exists = True
+                if ("(" in line) or ("and" in line) or ("or" in line):
+                    return "Complex"
+                elif "stop on runlevel [" in line:
+                    runlevel = GetRunLevel()    
+                    specified_runlevel_digits = line.split("[")[:-1]
+                    if str(runlevel) in specified_runlevel_digits:
+                        stop_on_is_enabled = True
+                    else:
+                        stop_on_is_enabled = False
+                    if "!" in specified_runlevel_digits:
+                        stop_on_is_enabled = not stop_on_is_enabled
+                else:
+                    return "Complex"
+        
+
+        if start_on_exists and start_on_is_enabled:
+            if stop_on_exists and stop_on_is_enabled:
+                print("Error: Having trouble determining whether service " + Name + " is enabled or disabled.")
+                return "Complex"
+            else:
+                return "True"
+        else:
+            return "False"
+
+        print("Info: Unable to find line containing 'start on' in " + Name + ".conf")
+        return "False"
     else:
+        print("Error: conf file does not exist for service named " + Name)
         return "False"
 
 def TestUpstartEnabled(Name, Enabled):
-    if Enabled and Enabled != GetUpstartEnabled(Name):
-        return False
+    if Enabled:
+        currently_enabled = GetUpstartEnabled(name)
+        if Enabled == "True" and currently_enabled == "False":
+            return False
+        elif Enabled == "False" and currently_enabled == "True":
+            return False
+        elif currently_enabled == "Complex":
+            print("Info: Cannot modify 'Enabled' state for service " + Name + ", conf file too complex.  Please use the File provider to write your own conf file for this service.")
+            return True
     return True
 
 def TestUpstart(Name, Enabled, State):
@@ -404,16 +445,41 @@ def CreateUpstartService(Name, Enabled, State):
     print("Error: Upstart services cannot be created from the service provider.  Please use the file provider to create an upstart conf file, then modify the service using this service provider.")
     return [-1]
 
-# TODO: Finish this function
 def ModifyUpstartConfFile(Name, Enabled):
-    if Enabled == "True":
-        # Add a 'start on [CURRENT_RUN_LEVEL]' to the file if no 'start on' exists.
-        pass
-    elif Enabled == "False":
-        # Comment 
-        pass
-    else:
-        print("Error: Invalid Enabled parameter to ModifyUpstartConfFile")
+    file_lines = ReadFile("/etc/init/" + Name + ".conf")
+    if len(file_lines) == 0:
+        print("Error: Conf file unable to be read for service " + Name)
+        return False
+
+    outfile = ""
+    start_on_exists = False
+
+    for full_line in file_lines:
+        line = full_line.split("#")[0]  
+        if "start on" in line and not start_on_exists:
+            # If we got to this point, we can assume that we're allowed to modify the conf file. No need to check for a "Complex" conf file.
+            start_on_exists = True
+            if Enabled == "True":
+                outfile += "start on runlevel [2345]\n"
+                outfile += "stop on runlevel [!2345]\n"
+            elif Enabled == "False":
+                outfile += "stop on runlevel [0123456]\n"
+        elif "stop on" in line:
+            # Let the 'start on' clause of this if statement handle the insertion of 'stop on'
+            pass
+        else:
+            outfile += full_line + "\n"
+
+    if not start_on_exists:
+        # If there was no "start on", make sure to add one
+        if Enabled == "True":
+            outfile += "start on runlevel [2345]\n"
+            outfile += "stop on runlevel [!2345]\n"
+        elif Enabled == "False":
+            outfile += "stop on runlevel [0123456]\n"
+
+    if WriteFile("/etc/init/" + Name + ".conf", outfile) == -1:
+        print("Error: Unable to write conf file for service " + Name)
         return False
 
     return True
