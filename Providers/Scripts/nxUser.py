@@ -65,6 +65,11 @@ def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
 ############################################################
 ### Begin user defined DSC functions
 ############################################################
+userdel_path = "/usr/sbin/userdel"
+useradd_path = "/usr/sbin/useradd"
+usermod_path = "/usr/sbin/usermod"
+chage_path = "/usr/bin/chage"
+
 def ReadPasswd(filename):
     f = open(filename, "r")
     lines = f.read().split("\n")
@@ -110,8 +115,8 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
     usermod_string = ""
     usermodonly_string = ""
 
-    if Ensure == "Absent":
-        exit_code = os.system("/usr/sbin/userdel " + UserName)
+    if Ensure.lower() == "absent":
+        exit_code = os.system(userdel_path + " " + UserName)
     else:
         usermod_string = ""
 
@@ -153,31 +158,32 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
             usermod_string += " -g " + GroupID
 
         if UserName not in passwd_entries:
-            exit_code = os.system("/usr/sbin/useradd " + usermod_string + " " + UserName)
+            exit_code = os.system(useradd_path + " " + usermod_string + " " + UserName)
             if exit_code != 0:
                 return [exit_code]
 
             if len(usermodonly_string) > 0:
-                exit_code = os.system("/usr/sbin/usermod " + usermodonly_string + " " + UserName)
-            if exit_code != 0:
-                return [exit_code]
+                exit_code = os.system(usermod_path + " " + usermodonly_string + " " + UserName)
+                if exit_code != 0:
+                    return [exit_code]
         else:
             print(usermod_string)
-            exit_code = os.system("/usr/sbin/usermod " + usermodonly_string + usermod_string + " " + UserName)
-            if exit_code != 0:
-                return [exit_code]
+            if len(usermodonly_string + usermod_string) > 0:
+                exit_code = os.system(usermod_path + " " + usermodonly_string + usermod_string + " " + UserName)
+                if exit_code != 0:
+                    return [exit_code]
 
 
         if PasswordChangeRequired:
             if PasswordChangeRequired == "True":
-                exit_code = os.system("/usr/bin/chage -d 0 " + UserName)
+                exit_code = os.system(chage_path + " -d 0 " + UserName)
             else:
                 # Set last password change to today
                 day_0 = datetime.datetime.utcfromtimestamp(0)
                 day_now = datetime.datetime.today()
                 days_since_day_0 = (day_now - day_0).days
 
-                exit_code = os.system("/usr/bin/chage -d "+ str(days_since_day_0) + " " + UserName)
+                exit_code = os.system(chage_path + " -d "+ str(days_since_day_0) + " " + UserName)
            
     return [exit_code]
 
@@ -188,13 +194,13 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
     if not Ensure:
         Ensure = "Present"
 
-    if Ensure == "Absent":
+    if Ensure.lower() == "absent":
         if UserName not in passwd_entries:
             return [0]
         else:
             print(UserName + " in passwd_entries")
             return [-1]
-    elif Ensure == "Present":
+    elif Ensure.lower() == "present":
         if UserName not in passwd_entries:
             print(UserName + " not in passwd_entries")
             return [-1]
@@ -267,8 +273,7 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
     if UserName not in passwd_entries:
         FullName = Description = Password = Disabled = PasswordChangeRequired = HomeDirectory = GroupID = ""
-        if Ensure == "Present":
-            Ensure = "Absent"
+        Ensure = "Absent"
     else:
         Ensure = "Present"
         
@@ -285,6 +290,7 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
         if len(Password) > 0:
             if Password[0] == "!":
                 Disabled = "True"
+                Password = Password[1:]
         if PasswordExpired(shadow_entries[UserName]):
             PasswordChangeRequired = "True"
         else:
@@ -292,12 +298,3 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
     return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
 
-
-#def UnitTests():
-#    print(Get("testuser", "Present", "Test User", "TEST DESCRIPTION", "", "True", "False", "/home/testhome", "3482"))
-#    print(Test("testuser", "Present", "Test User", "TEST DESCRIPTION", "", "True", "False", "/home/testhome", "3482"))
-#    print(Set("testuser", "Present", "Test User", "TEST DESCRIPTION", "", "True", "False", "/home/testhome", "3482"))
-#    print(Test("testuser", "Present", "Test User", "TEST DESCRIPTION", "", "True", "False", "/home/testhome", "3482"))
-#    print(Get("testuser", "Present", "Test User", "TEST DESCRIPTION", "", "True", "False", "/home/testhome", "3482"))
-
-#UnitTests()
