@@ -175,7 +175,7 @@ def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
 
     return True
 
-def ConvertLongModeToNumeric(DestinationPath, Mode):
+def ConvertLongModeToNumeric(Mode):
     u_r = Mode[0]
     u_w = Mode[1]
     u_x = Mode[2]
@@ -193,63 +193,63 @@ def ConvertLongModeToNumeric(DestinationPath, Mode):
     elif u_r == "-":
         pass
     else:
-        print("Error: Invalid character for character 0 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 0 in Mode")
 
     if u_w == "w":
         first_digit += 2
     elif u_w == "-":
         pass
     else:
-        print("Error: Invalid character for character 1 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 1 in Mode")
 
     if u_x == "x":
         first_digit += 1
     elif u_x == "-":
         pass
     else:
-        print("Error: Invalid character for character 2 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 2 in Mode")
 
     if g_r == "r":
         second_digit += 4
     elif g_r == "-":
         pass
     else:
-        print("Error: Invalid character for character 3 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 3 in Mode")
 
     if g_w == "w":
         second_digit += 2
     elif g_w == "-":
         pass
     else:
-        print("Error: Invalid character for character 4 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 4 in Mode")
 
     if g_x == "x":
         second_digit += 1
     elif g_x == "-":
         pass
     else:
-        print("Error: Invalid character for character 5 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 5 in Mode")
 
     if o_r == "r":
         third_digit += 4
     elif o_r == "-":
         pass
     else:
-        print("Error: Invalid character for character 6 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 6 in Mode")
 
     if o_w == "w":
         third_digit += 2
     elif o_w == "-":
         pass
     else:
-        print("Error: Invalid character for character 7 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 7 in Mode")
 
     if o_x == "x":
         third_digit += 1
     elif o_x == "-":
         pass
     else:
-        print("Error: Invalid character for character 8 in Mode for DestinationPath " + DestinationPath)
+        raise Exception("Error: Invalid character for character 8 in Mode")
 
     return str(first_digit) + str(second_digit) + str(third_digit)
 
@@ -615,7 +615,7 @@ class FileContext:
 
         if Mode:
             if len(Mode) == 9:
-                Mode = ConvertLongModeToNumeric(DestinationPath, Mode)
+                Mode = ConvertLongModeToNumeric(Mode)
             elif len(Mode) == 3:
                 # Already in proper format
                 pass

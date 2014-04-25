@@ -116,6 +116,12 @@ def DeleteUserFromGroup(UserName, GroupName):
             return False
     return True
 
+def GetGroupMembers(GroupName, group_entries):
+    group_members = group_entries[GroupName][2].split(",")
+    if group_members[0] == "":
+        group_members = []
+    return group_members
+
 def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     if not Ensure:
         Ensure = "present"
@@ -139,12 +145,15 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
                 print(groupadd_path + " " + GroupName + " failed.")
                 return [-1]
 
+            # Reread /etc/group
+            group_entries = ReadPasswd("/etc/group")
+
         if Members:
             if MembersToInclude or MembersToExclude:
                 print("If Members is provided, Include and Exclude are not allowed.")
                 return [-1]
 
-            group_members = group_entries[GroupName][2].split(",")
+            group_members = GetGroupMembers(GroupName, group_entries)
             for member in Members_list:
                 if member not in group_members:
                     print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.")
@@ -158,7 +167,7 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
                 
 
         else:
-            group_members = group_entries[GroupName][2].split(",")
+            group_members = GetGroupMembers(GroupName, group_entries)
             if MembersToInclude:
                 MembersToInclude_list = ParseList(MembersToInclude)
                 for member in MembersToInclude_list:
@@ -199,7 +208,7 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
                 print("If Members is provided, Include and Exclude are not allowed.")
                 return [-1]
 
-            group_members = group_entries[GroupName][2].split(",")
+            group_members = GetGroupMembers(GroupName, group_entries)
 
             for member in Members_list:
                 if member not in group_members:
@@ -211,7 +220,8 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
                     return [-1]
                 
         else:
-            group_members = group_entries[GroupName][2].split(",")
+            group_members = GetGroupMembers(GroupName, group_entries)
+
             if MembersToInclude:
                 MembersToInclude_list = ParseList(MembersToInclude)
                 for member in MembersToInclude_list:
@@ -238,7 +248,7 @@ def Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
     else:
         Ensure = "Present"
         PreferredGroupID = group_entries[GroupName][1]
-        group_members = group_entries[GroupName][2].split(",")
+        group_members = GetGroupMembers(GroupName, group_entries)
         for member in group_members:
             Members += member + "\n"
 
