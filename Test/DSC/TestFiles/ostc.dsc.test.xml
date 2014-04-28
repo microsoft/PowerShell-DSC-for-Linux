@@ -1006,5 +1006,127 @@
       </var>
       
     </section>
+
+    <section sid="3" dsc="nxGroup Provider">
+      <var set="3" lvl="1" vid="661714" dsc="[nxGroup] Verify if specific group is created if enumerated Ensure property is Present" cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:Present</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The group '%groupname%' is created successfully.</rec>
+        <rec key="failedMsg">The group '%groupname%' is not created.</rec>
+      </var>
+
+      <var set="3" lvl="1" vid="661715" dsc="[nxGroup] Verify if specific group is removed if enumerated Ensure property is absent" cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">present</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:absent</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The group '%groupname%' is removed successfully.</rec>
+        <rec key="failedMsg">The group '%groupname%' is still exists.</rec>
+      </var>
+
+      <var set="3" lvl="2" vid="661716" dsc="[nxGroup] Verify if specific members are added into group if the specific members are not in group" cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:present;Members:root,scxuser</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | grep "root,scxuser" | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The member 'root,scxuser' is added into '%groupname%'.</rec>
+        <rec key="failedMsg">The member 'root,scxuser' failed to add into '%groupname%'.</rec>
+      </var>
+
+      <var set="3" lvl="2" vid="661717" dsc="[nxGroup] Verify if the members are removed from group if the members are not in specific member list" cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">present</rec>
+        <rec key="members">root,scxuser</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:present;Members:root</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | grep "scxuser" | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The member 'scxuser' is removed into '%groupname%'.</rec>
+        <rec key="failedMsg">The member 'scxuser' is still exist in '%groupname%'..</rec>
+      </var>
+
+      <var set="3" lvl="3" vid="661719" dsc="[nxGroup] Verify if error out if the configuration MOF have both Members property and MembersToInclude/MembersToExlude property" cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:present;Members:;MembersToInclude:;MembersToExclude:</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid MOF have both Members property and MembersToInclude/MembersToExlude property.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="3" lvl="3" vid="661720" dsc="[nxGroup] Verify if error out if invliad members are listed" cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:present;Members:xxxxx</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invliad members are listed.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="3" lvl="2" vid="661721" dsc="[nxGroup] Verify if the members which listed in MembersToInclude property are added into group" cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:present;MembersToInclude:root,scxuser</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | grep "root,scxuser" | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The member 'root,scxuser' is added into '%groupname%'.</rec>
+        <rec key="failedMsg">The member 'root,scxuser' failed to add into '%groupname%'.</rec>
+      </var>
+
+      <var set="3" lvl="2" vid="661722" dsc="[nxGroup] Verify if the members which listed in MembersToExclude property are removed from group" cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">present</rec>
+        <rec key="members">root,scxuser</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:present;MembersToExclude:root,scxuser</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | grep "root,scxuser" | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The member 'root,scxuser' is removed from '%groupname%'.</rec>
+        <rec key="failedMsg">The member 'root,scxuser' failed to remove from '%groupname%'.</rec>
+      </var>
+    </section>
   </section>
 </varmap>

@@ -57,6 +57,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="nxGroup\GroupMofHelper.cs" />
+    <Compile Include="nxGroup\nxGroupTest.cs" />
     <Compile Include="ProviderTestBase.cs" />
     <Compile Include="CommonHelper.cs" />
     <Compile Include="nxFileProviderTest\FileMofHelper.cs" />

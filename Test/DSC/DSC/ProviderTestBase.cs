@@ -110,8 +110,8 @@ namespace DSC
                 {
                     try
                     {
-                        psHelper.CheckOutput(key, propMap[key]);
-                        ctx.Alw(String.Format("\t{0} : {1}", key, propMap[key]));
+                        psHelper.CheckOutput(key, returnedProperties[key]);
+                        ctx.Alw(String.Format("\t{0} : {1}", key, returnedProperties[key]));
                     }
                     catch (VarFail ex)
                     {
