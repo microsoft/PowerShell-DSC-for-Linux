@@ -5,6 +5,7 @@ import grp
 import os
 import stat
 import time
+import tempfile
 
 def Set_Marshall(GetScript, SetScript, TestScript, User, Group):
     GetScript = GetScript.decode("utf-8")
@@ -69,7 +70,8 @@ def PreExec(uid, gid):
 
 def Set(GetScript, SetScript, TestScript, User, Group):
     # write out SetScript to a file, run it as User/Group, return exit code
-    path = "/tmp/setscript.sh"
+    tempdir = TempWorkingDirectory(User, Group)
+    path = tempdir.GetTempPath()
     command = path
 
     uid = gid = -1
@@ -92,7 +94,8 @@ def Set(GetScript, SetScript, TestScript, User, Group):
 
 def Test(GetScript, SetScript, TestScript, User, Group):
     # write out TestScript to a file, run it as User/Group, return exit code
-    path = "/tmp/testscript.sh"
+    tempdir = TempWorkingDirectory(User, Group)
+    path = tempdir.GetTempPath()
     command = path
 
     uid = gid = -1
@@ -115,7 +118,8 @@ def Test(GetScript, SetScript, TestScript, User, Group):
 
 def Get(GetScript, SetScript, TestScript, User, Group):
     # write out GetScript to a file, run it as User/Group, then return stderr/stdout and exit code
-    path = "/tmp/getscript.sh"
+    tempdir = TempWorkingDirectory(User, Group)
+    path = tempdir.GetTempPath()
     command = path
 
     uid = gid = -1
@@ -138,8 +142,21 @@ def Get(GetScript, SetScript, TestScript, User, Group):
     return [exit_code, GetScript, SetScript, TestScript, User, Group, Result]
 
 
-#def BasicUnitTests():
-#    print(Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", ""))
-#    print(Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", ""))
+class TempWorkingDirectory:
+    def __init__(self, User, Group):
+        self.dir = tempfile.mkdtemp()
+        uid = gid = -1
+        if User:
+            uid = pwd.getpwnam(User)[2]
+        if Group:
+            gid = grp.getgrnam(Group)[2]
 
-#BasicUnitTests()
+        os.chown(self.dir, uid, gid)        
+        os.chmod(self.dir, stat.S_IXUSR | stat.S_IRUSR | stat.S_IXGRP | stat.S_IRGRP)
+
+    
+    def __del__(self):
+        shutil.rmtree(self.dir)
+
+    def GetTempPath(self):
+        return os.path.join(self.dir, "temp_script.sh")
