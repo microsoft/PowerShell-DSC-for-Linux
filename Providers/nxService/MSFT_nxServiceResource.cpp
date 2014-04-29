@@ -273,11 +273,11 @@ int SetElement(
     else if (type == MI_BOOLEAN)
     {
         bool callSetElement = true;
-        if (newFieldVal == "True")
+        if (newFieldVal == "True" || newFieldVal == "true")
         {
             value.boolean = MI_TRUE;
         }
-        else if (newFieldVal == "False")
+        else if (newFieldVal == "False" || newFieldVal == "false")
         {
             value.boolean = MI_FALSE;
         }
