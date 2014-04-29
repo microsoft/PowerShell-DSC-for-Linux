@@ -202,19 +202,11 @@ namespace DSC
                         if (prop.Value != null)
                         {
                             dict[prop.Name] = prop.Value.ToString();
-                            if (prop.Value.GetType().Equals(typeof(string[])))
+                            if (prop.Value.GetType() == typeof(string[]))
                             {
                                 string[] valueArray = (string[])prop.Value;
-                                string value = "";
-                                if (valueArray.Length > 0)
-                                {
-                                    value = valueArray[0];
-                                }
-                                for (int i = 1; i < valueArray.Length; i++)
-                                {
-                                    value += "," + valueArray[i];
-                                }
-                                dict[prop.Name] = value;
+
+                                dict[prop.Name] = String.Join(",", valueArray);
                             }
                         }
                     }

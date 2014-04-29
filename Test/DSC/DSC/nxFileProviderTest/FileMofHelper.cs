@@ -24,21 +24,30 @@ namespace DSC
 
         protected override string ConvertStringToMofProperty(Dictionary<string, string> propString)
         {
-            string content = string.Empty;
-
             StringBuilder text = new StringBuilder();
+
+            List<String> booleanProp = new List<String> { "Force", "Recurse" };
 
             foreach (string property in propString.Keys)
             {
                 if (!String.IsNullOrWhiteSpace(property))
                 {
-                    text.Append(String.Format("{0} = \"{1}\"\n",
-                        property,
-                        propString[property]));
+                    if (!booleanProp.Contains(property))
+                    {
+                        text.Append(String.Format("{0} = \"{1}\"\n",
+                            property,
+                            propString[property].Replace("$", "`$")));
+                    }
+                    else
+                    {
+                        text.Append(String.Format("{0} = ${1}\n",
+                            property,
+                            propString[property]));
+                    }
                 }
             }
 
-            content = this.MofGenerator.Replace("$Properties", text.ToString());
+            string content = this.MofGenerator.Replace("$Properties", text.ToString());
 
             if (propString.ContainsKey("DependsOn") && !propString["DependsOn"].EndsWith("#"))
             {
@@ -63,12 +72,21 @@ namespace DSC
                 content = content.Replace("#DependedProperties", dependedProp.ToString());
             }
 
-            return content; ;
+            return content;
         }
 
         public override Dictionary<string, string> ReturnedPropertiesOfGetDscConfiguration(Dictionary<string, string> propKeyValuePairs)
         {
-            string[] forbiddenProp = { "Contents", "Checksum", "Force", "Recurse", "Links", "DependsOn" };
+            List<string> forbiddenProp = 
+                new List<string>() { "Contents", "Checksum", "Force", "Recurse", "Links", "DependsOn" };
+
+            // If the Ensure is Absent, ignore Type property also.
+            if (propKeyValuePairs.Any(e => 
+                    e.Key.Equals("Ensure") && 
+                    e.Value.Equals("Absent" , StringComparison.InvariantCultureIgnoreCase)))
+            {
+                forbiddenProp.Add("Type");
+            }
 
             foreach (var prop in forbiddenProp)
             {
@@ -77,6 +95,7 @@ namespace DSC
                     propKeyValuePairs.Remove(prop);
                 }
             }
+
                 
             return propKeyValuePairs;
         }
