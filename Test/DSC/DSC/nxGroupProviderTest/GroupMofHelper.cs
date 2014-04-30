@@ -76,7 +76,7 @@ namespace DSC
                 }
                 else if (key.Equals(KEY_MEMBERSTOEXCLUDE))
                 {
-                    returnKeyValuePairs.Add(KEY_MEMBERS, "");
+                    // returnKeyValuePairs.Add(KEY_MEMBERS, "");
                 }
                 else
                 {

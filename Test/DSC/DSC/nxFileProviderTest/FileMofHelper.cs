@@ -96,8 +96,44 @@ namespace DSC
                 }
             }
 
-                
+            // Convert 9 characters Mode to 3 numberic Mode
+            if (propKeyValuePairs.ContainsKey("Mode"))
+            {
+                propKeyValuePairs["Mode"] = ConvertLongModeToNumeric(propKeyValuePairs["Mode"]);
+            }
+                            
             return propKeyValuePairs;
+        }
+
+        private string ConvertLongModeToNumeric(string mode)
+        {
+            StringBuilder numericMode = new StringBuilder(3);
+
+            char[] chars = mode.ToCharArray();
+
+            if (chars.Length == 9)
+            {
+                for (int i = 0; i < chars.Length; i = i + 3)
+                {
+                    int temp = 0;
+                    // r : 4;  w : 2;  x : 1
+                    temp += (chars[i] == 'r') ? 4 : 0;
+                    temp += (chars[i + 1] == 'w') ? 2 : 0;
+                    temp += (chars[i + 2] == 'x') ? 1 : 0;
+
+                    numericMode.Append(temp.ToString());
+                }
+            }
+            else if (chars.Length == 3)
+            {
+                numericMode.Append(chars);
+            }
+            else
+            {
+                throw new ArgumentException("The mode is invalid!");
+            }
+
+            return numericMode.ToString();
         }
     }
 }
