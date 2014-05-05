@@ -349,7 +349,15 @@ def SetFile(DestinationPath, SourcePath, fc):
             return False
 
     if SourcePath:
-        shutil.copyfile(SourcePath, DestinationPath)
+        should_copy_file = False
+        if fc.Checksum == "ctime" or fc.Checksum == "mtime":
+            if CompareFiles(DestinationPath, SourcePath, fc) == False:
+                should_copy_file = True
+        else:
+            # Just copy the file if this is a resource intensive file comparison
+            should_copy_file = True
+        if should_copy_file:
+            shutil.copyfile(SourcePath, DestinationPath)
     elif fc.Contents:
         if WriteFile(DestinationPath, fc.Contents) != 0:
             print("Error: Unable to write file at " + DestinationPath)
