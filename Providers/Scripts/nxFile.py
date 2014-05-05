@@ -351,11 +351,15 @@ def SetFile(DestinationPath, SourcePath, fc):
     if SourcePath:
         should_copy_file = False
         if fc.Checksum == "ctime" or fc.Checksum == "mtime":
-            if CompareFiles(DestinationPath, SourcePath, fc) == False:
+            if os.path.isfile(DestinationPath):
+                if CompareFiles(DestinationPath, SourcePath, fc) == False:
+                    should_copy_file = True
+            else:
                 should_copy_file = True
         else:
             # Just copy the file if this is a resource intensive file comparison
             should_copy_file = True
+
         if should_copy_file:
             shutil.copyfile(SourcePath, DestinationPath)
     elif fc.Contents:
