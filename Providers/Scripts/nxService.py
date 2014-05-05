@@ -290,7 +290,7 @@ def GetUpstartEnabled(sc):
 
 def TestUpstartEnabled(sc):
     if sc.Enabled:
-        currently_enabled = GetUpstartEnabled(name)
+        currently_enabled = GetUpstartEnabled(sc)
         if sc.Enabled == "true" and currently_enabled == "false":
             return False
         elif sc.Enabled == "false" and currently_enabled == "true":
@@ -431,12 +431,12 @@ def ModifySystemdService(sc):
     if retval == 0:
         print("running")
         if sc.State and sc.State != "running":
-            return StartService(sc)
+            return StopService(sc)
             
     else:
         print("stopped")
         if sc.State and sc.State != "stopped":
-            return StopService(sc)
+            return StartService(sc)
 
     return [0]
 
@@ -484,7 +484,7 @@ def ModifyUpstartConfFile(sc):
     return True
 
 def ModifyUpstartService(sc):
-    if sc.Enabled != GetUpstartEnabled(sc):
+    if sc.Enabled and sc.Enabled != GetUpstartEnabled(sc):
         if not ModifyUpstartConfFile(sc):
             print("Error: Failed to modify upstart conf file")
             return [-1]
