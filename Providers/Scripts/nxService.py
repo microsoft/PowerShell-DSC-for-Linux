@@ -247,7 +247,7 @@ def GetUpstartEnabled(sc):
                     return "Complex"
                 elif "start on runlevel [" in line:
                     runlevel = GetRunLevel()    
-                    specified_runlevel_digits = line.split("[")[:-1]
+                    specified_runlevel_digits = line.split("[")[1][:-1]
                     if str(runlevel) in specified_runlevel_digits:
                         start_on_is_enabled = True
                     else:
@@ -262,7 +262,7 @@ def GetUpstartEnabled(sc):
                     return "Complex"
                 elif "stop on runlevel [" in line:
                     runlevel = GetRunLevel()    
-                    specified_runlevel_digits = line.split("[")[:-1]
+                    specified_runlevel_digits = line.split("[")[1][:-1]
                     if str(runlevel) in specified_runlevel_digits:
                         stop_on_is_enabled = True
                     else:
@@ -602,7 +602,13 @@ def Get(Name, Controller, Enabled, State):
             print("Error: Unable to find service named " + sc.Name + " in upstart.")
             exit_code = -1
         else:
-            Enabled = GetUpstartEnabled(sc)
+            temp = GetUpstartEnabled(sc)
+            if temp == "false":
+                Enabled = "False"
+            else:
+                # When GetUpstartEnabled returns "Complex", we assume that it is enabled (and we won't modify it).
+                Enabled = "True"
+                
             State = GetUpstartState(sc)
             Path = "/etc/init/" + sc.Name + ".conf"
     elif sc.Controller == "init":
