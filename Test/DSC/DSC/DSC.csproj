@@ -61,6 +61,8 @@
     <Compile Include="nxGroupProviderTest\nxGroupTest.cs" />
     <Compile Include="nxScriptProviderTest\nxScriptTest.cs" />
     <Compile Include="nxScriptProviderTest\ScriptMofHelper.cs" />
+    <Compile Include="nxServiceProviderTest\nxServiceTest.cs" />
+    <Compile Include="nxServiceProviderTest\ServiceMofHelper.cs" />
     <Compile Include="ProviderTestBase.cs" />
     <Compile Include="CommonHelper.cs" />
     <Compile Include="nxFileProviderTest\FileMofHelper.cs" />

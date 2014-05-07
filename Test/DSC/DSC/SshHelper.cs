@@ -35,7 +35,7 @@ namespace DSC
 
             Execute(command, out actual);
 
-            if (!expected.Equals(actual))
+            if (!expected.Equals(actual, StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new Exception(String.Format(
                     "The result of command '{0}' is unexpected: expected - '{1}', actual - '{2}'",
@@ -63,7 +63,7 @@ namespace DSC
 
                 if (status != 0)
                 {
-                    throw new Exception(string.Format(
+                    throw new InvalidOperationException(string.Format(
                         "Failed to execute command {0} : return code = {1}; error message = {2}.",
                         command,
                         status,
@@ -89,7 +89,7 @@ namespace DSC
 
                 if (status != 0)
                 {
-                    throw new Exception(string.Format(
+                    throw new InvalidOperationException(string.Format(
                         "Failed to execute command {0} : return code = {1}.",
                         command,
                         status));

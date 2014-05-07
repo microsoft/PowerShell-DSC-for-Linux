@@ -7,10 +7,13 @@
   <!-- Variables. -->
   <snippet id="Variables">
     <!-- Linux Info. -->
-    <rec key="nxHostName">10.199.192.125</rec>
+    <rec key="nxHostName">10.199.192.141</rec>
     <rec key="nxUsername">root</rec>
     <rec key="nxPassword">OpsMgr2007R2</rec>
     <rec key="nxPort">22</rec>
+    
+    <rec key="testServiceName">atd</rec>
+    <rec key="invalidServiceName">invalidService</rec>
     
     <!-- DSC Info. -->
     <rec key="dscHome">/home/scxuser/DSC</rec>
@@ -631,7 +634,7 @@
         <rec key="initialCmd">rm -rf %path%;rm -rf %s_path%;mkdir %s_path%;touch %s_path%/%s_file%;mkdir %path%;cp %s_path%/%s_file% %path%;echo '%s_content%' &gt; %s_path%/%s_file%; sleep 1;echo '%content%' &gt; %path%/%s_file%;sleep 1;chmod a+x %path%/%s_file%</rec> 
         <rec key="finalCmd">rm -rf %path%;rm -rf %s_path%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">DestinationPath:%path%;SourcePath:%s_path%;Ensure:Present;Recurse:true;Type:Directory;Checksum:ctime</rec>
+        <rec key="propString">DestinationPath:%path%/%s_file%;SourcePath:%s_path%/%s_file%;Ensure:Present;Checksum:ctime</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat %path%/%s_file% | tr -d '\n'</rec>
@@ -871,7 +874,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
-        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;</rec>
@@ -887,7 +890,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user_661688</rec>
-        <rec key="initialCmd">userdel -rf %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Absent;</rec>
@@ -904,7 +907,7 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user_661689</rec>
         <rec key="fullName">%username%_full</rec>
-        <rec key="initialCmd">userdel -rf %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%</rec>
@@ -921,7 +924,7 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user_661690</rec>
         <rec key="fullName">Test Hot</rec>
-        <rec key="initialCmd">userdel -rf %username%;useradd -m %username% -c %username%_full; cat /etc/passwd|grep -i "^%username%"|grep -i "%username%_full"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username% -c %username%_full; cat /etc/passwd|grep -i "^%username%"|grep -i "%username%_full"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%</rec>
@@ -939,7 +942,7 @@
         <rec key="username">test_user_661691</rec>
         <rec key="fullName">Test Hot</rec>
         <rec key="description">GoodUser</rec>
-        <rec key="initialCmd">userdel -rf %username%;useradd -m %username% -c "Test Hot"; cat /etc/passwd|grep -i "^%username%"|grep -i "Test Hot"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username% -c "Test Hot"; cat /etc/passwd|grep -i "^%username%"|grep -i "Test Hot"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%</rec>
@@ -957,7 +960,7 @@
         <rec key="username">test_user_661692</rec>
         <rec key="fullName">Tester Cool</rec>
         <rec key="description">GoodUser!</rec>
-        <rec key="initialCmd">userdel -rf %username%;useradd -m %username% -c "Tester Cool,this is the description for this user"; cat /etc/passwd|grep -i "^%username%"|grep -i "Tester Cool,this is the description for this user"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username% -c "Tester Cool,this is the description for this user"; cat /etc/passwd|grep -i "^%username%"|grep -i "Tester Cool,this is the description for this user"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%</rec>
@@ -976,7 +979,7 @@
         <rec key="fullName">Tester Cool</rec>
         <rec key="description">BadUser!</rec>
         <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
-        <rec key="initialCmd">userdel -rf %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%;</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%BadUser%;Password:%password%;Disabled:false</rec>
@@ -995,7 +998,7 @@
         <rec key="fullName">Tester Cool</rec>
         <rec key="description">BadUser!</rec>
         <rec key="password">abcde</rec>
-        <rec key="initialCmd">userdel -rf %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
+        <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%;</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%;Password:%password%;Disabled:true</rec>
@@ -1013,7 +1016,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
-        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true</rec>
@@ -1030,7 +1033,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
-        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:false</rec>
@@ -1047,7 +1050,7 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="home">/home/testhome</rec>
-        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;HomeDirectory:%home%</rec>
@@ -1064,7 +1067,7 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="home">/home/testhome</rec>
-        <rec key="initialCmd">userdel -f -r %username%;useradd %username%</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;useradd %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;HomeDirectory:%home%</rec>
@@ -1082,7 +1085,7 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="groupID">0</rec>
-        <rec key="initialCmd">userdel -f -r %username%</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;GroupID:%groupID%</rec>
@@ -1100,7 +1103,7 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="groupID">0</rec>
-        <rec key="initialCmd">userdel -f -r %username%;useradd %username%</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;useradd %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;GroupID:%groupID%</rec>
@@ -1117,7 +1120,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
-        <rec key="initialCmd">userdel -f -r %username%;useradd %username%</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;useradd %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
         <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true</rec>
@@ -1131,6 +1134,7 @@
     </section>
 
     <section sid="3" dsc="nxGroup Provider">
+      
       <var set="3" lvl="1" vid="661714" dsc="[nxGroup] Verify if specific group is created if enumerated Ensure property is Present" cls="DSC.nxGroupTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -1250,6 +1254,7 @@
         <rec key="successfulMsg">The member 'root,scxuser' is removed from '%groupname%'.</rec>
         <rec key="failedMsg">The member 'root,scxuser' failed to remove from '%groupname%'.</rec>
       </var>
+      
     </section>
 
     <section sid="4" dsc="nxScript Provider">
@@ -1547,6 +1552,247 @@
       </var>
       
     </section>
-    
+
+    <section sid="5" dsc="nxService Provider">
+      
+      <!-- Init Controller. -->
+      <var set="5" lvl="1" vid="661810"
+           dsc="[nxService] Verify the specific service is started successfully by ‘init’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="1" vid="661812"
+          dsc="[nxService] Verify the specific service is stopped successfully by ‘init’ service controller"
+          cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialState">Running</rec>
+        <rec key="expectedState">Stopped</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="1" vid="661813"
+           dsc="[nxService] Verify the specific service is enabled successfully by ‘init’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialEnabledState">false</rec>
+        <rec key="Enabled">true</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;Enabled:%Enabled%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%Enabled%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="1" vid="661814"
+           dsc="[nxService] Verify the specific service is disabled successfully by ‘init’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialEnabledState">true</rec>
+        <rec key="Enabled">false</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;Enabled:%Enabled%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%Enabled%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <!-- Upstart Controller. -->
+      <var set="5" lvl="1" vid="661815"
+           dsc="[nxService] Verify the specific service is started successfully by ‘upstart’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">upstart</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="1" vid="661817"
+           dsc="[nxService] Verify the specific service is stopped successfully by ‘upstart’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">upstart</rec>
+        <rec key="initialState">Running</rec>
+        <rec key="expectedState">Stopped</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+      
+      <var set="5" lvl="1" vid="661818"
+           dsc="[nxService] Verify the specific service is enabled successfully by ‘upstart’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">upstart</rec>
+        <rec key="initialEnabledState">false</rec>
+        <rec key="expectedEnabledState">true</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;Enabled:%expectedEnabledState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+      
+      <var set="5" lvl="1" vid="661819"
+           dsc="[nxService] Verify the specific service is disabled successfully by ‘upstart’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">upstart</rec>
+        <rec key="initialEnabledState">true</rec>
+        <rec key="expectedEnabledState">false</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;Enabled:%expectedEnabledState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+  
+      <!-- Systemd Controller. -->
+      <var set="5" lvl="1" vid="661820"
+           dsc="[nxService] Verify the specific service is started successfully by ‘systemd’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">systemd</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="1" vid="661821"
+           dsc="[nxService] Verify the specific service is stopped successfully by ‘systemd’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">systemd</rec>
+        <rec key="initialState">Running</rec>
+        <rec key="expectedState">Stopped</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="1" vid="661824"
+           dsc="[nxService] Verify the specific service is enabled successfully by ‘systemd’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">systemd</rec>
+        <rec key="initialEnabledState">false</rec>
+        <rec key="expectedEnabledState">true</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;Enabled:%expectedEnabledState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="1" vid="663815"
+           dsc="[nxService] Verify the specific service is disabled successfully by ‘systemd’ service controller"
+           cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">systemd</rec>
+        <rec key="initialEnabledState">true</rec>
+        <rec key="expectedEnabledState">false</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;Enabled:%expectedEnabledState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="3" vid="663816"
+          dsc="[nxService] Verify if new service is created if the specific service name does not exist"
+          cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%invalidServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
+        <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
+      </var>
+
+    </section>
+
   </section>
 </varmap>

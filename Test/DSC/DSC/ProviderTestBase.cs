@@ -130,24 +130,10 @@ namespace DSC
             #region Check Linux State
 
             // Verify Linux machine state.
-            if (!string.IsNullOrWhiteSpace(verificationCmd))
-            {
-                try
-                {
-                    ctx.Alw(String.Format("Run verification command : '{0}', expect it return '{1}'",
-                        verificationCmd, expectedValue));
-                    sshHelper.VerifyExecution(verificationCmd, expectedValue);
-
-                    ctx.Alw(successfulyMsg);
-                }
-                catch (Exception ex)
-                {
-                    throw new VarFail(failedMsg, ex);
-                }
-            }
+            VerifyLinuxState(ctx);
 
             #endregion
-            
+
             ctx.Alw("Verify End.");
         }
 
@@ -181,7 +167,7 @@ namespace DSC
             ctx.Alw("Cleanup End.");
         }
 
-        private Dictionary<string, string> ConvertStringToPropMap(string propString)
+        protected Dictionary<string, string> ConvertStringToPropMap(string propString)
         {
             string[] properties = propString.Split(';');
 
@@ -189,6 +175,25 @@ namespace DSC
                     where !String.IsNullOrWhiteSpace(property)
                     select property.Split(':'))
                     .ToDictionary(propertyMap => propertyMap[0], propertyMap => propertyMap[1]);
-        } 
+        }
+
+        protected virtual void VerifyLinuxState(IContext ctx)
+        {
+            if (!string.IsNullOrWhiteSpace(verificationCmd))
+            {
+                try
+                {
+                    ctx.Alw(String.Format("Run verification command : '{0}', expect it return '{1}'",
+                        verificationCmd, expectedValue));
+                    sshHelper.VerifyExecution(verificationCmd, expectedValue);
+
+                    ctx.Alw(successfulyMsg);
+                }
+                catch (Exception ex)
+                {
+                    throw new VarFail(failedMsg, ex);
+                }
+            } 
+        }
     }
 }
