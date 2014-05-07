@@ -40,9 +40,6 @@
             // Check if the controller is supported on the Linux.
             CheckControllerExist(controller);
 
-            // Check if the service exists in the controller.
-            CheckServiceExistOrInvalid(controller, serviceName, invalidServiceName);
-
             initializeCmd = GetInitializeCmd(serviceName, controller, state, enable, out orgState, out orgEnableState);
             finalizeCmd = GetFinalizeCmd(serviceName, controller, orgState, orgEnableState);
 
@@ -210,38 +207,6 @@
             }
         }
 
-        private void CheckServiceExistOrInvalid(string controller, string serviceName, string expectedInvalidService)
-        {
-            if (serviceName.Equals(expectedInvalidService))
-            {
-                return;
-            }
-
-            switch (controller.ToLower())
-            {
-                case "init":
-                    if (!InitServiceExist(serviceName))
-                    {
-                        throw new VarUnsupported("service does not exist!");
-                    }
-                    break;
-                case "upstart":
-                    if (!UpstartServiceExist(serviceName))
-                    {
-                        throw new VarUnsupported("service does not exist!");
-                    }
-                    break;
-                case "systemd":
-                    if (!SystemdServiceExist(serviceName))
-                    {
-                        throw new VarUnsupported("service does not exist!");
-                    }
-                    break;
-                default:
-                    throw new ArgumentException("The controller is invalid!");
-            }
-        }
-
         #region Upstart Controller
         private string UpstartCmd(string name, string state, string enable)
         {
@@ -338,18 +303,6 @@
             }
         }
 
-        private bool UpstartServiceExist(string service)
-        {
-            try
-            {
-                sshHelper.Execute(String.Format("ls /etc/init/{0}.conf", service));
-                return true;
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
-        }
         #endregion
 
         #region Systemd Controller
@@ -415,19 +368,6 @@
             try
             {
                 sshHelper.Execute("ls /bin/systemctl");
-                return true;
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
-        }
-
-        private bool SystemdServiceExist(string service)
-        {
-            try
-            {
-                sshHelper.Execute(String.Format("ls /usr/lib/systemd/system/{0}.service", service));
                 return true;
             }
             catch (InvalidOperationException)
@@ -519,19 +459,6 @@
                 return true;
             }
             catch(InvalidOperationException)
-            {
-                return false;
-            }
-        }
-
-        private bool InitServiceExist(string service)
-        {
-            try
-            {
-                sshHelper.Execute(String.Format("ls /etc/init.d/{0}", service));
-                return true;
-            }
-            catch (InvalidOperationException)
             {
                 return false;
             }
