@@ -1,0 +1,11 @@
+[ClassVersion("1.0.0"),FriendlyName("nxService")]
+class MSFT_nxServiceResource : OMI_BaseResource
+{
+	[key] string Name;
+	[write,ValueMap{"init", "upstart", "serviced"},Values{"init","upstart","serviced"}] string Controller;
+	[write] boolean Enabled;
+	[write,ValueMap{"Running", "Stopped"},Values{"Running", "Stopped"}] string State;
+	[read] boolean IsEnabled;
+	[read] string Status;
+	[read] string Path;
+};
