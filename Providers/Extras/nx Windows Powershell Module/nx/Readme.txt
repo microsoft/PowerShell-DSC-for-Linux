@@ -1,0 +1,1 @@
+Copy everything in this folder into C:\Windows\System32\WindowsPowerShell\v1.0\Modules\nx\
