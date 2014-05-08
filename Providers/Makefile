@@ -7,7 +7,7 @@
 
 # Please define the variables below for your system!
 
-OMI_DIR := $(shell cd ../OMI; pwd)
+OMI_DIR := $(shell cd ../omi-1.0.8; pwd)
 BASE_DIR := $(shell pwd)
 TARGET_DIR := $(BASE_DIR)/target
 
@@ -40,7 +40,9 @@ PROVIDER_LIBRARIES_PATHS := $(addprefix $(TARGET_DIR)/,$(PROVIDER_LIBRARIES))
 
 all: $(PROVIDER_LIBRARIES_PATHS)
 
-$(TARGET_DIR):
+$(TARGET_DIR): $(TARGET_DIR)/objs
+
+$(TARGET_DIR)/objs:
 	mkdir -p $(TARGET_DIR)/objs
 
 # PythonHelper static library
@@ -134,19 +136,21 @@ clean :
 	-rm -r $(TARGET_DIR)
 
 
-OMI_OUTPUT_DIR := $(OMI_DIR)/output
-OMI_BINDIR := $(OMI_OUTPUT_DIR)/bin
-OMI_LIBDIR := $(OMI_OUTPUT_DIR)/lib
+include $(OMI_DIR)/output/config.mak
+OMI_BINDIR := $(CONFIG_BINDIR)
+OMI_LIBDIR := $(CONFIG_LIBDIR)
 OMIGEN := $(OMI_BINDIR)/omigen
 OMIREG := $(OMI_BINDIR)/omireg
+DSC_SCHEMA_DIR := $(CONFIG_SYSCONFDIR)/dsc/configuration/schema
+DSC_REGISTRATION_DIR := $(CONFIG_SYSCONFDIR)/dsc/configuration/registration
 
 reg :
-	mkdir -p $(TARGET_DIR)/omi
-	sudo mkdir -p /etc/opt/microsoft/omi/conf/omiregister/dsc
+	cp -R $(BASE_DIR)/Scripts $(OMI_LIBDIR)
 	for prov in $(PROVIDER_LIST); do \
-		export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); cd $(TARGET_DIR)/omi; $(OMIREG) -n "root/Microsoft/DesiredStateConfiguration" -o @requestor@ $(TARGET_DIR)/libMSFT_$${prov}Resource.so; \
-		mkdir -p  $(OMI_DIR)/etc/dsc/configuration/{registration,schema}/MSFT_$${prov}Resource; \
-		cp $(BASE_DIR)/$${prov}/MSFT_$${prov}Resource.schema.mof $(OMI_DIR)/etc/dsc/configuration/schema/MSFT_$${prov}Resource/MSFT_$${prov}Resource.schema.mof; \
-		cp $(BASE_DIR)/$${prov}/MSFT_$${prov}Resource.registration.mof $(OMI_DIR)/etc/dsc/configuration/registration/MSFT_$${prov}Resource/MSFT_$${prov}Resource.registration.mof; \
+		export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); $(OMIREG) -n "root/Microsoft/DesiredStateConfiguration" -o @requestor@ $(TARGET_DIR)/libMSFT_$${prov}Resource.so; \
+		mkdir -p  $(DSC_SCHEMA_DIR)/MSFT_$${prov}Resource; \
+		mkdir -p  $(DSC_REGISTRATION_DIR)/MSFT_$${prov}Resource; \
+		cp $(BASE_DIR)/$${prov}/MSFT_$${prov}Resource.schema.mof $(DSC_SCHEMA_DIR)/MSFT_$${prov}Resource/MSFT_$${prov}Resource.schema.mof; \
+		cp $(BASE_DIR)/$${prov}/MSFT_$${prov}Resource.registration.mof $(DSC_REGISTRATION_DIR)/MSFT_$${prov}Resource/MSFT_$${prov}Resource.registration.mof; \
 	done
 

@@ -1,1 +1,1 @@
-cd OMI; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure --dev
+cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure --dev

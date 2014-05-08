@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #include <micodec.h>
 #include <ctype.h>
 #include <stdlib.h>

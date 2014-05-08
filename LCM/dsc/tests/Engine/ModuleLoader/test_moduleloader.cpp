@@ -1,3 +1,7 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
 
 #include <nits.h>
 #include "../../common/NitsPriority.h"
@@ -125,7 +129,7 @@ NitsDRTCommonTest1(TestInitializeModuleManager, InitCA, PtrVal)
                         continue;
 
                     }
-		    else if( Tcscasecmp(MI_T("TEST_Test3User"), (moduleLoader->providerSchema[xCount])->classDecl->name) == 0 )
+                    else if( Tcscasecmp(MI_T("TEST_Test3User"), (moduleLoader->providerSchema[xCount])->classDecl->name) == 0 )
                     {
                         //find its mapping and get registration object.
                         if (NitsAssert((int) moduleLoader->schemaToRegistrationMapping[xCount] !=  -1, MI_T("Registration mapping for TEST_Test3User class not found")))
@@ -147,7 +151,7 @@ NitsDRTCommonTest1(TestInitializeModuleManager, InitCA, PtrVal)
                 }
                 NitsAssert( bTest1Found == MI_TRUE, MI_T("Class TEST_Test1 not found in schema files")) ;
                 NitsAssert( bTest2Found == MI_TRUE, MI_T("Class TEST_Test2 not found in schema files")) ;
-		        NitsAssert( bTest3UserFound == MI_TRUE, MI_T("Class TEST_Test3User not found in schema files")) ;
+                        NitsAssert( bTest3UserFound == MI_TRUE, MI_T("Class TEST_Test3User not found in schema files")) ;
             }
             NitsCompare(NitsGetTrap(h, CATraps, _CATest_Close)(moduleManager, &extendedError), MI_RESULT_OK, MI_T("ModuleManager Close Failed"));
             

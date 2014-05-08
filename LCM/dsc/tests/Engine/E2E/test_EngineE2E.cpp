@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #include <nits.h>
 #include "../../common/NitsPriority.h"
 #include <MI.h>

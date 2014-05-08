@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #ifdef _PREFAST_
 #pragma prefast (push)
 #pragma prefast (disable: 26018 28301 26006) //this is unit test code don't worry about the warnings.
@@ -171,7 +176,7 @@ Ptr PtrVal = {NULL};
 #pragma region Get
 NitsSetup0(SingleFileDirTestOfGetOperation, Ptr)
     //CreateProcessHelper(L"powershell.exe -executionpolicy unrestricted -command .\\FileUnitTestGetOperationSetup.ps1");
-	FileUnitTestGetOperationSetup();
+        FileUnitTestGetOperationSetup();
     NitsTrapHandle h = NitsOpenTrap("DSCCoreConfProv.dll", NativeProviderTraps);
         NitsAssert(h != NULL, L"Failed to load NativeProviderTraps!");
         NitsContext()->_Ptr->ptr = h;
@@ -212,7 +217,7 @@ NitsEndTest
 #pragma region TestCredentialSingleFile
 NitsSetup0(SingleFileDirTestOfTestOperation, Ptr)
     CreateProcessHelper(L"powershell.exe -executionpolicy unrestricted -command .\\FileUnitTestTestOperationSetup.ps1");
-	//FileUnitTestTestOperationSetup();
+        //FileUnitTestTestOperationSetup();
     NitsTrapHandle h = NitsOpenTrap("DSCCoreConfProv.dll", NativeProviderTraps);
         NitsAssert(h != NULL, L"Failed to load NativeProviderTraps!");
         NitsContext()->_Ptr->ptr = h;
@@ -268,16 +273,16 @@ NitsDRTTest1(SingleDirAndFileOfTestOperationPresentFile, SingleFileDirTestOfTest
         SingleValidObjOfTestOperation(createddatechecksum, true, h);
 
 
-		// Test For environment Variable in Path.
-		MSFT_FileDirectoryConfiguration environmentVarInPath= sourceFileAndDestFilewithbom;
-		environmentVarInPath.Ensure.exists = MI_TRUE;
-		environmentVarInPath.Ensure.value = L"Present";
-		environmentVarInPath.Type.exists = MI_TRUE;
-		environmentVarInPath.Type.value = L"File";
-		environmentVarInPath.Attributes.exists = MI_FALSE;
-		environmentVarInPath.SourcePath.value = L"%windir%\\System32\\cmd.exe";
-		environmentVarInPath.DestinationPath.value = L"%windir%\\System32\\cmd.exe";
-		SingleValidObjOfTestOperation(environmentVarInPath, true, h);
+                // Test For environment Variable in Path.
+                MSFT_FileDirectoryConfiguration environmentVarInPath= sourceFileAndDestFilewithbom;
+                environmentVarInPath.Ensure.exists = MI_TRUE;
+                environmentVarInPath.Ensure.value = L"Present";
+                environmentVarInPath.Type.exists = MI_TRUE;
+                environmentVarInPath.Type.value = L"File";
+                environmentVarInPath.Attributes.exists = MI_FALSE;
+                environmentVarInPath.SourcePath.value = L"%windir%\\System32\\cmd.exe";
+                environmentVarInPath.DestinationPath.value = L"%windir%\\System32\\cmd.exe";
+                SingleValidObjOfTestOperation(environmentVarInPath, true, h);
 
 
         SingleValidObjOfTestOperation(sourceFileAndDestDirWithSameFileWithBom, true, h);
@@ -389,19 +394,19 @@ NitsDRTTest1(SingleDirAndFileOfTestOperationAbsent, SingleFileDirTestOfTestOpera
         SingleValidObjOfTestOperation(DestFile, false, h);
         SingleValidObjOfTestOperation(NotExistDest, true, h);
 
-		MSFT_FileDirectoryConfiguration TypeFileActualDir = DestDir;
-		TypeFileActualDir.Ensure.exists = MI_TRUE;
-		TypeFileActualDir.Ensure.value = L"absent";
-		TypeFileActualDir.Type.exists = MI_TRUE;
-		TypeFileActualDir.Type.value = L"File";
-		SingleValidObjOfTestOperation(TypeFileActualDir, true, h);
-	
-		MSFT_FileDirectoryConfiguration TypeDirActualFile = DestFile;
-		TypeDirActualFile.Ensure.exists = MI_TRUE;
-		TypeDirActualFile.Ensure.value = L"absent";
-		TypeDirActualFile.Type.exists = MI_TRUE;
-		TypeDirActualFile.Type.value = L"Directory";
-		SingleValidObjOfTestOperation(TypeDirActualFile, true, h);
+                MSFT_FileDirectoryConfiguration TypeFileActualDir = DestDir;
+                TypeFileActualDir.Ensure.exists = MI_TRUE;
+                TypeFileActualDir.Ensure.value = L"absent";
+                TypeFileActualDir.Type.exists = MI_TRUE;
+                TypeFileActualDir.Type.value = L"File";
+                SingleValidObjOfTestOperation(TypeFileActualDir, true, h);
+        
+                MSFT_FileDirectoryConfiguration TypeDirActualFile = DestFile;
+                TypeDirActualFile.Ensure.exists = MI_TRUE;
+                TypeDirActualFile.Ensure.value = L"absent";
+                TypeDirActualFile.Type.exists = MI_TRUE;
+                TypeDirActualFile.Type.value = L"Directory";
+                SingleValidObjOfTestOperation(TypeDirActualFile, true, h);
     }
 NitsEndTest
 #pragma endregion Test
@@ -409,7 +414,7 @@ NitsEndTest
 #pragma region Set
 NitsSetup0(FileDirTestOfSetOperation, Ptr)
     CreateProcessHelper(L"powershell.exe -executionpolicy unrestricted -command .\\FileUnitTestSetOperationSetup.ps1");
-	//FileUnitTestSetOperationSetup(false);
+        //FileUnitTestSetOperationSetup(false);
     NitsTrapHandle h = NitsOpenTrap("DSCCoreConfProv.dll", NativeProviderTraps);
         NitsAssert(h != NULL, L"Failed to load NativeProviderTraps!");
         NitsContext()->_Ptr->ptr = h;
@@ -437,12 +442,12 @@ NitsTrapHandle h = NitsContext()->_FileDirTestOfSetOperation->_Ptr->ptr;
         if(i == 1)
         {
             CreateProcessHelper(L"powershell.exe -executionpolicy unrestricted -command \".\\FileUnitTestSetOperationSetup.ps1 -keepcache:$true\"");
-			//FileUnitTestSetOperationSetup(true);
+                        //FileUnitTestSetOperationSetup(true);
         }
         else
         {
             CreateProcessHelper(L"powershell.exe -executionpolicy unrestricted -command \".\\FileUnitTestSetOperationSetup.ps1 -keepcache:$false\"");
-			//FileUnitTestSetOperationSetup(false);
+                        //FileUnitTestSetOperationSetup(false);
         }
         
         ValidObjOfSetOperation(ContentNotMatchForSet, h);
@@ -526,12 +531,12 @@ NitsTrapHandle h = NitsContext()->_CredentialOperation->_Ptr->ptr;
         if(i == 1)
         {
             (L"powershell.exe -executionpolicy unrestricted -command \".\\FileUnitTestCredentialSetup.ps1 -keepcache:$true\"");
-			//FileUnitTestCredentialSetup();
+                        //FileUnitTestCredentialSetup();
         }
         else
         {
             CreateProcessHelper(L"powershell.exe -executionpolicy unrestricted -command \".\\FileUnitTestCredentialSetup.ps1 -keepcache:$false\"");
-			//FileUnitTestCredentialSetup();
+                        //FileUnitTestCredentialSetup();
         }
         ValidObjOfSetOperation(SingleFileRemoteSourceNotMatchLocalUser, h);
         ValidObjOfSetOperation(MultipleFileRemoteSourceNotMatchLocalUser, h);
@@ -625,9 +630,9 @@ void CheckOutpuFile()
 void CheckOutputOfSetOperation(int i)
 {
     if(i == 0)
-	CreateProcessHelper(L"powershell.exe -executionpolicy unrestricted -command .\\FileUnitTestSetOperationVerify.ps1");
-	else
-	FileUnitTestSetOperationVerify();
+        CreateProcessHelper(L"powershell.exe -executionpolicy unrestricted -command .\\FileUnitTestSetOperationVerify.ps1");
+        else
+        FileUnitTestSetOperationVerify();
     CheckOutpuFile();
 }
 
@@ -1093,9 +1098,9 @@ void InitializeInputInstancesOfTestOperation()
 
 #pragma region ensure=present&file
     fakeFT.SetElementAt = &Fake_SetElementAt;
-    noSourceJustDestFilewithbom.__instance.ft = &fakeFT;	    
+    noSourceJustDestFilewithbom.__instance.ft = &fakeFT;            
     noSourceJustDestFilewithbom.Checksum.exists = MI_TRUE;
-	noSourceJustDestFilewithbom.Checksum.value = L"None";
+        noSourceJustDestFilewithbom.Checksum.value = L"None";
 
 
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&noSourceJustDestFilewithbom, singledestfilewithbom.c_str());
@@ -1165,8 +1170,8 @@ void InitializeInputInstancesOfTestOperation()
     SetAttributesProperty(sourceDirAndDestDir, attributesDir);
     sourceDirAndDestDir.Ensure.exists = MI_TRUE;
     sourceDirAndDestDir.Ensure.value = L"Present";
-	sourceDirAndDestDir.Type.exists = MI_TRUE;
-	sourceDirAndDestDir.Type.value = L"Directory";
+        sourceDirAndDestDir.Type.exists = MI_TRUE;
+        sourceDirAndDestDir.Type.value = L"Directory";
 
     sourceDirAndNotExistDest = sourceDirAndDestDir;
     sourceDirAndNotExistDest.DestinationPath.value = L"C:\\doesntexist11bd9629-10c3-4aca-9247-d67cff7f212e.txt";
@@ -1193,12 +1198,12 @@ void InitializeInputInstancesOfTestOperation()
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&DestDir, singledestdirname.c_str());
     DestDir.Ensure.exists = MI_TRUE;
     DestDir.Ensure.value = L"absent";
-	DestDir.Type.exists = MI_TRUE;
-	DestDir.Type.value = L"Directory";
+        DestDir.Type.exists = MI_TRUE;
+        DestDir.Type.value = L"Directory";
 
     DestFile = DestDir;
-	DestFile.Type.exists = MI_TRUE;
-	DestFile.Type.value = L"File";
+        DestFile.Type.exists = MI_TRUE;
+        DestFile.Type.value = L"File";
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&DestFile, singledestfilewithbom.c_str());
 
     NotExistDest = DestDir;
@@ -1233,9 +1238,9 @@ void InitializeInputInstancesOfRecursiveTestOperation()
     MSFT_FileDirectoryConfiguration_Set_SourcePath(&RDestdirIdentical, RsourcedirPath.c_str());
     SetAttributesProperty(RDestdirIdentical, desiredAttributes);
     RDestdirIdentical.Ensure.value= L"Present";
-	RDestdirIdentical.Type.value= L"Directory";
+        RDestdirIdentical.Type.value= L"Directory";
     RDestdirIdentical.Ensure.exists = MI_TRUE;
-	RDestdirIdentical.Type.exists = MI_TRUE;
+        RDestdirIdentical.Type.exists = MI_TRUE;
     RDestdirIdentical.Force.value= MI_TRUE;
     RDestdirIdentical.Force.exists = MI_TRUE;
     RDestdirIdentical.Recurse.value= MI_TRUE;
@@ -1322,8 +1327,8 @@ void InitializeInputInstancesOfSetOperation()
     ContentNotMatchForSet = templateInstance;
     ContentNotMatchForSet.Ensure.exists =MI_TRUE;
     ContentNotMatchForSet.Ensure.value = L"Present";
-	ContentNotMatchForSet.Type.exists =MI_TRUE;
-	ContentNotMatchForSet.Type.value = L"file";
+        ContentNotMatchForSet.Type.exists =MI_TRUE;
+        ContentNotMatchForSet.Type.value = L"file";
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&ContentNotMatchForSet, singledestfilecontentmismatch.c_str());
     ContentNotMatchForSet.Contents.exists = MI_TRUE;
     ContentNotMatchForSet.Contents.value = contents.c_str();
@@ -1364,8 +1369,8 @@ void InitializeInputInstancesOfSetOperation()
     sourceDirAndDestDirForSet = templateInstance;
     sourceDirAndDestDirForSet.Ensure.exists =MI_TRUE;
     sourceDirAndDestDirForSet.Ensure.value = L"Present";
-	sourceDirAndDestDirForSet.Type.exists =MI_TRUE;
-	sourceDirAndDestDirForSet.Type.value = L"directory";
+        sourceDirAndDestDirForSet.Type.exists =MI_TRUE;
+        sourceDirAndDestDirForSet.Type.value = L"directory";
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&sourceDirAndDestDirForSet, singledestdirname.c_str());
     MSFT_FileDirectoryConfiguration_Set_SourcePath(&sourceDirAndDestDirForSet, singlesourcedirname.c_str());
 
@@ -1400,7 +1405,7 @@ void InitializeInputInstancesOfSetOperation()
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&DestDirForSet, DestDirForAbsent.c_str());
 
     DestFileForSet = DestDirForSet;
-	DestFileForSet.Type.exists = MI_TRUE;
+        DestFileForSet.Type.exists = MI_TRUE;
     DestFileForSet.Type.value = L"File";
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&DestFileForSet, DestFileForAbsent.c_str());
 
@@ -1410,7 +1415,7 @@ void InitializeInputInstancesOfSetOperation()
     DestDirNotEmptyForceTrue.Force.value = MI_TRUE;
 
     DestDirNotEmptyForceFALSE = DestDirForSet;
-	DestDirNotEmptyForceFALSE.Type.exists = MI_TRUE;
+        DestDirNotEmptyForceFALSE.Type.exists = MI_TRUE;
     DestDirNotEmptyForceFALSE.Type.value = L"Directory";
 
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&DestDirNotEmptyForceFALSE, DestDirNotEmptyForceFALSEPath.c_str());
@@ -1420,8 +1425,8 @@ void InitializeInputInstancesOfSetOperation()
 #pragma region invalid
     DestDirEnsureFileNoSource = sourceDirAndDestDirForSet;
     DestDirEnsureFileNoSource.Ensure.value = L"Present";
-	DestDirEnsureFileNoSource.Type.exists = MI_TRUE;
-	DestDirEnsureFileNoSource.Type.value = L"file";
+        DestDirEnsureFileNoSource.Type.exists = MI_TRUE;
+        DestDirEnsureFileNoSource.Type.value = L"file";
     DestDirEnsureFileNoSource.SourcePath.exists = MI_FALSE;
     DestWildcardEnsureFileNosouce = DestDirEnsureFileNoSource;
     MSFT_FileDirectoryConfiguration_Set_DestinationPath(&DestWildcardEnsureFileNosouce, L"C:\\*.txt");
@@ -1464,8 +1469,8 @@ void InitializeInputInstancesOfCredentialOperation()
 
     SingleFileRemoteSourceNotMatchLocalUser.Ensure.exists =MI_TRUE;
     SingleFileRemoteSourceNotMatchLocalUser.Ensure.value = L"Present";
-	SingleFileRemoteSourceNotMatchLocalUser.Type.exists =MI_TRUE;
-	SingleFileRemoteSourceNotMatchLocalUser.Type.value = L"file";
+        SingleFileRemoteSourceNotMatchLocalUser.Type.exists =MI_TRUE;
+        SingleFileRemoteSourceNotMatchLocalUser.Type.value = L"file";
     credential.UserName.exists = MI_TRUE;
     credential.UserName.value = L"localhost\\paxnj";
     credential.Password.exists = MI_TRUE;
@@ -1481,8 +1486,8 @@ void InitializeInputInstancesOfCredentialOperation()
     MultipleFileRemoteSourceNotMatchLocalUser.Recurse.exists = MI_TRUE;
     MultipleFileRemoteSourceNotMatchLocalUser.Recurse.value = MI_TRUE;
     MultipleFileRemoteSourceNotMatchLocalUser.Ensure.value = L"Present";
-	MultipleFileRemoteSourceNotMatchLocalUser.Type.exists =MI_TRUE;
-	MultipleFileRemoteSourceNotMatchLocalUser.Type.value = L"Directory";
+        MultipleFileRemoteSourceNotMatchLocalUser.Type.exists =MI_TRUE;
+        MultipleFileRemoteSourceNotMatchLocalUser.Type.value = L"Directory";
 
     CredentialIsSpecifiedButNoPassword = SingleFileRemoteSourceNotMatchLocalUser;
     noPasswordCredential.UserName.exists = MI_TRUE;

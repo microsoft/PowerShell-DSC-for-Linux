@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #ifdef _PREFAST_
 #pragma prefast (push)
 #pragma prefast (disable: 26018 28301 26006) //this is unit test code don't worry about the warnings.
@@ -47,8 +52,8 @@ LPCWSTR SetErrorBuffer(__out_ecount(bufLen) LPWSTR bufout, DWORD bufLen,  LPCWST
 #define TEST_MODULELOCATION_PSD1 L"%programfiles%\\WindowsPowershell\\Modules\\PsModuleForTestModuleForPull\\PsModuleForTestModuleForPull.psd1"
 #define TEST_MODULELOCATION_PSM1 L"%programfiles%\\WindowsPowershell\\Modules\\PsModuleForTestModuleForPull\\DSCResources\\TestModuleForPull\\TestModuleForPull.psm1"
 #define TEST_MODULELOCATION_MOF L"%programfiles%\\WindowsPowershell\\Modules\\PsModuleForTestModuleForPull\\DSCResources\\TestModuleForPull\\TestModuleForPull.schema.mof"
-//#define META_CONFIG_PULL L"instance of MSFT_KeyValuePair as $keyvaluepair1\n{\n      key=\"ServerUrl\";\n      value = \"http://localhost:8080/PSDSCPullServer/PSDSCPullServer.svc\";\n};\n	instance of MSFT_DSCMetaConfiguration\n{\n    ConfigurationID=\"d564b612-5436-43aa-a355-1aa8bdea22b6\";\n    DownloadManagerName=\"WebDownloadManager\";\n  ConfigurationModeFrequencyMins = 5;\n  DownloadManagerCustomData = {$keyvaluepair1};\n};\n"
-#define META_CONFIG_PULL L"instance of MSFT_KeyValuePair as $keyvaluepair1\n{\n      key=\"SourcePath\";\n      value = \"C:\\\\ProgramData\\\\DSCFileRepository\";\n};\n instance of MSFT_KeyValuePair as $keyvaluepair2\n{\n      key=\"DestinationPath\";\n      value = \"C:\\\\ProgramData\\\\DSCFileDownloadLocation\";\n};\n	instance of MSFT_DSCMetaConfiguration\n{\n    ConfigurationID=\"d564b612-5436-43aa-a355-1aa8bdea22b6\";\n    DownloadManagerName=\"DSCFileDownloadManager\";\n  ConfigurationModeFrequencyMins = 5;\n  DownloadManagerCustomData = {$keyvaluepair1,$keyvaluepair2};\n};\n"
+//#define META_CONFIG_PULL L"instance of MSFT_KeyValuePair as $keyvaluepair1\n{\n      key=\"ServerUrl\";\n      value = \"http://localhost:8080/PSDSCPullServer/PSDSCPullServer.svc\";\n};\n   instance of MSFT_DSCMetaConfiguration\n{\n    ConfigurationID=\"d564b612-5436-43aa-a355-1aa8bdea22b6\";\n    DownloadManagerName=\"WebDownloadManager\";\n  ConfigurationModeFrequencyMins = 5;\n  DownloadManagerCustomData = {$keyvaluepair1};\n};\n"
+#define META_CONFIG_PULL L"instance of MSFT_KeyValuePair as $keyvaluepair1\n{\n      key=\"SourcePath\";\n      value = \"C:\\\\ProgramData\\\\DSCFileRepository\";\n};\n instance of MSFT_KeyValuePair as $keyvaluepair2\n{\n      key=\"DestinationPath\";\n      value = \"C:\\\\ProgramData\\\\DSCFileDownloadLocation\";\n};\n     instance of MSFT_DSCMetaConfiguration\n{\n    ConfigurationID=\"d564b612-5436-43aa-a355-1aa8bdea22b6\";\n    DownloadManagerName=\"DSCFileDownloadManager\";\n  ConfigurationModeFrequencyMins = 5;\n  DownloadManagerCustomData = {$keyvaluepair1,$keyvaluepair2};\n};\n"
 
 HANDLE g_PresentHandle = NULL;
 
@@ -589,7 +594,7 @@ MI_Result CopyMetaConfig(NitsTrapHandle h)
 NitsSetup0(InitPull, Ptr)
 
     MI_Instance *cimErrorDetails = NULL;
-	NitsTrapHandle h = NitsOpenTrap("DSCCore.dll", LCMTraps);
+        NitsTrapHandle h = NitsOpenTrap("DSCCore.dll", LCMTraps);
     NitsAssert(h != NULL, L"Failed to load LCMTraps!");
     NitsContext()->_Ptr->ptr = h;
     MI_Result miResult  = CopyMetaConfigLocally(h);
@@ -656,7 +661,7 @@ NitsIDXTest1(TestLCM_Pull_ValidateEvents, InitPull, PtrVal)
         miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_LCM_Pull_Execute)( );
         MoveDirectory(DOWNLOADMANAGER_TEMPLOCATION, DOWNLOADMANAGER_LOCATION, h );
 
-		//getchar();
+                //getchar();
 
         //Check rest of the events.
         //Execute to get configuration and modules.

@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #include <ctype.h>
 #include "strset.h"
 #include <pal/strings.h>

@@ -1,3 +1,7 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
 /* @migen@ */
 #include <MI.h>
 #if defined(_MSC_VER)
@@ -119,8 +123,8 @@ void MI_CALL TEST_Stop_Invoke_GetTargetResource(
     _In_ const TEST_Stop* instanceName,
     _In_opt_ const TEST_Stop_GetTargetResource* in)
 {
-	TEST_Stop_GetTargetResource out;
-	MI_UNREFERENCED_PARAMETER(self);
+        TEST_Stop_GetTargetResource out;
+        MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
     MI_UNREFERENCED_PARAMETER(className);
     MI_UNREFERENCED_PARAMETER(methodName);

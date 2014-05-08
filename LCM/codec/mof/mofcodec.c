@@ -1,6 +1,6 @@
-/*
- * Copyright (C) 2012 Microsoft Corporation
- * All rights reserved.
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
  */
 
 

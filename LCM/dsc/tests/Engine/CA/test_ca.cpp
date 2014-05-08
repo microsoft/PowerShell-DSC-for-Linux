@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #include <nits.h>
 #include <EngineHelperInternal.h>
 #include <pal/format.h>
@@ -154,7 +159,7 @@ NitsDRTCommonTest1(TestGetConfiguration, InitCA, PtrVal)
     {
 #if defined(_MSC_VER)
         MI_Char binaryPath[MAX_PATH];
-        MI_Char finalPath[MAX_PATH];		
+        MI_Char finalPath[MAX_PATH];            
         if(NitsAssert(_GetCurrentDir(binaryPath, MAX_PATH) != NULL, MI_T("_GetCurrentDir Failed")))
         {
             Stprintf(finalPath, MAX_PATH, FMT, binaryPath,TEST_DOCUMENT_NAME);
@@ -277,7 +282,7 @@ NitsDRTCommonTest1(TestResolveDependencies, InitCA, PtrVal)
 
         if(NitsCompare(NitsGetTrap(h, CATraps, _CATEST_LoadInstanceDocumentFromLocation)(moduleManager, 0, TEST_DEPENDENCY_3, &extendedError, &resourceInstances, &documentIns), MI_RESULT_OK, MI_T("ResolveDependency Test 1: LoadInstanceDocumentFromLocation Failed")))
 #endif
-		{
+                {
             //Send configuration
             if( NitsAssert((ModuleLoaderObject*)moduleManager->reserved2, MI_T("ModuleLoader can't be NULL")))
             {
