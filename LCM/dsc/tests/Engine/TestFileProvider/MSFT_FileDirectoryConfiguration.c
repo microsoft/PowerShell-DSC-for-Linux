@@ -1,3 +1,7 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
 /* @migen@ */
 #include <MI.h>
 #include "MSFT_FileDirectoryConfiguration.h"

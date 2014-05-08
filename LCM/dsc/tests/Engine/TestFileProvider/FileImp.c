@@ -1,3 +1,7 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
 #include "MSFT_FileDirectoryConfiguration.h"
 #include "FileImp.h"
 #include "pal/file.h"

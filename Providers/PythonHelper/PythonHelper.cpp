@@ -1,3 +1,7 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
 #include "PythonHelper.hpp"
 #include <iostream>
 #include <stdlib.h>
@@ -362,16 +366,17 @@ int callPythonFunction(
 
 std::string GetScriptPath()
 {
-    char* sPath = getenv("DSC_PATH");
+    char* sPath = getenv("OMI_HOME");
     std::string scriptPath;
     if (sPath == NULL)
     {
-        scriptPath = "~";
+        std::cerr << "Error: Expected environment variable OMI_HOME is not defined.  Looking up scripts in /opt/omi-1.0.8/lib/Scripts" << std::endl;
+        scriptPath = "/opt/omi-1.0.8";
     }
     else
     {
         scriptPath = sPath;
     }
-    scriptPath += "/Scripts";
+    scriptPath += "/lib/Scripts";
     return scriptPath;
 }

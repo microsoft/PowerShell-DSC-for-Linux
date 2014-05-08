@@ -1,7 +1,0 @@
-instance of DSC_InternalStateCache
-{
-    ComplianceStatus = False;
-    GetActionStatusCode = 0;
-    LCMStatusCode = 0;
-};
-

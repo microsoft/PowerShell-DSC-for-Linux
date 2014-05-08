@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #include <nits.h>
 #include "../../common/NitsPriority.h"
 #include <MI.h>
@@ -76,7 +81,7 @@ using namespace std;
 #ifdef _MSC_VER
     #define TEST_CONFIG_FILE MI_T("testLCM.mof")
     #define TEST_META_CONFIG_MOF MI_T("testMetaConfig.mof")
-    #define TEST_STOPMOF	MI_T("Test_Stop.mof")
+    #define TEST_STOPMOF        MI_T("Test_Stop.mof")
     #define TEST_CER_PASSWORD_FILE    MI_T("unittest_password.cer")
     #define TEST_NONINDEPENDENT_INDEPENDENTRESOURCES MI_T("TestNonDependent_1.mof")
     #define TEST_NONINDEPENDENT_MIXEDMODE MI_T("TestNonDependent_2.mof")
@@ -93,7 +98,7 @@ using namespace std;
 #else
     #define TEST_CONFIG_FILE CONFIG_SRCDIR MI_T("/dsc/tests/Engine/LCM") MI_T("/testLCM2.mof")
     #define TEST_META_CONFIG_MOF CONFIG_SRCDIR MI_T("/dsc/tests/Engine/LCM") MI_T("/testMetaConfig.mof")
-    #define TEST_STOPMOF	CONFIG_SRCDIR MI_T("/dsc/tests/Engine/LCM") MI_T("/Test_Stop.mof")
+    #define TEST_STOPMOF        CONFIG_SRCDIR MI_T("/dsc/tests/Engine/LCM") MI_T("/Test_Stop.mof")
     #define TEST_CER_PASSWORD_FILE    CONFIG_SRCDIR MI_T("/dsc/tests/Engine/LCM") MI_T("/unittest_password.cer")
     #define TEST_NONINDEPENDENT_INDEPENDENTRESOURCES CONFIG_SRCDIR MI_T("/dsc/tests/Engine/LCM") MI_T("/TestNonDependent_1.mof")
     #define TEST_NONINDEPENDENT_MIXEDMODE CONFIG_SRCDIR MI_T("/dsc/tests/Engine/LCM") MI_T("/TestNonDependent_2.mof")
@@ -937,7 +942,7 @@ NitsDRTCommonTest1(TestLCM_Pull_Execute, InitLCMPull, PtrVal)
         TTRACE(MI_T("Skipping the test as this is client SKU."));
     }
 #else
-	miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_LCM_Pull_Execute)( );
+        miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_LCM_Pull_Execute)( );
         NitsCompare(miResult, MI_RESULT_OK, MI_T("Call pull configuration failed"));
 #endif
 
@@ -987,12 +992,12 @@ NitsDRTCommonTest1(TestSetConfig, InitLCM, PtrVal)
         return;
     }
 
-	NitsAssert(File_ExistT(metaConfigPath) != -1, MI_T("meta config file does not exist"));
-	MI_Char * currentLCMStatusCodeHistory = NULL;
-	miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
-	NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
-	NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
-	NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
+        NitsAssert(File_ExistT(metaConfigPath) != -1, MI_T("meta config file does not exist"));
+        MI_Char * currentLCMStatusCodeHistory = NULL;
+        miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
+        NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
+        NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
+        NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
 
 NitsEndTest
 
@@ -1033,11 +1038,11 @@ NitsDRTCommonTest1(TestSetConfigPendingExist, InitLCM, PtrVal)
     DeleteConfig(CONFIGURATION_PENDING, h);
     NitsAssert(File_ExistT(pendingPath) == -1, MI_T("pending file should be deleted by cleanup."));
 
-	MI_Char * currentLCMStatusCodeHistory = NULL;
-	miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
-	NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
-	NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
-	NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
+        MI_Char * currentLCMStatusCodeHistory = NULL;
+        miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
+        NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
+        NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
+        NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
 
 NitsEndTest
 
@@ -1085,11 +1090,11 @@ NitsDRTCommonTest1(TestSetConfigWithoutCurrent, InitLCM, PtrVal)
     NitsAssert(File_ExistT(pendingPath) == -1, MI_T("pending file still exist"));
     NitsAssert(File_ExistT(currentPath) != -1, MI_T("current file does not exist"));
 
-	MI_Char * currentLCMStatusCodeHistory = NULL;
-	miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
-	NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
-	NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
-	NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
+        MI_Char * currentLCMStatusCodeHistory = NULL;
+        miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
+        NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
+        NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
+        NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
 
 NitsEndTest
 
@@ -1100,7 +1105,7 @@ NitsDRTCommonTest1(TestConsistencyEngine, InitLCM, PtrVal)
     MI_Result miResult = MI_RESULT_OK;
     NitsTrapHandle h = NitsContext()->_InitLCM->_Ptr->ptr;
 
-	DeleteConfig(CONFIGURATION_PENDING, h);
+        DeleteConfig(CONFIGURATION_PENDING, h);
     DeleteConfig(CONFIGURATION_PREVIOUS, h);
     DeleteConfig(METACONFIG_LOCATION_MOF, h);
 
@@ -1133,11 +1138,11 @@ NitsDRTCommonTest1(TestConsistencyEngine, InitLCM, PtrVal)
 
     File_RemoveT(pendingPath);
 
-	MI_Char * currentLCMStatusCodeHistory = NULL;
-	miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
-	NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
-	NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
-	NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
+        MI_Char * currentLCMStatusCodeHistory = NULL;
+        miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
+        NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
+        NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
+        NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
 
 NitsEndTest
 
@@ -1170,11 +1175,11 @@ NitsDRTCommonTest1(TestSendConfiguration_SaveToPendingOnly, InitLCM, PtrVal)
     }
     File_RemoveT(pendingPath);
 
-	MI_Char * currentLCMStatusCodeHistory = NULL;
-	miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
-	NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
-	NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
-	NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
+        MI_Char * currentLCMStatusCodeHistory = NULL;
+        miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_GetLCMStatusCodeHistory)(&currentLCMStatusCodeHistory, &cimErrorDetails);
+        NitsCompare(miResult, MI_RESULT_OK, MI_T("get lcm status code history failed"));
+        NitsAssert(currentLCMStatusCodeHistory != NULL, MI_T("lcm status code history is null"));
+        NitsCompareString(currentLCMStatusCodeHistory, MI_T("0,1,0,"), MI_T("lcm status code history is different from expected"));
 
 NitsEndTest
 
@@ -2230,42 +2235,42 @@ NitsDRTLinuxTest1(TestRegisterTask, InitLCM, PtrVal)
     NitsTrapHandle h = NitsContext() -> _InitLCM -> _Ptr->ptr;
     MI_Result miResult = MI_RESULT_OK;
 
-	// Copy /etc/crontab to /etc/crontab.bak
-	File_CopyT(CRONTAB, CRONTABBAK);
+        // Copy /etc/crontab to /etc/crontab.bak
+        File_CopyT(CRONTAB, CRONTABBAK);
 
 
-	// test 1: add new task
+        // test 1: add new task
 
-	// Copy ./testcrontab to /etc/crontab
-	File_CopyT(TEST_CRONTAB1, CRONTAB);
-	
+        // Copy ./testcrontab to /etc/crontab
+        File_CopyT(TEST_CRONTAB1, CRONTAB);
+        
     // Load current meta configuration
     miResult = NitsGetTrap(h, LCMTraps, _LCMTest_GetMetaConfig)((MSFT_DSCMetaConfiguration **)&metaConfigInstance);
     NitsCompare(miResult, MI_RESULT_OK, MI_T("Call GetMetaConfig failed."));
 
     // Call RegisterTask
     const MI_Char * propName = MI_T("RefreshFrequencyMins");
-    const MI_Char * taskName = MI_T("Consistency");		// conformitive to result_crontab* files
-    MI_Uint32 defaultValue = 15;	// default refresh frequency mins
+    const MI_Char * taskName = MI_T("Consistency");             // conformitive to result_crontab* files
+    MI_Uint32 defaultValue = 15;        // default refresh frequency mins
     miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_RegisterTask)(metaConfigInstance, propName, taskName, defaultValue, &cimErrorDetails);
     NitsCompare(miResult, MI_RESULT_OK, MI_T("Call RegisterTask failed."));
 
-	// Validate content of /etc/crontab is identical to result_crontab1
-	MI_Uint8 * actualFileContent, * expectedFileContent;
-	MI_Uint32 actualFileLength, expectedFileLength;
+        // Validate content of /etc/crontab is identical to result_crontab1
+        MI_Uint8 * actualFileContent, * expectedFileContent;
+        MI_Uint32 actualFileLength, expectedFileLength;
 
-	miResult = ReadTestFile(CRONTAB, &actualFileContent, &actualFileLength);
-	miResult = ReadTestFile(RESULT_CRONTAB, &expectedFileContent, &expectedFileLength);
-	NitsCompare(actualFileLength, expectedFileLength, MI_T("actual crontab file's length is not equal to expected one"));
+        miResult = ReadTestFile(CRONTAB, &actualFileContent, &actualFileLength);
+        miResult = ReadTestFile(RESULT_CRONTAB, &expectedFileContent, &expectedFileLength);
+        NitsCompare(actualFileLength, expectedFileLength, MI_T("actual crontab file's length is not equal to expected one"));
     for (MI_Uint32 i = 0; i < actualFileLength; i++)
-	{
+        {
         NitsCompare(actualFileContent[i], expectedFileContent[i], MI_T("actual crontab file's content is not equal to expected one"));
     }
-	
-	// test 2: task already exists
+        
+        // test 2: task already exists
 
-	// Copy ./testcrontab to /etc/crontab
-	File_CopyT(TEST_CRONTAB2, CRONTAB);
+        // Copy ./testcrontab to /etc/crontab
+        File_CopyT(TEST_CRONTAB2, CRONTAB);
 
     // Load current meta configuration
     miResult = NitsGetTrap(h, LCMTraps, _LCMTest_GetMetaConfig)((MSFT_DSCMetaConfiguration **)&metaConfigInstance);
@@ -2275,18 +2280,18 @@ NitsDRTLinuxTest1(TestRegisterTask, InitLCM, PtrVal)
     miResult = NitsGetTrap(h, LCMTraps, _LCMTEST_RegisterTask)(metaConfigInstance, propName, taskName, defaultValue, &cimErrorDetails);
     NitsCompare(miResult, MI_RESULT_OK, MI_T("Call RegisterTask failed."));
 
-	// Validate content of /etc/crontab is identical to result_crontab2
-	miResult = ReadTestFile(CRONTAB, &actualFileContent, &actualFileLength);
-	miResult = ReadTestFile(RESULT_CRONTAB, &expectedFileContent, &expectedFileLength);
-	NitsCompare(actualFileLength, expectedFileLength, MI_T("actual crontab file's length is not equal to expected one"));
+        // Validate content of /etc/crontab is identical to result_crontab2
+        miResult = ReadTestFile(CRONTAB, &actualFileContent, &actualFileLength);
+        miResult = ReadTestFile(RESULT_CRONTAB, &expectedFileContent, &expectedFileLength);
+        NitsCompare(actualFileLength, expectedFileLength, MI_T("actual crontab file's length is not equal to expected one"));
     for (MI_Uint32 i = 0; i < actualFileLength; i++)
-	{
+        {
         NitsCompare(actualFileContent[i], expectedFileContent[i], MI_T("actual crontab file's content is not equal to expected one"));
     }
-	
-	// Copy /etc/crontab.bak /etc/crontab
-	File_CopyT(CRONTABBAK, CRONTAB);
-	File_RemoveT(CRONTABBAK);
+        
+        // Copy /etc/crontab.bak /etc/crontab
+        File_CopyT(CRONTABBAK, CRONTAB);
+        File_RemoveT(CRONTABBAK);
 
 NitsEndTest
 #endif

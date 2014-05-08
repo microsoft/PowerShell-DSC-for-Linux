@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #if defined(_MSC_VER)
 #ifdef _PREFAST_
 #pragma warning(push)
@@ -95,7 +100,7 @@ static MI_Result MI_CALL CreateOMIError_shared(
         if (result != MI_RESULT_OK) goto Exit;
         result = OMI_Error_Set_error_Category(err, errorCategory);
         if (result != MI_RESULT_OK) goto Exit;
-		result = OMI_Error_Set_CIMStatusCode(err, MI_RESULT_FAILED);
+                result = OMI_Error_Set_CIMStatusCode(err, MI_RESULT_FAILED);
         if (result != MI_RESULT_OK) goto Exit;
         *omiError = (MI_Instance*)err;
     }

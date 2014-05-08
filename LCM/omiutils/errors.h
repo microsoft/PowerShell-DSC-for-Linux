@@ -1,3 +1,8 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
+
 #include "OMI_DebugError.h"
 
 MI_EXTERN_C MI_ClassDecl CIM_Error_rtti;

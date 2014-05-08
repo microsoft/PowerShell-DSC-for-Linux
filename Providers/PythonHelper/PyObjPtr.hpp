@@ -1,3 +1,7 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
 #ifndef INCLUDED_PYOBJPTR_HPP
 #define INCLUDED_PYOBJPTR_HPP
 

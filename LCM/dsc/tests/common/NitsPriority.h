@@ -1,3 +1,7 @@
+/*============================================================================
+ * Copyright (C) Microsoft Corporation, All rights reserved. 
+ *============================================================================
+ */
 #include<nits.h>
 NitsSetup(DRT)
 NitsEndSetup

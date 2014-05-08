@@ -1,5 +1,0 @@
-#include <windows.h>
-
-#include "errors.rc"
-
-#include "strings.rc"
