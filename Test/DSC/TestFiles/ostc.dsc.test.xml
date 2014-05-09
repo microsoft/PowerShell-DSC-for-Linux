@@ -7,7 +7,7 @@
   <!-- Variables. -->
   <snippet id="Variables">
     <!-- Linux Info. -->
-    <rec key="nxHostName">10.199.192.141</rec>
+    <rec key="nxHostName">10.199.192.125</rec>
     <rec key="nxUsername">root</rec>
     <rec key="nxPassword">OpsMgr2007R2</rec>
     <rec key="nxPort">22</rec>
@@ -17,7 +17,7 @@
     
     <!-- DSC Info. -->
     <rec key="dscHome">/home/scxuser/DSC</rec>
-    <rec key="omiHome">%dscHome%/OMI</rec>
+    <rec key="omiHome">%dscHome%/omi-1.0.8</rec>
     <rec key="omiserverHome">%omiHome%/output/bin/omiserver</rec>
     <rec key="dscLog">/tmp/dsc_out.log</rec>
     <rec key="loadErrorMsg">Loading the instance document from the pending location did not succeed</rec>
@@ -43,7 +43,7 @@
     <rec key="getPid">ps -ef | grep omiserver | grep -v grep | awk '{print $2}' | tr -d '\n'</rec>
     <rec key="kill">kill -9 </rec>
     <rec key="startOMI">%omiserverHome% &amp;&gt;%dscLog%&amp;</rec>
-    <rec key="exportDSCPath">export DSC_PATH=%dscHome%/Providers</rec>
+    <rec key="exportDSCPath">export OMI_HOME=%omiHome%/output</rec>
   </snippet>
 
   <!-- All Test Cases. -->
@@ -1774,13 +1774,50 @@
         <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
       </var>
 
+      <!-- Negative -->
       <var set="5" lvl="3" vid="663816"
-          dsc="[nxService] Verify if new service is created if the specific service name does not exist"
+          dsc="[nxService] Verify if error out if the specific service does not exist in specific 'init' controller"
           cls="DSC.nxServiceTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="serviceName">%invalidServiceName%</rec>
         <rec key="controller">init</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
+        <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
+      </var>
+      
+      <var set="5" lvl="3" vid="671134"
+          dsc="[nxService] Verify if error out if the specific service does not exist in specific 'upstart' controller"
+          cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%invalidServiceName%</rec>
+        <rec key="controller">upstart</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
+        <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
+      </var>
+
+      <var set="5" lvl="3" vid="671136"
+          dsc="[nxService] Verify if error out if the specific service does not exist in specific 'systemd' controller"
+          cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%invalidServiceName%</rec>
+        <rec key="controller">systemd</rec>
         <rec key="initialState">Stopped</rec>
         <rec key="expectedState">Running</rec>
         <!-- MOF Info. -->

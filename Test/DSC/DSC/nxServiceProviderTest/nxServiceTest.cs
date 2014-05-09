@@ -1,11 +1,25 @@
 ﻿namespace DSC
 {
-    using Infra.Frmwrk;
     using System;
     using System.Text;
-
+    using Infra.Frmwrk;
+    
     class nxServiceTest : ProviderTestBase
     {
+        private const string service_tool = "/sbin/service";
+        private const string chkconfig_tool = "/sbin/chkconfig";
+        private const string invoke_tool = "/usr/sbin/invoke-rc.d";
+        private const string update_tool = "/usr/sbin/update_tool-rc.d";
+
+        private const string service_tool_check_status_command = service_tool + " {0} status | tr -d '\n';";
+        private const string chkconfig_tool_enable_command = chkconfig_tool + " {0} on;";
+        private const string chkconfig_tool_disable_command = chkconfig_tool + " {0} off;";
+
+        private const string invoke_tool_check_status_command = invoke_tool + " {0} status;";
+        private const string update_tool_enable_command = update_tool + " -f {0} defaults;";
+        private const string update_tool_disable_command = update_tool + " -f {0} remove;";
+            
+            
         public override void Setup(IContext ctx)
         {
             ctx.Alw("nxServiceTest Setup Begin.");
@@ -39,6 +53,9 @@
 
             // Check if the controller is supported on the Linux.
             CheckControllerExist(controller);
+
+            // Check if the service exists in the controller.
+            CheckServiceExistOrInvalid(controller, serviceName, invalidServiceName);
 
             initializeCmd = GetInitializeCmd(serviceName, controller, state, enable, out orgState, out orgEnableState);
             finalizeCmd = GetFinalizeCmd(serviceName, controller, orgState, orgEnableState);
@@ -207,6 +224,38 @@
             }
         }
 
+        private void CheckServiceExistOrInvalid(string controller, string serviceName, string expectedInvalidService)
+        {
+            if (serviceName.Equals(expectedInvalidService))
+            {
+                return;
+            }
+
+            switch (controller.ToLower())
+            {
+                case "init":
+                    if (!InitServiceExist(serviceName))
+                    {
+                        throw new VarUnsupported("service does not exist!");
+                    }
+                    break;
+                case "upstart":
+                    if (!UpstartServiceExist(serviceName))
+                    {
+                        throw new VarUnsupported("service does not exist!");
+                    }
+                    break;
+                case "systemd":
+                    if (!SystemdServiceExist(serviceName))
+                    {
+                        throw new VarUnsupported("service does not exist!");
+                    }
+                    break;
+                default:
+                    throw new ArgumentException("The controller is invalid!");
+            }
+        }
+
         #region Upstart Controller
         private string UpstartCmd(string name, string state, string enable)
         {
@@ -236,7 +285,7 @@
             {
                 // Disable Service.
                 string disableCommand = String.Format(
-                    "sed 's/stop on runlevel .*/stop on runlevel [0123456]/g' /etc/init/{0}.conf > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp> /etc/init/{0}.conf",
+                    "sed 's/start on runlevel .*//g' /etc/init/{0}.conf  > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp > /etc/init/{0}.conf;sed 's/stop on runlevel .*/stop on runlevel [0123456]/g' /etc/init/{0}.conf > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp> /etc/init/{0}.conf",
                     name);
                 command.Append(disableCommand);
             }
@@ -295,6 +344,19 @@
                 sshHelper.Execute("ls /sbin/start");
                 sshHelper.Execute("ls /sbin/stop");
                 sshHelper.Execute("ls /sbin/status");
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
+        private bool UpstartServiceExist(string service)
+        {
+            try
+            {
+                sshHelper.Execute(String.Format("ls /etc/init/{0}.conf", service));
                 return true;
             }
             catch (InvalidOperationException)
@@ -375,34 +437,67 @@
                 return false;
             }
         }
-        
+
+        private bool SystemdServiceExist(string service)
+        {
+            try
+            {
+                sshHelper.Execute(String.Format("ls /usr/lib/systemd/system/{0}.service", service));
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
         #endregion
 
         #region Init Controller
+
         private string InitCmd(string name, string state, string enable)
         {
             StringBuilder command = new StringBuilder();
 
+            string change_state_command = "";
+            string enable_command = "";
+            string disable_command = "";
+
+            try
+            {
+                sshHelper.Execute("ls /sbin/service");
+                sshHelper.Execute("ls /sbin/chkconfig");
+                change_state_command = service_tool;
+                enable_command = chkconfig_tool_enable_command;
+                disable_command = chkconfig_tool_disable_command;
+            }
+            catch (InvalidOperationException)
+            {
+                change_state_command = invoke_tool;
+                enable_command = update_tool_enable_command;
+                disable_command = update_tool_disable_command;
+            }
+
             if (state.ToLower() == "running")
             {
                 // Start Service.
-                command.Append("/sbin/service " + name + " start;");
+                command.Append(change_state_command + " " + name + " start;");
             }
             else if (state.ToLower() == "stopped")
             {
                 // Stop Service.
-                command.Append("/sbin/service " + name + " stop;");
+                command.Append(change_state_command + " " + name + " stop;");
             }
 
             if (enable.ToLower() == "true")
             {
                 // Enable Service.
-                command.Append("/sbin/chkconfig " + name + " on;");
+                command.Append(String.Format(enable_command, name));
             }
             else if (enable.ToLower() == "false")
             {
                 // Disable Service.
-                command.Append("/sbin/chkconfig " + name + " off;");
+                command.Append(String.Format(disable_command, name));
             }
 
             return command.ToString();
@@ -410,10 +505,22 @@
 
         private string InitGetStatus(string name)
         {
+            string check_status_command = "";
+            try
+            {
+                sshHelper.Execute("ls /sbin/service");
+                sshHelper.Execute("ls /sbin/chkconfig");
+                check_status_command = service_tool_check_status_command;
+            }
+            catch(InvalidOperationException)
+            {
+                check_status_command = invoke_tool_check_status_command;
+            }
+
             try
             {
                 string retval = "";
-                sshHelper.Execute("/sbin/service " + name + " status | tr -d '\n'", out retval);
+                sshHelper.Execute(String.Format(check_status_command, name), out retval);
 
                 if (retval.Contains("is running"))
                 {
@@ -423,29 +530,65 @@
                 {
                     return "Running";
                 }
+                else
+                {
+                    return "Stopped";
+                }
             }
-            catch { }
+            catch(InvalidOperationException)
+            {
+                return "Stopped";
+            }
 
-            return "Stopped";
         }
 
         private string InitGetEnabledState(string name)
         {
+            bool service_tool_exist = false;
             try
             {
-                string retval = "";
-                sshHelper.Execute("/sbin/chkconfig --list " + name + " | awk '{print $4$5$6$7}' | tr -d '\n'", out retval);
-
-                if (retval.Contains("2:on3:on4:on5:on"))
-                {
-                    return "true";
-                }
-                else if (retval.Contains("off"))
-                {
-                    return "false";
-                }
+                sshHelper.Execute("ls /sbin/service");
+                sshHelper.Execute("ls /sbin/chkconfig");
+                service_tool_exist = true;
             }
-            catch { }
+            catch (InvalidOperationException)
+            {
+                service_tool_exist = false;
+            }
+
+            if (service_tool_exist)
+            {
+                try
+                {
+                    string retval = "";
+                    sshHelper.Execute("/sbin/chkconfig --list " + name + " | awk '{print $4$5$6$7}' | tr -d '\n'", out retval);
+
+                    if (retval.Contains("2:on3:on4:on5:on"))
+                    {
+                        return "true";
+                    }
+                    else if (retval.Contains("off"))
+                    {
+                        return "false";
+                    }
+                }
+                catch (InvalidOperationException) { return "false"; }
+            }
+            else
+            { 
+                try
+                {
+                    string retval = "";
+                    string command = "start=`ls -l /etc/rc[2-5].d/S*{0} | wc -l`;stop=`ls -l /etc/rc[016].d/K*{0} | wc -l`;echo $start$stop | tr -d '\n'";
+                    sshHelper.Execute(String.Format(command, name), out retval);
+
+                    if (retval.Equals("43"))
+                    {
+                        return "true";
+                    }
+                }
+                catch (InvalidOperationException) { return "false"; }
+            }
 
             return "false";
         }
@@ -454,8 +597,7 @@
         {
             try
             {
-                sshHelper.Execute("ls /sbin/service");
-                sshHelper.Execute("ls /sbin/chkconfig");
+                sshHelper.Execute("ls /sbin/init");
                 return true;
             }
             catch(InvalidOperationException)
@@ -463,6 +605,20 @@
                 return false;
             }
         }
+
+        private bool InitServiceExist(string service)
+        {
+            try
+            {
+                sshHelper.Execute(String.Format("ls /etc/init.d/{0}", service));
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
         #endregion
 
         #endregion
