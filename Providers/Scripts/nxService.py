@@ -10,6 +10,7 @@ import os
 import stat
 import time
 import datetime
+import glob
 
 def Set_Marshall(Name, Controller, Enabled, State):
     Name = Name.decode("utf-8")
@@ -161,6 +162,8 @@ def DetermineInitState(stdout):
     if "is running" in stdout:
         return True
     elif stdout.strip() == "Running":
+        return True
+    elif "(running)" in stdout:
         return True
     else:
         return False
@@ -331,23 +334,28 @@ def TestInitState(sc):
     return True
 
 def GetInitEnabled(sc):
-    check_state_program = initd_service
-    check_enabled_program = initd_chkconfig
-    if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
-        check_state_program = initd_invokerc
-        check_enabled_program = initd_updaterc
-
-    (process_stdout, process_stderr, retval) = Process([check_enabled_program, "--list", sc.Name])
-    
-    if retval != 0:
-        print("Error: " + check_enabled_program + " failed: " + process_stderr)
-        return ""
-
     runlevel = GetRunLevel()
-    if DetermineInitEnabled(process_stdout, runlevel):
-        return "true"
-    else:
+    if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
+        # A service is enabled if a symbolic link exists in /etc/rc${RUNLEVEL}.d/ with the name:
+        #    S??${sc.Name}
+        matched_files = glob.glob("/etc/rc" + str(runlevel) + ".d/S??" + sc.Name)
+        for f in matched_files:
+            if os.path.islink(f):
+                return "true"
         return "false"
+    else:
+        check_state_program = initd_service
+        check_enabled_program = initd_chkconfig
+        (process_stdout, process_stderr, retval) = Process([check_enabled_program, "--list", sc.Name])
+
+        if retval != 0:
+            print("Error: " + check_enabled_program + " failed: " + process_stderr)
+            return ""
+
+        if DetermineInitEnabled(process_stdout, runlevel):
+            return "true"
+        else:
+            return "false"
 
 def TestInitEnabled(sc):
     if sc.Enabled and sc.Enabled != GetInitEnabled(sc):
@@ -523,17 +531,27 @@ def ModifyInitService(sc):
     if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
         check_state_program = initd_invokerc
         check_enabled_program = initd_updaterc
-
-    if sc.Enabled == "true":
-        (process_stdout, process_stderr, retval) = Process([check_enabled_program, sc.Name, "on"])
-        if retval != 0:
-            print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr)
-            return [-1]
-    elif sc.Enabled == "false":
-        (process_stdout, process_stderr, retval) = Process([check_enabled_program, sc.Name, "off"])
-        if retval != 0:
-            print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr)
-            return [-1]   
+        if sc.Enabled == "true":
+            (process_stdout, process_stderr, retval) = Process([check_enabled_program, "-f", sc.Name, "enable"])
+            if retval != 0:
+                print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + process_stderr)
+                return [-1]
+        elif sc.Enabled == "false":
+            (process_stdout, process_stderr, retval) = Process([check_enabled_program, "-f", sc.Name, "disable"])
+            if retval != 0:
+                print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + process_stderr)
+                return [-1]   
+    else:
+        if sc.Enabled == "true":
+            (process_stdout, process_stderr, retval) = Process([check_enabled_program, sc.Name, "on"])
+            if retval != 0:
+                print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr)
+                return [-1]
+        elif sc.Enabled == "false":
+            (process_stdout, process_stderr, retval) = Process([check_enabled_program, sc.Name, "off"])
+            if retval != 0:
+                print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr)
+                return [-1]   
 
     if sc.State == "running":
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "start"])
