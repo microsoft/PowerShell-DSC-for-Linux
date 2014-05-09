@@ -63,13 +63,14 @@ def WriteFile(path, contents):
         return -1
 
 # This is a function that returns a callback function.  The callback function is called prior to a user's script being executed
-def PreExec(uid, gid):
+def PreExec(uid, gid, User):
     def SetIDs_callback():
         if gid != -1:
             os.setgroups([gid])
             os.setgid(gid)
         if uid != -1:
             os.setuid(uid)
+            os.environ["HOME"] = os.path.expanduser("~" + User)
     return SetIDs_callback
 
 def Set(GetScript, SetScript, TestScript, User, Group):
@@ -88,7 +89,7 @@ def Set(GetScript, SetScript, TestScript, User, Group):
     os.chmod(path, stat.S_IXUSR | stat.S_IRUSR | stat.S_IXGRP | stat.S_IRGRP)
     os.chown(path, uid, gid)
 
-    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid))
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
     print("stdout: " + proc.stdout.read().decode("utf-8"))
     print("stderr: " + proc.stderr.read().decode("utf-8"))
@@ -112,7 +113,7 @@ def Test(GetScript, SetScript, TestScript, User, Group):
     os.chmod(path, stat.S_IXUSR | stat.S_IRUSR | stat.S_IXGRP | stat.S_IRGRP)
     os.chown(path, uid, gid)
 
-    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid))
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
     print("stdout: " + proc.stdout.read().decode("utf-8"))
     print("stderr: " + proc.stderr.read().decode("utf-8"))
@@ -136,7 +137,7 @@ def Get(GetScript, SetScript, TestScript, User, Group):
     os.chmod(path, stat.S_IXUSR | stat.S_IRUSR | stat.S_IXGRP | stat.S_IRGRP)
     os.chown(path, uid, gid)
 
-    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid))
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
     Result = proc.stdout.read().decode("utf-8")
     print("stdout: " + Result)
