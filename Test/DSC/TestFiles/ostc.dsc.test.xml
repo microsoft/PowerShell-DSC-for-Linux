@@ -7,7 +7,7 @@
   <!-- Variables. -->
   <snippet id="Variables">
     <!-- Linux Info. -->
-    <rec key="nxHostName">10.199.192.125</rec>
+    <rec key="nxHostName">10.199.192.141</rec>
     <rec key="nxUsername">root</rec>
     <rec key="nxPassword">OpsMgr2007R2</rec>
     <rec key="nxPort">22</rec>
@@ -29,7 +29,6 @@
     <rec key="configMofScriptPath">%scriptLocation%\config_%nxHostName%.ps1</rec>
     <rec key="dscSender">
       [void] (%configMofScriptPath%);    ########### Generate Mof ###########
-      Set-ExecutionPolicy unrestricted;
       [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
       $securePass = ConvertTo-SecureString -string "%nxPassword%" -AsPlainText -Force;
       $cred= New-Object System.Management.Automation.PSCredential "%nxUsername%", $SecurePass;

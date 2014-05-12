@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Program</StartAction>
     <StartProgram>C:\DSC_TFS\DSC\Test\DSC\DSC\bin\Debug\MCF\MCF3.3-CLR4\MCF.exe</StartProgram>
-    <StartArguments>/m:ostc.dsc.test.xml /v:671136</StartArguments>
+    <StartArguments>/m:ostc.dsc.test.xml /v:661810</StartArguments>
     <StartWorkingDirectory>C:\DSC_TFS\DSC\Test\DSC\DSC\bin\Debug\TestFiles\</StartWorkingDirectory>
   </PropertyGroup>
 </Project>

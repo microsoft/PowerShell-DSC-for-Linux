@@ -277,7 +277,7 @@
             {
                 // Enable Service.
                 string enableCommand = String.Format(
-                    "sed 's/start on runlevel .*/start on runlevel [2345]/g' /etc/init/{0}.conf  > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp > /etc/init/{0}.conf;sed 's/stop on runlevel .*/stop on runlevel [!2345]/g' /etc/init/{0}.conf > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp> /etc/init/{0}.conf",
+                    "ls /etc/init/{0}.conf;if [ $? -eq 0 ];then sed 's/start on runlevel .*/start on runlevel [2345]/g' /etc/init/{0}.conf  > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp > /etc/init/{0}.conf;sed 's/stop on runlevel .*/stop on runlevel [!2345]/g' /etc/init/{0}.conf > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp> /etc/init/{0}.conf;fi",
                     name);
                 command.Append(enableCommand);
             }
@@ -285,7 +285,7 @@
             {
                 // Disable Service.
                 string disableCommand = String.Format(
-                    "sed 's/start on runlevel .*//g' /etc/init/{0}.conf  > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp > /etc/init/{0}.conf;sed 's/stop on runlevel .*/stop on runlevel [0123456]/g' /etc/init/{0}.conf > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp> /etc/init/{0}.conf",
+                    "ls /etc/init/{0}.conf;if [ $? -eq 0 ];then sed 's/start on runlevel .*//g' /etc/init/{0}.conf  > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp > /etc/init/{0}.conf;sed 's/stop on runlevel .*/stop on runlevel [0123456]/g' /etc/init/{0}.conf > /tmp/{0}.conf.tmp; cat /tmp/{0}.conf.tmp> /etc/init/{0}.conf;fi",
                     name);
                 command.Append(disableCommand);
             }
