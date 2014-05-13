@@ -9,8 +9,9 @@
 namespace DSC
 {
     using System;
+    using System.Runtime.InteropServices;
     using sshcomLib;
-    
+
     public class SshHelper : IDisposable
     {
         private scxssh ssh;
@@ -99,20 +100,40 @@ namespace DSC
 
         private void NewSshConnection()
         {
-            ssh = new scxssh();
+            int retry = 0;
 
-            try
+            // Wait until the last import release, retry 6 times.
+            while (retry < 6)
             {
-                uint connStatus = ssh.ConnectWithPassword(this._hostName, this._port, this._username, this._password);
-
-                if (connStatus != 0)
+                try
                 {
-                    throw new Exception("Connection failed!");
+                    ssh = new scxssh();
+
+                    uint connStatus = ssh.ConnectWithPassword(this._hostName, this._port, this._username, this._password);
+
+                    if (connStatus != 0)
+                    {
+                        throw new Exception("Connection failed!");
+                    }
+
+                    break;
                 }
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Connection failed!", e);
+                catch (COMException comEx)
+                {
+                    if (retry == 5)
+                    {
+                        throw comEx;
+                    }
+
+                    // Wait 10 seconds to let the last import release.
+                    System.Threading.Thread.Sleep(1000 * 10);
+                    Console.WriteLine(retry);
+                    retry += 1;
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Connection failed!", e);
+                }
             }
         }
 
