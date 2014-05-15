@@ -18,7 +18,7 @@ namespace DSC
         #region Generator
 
         public string GeneratorFormat =
-            "Configuration MyTestConfig{Node \"$agentName\"{\n$ResourceType $ResourceName{$Properties}\n#DependdeResourceType #DependedResourceName{#DependedProperties}\n}};MyTestConfig -outputpath:$mofPath";
+            "Configuration MyTestConfig{Import-DscResource -Module nx;Node \"$agentName\"{\n$ResourceType $ResourceName{$Properties}\n#DependdeResourceType #DependedResourceName{#DependedProperties}\n}};MyTestConfig -outputpath:$mofPath";
 
         public string MofGenerator
         {
