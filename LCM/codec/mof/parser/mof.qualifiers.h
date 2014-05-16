@@ -1,5 +1,5 @@
 /*============================================================================
- * Copyright (C) Microsoft Corporation, All rights reserved. 
+ * Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
  *============================================================================
  */
 #ifndef _mof_qualifiers_h
