@@ -1,3 +1,19 @@
+/**
+ * Copyright (c) Microsoft Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+ * this file except in compliance with the License. You may obtain a copy of the 
+ * License at http://www.apache.org/licenses/LICENSE-2.0.
+ *  
+ * THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+ * OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION 
+ * ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE, 
+ * MERCHANTABLITY OR NON-INFRINGEMENT. 
+ *
+ * See the Apache Version 2.0 License for specific language governing 
+ * permissions and limitations under the License.
+ */
+
 Building the Desired State Configuration (DSC) Local Configuration Manager and Linux Resource Providers
 
 Prerequisites
@@ -7,12 +23,15 @@ Prerequisites
     b. These build tools:
         i.  GNU Make
         ii. g++
+		iii. Python version 2.5 or later, the package python-devel
 	c. Open Management Infrastructure (OMI) 1.0.8. http://theopengroup.org/software/omi
+		i. pam-devel
+		ii. openssl-devel
 
 
 Building and installing the Local Configuration Manager and Linux Resource Providers
 ----------------------------------------------------------------------
-1. Extract DSC_for_Linux.tar into a directory that you will build it from.
+1. Extract PSDSCLinux.tar into a directory that you will build it from.
 2. Download and extract OMI 1.0.8 into a directory named "omi-1.0.8" in a directory parallel to the LCM and Providers directory.  The directory tree should look something like:
 
    ./configure
@@ -53,7 +72,6 @@ Prerequisites
     B. Windows PowerShell (>=4.0)
 
 
-
 1. Install the Linux Resource Provider MOF module:
    A. Extract the nx.zip file into %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\ such that the directory tree looks like:
       %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\nx\nx.psd1
@@ -73,7 +91,9 @@ Prerequisites
         Get-DscConfiguration -CimSession:$myCimSession
    D. You can test the current configuration of the system by running:
         Test-DscConfiguration -CimSession:$myCimSession
+   E. For more information on creating a CimSession for use with the -CimSession parameter, see: http://technet.microsoft.com/en-us/library/jj590760.aspx
 
 3. Notes
    A. More detail on errors can be found in the stderr/stdout of omiserver on the Linux system. For diagnostic purposes, omiserver can be run in a tty so that stderr/stdout are visible.
+   B. The DSC Local Configuration Manager log can be found at $OMI_HOME/var/log/dsc.log
 
