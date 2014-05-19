@@ -14,7 +14,8 @@
  * permissions and limitations under the License.
  */
  
- Windows PowerShell Desired State Configuration for Linux - v1.0.0-CTP
+Windows PowerShell Desired State Configuration for Linux - v1.0.0-CTP
+
 
 Building the Desired State Configuration (DSC) Local Configuration Manager and Linux Resource Providers
 
