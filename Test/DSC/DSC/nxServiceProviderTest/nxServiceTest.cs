@@ -9,15 +9,16 @@
         private const string service_tool = "/sbin/service";
         private const string chkconfig_tool = "/sbin/chkconfig";
         private const string invoke_tool = "/usr/sbin/invoke-rc.d";
-        private const string update_tool = "/usr/sbin/update_tool-rc.d";
+        private const string update_tool = "/usr/sbin/update-rc.d";
 
         private const string service_tool_check_status_command = service_tool + " {0} status | tr -d '\n';";
         private const string chkconfig_tool_enable_command = chkconfig_tool + " {0} on;";
         private const string chkconfig_tool_disable_command = chkconfig_tool + " {0} off;";
 
         private const string invoke_tool_check_status_command = invoke_tool + " {0} status;";
-        private const string update_tool_enable_command = update_tool + " -f {0} defaults;";
-        private const string update_tool_disable_command = update_tool + " -f {0} remove;";
+        private const string update_tool_enable_command = update_tool + " -f {0} enable;";
+        private const string update_tool_disable_command = update_tool + " -f {0} disable;";
+       
             
             
         public override void Setup(IContext ctx)
@@ -463,6 +464,7 @@
             string enable_command = "";
             string disable_command = "";
 
+            
             try
             {
                 sshHelper.Execute("ls /sbin/service");
@@ -476,8 +478,13 @@
                 change_state_command = invoke_tool;
                 enable_command = update_tool_enable_command;
                 disable_command = update_tool_disable_command;
+
+                command.Append(String.Format(disable_command, name));
+                command.Append(String.Format(enable_command, name)); 
+       
             }
 
+            
             if (state.ToLower() == "running")
             {
                 // Start Service.
@@ -485,6 +492,7 @@
             }
             else if (state.ToLower() == "stopped")
             {
+                command.Append(change_state_command + " " + name + " start;");
                 // Stop Service.
                 command.Append(change_state_command + " " + name + " stop;");
             }
@@ -498,6 +506,7 @@
             {
                 // Disable Service.
                 command.Append(String.Format(disable_command, name));
+
             }
 
             return command.ToString();
