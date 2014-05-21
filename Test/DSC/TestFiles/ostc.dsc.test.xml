@@ -1829,7 +1829,9 @@
       </var>
 
     </section>
+    
     <section sid="6" dsc="nxEnvironment Provider">
+      
       <var set="6" lvl="1" vid="661727"
            dsc="[nxEnvironment] Verify if environment variable with value is created if only specify the Name and Value property"
            cls="DSC.nxEnvironmentTest">
@@ -1839,19 +1841,172 @@
         <rec key="varValue">envVarValue</rec>
         <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
         <rec key="etcEnv">/etc/enviroment</rec>
-        <rec key="initialCmd">rm -f %dscProfile%;unset %varName%; sed '/%varName%/'d %etcEnv%; source %etcEnv%</rec>
-        <rec key="finalCmd">rm -f %dscProfile%;unset %varName%; sed '/%varName%/'d %etcEnv%; source %etcEnv%</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
         <!-- MOF Info. -->
         <rec key="propString">Name:%varName%;Ensure:Present;Value=%varValue%</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">set| grep "%testEnvVar%=%varValue%" &amp;&amp; cat %etcEnv%| grep "%testEnvVar%=%varValue%"</rec>
-        <rec key="expectedValue">0</rec>
+        <rec key="verificationCmd">checkEnv=`cat %dscProfile%| grep "%testEnvVar%" | wc -l |tr -d '\n'`; env| grep "%testEnvVar%=%varValue%" &amp;&amp; cat %etcEnv%| grep "%testEnvVar%=%varValue%";echo $?$checkEnv</rec>
+        <rec key="expectedValue">00</rec>
         <rec key="successfulMsg">The environment variable is created successfully.</rec>
         <rec key="failedMsg">The environment variable is not created.</rec>
       </var>
+      
+      <var set="6" lvl="1" vid="661728"
+           dsc="[nxEnvironment] Verify if Path environment variable with value is created if Path is 'true'"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/enviroment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%; mkdir /tmp/var_661728; echo "%varName%='/tmp/var_661728'" >>%dscProfile%; source %dscProfile%</rec>
+        <rec key="finalCmd">%cleanVar%; rm -r %dscProfile%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value=%varValue%;Path:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">checkEnv=`cat %etcEnv%| grep "%testEnvVar%" | wc -l |tr -d '\n'`; env| grep "%testEnvVar%=%varValue%" &amp;&amp; cat %dscProfile%| grep "%testEnvVar%=/tmp/var_661728:%varValue%"; echo $?$checkEnv </rec>
+        <rec key="expectedValue">00</rec>
+        <rec key="successfulMsg">The environment variable is created successfully if Path is true.</rec>
+        <rec key="failedMsg">The environment variable is not created.</rec>
+      </var>
     
+      <var set="6" lvl="2" vid="661729"
+           dsc="[nxEnvironment] Verify if environment variable without value is created if only specify the Name property"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/enviroment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %etcEnv%| grep "%testEnvVar" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The environment variable without value is created successfully.</rec>
+        <rec key="failedMsg">The environment variable without value is not created.</rec>
+      </var>
+      
+      <var set="6" lvl="1" vid="661730"
+           dsc="[nxEnvironment] Verify if environment variable is removed if the Ensure is 'absent'"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/enviroment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%; echo "%varName%=%varValue% >> %etcEnv%"; source %etcEnv%"</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:absent;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %etcEnv%| grep "%testEnvVar" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The environment variable is not removed if the Ensure is 'absent' and the variable is not originally added by DSC.</rec>
+        <rec key="failedMsg">The environment variable is removed successfully.</rec>
+      </var>
+
+      <var set="6" lvl="2" vid="661731"
+             dsc="[nxEnvironment] Verify if Path environment variable which was added by DSC is removed when the Ensure is absent"
+             cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="pathTmp">/tmp/path.tmp</rec>
+        <rec key="initialCmd">echo $PATH > %pathTmp%</rec>
+        <rec key="finalCmd">rm -f %pathTmp%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Absent;Path:True</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">old=`cat %pathTmp%`;new=`echo $PATH`; if [ $old = $new ]; then echo 0; fi;</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The PATH environment variable is not changed or removed.</rec>
+      </var>
+
+      <var set="6" lvl="3" vid="661732"
+           dsc="[nxEnvironment] Verify if Path environment variable which never changed by DSC is not removed when the Ensure is absent"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="pathTmp">/tmp/path.tmp</rec>
+        <rec key="initialCmd">echo $PATH > %pathTmp%</rec>
+        <rec key="finalCmd">rm -f %pathTmp%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Absent;Path:True</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">old=`cat %pathTmp%`;new=`echo $PATH`; if [ $old = $new ]; then echo 0; fi;</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The PATH environment variable is not changed or removed.</rec>
+      </var>
+
+      <var set="6" lvl="2" vid="661737"
+           dsc="[nxEnvironment] Verify if environment variable is updated if the environment variable exists with value"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="orgValue">envVarValue</rec>
+        <rec key="newValue">envVarValue_new</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/enviroment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">rm -f %dscProfile%;set %varName%=%orgValue%;</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value=%newValue%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">checkEnv=`cat %dscProfile%| grep "%testEnvVar%" | wc -l |tr -d '\n'`; env| grep "%testEnvVar%=%varValue%" &amp;&amp; cat %etcEnv%| grep "%testEnvVar%=%varValue%";echo $?$checkEnv</rec>
+        <rec key="expectedValue">00</rec>
+        <rec key="successfulMsg">The environment variable is updated successfully.</rec>
+        <rec key="failedMsg">The environment variable is not updated.</rec>
+      </var>
+
+      <var set="6" lvl="3" vid="661740"
+           dsc="[nxEnvironment] Verify if environment variable is updated if the environment variable exists without value"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="orgValue">envVarValue</rec>
+        <rec key="newValue">envVarValue_new</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/enviroment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">rm -f %dscProfile%;set %varName%=%orgValue%;unset %varName%;</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value=%newValue%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">checkEnv=`cat %dscProfile%| grep "%testEnvVar%" | wc -l |tr -d '\n'`; env| grep "%testEnvVar%=%varValue%" &amp;&amp; cat %etcEnv%| grep "%testEnvVar%=%varValue%";echo $?$checkEnv</rec>
+        <rec key="expectedValue">00</rec>
+        <rec key="successfulMsg">The environment variable is updated successfully.</rec>
+        <rec key="failedMsg">The environment variable is not updated.</rec>
+      </var>
+
     </section>
-    
+
   </section>
 </varmap>
