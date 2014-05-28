@@ -863,7 +863,7 @@
         <rec key="expectedValue">0</rec>
       </var>
 
-  </section>
+    </section>
 
     <section sid="2" dsc="nxUser Provider">
       
@@ -2007,6 +2007,28 @@
       </var>
 
     </section>
+    
 
+    <section sid="7" dsc="nxPackage Provider">
+ 
+      <var set="7" lvl="1" vid="665043"
+           dsc="[nxPackage] Verify if specific package is installed successfully by PackageManager"
+           cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="manager">yum</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;PackageManager:%manager%;Installed:%expectedInstallState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="successfulMsg">The sprcific package is installed as expected.</rec>
+      </var>
+    
+    </section>
   </section>
 </varmap>
