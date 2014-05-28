@@ -1,0 +1,86 @@
+[ClassVersion ("1.0.0"),
+ Description (
+    "Local Configuration Manager that controls the states of configuration files and uses Configuration Agent to apply the configurations.")]
+class MSFT_DSCLocalConfigurationManager
+{
+        [static, 
+         Description (
+            "Send the configuration document to the managed node and save it as pending." )] 
+    uint32 SendConfiguration(
+            [in, Octetstring] 
+        uint8 ConfigurationData[],
+            [in]
+        boolean force);
+    
+        [static,
+         Description (
+            "Send the configuration document to the managed node and use Configuration Agent to apply the configuration." )]
+    uint32 SendConfigurationApply(
+            [in, Octetstring]
+        uint8 ConfigurationData[], 
+            [in]
+        boolean force);
+
+        [static,
+         Description (
+            "Send the configuration document to the managed node and use Configuration Agent to apply the configuration using the Get method." )]
+    uint32 GetConfiguration(
+            [in, Octetstring]
+        uint8 configurationData[],
+            [EmbeddedInstance("OMI_BaseResource"),out]
+        string configurations[]);
+
+        [static,
+         Description (
+            "Send the configuration document to the managed node and test it against the current configuration." )]
+    uint32 TestConfiguration(
+            [in, Octetstring]
+        uint8 configurationData[],
+            [out]
+        boolean InDesiredState,
+            [out]
+        string ResourceId[]);
+
+        [static,
+         Description (
+            "Use Configuration Agent to apply the configuration at the pending stage. If no configuration is pending we reaplly the current configuration." )]
+    uint32 ApplyConfiguration();
+    
+        [static,
+         Description (
+            "Set Local Configuration Manager settings that are used to control Configuration Agent." )]
+    uint32 SendMetaConfigurationApply(
+            [in, Octetstring]
+        uint8 ConfigurationData[]);
+    
+        [static,
+         Description (
+            "Get Local Configuration Manager settings that are used to control Configuration Agent." )]
+    uint32 GetMetaConfiguration(
+            [out, 
+            EmbeddedInstance("MSFT_DSCMetaConfiguration")]
+        string MetaConfiguration);
+
+        [static,
+         Description (
+            "Rollback to previous configuration." )]
+    uint32 RollBack(
+            [in]    
+        uint8 configurationNumber);
+
+	        [static,
+         Description (
+            "Starts the consistency check through Task Scheduler." )]
+    uint32 PerformRequiredConfigurationChecks(
+            [in]
+        uint32 Flags);
+
+		[static,
+         Description (
+            "Stopping the configuration in progress." )]
+    uint32 StopConfiguration(
+        [in]
+        boolean force);
+
+};
+

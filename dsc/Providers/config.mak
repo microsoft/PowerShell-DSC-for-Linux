@@ -1,0 +1,2 @@
+ENABLE_DEBUG=1
+OMI_CONFIGURE_QUALS=--enable-debug   

@@ -1,0 +1,12 @@
+// ===============================================================
+//  MSFT_BaseResourceConfiguration
+// ===============================================================
+#pragma include("cim_schema_2.26.0.mof")
+[Abstract, 
+ version("1.0.0"), 
+ Description (
+    "Base schema for all native configuration providers." )]
+class MSFT_BaseResourceConfiguration 
+{
+
+};

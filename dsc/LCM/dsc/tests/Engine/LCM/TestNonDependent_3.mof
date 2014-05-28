@@ -1,0 +1,44 @@
+instance of TestNonDependent
+{
+    ResourceId = "a";
+    ModuleName="PsModuleForTestNonDependent";
+    ModuleVersion="1.0";
+    Id1 = "10";
+    bFail = false;
+    DependsOn={"b"};
+};
+
+instance of TestNonDependent
+{
+    ResourceId = "b";
+    ModuleName="PsModuleForTestNonDependent";
+    ModuleVersion="1.0";
+    bFail = true;
+    Id1 = "11";
+};
+
+instance of TestNonDependent
+{
+    ResourceId = "c";
+    ModuleName="PsModuleForTestNonDependent";
+    ModuleVersion="1.0";
+    Id1 = "12";
+    bFail = false;
+    DependsOn={"d"};
+};
+
+instance of TestNonDependent
+{
+    ResourceId = "d";
+    ModuleName="PsModuleForTestNonDependent";
+    ModuleVersion="1.0";
+    bFail = true;
+    Id1 = "13";
+};
+
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

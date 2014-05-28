@@ -1,0 +1,1 @@
+Convert-MofToProvider.exe -moffile Test_Test.mof -classlist TEST_TEST1 TEST_Test2 Test_Stop TEST_Test3User TEST_Test4NoOMI -includepath d:\blue\admin\dsc\engine\mof  E:\WinBlueM1\admin\wmi\wmiv2\CIM-2.26.0

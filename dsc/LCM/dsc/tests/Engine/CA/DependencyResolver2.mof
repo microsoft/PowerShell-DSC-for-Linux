@@ -1,0 +1,76 @@
+instance of TEST_Test1
+{
+    ResourceId = "a";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "10";
+    DependsOn={"b"};
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "b";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "11";
+    DependsOn={"c"};
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "c";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "11";
+    DependsOn={"d"};
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "d";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "13";
+    DependsOn={"e"};
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "e";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "14";
+    DependsOn={"f"};
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "f";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "15";
+    DependsOn={"g"};
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "g";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "16";
+    DependsOn={"h"};
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "h";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "17";
+};
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

@@ -1,0 +1,17 @@
+instance of MSFT_FileDirectoryConfiguration
+{
+    ResourceId = "StyleSheet";
+    ModuleName="PSDesiredStateConfiguration";
+    ModuleVersion="1.0";
+    DestinationPath = "C:\\Test.txt";
+    Ensure = "Present";
+    Type = "file";
+    contents="DDDD";
+    checksum = "sha-1";
+};
+
+
+instance of OMI_ConfigurationDocument
+{
+	Version="1.0.0";
+};

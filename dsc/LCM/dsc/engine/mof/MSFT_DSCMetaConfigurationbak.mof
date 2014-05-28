@@ -1,0 +1,86 @@
+// ===============================================================
+//  MetaConfiguration
+// ===============================================================
+[ClassVersion ("1.0.0"), Description ("Local Configuration Manager settings.")]
+class MSFT_DSCMetaConfiguration : OMI_BaseResource
+{
+   [Description ("The download path for configuration document for pull scenario." )]
+   string	ConfigurationDownloadPath;
+
+   [Description ("The time interval between consecutive runs for reapplying the configuration to get to the desired state." )]
+   uint32  ConfigurationRefreshFrequencyInSeconds = 0;
+
+   [Description ("The time interval between consecutive runs to download the configuration from the pull server." )]
+   uint32	ConfigurationDownloadFrequencyInMinutes = 0;
+
+   [Description ("The download location for custom providers." )]
+   string  CentralProviderRepositoryPath;
+
+   [Description ("Maximum number of previous configurations to store." )]
+   uint8   MaxStoredPreviousConfigurations = 10;
+
+   [Description ("Maximum total size for stored previous configurations." )]
+   uint32   MaxStoredPreviousConfigurationsInMB = 10;
+
+   [Description ("The flag for boot time application of the configuration." )]
+   boolean ProcessConfigurationAtBoot = false;
+
+   [Description ("The location to which the package provider will download the package." )]
+   string  DefaultPackagePath;
+
+   [Description ("The number of retries the configuration agent uses in case of failure." )]
+   uint8   NumberOfRetry = 3;
+
+   [Description ("Level of tracing"), 
+   ValueMap { "1", "2", "3", "4" }, 
+   Values { "Admin", "Operational", "Analytic","Debug"}]
+   uint8   TraceLevel = 1;
+
+   [Description ("Auto restart mode."), 
+   ValueMap { "0", "1", "2" }, 
+   Values { "NoAutoRestart", "RestartOnce", "RestartAsNeeded"}]
+   uint8   AutoRestartMode = 0;
+
+   [EmbeddedInstance("MSFT_Credential"),
+   Description ("Default credential to access resources." )]
+   string Credential;
+
+   [Octetstring, Description ("Symmetric key used to encrypt configuration documents that have sensitive information." )]
+   uint8  EncryptionKey[];
+
+   [Octetstring, Description ("Symmetric key used to encrypt configuration embedded passwords." )]
+   uint8  PasswordEncryptionKey[];
+
+   [Description ("The configuration mode for the server. Valid values are Pull and Push." )]
+   string  ConfigurationMode = "PUSH";
+
+   [Description ("The location of the certificate file (.pfx) that contains both the public and private keys." )]
+   string  CertificateInstallLocation;    
+
+   [Description ("The certificate ID used to locate the certificate." )]
+   string  CertificateID;
+
+   [Description ("Server URL to report inventory data." )]
+   string  InventoryUrl;
+
+   [Description ("The configuration ID used to get the configuration from the pull server." )]
+   string  ConfigurationID;
+
+   [Description ("Delete the certificate file specified by CertificateInstallLocation." )]
+   boolean  DeleteCertificateOnInstallation;        
+
+   [Description ("Name of the configuration and module Download Manager." )]
+   string  DownloadManagerName;    
+
+   [Description ("Custom data that is specific to Download Manager." ),
+   EmbeddedInstance("MSFT_KeyValuePair")]
+   string  DownloadManagerCustomData[];    
+
+   [Description ("The time interval between consecutive runs to get the action from the server." )]
+   uint32  PullActionRefreshFrequencyInSeconds = 60;    
+
+   [Description ("The time interval ( in seconds) between consecutive runs to get the new configuration from the server." )]
+   uint32  PullConfigurationRefreshFrequencyInSeconds = 0;        
+
+};
+

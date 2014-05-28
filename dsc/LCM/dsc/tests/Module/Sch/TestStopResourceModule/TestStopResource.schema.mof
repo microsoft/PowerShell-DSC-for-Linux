@@ -1,0 +1,6 @@
+[ClassVersion("1.0.0")]
+class TEST_Stop : OMI_BaseResource 
+{
+   [key]
+	string Id1;   
+};

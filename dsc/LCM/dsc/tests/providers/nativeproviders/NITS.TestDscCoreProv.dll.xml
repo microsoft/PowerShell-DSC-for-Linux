@@ -1,0 +1,12 @@
+<NitsConfigurationSet>
+<Nits Targets="dsccore.dll;dsccoreconfprov.dll" Install="True" OtherParameters="">
+  <SetupCommands>
+    <Command>..\..\..\LCM\UnitTests\DscUnitTestSetup.ps1</Command>
+  </SetupCommands>
+</Nits>
+<Nits Targets="dsccore.dll;dsccoreconfprov.dll" Install="True" OtherParameters="" Priority="IDX"  Fault="True">
+  <SetupCommands>
+    <Command>..\..\..\LCM\UnitTests\DscUnitTestSetup.ps1</Command>
+  </SetupCommands>
+</Nits>
+</NitsConfigurationSet>

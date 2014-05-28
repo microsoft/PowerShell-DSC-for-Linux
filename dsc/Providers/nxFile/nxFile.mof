@@ -1,0 +1,84 @@
+#pragma include ("OMI_BaseResource.mof")
+#pragma include ("MSFT_Credential.mof")
+
+[ClassVersion("1.0.0"), Description("The configuration provider for files and directories."), FriendlyName("nxFile")]
+class OMI_nxFileResource:OMI_BaseResource
+{
+       [Key] string DestinationPath;
+       [Write] string SourcePath;
+       [Write, ValueMap{"present", "absent"}] string Ensure;
+       [Write, ValueMap{"file", "directory", "link"}] string Type;
+       [Write] string Contents;
+       [Write, ValueMap{"md5", "md5lite", "mtime", "ctime", "none"}] string Checksum;
+       [Write, ValueMap{"true", "false"}] string Recurse;
+       [Write, ValueMap{"true", "false", "yes", "no"}] string Force;
+       [Write, ValueMap{"follow", "manage"}] string Links;
+       [Write] string Group;
+       [Write] string Mode;
+       [Write] string Owner;
+       [Read] datetime CreatedDate;
+       [Read] datetime ModifiedDate;
+
+		[static,
+         Description (
+             "Get resource states based on input configuration file." )]
+    uint32 GetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_nxFileResource"),
+             Description (
+                "Configuration document that is to be applied." )]
+        string InputResource,
+
+            [in,
+             Description (
+                "Flags passed to the providers. Reserved for future use." )]
+        uint32 Flags,
+            [out,
+             EmbeddedInstance ("OMI_nxFileResource"),
+             Description (
+                "The current state of the specified configuration resources." )]
+        string OutputResource
+        );
+
+        [static,
+         Description (
+             "Test resource states based on input configuration file." )]
+    uint32 TestTargetResource(
+            [in,
+             EmbeddedInstance("OMI_nxFileResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in, 
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,   
+            [out,
+             Description (
+                "True if identical. False otherwise." )]
+        boolean Result,     
+            [out,
+             Description (
+                "Context information that the provider can use to optimize the set, This is optional." )]
+        uint64 ProviderContext
+        );
+
+        [static,
+         Description (
+            "Set resource states based on input configuration file." )]
+    uint32 SetTargetResource(
+            [in,
+             EmbeddedInstance ("OMI_nxFileResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in,
+             Description (
+                "Context information that the provider can use to optimize the set from TestTargetResource, This is optional." )]
+        uint64 ProviderContext,
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags
+		);
+};
