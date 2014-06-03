@@ -2256,5 +2256,42 @@
       </var>
       
     </section>
+
+
+    <section sid="8" dsc="nxLog Provider">
+      <var set="8" lvl="1" vid="661741"
+           dsc="[nxLog] Verify if the log message is written into DSC resources log file"
+           cls="DSC.nxLogTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="logFile">/tmp/Log.dsc</rec>
+        <rec key="message">Test message for case 661741!</rec>
+        <rec key="initialInstallState">rm -r %logFile%</rec>
+        <rec key="expectedInstallState">rm -r %logFile%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString"></rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %logFile% | grep "%message%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The log message is recorded into DSC resources log file.</rec>
+        <rec key="failedMsg">The log message is not recorded into DSC resources log file.</rec>
+      </var>
+
+      <var set="8" lvl="2" vid="661744"
+          dsc="[nxLog] Verify if error out if no Message property in configuration mof"
+          cls="DSC.nxLogTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <!-- MOF Info. -->
+        <rec key="propString"></rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as missing Message property.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+    </section>
+    
   </section>
 </varmap>
