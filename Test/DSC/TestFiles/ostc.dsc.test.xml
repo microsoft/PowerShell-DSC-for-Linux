@@ -2292,6 +2292,27 @@
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
       </var>
     </section>
-    
+
+    <section sid="9" dsc="nxExec Provider">
+      <var set="9" lvl="1" vid="664732"
+           dsc="[nxExec] Verify if specific command executed successfully"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664732</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %name% | wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The specific command is executed successfully</rec>
+        <rec key="failedMsg">The specific command is not executed successfully</rec>
+      </var>
+      
+    </section>
   </section>
 </varmap>
