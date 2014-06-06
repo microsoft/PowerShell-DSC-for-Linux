@@ -2312,6 +2312,275 @@
         <rec key="successfulMsg">The specific command is executed successfully</rec>
         <rec key="failedMsg">The specific command is not executed successfully</rec>
       </var>
+
+      <var set="9" lvl="1" vid="664733"
+           dsc="[nxExec] Verify if specific shell command executed successfully"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664733</rec>
+        <rec key="scriptName">/tmp/test.sh</rec>
+        <rec key="command">%scriptName%</rec>
+        <rec key="initialCmd">rm -rf %name% %scriptName%; echo "touch %name%" >%scriptName%</rec>
+        <rec key="finalCmd">rm -rf %name% %scriptName%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %name% | wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The specific command is executed successfully</rec>
+        <rec key="failedMsg">The specific command is not executed successfully</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664734"
+           dsc="[nxExec] Verify if environment variable is exported succeessfully"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664734</rec>
+        <rec key="command">echo $key >%name% </rec>
+        <rec key="initialCmd">unset key; rm -rf %name%</rec>
+        <rec key="finalCmd">unset key; rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;Environment:key=value</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">content=`cat %name%`;if [ "$content" == "value" ]; then echo 0; else echo '1'; fi;</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The environment variable is exported successfully</rec>
+        <rec key="failedMsg">The environment variable is not exported successfully</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664736"
+           dsc="[nxExec] Verify no error if the return code of command match specific ReturnCode"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664736</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;ReturnCode:0</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %name% | wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The specific command is executed successfully</rec>
+        <rec key="failedMsg">The specific command is not executed successfully</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664737"
+           dsc="[nxExec] Verify error out if the return code of command does not match specific ReturnCode"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664737</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;ReturnCode:1</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664738"
+           dsc="[nxExec] Verify error out if the command executing time exceed the specific Timeout"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="command">sleep 15</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;Timeout:10</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664739"
+           dsc="[nxExec] Verify if command does not execute if TestCommand return 0"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664739</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="testCommand">exit 0</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;TestCommand:</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %name% | wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The Command is not executed if TestCommand returns 0.</rec>
+        <rec key="failedMsg">The Command is executed if TestCommand returns 0</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664740"
+           dsc="[nxExec] Verify if command does execute if TestCommand return code is other than 0"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664737</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="testCommand">errorcommand</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;TestCommand:%testCommand%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %name% | wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The Command is executed if TestCommand return code is other than 0.</rec>
+        <rec key="failedMsg">The Command is not executed if TestCommand return code is other than 0</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664741"
+           dsc="[nxExec] Verify if error out if the command is invalid to execute"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="command">stherror</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664742"
+           dsc="[nxExec] Verify if error out if the shell has no execution permission"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="scriptName">/tmp/test.sh</rec>
+        <rec key="command">%scriptName%</rec>
+        <rec key="initialCmd">echo "ls -al /tmp">%scriptName%;chmod 644 %scriptName%</rec>
+        <rec key="finalCmd">rm -rf %scriptName%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="664743"
+           dsc="[nxExec] Verify if the group to run command is the same as the specific Group property"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664743</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>        
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;Group:scxuser</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %name% | wc -l | tr -d "\n" ; group=`stat -c %G %name%`; if [ "$group" == "scxuser" ]; then echo 0; else echo '1'; fi </rec>
+        <rec key="expectedValue">10</rec>
+        <rec key="successfulMsg">The group to run command is the same as the specific Group property.</rec>
+        <rec key="failedMsg">The group to run command is not the same as the specific Group property</rec>
+      </var>
+
+
+      <var set="9" lvl="2" vid="664744"
+           dsc="[nxExec] Verify if the user to run shell is the same as the specific User property"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664744</rec>
+        <rec key="scriptName">/tmp/test.sh</rec>
+        <rec key="command">%scriptName%</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;User:scxuser</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %name% | wc -l | tr -d "\n" ; user=`stat -c %U %name%`; if [ "$user" == "scxuser" ]; then echo 0; else echo '1'; fi </rec>
+        <rec key="expectedValue">10</rec>
+        <rec key="successfulMsg">The group to run command is the same as the specific User property.</rec>
+        <rec key="failedMsg">The group to run command is not the same as the specific User property</rec>
+      </var>
+
+      <var set="9" lvl="3" vid="664745"
+           dsc="[nxExec] Verify if warning out if the user and group property both exist in configuration MOF"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664745</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;User:scxuser;Group:root</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %name% | wc -l | tr -d "\n" ; user=`stat -c %U %name%`; if [ "$user" == "scxuser" ]; then echo 0; else echo '1'; fi </rec><!--TBD: check warning-->>
+        <rec key="expectedValue">10</rec>
+        <rec key="successfulMsg">A warning is logged if the user and group property both exist in configuration MOF.</rec>
+        <rec key="failedMsg">The warning is not logged if the user and group property both exist in configuration MOF</rec>
+      </var>
+
+      <var set="9" lvl="3" vid="664746"
+           dsc="[nxExec] Verify if error out if the current user context does not have privilege to switch to specific user"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664746</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="initialCmd">su - scxuser;rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%;exit</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;User:root</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
+
+      <var set="9" lvl="3" vid="664747"
+           dsc="[nxExec] Verify if error out if the current user context does not have privilege to switch to specific group"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="name">/tmp/test_664747</rec>
+        <rec key="command">touch %name%</rec>
+        <rec key="initialCmd">su - scxuser;rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%;exit</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;Group:root</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
+
+      <var set="9" lvl="3" vid="664749"
+           dsc="[nxExec] Verify if error out if the specific user doesn't exist"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="command">touch /tmp/test_664749</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;User:stherror</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
+
+      <var set="9" lvl="3" vid="664750"
+           dsc="[nxExec] Verify if error out if the specific group doesn't exist"
+           cls="DSC.nxExecTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="command">touch /tmp/test_664750</rec>
+        <rec key="initialCmd">rm -rf %name%</rec>
+        <rec key="finalCmd">rm -rf %name%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Command:%command%;Group:stherror</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
       
     </section>
   </section>
