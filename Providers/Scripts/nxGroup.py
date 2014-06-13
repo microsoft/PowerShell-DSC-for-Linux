@@ -1,16 +1,14 @@
+#!/usr/bin/env python
 #============================================================================
 # Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 #============================================================================
+from __future__ import print_function
+from __future__ import with_statement
+from contextlib import contextmanager
 
-import subprocess
-import shutil
-import pwd
-import grp
 import os
-import stat
-import time
-import datetime
-import operator
+import sys
+import codecs
 
 def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     GroupName = GroupName.decode("utf-8")
@@ -58,6 +56,22 @@ def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
 ### Begin user defined DSC functions
 ############################################################
 
+@contextmanager
+def opened_w_error(filename, mode="r"):
+    """
+    This context ensures the file is closed.
+    """
+    try:
+        f = codecs.open(filename, encoding='utf-8' , mode=mode)
+    except IOError, err:
+        yield None, err
+    else:
+        try:
+            yield f, None
+        finally:
+            f.close()
+
+
 groupadd_path = "/usr/sbin/groupadd"
 groupdel_path = "/usr/sbin/groupdel"
 groupmod_path = "/usr/sbin/groupmod"
@@ -83,8 +97,12 @@ def SwapGroupModCommand():
         delete_user_from_group = delete_user_from_group_gpasswd
 
 def ReadPasswd(filename):
-    f = open(filename, "r")
-    lines = f.read().split("\n")
+    with opened_w_error(filename,'rb') as (f,error):
+        if error:
+            print("Exception opening file " + filename + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+            return None
+        else:
+            lines = f.read().split("\n")
     
     entries = dict()
     for line in lines:
@@ -95,8 +113,11 @@ def ReadPasswd(filename):
     return entries
 
 def ParseList(s):
-    return s.split("\n")[:-1]
-
+    if type(s) == 'str':
+        return s.strip('\n')
+    else:
+        return s
+    
 def get_GID(n):
     return int(n[1][1])
 
@@ -106,7 +127,7 @@ def AddUserToGroup(UserName, GroupName):
         SwapGroupModCommand()
         retval = os.system(add_user_to_group + UserName + " " + GroupName)
         if retval != 0:
-            print("Error adding user: " + UserName + " to group: " + GroupName)
+            print("Error adding user: " + UserName + " to group: " + GroupName,file=sys.stderr)
             return False
     return True
 
@@ -116,7 +137,7 @@ def DeleteUserFromGroup(UserName, GroupName):
         SwapGroupModCommand()
         retval = os.system(delete_user_from_group + UserName + " " + GroupName)
         if retval != 0:
-            print("Error removing user: " + UserName + " from group: " + GroupName)
+            print("Error removing user: " + UserName + " from group: " + GroupName,file=sys.stderr)
             return False
     return True
 
@@ -129,24 +150,26 @@ def GetGroupMembers(GroupName, group_entries):
 def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     if not Ensure:
         Ensure = "present"
-
+    group_entries=None
     group_entries = ReadPasswd("/etc/group")
+    if group_entries == None:
+        return [-1]
     Members_list = ParseList(Members)
 
     if Ensure.lower() == "absent":
         if GroupName in group_entries:
             # Delete group
-            print("Deleting group")
+            print("Deleting group",file=sys.stderr)
             retval = os.system(groupdel_path + " " + GroupName)
             if retval != 0:
-                print(groupdel_path + " " + GroupName + " failed.")
+                print(groupdel_path + " " + GroupName + " failed.",file=sys.stderr)
                 return [-1]
     else:
         if GroupName not in group_entries:
-            print("Group does not exist. Creating it.")
+            print("Group does not exist. Creating it.",file=sys.stderr)
             retval = os.system(groupadd_path + " " + GroupName)
             if retval != 0:
-                print(groupadd_path + " " + GroupName + " failed.")
+                print(groupadd_path + " " + GroupName + " failed.",file=sys.stderr)
                 return [-1]
 
             # Reread /etc/group
@@ -154,18 +177,18 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
 
         if Members:
             if MembersToInclude or MembersToExclude:
-                print("If Members is provided, Include and Exclude are not allowed.")
+                print("If Members is provided, Include and Exclude are not allowed.",file=sys.stderr)
                 return [-1]
 
             group_members = GetGroupMembers(GroupName, group_entries)
             for member in Members_list:
                 if member not in group_members:
-                    print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.")
+                    print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.",file=sys.stderr)
                     if AddUserToGroup(member, GroupName) == False:
                         return [-1]
             for member in group_members:
                 if member not in Members_list:
-                    print("Member: " + member + " is in the member list for group: " + GroupName + " but not speficied in Members.  Removing.")
+                    print("Member: " + member + " is in the member list for group: " + GroupName + " but not speficied in Members.  Removing.",file=sys.stderr)
                     if DeleteUserFromGroup(member, GroupName) == False:
                         return [-1]
                 
@@ -176,14 +199,14 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
                 MembersToInclude_list = ParseList(MembersToInclude)
                 for member in MembersToInclude_list:
                     if member not in group_members:
-                        print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.")
+                        print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.",file=sys.stderr)
                         if AddUserToGroup(member, GroupName) == False:
                             return [-1]
             if MembersToExclude:
                 MembersToExclude_list = ParseList(MembersToExclude)
                 for member in MembersToExclude_list:
                     if member in group_members:
-                        print("Member: " + member + " is in member list for group: " + GroupName + ".  Removing.")
+                        print("Member: " + member + " is in member list for group: " + GroupName + ".  Removing.",file=sys.stderr)
                         if DeleteUserFromGroup(member, GroupName) == False:
                             return [-1]
     
@@ -204,23 +227,23 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
             return [-1]
     else:
         if GroupName not in group_entries:
-            print("Group does not exist.")
+            print("Group does not exist.",file=sys.stderr)
             return [-1]
         
         if Members:
             if MembersToInclude or MembersToExclude:
-                print("If Members is provided, Include and Exclude are not allowed.")
+                print("If Members is provided, Include and Exclude are not allowed.",file=sys.stderr)
                 return [-1]
 
             group_members = GetGroupMembers(GroupName, group_entries)
 
             for member in Members_list:
                 if member not in group_members:
-                    print("Member: " + member + " not in member list for group: " + GroupName)
+                    print("Member: " + member + " not in member list for group: " + GroupName,file=sys.stderr)
                     return [-1]
             for member in group_members:
                 if member not in Members_list:
-                    print("Member: " + member + " is in the member list for group: " + GroupName + " but not speficied in Members")
+                    print("Member: " + member + " is in the member list for group: " + GroupName + " but not speficied in Members",file=sys.stderr)
                     return [-1]
                 
         else:
@@ -230,13 +253,13 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
                 MembersToInclude_list = ParseList(MembersToInclude)
                 for member in MembersToInclude_list:
                     if member not in group_members:
-                        print("Member: " + member + " not in member list for group: " + GroupName)
+                        print("Member: " + member + " not in member list for group: " + GroupName,file=sys.stderr)
                         return [-1]
             if MembersToExclude:
                 MembersToExclude_list = ParseList(MembersToExclude)
                 for member in MembersToExclude_list:
                     if member in group_members:
-                        print("Member: " + member + " is in member list for group: " + GroupName)
+                        print("Member: " + member + " is in member list for group: " + GroupName,file=sys.stderr)
                         return [-1]
 
     return [0]
@@ -252,9 +275,111 @@ def Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
     else:
         Ensure = "Present"
         PreferredGroupID = group_entries[GroupName][1]
-        group_members = GetGroupMembers(GroupName, group_entries)
-        for member in group_members:
-            Members += member + "\n"
+        Members = GetGroupMembers(GroupName, group_entries)
+#         for member in group_members:
+#             if len(Members)>0:
+#                 Members+=','
+#             Members += member + "\n"
 
     return [0, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID]
+
+import unittest,time
+
+class LinuxGroupTestCases(unittest.TestCase):
+    """
+    Test cases for LinuxFile
+    """
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        os.system('groupdel jojomamas &> /dev/null')
+        os.system('useradd -m jojoma &> /dev/null')
+        time.sleep(1)
+        
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        os.system('userdel -r jojoma &> /dev/null')
+        os.system('groupdel jojomamas &> /dev/null')
+        time.sleep(1)
+
+    def noop(self,arg2):
+        """
+        Set a method to noop() to prevent its operation.
+        """
+        pass
+
+    def pswd_hash(self,pswd):
+        import subprocess,hashlib,base64
+        salt=(subprocess.Popen("openssl rand -base64 3", shell=True, bufsize=100, stdout=subprocess.PIPE).stdout).readline().rstrip()
+        m = hashlib.sha1()
+        m.update(pswd+salt)
+        return base64.b64encode(m.digest()+salt)
+
+    # Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
+    
+    def testSetGroupPresent(self):
+        assert Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) == [0],'Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) should return == [0]'
+
+    def testSetGroupAbsent(self):
+        assert Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) == [0],'Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) should return == [0]'
+        assert Set("jojomamas", "Absent", ["jojoma"], "", "", 1101 ) == [0],'Set("jojomamas", "Absent", ["jojoma"], "", "", 1101 ) should return == [0]'
+
+    def testGetGroupAbsent(self):
+        assert Get("jojomamas", "", "", "", "", "")[:3]== [0,"jojomamas","Absent"],'Get("jojomamas", "", "", "", "", "")[:3] should return ==[0,"jojomamas","Absent"]'
+
+    def testGetGroupPresent(self):
+        assert Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) == [0],'Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) should return == [0]'
+        print('GET='+repr(Get("jojomamas", "", "", "", "", "")[:6]))
+        assert Get("jojomamas", "", "", "", "", "")[:6]== [0,"jojomamas","Present", ['jojoma'], "", ""], \
+               'Get("jojomamas", "", "", "", "", "")[:6] should return ==[0,"jojomamas","Present", "", "", ""]'
+
+    def testTestGroupAbsent(self):
+        assert Test("jojomamas", "Absent", "", "", "", "") == [0],'Test("jojomamas", "Absent", "", "", "", "") should return ==[0]'
+
+    def testTestGroupAbsentError(self):
+        assert Test("mail", "Absent", "", "", "", "")== [-1],'Test("mail", "Absent", "", "", "", "") should return ==[-1]'
+
+    def testTestGroupPresent(self):
+        assert Test("mail", "Present", "", "", "", "")== [0],'Test("mail", "Present", "", "", "", "") should return ==[0]'
+
+    def testTestGroupPresentError(self):
+        assert Test("jojomamas", "Present", "", "", "", "")== [-1],'Test("jojomamas", "Present", "", "", "", "") should return ==[-1]'
+
+    def testSetGroupPresentMembers(self):
+        assert Set("jojomamas", "Present", ("jojoma","root"), "", "", 1101 ) == [0],'Set("jojomamas", "Present", ("jojoma","root"), "", "", 1101 ) should return == [0]'
+        assert Test("jojomamas", "Present", ("jojoma","root"), "", "", "")== [0],'Test("jojomamas", "Present", ("jojoma","root"), "", "", "") should return ==[0]'
+
+    def testSetGroupPresentMembersInclude(self):
+        assert Set("jojomamas", "Present", "", "", "", 1101 ) == [0],'Set("jojomamas", "Present", "", "", "", 1101 ) should return == [0]'
+        assert Set("jojomamas", "Present", "", ["jojoma"], "", 1101 ) == [0],'Set("jojomamas", "Present", "", ["jojoma"], "", 1101 ) should return == [0]'
+        assert Test("jojomamas", "Present", ["jojoma"], "", "", "")== [0],'Test("jojomamas", "Present", ["jojoma"], "", "", "") should return ==[0]'
+
+    def testSetGroupPresentMembersExclude(self):
+        assert Set("jojomamas", "Present", ("jojoma","root"), "", "", 1101 ) == [0],'Set("jojomamas", "Present", ("jojoma","root"), "", "", 1101 ) should return == [0]'
+        assert Set("jojomamas", "Present", "", "", ["jojoma"], 1101 ) == [0],'Set("jojomamas", "Present", "", "", ("jojoma"), 1101 ) should return == [0]'
+        assert Test("jojomamas", "Present", ["root"], "", "", "")== [0],'Test("jojomamas", "Present", "root", "", "", "") should return ==[0]'
+
+    def testSetGroupPresentMembersIncludeError(self):
+        assert Set("jojomamas", "Present", "", "", "", 1101 ) == [0],'Set("jojomamas", "Present", "", "", "", 1101 ) should return == [0]'
+        assert Set("jojomamas", "Present", "", ["ojoma"], "", 1101 ) == [-1],'Set("jojomamas", "Present", "", "ojoma", "", 1101 ) should return == [-1]'
+        print("TEST="+repr(Test("jojomamas", "Present", ["ojoma"], "", "", "")))
+        assert Test("jojomamas", "Present", ["ojoma"], "", "", "")== [-1],'Test("jojomamas", "Present", ["ojoma"], "", "", "") should return ==[-1]'
+
+    def testSetGroupPresentMembersExcludeError(self):
+        assert Set("jojomamas", "Present", ["root"], "", "", 1101 ) == [0],'Set("jojomamas", "Present", ["root"], "", "", 1101 ) should return == [0]'
+        assert Set("jojomamas", "Present", "", "", ["jojoma"], 1101 ) == [0],'Set("jojomamas", "Present", "", "", ["jojoma"], 1101 ) should return == [0]'
+        print("TEST="+repr(Test("jojomamas", "Present", ["jojoma"], "", "", "")))
+        assert Test("jojomamas", "Present", ["jojoma"], "", "", "")== [-1],'Test("jojomamas", "Present", "root", "", "", "") should return ==[-1]'
+
+
+if __name__ == '__main__':
+    s=unittest.TestLoader().loadTestsFromTestCase(LinuxGroupTestCases)
+    unittest.TextTestRunner(verbosity=2).run(s)
+
+
+
+
 
