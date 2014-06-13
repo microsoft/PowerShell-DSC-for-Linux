@@ -59,8 +59,8 @@
   <ItemGroup>
     <Compile Include="nxEnvironmentProviderTest\EnvironmentMofHelper.cs" />
     <Compile Include="nxEnvironmentProviderTest\nxEnvironmentTest.cs" />
-    <Compile Include="nxExecResource\ExecMofHelper.cs" />
-    <Compile Include="nxExecResource\nxExecTest.cs" />
+    <Compile Include="nxExecProviderTest\ExecMofHelper.cs" />
+    <Compile Include="nxExecProviderTest\nxExecTest.cs" />
     <Compile Include="nxGroupProviderTest\GroupMofHelper.cs" />
     <Compile Include="nxGroupProviderTest\nxGroupTest.cs" />
     <Compile Include="nxLogProviderTest\LogMofHelper.cs" />
@@ -71,6 +71,8 @@
     <Compile Include="nxScriptProviderTest\ScriptMofHelper.cs" />
     <Compile Include="nxServiceProviderTest\nxServiceTest.cs" />
     <Compile Include="nxServiceProviderTest\ServiceMofHelper.cs" />
+    <Compile Include="nxSshAuthProviderTest\nxSshAuthTest.cs" />
+    <Compile Include="nxSshAuthProviderTest\SshAuthMofHelper.cs" />
     <Compile Include="ProviderTestBase.cs" />
     <Compile Include="CommonHelper.cs" />
     <Compile Include="nxFileProviderTest\FileMofHelper.cs" />
@@ -94,6 +96,7 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd $(SolutionDir)..\

@@ -2007,8 +2007,7 @@
       </var>
 
     </section>
-    
-
+    s
     <section sid="7" dsc="nxPackage Provider">
  
       <var set="7" lvl="1" vid="665043"
@@ -2256,7 +2255,6 @@
       </var>
       
     </section>
-
 
     <section sid="8" dsc="nxLog Provider">
       <var set="8" lvl="1" vid="661741"
@@ -2580,6 +2578,153 @@
         <rec key="propString">Command:%command%;Group:stherror</rec>
         <rec key="psScript">%dscSender%</rec>
         <rec key="psErrorMsg">%funcErrorMsg%</rec>
+      </var>
+    </section>
+
+    <section sid="10" dsc="nxSshAuthorizedKeys Provider">
+      <var set="10" lvl="1" vid="664653"
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key for specific user is stored into ~/.ssh/authorizied_keys"
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">testUser</rec>
+        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <rec key="initialCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <rec key="finalCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="expectedLogin">true</rec>
+        <rec key="successfulMsg">The ssh authorized key for specific user is stored into ~/.ssh/authorizied_keys</rec>
+        <rec key="failedMsg">The ssh authorized key for specific user is not stored into ~/.ssh/authorizied_keys</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="664654"
+           dsc="[nxSshAuthorizedKeys] Verify if authorized_keys file is created with specific authorized key if authorized_keys does not exist"
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">root</rec>
+        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft1234</rec>
+        <rec key="initialCmd">cp %sshKeyPath% /tmp/tmpSshKey; rm -f %sshKeyPath%</rec>
+        <rec key="finalCmd">mv /tmp/tmpSshKey %sshKeyPath%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="expectedLogin">false</rec>
+        <rec key="successfulMsg">The authorized_keys file is created if this file does not exist</rec>
+        <rec key="failedMsg">The authorized_keys file is not created if this file does not exist</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="664655"
+           dsc="[nxSshAuthorizedKeys] Verify if authorized_keys file is created with specific authorized key if .ssh directory does not exist"
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">root</rec>
+        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <rec key="initialCmd">cp -r ~/.ssh /tmp/ssh_bk; rm -rf ~/.ssh</rec>
+        <rec key="finalCmd">mv /tmp/ssh_bk ~/.ssh</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The authorized_keys file is created if .ssh directory does not exist</rec>
+        <rec key="failedMsg">The authorized_keys file is not created if .ssh directory does not exist</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="664656"
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is updated if the KeyComment does exist"
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">root</rec>
+        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <rec key="initialCmd">cp %sshKeyPath% /tmp/tmpSshKey;echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApiuRzWP4CR8cOyYuGcpCAItqb22+2R26rxQvZIfZ2yn4wDzdvXwsxNwnwewJ76gFV814OR85XqrAshOjcyfWEoVKxh4Vd1+LUAMXCFHMgvEkUY6BAvkw5/mJRFWHPctpb3qL6rMe5l5jDGwsZWCnrRvoVNFjBUy4mYfKu4saDXfU973n0okIGiVVgChoSWmLDJnv/v3bJNOjZeinnsD9wRPB7jD7y7aIKLkm9QjHbAvjBX4AtdMPQpqT+hpiGEs7FBY9ohomX9E5c/VpU7AnRL0E7nx1DcRj3AxpDmIcxkgW5gRQUrAwD21nQ/zDEiok+4IEYWUqEtC5HmBLFCfBrQ== testKeyComments" >> %sshKeyPath%</rec>
+        <rec key="finalCmd"> rm -f %sshKeyPath%; mv /tmp/tmpSshKey %sshKeyPath%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The ssh authorized key is updated if the KeyComment does exist</rec>
+        <rec key="failedMsg">The ssh authorized key is not updated if the KeyComment does exist</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="664658"
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is delete if the Ensure is set to 'absent'"
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key"></rec>
+        <rec key="initialCmd">cp %sshKeyPath% /tmp/tmpSshKey;echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApiuRzWP4CR8cOyYuGcpCAItqb22+2R26rxQvZIfZ2yn4wDzdvXwsxNwnwewJ76gFV814OR85XqrAshOjcyfWEoVKxh4Vd1+LUAMXCFHMgvEkUY6BAvkw5/mJRFWHPctpb3qL6rMe5l5jDGwsZWCnrRvoVNFjBUy4mYfKu4saDXfU973n0okIGiVVgChoSWmLDJnv/v3bJNOjZeinnsD9wRPB7jD7y7aIKLkm9QjHbAvjBX4AtdMPQpqT+hpiGEs7FBY9ohomX9E5c/VpU7AnRL0E7nx1DcRj3AxpDmIcxkgW5gRQUrAwD21nQ/zDEiok+4IEYWUqEtC5HmBLFCfBrQ== testKeyComments" >> %sshKeyPath%</rec>
+        <rec key="finalCmd"> rm -f %sshKeyPath%; mv /tmp/tmpSshKey %sshKeyPath%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Absent</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The ssh authorized key is delete if the Ensure is set to 'absent'</rec>
+        <rec key="failedMsg">The ssh authorized key is not delete if the Ensure is set to 'absent'</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="664659"
+     dsc="[nxSshAuthorizedKeys] Verify if error out if there is no KeyComment property in Configuration MOF file"
+     cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">root</rec>。
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as no KeyComment property in Configuration MOF file.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="664660"
+     dsc="[nxSshAuthorizedKeys] Verify if error out if the specific Ensure is invalid"
+     cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">root</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:xzcxczx;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid Ensure property.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
       </var>
       
     </section>
