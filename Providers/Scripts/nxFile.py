@@ -266,9 +266,14 @@ def CopyFile(spath,dpath):
 
 def CompareFiles(DestinationPath, SourcePath, Checksum):
     """
+    If the files differ in size, return -1.
     Reading and computing the hash here is done in a block-by-block manner, 
     in case the file is quite large.
     """
+    stat_dest = StatFile(DestinationPath)
+    stat_src = StatFile(SourcePath)
+    if stat_src.st_size != stat_dest.st_size:
+        return -1
     if Checksum == "md5":
         src_error = None
         dest_error = None
@@ -296,16 +301,12 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
         if src_hash.hexdigest() == dest_hash.hexdigest():
             return 0  
     elif Checksum == "ctime":
-        stat_dest = StatFile(DestinationPath)
-        stat_src = StatFile(SourcePath)
         if stat_src.st_ctime > stat_dest.st_ctime:
             # Source is newer than Destination
             return -1
         else:
             return 0
     elif Checksum == "mtime":
-        stat_dest = StatFile(DestinationPath)
-        stat_src = StatFile(SourcePath)
         if stat_src.st_mtime > stat_dest.st_mtime:
             # Source is newer than Destination
             return -1
@@ -865,207 +866,3 @@ class FileContext:
                 Mode = ""
 
         self.Mode = Mode
-
-import unittest
-
-class LinuxFileTestCases(unittest.TestCase):
-    """
-    Test cases for LinuxFile
-    """
-    def setUp(self):
-        """
-        Setup test resources
-        """
-        os.system('rm -rf /tmp/*pp*')
-
-    def tearDown(self):
-        """
-        Remove test resources.
-        """
-        os.system('rm -rf /tmp/*pp*')
-
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
-    def testSetFileAbsent(self):
-        assert Set("/tmp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testSetFileAbsentError(self):
-        assert Set("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==[0],'Set("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testSetFileData(self):
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]'
-        d,e=ReadFile('/tmp/1.pp')
-        assert d=="These are the contents of 1.pp","File contents mismatch:"+d
-
-    def testSetFileDataError(self):
-        assert Set("/tp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[-1],'Set("/tp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [-1]'
-
-    def testSetFileNoData(self):
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-        d,e=ReadFile('/tmp/1.pp')
-        assert len(d)==0,"The contents of 1.pp should be empty.  File contents mismatch:"+d
-
-    def testTestCompareFilesMD5Same(self):
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==[0],'Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]'
-        
-    def testTestCompareFilesMD5Different(self):
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==[0],'Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]'
-        
-    def testTestCompareFilesMD5Error(self):
-        assert Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==[-1],'Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [-1]'
-
-    def testSetFileCopy(self):
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]'
-        d,e=ReadFile('/tmp/12.pp')
-        assert d=="These are the contents of 1.pp","File contents mismatch:"+d
-
-#     def testSetFileCopyError(self):
-#         assert Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==[-1],'Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [-1]'
-
-    def testSetDirectoryPresent(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert os.path.isdir('/tmp/pp') == True,'Directory /tmp/pp is missing.'
-
-    def testSetDirectoryAbsent(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert os.path.isdir('/tmp/pp') == False,'Directory /tmp/pp is present.'
-
-    def testSetDirectoryAbsentError(self):
-        assert Set("/tmp/pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testSetCopyDirectoryToNew(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert os.path.isdir('/tmp/pp') == True,'Directory /tmp/pp is missing.'
-        assert Set("/tmp/ppp", "/tmp/pp", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert os.path.isdir('/tmp/ppp') == True,'Directory /tmp/ppp is missing.'
-        
-#     def testSetCopyDirectoryToNewError(self):
-#         assert Set("/tmp/ppp", "/tmp/pp", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[-1],'Set("/tmp/ppp", "/tmp/pp", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [-1]'
-#         assert os.path.isdir('/tmp/ppp') == False,'Directory /tmp/ppp should be missing.'
-        
-    def testSetCopyDirectoryToExistingForce(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert os.path.isdir('/tmp/pp') == True,'Directory /tmp/pp is missing.'
-        assert Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]'
-        d,e=ReadFile('/tmp/pp/1.pp')
-        assert d=="These are the contents of 1.pp","File contents mismatch:"+d
-        assert Set("/tmp/ppp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert os.path.isdir('/tmp/ppp') == True,'Directory /tmp/ppp is missing.'
-        assert Set("/tmp/ppp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/ppp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]'
-        d,e=ReadFile('/tmp/ppp/1.pp')
-        assert d=="These are the contents of 1.pp","File contents mismatch:"+d
-        assert Set("/tmp/ppp", "/tmp/pp", "Present", "Directory", "Force", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testSetModeRecursive(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "755")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "755") should return [0]'
-        assert (StatFile('/tmp/pp/1.pp').st_mode & 0755 ) == 0755 and (StatFile('/tmp/pp/12.pp').st_mode & 0755) == 0755,'Mode of /tmp/pp/1.pp and /tmp/pp/12.pp should be 755'
-
-    def testSetOwnerRecursive(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "") should return [0]'
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "mail", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "mail", "") should return [0]'
-        assert StatFile('/tmp/pp/1.pp').st_gid == grp.getgrnam('mail')[2]  and StatFile('/tmp/pp/12.pp').st_gid == grp.getgrnam('mail')[2] ,'Group of /tmp/pp/1.pp and /tmp/pp/12.pp should be mail'
-
-    def testTestNoDestPathError(self):
-        assert Test("", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[-1],'Test("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]'
-
-    def testTestFilePresentError(self):
-        assert Test("/tp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[-1],'Test("/tp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]'
-
-    def testTestFilePresent(self):
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Test("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[0],'Test("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testTestFileAbsentError(self):
-        assert Test("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==[0],'Test("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testTestFileAbsent(self):
-        assert Test("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==[0],'Test("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testTestDirectoryRecurseCheckOwnerError(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "") should return [0]'
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "udos", "", "")==[-1],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "udos", "", "") should return [-1]'
-
-    def testTestDirectoryRecurseCheckGroupError(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "mail", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "mail", "") should return [0]'
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "udos", "")==[-1],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "udos", "") should return [-1]'
-
-    def testTestDirectoryRecurseCheckModeError(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "755")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "755") should return [0]'
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "755")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "755") should return [0]'
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "744")==[-1],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "744") should return [-1]'
-
-    def testTestDirectoryRecurseCheckOwner(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "") should return [0]'
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-        me =  pwd.getpwuid(os.getuid()).pw_name
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", me, "", "")==[0],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "'+me+'", "", "") should return [0]'
-
-    def testTestDirectoryRecurseCheckGroup(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "mail", "") should return [0]'
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-        me = grp.getgrgid(os.getgid()).gr_name
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", me, "")==[0],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "'+me+'", "", "") should return [0]'
-
-    def testTestDirectoryRecurseCheckMode(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "755")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "755") should return [0]'
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "755")==[0],'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "755") should return [0]'
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "755")==[0],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "True", "", "", "", "755") should return [0]'
-
-    def testGetNoDestPathError(self):
-        assert Get("", "", "Present", "File", "", "", "md5", "", "", "", "", "")[0]==-1,'Get("", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]'
-
-    def testGetFilePresent(self):
-        assert Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")[0]==0,'Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Get("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")[0]==0,'Get("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testGetDirectoryPresent(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")[0]==0,'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "","", "")==[0],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Get("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")[0]==0,'Get("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-
-    def testTestDirectoryCheckOwnerError(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "udos", "", "")==[-1],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "udos", "", "") should return [-1]'
-
-    def testTestDirectoryCheckGroupError(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "") should return [0]'
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "udos", "")==[-1],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "udos", "") should return [-1]'
-
-#     def testTestDirectoryCheckModeError(self):
-#         assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "776")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "755") should return [0]'
-#         assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "744")==[-1],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "744") should return [-1]'
-
-    def testTestDirectoryCheckOwner(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]'
-        me =  pwd.getpwuid(os.getuid()).pw_name
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", me, "", "")==[0],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "'+me+'", "", "") should return [0]'
-
-    def testTestDirectoryCheckGroup(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "") should return [0]'
-        me = grp.getgrgid(os.getgid()).gr_name
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", me, "")==[0],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "'+me+'", "", "") should return [0]'
-
-    def testTestDirectoryCheckMode(self):
-        assert Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "776")==[0],'Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "776") should return [0]'
-        assert Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "776")==[0],'Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "776") should return [0]'
-
-if __name__ == '__main__':
-    s=unittest.TestLoader().loadTestsFromTestCase(LinuxFileTestCases)
-    unittest.TextTestRunner(verbosity=2).run(s)
