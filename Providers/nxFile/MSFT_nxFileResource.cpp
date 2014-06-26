@@ -1,11 +1,12 @@
-/*============================================================================
- * Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
- *============================================================================
- */
 /* @migen@ */
-#include "PythonHelper.hpp"
+#include <boost/python.hpp>
+#include "debug_tags.hpp"
+#include "python_file_resource.hpp"
+#include "python_helper.hpp"
+#include "python_scoped_context.hpp"
 #include <MI.h>
 #include "MSFT_nxFileResource.h"
+
 
 #include <cstdlib>
 #include <string>
@@ -18,129 +19,26 @@
 #include <iostream>
 
 
-struct _MSFT_nxFileResource_Self
+typedef struct _MSFT_nxFileResource_Self : public scx::PythonFileResource
 {
-public:
-    PyObjPtr pModule;
-    PyObjPtr pSetFn;
-    PyObjPtr pTestFn;
-    PyObjPtr pGetFn;
+    /*ctor*/ _MSFT_nxFileResource_Self (scx::PythonFileResource& base)
+      : scx::PythonFileResource (base) {}
+} MSFT_nxFileResource_Self;
 
-    static int create (_MSFT_nxFileResource_Self** const ppInstance);
-
-private:
-    /*ctor*/ _MSFT_nxFileResource_Self (
-        PyObjPtr const& _pModule,
-        PyObjPtr const& _pSetFn,
-        PyObjPtr const& _pTestFn,
-        PyObjPtr const& _pGetFn)
-      : pModule (_pModule)
-      , pSetFn (_pSetFn)
-      , pTestFn (_pTestFn)
-      , pGetFn (_pGetFn)
-    {
-        // empty
-    }
-
-};
-
-typedef _MSFT_nxFileResource_Self MSFT_nxFileResource_Self;
-
-
-
-/*static*/
-int
-_MSFT_nxFileResource_Self::create (
-    _MSFT_nxFileResource_Self** const ppInstance)
-{
-    int rval = EXIT_SUCCESS;
-    PyObjPtr pModule;
-    PyObjPtr pSetFn;
-    PyObjPtr pTestFn;
-    PyObjPtr pGetFn;
-    if (ppInstance &&
-        !*ppInstance)
-    {
-        if (EXIT_SUCCESS == (rval = initPython ("do'h", GetScriptPath().c_str())))
-        {
-            pModule = loadModule ("nxFile");
-            if (pModule)
-            {
-                pSetFn = loadFunctionFromModule (pModule, "Set_Marshall");
-                pTestFn = loadFunctionFromModule (pModule, "Test_Marshall");
-                pGetFn = loadFunctionFromModule (pModule, "Get_Marshall");
-                if (pSetFn && pTestFn && pGetFn)
-                {
-                    *ppInstance = new _MSFT_nxFileResource_Self (
-                        pModule, pSetFn, pTestFn, pGetFn);
-                }
-                else
-                {
-                    rval = EXIT_FAILURE;
-                }
-            }
-            else
-            {
-                rval = EXIT_FAILURE;
-            }
-        }
-        else
-        {
-            rval = EXIT_FAILURE;
-        }
-    }
-    else
-    {
-        rval = EXIT_FAILURE;
-    }
-    return rval;
-}
-
-static const MI_Char* PassString(const MI_ConstStringField& field)
-{
-    if (field.exists == MI_TRUE)
-    {
-        return field.value;
-    }
-    else
-    {
-        return (const MI_Char*)"";
-    }
-}
-
-static const MI_Char* PassBoolean(const MI_ConstBooleanField& field)
-{
-    if (field.exists == MI_TRUE)
-    {
-        if (field.value == MI_TRUE)
-        {
-            return (const MI_Char*) "True";
-        }
-        else
-        {
-            return (const MI_Char*) "False";
-        }
-    }
-    else
-    {
-        return (const MI_Char*)"";
-    }
-}
 
 void MI_CALL MSFT_nxFileResource_Load(
     _Outptr_result_maybenull_ MSFT_nxFileResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
+    SCX_BOOKEND_EX ("Load", " name=\"nxFile\"");
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
-    if (EXIT_SUCCESS != MSFT_nxFileResource_Self::create (self))
+    if (0 != self &&
+        EXIT_SUCCESS != scx::PythonFileResource::create (self, "nxFile"))
     {
         res = MI_RESULT_FAILED;
-    
     }
-
-
     MI_Context_PostResult(context, res);
 }
 
@@ -148,11 +46,11 @@ void MI_CALL MSFT_nxFileResource_Unload(
     _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context)
 {
+    SCX_BOOKEND_EX ("Unload", " name=\"nxFile\"");
     if (self)
     {
         delete self;
     }
-
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
@@ -239,75 +137,6 @@ void MI_CALL MSFT_nxFileResource_DeleteInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-int SetElement(
-    MI_Instance* newInstance, 
-    char const * field,
-    std::string& newFieldVal,
-    MI_Type type)
-{
-    MI_Value value;
-    MI_Result r;
-
-    if (type == MI_STRING)
-    {
-        value.string = (MI_Char*)newFieldVal.c_str();
-        r = MI_Instance_SetElement(newInstance, field, &value, MI_STRING, 0);
-        if ( r != MI_RESULT_OK )
-        {
-            return -1;
-        }
-    }
-    else if (type == MI_DATETIME)
-    {
-        time_t time_in_seconds = atol(newFieldVal.c_str());
-        struct tm* time_in_tm = localtime(&time_in_seconds);
-        value.datetime.u.timestamp.year = time_in_tm->tm_year+1900;
-        value.datetime.u.timestamp.month = time_in_tm->tm_mon+1;
-        value.datetime.u.timestamp.day = time_in_tm->tm_mday;
-        value.datetime.u.timestamp.hour = time_in_tm->tm_hour;
-        value.datetime.u.timestamp.minute = time_in_tm->tm_min;
-        value.datetime.u.timestamp.second = time_in_tm->tm_sec;
-        value.datetime.u.timestamp.utc = -8*60;
-        r = MI_Instance_SetElement(newInstance, field, &value, MI_DATETIME, 0);
-        if ( r != MI_RESULT_OK )
-        {
-            return -1;
-        }
-    }
-    else if (type == MI_BOOLEAN)
-    {
-        bool callSetElement = true;
-        if (newFieldVal == "True")
-        {
-            value.boolean = MI_TRUE;
-        }
-        else if (newFieldVal == "False")
-        {
-            value.boolean = MI_FALSE;
-        }
-        else if (newFieldVal == "")
-        {
-            value.boolean = MI_FALSE;
-            callSetElement = false;
-        }
-        else
-        {
-            std::cerr << "Expecting: True or False" << std::endl;
-            return -1;
-        }
-
-        if (callSetElement)
-        {
-            r = MI_Instance_SetElement(newInstance, field, &value, MI_BOOLEAN, 0);
-            if ( r != MI_RESULT_OK )
-            {
-                return -1;
-            }
-        }
-    }
-    return 0;
-}
-
 void MI_CALL MSFT_nxFileResource_Invoke_GetTargetResource(
     _In_opt_ MSFT_nxFileResource_Self* self,
     _In_ MI_Context* context,
@@ -317,93 +146,102 @@ void MI_CALL MSFT_nxFileResource_Invoke_GetTargetResource(
     _In_ const MSFT_nxFileResource* instanceName,
     _In_opt_ const MSFT_nxFileResource_GetTargetResource* in)
 {
-
-    std::cout << "Get" << std::endl;
-
+    SCX_BOOKEND_EX ("Get", " name=\"nxFile\"");
+    scx::PythonScopedContext lock (self->getThreadState ());
     MI_Result r = MI_RESULT_OK;
-    MI_Boolean res = MI_TRUE;
     MSFT_nxFileResource_GetTargetResource out;
     MI_Instance *newInstance;
     MI_Value value;
 
-    r = MSFT_nxFileResource_GetTargetResource_Construct(&out, context);
-    r = MSFT_nxFileResource_GetTargetResource_Set_MIReturn(&out, 0);
+    r = MSFT_nxFileResource_GetTargetResource_Construct (&out, context);
+    r = MSFT_nxFileResource_GetTargetResource_Set_MIReturn (&out, 0);
 
-    const MSFT_nxFileResource * file = in->InputResource.value;
-    r = MI_Instance_Clone(&file->__instance, &newInstance);
+    const MSFT_nxFileResource* file = in->InputResource.value;
+    r = MI_Instance_Clone (&file->__instance, &newInstance);
 
+    MI_Boolean res = MI_TRUE;
+    boost::python::object retVals;
+    int exitCode = scx::invoke_python_function (
+        &retVals,
+        self->getGetFn (),
+        scx::get_mi_value (file->DestinationPath),
+        scx::get_mi_value (file->SourcePath),
+        scx::get_mi_value (file->Ensure),
+        scx::get_mi_value (file->Type),
+        scx::get_mi_value (file->Force),
+        scx::get_mi_value (file->Contents),
+        scx::get_mi_value (file->Checksum),
+        scx::get_mi_value (file->Recurse),
+        scx::get_mi_value (file->Links),
+        scx::get_mi_value (file->Owner),
+        scx::get_mi_value (file->Group),
+        scx::get_mi_value (file->Mode));
 
-    std::vector<std::string> ret_strings;
-    long exit_code = callPythonFunction(
-        ret_strings,
-        self->pGetFn,
-        12,
-        PassString(file->DestinationPath),
-        PassString(file->SourcePath),
-        PassString(file->Ensure),
-        PassString(file->Type),
-        PassBoolean(file->Force),
-        PassString(file->Contents),
-        PassString(file->Checksum),
-        PassBoolean(file->Recurse),
-        PassString(file->Links),
-        PassString(file->Owner),
-        PassString(file->Group),
-        PassString(file->Mode));
-    
-    // 12+1 represents: the 12 normal fields, the 1 'read' fields
-    if (ret_strings.size() == (12+1) && exit_code == 0)
+    // 1 + 12 + 1 represents: result, 11 normal fields, 1 'read' fields
+    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals) &&
+        (1 + 12 + 1) == boost::python::len (retVals))
     {
         res = MI_TRUE;
     }
     else
     {
-        MI_Context_PostResult(context, MI_RESULT_FAILED);
+        SCX_BOOKEND_PRINT ("Failed - 1");
+        MI_Context_PostResult (context, MI_RESULT_FAILED);
         return;
     }
-
-    if (SetElement(newInstance, "DestinationPath", ret_strings[0], MI_STRING)  != 0 ||
-        SetElement(newInstance, "SourcePath", ret_strings[1], MI_STRING)       != 0 ||
-        SetElement(newInstance, "Ensure", ret_strings[2], MI_STRING)           != 0 ||
-        SetElement(newInstance, "Type", ret_strings[3], MI_STRING)             != 0 ||
-        SetElement(newInstance, "Force", ret_strings[4], MI_BOOLEAN)           != 0 ||
-        SetElement(newInstance, "Contents", ret_strings[5], MI_STRING)         != 0 ||
-        SetElement(newInstance, "Checksum", ret_strings[6], MI_STRING)         != 0 ||
-        SetElement(newInstance, "Recurse", ret_strings[7], MI_BOOLEAN)         != 0 ||
-        SetElement(newInstance, "Links", ret_strings[8], MI_STRING)            != 0 ||
-        SetElement(newInstance, "Owner", ret_strings[9], MI_STRING)            != 0 ||
-        SetElement(newInstance, "Group", ret_strings[10], MI_STRING)           != 0 ||
-        SetElement(newInstance, "Mode", ret_strings[11], MI_STRING)            != 0 ||
-        SetElement(newInstance, "ModifiedDate", ret_strings[12], MI_DATETIME)  != 0)
+    
+    if (EXIT_SUCCESS != scx::set_mi_string (
+            newInstance, "DestinationPath", retVals[1]) ||
+        EXIT_SUCCESS != scx::set_mi_string (
+            newInstance, "SourcePath", retVals[2]) ||
+        EXIT_SUCCESS != scx::set_mi_string (
+            newInstance, "Ensure", retVals[3]) ||
+        EXIT_SUCCESS != scx::set_mi_string (newInstance, "Type", retVals[4]) ||
+        EXIT_SUCCESS != scx::set_mi_bool (newInstance, "Force", retVals[5]) ||
+        EXIT_SUCCESS != scx::set_mi_string (
+            newInstance, "Contents", retVals[6]) ||
+        EXIT_SUCCESS != scx::set_mi_string (
+            newInstance, "Checksum", retVals[7]) ||
+        EXIT_SUCCESS != scx::set_mi_bool (newInstance, "Recurse", retVals[8]) ||
+        EXIT_SUCCESS != scx::set_mi_string (newInstance, "Links", retVals[9]) ||
+        EXIT_SUCCESS != scx::set_mi_string (
+            newInstance, "Owner", retVals[10]) ||
+        EXIT_SUCCESS != scx::set_mi_string (
+            newInstance, "Group", retVals[11]) ||
+        EXIT_SUCCESS != scx::set_mi_string (newInstance, "Mode", retVals[12]))
     {
-        MI_Context_PostResult(context, MI_RESULT_FAILED);
+        SCX_BOOKEND_PRINT ("Failed - 2");
+        MI_Context_PostResult (context, MI_RESULT_FAILED);
         return;
     }
-
     value.instance = newInstance;
-    r = MI_Instance_SetElement(&out.__instance, "OutputResource", &value, MI_INSTANCE, 0);
-    if ( r != MI_RESULT_OK )
+    r = MI_Instance_SetElement (
+        &out.__instance, "OutputResource", &value, MI_INSTANCE, 0);
+    if (MI_RESULT_OK != r)
     {
-        MI_Context_PostResult(context, r);
+        SCX_BOOKEND_PRINT ("Failed - 3");
+        MI_Context_PostResult (context, r);
         return;
     }
 
-    MI_Instance_Delete(newInstance);
-    r = MSFT_nxFileResource_GetTargetResource_Post(&out, context);
-    if ( r != MI_RESULT_OK )
+    MI_Instance_Delete (newInstance);
+    r = MSFT_nxFileResource_GetTargetResource_Post (&out, context);
+    if (MI_RESULT_OK != r)
     {
-        MI_Context_PostResult(context, r);
+        SCX_BOOKEND_PRINT ("Failed - 4");
+        MI_Context_PostResult (context, r);
         return;
     }
 
-    r = MSFT_nxFileResource_GetTargetResource_Destruct(&out);
-    if ( r != MI_RESULT_OK )
+    r = MSFT_nxFileResource_GetTargetResource_Destruct (&out);
+    if (MI_RESULT_OK != r)
     {
-        MI_Context_PostResult(context, r);
+        SCX_BOOKEND_PRINT ("Failed - 5");
+        MI_Context_PostResult (context, r);
         return;
     }
 
-    MI_Context_PostResult(context, MI_RESULT_OK);
+    MI_Context_PostResult (context, MI_RESULT_OK);
 }
 
 void MI_CALL MSFT_nxFileResource_Invoke_TestTargetResource(
@@ -415,38 +253,35 @@ void MI_CALL MSFT_nxFileResource_Invoke_TestTargetResource(
     _In_ const MSFT_nxFileResource* instanceName,
     _In_opt_ const MSFT_nxFileResource_TestTargetResource* in)
 {
-    std::cout << "Test" << std::endl;
-
+    SCX_BOOKEND_EX ("Test", " name=\"nxFile\"");
     if (!self)
     {
         MI_Context_PostResult(context, MI_RESULT_OK);
         return;
     }
-
+    scx::PythonScopedContext lock (self->getThreadState ());
     MI_Result r = MI_RESULT_OK;
     MI_Boolean res = MI_TRUE;
     MSFT_nxFileResource_TestTargetResource out;
-    const MSFT_nxFileResource * file = in->InputResource.value;
 
-    std::vector<std::string> ret_strings;
-    long exit_code = callPythonFunction(
-        ret_strings,
-        self->pTestFn,
-        12,
-        PassString(file->DestinationPath),
-        PassString(file->SourcePath),
-        PassString(file->Ensure),
-        PassString(file->Type),
-        PassBoolean(file->Force),
-        PassString(file->Contents),
-        PassString(file->Checksum),
-        PassBoolean(file->Recurse),
-        PassString(file->Links),
-        PassString(file->Owner),
-        PassString(file->Group),
-        PassString(file->Mode));
-
-    if (ret_strings.size() == 0 && exit_code == 0)
+    MSFT_nxFileResource const* file = in->InputResource.value;
+    boost::python::object retVals;
+    int exitCode = scx::invoke_python_function (
+        &retVals,
+        self->getTestFn (),
+        scx::get_mi_value (file->DestinationPath),
+        scx::get_mi_value (file->SourcePath),
+        scx::get_mi_value (file->Ensure),
+        scx::get_mi_value (file->Type),
+        scx::get_mi_value (file->Force),
+        scx::get_mi_value (file->Contents),
+        scx::get_mi_value (file->Checksum),
+        scx::get_mi_value (file->Recurse),
+        scx::get_mi_value (file->Links),
+        scx::get_mi_value (file->Owner),
+        scx::get_mi_value (file->Group),
+        scx::get_mi_value (file->Mode));
+    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals))
     {
         res = MI_TRUE;
     }
@@ -455,6 +290,7 @@ void MI_CALL MSFT_nxFileResource_Invoke_TestTargetResource(
         res = MI_FALSE;
     }
 
+    // Why are the results (r) of these functions being captured but not used?
     r = MSFT_nxFileResource_TestTargetResource_Construct(&out, context);
     r = MSFT_nxFileResource_TestTargetResource_Set_Result(&out, res);
     r = MSFT_nxFileResource_TestTargetResource_Set_MIReturn(&out, 0);
@@ -472,38 +308,35 @@ void MI_CALL MSFT_nxFileResource_Invoke_SetTargetResource(
     _In_ const MSFT_nxFileResource* instanceName,
     _In_opt_ const MSFT_nxFileResource_SetTargetResource* in)
 {
-    std::cout << "Set" << std::endl;
-
+    SCX_BOOKEND_EX ("Set", " name=\"nxFile\"");
     if (!self)
     {
-        MI_Context_PostResult(context, MI_RESULT_OK);
+        MI_Context_PostResult(context, MI_RESULT_FAILED);
         return;
     }
-
+    scx::PythonScopedContext lock (self->getThreadState ());
     MI_Result r = MI_RESULT_OK;
     MSFT_nxFileResource_SetTargetResource out;
-    const MSFT_nxFileResource * file = in->InputResource.value;
     MI_Result res = MI_RESULT_OK;
 
-    std::vector<std::string> ret_strings;
-    long exit_code = callPythonFunction(
-        ret_strings,
-        self->pSetFn,
-        12,
-        PassString(file->DestinationPath),
-        PassString(file->SourcePath),
-        PassString(file->Ensure),
-        PassString(file->Type),
-        PassBoolean(file->Force),
-        PassString(file->Contents),
-        PassString(file->Checksum),
-        PassBoolean(file->Recurse),
-        PassString(file->Links),
-        PassString(file->Owner),
-        PassString(file->Group),
-        PassString(file->Mode));
-
-    if (ret_strings.size() == 0 && exit_code == 0)
+    MSFT_nxFileResource const* file = in->InputResource.value;
+    boost::python::object retVals;
+    int exitCode = scx::invoke_python_function (
+        &retVals,
+        self->getSetFn (),
+        scx::get_mi_value (file->DestinationPath),
+        scx::get_mi_value (file->SourcePath),
+        scx::get_mi_value (file->Ensure),
+        scx::get_mi_value (file->Type),
+        scx::get_mi_value (file->Force),
+        scx::get_mi_value (file->Contents),
+        scx::get_mi_value (file->Checksum),
+        scx::get_mi_value (file->Recurse),
+        scx::get_mi_value (file->Links),
+        scx::get_mi_value (file->Owner),
+        scx::get_mi_value (file->Group),
+        scx::get_mi_value (file->Mode));
+    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals))
     {
         res = MI_RESULT_OK;
     }
@@ -512,6 +345,7 @@ void MI_CALL MSFT_nxFileResource_Invoke_SetTargetResource(
         res = MI_RESULT_FAILED;
     }
 
+    // Why are the results (r) of these functions being captured but not used?
     r = MSFT_nxFileResource_SetTargetResource_Construct(&out, context);
     r = MSFT_nxFileResource_SetTargetResource_Set_MIReturn(&out, res);
     r = MSFT_nxFileResource_SetTargetResource_Post(&out, context);

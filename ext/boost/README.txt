@@ -6,8 +6,13 @@ Build instructions:
       --includedir=/usr/local/include/boost_1_55_0
 
     <edit file> project-config.jam
-        change the line 'using python : 2.5 /usr/local ;'
-        to 'using python : 2.5 : /usr/local/bin/python2.5 : /usr/local/include/python2.5 ;'
+        change the line:
+            'using python : 2.5 /usr/local ;'
+        to:
+            'using python : 2.5 : /usr/local/bin/python2.5
+             : /usr/local/include/python2.5 ;
+            using python : 2.7 : /usr/local/bin/python2.7
+             : /usr/local/include/python2.7 ;'
         change the line 'using gcc ;'
         to 'using gcc : : : <cxxflags>"-fPIC -DPy_UNICODE_SIZE=4" ;'
     </edit file>
