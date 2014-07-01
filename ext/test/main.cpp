@@ -1,12 +1,12 @@
-#include <boost/filesystem.hpp>
 #include <boost/python.hpp>
+#include <boost/filesystem.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
 
-#include "python_io_helpers.hpp"
+#include "python_io_helper.hpp"
 
 
 namespace
@@ -14,7 +14,7 @@ namespace
 
 char const FILENAME[] = "hello.py";
 char const FUNCTION_NAME[] = "area";
-double const DEFAULT_RADIUS = 4;
+double const DEFAULT_RADIUS = 4.0;
 
 
 class PrintOnExit
@@ -49,7 +49,7 @@ main (
     PyObject* sysPath =
         PySys_GetObject (const_cast<char*>("path"));
     PyList_Insert (sysPath, 0,
-                   PyString_FromString (workingDir.string ().c_str ()));
+                   boost::python::object (workingDir.string ()).ptr ());
 
     std::wcout << scx::python_unicode_info << std::endl;
     std::wcout << L"<python path>" << std::endl;

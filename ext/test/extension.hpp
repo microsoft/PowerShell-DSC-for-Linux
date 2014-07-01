@@ -2,6 +2,7 @@
 #define INCLUDED_EXTENSION_HPP
 
 
+#include <boost/python.hpp>
 #include <string>
 
 
