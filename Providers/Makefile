@@ -221,13 +221,15 @@ $(BIN_PATH$2)/%.o : $(PROVIDER_PATH)/$1/%.cpp
 # add this shared object to the "all" target
 all: $(BIN_PATH$2)/libMSFT_$1Resource.so
 
+LDFLAGS_%2:=$(LDFLAGS) $(filter-out -L%,$(shell python$2-config --ldflags))
+
 $(BIN_PATH$2)/libMSFT_$1Resource.so : \
 	$(addprefix $(BIN_PATH$2)/,$(COMMON_OBJS)) \
 	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
 	$(BIN_PATH$2)/MSFT_$1Resource.o
 	@echo ...linking: $(BIN_PATH$2)/libMSFT_$1Resource.so
-	$(CXX) -shared -Wl $(LDFLAGS) $(shell python$2-config --ldflags) \
-	    $(BOOST_LIB_ROOT)/libboost_python$2.a $$^ -o $$@
+	$(CXX) -shared -Wl $(LDFLAGS_%2) $(BOOST_LIB_ROOT)/libboost_python$2.a \
+        $$^ -o $$@
 
 endef
 
