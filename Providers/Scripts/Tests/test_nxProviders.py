@@ -19,8 +19,12 @@ import platform
 import pwd
 
 os.system('tar -zxvf ./unittest2-0.5.1.tar.gz ')
-sys.path.append('.:'+os.path.realpath('./Scripts'))
-import unittest2
+os.system('cd ./unittest2-0.5.1 && python ./setup.py install --prefix=/share/pythonLib')
+sys.path.append('/share/pythonLib/lib/python2.7/site-packages:.:'+os.path.realpath('./Scripts'))
+try:
+    import unittest2
+except:
+    import unittest as unittest2
 
 nxUser=imp.load_source('nxUser','../nxUser.py') 
 nxGroup=imp.load_source('nxGroup','../nxGroup.py') 
@@ -30,6 +34,7 @@ nxService=imp.load_source('nxService','../nxService.py')
 nxPackage=imp.load_source('nxPackage','../nxPackage.py') 
 nxSshAuthorizedKeys=imp.load_source('nxSshAuthorizedKeys','../nxSshAuthorizedKeys.py')
 nxEnvironment=imp.load_source('nxEnvironment','../nxEnvironment.py')
+nxExec=imp.load_source('nxExec','../nxExec.py')
 
 class LinuxUserTestCases(unittest2.TestCase):
     """
@@ -1309,19 +1314,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
             init_file=redhat_init_file
         elif 'debian' in dist:
             init_file=debian_init_file
-            
-        if nxService.SystemdExists():
-            self.provider='systemd'
-            try:
-                nxService.WriteFile('/etc/rc.d/dummy_service',init_file)
-                os.chmod('/etc/rc.d/dummy_service',0744)
-                nxService.WriteFile('/usr/sbin/dummy_service.py',dummy_service_file)
-                os.chmod('/usr/sbin/dummy_service.py',0744)
-            except:
-                print(repr(sys.sys_info()))
-                sys.exit(1)
-
-        elif nxService.UpstartExists():
+        if nxService.UpstartExists():
             self.provider='upstart'
             try:
                 nxService.WriteFile('/etc/default/dummy_service',upstart_etc_default)
@@ -1332,8 +1325,19 @@ class LinuxServiceTestCases(unittest2.TestCase):
                 nxService.WriteFile('/usr/sbin/dummy_service.py',dummy_service_file)
                 os.chmod('/usr/sbin/dummy_service.py',0744)
             except:
-                print(repr(sys.sys_info()))
+                print(repr(sys.exc_info()))
                 sys.exit(1)
+        elif nxService.SystemdExists():
+            self.provider='systemd'
+            try:
+                nxService.WriteFile('/etc/rc.d/dummy_service',init_file)
+                os.chmod('/etc/rc.d/dummy_service',0744)
+                nxService.WriteFile('/usr/sbin/dummy_service.py',dummy_service_file)
+                os.chmod('/usr/sbin/dummy_service.py',0744)
+            except:
+                print(repr(sys.exc_info()))
+                sys.exit(1)
+
         elif nxService.InitExists():
             self.provider='init'
             try:
@@ -1342,7 +1346,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
                 nxService.WriteFile('/usr/sbin/dummy_service.py',dummy_service_file)
                 os.chmod('/usr/sbin/dummy_service.py',0744)
             except:
-                print(repr(sys.sys_info()))
+                print(repr(sys.exc_info()))
                 sys.exit(1)
             
 
@@ -1485,10 +1489,7 @@ class LinuxSshAuthorizedKeysTestCases(unittest2.TestCase):
         Remove test resources.
         """
         path='/home/jojoma/.ssh/authorized_keys'
-        if os.path.isfile('/tmp/authorized_keys'):
-            os.system('mv /tmp/authorized_keys ' + path)
-        os.system('chown jojoma ' + path)
-            
+        os.system('rm -rf ' + path)
 
 
     def noop(self,arg2):
@@ -1717,7 +1718,7 @@ class LinuxEnvironmentTestCases(unittest2.TestCase):
 
  
 
- class LinuxExecTestCases(unittest2.TestCase):
+class LinuxExecTestCases(unittest2.TestCase):
     """
     Test cases for nxExec.py
     """
@@ -1726,31 +1727,13 @@ class LinuxEnvironmentTestCases(unittest2.TestCase):
         """
         Setup test resources
         """
-        os.system('rm /tmp/environment /tmp/DSCExec.sh')
-        path='/etc/environment'
-        if os.path.isfile(path) :
-            os.system('cp -p ' + path + ' /tmp/')
-
-        path='/etc/profile.d/DSCExec.sh'
-        if os.path.isfile(path) :
-            os.system('cp -p ' + path + ' /tmp/')
+        pass
 
     def tearDown(self):
         """
         Remove test resources.
         """
-        print("TEARDOWN")
-        os.system('echo "Contents of /etc/environment are: " 1>&2' )
-        os.system('cat /etc/environment 1>&2')
-        os.system('echo "Contents of /etc/profile.d/DSCExec.sh are: " 1>&2')
-        os.system('cat /etc/profile.d/DSCExec.sh 1>&2')
-        path='/etc/environment'
-        if os.path.isfile('/tmp/environment') :
-            os.system('mv ' + ' /tmp/environment ' + path)
-        path='/etc/profile.d/DSCExec.sh'
-        if os.path.isfile('/tmp/DSCExec.sh') :
-            os.system('mv ' + ' /tmp/DSCExec.sh ' + path)
-            
+        pass
 
     def noop(self,arg2):
         """
@@ -1760,10 +1743,89 @@ class LinuxEnvironmentTestCases(unittest2.TestCase):
 
 # (Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
 
-    def testSetVarPresentTwice(self):
-        self.assertTrue(nxExec.Set('export JOJO=MAMA','/tmp','Present','if [ $JOJO != "MAMA" ]; then echo 0 ; else echo 1; fi') ==
-                        [0],"self.assertTrue(nxExec.Set('MYVAR','/tmp','Present','False') should == [0]")
+    def testSetShellCmdTestPass(self):
+        #our set cmd should run if the test command returncode == Returncode.
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','','echo $JOJO | grep MAMA') ==
+                        [0],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','','echo $JOJO | grep MAMA') should == [0]")
 
+    def testSetShellCmdBadRetcodeFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','-1','30','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','-1','30','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetShellCmdTestFail(self):
+        #our set cmd should not run if the test command returns != Returncode.
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAM','True','0','30','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAM','True','0','30','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetCmdTestPass(self):
+        self.assertTrue(nxExec.Set('/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"','JOJO=MAMA','False','0','30','','','/bin/bash -c "echo $JOJO | grep MAMA"') ==
+                        [0],"self.assertTrue(nxExec.Set('/bin/bash -c export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','False','0','30','','','/bin/bash -c echo $JOJO | grep MAMA') should == [0]")
+
+    def testSetCmdBadRetcodeFail(self):
+        self.assertTrue(nxExec.Set('/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"','JOJO=MAMA','False','-1','30','','','/bin/bash -c "echo $JOJO | grep MAMA"') ==
+                        [-1],"self.assertTrue(nxExec.Set(''/bin/bash -c export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','False','-1','30','','','/bin/bash -c echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetCmdTestFail(self):
+        self.assertTrue(nxExec.Set('/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"','JOJO=MAM','False','0','30','','','/bin/bash -c "echo $JOJO | grep MAMA"') ==
+                        [-1],"self.assertTrue(nxExec.Set('/bin/bash -c export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAM','False','0','30','','','/bin/bash -c echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetBadCmdFail(self):
+        self.assertTrue(nxExec.Set('/bin/bash -c "export JOJO=mam ; echo $JOJO | grep mama"','JOJO=MAMA','False','0','30','','','/bin/bash -c "echo $JOJO | grep MAMA"') ==
+                        [-1],"self.assertTrue(nxExec.Set('/bin/bash -c export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA','False','0','30','','','/bin/bash -c echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetBadShellCmdFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetShellCmdMissingRetcodeFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','','30','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','','30','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetShellCmdMissingSetFail(self):
+        self.assertTrue(nxExec.Set('','JOJO=MAMA','True','0','30','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('','JOJO=MAMA','True','0','30','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetShellCmdMissingTestFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','','') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','','') should == [-1]")
+
+    def testSetShellCmdMissingShellFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','','0','30','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','','0','30','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetShellCmdMissingTimeoutFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetBadEnviromentShellCmdFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO"=MAMA','True','0','30','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO\"=MAMA','True','0','30','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetUserPassShellCmdTest(self):
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','root','','echo $JOJO | grep MAMA') ==
+                        [0],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','root','','echo $JOJO | grep MAMA') should == [0]")
+
+    def testSetBadUserShellCmdFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO"=MAMA','True','0','30','toor','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','toor','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetGroupShellCmdTestPass(self):
+        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','adm','echo $JOJO | grep MAMA') ==
+                        [0],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','adm','echo $JOJO | grep MAMA') should == [0]")
+
+    def testSetBadGroupShellCmdFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO"=MAMA','True','0','30','','toor','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','toor','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetExceedTimeoutShellCmdFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mam ; sleep 30; echo $JOJO | grep mama','JOJO"=MAMA','True','0','10','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA','True','0','10','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    def testSetBadEnviromenShellCmdFail(self):
+        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO"=MAMA','True','0','0','','','echo $JOJO | grep MAMA') ==
+                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA','True','0','30','','','echo $JOJO | grep MAMA') should == [-1]")
+
+    
 ######################################
 if __name__ == '__main__':
     s1=unittest2.TestLoader().loadTestsFromTestCase(LinuxUserTestCases)
@@ -1774,7 +1836,7 @@ if __name__ == '__main__':
     s6=unittest2.TestLoader().loadTestsFromTestCase(LinuxPackageTestCases)
     s7=unittest2.TestLoader().loadTestsFromTestCase(LinuxSshAuthorizedKeysTestCases)
     s8=unittest2.TestLoader().loadTestsFromTestCase(LinuxEnvironmentTestCases)
-    s9=unittest2.TestLoader().loadTestsFromTestCase(LinuxEnvironmentTestCases)
-#    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9])
-    unittest2.TextTestRunner(verbosity=3).run(s9)
+    s9=unittest2.TestLoader().loadTestsFromTestCase(LinuxExecTestCases)
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s7,s8,s9,s5,s6])
+    unittest2.TextTestRunner(verbosity=3).run(alltests)
 
