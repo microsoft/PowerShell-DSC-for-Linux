@@ -1,0 +1,14 @@
+// ===============================================================
+//  OMI_BaseResource
+// ===============================================================
+#pragma include("cim_schema_2.26.0.mof")
+#pragma include("MSFT_Qualifiers.mof")
+[Abstract, 
+ ClassVersion("1.0.0"), 
+ Description (
+    "Base schema for all native configuration providers." )]
+class OMI_BaseResource 
+{
+
+};
+
