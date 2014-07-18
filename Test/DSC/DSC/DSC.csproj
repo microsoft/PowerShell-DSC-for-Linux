@@ -57,6 +57,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="nxComputerProviderTest\ComputerMofHelper.cs" />
+    <Compile Include="nxComputerProviderTest\nxComputerTest.cs" />
     <Compile Include="nxEnvironmentProviderTest\EnvironmentMofHelper.cs" />
     <Compile Include="nxEnvironmentProviderTest\nxEnvironmentTest.cs" />
     <Compile Include="nxExecProviderTest\ExecMofHelper.cs" />
