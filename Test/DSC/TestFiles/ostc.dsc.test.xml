@@ -2253,7 +2253,6 @@
         <rec key="successfulMsg">PowerShell error as unsupported package.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
       </var>
-      
     </section>
 
     <section sid="8" dsc="nxLog Provider">
@@ -2748,6 +2747,29 @@
         <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">The hostname and timezone are set as required</rec>
         <rec key="failedMsg">The hostname and timezone are not set as required</rec>
+      </var>
+    </section>
+    
+    <section sid="12" dsc="nxIPAddress Provider">
+      <var set="12" lvl="1" vid="001"
+           dsc="[nxComputer] Verify if DefaultGateway is set successfully"
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="ipAddr">10.199.192.126</rec>
+        <rec key="interfaceName">eth0</rec>
+        <rec key="bootPro">Static</rec>
+        <rec key="defaultGW">10.199.192.1</rec>
+        <rec key="prefixLength">255.255.255.0</rec>
+        <rec key="addrFamily">IPv4</rec>
+        <rec key="initialSet">InterfaceName:eth0;IPAddress:10.199.192.126;DefaultGateway:10.199.192.6</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">InterfaceName:%interfaceName%;IPAddress:%ipAddr%;BootProtocol:%bootPro%;DefaultGateway:%defaultGW%;Ensure:Present;PrefixLength:%prefixLength%;AddressFamily:%IPv4%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="successfulMsg">The DefaultGateway is set as required</rec>
+        <rec key="failedMsg">The DefaultGateway is not set as required</rec>
       </var>
     </section>
   </section>
