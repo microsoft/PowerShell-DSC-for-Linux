@@ -31,6 +31,9 @@ endif
 
 # additional include paths
 INCLUDE_PATH+=$(INCDIR)
+INCLUDE_PATH+=$(SRCDIR)
+INCLUDE_PATH+=$(SRCDIR)/base
+INCLUDE_PATH+=$(SRCDIR)/common
 INCLUDE_PATH+=$(PROVIDER_PATH)/PythonHelper
 CPPFLAGS+=$(addprefix -I,$(INCLUDE_PATH))
 
@@ -99,35 +102,35 @@ all:
 
 # reg target
 ################################################################################
-##OMI_BIN_PATH:=$(OMI_PATH)/output/bin
-#OMI_BIN_PATH:=$(BINDIR)
-##OMI_LIB_PATH:=$(OMI_PATH)/output/lib
-#OMI_LIB_PATH:=$(LIBDIR)
-##OMI_CONFIG_PATH:=$(OMI_PATH)/etc/dsc/configuration
-#OMI_CONFIG_PATH:=$(CONFIG_SYSCONFDIR)/dsc/configuration
-#OMI_REG_PATH:=$(BIN_PATH)/omi
-#OMI_REG:=$(OMI_BIN_PATH)/omireg -n root/Microsoft/DesiredStateConfiguration \
-#	-o @requestor@
-#SCHEMA:=Resource.schema.mof
-#REGISTER:=Resource.registration.mof
+#OMI_BIN_PATH:=$(OMI_PATH)/output/bin
+OMI_BIN_PATH:=$(BINDIR)
+#OMI_LIB_PATH:=$(OMI_PATH)/output/lib
+OMI_LIB_PATH:=$(LIBDIR)
+#OMI_CONFIG_PATH:=$(OMI_PATH)/etc/dsc/configuration
+OMI_CONFIG_PATH:=$(CONFIG_SYSCONFDIR)/dsc/configuration
+OMI_REG_PATH:=$(BIN_PATH)/omi
+OMI_REG:=$(OMI_BIN_PATH)/omireg -n root/Microsoft/DesiredStateConfiguration \
+	-o @requestor@
+SCHEMA:=Resource.schema.mof
+REGISTER:=Resource.registration.mof
 
-## $(call REGISTER_PROVIDER,provider-name)
-#define REGISTER-PROVIDER
-#	echo ...registering: $1;
-#	export LD_LIBRARY_PATH=$(BOOST_LIB_ROOT):$$LD_LIBRARY_PATH; \
-#	$(MKDIR) $(OMI_CONFIG_PATH)/{registration,schema}/MSFT_$1Resource; \
-#	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(SCHEMA) \
-#	    $(OMI_CONFIG_PATH)/schema/MSFT_$1Resource/MSFT_$1$(SCHEMA); \
-#	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(REGISTER) \
-#	    $(OMI_CONFIG_PATH)/registration/MSFT_$1Resource/MSFT_$1$(REGISTER); \
-#	$(OMI_REG) $(BIN_PATH)/libMSFT_$1Resource.so;
-#endef
+# $(call REGISTER_PROVIDER,provider-name)
+define REGISTER-PROVIDER
+	echo ...registering: $1;
+	export LD_LIBRARY_PATH=$(BOOST_LIB_ROOT):$$LD_LIBRARY_PATH; \
+	$(MKDIR) $(OMI_CONFIG_PATH)/{registration,schema}/MSFT_$1Resource; \
+	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(SCHEMA) \
+	    $(OMI_CONFIG_PATH)/schema/MSFT_$1Resource/MSFT_$1$(SCHEMA); \
+	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(REGISTER) \
+	    $(OMI_CONFIG_PATH)/registration/MSFT_$1Resource/MSFT_$1$(REGISTER); \
+	$(OMI_REG) $(BIN_PATH)/2.5/libMSFT_$1Resource.so;
+endef
 
-#.PHONY: reg
-#reg :
-#	echo ...copying scripts
-#	$(COPY) -R $(PROVIDER_PATH)/Scripts $(OMI_LIB_PATH)
-#	@$(foreach provider,$(PROVIDERS),$(call REGISTER-PROVIDER,$(provider)))
+.PHONY: reg
+reg :
+	echo ...copying scripts
+	$(COPY) -R $(PROVIDER_PATH)/Scripts $(OMI_LIB_PATH)
+	@$(foreach provider,$(PROVIDERS),$(call REGISTER-PROVIDER,$(provider)))
 
 
 # compile rule
@@ -153,7 +156,8 @@ define PER-PYTHON-VERSION-RULES
 
 # compiler flags
 $(eval PYFLAGS_$1:=\
-    $(filter-out -Wstrict-prototypes,$(shell python$1-config --cflags)))
+    $(filter-out -Wstrict-prototypes,$(shell /usr/local/bin/python$1-config \
+          --cflags)))
 
 # bin path
 $(eval BIN_PATH$1:=$(BIN_PATH)/$1)
@@ -182,6 +186,10 @@ clean-action : clean$1
 
 # include dependency file rule
 -include $(BIN_PATH$1)/*.P
+
+# create linker flags
+$(eval LDFLAGS_$1:=$(filter-out -L%,$(shell /usr/local/bin/python$1-config \
+    --ldflags)) $(LDFLAGS) $(BOOST_LIB_ROOT)/libboost_python$1.a)
 
 endef
 
@@ -221,15 +229,12 @@ $(BIN_PATH$2)/%.o : $(PROVIDER_PATH)/$1/%.cpp
 # add this shared object to the "all" target
 all: $(BIN_PATH$2)/libMSFT_$1Resource.so
 
-LDFLAGS_%2:=$(LDFLAGS) $(filter-out -L%,$(shell python$2-config --ldflags))
-
 $(BIN_PATH$2)/libMSFT_$1Resource.so : \
 	$(addprefix $(BIN_PATH$2)/,$(COMMON_OBJS)) \
 	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
 	$(BIN_PATH$2)/MSFT_$1Resource.o
 	@echo ...linking: $(BIN_PATH$2)/libMSFT_$1Resource.so
-	$(CXX) -shared -Wl $(LDFLAGS_%2) $(BOOST_LIB_ROOT)/libboost_python$2.a \
-        $$^ -o $$@
+	$(CXX) -shared -Wl $(LDFLAGS_$2) -o $$@ $$^ $(LIBDIR)/libpal.a $(LDFLAGS_$2)
 
 endef
 
