@@ -234,7 +234,7 @@ $(BIN_PATH$2)/libMSFT_$1Resource.so : \
 	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
 	$(BIN_PATH$2)/MSFT_$1Resource.o
 	@echo ...linking: $(BIN_PATH$2)/libMSFT_$1Resource.so
-	$(CXX) -shared -Wl $(LDFLAGS_$2) -o $$@ $$^ $(LIBDIR)/libpal.a $(LDFLAGS_$2)
+	$(CXX) -shared $(LDFLAGS_$2) -o $$@ $$^ $(LIBDIR)/libpal.a $(LDFLAGS_$2)
 
 endef
 
