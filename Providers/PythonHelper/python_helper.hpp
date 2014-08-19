@@ -78,6 +78,10 @@ std::basic_string<MI_Char>
 get_mi_value (
     MI_ConstStringAField const& field);
 
+std::basic_string<MI_Char>
+get_mi_value (
+    MI_ConstUint32Field const& field);
+
 int
 set_mi_string (
     MI_Instance* const newInstance, 
@@ -98,6 +102,12 @@ set_mi_bool (
 
 int
 set_mi_string_array (
+    MI_Instance* const newInstance, 
+    char const* const field,
+    boost::python::object const& obj);
+
+int
+set_mi_uint32 (
     MI_Instance* const newInstance, 
     char const* const field,
     boost::python::object const& obj);

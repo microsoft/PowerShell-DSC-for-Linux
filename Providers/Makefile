@@ -81,6 +81,10 @@ PROVIDERS+=nxScript
 PROVIDERS+=nxUser
 PROVIDERS+=nxGroup
 PROVIDERS+=nxService
+PROVIDERS+=nxComputer
+PROVIDERS+=nxDNSServerAddress
+PROVIDERS+=nxIPAddress
+PROVIDERS+=nxFirewall
 
 # list of the different python versions to build against
 #PYTHON_VERSIONS:=2.4
@@ -103,9 +107,9 @@ all:
 # reg target
 ################################################################################
 #OMI_BIN_PATH:=$(OMI_PATH)/output/bin
-OMI_BIN_PATH:=$(BINDIR)
+OMI_BIN_PATH:=$(CONFIG_BINDIR)
 #OMI_LIB_PATH:=$(OMI_PATH)/output/lib
-OMI_LIB_PATH:=$(LIBDIR)
+OMI_LIB_PATH:=$(CONFIG_LIBDIR)
 #OMI_CONFIG_PATH:=$(OMI_PATH)/etc/dsc/configuration
 OMI_CONFIG_PATH:=$(CONFIG_SYSCONFDIR)/dsc/configuration
 OMI_REG_PATH:=$(BIN_PATH)/omi
