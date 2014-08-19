@@ -1,0 +1,34 @@
+/* @migen@ */
+/*
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+** IF YOU NEED TO ADD RESOURCES, CREATE A SECOND .RC FILE, AND USE #INCLUDE TO MERGE THIS FILE
+** INTO THE .RC FILE YOU CREATED.
+**
+**==============================================================================
+*/
+STRINGTABLE
+{
+    1, "Base schema for all native configuration providers."
+    2, "Present"
+    3, "Absent"
+    4, "IPv4"
+    5, "IPv6"
+    6, "Allow"
+    7, "Block"
+    8, "INPUT"
+    9, "OUTPUT"
+    10, "FORWARD"
+    11, "Get resource states based on input configuration file."
+    12, "Configuration document that is to be applied."
+    13, "Flags passed to the providers. Reserved for future use."
+    14, "The current state of the specified configuration resources."
+    15, "Test resource states based on input configuration file."
+    16, "Configuration document that to be applied."
+    17, "Flags passed to the providers. reserved for future use."
+    18, "True if identical. False otherwise."
+    19, "Context information that the provider can use to optimize the set, This is optional."
+    20, "Set resource states based on input configuration file."
+    21, "Context information that the provider can use to optimize the set from TestTargetResource, This is optional."
+}

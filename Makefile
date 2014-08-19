@@ -1,6 +1,6 @@
 all: lcm providers
 
-reg: lcmreg
+reg: lcmreg providersreg
 
 lcm:
 	make -C omi-1.0.8
@@ -11,3 +11,6 @@ lcmreg:
 
 providers:
 	make -C Providers
+
+providersreg:
+	make -C Providers reg

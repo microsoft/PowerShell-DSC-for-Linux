@@ -1,0 +1,23 @@
+
+
+
+[ClassVersion("1.0.0"), FriendlyName("nxFirewallResource")]
+class MSFT_nxFirewallResource:OMI_BaseResource
+{
+       [Key] string Name;
+       
+       [Write, ValueMap{"tcp", "udp", "icmp"}] string Protocol;
+       [Write, ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+       [Write, ValueMap{"IPv4", "IPv6"},Values{"IPv4", "IPv6"}] string AddressFamily;
+       [Required, ValueMap{"Allow", "Block"},Values{"Allow", "Block"}] string Access;
+       [Write, ValueMap{"NEW", "RELATED", "ESTABLISHED"}] string State;
+       [Write, ValueMap{"NEW", "RELATED", "ESTABLISHED"}] string State2;
+       [Write, ValueMap{"NEW", "RELATED", "ESTABLISHED"}] string State3;
+       [Write, ValueMap{"INPUT", "OUTPUT", "FORWARD"},Values{"INPUT", "OUTPUT", "FORWARD"}] string Direction;
+       [Write] string SourceHost;
+       [Write] string SourcePort;
+       [Write] string DestinationHost;
+       [Write] string DestinationPort;
+
+};
+

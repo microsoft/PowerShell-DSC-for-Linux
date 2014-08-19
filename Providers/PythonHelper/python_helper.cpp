@@ -55,6 +55,24 @@ did_function_succeed (
     return EXIT_FAILURE;
 }
 
+
+std::basic_string<MI_Char>
+get_mi_value (
+    MI_ConstUint32Field const& field)
+{
+    HELPER_BOOKEND_EX ("get_mi_value", " type=\"MI_ConstUint32Field\"");
+    if (MI_TRUE == field.exists)
+    {
+        std::basic_ostringstream<MI_Char> cache;
+        cache << field.value;
+        HELPER_BOOKEND_PRINT (cache.str ());
+        return cache.str ();
+    }
+    HELPER_BOOKEND_PRINT ("field doesn't exist");
+    return std::basic_string<MI_Char> (EMPTY_STRING);
+}
+
+
 MI_Char const*
 get_mi_value (
     MI_ConstStringField const& field)
@@ -114,6 +132,35 @@ get_mi_value (
     HELPER_BOOKEND_PRINT ("field doesn't exist");
     return std::basic_string<MI_Char> (EMPTY_STRING);
 }
+
+int
+set_mi_uint32 (
+    MI_Instance* const newInstance,
+    char const* const field,
+    boost::python::object const& obj)
+{
+    HELPER_BOOKEND ("set_mi_uint32");
+    boost::python::extract<char const*> getStr (obj);
+    if (getStr.check ())
+    {
+        char* endPtr = 0;
+        MI_Value temp;
+        temp.uint32 = strtoul (getStr (), &endPtr, 0);
+        if ('\0' == *endPtr)
+        {
+            if (MI_RESULT_OK ==
+                MI_Instance_SetElement (
+                    newInstance, field, &temp, MI_UINT32, 0))
+            {
+                HELPER_BOOKEND_PRINT ("succeeded");
+                return EXIT_SUCCESS;
+            }
+        }
+    }
+    HELPER_BOOKEND_PRINT ("failed");
+    return EXIT_FAILURE;
+}
+
 
 int
 set_mi_string (

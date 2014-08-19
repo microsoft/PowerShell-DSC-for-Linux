@@ -1,0 +1,7 @@
+
+
+[ClassVersion("1.0.0"), FriendlyName("nxDNSServerAddress")] 
+class MSFT_nxDNSServerAddressResource : OMI_BaseResource
+{
+  [Required] string Address[];
+};
