@@ -34,7 +34,7 @@ INCLUDE_PATH+=$(INCDIR)
 INCLUDE_PATH+=$(SRCDIR)
 INCLUDE_PATH+=$(SRCDIR)/base
 INCLUDE_PATH+=$(SRCDIR)/common
-INCLUDE_PATH+=$(PROVIDER_PATH)/PythonHelper
+INCLUDE_PATH+=$(PROVIDER_PATH)
 CPPFLAGS+=$(addprefix -I,$(INCLUDE_PATH))
 
 # add the OMI lib path to the library path
@@ -44,14 +44,6 @@ LDFLAGS+=-L$(LIBDIR)
 LDFLAGS+=-lmicxx
 LDFLAGS+=-lrt
 
-# boost include path
-CPPFLAGS+=-I/usr/local/include/boost_1_55_0
-
-# boost libraries
-BOOST_LIB_ROOT:=/usr/local/lib/boost_1_55_0
-LDFLAGS+=$(BOOST_LIB_ROOT)/libboost_system.a
-LDFLAGS+=$(BOOST_LIB_ROOT)/libboost_filesystem.a
-
 # extra compile flags
 CXXFLAGS+=-fPIC
 CXXFLAGS+=-DNDEBUG
@@ -59,15 +51,10 @@ CXXFLAGS+=-Wall
 CXXFLAGS+=-ggdb
 CXXFLAGS+=-O2
 
-# include extra source paths
-VPATH:=$(PROVIDER_PATH)/PythonHelper
-
 # common source files
 COMMON_SOURCES:=debug_tags.cpp
-COMMON_SOURCES+=python_file_resource.cpp
-COMMON_SOURCES+=python_helper.cpp
-COMMON_SOURCES+=python_io_helper.cpp
-COMMON_SOURCES+=python_scoped_context.cpp
+COMMON_SOURCES+=PythonProvider.cpp
+
 COMMON_OBJS:=$(COMMON_SOURCES:.cpp=.o)
 
 # these are the names of the files that are auto-generated for each provider
@@ -77,22 +64,10 @@ GENERATED_OBJS:=$(GENERATED_SOURCES:.c=.o)
 
 # list of providers
 PROVIDERS:=nxFile
-PROVIDERS+=nxScript
-PROVIDERS+=nxUser
-PROVIDERS+=nxGroup
-PROVIDERS+=nxService
-PROVIDERS+=nxComputer
-PROVIDERS+=nxDNSServerAddress
-PROVIDERS+=nxIPAddress
-PROVIDERS+=nxFirewall
-
-# list of the different python versions to build against
-#PYTHON_VERSIONS:=2.4
-PYTHON_VERSIONS+=2.5
-PYTHON_VERSIONS+=2.6
-PYTHON_VERSIONS+=2.7
-PYTHON_VERSIONS+=3.2
-PYTHON_VERSIONS+=3.3
+#PROVIDERS+=nxScript
+#PROVIDERS+=nxUser
+#PROVIDERS+=nxGroup
+#PROVIDERS+=nxService
 
 # this is used to enable the printing of xml style tags for help in debugging
 PRINT_BOOKENDS?=0
@@ -106,11 +81,8 @@ all:
 
 # reg target
 ################################################################################
-#OMI_BIN_PATH:=$(OMI_PATH)/output/bin
-OMI_BIN_PATH:=$(CONFIG_BINDIR)
-#OMI_LIB_PATH:=$(OMI_PATH)/output/lib
-OMI_LIB_PATH:=$(CONFIG_LIBDIR)
-#OMI_CONFIG_PATH:=$(OMI_PATH)/etc/dsc/configuration
+OMI_BIN_PATH:=$(BINDIR)
+OMI_LIB_PATH:=$(LIBDIR)
 OMI_CONFIG_PATH:=$(CONFIG_SYSCONFDIR)/dsc/configuration
 OMI_REG_PATH:=$(BIN_PATH)/omi
 OMI_REG:=$(OMI_BIN_PATH)/omireg -n root/Microsoft/DesiredStateConfiguration \
@@ -127,7 +99,7 @@ define REGISTER-PROVIDER
 	    $(OMI_CONFIG_PATH)/schema/MSFT_$1Resource/MSFT_$1$(SCHEMA); \
 	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(REGISTER) \
 	    $(OMI_CONFIG_PATH)/registration/MSFT_$1Resource/MSFT_$1$(REGISTER); \
-	$(OMI_REG) $(BIN_PATH)/2.5/libMSFT_$1Resource.so;
+	$(OMI_REG) $(BIN_PATH)/libMSFT_$1Resource.so;
 endef
 
 .PHONY: reg
@@ -142,7 +114,7 @@ reg :
 # this macro defines rules for compiling source files using extra flags,
 # generating files with lists of dependencies, and alternate placement for those
 # files
-# $(call COMPILE-WITH-DEPEND,dest-path-prefix,flags)
+# $(call COMPILE-WITH-DEPEND,dest-path-prefix)
 define COMPILE-WITH-DEPEND
 	@echo ...compiling: $$(@F)
 	$(COMPILE.cpp) $($2) $(MKDEP) $$< -o $$@
@@ -153,99 +125,50 @@ define COMPILE-WITH-DEPEND
 endef
 
 
-# per python version specific rules
-################################################################################
-# $(call PER-PYTHON-VERSION-RULES,python-version)
-define PER-PYTHON-VERSION-RULES
-
-# compiler flags
-$(eval PYFLAGS_$1:=\
-    $(filter-out -Wstrict-prototypes,$(shell /usr/local/bin/python$1-config \
-          --cflags)))
-
-# bin path
-$(eval BIN_PATH$1:=$(BIN_PATH)/$1)
-
-# bin path rule
-$(BIN_PATH$1): | $(BIN_PATH)
-	@echo $(MKDIR) $(BIN_PATH$1)...
-	$(MKDIR) $(BIN_PATH$1)
-
 # compile rule
-$(BIN_PATH$1)/%.o : %.cpp
-	$(call COMPILE-WITH-DEPEND,$(BIN_PATH$1)/,PYFLAGS_$1)
+$(BIN_PATH)/%.o : %.cpp
+	@echo ...compiling: $(@F)
+	$(COMPILE.cpp) $(MKDEP) $< -o $@
+	@-$(COPY) $(BIN_PATH)/$*.d $(BIN_PATH)/$*.P;
+	@$(SED) -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' \
+	    -e 's/$$/ :/' < $(BIN_PATH)/$*.d >> $(BIN_PATH)/$*.P
+	@$(RM) $(BIN_PATH)/$*.d
+
 
 # add bin path dependencies to the object files
-$(addprefix $(BIN_PATH$1)/,$(COMMON_OBJS)) : | $(BIN_PATH$1)
-$(BIN_PATH$1)/MSFT_$1Resource.o : $(BIN_PATH$1)
-
-# clean bin directory rule
-.phony : clean$1
-clean$1:
-	@$(RM) $(BIN_PATH$1)/*.o $(BIN_PATH$1)/*.d $(BIN_PATH$1)/*.P \
-	    $(BIN_PATH$1)/*.so
-
-# add this to the clean target
-clean-action : clean$1
-
-# include dependency file rule
--include $(BIN_PATH$1)/*.P
-
-# create linker flags
-$(eval LDFLAGS_$1:=$(filter-out -L%,$(shell /usr/local/bin/python$1-config \
-    --ldflags)) $(LDFLAGS) $(BOOST_LIB_ROOT)/libboost_python$1.a)
-
-endef
-
-# instantiate per python version rules
-$(foreach version,$(PYTHON_VERSIONS),\
-    $(eval $(call PER-PYTHON-VERSION-RULES,$(version))))
+$(addprefix $(BIN_PATH)/,$(COMMON_OBJS)) : | $(BIN_PATH)
 
 
 # per provider specific rules
 ################################################################################
-# $(call PER-PROVIDER-RULES,python-version)
+# $(call PER-PROVIDER_RULES,provider)
 define PER-PROVIDER-RULES
 
 # compile rule
 $(BIN_PATH)/$1_%.o : $(PROVIDER_PATH)/$1/%.c
 	$(call COMPILE-WITH-DEPEND,$(BIN_PATH)/$1_)
 
+$(BIN_PATH)/%.o : $(PROVIDER_PATH)/$1/%.cpp
+	$(call COMPILE-WITH-DEPEND,$(BIN_PATH)/)
+
 # add bin path dependencies to the object files
 $(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) : | $(BIN_PATH)
+
+# add this shared object to the "all" target
+all: $(BIN_PATH)/libMSFT_$1Resource.so
+
+$(BIN_PATH)/libMSFT_$1Resource.so : \
+	$(addprefix $(BIN_PATH)/,$(COMMON_OBJS)) \
+	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
+	$(BIN_PATH)/MSFT_$1Resource.o
+	@echo ...linking: $(BIN_PATH)/libMSFT_$1Resource.so
+	$(CXX) -shared -o $$@ $$^ $(LIBDIR)/libpal.a
 
 endef
 
 # instantiate per provider rules
 $(foreach provider,$(PROVIDERS),\
     $(eval $(call PER-PROVIDER-RULES,$(provider))))
-
-
-# per provider X per python version specific rules
-################################################################################
-# $(call PROVIDER-X-PYTHON-RULES,provider,python-version)
-define PROVIDER-X-PYTHON-RULES
-
-# compile rule
-$(BIN_PATH$2)/%.o : $(PROVIDER_PATH)/$1/%.cpp
-	$(call COMPILE-WITH-DEPEND,$(BIN_PATH$2)/,PYFLAGS_$2)
-
-# add this shared object to the "all" target
-all: $(BIN_PATH$2)/libMSFT_$1Resource.so
-
-$(BIN_PATH$2)/libMSFT_$1Resource.so : \
-	$(addprefix $(BIN_PATH$2)/,$(COMMON_OBJS)) \
-	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
-	$(BIN_PATH$2)/MSFT_$1Resource.o
-	@echo ...linking: $(BIN_PATH$2)/libMSFT_$1Resource.so
-	$(CXX) -shared $(LDFLAGS_$2) -o $$@ $$^ $(LIBDIR)/libpal.a $(LDFLAGS_$2)
-
-endef
-
-# instantiate per provider X per python version rules
-$(foreach provider,$(PROVIDERS), \
-    $(foreach version,$(PYTHON_VERSIONS), \
-        $(eval $(call PROVIDER-X-PYTHON-RULES,$(provider),$(version)))))
 
 
 # miscellaneous rules
