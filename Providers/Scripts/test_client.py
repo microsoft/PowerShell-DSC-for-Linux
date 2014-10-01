@@ -9,6 +9,10 @@ import nxFile
 import struct
 ######################################
 
+#class Datetime:
+#    def __init__ (self, tm):
+#        self.tm = tm
+    
 def write_uchar (fd, val):
     buf = struct.pack ('B', val)
     fd.send (buf)
@@ -86,32 +90,38 @@ def read_string (s):
 
 
 def read_value (s):
-    #print '<read_value>'
+    print '<read_value>'
     arg_name = read_string (s)
-    #print '  arg_name: "{0}"'.format (arg_name)
+    print '  arg_name: "{0}"'.format (arg_name)
     arg_type = read_uchar (s)
-    #print '  arg_type: {0}'.format (int (arg_type))
+    print '  arg_type: {0}'.format (int (arg_type))
     argv =''
-    if 0 == arg_type:
-        argv = read_bool (s)
-        #print '  argv: {0}'.format (argv)
-    elif 13 == arg_type:
-        argv = read_string (s)
-        #print '  argv: "{0}"'.format (argv)
-    #print '</read_value>'
+    if 0 == (64 & arg_type): # MI_NULL_FLAG = 64
+        if 0 == arg_type: # MI_Boolean = 0
+            argv = read_bool (s)
+            print '  argv: {0}'.format (argv)
+        elif 13 == arg_type: # MI_String = 13
+            argv = read_string (s)
+            print '  argv: "{0}"'.format (argv)
+        else:
+            print '  unhandled arg type!'
+    else: # MI_NULL_FLAG = 64
+        argv = None
+        print '  argv: None'
+    print '</read_value>'
     return (arg_name, argv)
 
 
 def read_values (s):
-    #print '<read_values>'
+    print '<read_values>'
     d = dict ()
     argc = read_int (s)
-    #print '  argc: {0}'.format (argc)
+    print '  argc: {0}'.format (argc)
     for i in range (argc):
         #print 'val #{0}'.format (i)
         arg = read_value (s)
         d[arg[0]] = arg[1]
-    #print '</read_values>'
+    print '</read_values>'
     return d
 
 
@@ -129,8 +139,11 @@ def read_request (s):
 def write_arg (s, arg):
     #print '<write_arg>'
     if type (arg) is bool:
-        write_uchar (s, 0x0) # MI_Boolean = 0
+        write_uchar (s, 0) # MI_Boolean = 0
         write_bool (s, arg)
+    #elif type (arg) is class:
+    #    write_uchar (s, 12) # MI_Datetime = 12
+    #    write_int (s, arg.tm)
     elif type (arg) is str:
         write_uchar (s, 13) # MI_String = 13
         write_string (s, arg)
@@ -190,18 +203,18 @@ def handle_request (s, req):
             if 2 == req[0]:
                 # Get
                 ret = nxFile.Get_Marshall (
-                    req[2].get ('DestinationPath', ''),
-                    req[2].get ('SourcePath', ''),
-                    req[2].get ('Ensure', ''),
-                    req[2].get ('Type', ''),
-                    str (req[2].get ('Force', '')),
-                    req[2].get ('Contents', ''),
-                    req[2].get ('Checksum', ''),
-                    str (req[2].get ('Recurse', '')),
-                    req[2].get ('Links', ''),
-                    req[2].get ('Owner', ''),
-                    req[2].get ('Group', ''),
-                    req[2].get ('Mode', ''))
+                    req[2]['DestinationPath'] if req[2]['DestinationPath'] is not None else '',
+                    req[2]['SourcePath'] if req[2]['SourcePath'] is not None else '',
+                    req[2]['Ensure'] if req[2]['Ensure'] is not None else '',
+                    req[2]['Type'] if req[2]['Type'] is not None else '',
+                    str (req[2]['Force']) if req[2]['Force'] is not None else '',
+                    req[2]['Contents'] if req[2]['Contents'] is not None else '',
+                    req[2]['Checksum'] if req[2]['Checksum'] is not None else '',
+                    str (req[2]['Recurse']) if req[2]['Recurse'] is not None else '',
+                    req[2]['Links'] if req[2]['Links'] is not None else '',
+                    req[2]['Owner'] if req[2]['Owner'] is not None else '',
+                    req[2]['Group'] if req[2]['Group'] is not None else '',
+                    req[2]['Mode'] if req[2]['Mode'] is not None else '')
                 rval = ret[0]
                 if 0 == rval:
                     args = dict ()
@@ -223,6 +236,8 @@ def handle_request (s, req):
                     args['Owner'] = ret[10]
                     args['Group'] = ret[11]
                     args['Mode'] = ret[12]
+#                    print 'ModifiedDate: {0}'.format (ret[13])
+#                    args['ModifiedDate'] = Datetime (int (ret[13]))
                     write_success (s, args)
                 else:
                     # Fail
@@ -231,33 +246,33 @@ def handle_request (s, req):
                 if 0 == req[0]:
                     # Test
                     ret = nxFile.Test_Marshall (
-                        req[2].get ('DestinationPath', ''),
-                        req[2].get ('SourcePath', ''),
-                        req[2].get ('Ensure', ''),
-                        req[2].get ('Type', ''),
-                        str (req[2].get ('Force', '')),
-                        req[2].get ('Contents', ''),
-                        req[2].get ('Checksum', ''),
-                        str (req[2].get ('Recurse', '')),
-                        req[2].get ('Links', ''),
-                        req[2].get ('Owner', ''),
-                        req[2].get ('Group', ''),
-                        req[2].get ('Mode', ''))
+                        req[2]['DestinationPath'] if req[2]['DestinationPath'] is not None else '',
+                        req[2]['SourcePath'] if req[2]['SourcePath'] is not None else '',
+                        req[2]['Ensure'] if req[2]['Ensure'] is not None else '',
+                        req[2]['Type'] if req[2]['Type'] is not None else '',
+                        str (req[2]['Force']) if req[2]['Force'] is not None else '',
+                        req[2]['Contents'] if req[2]['Contents'] is not None else '',
+                        req[2]['Checksum'] if req[2]['Checksum'] is not None else '',
+                        str (req[2]['Recurse']) if req[2]['Recurse'] is not None else '',
+                        req[2]['Links'] if req[2]['Links'] is not None else '',
+                        req[2]['Owner'] if req[2]['Owner'] is not None else '',
+                        req[2]['Group'] if req[2]['Group'] is not None else '',
+                        req[2]['Mode'] if req[2]['Mode'] is not None else '')
                 else:
                     # Set
                     ret = nxFile.Set_Marshall (
-                        req[2].get ('DestinationPath', ''),
-                        req[2].get ('SourcePath', ''),
-                        req[2].get ('Ensure', ''),
-                        req[2].get ('Type', ''),
-                        str (req[2].get ('Force', '')),
-                        req[2].get ('Contents', ''),
-                        req[2].get ('Checksum', ''),
-                        str (req[2].get ('Recurse', '')),
-                        req[2].get ('Links', ''),
-                        req[2].get ('Owner', ''),
-                        req[2].get ('Group', ''),
-                        req[2].get ('Mode', ''))
+                        req[2]['DestinationPath'] if req[2]['DestinationPath'] is not None else '',
+                        req[2]['SourcePath'] if req[2]['SourcePath'] is not None else '',
+                        req[2]['Ensure'] if req[2]['Ensure'] is not None else '',
+                        req[2]['Type'] if req[2]['Type'] is not None else '',
+                        str (req[2]['Force']) if req[2]['Force'] is not None else '',
+                        req[2]['Contents'] if req[2]['Contents'] is not None else '',
+                        req[2]['Checksum'] if req[2]['Checksum'] is not None else '',
+                        str (req[2]['Recurse']) if req[2]['Recurse'] is not None else '',
+                        req[2]['Links'] if req[2]['Links'] is not None else '',
+                        req[2]['Owner'] if req[2]['Owner'] is not None else '',
+                        req[2]['Group'] if req[2]['Group'] is not None else '',
+                        req[2]['Mode'] if req[2]['Mode'] is not None else '')
                 rval = ret[0]
                 if 0 == rval:
                     write_success (s)

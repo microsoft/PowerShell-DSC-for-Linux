@@ -24,7 +24,8 @@ namespace scx
 class PythonProvider
 {
 public:
-    static const int INVALID_SOCKET = -1;
+    static int const INVALID_SOCKET = -1;
+    static unsigned char const MI_NULL_FLAG;
 
     template<typename T>
     explicit /*ctor*/ PythonProvider (T const& name);
@@ -516,76 +517,87 @@ PythonProvider::send (
     T const* const pResource)
 {
     //SCX_BOOKEND ("PythonProvider::send (template)");
-    int rval = send (static_cast<unsigned char>(property.type));
-    if (EXIT_SUCCESS == rval)
+    int rval = EXIT_FAILURE;
+    if (exists (property, pResource))
     {
-        std::ostringstream strm;
-        switch (property.type)
+        rval = send (static_cast<unsigned char>(property.type));
+        if (EXIT_SUCCESS == rval)
         {
-        case MI_BOOLEAN:
-            rval = TypeHelper<MI_ConstBooleanField>::send<T, unsigned char> (
-                this, property, pResource);
-            break;
-        case MI_STRING:
-            rval = TypeHelper<MI_ConstStringField>::send (
-                this, property, pResource);
-            break;
-        case MI_DATETIME:
-            rval = TypeHelper<MI_ConstDatetimeField>::send (
-                this, property, pResource);
-            break;
-        case MI_UINT8:
-        case MI_SINT8:
-        case MI_UINT16:
-        case MI_SINT16:
-        case MI_UINT32:
-        case MI_SINT32:
-        case MI_UINT64:
-        case MI_SINT64:
-        case MI_REAL32:
-        case MI_REAL64:
-        case MI_CHAR16:
-        case MI_BOOLEANA:
-        case MI_UINT8A:
-        case MI_SINT8A:
-        case MI_UINT16A:
-        case MI_SINT16A:
-        case MI_UINT32A:
-        case MI_SINT32A:
-        case MI_UINT64A:
-        case MI_SINT64A:
-        case MI_REAL32A:
-        case MI_REAL64A:
-        case MI_CHAR16A:
-        case MI_DATETIMEA:
-        case MI_STRINGA:
-            strm << __FILE__ << '[' << __LINE__ << ']'
-                 << "encountered an unhandled param type: " << property.type;
+            std::ostringstream strm;
+            switch (property.type)
+            {
+            case MI_BOOLEAN:
+                rval =
+                    TypeHelper<MI_ConstBooleanField>::send<T, unsigned char> (
+                        this, property, pResource);
+                break;
+            case MI_STRING:
+                rval = TypeHelper<MI_ConstStringField>::send (
+                    this, property, pResource);
+                break;
+            case MI_DATETIME:
+                //rval = TypeHelper<MI_ConstDatetimeField>::send (
+                //    this, property, pResource);
+                break;
+            case MI_UINT8:
+            case MI_SINT8:
+            case MI_UINT16:
+            case MI_SINT16:
+            case MI_UINT32:
+            case MI_SINT32:
+            case MI_UINT64:
+            case MI_SINT64:
+            case MI_REAL32:
+            case MI_REAL64:
+            case MI_CHAR16:
+            case MI_BOOLEANA:
+            case MI_UINT8A:
+            case MI_SINT8A:
+            case MI_UINT16A:
+            case MI_SINT16A:
+            case MI_UINT32A:
+            case MI_SINT32A:
+            case MI_UINT64A:
+            case MI_SINT64A:
+            case MI_REAL32A:
+            case MI_REAL64A:
+            case MI_CHAR16A:
+            case MI_DATETIMEA:
+            case MI_STRINGA:
+                strm << __FILE__ << '[' << __LINE__ << ']'
+                     << "encountered an unhandled param type: "
+                     << property.type;
+                SCX_BOOKEND_PRINT (strm.str ());
+                std::cerr << strm.str () << std::endl;
+                strm.str ("");
+                strm.clear ();
+                break;
+            case MI_REFERENCE:
+            case MI_INSTANCE:
+            case MI_REFERENCEA:
+            case MI_INSTANCEA:
+                strm << __FILE__ << '[' << __LINE__ << ']'
+                     << "encountered a non-standard param type: "
+                     << property.type;
             SCX_BOOKEND_PRINT (strm.str ());
             std::cerr << strm.str () << std::endl;
             strm.str ("");
             strm.clear ();
             break;
-        case MI_REFERENCE:
-        case MI_INSTANCE:
-        case MI_REFERENCEA:
-        case MI_INSTANCEA:
-            strm << __FILE__ << '[' << __LINE__ << ']'
-                 << "encountered a non-standard param type: " << property.type;
-            SCX_BOOKEND_PRINT (strm.str ());
-        std::cerr << strm.str () << std::endl;
-        strm.str ("");
-        strm.clear ();
-        break;
-        default:
-            strm << __FILE__ << '[' << __LINE__ << ']'
-                 << "encountered an unknown param type: " << property.type;
-            SCX_BOOKEND_PRINT (strm.str ());
-            std::cerr << strm.str () << std::endl;
-            strm.str ("");
-            strm.clear ();
-            break;
+            default:
+                strm << __FILE__ << '[' << __LINE__ << ']'
+                     << "encountered an unknown param type: " << property.type;
+                SCX_BOOKEND_PRINT (strm.str ());
+                std::cerr << strm.str () << std::endl;
+                strm.str ("");
+                strm.clear ();
+                break;
+            }
         }
+    }
+    else
+    {
+        rval = send<unsigned char> (property.type | MI_NULL_FLAG);
     }
     return rval;
 }
@@ -730,9 +742,8 @@ PythonProvider::isInputParam (
     MI_PropertyDecl const* const pProperty,
     T const* const pResource)
 {
-    return exists (*pProperty, pResource) &&
-        (MI_FLAG_KEY == (MI_FLAG_KEY & pProperty->flags) ||
-         0 == (MI_FLAG_READONLY & pProperty->flags));
+    return !(MI_FLAG_READONLY == (MI_FLAG_READONLY & pProperty->flags) &&
+             MI_FLAG_KEY != (MI_FLAG_KEY & pProperty->flags));
 }
 
 

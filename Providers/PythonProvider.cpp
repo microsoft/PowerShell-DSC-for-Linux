@@ -81,6 +81,9 @@ namespace scx
 {
 
 
+/*static*/ unsigned char const PythonProvider::MI_NULL_FLAG = 64;
+
+
 /*dtor*/
 PythonProvider::~PythonProvider ()
 {
@@ -407,8 +410,31 @@ PythonProvider::recv_MI_Value (
                 val.string = const_cast<MI_Char*>(tempStr.c_str ());
                 break;
             case MI_DATETIME:
-//                rval = TypeHelper<MI_ConstDatetimeField>::send (
-//                    this, property, pResource);
+                // working on this, it is not ready to check in
+                //{
+                //    time_t temp;
+                //    rval = recv (&temp);
+                //    tm localTM;
+                //    tm gmTM;
+                //    if (localtime_r (&temp, &localTM) &&
+                //        gmtime_r (&temp, &gmTM))
+                //    {
+                //        val.datetime.isTimestamp = MI_TRUE;
+                //        val.datetime.u.timestamp.year = localTM.tm_year + 1900;
+                //        val.datetime.u.timestamp.month = localTM.tm_mon + 1;
+                //        val.datetime.u.timestamp.day = localTM.tm_mday;
+                //        val.datetime.u.timestamp.hour = localTM.tm_hour;
+                //        val.datetime.u.timestamp.minute = localTM.tm_min;
+                //        val.datetime.u.timestamp.second = localTM.tm_sec;
+                //        time_t gmt = mktime (&gmTM);
+                //        val.datetime.u.timestamp.utc =
+                //            60 * static_cast<time_t>(difftime (gmt, temp));
+                //    }
+                //    else
+                //    {
+                //        rval = EXIT_FAILURE;
+                //    }
+                //}
                 break;
             case MI_UINT8:
             case MI_SINT8:
