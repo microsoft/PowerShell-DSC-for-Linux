@@ -1,0 +1,3537 @@
+GET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = ""
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "LYWGE127DeQ9/baQ6jz78zGyAPdUSEhC"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+GET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = ""
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Absent"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "KUyyi8Jw7lVfUTes0zicudillr15RHpT"
+    Disabled = True
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "KUyyi8Jw7lVfUTes0zicudillr15RHpT"
+    Disabled = True
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "3EqqeOcNuKxrklQPBLY0eq/VZtFzeUJC"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "3EqqeOcNuKxrklQPBLY0eq/VZtFzeUJC"
+    Disabled = True
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "p+Blji0ngu+gxvunOXXpcmXqNwtCN1Vw"
+    Disabled = False
+    PasswordChangeRequired = True
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "p+Blji0ngu+gxvunOXXpcmXqNwtCN1Vw"
+    Disabled = False
+    PasswordChangeRequired = True
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "232mjqzjyzyOtIq67CmG6yFP2qpuSS9m"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "232mjqzjyzyOtIq67CmG6yFP2qpuSS9m"
+    Disabled = False
+    PasswordChangeRequired = True
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "44jpV12iw1KApqEojROESysXuhNSck1V"
+    Disabled = False
+    PasswordChangeRequired = True
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "44jpV12iw1KApqEojROESysXuhNSck1V"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "YjzU3iASfX6Qu3vpu6TJM/7qLhhMZTVG"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Absent"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "root"
+    Ensure = "Absent"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = "JOJOMA"
+    Password = "mottvA+CaZG7n+66wU46+d73XvJIZEpx"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = "JOJOMA"
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = "JOJOMA"
+    Password = "x3HGAXt81Ll0g+/7HdG1B3FFgoNxZDI2"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = "NOTJOJOMA"
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = ""
+    Password = "AgZQGQpmxAzxMc6RVvkh7lnDv1EwWW0y"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = ""
+    Password = "3Sn1fIJjUowG3w5+UR68qXxbmHxIMldj"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MAMA"
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "Lr4hL6pKBYZcase202ViYQT1RppkREFv"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = "8"
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = "Zm2KbHOV7aViVoE/BfpGjZ1UMrNHWkVH"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = "1200"
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = "1hB5Z8GVVPNTe58D3bqGO2UUJEBBOFpI"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = "IJghrks2BCmWQmd4W62SduEbwgRPd1la"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = "/home/ojoma"
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "yEatL8Qk9X1d4jq+SWjNHZUTwjBzdVhS"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = yEatL8Qk9X1d4jq+SWjNHZUTwjBzdVhS
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = "bzkdyjSkKfZdD8qBpl2o1S+ur5FiaWZl"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = "2u/Mw7cCyIhaP2HlgSPxkjWqYCx3S3E3"
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "root"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+TEST nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = ""
+    Description = ""
+    Password = ""
+    Disabled = 
+    PasswordChangeRequired = 
+    HomeDirectory = ""
+    GroupID = ""
+}
+
+GET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = ""
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['jojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+GET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = ""
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+GET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = ""
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['jojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Absent"
+    Members = "['jojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['jojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "('jojoma', 'root')"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "('jojoma', 'root')"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "('jojoma', 'root')"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "['jojoma']"
+    PreferredGroupID = "1101"
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['root']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['root']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "['jojoma']"
+    PreferredGroupID = "1101"
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['jojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['jojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "''"
+    MembersToInclude = "['jojoma']"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['jojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+SET nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "''"
+    MembersToInclude = "['ojoma']"
+    MembersToExclude = "''"
+    PreferredGroupID = "1101"
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['ojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "['ojoma']"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Absent"
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "mail"
+    Ensure = "Absent"
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "mail"
+    Ensure = "Present"
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+TEST nxGroup MyGroup 
+{
+    GroupName = "jojomamas"
+    Ensure = "Present"
+    Members = "''"
+    MembersToInclude = "''"
+    MembersToExclude = "''"
+    PreferredGroupID = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+GET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+GET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+GET nxFile MyFile
+{
+    DestinationPath = ""
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/ppp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/ppp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/ppp"
+    SourcePath = "/tmp/pp"
+    Ensure = "Present"
+    Type = "Directory"
+    Force = Force
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/ppp"
+    SourcePath = "/tmp/pp"
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Absent"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Absent"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Absent"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tp/1.pp"
+    SourcePath = ""
+    Ensure = "Absent"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/12.pp"
+    SourcePath = "/tmp/1.pp"
+    Ensure = ""
+    Type = ""
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp/12.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 12.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = "755"
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp/12.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 12.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = "mail"
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/12.pp"
+    SourcePath = "/tmp/1.pp"
+    Ensure = ""
+    Type = ""
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/12.pp"
+    SourcePath = "/tmp/1.pp"
+    Ensure = ""
+    Type = ""
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/12.pp"
+    SourcePath = "/tmp/1.pp"
+    Ensure = ""
+    Type = ""
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = "These are the contents of 1.pp"
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/12.pp"
+    SourcePath = "/tmp/1.pp"
+    Ensure = ""
+    Type = ""
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/12.pp"
+    SourcePath = "/tmp/1.pp"
+    Ensure = ""
+    Type = ""
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = "root"
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = "mail"
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = "udos"
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = "776"
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = "776"
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = "root"
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = "udos"
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = "root"
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = "mail"
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = "udos"
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = "755"
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = "755"
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = "755"
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = "755"
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = "755"
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = "744"
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = "root"
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "Directory"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = True
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = "udos"
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tp/1.pp"
+    SourcePath = ""
+    Ensure = "Absent"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tp/1.pp"
+    SourcePath = ""
+    Ensure = "Absent"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tmp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = "/tp/1.pp"
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+TEST nxFile MyFile
+{
+    DestinationPath = ""
+    SourcePath = ""
+    Ensure = "Present"
+    Type = "File"
+    Force = 
+    Contents = ""
+    Checksum = "md5"
+    Recurse = 
+    Links = ""
+    Group = ""
+    Mode = ""
+    Owner = ""
+}
+
+SET nxUser MyUser 
+{
+    UserName = "jojoma"
+    Ensure = "Present"
+    FullName = "JO JO MA"
+    Description = "JOJOMA"
+    Password = "badpass"
+    Disabled = False
+    PasswordChangeRequired = False
+    HomeDirectory = "/home/jojoma"
+    GroupID = "mail"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+GET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+GET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+GET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Absent"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Absent"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = ""
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = ""
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = ""
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = ""
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+TEST nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+TEST nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+TEST nxSshAuthorizedKeys MyKey 
+{
+    KeyComment = "MyKey"
+    Ensure = "Present"
+    UserName = "jojoma"
+    Key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Absent"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Absent"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Absent"
+    Path = "False"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Absent"
+    Path = "False"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR2"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+GET nxEnvironment MyEnv 
+{
+    Name = "MYVAR2"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+TEST nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+TEST nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp2"
+    Ensure = "Present"
+    Path = "True"
+}
+
+TEST nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "True"
+}
+
+TEST nxEnvironment MyEnv 
+{
+    Name = ""
+    Value = "/tmp2"
+    Ensure = "Present"
+    Path = "True"
+}
+
+SET nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+TEST nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tmp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+TEST nxEnvironment MyEnv 
+{
+    Name = "MYVAR"
+    Value = "/tp"
+    Ensure = "Present"
+    Path = "False"
+}
+
+SET nxExec MyCmd
+{
+    Command/bin/bash -c "export JOJO=mam ; echo $JOJO | grep mama"
+    Environment = "JOJO=MAMA"
+    Shell = "False"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "/bin/bash -c "echo $JOJO | grep MAMA""
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mam ; echo $JOJO | grep mama
+    Environment = "JOJO"=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 0
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mam ; echo $JOJO | grep mama
+    Environment = "JOJO"=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mam ; echo $JOJO | grep mama
+    Environment = "JOJO"=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = "toor"
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mam ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mam ; echo $JOJO | grep mama
+    Environment = "JOJO"=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = "toor"
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Command/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"
+    Environment = "JOJO=MAMA"
+    Shell = "False"
+    Returncode = -1
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "/bin/bash -c "echo $JOJO | grep MAMA""
+}
+
+SET nxExec MyCmd
+{
+    Command/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"
+    Environment = "JOJO=MAM"
+    Shell = "False"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "/bin/bash -c "echo $JOJO | grep MAMA""
+}
+
+SET nxExec MyCmd
+{
+    Command/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"
+    Environment = "JOJO=MAMA"
+    Shell = "False"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "/bin/bash -c "echo $JOJO | grep MAMA""
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mam ; sleep 30; echo $JOJO | grep mama
+    Environment = "JOJO"=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 10
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = "adm"
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = -1
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = 
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Command
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = ""
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = ""
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAM"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = ""
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxExec MyCmd
+{
+    Commandexport JOJO=mama ; echo $JOJO | grep mama
+    Environment = "JOJO=MAMA"
+    Shell = "True"
+    Returncode = 0
+    Timeout = 30
+    User = "root"
+    Group = ""
+    TestCommand = "echo $JOJO | grep MAMA"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+GET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+GET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+SET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+GET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+GET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+GET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+SET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+GET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+GET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+SET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+SET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+TEST nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+TEST nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+SET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+TEST nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = False
+    State = "stopped"
+}
+
+TEST nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = True
+    State = "stopped"
+}
+
+SET nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+TEST nxService MyService{
+    Name = "dummy_service"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+SET nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+TEST nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+TEST nxService MyService{
+    Name = "yummyservice"
+    Controller = "upstart"
+    Enabled = True
+    State = "running"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 6
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 6
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+GET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 6
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = ""
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = "BADPATH./nano_2.2.6-1ubuntu1_amd64.deb"
+    PackageGroup = "True"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = ""
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = "./nano_2.2.6-1ubuntu1_amd64.deb"
+    PackageGroup = "True"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = ""
+    Ensure = "Present"
+    PackageManager = ""
+    Path = "BADPATH./nano_2.2.6-1ubuntu1_amd64.deb"
+    PackageGroup = "True"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = "zypper"
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = "--dry-run"
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 6
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = "apt"
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = "./nano_2.2.6-1ubuntu1_amd64.deb"
+    PackageGroup = "True"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = ""
+    Ensure = "Present"
+    PackageManager = ""
+    Path = "./nano_2.2.6-1ubuntu1_amd64.deb"
+    PackageGroup = "True"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Absent"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nanoo"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+SET nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 0
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 6
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 6
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
+
+TEST nxPackage MyPackage 
+{
+    Name = "nano"
+    Ensure = "Present"
+    PackageManager = ""
+    Path = ""
+    PackageGroup = "False"
+    Arguments = ""
+    RepoUpdate = "True"
+    ReturnCode = 6
+    LogPath = "/tmp/DSC-nxPackage.log"
+}
+
