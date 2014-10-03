@@ -1,13 +1,12 @@
-#!/usr/bin/env python
 #============================================================================
 # Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 #============================================================================
 import time
-import socket
+import os
 import sys
-import nxFile
+import socket
 import struct
-######################################
+
 
 #class Datetime:
 #    def __init__ (self, tm):
@@ -90,11 +89,11 @@ def read_string (s):
 
 
 def read_value (s):
-    print '<read_value>'
+    #print '<read_value>'
     arg_name = read_string (s)
-    print '  arg_name: "{0}"'.format (arg_name)
+    #print '  arg_name: "{0}"'.format (arg_name)
     arg_type = read_uchar (s)
-    print '  arg_type: {0}'.format (int (arg_type))
+    #print '  arg_type: {0}'.format (int (arg_type))
     argv =''
     if 0 == (64 & arg_type): # MI_NULL_FLAG = 64
         if 0 == arg_type: # MI_Boolean = 0
@@ -113,15 +112,15 @@ def read_value (s):
 
 
 def read_values (s):
-    print '<read_values>'
+    #print '<read_values>'
     d = dict ()
     argc = read_int (s)
-    print '  argc: {0}'.format (argc)
+    #print '  argc: {0}'.format (argc)
     for i in range (argc):
         #print 'val #{0}'.format (i)
         arg = read_value (s)
         d[arg[0]] = arg[1]
-    print '</read_values>'
+    #print '</read_values>'
     return d
 
 
@@ -185,112 +184,42 @@ def write_failed (s, fail_code, text=''):
     print '</write_failed>'
     
 
+
+def callMOF(m):
+    sys.stderr.write('MOF='+repr(m))
+    op=('Test','Set','Get')
+    if not globals().has_key(m[1]):
+        sys.stderr.write('Unable to find module: ' + md)
+        return None
+    the_module=globals()[m[1]]
+    method_name=op[m[0]]+'_Marshall'
+    if not the_module.__dict__.has_key(method_name):
+        sys.stderr.write('Unable to find method: ' + method_name)
+        return None
+    sys.stderr.write('calling '+m[1]+'.'+method_name+repr(m[2]))
+    ret = the_module.__dict__[method_name](**m[2])
+    sys.stderr.write(repr(ret))
+    return ret
+    
 def handle_request (s, req):
-    print '<handle_request>'
-    op = ''
-    if 0 == req[0]:
-        op = 'Test'
-    elif 1 == req[0]:
-        op = 'Set'
-    elif 2 == req[0]:
-        op = 'Get'
-    print '  {0} : {1}'.format (op, req[1])
-    error_text = ''
-    ret = []
-    rval = 0
-    if 0 <= req[0] and 2 >= req[0]:
-        if 'nxFile' == req[1]:
-            if 2 == req[0]:
-                # Get
-                ret = nxFile.Get_Marshall (
-                    req[2]['DestinationPath'] if req[2]['DestinationPath'] is not None else '',
-                    req[2]['SourcePath'] if req[2]['SourcePath'] is not None else '',
-                    req[2]['Ensure'] if req[2]['Ensure'] is not None else '',
-                    req[2]['Type'] if req[2]['Type'] is not None else '',
-                    str (req[2]['Force']) if req[2]['Force'] is not None else '',
-                    req[2]['Contents'] if req[2]['Contents'] is not None else '',
-                    req[2]['Checksum'] if req[2]['Checksum'] is not None else '',
-                    str (req[2]['Recurse']) if req[2]['Recurse'] is not None else '',
-                    req[2]['Links'] if req[2]['Links'] is not None else '',
-                    req[2]['Owner'] if req[2]['Owner'] is not None else '',
-                    req[2]['Group'] if req[2]['Group'] is not None else '',
-                    req[2]['Mode'] if req[2]['Mode'] is not None else '')
-                rval = ret[0]
-                if 0 == rval:
-                    args = dict ()
-                    args['DestinationPath'] = ret[1]
-                    args['SourcePath'] = ret[2]
-                    args['Ensure'] = ret[3]
-                    args['Type']= ret[4]
-                    if ret[5] == 'True':
-                        args['Force'] = True
-                    else:
-                        args['Force'] = False
-                    args['Contents'] = ret[6]
-                    args['Checksum'] = ret[7]
-                    if ret[8] == 'True':
-                        args['Recurse'] = True
-                    else:
-                        args['Recurse'] = False
-                    args['Links'] = ret[9]
-                    args['Owner'] = ret[10]
-                    args['Group'] = ret[11]
-                    args['Mode'] = ret[12]
-#                    print 'ModifiedDate: {0}'.format (ret[13])
-#                    args['ModifiedDate'] = Datetime (int (ret[13]))
-                    write_success (s, args)
-                else:
-                    # Fail
-                    error_text = 'Test failed'
-            else:
-                if 0 == req[0]:
-                    # Test
-                    ret = nxFile.Test_Marshall (
-                        req[2]['DestinationPath'] if req[2]['DestinationPath'] is not None else '',
-                        req[2]['SourcePath'] if req[2]['SourcePath'] is not None else '',
-                        req[2]['Ensure'] if req[2]['Ensure'] is not None else '',
-                        req[2]['Type'] if req[2]['Type'] is not None else '',
-                        str (req[2]['Force']) if req[2]['Force'] is not None else '',
-                        req[2]['Contents'] if req[2]['Contents'] is not None else '',
-                        req[2]['Checksum'] if req[2]['Checksum'] is not None else '',
-                        str (req[2]['Recurse']) if req[2]['Recurse'] is not None else '',
-                        req[2]['Links'] if req[2]['Links'] is not None else '',
-                        req[2]['Owner'] if req[2]['Owner'] is not None else '',
-                        req[2]['Group'] if req[2]['Group'] is not None else '',
-                        req[2]['Mode'] if req[2]['Mode'] is not None else '')
-                else:
-                    # Set
-                    ret = nxFile.Set_Marshall (
-                        req[2]['DestinationPath'] if req[2]['DestinationPath'] is not None else '',
-                        req[2]['SourcePath'] if req[2]['SourcePath'] is not None else '',
-                        req[2]['Ensure'] if req[2]['Ensure'] is not None else '',
-                        req[2]['Type'] if req[2]['Type'] is not None else '',
-                        str (req[2]['Force']) if req[2]['Force'] is not None else '',
-                        req[2]['Contents'] if req[2]['Contents'] is not None else '',
-                        req[2]['Checksum'] if req[2]['Checksum'] is not None else '',
-                        str (req[2]['Recurse']) if req[2]['Recurse'] is not None else '',
-                        req[2]['Links'] if req[2]['Links'] is not None else '',
-                        req[2]['Owner'] if req[2]['Owner'] is not None else '',
-                        req[2]['Group'] if req[2]['Group'] is not None else '',
-                        req[2]['Mode'] if req[2]['Mode'] is not None else '')
-                rval = ret[0]
-                if 0 == rval:
-                    write_success (s)
-        else:
-            # Error
-            error_text = 'Received a request for an unexpected operation!'
+    sys.stderr.write('<handle_request>')
+    #import pdb; pdb.set_trace()
+    r = callMOF(req)
+    if len(r) < 2 :
+        ret=None
+        rval=r[0]
     else:
-        # fail
-        error_text = 'Received a request for an invalid operation type!'
-    if 0 != rval:
-        if 0 < len (error_text):
-            print error_text
-        write_failed (s, rval, error_text)
-    print '</handle_request>'
+        rval=r[0]
+        ret=r[1]
+        
+    if rval != 0:
+        write_failed(s,rval,'Error occurred processing '+repr(req))
+        return
+    else:
+        write_success (s,ret)
+    sys.stderr.write('</handle_request>')
 
-
-def main (argv=sys.argv):
-    print 'socket: {0}'.format (argv[1])
+def main (argv):
     s = socket.fromfd (int (argv[1]), socket.AF_UNIX, socket.SOCK_STREAM)
     read = 1
     out = ''
@@ -300,9 +229,51 @@ def main (argv=sys.argv):
             handle_request (s, req)
         except socket.error:
             read = -1;
-            print 'exception encountered'
+            sys.stderr.write('exception encountered')
+
+##############################
+try:
+
+    sys.stderr.write('socket: {0}'.format (sys.argv[1]))
+    
+    if 'OMI_HOME' in os.environ and len(os.environ['OMI_HOME']):
+        omi_home=os.environ['OMI_HOME']
+    else:
+        omi_home='/opt/omi-1.0.8'
+    if not os.path.isdir(omi_home):
+        sys.stderr.write("omi home not found.  Please set OMI_HOME")
+        sys.exit(1)
+    pid_path=omi_home+'/var/run/python/'+repr(os.getuid())
+    
+    if not os.path.isdir(pid_path):
+        os.system('mkdir -p ' + pid_path)
+    pid_file=pid_path+'/dsc_python_client.pid'
+    
+    with open(pid_file,'w') as F: 
+            F.write(str(os.getpid()) + "\n")
+            F.flush()
+            F.close()
+    sys.stderr.write('using python version '+ sys.version) 
+    sys.path.insert(0,'') # put the cwd in the path so we can find our module
+    if sys.version < '2.6':
+        sys.stderr.write('/lib/Scripts/2.4x-2.5x')
+        os.chdir(omi_home+'/lib/Scripts/2.4x-2.5x')
+    elif sys.version < '3':
+        sys.stderr.write('/lib/Scripts/2.6x-2.7x')
+        os.chdir(omi_home+'/lib/Scripts/2.6x-2.7x')
+    else:
+        sys.stderr.write('/lib/Scripts/3.x')
+        os.chdir(omi_home+'/lib/Scripts/3.x')
+    from Scripts import *
+    
+        
+        
+    if __name__ == '__main__':
+            main (sys.argv)
 
 
-if __name__ == '__main__':
-    main ()
-
+except Exception, e:
+    sys.stderr.write('Uncaught exception'+repr(e))
+finally:
+    sys.stderr.write('Exiting - closing socket' )
+    (socket.fromfd(int (sys.argv[1]), socket.AF_UNIX, socket.SOCK_STREAM)).close()
