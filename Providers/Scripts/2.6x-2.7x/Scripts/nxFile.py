@@ -239,7 +239,7 @@ def ReadFile(path):
     """
     d=None
     error=None
-    with opened_w_error(path,'rb') as (F,error):
+    with opened_w_error(path,'r') as (F,error):
         if error:
             Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
         else:
@@ -256,7 +256,7 @@ def WriteFile(path,contents):
     Log results to stderr.
     """
     error=None
-    with opened_w_error(path,'wb+') as (F,error):
+    with opened_w_error(path,'w+') as (F,error):
         if error:
             Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
         else:
@@ -886,7 +886,7 @@ def TestFile(DestinationPath, SourcePath, fc):
             return False
 
     elif fc.Contents:
-        dest_file = ReadFile(DestinationPath)
+        dest_file,error = ReadFile(DestinationPath)
         if fc.Contents != dest_file:
             return False
 
@@ -976,7 +976,7 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         Type = "directory"
         
     ModifiedDate = str(int(stat_info.st_mtime))
-
+    Contents,error=ReadFile(DestinationPath)
     return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
 class FileContext:
