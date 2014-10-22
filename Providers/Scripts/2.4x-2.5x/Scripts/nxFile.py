@@ -973,7 +973,11 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         Type = "directory"
         
     ModifiedDate = str(int(stat_info.st_mtime))
-    Contents,error=ReadFile(DestinationPath)
+
+    if Type == "directory":
+        Contents = ListDir(DestinationPath)
+    else :
+        Contents,error=ReadFile(DestinationPath)
     return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
 class FileContext:

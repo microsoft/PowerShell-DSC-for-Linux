@@ -2,7 +2,7 @@
 #============================================================================
 # Copyright (C) Microsoft Corporation, All rights reserved. 
 #============================================================================
-from __future__ import print_function
+#from __future__ import print_function
 from __future__ import with_statement
 from contextlib import contextmanager
 
@@ -16,32 +16,88 @@ import stat
 import tempfile
 import codecs
 
+# 	[Key] string GetScript;
+# 	[Key] string SetScript;
+# 	[Key] string TestScript;
+# 	[write] string User;
+# 	[write] string Group;
+# 	[Read] string Result;
+
+global show_mof
+show_mof=False
+
 def Set_Marshall(GetScript, SetScript, TestScript, User, Group):
-    GetScript = GetScript.decode("utf-8")
-    SetScript = SetScript.decode("utf-8")
-    TestScript = TestScript.decode("utf-8")
-    User = User.decode("utf-8")
-    Group = Group.decode("utf-8")
+    if GetScript != None :
+        GetScript=GetScript.decode("utf-8")
+    else:
+        GetScript = ''
+    if SetScript != None :
+        SetScript=SetScript.decode("utf-8")
+    else:
+        SetScript = ''
+    if TestScript != None :
+        TestScript=TestScript.decode("utf-8")
+    else:
+        TestScript = ''
+    if User != None :
+        User=User.decode("utf-8")
+    else:
+        User = ''
+    if Group != None :
+        Group=Group.decode("utf-8")
+    else:
+        Group = ''
     
     retval = Set(GetScript, SetScript, TestScript, User, Group)
     return retval
 
 def Test_Marshall(GetScript, SetScript, TestScript, User, Group):
-    GetScript = GetScript.decode("utf-8")
-    SetScript = SetScript.decode("utf-8")
-    TestScript = TestScript.decode("utf-8")
-    User = User.decode("utf-8")
-    Group = Group.decode("utf-8")
+    if GetScript != None :
+        GetScript=GetScript.decode("utf-8")
+    else:
+        GetScript = ''
+    if SetScript != None :
+        SetScript=SetScript.decode("utf-8")
+    else:
+        SetScript = ''
+    if TestScript != None :
+        TestScript=TestScript.decode("utf-8")
+    else:
+        TestScript = ''
+    if User != None :
+        User=User.decode("utf-8")
+    else:
+        User = ''
+    if Group != None :
+        Group=Group.decode("utf-8")
+    else:
+        Group = ''
     
     retval = Test(GetScript, SetScript, TestScript, User, Group)
     return retval
 
 def Get_Marshall(GetScript, SetScript, TestScript, User, Group):
-    GetScript = GetScript.decode("utf-8")
-    SetScript = SetScript.decode("utf-8")
-    TestScript = TestScript.decode("utf-8")
-    User = User.decode("utf-8")
-    Group = Group.decode("utf-8")
+    arg_names=locals().keys()
+    if GetScript != None :
+        GetScript=GetScript.decode("utf-8")
+    else:
+        GetScript = ''
+    if SetScript != None :
+        SetScript=SetScript.decode("utf-8")
+    else:
+        SetScript = ''
+    if TestScript != None :
+        TestScript=TestScript.decode("utf-8")
+    else:
+        TestScript = ''
+    if User != None :
+        User=User.decode("utf-8")
+    else:
+        User = ''
+    if Group != None :
+        Group=Group.decode("utf-8")
+    else:
+        Group = ''
 
     retval = 0
     (retval, GetScript, SetScript, TestScript, User, Group, Result) = Get(GetScript, SetScript, TestScript, User, Group)
@@ -53,12 +109,40 @@ def Get_Marshall(GetScript, SetScript, TestScript, User, Group):
     Group = Group.encode("utf-8")
     Result = Result.encode("utf-8")
 
-    return [retval, GetScript, SetScript, TestScript, User, Group, Result]
+    retd={}
+    ld=locals()
+    for k in arg_names :
+        retd[k]=ld[k] 
+    return retval, retd
 
 
 ############################################################
 ### Begin user defined DSC functions
 ############################################################
+
+def SetShowMof(a):
+    global show_mof
+    show_mof=a
+
+def ShowMof(op, GetScript, SetScript, TestScript, User, Group):
+    if not show_mof:
+        return
+    mof=''
+    mof+= op +' nxScript MyScript \n'
+    mof+='{\n'
+    mof+='    TestScript = "' + TestScript + '"\n'
+    mof+='    GetScript = "' + GetScript + '"\n'
+    mof+='    SetScript = "' + SetScript + '"\n'
+    mof+='    User = "' + User + '"\n'
+    mof+='    Group = "' + Group + '"\n'
+    mof+='}\n'
+    f=open('./test_mofs.log','a')
+    Print(mof,file=f)
+    f.close()
+    
+def Print(s,file=sys.stdout):
+    file.write(s+'\n')
+    
 @contextmanager
 def opened_w_error(filename, mode="r"):
     """
@@ -77,7 +161,7 @@ def opened_w_error(filename, mode="r"):
 def WriteFile(path, contents):
     with opened_w_error(path,'wb') as (f,error):
         if error:
-            print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+            Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
             return -1
         else:
             f.write(contents.replace("\r",""))
@@ -88,7 +172,7 @@ def GetUID(User):
     try:
         uid = pwd.getpwnam(User)[2]
     except KeyError:
-        print('ERROR: Unknown UID for '+User,file=sys.stderr)
+        Print('ERROR: Unknown UID for '+User,file=sys.stderr)
     return uid
 
 def GetGID(Group):
@@ -96,7 +180,7 @@ def GetGID(Group):
     try:
         gid = grp.getgrnam(Group)[2]
     except KeyError:
-        print('ERROR: Unknown GID for '+Group,file=sys.stderr)
+        Print('ERROR: Unknown GID for '+Group,file=sys.stderr)
     return gid
 
 
@@ -111,7 +195,18 @@ def PreExec(uid, gid, User):
             os.environ["HOME"] = os.path.expanduser("~" + User)
     return SetIDs_callback
 
+class Params:
+    def __init__(self,GetScript, SetScript, TestScript, User, Group):
+        self.GetScript = GetScript
+        self.SetScript = SetScript
+        self.TestScript = TestScript
+        self.User = User
+        self.Group = Group
+        self.Result = ''
+
 def Set(GetScript, SetScript, TestScript, User, Group):
+    ShowMof('SET', GetScript, SetScript, TestScript, User, Group)
+    p=Params(GetScript, SetScript, TestScript, User, Group)
     # write out SetScript to a file, run it as User/Group, return exit code
     tempdir = TempWorkingDirectory(User, Group)
     path = tempdir.GetTempPath()
@@ -121,12 +216,12 @@ def Set(GetScript, SetScript, TestScript, User, Group):
     if User:
         uid = GetUID(User)
         if uid == None :
-            print('ERROR: Unknown UID for '+User,file=sys.stderr)
+            Print('ERROR: Unknown UID for '+User,file=sys.stderr)
             return [-1]
     if Group:
         gid = GetGID(Group)
         if gid == None :
-            print('ERROR: Unknown GID for '+Group,file=sys.stderr)
+            Print('ERROR: Unknown GID for '+Group,file=sys.stderr)
             return [-1]
 
     WriteFile(path, SetScript)
@@ -135,14 +230,16 @@ def Set(GetScript, SetScript, TestScript, User, Group):
 
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
-    print("stdout: " + proc.stdout.read().decode("utf-8"))
-    print("stderr: " + proc.stderr.read().decode("utf-8"))
+    Print("stdout: " + proc.stdout.read().decode("utf-8"))
+    Print("stderr: " + proc.stderr.read().decode("utf-8"))
 
     os.remove(path)
     return [exit_code]
 
 def Test(GetScript, SetScript, TestScript, User, Group):
     # write out TestScript to a file, run it as User/Group, return exit code
+    ShowMof('TEST', GetScript, SetScript, TestScript, User, Group)
+    p=Params(GetScript, SetScript, TestScript, User, Group)
     tempdir = TempWorkingDirectory(User, Group)
     path = tempdir.GetTempPath()
     command = path
@@ -151,12 +248,12 @@ def Test(GetScript, SetScript, TestScript, User, Group):
     if User:
         uid = GetUID(User)
         if uid == None :
-            print('ERROR: Unknown UID for '+User,file=sys.stderr)
+            Print('ERROR: Unknown UID for '+User,file=sys.stderr)
             return [-1]
     if Group:
         gid = GetGID(Group)
         if gid == None :
-            print('ERROR: Unknown GID for '+Group,file=sys.stderr)
+            Print('ERROR: Unknown GID for '+Group,file=sys.stderr)
             return [-1]
 
     WriteFile(path, TestScript)
@@ -165,14 +262,16 @@ def Test(GetScript, SetScript, TestScript, User, Group):
 
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
-    print("stdout: " + proc.stdout.read().decode("utf-8"))
-    print("stderr: " + proc.stderr.read().decode("utf-8"))
+    Print("stdout: " + proc.stdout.read().decode("utf-8"))
+    Print("stderr: " + proc.stderr.read().decode("utf-8"))
 
     os.remove(path)
     return [exit_code]
 
 def Get(GetScript, SetScript, TestScript, User, Group):
     # write out GetScript to a file, run it as User/Group, then return stderr/stdout and exit code
+    ShowMof('GET', GetScript, SetScript, TestScript, User, Group)
+    p=Params(GetScript, SetScript, TestScript, User, Group)
     tempdir = TempWorkingDirectory(User, Group)
     path = tempdir.GetTempPath()
     command = path
@@ -181,12 +280,12 @@ def Get(GetScript, SetScript, TestScript, User, Group):
     if User:
         uid = GetUID(User)
         if uid == None :
-            print('ERROR: Unknown UID for '+User,file=sys.stderr)
+            Print('ERROR: Unknown UID for '+User,file=sys.stderr)
             return [-1]
     if Group:
         gid = GetGID(Group)
         if gid == None :
-            print('ERROR: Unknown GID for '+Group,file=sys.stderr)
+            Print('ERROR: Unknown GID for '+Group,file=sys.stderr)
             return [-1]
 
     WriteFile(path, GetScript)
@@ -196,8 +295,8 @@ def Get(GetScript, SetScript, TestScript, User, Group):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
     Result = proc.stdout.read().decode("utf-8")
-    print("stdout: " + Result)
-    print("stderr: " + proc.stderr.read().decode("utf-8"))
+    Print("stdout: " + Result)
+    Print("stderr: " + proc.stderr.read().decode("utf-8"))
 
     os.remove(path)
     return [exit_code, GetScript, SetScript, TestScript, User, Group, Result]
@@ -210,12 +309,12 @@ class TempWorkingDirectory:
         if User:
             uid = GetUID(User)
             if uid == None :
-                print('ERROR: Unknown UID for '+User,file=sys.stderr)
+                Print('ERROR: Unknown UID for '+User,file=sys.stderr)
                 uid = -1
         if Group:
             gid = GetGID(Group)
             if gid == None :
-                print('ERROR: Unknown GID for '+Group,file=sys.stderr)
+                Print('ERROR: Unknown GID for '+Group,file=sys.stderr)
                 gid = -1
             
         os.chown(self.dir, uid, gid)        

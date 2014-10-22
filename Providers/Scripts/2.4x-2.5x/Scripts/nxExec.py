@@ -2,9 +2,6 @@
 #============================================================================
 # Copyright (C) Microsoft Corporation, All rights reserved. 
 #============================================================================
-from __future__ import print_function
-from __future__ import with_statement
-from contextlib import contextmanager
 
 import subprocess
 import pwd
@@ -25,52 +22,110 @@ LogPath='/tmp/nxExec.log'
 #   [write] string Group;
 #   [write] string TestCommand;
 
+global show_mof
+show_mof=False
+
 def Set_Marshall(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
-    Command = Command.decode("utf-8")
-    Environment = Environment.decode("utf-8")
-    Shell = Shell.decode("utf-8")
-    Returncode = Returncode.decode("utf-8")
-    Timeout = Timeout.decode("utf-8")
-    User = User.decode("utf-8")
-    Group = Group.decode("utf-8")
-    TestCommand = TestCommand.decode("utf-8")
+    if Command != None :
+        Command=Command.decode("utf-8")
+    else:
+        Command = ''
+    if Environment != None :
+        Environment=Environment.decode("utf-8")
+    else:
+        Environment = ''
+    if Shell == None :
+        Shell = False
+    if Returncode == None :
+        Returncode = 0
+    if Timeout == None:
+        Timeout = 0
+    if User != None :
+        User=User.decode("utf-8")
+    else:
+        User = ''
+    if Group != None :
+        Group=Group.decode("utf-8")
+    else:
+        Group = ''
+    if TestCommand != None :
+        TestCommand=TestCommand.decode("utf-8")
+    else:
+        TestCommand = ''
 
     retval = Set(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     return retval
 
 def Test_Marshall(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
-    Command = Command.decode("utf-8")
-    Environment = Environment.decode("utf-8")
-    Shell = Shell.decode("utf-8")
-    Returncode = Returncode.decode("utf-8")
-    Timeout = Timeout.decode("utf-8")
-    User = User.decode("utf-8")
-    Group = Group.decode("utf-8")
-    TestCommand = TestCommand.decode("utf-8")
+    if Command != None :
+        Command=Command.decode("utf-8")
+    else:
+        Command = ''
+    if Environment != None :
+        Environment=Environment.decode("utf-8")
+    else:
+        Environment = ''
+    if Shell == None :
+        Shell = False
+    if Returncode == None :
+        Returncode = 0
+    if Timeout == None:
+        Timeout = 0
+    if User != None :
+        User=User.decode("utf-8")
+    else:
+        User = ''
+    if Group != None :
+        Group=Group.decode("utf-8")
+    else:
+        Group = ''
+    if TestCommand != None :
+        TestCommand=TestCommand.decode("utf-8")
+    else:
+        TestCommand = ''
 
     retval = Test(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     return retval
 
 def Get_Marshall(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
-    Command = Command.decode("utf-8")
-    Environment = Environment.decode("utf-8")
-    Shell = Shell.decode("utf-8")
-    Returncode = Returncode.decode("utf-8")
-    Timeout = Timeout.decode("utf-8")
-    User = User.decode("utf-8")
-    Group = Group.decode("utf-8")
-    TestCommand = TestCommand.decode("utf-8")
+    arg_names=locals().keys()
+    if Command != None :
+        Command=Command.decode("utf-8")
+    else:
+        Command = ''
+    if Environment != None :
+        Environment=Environment.decode("utf-8")
+    else:
+        Environment = ''
+    if Shell == None :
+        Shell = False
+    if Returncode == None :
+        Returncode = 0
+    if Timeout == None:
+        Timeout = 0
+    if User != None :
+        User=User.decode("utf-8")
+    else:
+        User = ''
+    if Group != None :
+        Group=Group.decode("utf-8")
+    else:
+        Group = ''
+    if TestCommand != None :
+        TestCommand=TestCommand.decode("utf-8")
+    else:
+        TestCommand = ''
 
     (retval,Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand) = Get(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
-
-    return [Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand]
-
+    retd={}
+    ld=locals()
+    for k in arg_names :
+        retd[k]=ld[k] 
+    return retval, retd
 
 ############################################################
 ### Begin user defined DSC functions
 ############################################################
-
-@contextmanager
 def opened_w_error(filename, mode="a"):
     """
     This context ensures the file is closed.
@@ -78,49 +133,75 @@ def opened_w_error(filename, mode="a"):
     try:
         f = open(filename, mode=mode)
     except IOError, err:
-        yield None, err
-    else:
-        try:
-            yield f, None
-        finally:
-            f.close()
+        return None, err
+    return f, None
 
+def SetShowMof(a):
+    global show_mof
+    show_mof=a
+
+def ShowMof(op, Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
+    if not show_mof:
+        return
+    mof=''
+    mof+=op + ' nxExec MyCmd' + '\n'
+    mof+='{\n'
+    mof+='    Command' + Command +'\n'
+    mof+='    Environment = "' + Environment + '"\n'
+    mof+='    Shell = "' + str(Shell) + '"\n'
+    mof+='    Returncode = ' + str(Returncode) + '\n'
+    mof+='    Timeout = ' + str(Timeout) + '\n'
+    mof+='    User = "' + User + '"\n'
+    mof+='    Group = "' + Group + '"\n'
+    mof+='    TestCommand = "' + TestCommand + '"\n'
+    mof+='}\n'
+    f=open('./test_mofs.log','a')
+    Print(mof,file=f)
+    f.close()
+    
+def Print(s,file=sys.stdout):
+    file.write(s+'\n')
+    
 def Log(file_path,message):
     if len(file_path)<1 or len(message) < 1:
         return
     t = time.localtime()
     t = "%04u/%02u/%02u %02u:%02u:%02u " % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec)
     lines=re.sub(re.compile(r'^(.)',re.MULTILINE),t+r'\1',message)
-    with opened_w_error(file_path,'a') as (F,error):
-        if error:
-            print("Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
-            Log(LogPath,"Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
-        else:
+    # no yield in try/except/finally, no as keyword
+    F,error = opened_w_error(file_path,'a')
+    if error:
+        Print("Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Log(LogPath,"Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+    else:
+        try:
             F.write(lines + "\n")
+        except (IOError) :
+            error=sys.exc_info()[1].args[0]
+            Print("Exception opening logfile " + file_path + " Error: " + error,file=sys.stderr)
+            Log(LogPath,"Exception opening logfile " + file_path + " Error: " + error)
+        F.close()
 
 class Params:
 
     def __init__(self,Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
         if len(Command)<1:
-            print('ERROR: Mandatory Param Command missing.',file=sys.stderr)
+            Print('ERROR: Mandatory Param Command missing.',file=sys.stderr)
             Log(LogPath,'ERROR: Mandatory Param Command missing.')
             raise Exception('BadParameter')
         self.Command = Command
 
         self.Environment = Environment
 
-        if len(Shell)<1:
-            print('ERROR: Mandatory Param Shell missing.',file=sys.stderr)
+        if Shell != True and Shell != False:
+            Print('ERROR: Mandatory Param Shell missing.',file=sys.stderr)
             Log(LogPath,'ERROR: Mandatory Param Shell missing.')
-            raise Exception('BadParameter')
-        elif not ( "True" in Shell or "False" in Shell ):
-            print('ERROR: Param Shell must be True or False.',file=sys.stderr)
             raise Exception('BadParameter')
         self.Shell = Shell
 
         if type(Returncode) == str:
             if len(Returncode)<1:
-                print('ERROR: Mandatory Param Returncode missing.',file=sys.stderr)
+                Print('ERROR: Mandatory Param Returncode missing.',file=sys.stderr)
                 Log(LogPath,'ERROR: Mandatory Param Returncode missing.')
                 raise Exception('BadParameter')
         self.Returncode = int(Returncode)
@@ -131,44 +212,46 @@ class Params:
 
         if type(Timeout) == str:
             if len(Timeout)<1:
-                print('ERROR: Mandatory Param Timeout missing.',file=sys.stderr)
+                Print('ERROR: Mandatory Param Timeout missing.',file=sys.stderr)
                 Log(LogPath,'ERROR: Mandatory Param Timeout missing.')
                 raise Exception('BadParameter')
         self.Timeout = int(Timeout)
 
         if len(TestCommand)<1:
-            print('ERROR: Mandatory Param TestCommand missing.',file=sys.stderr)
+            Print('ERROR: Mandatory Param TestCommand missing.',file=sys.stderr)
             Log(LogPath,'ERROR: Mandatory Param TestCommand missing.')
             raise Exception('BadParameter')
         self.TestCommand = TestCommand
         
 def Exec(p,is_test):
     exit_code = -1
+    tcmd=''
     if is_test :
-        cmd=p.TestCommand
+        tcmd=p.TestCommand
     else:
-        cmd=p.Command
+        tcmd=p.Command
     uid = gid = -1
     if p.User:
         uid = GetUID(p.User)
         if uid == None :
-            print('ERROR: Unknown UID for '+p.User,file=sys.stderr)
+            Print('ERROR: Unknown UID for '+p.User,file=sys.stderr)
             return [-1]
     if p.Group:
         gid = GetGID(p.Group)
         if gid == None :
-            print('ERROR: Unknown GID for '+p.Group,file=sys.stderr)
+            Print('ERROR: Unknown GID for '+p.Group,file=sys.stderr)
             return [-1]
     s=''
-    if 'True' in p.Shell:
+    cmd=tcmd.encode('ascii')
+    if True == p.Shell:
         s=' in shell'
     else:
         cmd=shlex.split(cmd)
-    print('Executing Command'+s+ ' '+ repr(cmd))
+    Print('Executing Command'+s+ ' '+ repr(cmd))
     try:
-        proc = subprocess.Popen(cmd, shell=( 'True' in p.Shell ),stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,p.User,p.Environment))
-    except Exception as e:
-        print(LogPath,'Exception launching ' + repr(cmd) + str(e),file=sys.stderr)
+        proc = subprocess.Popen(cmd, shell=p.Shell,stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,p.User,p.Environment))
+    except Exception, e:
+        Print('Exception launching ' + repr(cmd) + str(e),file=sys.stderr)
         Log(LogPath,'Exception launching ' + repr(cmd) + str(e))
         return exit_code
     retry = p.Timeout/5
@@ -183,8 +266,8 @@ def Exec(p,is_test):
             return exit_code
     exit_code = proc.wait()
     Result = proc.stdout.read().decode("utf-8")
-    print("stdout: " + Result)
-    print("stderr: " + proc.stderr.read().decode("utf-8"))
+    Print("stdout: " + Result)
+    Print("stderr: " + proc.stderr.read().decode("utf-8"))
     retcode=-1
     if is_test:
         if exit_code == 0:
@@ -200,7 +283,7 @@ def GetUID(User):
     try:
         uid = pwd.getpwnam(User)[2]
     except KeyError:
-        print('ERROR: Unknown UID for '+User,file=sys.stderr)
+        Print('ERROR: Unknown UID for '+User,file=sys.stderr)
     return uid
 
 def GetGID(Group):
@@ -208,7 +291,7 @@ def GetGID(Group):
     try:
         gid = grp.getgrnam(Group)[2]
     except KeyError:
-        print('ERROR: Unknown GID for '+Group,file=sys.stderr)
+        Print('ERROR: Unknown GID for '+Group,file=sys.stderr)
     return gid
 
 
@@ -230,6 +313,7 @@ def PreExec(uid, gid, User, Environment):
 
 def Set(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
     retcode=-1
+    ShowMof('SET', Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     try:
         p=Params(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     except :
@@ -237,17 +321,18 @@ def Set(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
     is_test=True
     code=Exec(p,is_test)
     if code == 0:
-        print("Test command successful:"+p.TestCommand+" with code of "+ str(code) ,file=sys.stderr)
+        Print("Test command successful:"+p.TestCommand+" with code of "+ str(code) ,file=sys.stderr)
         Log(LogPath,"Test command successful:"+p.TestCommand+" with code of "+ str(code) )
         is_test=False
         retcode=Exec(p,is_test)
     else:
-        print("Test command failed:"+p.TestCommand+" return code of "+ str(code),file=sys.stderr)
+        Print("Test command failed:"+p.TestCommand+" return code of "+ str(code),file=sys.stderr)
         Log(LogPath,"Test command failed:"+p.TestCommand+" return code of "+ str(code))
     return [ retcode ]
 
 def Test(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
     retcode=-1
+    ShowMof('TEST', Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     try:
         p=Params(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     except :
@@ -256,15 +341,16 @@ def Test(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
     code=Exec(p,is_test)
     if code== 0:
         retcode=0
-        print("Test command successful:"+p.TestCommand+" with code of "+ str(code),file=sys.stderr)
+        Print("Test command successful:"+p.TestCommand+" with code of "+ str(code),file=sys.stderr)
         Log(LogPath,"Test command successful:"+p.TestCommand+" with code of "+ str(code))
     else:
-        print("Test command failed:"+p.TestCommand+" return code of "+ str(code)  ,file=sys.stderr)
+        Print("Test command failed:"+p.TestCommand+" return code of "+ str(code)  ,file=sys.stderr)
         Log(LogPath,"Test command failed:"+p.TestCommand+" return code of "+ str(code)  )
     return [ retcode ]
 
 def Get(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
     retcode=-1
+    ShowMof('GET', Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     try:
         p=Params(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     except :
@@ -273,12 +359,12 @@ def Get(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
     code=Exec(p,is_test)
     if code== 0:
         retcode=0
-        print("Test command successful:"+p.TestCommand+" with code of "+ str(code),file=sys.stderr)
+        Print("Test command successful:"+p.TestCommand+" with code of "+ str(code),file=sys.stderr)
         Log(LogPath,"Test command successful:"+p.TestCommand+" with code of "+ str(code))
         is_test=False
         retcode=Exec(p,is_test)
     else:
-        print("Test command failed:"+p.TestCommand+" return code of "+ str(code)   ,file=sys.stderr)
+        Print("Test command failed:"+p.TestCommand+" return code of "+ str(code)   ,file=sys.stderr)
         Log(LogPath,"Test command failed:"+p.TestCommand+" return code of "+ str(code) )
         retcode=0
     return [ retcode ]

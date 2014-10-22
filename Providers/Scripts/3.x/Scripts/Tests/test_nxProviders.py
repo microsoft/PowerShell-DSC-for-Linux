@@ -23,7 +23,7 @@ def opened_w_error(filename, mode="r"):
     """
     try:
         f = codecs.open(filename, encoding='utf-8' , mode=mode)
-    except IOError, err:
+    except IOError as err:
         yield None, err
     else:
         try:
@@ -50,12 +50,14 @@ def RunGetOutput(cmd,no_output,chk_err=True):
             out_file=subprocess.PIPE
         process = subprocess.Popen(stdout=out_file, *popenargs, **kwargs)
         output, unused_err = process.communicate()
+        output=output.decode('utf-8')
         retcode = process.poll()
         if retcode:
             cmd = kwargs.get("args")
             if cmd is None:
                 cmd = popenargs[0]
             raise subprocess.CalledProcessError(retcode, cmd, output=output)
+        sys.stderr.write('The type of output is' + repr(type(output)))
         return output
 
     # Exception classes used by this module.
@@ -71,11 +73,11 @@ def RunGetOutput(cmd,no_output,chk_err=True):
     subprocess.CalledProcessError=CalledProcessError
     try:                                     
         output=subprocess.check_output(no_output,cmd,stderr=subprocess.STDOUT,shell=True)
-    except subprocess.CalledProcessError,e :
+    except subprocess.CalledProcessError as e :
         if chk_err :
-            print 'CalledProcessError.  Error Code is ' + str(e.returncode)
-            print 'CalledProcessError.  Command string was ' + e.cmd 
-            print 'CalledProcessError.  Command result was ' + (e.output[:-1])
+            print('CalledProcessError.  Error Code is ' + str(e.returncode))
+            print('CalledProcessError.  Command string was ' + e.cmd) 
+            print('CalledProcessError.  Command result was ' + (e.output[:-1]))
         if no_output:
             return e.returncode,None
         else:
@@ -87,7 +89,7 @@ def RunGetOutput(cmd,no_output,chk_err=True):
         return 0,output
 
 
-sys.path.append('/share/pythonLib/lib/python'+RunGetOutput('python -V',False)[1].split(' ')[1].strip()+'/site-packages:.:'+os.path.realpath('./Scripts'))
+#sys.path.append('/share/pythonLib/lib/python'+RunGetOutput('python -V',False)[1].split(' ')[1].strip()+'/site-packages:.:'+os.path.realpath('./Scripts'))
 try:
     import unittest2
 except:
@@ -114,7 +116,7 @@ class LinuxUserTestCases(unittest2.TestCase):
         os.system('userdel -r jojoma ')
         time.sleep(1)
         nxUser.SetShowMof(True)
-        print self.id() + '\n'
+        print(self.id() + '\n')
         
     def tearDown(self):
         """
@@ -132,6 +134,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def pswd_hash(self,pswd):
         salt=(subprocess.Popen("openssl rand -base64 3", shell=True, bufsize=100, stdout=subprocess.PIPE).stdout).readline().rstrip()
+        pswd=pswd.encode('utf8')
         m = hashlib.sha1()
         m.update(pswd+salt)
         return base64.b64encode(m.digest()+salt)
@@ -142,6 +145,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testSetUserPresent(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
 
@@ -154,6 +158,7 @@ class LinuxUserTestCases(unittest2.TestCase):
         Note - GroupID is currently returned as the string representation of a number, eg - '27'
         """
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         grpid=str(grp.getgrnam('mail')[2])
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
@@ -178,6 +183,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserFullName(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "", "", "", "", "", "" )==
@@ -185,6 +191,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserDescription(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "", "JOJOMA", "", "", "", "", "" )==
@@ -192,6 +199,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserHomeDirectory(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", False, False, "/home/jojoma", "" )==
@@ -199,6 +207,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserGroupID(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         grpid=str(grp.getgrnam('mail')[2])
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
@@ -207,6 +216,7 @@ class LinuxUserTestCases(unittest2.TestCase):
         
     def testTestUserPassword(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", pswd, "", "", "" )==
@@ -214,6 +224,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserFullNameError(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MAMA", "", "", "", "", "", "" )==
@@ -221,6 +232,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserDescriptionError(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "", "NOTJOJOMA", "", "", "", "", "" )==
@@ -228,6 +240,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserHomeDirectoryError(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", "", "", "/home/ojoma", "" )==
@@ -235,6 +248,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserGroupIDError(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", "", "", "", 1200 )==
@@ -242,14 +256,17 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testTestUserPasswordError(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         pswd=self.pswd_hash('jojomama')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Test("jojoma", "Present", "", "", pswd , "", "", "", "" )==
                         [-1],'Test("jojoma", "Present", "", "", "'+pswd+'", "", "", "", "" ) should return ==[-1]')
 
     def testSetUserDisabled(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', True, False, "/home/jojoma", "" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
@@ -258,6 +275,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testSetUserDisabledError(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
@@ -265,6 +283,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testSetUserExpired(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, True, "/home/jojoma", "" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
@@ -273,6 +292,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testSetUserExpiredError(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
@@ -280,6 +300,7 @@ class LinuxUserTestCases(unittest2.TestCase):
 
     def testSetUserNotExpiredError(self):
         pswd=self.pswd_hash('jojoma')
+        pswd=pswd.decode('utf8')
         self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
  [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, True, "/home/jojoma", "" ) should return == [0]')
         self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
@@ -297,7 +318,7 @@ class LinuxGroupTestCases(unittest2.TestCase):
         os.system('useradd -m jojoma &> /dev/null')
         time.sleep(1)
         nxGroup.SetShowMof(True)
-        print self.id() + '\n'
+        print(self.id() + '\n')
         
     def tearDown(self):
         """
@@ -316,6 +337,7 @@ class LinuxGroupTestCases(unittest2.TestCase):
     def pswd_hash(self,pswd):
         import subprocess,hashlib,base64
         salt=(subprocess.Popen("openssl rand -base64 3", shell=True, bufsize=100, stdout=subprocess.PIPE).stdout).readline().rstrip()
+        pswd=pswd.decode('utf8')
         m = hashlib.sha1()
         m.update(pswd+salt)
         return base64.b64encode(m.digest()+salt)
@@ -339,7 +361,7 @@ class LinuxGroupTestCases(unittest2.TestCase):
     def testGetGroupPresent(self):
         self.assertTrue(nxGroup.Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) ==
                         [0],'Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) should return == [0]')
-        print 'GET='+repr(nxGroup.Get("jojomamas", "", "", "", "", "")[:6])
+        print('GET='+repr(nxGroup.Get("jojomamas", "", "", "", "", "")[:6]))
         self.assertTrue(nxGroup.Get("jojomamas", "", "", "", "", "")[:6]==
                         [0,"jojomamas","Present", ['jojoma'], "", ""],                'Get("jojomamas", "", "", "", "", "")[:6] should return ==[0,"jojomamas","Present", "", "", ""]')
 
@@ -386,7 +408,7 @@ class LinuxGroupTestCases(unittest2.TestCase):
                         [0],'Set("jojomamas", "Present", "", "", "", 1101 ) should return == [0]')
         self.assertTrue(nxGroup.Set("jojomamas", "Present", "", ["ojoma"], "", 1101 ) ==
                         [-1],'Set("jojomamas", "Present", "", "ojoma", "", 1101 ) should return == [-1]')
-        print "TEST="+repr(nxGroup.Test("jojomamas", "Present", ["ojoma"], "", "", ""))
+        print("TEST="+repr(nxGroup.Test("jojomamas", "Present", ["ojoma"], "", "", "")))
         self.assertTrue(nxGroup.Test("jojomamas", "Present", ["ojoma"], "", "", "")==
                         [-1],'Test("jojomamas", "Present", ["ojoma"], "", "", "") should return ==[-1]')
 
@@ -395,7 +417,7 @@ class LinuxGroupTestCases(unittest2.TestCase):
                         [0],'Set("jojomamas", "Present", ["root"], "", "", 1101 ) should return == [0]')
         self.assertTrue(nxGroup.Set("jojomamas", "Present", "", "", ["jojoma"], 1101 ) ==
                         [0],'Set("jojomamas", "Present", "", "", ["jojoma"], 1101 ) should return == [0]')
-        print "TEST="+repr(nxGroup.Test("jojomamas", "Present", ["jojoma"], "", "", ""))
+        print("TEST="+repr(nxGroup.Test("jojomamas", "Present", ["jojoma"], "", "", "")))
         self.assertTrue(nxGroup.Test("jojomamas", "Present", ["jojoma"], "", "", "")==
                         [-1],'Test("jojomamas", "Present", "root", "", "", "") should return ==[-1]')
 
@@ -431,63 +453,63 @@ class LinuxScriptTestCases(unittest2.TestCase):
 
     def testGetScriptUser(self):
         r=nxScript.Get(self.get_script,self.set_script,self.test_script, "jojoma", "" )
-        print 'GET='+repr(r)
+        print('GET='+repr(r))
         self.assertTrue(r[0] == 0,'nxScript.Get(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testTestScriptUser(self):
         r=nxScript.Test(self.get_script,self.set_script,self.test_script, "jojoma", "" )
-        print 'TEST='+repr(r)
+        print('TEST='+repr(r))
         self.assertTrue(r == [0],'nxScript.Test(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testSetScriptUser(self):
         r=nxScript.Set(self.get_script,self.set_script,self.test_script, "jojoma", "" )
-        print 'SET='+repr(r)
+        print('SET='+repr(r))
         self.assertTrue(r[0] == 0,'nxScript.Set(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testGetScriptGroup(self):
         r=nxScript.Get(self.get_script,self.set_script,self.test_script, "", "mail" )
-        print 'GET='+repr(r)
+        print('GET='+repr(r))
         self.assertTrue(r[0] == 0,'nxScript.Get(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
     def testTestScriptGroup(self):
         r=nxScript.Test(self.get_script,self.set_script,self.test_script, "", "mail" )
-        print 'TEST='+repr(r)
+        print('TEST='+repr(r))
         self.assertTrue(r == [0],'nxScript.Test(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
     def testSetScriptGroup(self):
         r=nxScript.Set(self.get_script,self.set_script,self.test_script, "", "mail" )
-        print 'SET='+repr(r)
+        print('SET='+repr(r))
         self.assertTrue(r[0] == 0,'nxScript.Set(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
 
     def testGetScriptUserError(self):
         r=nxScript.Get(self.get_script,self.set_script,self.test_script, "ojoma", "" )
-        print 'GET='+repr(r)
+        print('GET='+repr(r))
         self.assertTrue(r[0] == -1,'nxScript.Get(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testTestScriptUserError(self):
         r=nxScript.Test(self.get_script,self.set_script,self.test_script, "ojoma", "" )
-        print 'TEST='+repr(r)
+        print('TEST='+repr(r))
         self.assertTrue(r == [-1],'nxScript.Test(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testSetScriptUserError(self):
         r=nxScript.Set(self.get_script,self.set_script,self.test_script, "ojoma", "" )
-        print 'SET='+repr(r)
+        print('SET='+repr(r))
         self.assertTrue(r[0] == -1,'nxScript.Set(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testGetScriptGroupError(self):
         r=nxScript.Get(self.get_script,self.set_script,self.test_script, "", "ojoma" )
-        print 'GET='+repr(r)
+        print('GET='+repr(r))
         self.assertTrue(r[0] == -1,'nxScript.Get(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
     def testTestScriptGroupError(self):
         r=nxScript.Test(self.get_script,self.set_script,self.test_script, "", "ojoma" )
-        print 'TEST='+repr(r)
+        print('TEST='+repr(r))
         self.assertTrue(r == [-1],'nxScript.Test(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
     def testSetScriptGroupError(self):
         r=nxScript.Set(self.get_script,self.set_script,self.test_script, "", "ojoma" )
-        print 'SET='+repr(r)
+        print('SET='+repr(r))
         self.assertTrue(r[0] == -1,'nxScript.Set(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
 class LinuxPackageTestCases(unittest2.TestCase):
@@ -512,7 +534,7 @@ class LinuxPackageTestCases(unittest2.TestCase):
         elif 'mint' in d or 'ubuntu' in d or 'debian' in d:
             self.package_path='./nano_2.2.6-1ubuntu1_amd64.deb'
         nxPackage.SetShowMof(True)
-        print self.id() + '\n'
+        print(self.id() + '\n')
         
     def tearDown(self):
         """
@@ -580,7 +602,7 @@ class LinuxPackageTestCases(unittest2.TestCase):
     def testGetEnableNameDefaultProvider(self):
         self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
-        print 'GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
+        print('GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0]==
                         0,"nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0] should return == 0")
@@ -588,7 +610,7 @@ class LinuxPackageTestCases(unittest2.TestCase):
     def testTestEnableNameDefaultProviderBadReturnCodeError(self):
         self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
-        print 'TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log'))
+        print('TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')==
                         [-1],"nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log') should return == [-1]")
@@ -596,7 +618,7 @@ class LinuxPackageTestCases(unittest2.TestCase):
     def testGetEnableNameDefaultProviderBadReturnCodeError(self):
         self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
-        print 'GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log'))
+        print('GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')[0]==
                         -1,"nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')[0] should return == -1")
@@ -604,7 +626,7 @@ class LinuxPackageTestCases(unittest2.TestCase):
     def testTestEnableNameDefaultProvider(self):
         self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
-        print 'TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
+        print('TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return == [0]")
@@ -633,7 +655,7 @@ class LinuxPackageTestCases(unittest2.TestCase):
         self.assertTrue(nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
         time.sleep(4)
-        print 'GET:'+repr(nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
+        print('GET:'+repr(nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0]==
                         0,"nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0] should return == 0")
@@ -645,7 +667,7 @@ class LinuxPackageTestCases(unittest2.TestCase):
         self.assertTrue(nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
         time.sleep(4)
-        print 'TEST:'+repr(nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
+        print('TEST:'+repr(nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return == [0]")
@@ -668,13 +690,13 @@ class LinuxPackageTestCases(unittest2.TestCase):
                         [-1],"nxPackage.Set('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[-1]")
 
     def testGetEnableBadNameDefaultProvider(self):
-        print 'GET:'+repr(nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
+        print('GET:'+repr(nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0]==
                         -1,"nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')[-1] should return == -1")
 
     def testTestEnableBadNameDefaultProvider(self):
-        print 'TEST:'+repr(nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
+        print('TEST:'+repr(nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [-1],"nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return == [-1]")
@@ -688,13 +710,13 @@ class LinuxPackageTestCases(unittest2.TestCase):
                         [0],"nxPackage.Set('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
 
     def testGetDisableBadNameDefaultProvider(self):
-        print 'GET:'+repr(nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
+        print('GET:'+repr(nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0]==
                         0,"nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0] should return == 0")
 
     def testTestDisableBadNameDefaultProvider(self):
-        print 'TEST:'+repr(nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
+        print('TEST:'+repr(nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
         self.assertTrue(nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
                         [0],"nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return == [0]")
@@ -713,7 +735,7 @@ class LinuxFileTestCases(unittest2.TestCase):
         """
         os.system('rm -rf /tmp/*pp*')
         nxFile.SetShowMof(True)
-        print self.id() + '\n'
+        print(self.id() + '\n')
         
     def tearDown(self):
         """
@@ -841,8 +863,8 @@ class LinuxFileTestCases(unittest2.TestCase):
                         [0],'nxFile.Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "") should return [0]')
         self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
                         [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
-        self.assertTrue((nxFile.StatFile('/tmp/pp/1.pp').st_mode & 0755 ) ==
-                        0755 and (nxFile.StatFile('/tmp/pp/12.pp').st_mode & 0755) == 0755,'Mode of /tmp/pp/1.pp and /tmp/pp/12.pp should be 755')
+        self.assertTrue((nxFile.StatFile('/tmp/pp/1.pp').st_mode & 0o755 ) ==
+                        0o755 and (nxFile.StatFile('/tmp/pp/12.pp').st_mode & 0o755) == 0o755,'Mode of /tmp/pp/1.pp and /tmp/pp/12.pp should be 755')
 
     def testSetOwnerRecursive(self):
         self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
@@ -1384,7 +1406,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
         """
         self.provider = None
         nxService.SetShowMof(True)
-        print self.id() + '\n'
+        print(self.id() + '\n')
         dist=platform.dist()[0].lower()
         if 'suse' in dist:
             init_file=suse_init_file
@@ -1398,35 +1420,35 @@ class LinuxServiceTestCases(unittest2.TestCase):
             self.provider='upstart'
             try:
                 nxService.WriteFile('/etc/default/dummy_service',upstart_etc_default)
-                os.chmod('/etc/default/dummy_service',0744)
+                os.chmod('/etc/default/dummy_service',0o744)
                 nxService.WriteFile('/etc/init/dummy_service.conf',upstart_init_conf)
                 nxService.WriteFile('/etc/init.d/dummy_service',upstart_init_d_file)
-                os.chmod('/etc/init.d/dummy_service',0744)
+                os.chmod('/etc/init.d/dummy_service',0o744)
                 nxService.WriteFile('/usr/sbin/dummy_service.py',dummy_service_file)
-                os.chmod('/usr/sbin/dummy_service.py',0744)
+                os.chmod('/usr/sbin/dummy_service.py',0o744)
             except:
-                print repr(sys.exc_info())
+                print(repr(sys.exc_info()))
                 sys.exit(1)
         elif nxService.SystemdExists():
             self.provider='systemd'
             try:
                 nxService.WriteFile('/etc/rc.d/dummy_service',init_file)
-                os.chmod('/etc/rc.d/dummy_service',0744)
+                os.chmod('/etc/rc.d/dummy_service',0o744)
                 nxService.WriteFile('/usr/sbin/dummy_service.py',dummy_service_file)
-                os.chmod('/usr/sbin/dummy_service.py',0744)
+                os.chmod('/usr/sbin/dummy_service.py',0o744)
             except:
-                print repr(sys.exc_info())
+                print(repr(sys.exc_info()))
                 sys.exit(1)
 
         elif nxService.InitExists():
             self.provider='init'
             try:
                 nxService.WriteFile('/etc/init.d/dummy_service',init_file)
-                os.chmod('/etc/init.d/dummy_service',0744)
+                os.chmod('/etc/init.d/dummy_service',0o744)
                 nxService.WriteFile('/usr/sbin/dummy_service.py',dummy_service_file)
-                os.chmod('/usr/sbin/dummy_service.py',0744)
+                os.chmod('/usr/sbin/dummy_service.py',0o744)
             except:
-                print repr(sys.exc_info())
+                print(repr(sys.exc_info()))
                 sys.exit(1)
             
 
@@ -1489,7 +1511,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
                         [0],'nxService.Set("dummy_service", "'+provider+'", True, "running") should return ==[0]')
         self.assertTrue(nxService.Set("dummy_service", provider, False, "stopped")==
                         [0],'nxService.Set("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
-        print 'GET:'+repr(nxService.Get("dummy_service", provider, False, "stopped"))
+        print('GET:'+repr(nxService.Get("dummy_service", provider, False, "stopped")))
         self.assertTrue(nxService.Get("dummy_service", provider, False, "stopped")[0:5]==
                         [0,"dummy_service", provider, False, "stopped"],'nxService.Get("dummy_service", "'+provider+'", False, "stopped") should return ==[0,"dummy_service", provider, False, "stopped"]')
 
@@ -1497,7 +1519,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
         provider=self.provider
         self.assertTrue(nxService.Set("yummyservice", provider, True, "running")==
                         [-1],'nxService.Set("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
-        print 'GET:'+repr(nxService.Get("yummyservice", provider, True, "running")[0:5])
+        print('GET:'+repr(nxService.Get("yummyservice", provider, True, "running")[0:5]))
         self.assertTrue(nxService.Get("yummyservice", provider, True, "running")[0:5]==
                         [-1,"yummyservice", provider, True, "running"],'nxService.Get("yummyservice", "'+provider+'", True, "running")[0:5] should return ==[-1,"yummyservice", provider, True, "running"]')
 
@@ -1505,7 +1527,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
         provider=self.provider
         self.assertTrue(nxService.Set("yummyservice", provider, False, "stopped")==
                         [-1],'nxService.Set("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
-        print 'GET:'+repr(nxService.Get("yummyservice", provider, False, "stopped"))
+        print('GET:'+repr(nxService.Get("yummyservice", provider, False, "stopped")))
         self.assertTrue(nxService.Get("yummyservice", provider, False, "stopped")[0:5]==
                         [-1,"yummyservice", provider, False, "stopped"],'nxService.Get("yummyservice", "'+provider+'", False, "stopped")[0:5] should return ==[-1,"yummyservice", provider, False, "stopped"]')
 
@@ -1522,7 +1544,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
                         [0],'nxService.Set("dummy_service", "'+provider+'", True, "running") should return ==[0]')
         self.assertTrue(nxService.Set("dummy_service", provider, False, "stopped")==
                         [0],'nxService.Set("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
-        print 'GET:'+repr(nxService.Test("dummy_service", provider, False, "stopped"))
+        print('GET:'+repr(nxService.Test("dummy_service", provider, False, "stopped")))
         self.assertTrue(nxService.Test("dummy_service", provider, False, "stopped")==
                         [0],'nxService.Test("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
 
@@ -1530,7 +1552,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
         provider=self.provider
         self.assertTrue(nxService.Set("yummyservice", provider, True, "running")==
                         [-1],'nxService.Set("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
-        print 'GET:'+repr(nxService.Test("yummyservice", provider, True, "running")[0:5])
+        print('GET:'+repr(nxService.Test("yummyservice", provider, True, "running")[0:5]))
         self.assertTrue(nxService.Test("yummyservice", provider, True, "running")==
                         [-1],'nxService.Test("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
 
@@ -1543,7 +1565,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
         provider=self.provider
         self.assertTrue(nxService.Set("yummyservice", provider, False, "stopped")==
                         [-1],'nxService.Set("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
-        print 'GET:'+repr(nxService.Test("yummyservice", provider, False, "stopped"))
+        print('GET:'+repr(nxService.Test("yummyservice", provider, False, "stopped")))
         self.assertTrue(nxService.Test("yummyservice", provider, True, "stopped")==
                         [-1],'nxService.Test("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
 
@@ -1564,7 +1586,7 @@ class LinuxSshAuthorizedKeysTestCases(unittest2.TestCase):
             os.system('echo '+ self.mykey + ' > ' + path +' ; echo ' + self.mykey +' >> ' + path )
         os.system('cp -p ' + path + ' /tmp/')
         nxSshAuthorizedKeys.SetShowMof(True)
-        print self.id() + '\n'
+        print(self.id() + '\n')
 
     def tearDown(self):
         """
@@ -1659,13 +1681,13 @@ class LinuxEnvironmentTestCases(unittest2.TestCase):
         if os.path.isfile(path) :
             os.system('cp -p ' + path + ' /tmp/')
         nxEnvironment.SetShowMof(True)
-        print self.id() + '\n'
+        print(self.id() + '\n')
         
     def tearDown(self):
         """
         Remove test resources.
         """
-        print "TEARDOWN"
+        print("TEARDOWN")
         os.system('echo "Contents of /etc/environment are: " 1>&2' )
         os.system('cat /etc/environment 1>&2')
         os.system('echo "Contents of /etc/profile.d/DSCEnvironment.sh are: " 1>&2')
@@ -1725,12 +1747,12 @@ class LinuxEnvironmentTestCases(unittest2.TestCase):
     def testGetVarPresent(self):
         self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) ==
                         [0],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [0]")
-        print 'GET:'+repr(nxEnvironment.Get('MYVAR','/tmp','Present',False))
+        print('GET:'+repr(nxEnvironment.Get('MYVAR','/tmp','Present',False)))
         self.assertTrue(nxEnvironment.Get('MYVAR','/tmp','Present',False)[0] ==
                         0,"assert nxEnvironment.Get('MYVAR','/tmp','Present',False)[0] should == [0]")
         
     def testGetVarPresentError(self):
-        print 'GET:'+repr(nxEnvironment.Get('MYVAR','/tp','Present',False))
+        print('GET:'+repr(nxEnvironment.Get('MYVAR','/tp','Present',False)))
         self.assertTrue(nxEnvironment.Get('MYVAR','/tp','Present',False)[0] ==
                         -1,"assert nxEnvironment.Get('MYVAR','/tmp','Present',False)[0] should == [-1]")
 
@@ -1773,12 +1795,12 @@ class LinuxEnvironmentTestCases(unittest2.TestCase):
     def testGetPathPresent(self):
         self.assertTrue(nxEnvironment.Set('','/tmp','Present',True) ==
                         [0],"assert nxEnvironment.Set('','/tmp','Present',True) should == [0]")
-        print 'GET:'+repr(nxEnvironment.Get('','/tmp','Present',True))
+        print('GET:'+repr(nxEnvironment.Get('','/tmp','Present',True)))
         self.assertTrue(nxEnvironment.Get('','/tmp','Present',True)[0] ==
                         0,"assert nxEnvironment.Get('','/tmp','Present',True) should == [0]")
         
     def testGetPathPresentError(self):
-        print 'GET:'+repr(nxEnvironment.Get('','/tp','Present',True))
+        print('GET:'+repr(nxEnvironment.Get('','/tp','Present',True)))
         self.assertTrue(nxEnvironment.Get('','/tp','Present',True)[0] ==
                         -1,"assert nxEnvironment.Get('','/tmp','Present',True)[0] should == [-1]")
 
@@ -1812,7 +1834,7 @@ class LinuxExecTestCases(unittest2.TestCase):
         Setup test resources
         """
         nxExec.SetShowMof(True)
-        print self.id() + '\n'
+        print(self.id() + '\n')
 
     def tearDown(self):
         """
@@ -1922,6 +1944,7 @@ if __name__ == '__main__':
     s7=unittest2.TestLoader().loadTestsFromTestCase(LinuxSshAuthorizedKeysTestCases)
     s8=unittest2.TestLoader().loadTestsFromTestCase(LinuxEnvironmentTestCases)
     s9=unittest2.TestLoader().loadTestsFromTestCase(LinuxExecTestCases)
-    alltests = unittest2.TestSuite([s1,s2,s3,s4,s7,s8,s9,s5,s6])
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s7,s8,s9,s5,s6,s7,s8,s9])
     unittest2.TextTestRunner(verbosity=3).run(alltests)
+
 
