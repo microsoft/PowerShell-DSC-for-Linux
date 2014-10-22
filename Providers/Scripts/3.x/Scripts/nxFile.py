@@ -167,7 +167,7 @@ def ReadFile(path):
     error=None
     with opened_w_error(path,'r') as (F,error):
         if error:
-            Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+            Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr )
         else:
             d=F.read()
     return d,error
@@ -184,7 +184,7 @@ def WriteFile(path,contents):
     error=None
     with opened_w_error(path,'w+') as (F,error):
         if error:
-            Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
         else:
             F.write(contents)
     return error
@@ -201,9 +201,9 @@ def LStatFile(path):
     try:
         d=os.lstat(path)
     except OSError as error:
-         Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return d
 
 def StatFile(path):
@@ -215,9 +215,9 @@ def StatFile(path):
     try:
         d=os.stat(path)
     except OSError as error:
-         Print("Exception stating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception stating file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception stating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception stating file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return d
 
 def Chown(path,owner,group):
@@ -225,9 +225,9 @@ def Chown(path,owner,group):
     try:
         os.chown(path,owner,group)
     except OSError as error:
-         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
 
 def Chmod(path,mode):
@@ -237,9 +237,9 @@ def Chmod(path,mode):
     try:
         os.chmod(path,mode)
     except OSError as error:
-         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
 
 def LChown(path,owner,group):
@@ -247,9 +247,9 @@ def LChown(path,owner,group):
     try:
         os.lchown(path,owner,group)
     except OSError as error:
-         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
 
 def LChmod(path,mode):
@@ -257,9 +257,9 @@ def LChmod(path,mode):
     try:
         os.lchmod(path,mode)
     except OSError as error:
-         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
 
 def ListDir(path):
@@ -268,9 +268,9 @@ def ListDir(path):
     try:
         d=os.listdir(path)
     except OSError as error:
-         Print("Exception listing dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception listing dir" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception listing dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception listing dir" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return d
 
 def Symlink(spath,dpath):
@@ -278,9 +278,9 @@ def Symlink(spath,dpath):
     try:
         os.symlink(os.readlink(spath), dpath)
     except OSError as error:
-        Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-        Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
     
 def MakeDirs(path):
@@ -288,9 +288,9 @@ def MakeDirs(path):
     try:
         os.makedirs(path)
     except OSError as error:
-         Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
 
 def RemoveFile(path):
@@ -298,9 +298,9 @@ def RemoveFile(path):
     try:
         os.remove(path)
     except OSError as error:
-         Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
 
 def CopyFile(spath,dpath):
@@ -308,9 +308,9 @@ def CopyFile(spath,dpath):
     try:
         shutil.copyfile(spath,dpath)
     except OSError as error:
-         Print("Exception removing tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception removing tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
-         Print("Exception removing tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception removing tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
 
 def CompareFiles(DestinationPath, SourcePath, Checksum):
@@ -333,18 +333,18 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
         with opened_w_error(SourcePath,'r') as (src_file,src_error):
             if src_error:
                 Print("Exception opening source file " + SourcePath  + " Error Code: " + str(src_error.errno) +
-                      " Error: " + src_error.message + src_error.strerror,file=sys.stderr)
+                      " Error: " + src_error.strerror,file=sys.stderr)
                 return -1
             with opened_w_error(DestinationPath,'r') as (dest_file,dest_error):
                 if dest_error:
                     Print("Exception opening destination file " + DestinationPath + " Error Code: " + str(dest_error.errno) +
-                          " Error: " + dest_error.message + dest_error.strerror,file=sys.stderr)
+                          " Error: " + dest_error.strerror,file=sys.stderr)
                     return -1
                 while src_block != '' and dest_block != '':
                     src_block=src_file.read(BLOCK_SIZE)
                     dest_block=dest_file.read(BLOCK_SIZE)
-                    src_hash.update(src_block)
-                    dest_hash.update(dest_block)
+                    src_hash.update(src_block.encode('utf8'))
+                    dest_hash.update(dest_block.encode('utf8'))
                     if src_hash.hexdigest() != dest_hash.hexdigest():
                         return -1  
         if src_hash.hexdigest() == dest_hash.hexdigest():
@@ -368,10 +368,10 @@ def RemoveTree(path):
         shutil.rmtree(path)
     except OSError as error:
         Print("Exception removing folder " + path + " Error Code: "
-              + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+              + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
         Print("Exception removing folder " + path + " Error Code: "
-              + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+              + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     return error
     
 def RemovePath(path):
@@ -394,7 +394,7 @@ def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
         try:
             Specified_Owner_ID = pwd.getpwnam(fc.Owner)[2]
         except KeyError as error:
-             Print("Exception obtaining gid from group name " + fc.Group  + " Error: " + error.message,file=sys.stderr)
+             Print("Exception obtaining gid from group name " + fc.Group  + " Error: " + repr(error),file=sys.stderr)
              return False
         if Specified_Owner_ID != pwd.getpwuid(stat_info.st_uid)[2]:
             return False
@@ -407,7 +407,7 @@ def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
         try:
             Specified_Group_ID = grp.getgrnam(fc.Group)[2]
         except KeyError as error:
-             Print("Exception obtaining gid from group name " + fc.Group  + " Error: " + error.message,file=sys.stderr)
+             Print("Exception obtaining gid from group name " + fc.Group  + " Error: " +  repr(error),file=sys.stderr)
              return False
         if Specified_Group_ID != grp.getgrgid(stat_info.st_gid)[2]:
             return False
@@ -636,9 +636,9 @@ def SetFile(DestinationPath, SourcePath, fc):
         try:
             open(DestinationPath, 'a').close()
         except OSError as error:
-            Print("Exception creating file " + DestinationPath  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            Print("Exception creating file " + DestinationPath  + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
         except IOError as error:
-            Print("Exception creating file " + DestinationPath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            Print("Exception creating file " + DestinationPath + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
 
     SetOwnerGroupMode(DestinationPath, SourcePath, fc)
 
@@ -902,7 +902,10 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         Type = "directory"
         
     ModifiedDate = str(int(stat_info.st_mtime))
-    Contents,error=ReadFile(DestinationPath)
+    if Type == "directory":
+        Contents = ListDir(DestinationPath)
+    else :
+        Contents,error=ReadFile(DestinationPath)
     return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
 class FileContext:
@@ -934,7 +937,7 @@ class FileContext:
                 try:
                     Mode = ConvertLongModeToNumeric(Mode)
                 except Exception as error:
-                    Print("Exception in ConvertLongModeToNumeric on " + Mode  + " Error: " + error.message,file=sys.stderr)    
+                    Print("Exception in ConvertLongModeToNumeric on " + Mode  + " Error: " + error.strerror,file=sys.stderr)    
             elif len(Mode) == 3:
                 # Already in proper format
                 pass

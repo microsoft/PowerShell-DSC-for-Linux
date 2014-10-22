@@ -3,7 +3,6 @@
 # Copyright (C) Microsoft Corporation, All rights reserved. 
 #============================================================================
 
-from __future__ import print_function
 from __future__ import with_statement
 from contextlib import contextmanager
 
@@ -12,6 +11,10 @@ import sys
 import re
 import time
 
+global show_mof
+show_mof=False
+
+
 #   [Key] string Name;
 #   [write] string Value;
 #   [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
@@ -19,69 +22,120 @@ import time
   
 LogPath='/tmp/nxEnvironment.log'
 def Set_Marshall(Name,Value,Ensure,Path):
-    Name = Name.decode('utf-8')
-    Value = Value.decode('utf-8')
-    Ensure = Ensure.decode('utf-8')
-    Path = Path.decode('utf-8')
+    if Name != None :
+        Name=Name.decode('utf-8')
+    else:
+        Name = ''
+    if Value != None :
+        Value = Value.decode('utf-8')
+    else:
+        Value = ''
+    if Ensure != None :
+        Ensure = Ensure.decode('utf-8')
+    else:
+        Ensure = ''
+    if Path == None :
+        Path = False
+        
     retval = Set(Name,Value,Ensure,Path)
     return retval
 
 def Test_Marshall(Name,Value,Ensure,Path):
-    Name = Name.decode('utf-8')
-    Value = Value.decode('utf-8')
-    Ensure = Ensure.decode('utf-8')
-    Path = Path.decode('utf-8')
+    if Name != None :
+        Name=Name.decode('utf-8')
+    else:
+        Name = ''
+    if Value != None :
+        Value = Value.decode('utf-8')
+    else:
+        Value = ''
+    if Ensure != None :
+        Ensure = Ensure.decode('utf-8')
+    else:
+        Ensure = ''
+    if Path == None :
+        Path = False
     retval = Test(Name,Value,Ensure,Path)
     return retval
 
 def Get_Marshall(Name,Value,Ensure,Path):
-    Name = Name.decode('utf-8')
-    Value = Value.decode('utf-8')
-    Ensure = Ensure.decode('utf-8')
-    Path = Path.decode('utf-8')
+    arg_names=locals().keys()
+    if Name != None :
+        Name=Name.decode('utf-8')
+    else:
+        Name = ''
+    if Value != None :
+        Value = Value.decode('utf-8')
+    else:
+        Value = ''
+    if Ensure != None :
+        Ensure = Ensure.decode('utf-8')
+    else:
+        Ensure = ''
+    if Path == None :
+        Path = False
     retval = 0
     retval,Name,Value,Ensure,Path = Get(Name,Value,Ensure,Path)
 
-    return [retval,Name,Value,Ensure,Path]
+    retd={}
+    ld=locals()
+    for k in arg_names :
+        retd[k]=ld[k] 
+    return retval, retd
 
 
 ############################################################
 ### Begin user defined DSC functions
 ############################################################
 
+def SetShowMof(a):
+    global show_mof
+    show_mof=a
+
+def ShowMof(op, Name,Value,Ensure,Path):
+    if not show_mof:
+        return
+    mof=''
+    mof+=op + ' nxEnvironment MyEnv \n'
+    mof+='{\n'
+    mof+='    Name = "' + Name + '"\n'
+    mof+='    Value = "' + Value + '"\n'
+    mof+='    Ensure = "' + Ensure + '"\n'
+    mof+='    Path = "' + str(Path) + '"\n'
+    mof+='}\n'
+    f=open('./test_mofs.log','a')
+    Print(mof,file=f)
+    f.close()
+ 
 class Params:
     def __init__(self,Name,Value,Ensure,Path):
 
         if not ( "Present" in Ensure or "Absent" in Ensure ):
-            print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
+            Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
             Log(LogPath,'ERROR: Param Ensure must be Present or Absent.')
             raise Exception('BadParameter')
         self.Ensure = Ensure
 
-        if len(Path)<1:
-            print('ERROR: Mandatory Param Path missing.',file=sys.stderr)
-            Log(LogPath,'ERROR: Mandatory Param Path missing.')
-            raise Exception('BadParameter')
-        elif not ( "True" in Path or "False" in Path ):
-            print('ERROR: Param Path must be True or False.',file=sys.stderr)
+        if Path != True and Path != False:
+            Print('ERROR: Param Path must be True or False.',file=sys.stderr)
             raise Exception('BadParameter')
         self.Path = Path
 
-        if len(Name)<1 and 'True' not in Path:
-            print('ERROR: Param Name must be set if Path <> True.',file=sys.stderr)
+        if len(Name)<1 and True != Path:
+            Print('ERROR: Param Name must be set if Path <> True.',file=sys.stderr)
             Log(LogPath,'ERROR: Param Name must be set if Path <> True.')
             raise Exception('BadParameter')
         self.Name = Name
 
         if len(Value)<1:
-            print('ERROR: Mandatory Param Value missing.',file=sys.stderr)
+            Print('ERROR: Mandatory Param Value missing.',file=sys.stderr)
             Log(LogPath,'ERROR: Mandatory Param Value missing.')
             raise Exception('BadParameter')
         self.Value = Value
 
 
         self.file_path='/etc/environment'
-        if 'True' in self.Path:
+        if True == self.Path:
             self.file_path='/etc/profile.d/DSCEnvironment.sh'
             self.Name='PATH=$PATH:"'
 
@@ -113,9 +167,10 @@ def Set(Name,Value,Ensure,Path):
     try:
         p=Params(Name,Value,Ensure,Path)
     except Exception,e:
-        print('ERROR - Unable to initialize nxEnvironmentProvider.  '+e.message,file=sys.stderr)
+        Print('ERROR - Unable to initialize nxEnvironmentProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxEnvironmentProvider. '+ e.message)
         return [retval]
+    ShowMof('SET', Name,Value,Ensure,Path)
     if AddOrDelVar(p) == None:
             retval = 0
     return [retval]
@@ -125,9 +180,10 @@ def Test(Name,Value,Ensure,Path):
     try:
         p=Params(Name,Value,Ensure,Path)
     except Exception,e:
-        print('ERROR - Unable to initialize nxEnvironmentProvider.  '+e.message,file=sys.stderr)
+        Print('ERROR - Unable to initialize nxEnvironmentProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxEnvironmentProvider. '+ e.message)
         return [retval]
+    ShowMof('TEST', Name,Value,Ensure,Path)
     found,error=FindVar(p)
     if  found and p.Ensure == 'Present'  :
         retval = 0
@@ -137,14 +193,14 @@ def Test(Name,Value,Ensure,Path):
     return [retval]
 
 def Get(Name,Value,Ensure,Path):
-#    import pdb; pdb.set_trace()
     retval=-1
     try:
         p=Params(Name,Value,Ensure,Path)
     except Exception,e:
-        print('ERROR - Unable to initialize nxEnvironmentProvider.  '+e.message,file=sys.stderr)
+        Print('ERROR - Unable to initialize nxEnvironmentProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxEnvironmentProvider. '+ e.message)
         return [retval]
+    ShowMof('GET', Name,Value,Ensure,Path)
     found,error=FindVar(p)
     if  found and p.Ensure == 'Present'  :
         retval = 0
@@ -167,6 +223,9 @@ def opened_w_error(filename, mode="a"):
         finally:
             f.close()
 
+def Print(s,file=sys.stdout):
+    file.write(s+'\n')
+    
 def Log(file_path,message):
     if len(file_path)<1 or len(message) < 1:
         return
@@ -175,7 +234,7 @@ def Log(file_path,message):
     lines=re.sub(re.compile(r'^(.)',re.MULTILINE),t+r'\1',message)
     with opened_w_error(file_path,'a') as (F,error):
         if error:
-            print("Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            Print("Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
             Log(LogPath,"Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
         else:
             F.write(lines + "\n")
@@ -190,11 +249,11 @@ def AddOrDelVar(p):
         st=os.stat(p.file_path)
     with opened_w_error(p.file_path,'r+') as (F,error):
         if error:
-            print("Exception opening file " + p.file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+            Print("Exception opening file " + p.file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
             Log(LogPath,"Exception opening file " + p.file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
             return found,error
         for l in F.readlines():
-            if p.Path == 'True' : 
+            if p.Path == True : 
                 if l.startswith(p.Name+p.Value) and p.Ensure == 'Present': # is is already there - keep it if present requested otherwise skip
                             found=True
                             n+=l
@@ -208,7 +267,7 @@ def AddOrDelVar(p):
                 else:
                     n+=l
         if not found and p.Ensure == 'Present': # not found - present requested so add it.
-            if p.Path == 'True':
+            if p.Path == True:
                 n+=p.Name+p.Value+'"\n'
             else:
                 n+=p.Name+'="'+p.Value+'"\n'
@@ -226,11 +285,11 @@ def FindVar(p):
         return found
     with opened_w_error(p.file_path,'rb') as (F,error):
         if error:
-            print("Exception opening file " + p.file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+            Print("Exception opening file " + p.file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
             Log(LogPath,"Exception opening file " + p.file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
             return found,error
         for l in F.readlines():
-            if p.Path == 'True':
+            if p.Path == True:
                 if p.Name+p.Value in l:
                     found = True
             elif p.Name+ '="' +p.Value+'"' in l:

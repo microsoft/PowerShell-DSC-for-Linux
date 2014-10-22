@@ -1900,6 +1900,6 @@ if __name__ == '__main__':
     s7=unittest2.TestLoader().loadTestsFromTestCase(LinuxSshAuthorizedKeysTestCases)
     s8=unittest2.TestLoader().loadTestsFromTestCase(LinuxEnvironmentTestCases)
     s9=unittest2.TestLoader().loadTestsFromTestCase(LinuxExecTestCases)
-    alltests = unittest2.TestSuite([s1,s2,s3,s4,s7,s8,s9,s5,s6])
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s7,s8,s9,s5,s6,s7,s8,s9])
     unittest2.TextTestRunner(verbosity=3).run(alltests)
 

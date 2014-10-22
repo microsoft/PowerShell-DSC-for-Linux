@@ -2,9 +2,6 @@
 #============================================================================
 # Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 #============================================================================
-from __future__ import print_function
-from __future__ import with_statement
-from contextlib import contextmanager
 
 import os
 import sys
@@ -12,44 +9,127 @@ import datetime
 import grp
 import codecs
 
+# 	[Key] string UserName;
+# 	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+# 	[write] string FullName;
+# 	[write] string Description;
+# 	[write] string Password;
+# 	[write] boolean Disabled;
+# 	[write] boolean PasswordChangeRequired;
+# 	[write] string HomeDirectory;
+# 	[write] string GroupID;
+
+global show_mof
+show_mof=False
+
 def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    UserName = UserName.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    FullName = FullName.decode("utf-8")
-    Description = Description.decode("utf-8")
-    Password = Password.decode("utf-8")
-    Disabled = Disabled.decode("utf-8")
-    PasswordChangeRequired = PasswordChangeRequired.decode("utf-8")
-    HomeDirectory = HomeDirectory.decode("utf-8")
-    GroupID = GroupID.decode("utf-8")
+    if UserName != None :
+        UserName=UserName.decode("utf-8")
+    else:
+        UserName = ''
+    if Ensure != None :
+        Ensure=Ensure.decode("utf-8")
+    else:
+        Ensure = ''
+    if FullName != None :
+        FullName=FullName.decode("utf-8")
+    else:
+        FullName = ''
+    if Description != None :
+        Description=Description.decode("utf-8")
+    else:
+        Description = ''
+    if Password != None :
+        Password=Password.decode("utf-8")
+    else:
+        Password = ''
+    if Disabled == None :
+        Disabled = False
+    if PasswordChangeRequired == None :
+        PasswordChangeRequired = False
+    if HomeDirectory != None :
+        HomeDirectory=HomeDirectory.decode("utf-8")
+    else:
+        HomeDirectory = ''
+    if GroupID != None :
+        GroupID=GroupID.decode("utf-8")
+    else:
+        GroupID = ''
 
     retval = Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
 
 def Test_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    UserName = UserName.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    FullName = FullName.decode("utf-8")
-    Description = Description.decode("utf-8")
-    Password = Password.decode("utf-8")
-    Disabled = Disabled.decode("utf-8")
-    PasswordChangeRequired = PasswordChangeRequired.decode("utf-8")
-    HomeDirectory = HomeDirectory.decode("utf-8")
-    GroupID = GroupID.decode("utf-8")
+    if UserName != None :
+        UserName=UserName.decode("utf-8")
+    else:
+        UserName = ''
+    if Ensure != None :
+        Ensure=Ensure.decode("utf-8")
+    else:
+        Ensure = ''
+    if FullName != None :
+        FullName=FullName.decode("utf-8")
+    else:
+        FullName = ''
+    if Description != None :
+        Description=Description.decode("utf-8")
+    else:
+        Description = ''
+    if Password != None :
+        Password=Password.decode("utf-8")
+    else:
+        Password = ''
+    if Disabled == None :
+        Disabled = False
+    if PasswordChangeRequired == None :
+        PasswordChangeRequired = False
+    if HomeDirectory != None :
+        HomeDirectory=HomeDirectory.decode("utf-8")
+    else:
+        HomeDirectory = ''
+    if GroupID != None :
+        GroupID=GroupID.decode("utf-8")
+    else:
+        GroupID = ''
     
     retval = Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
 
 def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    UserName = UserName.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    FullName = FullName.decode("utf-8")
-    Description = Description.decode("utf-8")
-    Password = Password.decode("utf-8")
-    Disabled = Disabled.decode("utf-8")
-    PasswordChangeRequired = PasswordChangeRequired.decode("utf-8")
-    HomeDirectory = HomeDirectory.decode("utf-8")
-    GroupID = GroupID.decode("utf-8")
+    arg_names=locals().keys()
+    if UserName != None :
+        UserName=UserName.decode("utf-8")
+    else:
+        UserName = ''
+    if Ensure != None :
+        Ensure=Ensure.decode("utf-8")
+    else:
+        Ensure = ''
+    if FullName != None :
+        FullName=FullName.decode("utf-8")
+    else:
+        FullName = ''
+    if Description != None :
+        Description=Description.decode("utf-8")
+    else:
+        Description = ''
+    if Password != None :
+        Password=Password.decode("utf-8")
+    else:
+        Password = ''
+    if Disabled == None :
+        Disabled = False
+    if PasswordChangeRequired == None :
+        PasswordChangeRequired = False
+    if HomeDirectory != None :
+        HomeDirectory=HomeDirectory.decode("utf-8")
+    else:
+        HomeDirectory = ''
+    if GroupID != None :
+        GroupID=GroupID.decode("utf-8")
+    else:
+        GroupID = ''
 
     retval = 0
     (retval, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
@@ -59,31 +139,70 @@ def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
     FullName = FullName.encode("utf-8")
     Description = Description.encode("utf-8")
     Password = Password.encode("utf-8")
-    Disabled = Disabled.encode("utf-8")
-    PasswordChangeRequired = PasswordChangeRequired.encode("utf-8")
     HomeDirectory = HomeDirectory.encode("utf-8")
     GroupID = GroupID.encode("utf-8")
 
-    return [retval, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
+
+    retd={}
+    ld=locals()
+    for k in arg_names :
+        retd[k]=ld[k] 
+    return retval, retd
 
 
 ############################################################
 ### Begin user defined DSC functions
 ############################################################
-@contextmanager
-def opened_w_error(filename, mode="r"):
+
+class Params:
+    def __init__(self,UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+        self.UserName = UserName
+        self.Ensure = Ensure
+        self.FullName = FullName
+        self.Description = Description
+        self.Password = Password
+        self.Disabled = Disabled
+        self.PasswordChangeRequired = PasswordChangeRequired
+        self.HomeDirectory = HomeDirectory
+        self.GroupID = GroupID
+
+
+def SetShowMof(a):
+    global show_mof
+    show_mof=a
+
+def ShowMof(op, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    if not show_mof:
+        return
+    mof=''
+    mof+= op + ' nxUser MyUser \n'
+    mof+='{\n'
+    mof+='    UserName = "' + UserName + '"\n'
+    mof+='    Ensure = "' + Ensure + '"\n'
+    mof+='    FullName = "' + FullName + '"\n'
+    mof+='    Description = "' + Description + '"\n'
+    mof+='    Password = "' + Password + '"\n'
+    mof+='    Disabled = ' + str(Disabled) + '\n'
+    mof+='    PasswordChangeRequired = ' + str(PasswordChangeRequired) + '\n'
+    mof+='    HomeDirectory = "' + HomeDirectory + '"\n'
+    mof+='    GroupID = "' + str(GroupID) + '"\n'
+    mof+='}\n'
+    f=open('./test_mofs.log','a')
+    Print(mof,file=f)
+    f.close()
+    
+def Print(s,file=sys.stdout):
+    file.write(s+'\n')
+
+def opened_w_error(filename, mode="a"):
     """
     This context ensures the file is closed.
     """
     try:
-        f = codecs.open(filename, encoding='utf-8' , mode=mode)
+        f = open(filename, mode=mode)
     except IOError, err:
-        yield None, err
-    else:
-        try:
-            yield f, None
-        finally:
-            f.close()
+        return None, err
+    return f, None
 
 userdel_path = "/usr/sbin/userdel"
 useradd_path = "/usr/sbin/useradd"
@@ -91,13 +210,13 @@ usermod_path = "/usr/sbin/usermod"
 chage_path = "/usr/bin/chage"
 
 def ReadPasswd(filename):
-    with opened_w_error(filename,'rb') as (f,error):
-        if error:
-            print("Exception opening file " + filename + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
-            return None
-        else:
-            lines = f.read().split("\n")
-    
+    f,error = opened_w_error(filename,'rb')
+    if error:
+        Print("Exception opening file " + filename + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+        return None
+    else:
+        lines = f.read().split("\n")
+        f.close()
     entries = dict()
     for line in lines:
         tokens = line.split(":")
@@ -133,7 +252,8 @@ def PasswordExpired(shadow_entry):
     
 
 def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-
+    ShowMof('SET', UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
+    p=Params(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     passwd_entries = None
     shadow_entries = None
     passwd_entries = ReadPasswd("/etc/passwd")
@@ -162,25 +282,24 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
             usermod_string += "\""
 
         disabled_user_string = ""
-        if Disabled == "True":
+        if Disabled == True:
             disabled_user_string = "!"
 
         if Password:
             usermod_string += " -p \"" + disabled_user_string + Password.replace("$", "\$") + "\""
-        elif Disabled:
-            if Disabled == "True":
-                usermodonly_string += " -L"
-            elif Disabled == "False":
-                cur_pass = shadow_entries[UserName][0]
-                if cur_pass == "!!":
-                    print("Unable to unlock user: " + UserName + ".  Password is not set.",file=sys.stderr)
+        elif Disabled == True:
+            usermodonly_string += " -L"
+        elif Disabled == False:
+            cur_pass = shadow_entries[UserName][0]
+            if cur_pass == "!!":
+                Print("Unable to unlock user: " + UserName + ".  Password is not set.",file=sys.stderr)
+                return [-1]
+            elif cur_pass[0] == '!':
+                if len(cur_pass) > 1:
+                    usermodonly_string += " -U"
+                else:
+                    Print("Unable to unlock user: " + UserName + ".  Doing so would result in a passwordless account.",file=sys.stderr)
                     return [-1]
-                elif cur_pass[0] == '!':
-                    if len(cur_pass) > 1:
-                        usermodonly_string += " -U"
-                    else:
-                        print("Unable to unlock user: " + UserName + ".  Doing so would result in a passwordless account.",file=sys.stderr)
-                        return [-1]
             
         if HomeDirectory:
             usermod_string += " -m -d \"" + HomeDirectory + "\""
@@ -198,27 +317,28 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
                 if exit_code != 0:
                     return [exit_code]
         else:
-            print(usermod_string,file=sys.stderr)
+            Print(usermod_string,file=sys.stderr)
             if len(usermodonly_string + usermod_string) > 0:
                 exit_code = os.system(usermod_path + " " + usermodonly_string + usermod_string + " " + UserName)
                 if exit_code != 0:
                     return [exit_code]
 
 
-        if PasswordChangeRequired:
-            if PasswordChangeRequired == "True":
-                exit_code = os.system(chage_path + " -d 0 " + UserName)
-            else:
-                # Set last password change to today
-                day_0 = datetime.datetime.utcfromtimestamp(0)
-                day_now = datetime.datetime.today()
-                days_since_day_0 = (day_now - day_0).days
-
-                exit_code = os.system(chage_path + " -d "+ str(days_since_day_0) + " " + UserName)
+        if PasswordChangeRequired == True:
+            exit_code = os.system(chage_path + " -d 0 " + UserName)
+        else:
+            # Set last password change to today
+            day_0 = datetime.datetime.utcfromtimestamp(0)
+            day_now = datetime.datetime.today()
+            days_since_day_0 = (day_now - day_0).days
+            
+            exit_code = os.system(chage_path + " -d "+ str(days_since_day_0) + " " + UserName)
            
     return [exit_code]
 
 def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    ShowMof('TEST', UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
+    p=Params(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
 
     passwd_entries = None
     shadow_entries = None
@@ -236,75 +356,75 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
         if UserName not in passwd_entries:
             return [0]
         else:
-            print(UserName + " in passwd_entries",file=sys.stderr)
+            Print(UserName + " in passwd_entries",file=sys.stderr)
             return [-1]
     elif Ensure.lower() == "present":
         if UserName not in passwd_entries:
-            print(UserName + " not in passwd_entries",file=sys.stderr)
+            Print(UserName + " not in passwd_entries",file=sys.stderr)
             return [-1]
         if UserName not in shadow_entries:
-            print(UserName + " not in shadow_entries",file=sys.stderr)
+            Print(UserName + " not in shadow_entries",file=sys.stderr)
             return [-1]
 
         if len(passwd_entries[UserName]) < 6:
-            print("Unable to read /etc/passwd entry for username: " + UserName,file=sys.stderr)
+            Print("Unable to read /etc/passwd entry for username: " + UserName,file=sys.stderr)
             return [-1]
         if len(shadow_entries[UserName]) < 8:
-            print("Unable to read /etc/shadow entry for username: " + UserName,file=sys.stderr)
+            Print("Unable to read /etc/shadow entry for username: " + UserName,file=sys.stderr)
             return [-1]
 
         extra_fields = passwd_entries[UserName][3].split(",")
 
         if FullName and extra_fields[0] != FullName:
-            print("Incorrect full name (" + extra_fields[0] + "), should be: " + FullName + ", for username: " + UserName,file=sys.stderr)
+            Print("Incorrect full name (" + extra_fields[0] + "), should be: " + FullName + ", for username: " + UserName,file=sys.stderr)
             return [-1]
 
         if Description:
             if len(extra_fields) < 2:
-                print("There is no description.",file=sys.stderr)
+                Print("There is no description.",file=sys.stderr)
                 return [-1]
             elif extra_fields[1] != Description:
-                print("Incorrect description for username: " + UserName,file=sys.stderr)
+                Print("Incorrect description for username: " + UserName,file=sys.stderr)
                 return [-1]
 
         if HomeDirectory and passwd_entries[UserName][4] != HomeDirectory:
-            print("Home directories do not match",file=sys.stderr)
+            Print("Home directories do not match",file=sys.stderr)
             return [-1]
     
         if GroupID and passwd_entries[UserName][2] != GroupID:
-            print("GroupID does not match",file=sys.stderr)
+            Print("GroupID does not match",file=sys.stderr)
             return [-1]
 
         if Password:
             read_password = shadow_entries[UserName][0]
             if len(read_password) == 0:
-                print("Password does not match",file=sys.stderr)
+                Print("Password does not match",file=sys.stderr)
                 return [-1]
             if read_password[0] == "!":
                 read_password = read_password[1:]
             if read_password != Password:
-                print("Password does not match",file=sys.stderr)
+                Print("Password does not match",file=sys.stderr)
                 return [-1]
 
-        if PasswordChangeRequired:
-            if PasswordChangeRequired == "True" and not PasswordExpired(shadow_entries[UserName]):
-                print("PasswordChangeRequired is True and the password is not expired.",file=sys.stderr)
-                return [-1]
-            elif PasswordChangeRequired == "False" and PasswordExpired(shadow_entries[UserName]):
-                print("PasswordChangeRequired is False and the password is expired.",file=sys.stderr)
-                return [-1]
+        if PasswordChangeRequired == True and not PasswordExpired(shadow_entries[UserName]):
+            Print("PasswordChangeRequired is True and the password is not expired.",file=sys.stderr)
+            return [-1]
+        elif PasswordChangeRequired == False and PasswordExpired(shadow_entries[UserName]):
+            Print("PasswordChangeRequired is False and the password is expired.",file=sys.stderr)
+            return [-1]
             
-        if Disabled:
-            if Disabled == "True" and shadow_entries[UserName][0][0] != "!":
-                print("Account not disabled",file=sys.stderr)
-                return [-1]
-            if Disabled == "False" and shadow_entries[UserName][0][0] == "!":
-                print("Account disabled",file=sys.stderr)
-                return [-1]
+        if Disabled == True and shadow_entries[UserName][0][0] != "!":
+            Print("Account not disabled",file=sys.stderr)
+            return [-1]
+        if Disabled == False and shadow_entries[UserName][0][0] == "!":
+            Print("Account disabled",file=sys.stderr)
+            return [-1]
 
     return [0]
 
 def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    ShowMof('GET', UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
+    p=Params(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     passwd_entries = None
     shadow_entries = None
     passwd_entries = ReadPasswd("/etc/passwd")
@@ -317,7 +437,7 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
     exit_code = 0
 
     if UserName not in passwd_entries:
-        FullName = Description = Password = Disabled = PasswordChangeRequired = HomeDirectory = GroupID = ""
+        FullName = Description = Password = HomeDirectory = GroupID = ""
         Ensure = "Absent"
     else:
         Ensure = "Present"
@@ -331,14 +451,14 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
         GroupID = passwd_entries[UserName][2]
         
         Password = shadow_entries[UserName][0]
-        Disabled = "False"
+        Disabled = False
         if len(Password) > 0:
             if Password[0] == "!":
-                Disabled = "True"
+                Disabled = True
                 Password = Password[1:]
         if PasswordExpired(shadow_entries[UserName]):
-            PasswordChangeRequired = "True"
+            PasswordChangeRequired = True
         else:
-            PasswordChangeRequired = "False"
+            PasswordChangeRequired = False
 
     return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]

@@ -3,10 +3,6 @@
 # Copyright (C) Microsoft Corporation, All rights reserved. 
 #============================================================================
 
-from __future__ import print_function
-from __future__ import with_statement
-from contextlib import contextmanager
-
 import os
 import sys
 import pwd
@@ -18,35 +14,79 @@ import time
 # [write] string UserName;
 # [write] string Key;
 
+global show_mof
+show_mof=False
+
 LogPath='/tmp/nxSshAuthorizedKeys.log'
 def Set_Marshall(KeyComment,Ensure,UserName,Key):
-    Ensure = Ensure.decode('utf-8')
-    KeyComment = KeyComment.decode('utf-8') 
-    UserName = UserName.decode('utf-8') 
-    Key = Key.decode('utf-8') 
+    if Ensure != None :
+        Ensure=Ensure.decode('utf-8')
+    else:
+        Ensure = ''
+    if KeyComment != None :
+        KeyComment=KeyComment.decode('utf-8')
+    else:
+        KeyComment = ''
+    if UserName != None :
+        UserName=UserName.decode('utf-8')
+    else:
+        UserName = ''
+    if Key != None :
+        Key=Key.decode('utf-8')
+    else:
+        Key = ''
 
     retval = Set(KeyComment,Ensure,UserName,Key)
     return retval
 
 def Test_Marshall(KeyComment,Ensure,UserName,Key):
-    Ensure = Ensure.decode('utf-8')
-    KeyComment = KeyComment.decode('utf-8') 
-    UserName = UserName.decode('utf-8') 
-    Key = Key.decode('utf-8') 
+    if Ensure != None :
+        Ensure=Ensure.decode('utf-8')
+    else:
+        Ensure = ''
+    if KeyComment != None :
+        KeyComment=KeyComment.decode('utf-8')
+    else:
+        KeyComment = ''
+    if UserName != None :
+        UserName=UserName.decode('utf-8')
+    else:
+        UserName = ''
+    if Key != None :
+        Key=Key.decode('utf-8')
+    else:
+        Key = ''
 
     retval = Test(KeyComment,Ensure,UserName,Key)
     return retval
 
 def Get_Marshall(KeyComment,Ensure,UserName,Key):
-    Ensure = Ensure.decode('utf-8')
-    KeyComment = KeyComment.decode('utf-8') 
-    UserName = UserName.decode('utf-8') 
-    Key = Key.decode('utf-8') 
+    arg_names=locals().keys()
+    if Ensure != None :
+        Ensure=Ensure.decode('utf-8')
+    else:
+        Ensure = ''
+    if KeyComment != None :
+        KeyComment=KeyComment.decode('utf-8')
+    else:
+        KeyComment = ''
+    if UserName != None :
+        UserName=UserName.decode('utf-8')
+    else:
+        UserName = ''
+    if Key != None :
+        Key=Key.decode('utf-8')
+    else:
+        Key = ''
 
     retval = 0
     retval,KeyComment,Ensure,UserName,Key = Get(KeyComment,Ensure,UserName,Key)
 
-    return [retval,KeyComment,Ensure,UserName,Key]
+    retd={}
+    ld=locals()
+    for k in arg_names :
+        retd[k]=ld[k] 
+    return retval, retd
 
 
 ############################################################
@@ -57,26 +97,26 @@ class Params:
     def __init__(self,KeyComment,Ensure,UserName,Key):
 
         if not ( "Present" in Ensure or "Absent" in Ensure ):
-            print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
+            Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
             Log(LogPath,'ERROR: Param Ensure must be Present or Absent.')
             raise Exception('BadParameter')
         self.Ensure = Ensure
 
         if len(KeyComment)<1:
-            print('ERROR: Mandatory Param KeyComment missing.',file=sys.stderr)
+            Print('ERROR: Mandatory Param KeyComment missing.',file=sys.stderr)
             Log(LogPath,'ERROR: Mandatory Param KeyComment missing.')
             raise Exception('BadParameter')
         self.KeyComment = KeyComment
 
         if len(UserName)<1:
-            print('ERROR: Mandatory Param UserName missing.',file=sys.stderr)
+            Print('ERROR: Mandatory Param UserName missing.',file=sys.stderr)
             Log(LogPath,'ERROR: Mandatory Param UserName missing.')
             raise Exception('BadParameter')
         pw_st=None
         try:
              pw_st=pwd.getpwnam(UserName)
         except KeyError:
-            print('ERROR:  UserName:' + UserName + ' does not exist.',file=sys.stderr)
+            Print('ERROR:  UserName:' + UserName + ' does not exist.',file=sys.stderr)
             Log(LogPath,'ERROR:  UserName:' + UserName + ' does not exist.')
             raise Exception('BadParameter')
 
@@ -84,18 +124,19 @@ class Params:
         self.UserHome=pw_st.pw_dir
 
         if len(Key)<1:
-            print('ERROR: Mandatory Param Key missing.',file=sys.stderr)
+            Print('ERROR: Mandatory Param Key missing.',file=sys.stderr)
             Log(LogPath,'ERROR: Mandatory Param Key missing.')
             raise Exception('BadParameter')
         self.Key = Key
 
 def Set(KeyComment,Ensure,UserName,Key):
     retval=-1
+    ShowMof('SET', KeyComment,Ensure,UserName,Key)
     try:
         p=Params(KeyComment,Ensure,UserName,Key)
     except Exception,e:
-        print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  '+e.message,file=sys.stderr)
-        Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ e.message)
+        Print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  '+str(e),file=sys.stderr)
+        Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ str(e))
         return [retval]
     if  p.Ensure == 'Present'  :
         if AddKey(p) == None:
@@ -107,11 +148,12 @@ def Set(KeyComment,Ensure,UserName,Key):
    
 def Test(KeyComment,Ensure,UserName,Key):
     retval=-1
+    ShowMof('TEST', KeyComment,Ensure,UserName,Key)
     try:
         p=Params(KeyComment,Ensure,UserName,Key)
     except Exception,e:
-        print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  '+e.message,file=sys.stderr)
-        Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ e.message)
+        Print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  '+str(e),file=sys.stderr)
+        Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ str(e))
         return [retval]
     found,error=FindKey(p)
     if  found and p.Ensure == 'Present'  :
@@ -123,11 +165,12 @@ def Test(KeyComment,Ensure,UserName,Key):
 
 def Get(KeyComment,Ensure,UserName,Key):
     retval=-1
+    ShowMof('GET', KeyComment,Ensure,UserName,Key)
     try:
         p=Params(KeyComment,Ensure,UserName,Key)
     except Exception,e:
-        print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  '+e.message,file=sys.stderr)
-        Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ e.message)
+        Print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  '+str(e),file=sys.stderr)
+        Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ str(e))
         return [retval]
     found,error=FindKey(p)
     if  found and p.Ensure == 'Present'  :
@@ -136,7 +179,26 @@ def Get(KeyComment,Ensure,UserName,Key):
         retval =0
     return [retval,KeyComment,Ensure,UserName,Key]
 
-@contextmanager
+def SetShowMof(a):
+    global show_mof
+    show_mof=a
+
+def ShowMof(op, KeyComment,Ensure,UserName,Key):
+    if not show_mof:
+        return
+    mof=''
+    mof+= op + ' nxSshAuthorizedKeys MyKey \n'
+    mof+='{\n'
+    mof+='    KeyComment = "' + KeyComment + '"\n'
+    mof+='    Ensure = "' + Ensure + '"\n'
+    mof+='    UserName = "' + UserName + '"\n'
+    mof+='    Key = "' + Key + '"\n'
+    mof+='}\n'
+    f=open('./test_mofs.log','a')
+    Print(mof,file=f)
+    f.close()
+
+
 def opened_w_error(filename, mode="a"):
     """
     This context ensures the file is closed.
@@ -144,25 +206,25 @@ def opened_w_error(filename, mode="a"):
     try:
         f = open(filename, mode=mode)
     except IOError, err:
-        yield None, err
-    else:
-        try:
-            yield f, None
-        finally:
-            f.close()
+        return None, err
+    return f, None
 
+def Print(s,file=sys.stdout):
+    file.write(s+'\n')
+    
 def Log(file_path,message):
     if len(file_path)<1 or len(message) < 1:
         return
     t = time.localtime()
     t = "%04u/%02u/%02u %02u:%02u:%02u " % (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec)
     lines=re.sub(re.compile(r'^(.)',re.MULTILINE),t+r'\1',message)
-    with opened_w_error(file_path,'a') as (F,error):
-        if error:
-            print("Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
-            Log(LogPath,"Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
-        else:
-            F.write(lines + "\n")
+    F,error = opened_w_error(file_path,'a')
+    if error:
+        Print("Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Log(LogPath,"Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+    else:
+        F.write(lines + "\n")
+        F.close()
 
 def AddKey(p):
     d=p.UserHome+'/.ssh'
@@ -172,31 +234,31 @@ def AddKey(p):
             os.chmod(d,0700)
             os.chown(d,pwd.getpwnam(p.UserName).pw_uid,pwd.getpwnam(p.UserName).pw_gid)
         except IOError, error:
-            print("Exception creating directory " + d + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+            Print("Exception creating directory " + d + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
             Log(LogPath,"Exception creating directory " + d + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
             return error
         except OSError,error:
-            print("Exception opening directory " + d + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+            Print("Exception opening directory " + d + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
             Log(LogPath,"Exception opening directory " + d + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
             return error
     
     path=d+'/authorized_keys'
     error=None
-    with opened_w_error(path,'wb+') as (F,error):
-        if error:
-            print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
-            Log(LogPath,"Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+    F,error = opened_w_error(path,'wb+')
+    if error:
+        Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+        Log(LogPath,"Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+        return error
+    F.seek(0,0)
+    for l in F.readlines():
+        if p.KeyComment in l:
+            F.close()
             return error
-        F.seek(0,0)
-        for l in F.readlines():
-            if p.KeyComment in l:
-                F.close()
-                return error
-        #we are at the end of the file.
-        F.write('\n#'+p.KeyComment+'\n'+p.Key+'\n')
-        F.close()
-        os.chmod(path,0700)
-        os.chown(path,pwd.getpwnam(p.UserName).pw_uid,pwd.getpwnam(p.UserName).pw_gid)
+    #we are at the end of the file.
+    F.write('\n#'+p.KeyComment+'\n'+p.Key+'\n')
+    F.close()
+    os.chmod(path,0700)
+    os.chown(path,pwd.getpwnam(p.UserName).pw_uid,pwd.getpwnam(p.UserName).pw_gid)
     return error
     
 def DelKey(p):
@@ -205,23 +267,23 @@ def DelKey(p):
     found=False
     if not os.path.isfile(path):
         return error
-    with opened_w_error(path,'rb+') as (F,error):
-        if error:
-            print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
-            Log(LogPath,"Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror) 
-            return error
-        n=''
-        for l in F.readlines():
-            if found==True:
-                found=False #skip this line
-                continue
-            if p.KeyComment in l:
-                found = True # set this true to skip the next line which is the key
-                continue
-            n+=l
-        F.seek(0,0)
-        F.write(n)
-        F.close()
+    F,error = opened_w_error(path,'rb+')
+    if error:
+        Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+        Log(LogPath,"Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror) 
+        return error
+    n=''
+    for l in F.readlines():
+        if found==True:
+            found=False #skip this line
+            continue
+        if p.KeyComment in l:
+            found = True # set this true to skip the next line which is the key
+            continue
+        n+=l
+    F.seek(0,0)
+    F.write(n)
+    F.close()
     return error
 
 def FindKey(p):
@@ -230,13 +292,13 @@ def FindKey(p):
     found=False
     if not os.path.isfile(path):
         return found
-    with opened_w_error(path,'rb') as (F,error):
-        if error:
-            print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
-            Log(LogPath,"Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
-            return found,error
-        for l in F.readlines():
-            if p.KeyComment in l:
-                found = True
+    F,error = opened_w_error(path,'rb')
+    if error:
+        Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+        Log(LogPath,"Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+        return found,error
+    for l in F.readlines():
+        if p.KeyComment in l:
+            found = True
         F.close()
     return found,error
