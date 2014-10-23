@@ -13,6 +13,7 @@ import pwd
 import shutil
 import grp
 import codecs
+import protocol
 
 # 	[Key] string DestinationPath; 
 # 	[Write] string SourcePath;
@@ -189,19 +190,20 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     retval = 0
     (retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate) = Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
 
-    DestinationPath = DestinationPath.encode("utf-8")
-    SourcePath = SourcePath.encode("utf-8")
-    Ensure = Ensure.encode("utf-8")
-    Type = Type.encode("utf-8")
-    Force = Force
-    Contents = Contents.encode("utf-8")
-    Checksum = Checksum.encode("utf-8")
-    Recurse = Recurse
-    Links = Links.encode("utf-8")
-    Owner = Owner.encode("utf-8")
-    Group = Group.encode("utf-8")
-    Mode = Mode.encode("utf-8")
-    ModifiedDate = ModifiedDate.encode("utf-8")
+    DestinationPath = protocol.MI_String (DestinationPath.encode("utf-8"))
+    SourcePath = protocol.MI_String (SourcePath.encode("utf-8"))
+    Ensure = protocol.MI_String (Ensure.encode("utf-8"))
+    Type = protocol.MI_String (Type.encode("utf-8"))
+    Force = protocol.MI_Boolean (Force)
+    Contents = protocol.MI_String (Contents.encode("utf-8"))
+    Checksum = protocol.MI_String (Checksum.encode("utf-8"))
+    Recurse = protocol.MI_Boolean (Recurse)
+    Links = protocol.MI_String (Links.encode("utf-8"))
+    Owner = protocol.MI_String (Owner.encode("utf-8"))
+    Group = protocol.MI_String (Group.encode("utf-8"))
+    Mode = protocol.MI_String (Mode.encode("utf-8"))
+    ModifiedDate = protocol.MI_Timestamp.from_time (ModifiedDate)
+
     retd={}
     ld=locals()
     for k in arg_names :
@@ -975,7 +977,8 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
     elif os.path.isdir(DestinationPath):
         Type = "directory"
         
-    ModifiedDate = str(int(stat_info.st_mtime))
+    #ModifiedDate = str(int(stat_info.st_mtime))
+    ModifiedDate = stat_info.st_mtime
     Contents,error=ReadFile(DestinationPath)
     return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 

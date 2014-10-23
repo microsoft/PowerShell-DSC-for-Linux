@@ -66,6 +66,7 @@ private:
     int send (T const& val);
     int send (char const* const str);
     int send (std::string const& str);
+    int send (MI_Datetime const& datetime);
     template<typename T>
     int send (
         MI_PropertyDecl const& property,
@@ -74,16 +75,12 @@ private:
     template<typename T>
     int recv (T* const pValOut);
     int recv (std::string* const pStrOut);
+    int recv (MI_Datetime* const pDatetimeOut);
     
     int recvResult (
         MI_Boolean* const pResultOut);
 
     int recv_MI_Value (
-        MI_Instance* const pInstanceOut);
-
-    template<unsigned int>
-    int recv (
-        std::string const& name,
         MI_Instance* const pInstanceOut);
 
 
@@ -95,41 +92,47 @@ private:
         static int
         exists (
             MI_PropertyDecl const& property,
-            TT const* const pResource)
-        {
-            return (reinterpret_cast<T const*>(
-                        reinterpret_cast<char const*>(
-                            pResource) + property.offset))->exists;
-        }
+            TT const* const pResource);
 
         template<typename TT>
         static int
         send (
             PythonProvider* const pProvider,
             MI_PropertyDecl const& property,
-            TT const* const pResource)
-        {
-            //SCX_BOOKEND ("TypeHelper::send");
-            return pProvider->send ((
-                reinterpret_cast<T const*>(
-                    reinterpret_cast<char const*>(
-                        pResource) + property.offset))->value);
-        }
+            TT const* const pResource);
+
+        template<typename TT>
+        static int
+        send_array (
+            PythonProvider* const pProvider,
+            MI_PropertyDecl const& property,
+            TT const* const pResource);
 
         template<typename resource_t, typename cast_t>
         static int
         send (
             PythonProvider* const pProvider,
             MI_PropertyDecl const& property,
-            resource_t const* const pResource)
-        {
-            //SCX_BOOKEND ("TypeHelper::send");
-            return pProvider->send (
-                static_cast<cast_t>(
-                    (reinterpret_cast<T const*>(
-                        reinterpret_cast<char const*>(
-                            pResource) + property.offset))->value));
-        }
+            resource_t const* const pResource);
+
+        template<typename resource_t, typename cast_t>
+        static int
+        send_array (
+            PythonProvider* const pProvider,
+            MI_PropertyDecl const& property,
+            resource_t const* const pResource);
+
+        static int
+        recv (
+            PythonProvider* const pProvider,
+            T* const pValueOut);
+
+        template<typename Array_t>
+        static int
+        recv_array (
+            PythonProvider* const pProvider,
+            Array_t* const pValueOut,
+            util::unique_ptr<char[]>* const pStorage);
     };
 
 
@@ -256,57 +259,6 @@ PythonProvider::get (
     SCX_BOOKEND_EX ("PythonProvider::get", strm.str ());
     strm.str ("");
     strm.clear ();
-#endif
-#if (0)
-    MI_PropertyDecl const* const* ppProperties =
-        pInstanceOut->classDecl->properties;
-    MI_Uint32 const numProperties =
-        pInstanceOut->classDecl->numProperties;
-    for (MI_PropertyDecl const* const* pPos = ppProperties,
-             * const* const pEndPos = ppProperties + numProperties;
-         pPos != pEndPos;
-         ++pPos)
-    {
-        strm << "name: \"" << (*pPos)->name << "\" - type: " << (*pPos)->type
-             << " - flags: " << std::hex << std::setfill ('0') << std::setw (10)
-             << std::setiosflags (std::ios::internal | std::ios::showbase
-                                  | std::ios::uppercase)
-             << (*pPos)->flags << std::dec << " - offset: " << (*pPos)->offset;
-        if ((*pPos)->value)
-        {
-            switch ((*pPos)->type)
-            {
-            case MI_STRING:
-                {
-                    strm << " - string:";
-                    MI_ConstStringField const* strField =
-                        reinterpret_cast<MI_ConstStringField const*>(
-                            (*pPos)->type);
-                    if (strField->exists)
-                    {
-                        strm << " \"" << strField->value << '\"';
-                    }
-                    else
-                    {
-                        strm << " [empty]";
-                    }
-                }
-                break;
-            case MI_BOOLEAN:
-            case MI_DATETIME:
-            default:
-                strm << " - unhandled type with value";
-                break;
-            }
-        }
-        else
-        {
-            strm << " - [empty value]";
-        }
-        SCX_BOOKEND_PRINT (strm.str ());
-        strm.str ("");
-        strm.clear ();
-    }
 #endif
     // 1: send the request
     // 2: read (int) RESULT
@@ -442,22 +394,6 @@ PythonProvider::sendRequest (
             }
         }
     }
-#if (0)
-    for (MI_PropertyDecl const* const* pPos = ppProperties,
-             * const* const pEndPos = ppProperties + numProperties;
-         pPos != pEndPos;
-         ++pPos)
-    {
-        strm << "name: \"" << (*pPos)->name << "\" - type: " << (*pPos)->type
-             << " - flags: " << std::hex << std::setfill ('0') << std::setw (10)
-             << std::setiosflags (std::ios::internal | std::ios::showbase
-                                  | std::ios::uppercase)
-             << (*pPos)->flags << std::dec << " - offset: " << (*pPos)->offset;
-        SCX_BOOKEND_PRINT (strm.str ());
-        strm.str ("");
-        strm.clear ();
-    }
-#endif
     return rval;
 }
 
@@ -470,8 +406,8 @@ PythonProvider::send (
     //SCX_BOOKEND ("PythonProvider::send (template)");
     int rval = EXIT_SUCCESS;
     ssize_t nBytesSent = 0;
-    ssize_t const nBytes = static_cast<ssize_t>(sizeof (T));
-    char const* const pData = reinterpret_cast<char const*>(&val);
+    ssize_t const nBytes = static_cast<ssize_t> (sizeof (T));
+    char const* const pData = reinterpret_cast<char const*> (&val);
     while (EXIT_SUCCESS == rval &&
            -1 != nBytesSent &&
            nBytes > nBytesSent)
@@ -520,7 +456,7 @@ PythonProvider::send (
     int rval = EXIT_FAILURE;
     if (exists (property, pResource))
     {
-        rval = send (static_cast<unsigned char>(property.type));
+        rval = send (static_cast<unsigned char> (property.type));
         if (EXIT_SUCCESS == rval)
         {
             std::ostringstream strm;
@@ -531,46 +467,139 @@ PythonProvider::send (
                     TypeHelper<MI_ConstBooleanField>::send<T, unsigned char> (
                         this, property, pResource);
                 break;
+            case MI_UINT8:
+                rval =
+                    TypeHelper<MI_ConstUint8Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_SINT8:
+                rval =
+                    TypeHelper<MI_ConstSint8Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_UINT16:
+                rval =
+                    TypeHelper<MI_ConstUint16Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_SINT16:
+                rval =
+                    TypeHelper<MI_ConstSint16Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_UINT32:
+                rval =
+                    TypeHelper<MI_ConstUint32Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_SINT32:
+                rval =
+                    TypeHelper<MI_ConstSint32Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_UINT64:
+                rval =
+                    TypeHelper<MI_ConstUint64Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_SINT64:
+                rval =
+                    TypeHelper<MI_ConstSint64Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_REAL32:
+                rval =
+                    TypeHelper<MI_ConstReal32Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_REAL64:
+                rval =
+                    TypeHelper<MI_ConstReal64Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_CHAR16:
+                rval =
+                    TypeHelper<MI_ConstChar16Field>::send<T> (
+                        this, property, pResource);
+                break;
+            case MI_DATETIME:
+                rval = TypeHelper<MI_ConstDatetimeField>::send (
+                    this, property, pResource);
+                break;
             case MI_STRING:
                 rval = TypeHelper<MI_ConstStringField>::send (
                     this, property, pResource);
                 break;
-            case MI_DATETIME:
-                //rval = TypeHelper<MI_ConstDatetimeField>::send (
-                //    this, property, pResource);
-                break;
-            case MI_UINT8:
-            case MI_SINT8:
-            case MI_UINT16:
-            case MI_SINT16:
-            case MI_UINT32:
-            case MI_SINT32:
-            case MI_UINT64:
-            case MI_SINT64:
-            case MI_REAL32:
-            case MI_REAL64:
-            case MI_CHAR16:
             case MI_BOOLEANA:
+                rval =
+                    TypeHelper<MI_ConstBooleanAField>::send_array<
+                        T, unsigned char> (
+                            this, property, pResource);
+                break;
             case MI_UINT8A:
+                rval =
+                    TypeHelper<MI_ConstUint8AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_SINT8A:
+                rval =
+                    TypeHelper<MI_ConstSint8AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_UINT16A:
+                rval =
+                    TypeHelper<MI_ConstUint16AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_SINT16A:
+                rval =
+                    TypeHelper<MI_ConstSint16AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_UINT32A:
+                rval =
+                    TypeHelper<MI_ConstUint32AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_SINT32A:
+                rval =
+                    TypeHelper<MI_ConstSint32AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_UINT64A:
+                rval =
+                    TypeHelper<MI_ConstUint64AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_SINT64A:
+                rval =
+                    TypeHelper<MI_ConstSint64AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_REAL32A:
+                rval =
+                    TypeHelper<MI_ConstReal32AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_REAL64A:
+                rval =
+                    TypeHelper<MI_ConstReal64AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_CHAR16A:
+                rval =
+                    TypeHelper<MI_ConstChar16AField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_DATETIMEA:
+                rval =
+                    TypeHelper<MI_ConstDatetimeAField>::send_array<T> (
+                        this, property, pResource);
+                break;
             case MI_STRINGA:
-                strm << __FILE__ << '[' << __LINE__ << ']'
-                     << "encountered an unhandled param type: "
-                     << property.type;
-                SCX_BOOKEND_PRINT (strm.str ());
-                std::cerr << strm.str () << std::endl;
-                strm.str ("");
-                strm.clear ();
+                rval =
+                    TypeHelper<MI_ConstStringAField>::send_array<T> (
+                        this, property, pResource);
                 break;
             case MI_REFERENCE:
             case MI_INSTANCE:
@@ -612,9 +641,9 @@ PythonProvider::recv (
     //SCX_BOOKEND ("PythonProvider::recv (template)");
     int rval = EXIT_SUCCESS;
     ssize_t nBytesRead = 0;
-    ssize_t const nBytes = static_cast<ssize_t>(sizeof (T));
+    ssize_t const nBytes = static_cast<ssize_t> (sizeof (T));
     T temp = T ();
-    char* const pData = reinterpret_cast<char*>(&temp);
+    char* const pData = reinterpret_cast<char*> (&temp);
     while (EXIT_SUCCESS == rval &&
            nBytes > nBytesRead)
     {
@@ -672,45 +701,113 @@ PythonProvider::exists (
         rval = TypeHelper<MI_ConstBooleanField>::exists (
             property, pResource);
         break;
-    case MI_STRING:
-        rval = TypeHelper<MI_ConstStringField>::exists (
+    case MI_UINT8:
+        rval = TypeHelper<MI_Uint8Field>::exists (
+            property, pResource);
+        break;
+    case MI_SINT8:
+        rval = TypeHelper<MI_Sint8Field>::exists (
+            property, pResource);
+        break;
+    case MI_UINT16:
+        rval = TypeHelper<MI_Uint16Field>::exists (
+            property, pResource);
+        break;
+    case MI_SINT16:
+        rval = TypeHelper<MI_Sint16Field>::exists (
+            property, pResource);
+        break;
+    case MI_UINT32:
+        rval = TypeHelper<MI_Uint32Field>::exists (
+            property, pResource);
+        break;
+    case MI_SINT32:
+        rval = TypeHelper<MI_Sint32Field>::exists (
+            property, pResource);
+        break;
+    case MI_UINT64:
+        rval = TypeHelper<MI_Uint64Field>::exists (
+            property, pResource);
+        break;
+    case MI_SINT64:
+        rval = TypeHelper<MI_Sint64Field>::exists (
+            property, pResource);
+        break;
+    case MI_REAL32:
+        rval = TypeHelper<MI_Real32Field>::exists (
+            property, pResource);
+        break;
+    case MI_REAL64:
+        rval = TypeHelper<MI_Real64Field>::exists (
+            property, pResource);
+        break;
+    case MI_CHAR16:
+        rval = TypeHelper<MI_Char16Field>::exists (
             property, pResource);
         break;
     case MI_DATETIME:
         rval = TypeHelper<MI_ConstDatetimeField>::exists (
             property, pResource);
         break;
-    case MI_UINT8:
-    case MI_SINT8:
-    case MI_UINT16:
-    case MI_SINT16:
-    case MI_UINT32:
-    case MI_SINT32:
-    case MI_UINT64:
-    case MI_SINT64:
-    case MI_REAL32:
-    case MI_REAL64:
-    case MI_CHAR16:
+    case MI_STRING:
+        rval = TypeHelper<MI_ConstStringField>::exists (
+            property, pResource);
+        break;
     case MI_BOOLEANA:
+        rval = TypeHelper<MI_ConstBooleanAField>::exists (
+            property, pResource);
+        break;
     case MI_UINT8A:
+        rval = TypeHelper<MI_ConstUint8AField>::exists (
+            property, pResource);
+        break;
     case MI_SINT8A:
+        rval = TypeHelper<MI_ConstSint8AField>::exists (
+            property, pResource);
+        break;
     case MI_UINT16A:
+        rval = TypeHelper<MI_ConstUint16AField>::exists (
+            property, pResource);
+        break;
     case MI_SINT16A:
+        rval = TypeHelper<MI_ConstSint16AField>::exists (
+            property, pResource);
+        break;
     case MI_UINT32A:
+        rval = TypeHelper<MI_ConstUint32AField>::exists (
+            property, pResource);
+        break;
     case MI_SINT32A:
+        rval = TypeHelper<MI_ConstSint32AField>::exists (
+            property, pResource);
+        break;
     case MI_UINT64A:
+        rval = TypeHelper<MI_ConstUint64AField>::exists (
+            property, pResource);
+        break;
     case MI_SINT64A:
+        rval = TypeHelper<MI_ConstSint64AField>::exists (
+            property, pResource);
+        break;
     case MI_REAL32A:
+        rval = TypeHelper<MI_ConstReal32AField>::exists (
+            property, pResource);
+        break;
     case MI_REAL64A:
+        rval = TypeHelper<MI_ConstReal64AField>::exists (
+            property, pResource);
+        break;
     case MI_CHAR16A:
+        rval = TypeHelper<MI_ConstChar16AField>::exists (
+            property, pResource);
+        break;
     case MI_DATETIMEA:
+        rval = TypeHelper<MI_ConstDatetimeAField>::exists (
+            property, pResource);
+        break;
     case MI_STRINGA:
-        strm << __FILE__ << '[' << __LINE__ << ':'
-             << "encountered an unhandled param type: " << property.type;
-        SCX_BOOKEND_PRINT (strm.str ());
-        std::cerr << strm.str () << std::endl;
-        strm.str ("");
-        strm.clear ();
+        rval = TypeHelper<MI_ConstStringAField>::exists (
+            property, pResource);
         break;
     case MI_REFERENCE:
     case MI_INSTANCE:
@@ -744,6 +841,148 @@ PythonProvider::isInputParam (
 {
     return !(MI_FLAG_READONLY == (MI_FLAG_READONLY & pProperty->flags) &&
              MI_FLAG_KEY != (MI_FLAG_KEY & pProperty->flags));
+}
+
+
+template<typename T>
+template<typename TT>
+/*static*/ int
+PythonProvider::TypeHelper<T>::exists (
+    MI_PropertyDecl const& property,
+    TT const* const pResource)
+{
+    return (reinterpret_cast<T const*> (
+                reinterpret_cast<char const*> (
+                    pResource) + property.offset))->exists;
+}
+
+
+template<typename T>
+template<typename TT>
+/*static*/ int
+PythonProvider::TypeHelper<T>::send (
+    PythonProvider* const pProvider,
+    MI_PropertyDecl const& property,
+    TT const* const pResource)
+{
+    //SCX_BOOKEND ("TypeHelper::send");
+    return pProvider->send ((reinterpret_cast<T const*> (
+                                 reinterpret_cast<char const*> (
+                                     pResource) + property.offset))->value);
+}
+
+
+template<typename T>
+template<typename TT>
+/*static*/ int
+PythonProvider::TypeHelper<T>::send_array (
+    PythonProvider* const pProvider,
+    MI_PropertyDecl const& property,
+    TT const* const pResource)
+{
+    SCX_BOOKEND ("TypeHelper::send_array");
+    T const* const ptr = reinterpret_cast<T const*> (
+        reinterpret_cast<char const*> (
+            pResource) + property.offset);
+    int rval = pProvider->send (static_cast<int> (ptr->value.size));
+    for (MI_Uint32 i = 0;
+         EXIT_SUCCESS == rval && i < ptr->value.size;
+        ++i)
+    {
+        rval = pProvider->send (ptr->value.data[i]);
+    }
+    return rval;
+}
+
+
+template<typename T>
+template<typename resource_t,
+         typename cast_t>
+/*static*/ int
+PythonProvider::TypeHelper<T>::send (
+    PythonProvider* const pProvider,
+    MI_PropertyDecl const& property,
+    resource_t const* const pResource)
+{
+    //SCX_BOOKEND ("TypeHelper::send");
+    return pProvider->send (
+        static_cast<cast_t> (
+            (reinterpret_cast<T const*> (
+                reinterpret_cast<char const*> (
+                    pResource) + property.offset))->value));
+}
+
+
+template<typename T>
+template<typename resource_t,
+         typename cast_t>
+/*static*/ int
+PythonProvider::TypeHelper<T>::send_array (
+    PythonProvider* const pProvider,
+    MI_PropertyDecl const& property,
+    resource_t const* const pResource)
+{
+    SCX_BOOKEND ("TypeHelper::send_array");
+    T const* const ptr = reinterpret_cast<T const*> (
+        reinterpret_cast<char const*> (
+            pResource) + property.offset);
+    int rval = pProvider->send (static_cast<int> (ptr->value.size));
+    for (MI_Uint32 i = 0;
+         EXIT_SUCCESS == rval && i < ptr->value.size;
+        ++i)
+    {
+        rval = pProvider->send (
+            static_cast<cast_t> (ptr->value.data[i]));
+    }
+    return rval;
+}
+
+
+template<typename T>
+/*static*/ int
+PythonProvider::TypeHelper<T>::recv (
+    PythonProvider* const pProvider,
+    T* const pValueOut)
+{
+    SCX_BOOKEND ("TypeHelper::recv");
+    T temp;
+    int rval = pProvider->recv (&temp);
+    if (EXIT_SUCCESS == rval)
+    {
+        *pValueOut = temp;
+    }
+    return rval;
+}
+
+
+template<typename T>
+template<typename Array_t>
+/*static*/ int
+PythonProvider::TypeHelper<T>::recv_array (
+    PythonProvider* const pProvider,
+    Array_t* const pValueOut,
+    util::unique_ptr<char[]>* const pStorage)
+{
+    SCX_BOOKEND ("TypeHelper::recv_array");
+    int length;
+    int rval = pProvider->recv (&length);
+    if (EXIT_SUCCESS == rval)
+    {
+        pStorage->reset (new char[length * sizeof (T)]);
+        T* const pArray = reinterpret_cast<T* const> (pStorage->get ());
+        for (int i = 0;
+             EXIT_SUCCESS == rval && length > i;
+             ++i)
+        {
+            rval = pProvider->recv (pArray + i);
+        }
+        if (EXIT_SUCCESS == rval)
+        {
+            pValueOut->data = pArray;
+            pValueOut->size = static_cast<MI_Uint32> (length);
+        }
+    }
+    return rval;
 }
 
 

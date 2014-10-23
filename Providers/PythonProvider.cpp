@@ -23,16 +23,20 @@ namespace
 typedef util::unique_ptr<char[]> char_array;
 
 
+char const OMI_PYTHON_VERSION_STR[] = "OMI_PYTHON_VERSION";
+char const OMI_HOME_STR[] = "OMI_HOME";
+char const DSC_SCRIPT_STR[] = "DSC_SCRIPT";
 char const DEFAULT_PYTHON_VERSION[] = "python";
 char const DEFAULT_OMI_PATH[] = "/opt/omi-1.0.8/";
 char const SCRIPT_PATH_EXTENSION[] = "/lib/Scripts/";
+char const DEFAULT_DSC_SCRIPT[] = "client";
 char const PY_EXTENSION[] = ".py";
 
 
 char_array::move_type
 get_python_version ()
 {
-    char* sPath = getenv ("OMI_PYTHON_VERSION");
+    char* sPath = getenv (OMI_PYTHON_VERSION_STR);
     char_array pyV;
     if (sPath == NULL)
     {
@@ -48,29 +52,28 @@ get_python_version ()
 
 
 char_array::move_type
-get_script_path (
-    char const* const fileName)
+get_script_path ()
 {
-    char* sPath = getenv ("OMI_HOME");
-    char_array scriptPath;
-    size_t len = strlen (SCRIPT_PATH_EXTENSION);
+    char const* pathName = getenv (OMI_HOME_STR);
+    if (NULL == pathName)
+    {
+        pathName = DEFAULT_OMI_PATH;
+    }
+    size_t len = strlen (pathName) + 1;
+    char_array fullPath (strcpy (new char[len], pathName));
+    char const* fileName = getenv (DSC_SCRIPT_STR);
+    if (NULL == fileName)
+    {
+        fileName = DEFAULT_DSC_SCRIPT;
+    }
+    len += strlen (SCRIPT_PATH_EXTENSION);
     len += strlen (fileName);
     len += strlen (PY_EXTENSION);
-    len += 1; // null terminator
-    if (sPath == NULL)
-    {
-        scriptPath.reset (new char[len + strlen (DEFAULT_OMI_PATH)]);
-        strcpy (scriptPath.get (), DEFAULT_OMI_PATH);
-    }
-    else
-    {
-        scriptPath.reset (new char[len + strlen (sPath)]);
-        strcpy (scriptPath.get (), sPath);
-    }
-    strcat (scriptPath.get (), SCRIPT_PATH_EXTENSION);
-    strcat (scriptPath.get (), fileName);
-    strcat (scriptPath.get (), PY_EXTENSION);
-    return scriptPath.move ();
+    fullPath.reset (strcpy (new char[len], fullPath.get ()));
+    strcat (fullPath.get (), SCRIPT_PATH_EXTENSION);
+    strcat (fullPath.get (), fileName);
+    strcat (fullPath.get (), PY_EXTENSION);
+    return fullPath.move ();
 }
 
 
@@ -152,8 +155,8 @@ PythonProvider::forkExec ()
                 char socketID[SOCK_ID_BUF_LEN];
                 snprintf (socketID, SOCK_ID_BUF_LEN, "%d", sockets[0]);
                 char_array pyV (get_python_version ());
-                char_array fullName (get_script_path ("test_client"));
-                char* args[] = { pyV.get (), fullName.get (), socketID, NULL };
+                char_array fullName (get_script_path ());
+                char* args[] = { pyV.get (), fullName.get (), socketID, 0 };
                 // exec
                 execvp (args[0], args);
                 SCX_BOOKEND_PRINT ("execvp - failed");
@@ -247,8 +250,44 @@ PythonProvider::send (
                  << '\"';
             SCX_BOOKEND_PRINT (strm.str ());
             std::cerr << strm.str () << std::endl;
-            strm.str ("");
-            strm.clear ();
+        }
+    }
+    return rval;
+}
+
+
+int
+PythonProvider::send (
+    MI_Datetime const& datetime)
+{
+    SCX_BOOKEND ("PythonProvider::send (MI_Datetime)");
+    int rval = send (static_cast<unsigned char>(datetime.isTimestamp));
+    if (EXIT_SUCCESS == rval)
+    {
+        if (datetime.isTimestamp)
+        {
+            if (EXIT_SUCCESS != send (datetime.u.timestamp.year) ||
+                EXIT_SUCCESS != send (datetime.u.timestamp.month) ||
+                EXIT_SUCCESS != send (datetime.u.timestamp.day) ||
+                EXIT_SUCCESS != send (datetime.u.timestamp.hour) ||
+                EXIT_SUCCESS != send (datetime.u.timestamp.minute) ||
+                EXIT_SUCCESS != send (datetime.u.timestamp.second) ||
+                EXIT_SUCCESS != send (datetime.u.timestamp.microseconds) ||
+                EXIT_SUCCESS != send (datetime.u.timestamp.utc))
+            {
+                rval = EXIT_FAILURE;
+            }
+        }
+        else
+        {
+            if (EXIT_SUCCESS != send (datetime.u.interval.days) ||
+                EXIT_SUCCESS != send (datetime.u.interval.hours) ||
+                EXIT_SUCCESS != send (datetime.u.interval.minutes) ||
+                EXIT_SUCCESS != send (datetime.u.interval.seconds) ||
+                EXIT_SUCCESS != send (datetime.u.interval.microseconds))
+            {
+                rval = EXIT_FAILURE;
+            }
         }
     }
     return rval;
@@ -325,6 +364,52 @@ PythonProvider::recv (
 
 
 int
+PythonProvider::recv (
+    MI_Datetime* const pDatetimeOut)
+{
+    //SCX_BOOKEND ("PythonProvider::recv (MI_Datetime)");
+    MI_Datetime tempVal;
+    unsigned char isTimestamp;
+    int rval = recv (&isTimestamp);
+    if (EXIT_SUCCESS == rval)
+    {
+        if (isTimestamp)
+        {
+            tempVal.isTimestamp = MI_TRUE;
+            if (EXIT_SUCCESS != recv (&(tempVal.u.timestamp.year)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.timestamp.month)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.timestamp.day)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.timestamp.hour)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.timestamp.minute)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.timestamp.second)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.timestamp.microseconds)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.timestamp.utc)))
+            {
+                rval = EXIT_FAILURE;
+            }
+        }
+        else
+        {
+            tempVal.isTimestamp = MI_FALSE;
+            if (EXIT_SUCCESS != recv (&(tempVal.u.interval.days)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.interval.hours)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.interval.minutes)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.interval.seconds)) ||
+                EXIT_SUCCESS != recv (&(tempVal.u.interval.microseconds)))
+            {
+                rval = EXIT_FAILURE;
+            }
+        }
+    }
+    if (EXIT_SUCCESS == rval)
+    {
+        *pDatetimeOut = tempVal;
+    }
+    return rval;
+}
+
+
+int
 PythonProvider::recvResult (
     MI_Boolean* const pResultOut)
 {
@@ -392,126 +477,227 @@ PythonProvider::recv_MI_Value (
         rval = recv (&type);
         if (EXIT_SUCCESS == rval)
         {
-            std::ostringstream strm;
-            std::string tempStr;
-            MI_Value val;
-
-            switch (type)
+            if (0 == (MI_NULL_FLAG & type))
             {
-            case MI_BOOLEAN:
+                std::ostringstream strm;
+                std::string tempStr;
+                util::unique_ptr<char[]> pArray;
+                util::unique_ptr<std::string[]> pStrArray;
+                MI_Value val;
+                switch (type)
                 {
-                    unsigned char temp;
-                    rval = recv (&temp);
-                    val.boolean = temp ? MI_TRUE : MI_FALSE;
-                }
-                break;
-            case MI_STRING:
-                rval = recv (&tempStr);
-                val.string = const_cast<MI_Char*>(tempStr.c_str ());
-                break;
-            case MI_DATETIME:
-                // working on this, it is not ready to check in
-                //{
-                //    time_t temp;
-                //    rval = recv (&temp);
-                //    tm localTM;
-                //    tm gmTM;
-                //    if (localtime_r (&temp, &localTM) &&
-                //        gmtime_r (&temp, &gmTM))
-                //    {
-                //        val.datetime.isTimestamp = MI_TRUE;
-                //        val.datetime.u.timestamp.year = localTM.tm_year + 1900;
-                //        val.datetime.u.timestamp.month = localTM.tm_mon + 1;
-                //        val.datetime.u.timestamp.day = localTM.tm_mday;
-                //        val.datetime.u.timestamp.hour = localTM.tm_hour;
-                //        val.datetime.u.timestamp.minute = localTM.tm_min;
-                //        val.datetime.u.timestamp.second = localTM.tm_sec;
-                //        time_t gmt = mktime (&gmTM);
-                //        val.datetime.u.timestamp.utc =
-                //            60 * static_cast<time_t>(difftime (gmt, temp));
-                //    }
-                //    else
-                //    {
-                //        rval = EXIT_FAILURE;
-                //    }
-                //}
-                break;
-            case MI_UINT8:
-            case MI_SINT8:
-            case MI_UINT16:
-            case MI_SINT16:
-            case MI_UINT32:
-            case MI_SINT32:
-            case MI_UINT64:
-            case MI_SINT64:
-            case MI_REAL32:
-            case MI_REAL64:
-            case MI_CHAR16:
-            case MI_BOOLEANA:
-            case MI_UINT8A:
-            case MI_SINT8A:
-            case MI_UINT16A:
-            case MI_SINT16A:
-            case MI_UINT32A:
-            case MI_SINT32A:
-            case MI_UINT64A:
-            case MI_SINT64A:
-            case MI_REAL32A:
-            case MI_REAL64A:
-            case MI_CHAR16A:
-            case MI_DATETIMEA:
-            case MI_STRINGA:
-                strm << __FILE__ << '[' << __LINE__ << ']'
-                     << "encountered an unhandled param type: " << type;
-                SCX_BOOKEND_PRINT (strm.str ());
-                std::cerr << strm.str () << std::endl;
-                strm.str ("");
-                strm.clear ();
-                rval = EXIT_FAILURE;
-                break;
-            case MI_REFERENCE:
-            case MI_INSTANCE:
-            case MI_REFERENCEA:
-            case MI_INSTANCEA:
-                strm << __FILE__ << '[' << __LINE__ << ']'
-                     << "encountered a non-standard param type: " << type;
-                SCX_BOOKEND_PRINT (strm.str ());
-                std::cerr << strm.str () << std::endl;
-                strm.str ("");
-                strm.clear ();
-                rval = EXIT_FAILURE;
-                break;
-            default:
-                strm << __FILE__ << '[' << __LINE__ << ']'
-                     << "encountered an unknown param type: " << type;
-                SCX_BOOKEND_PRINT (strm.str ());
-                std::cerr << strm.str () << std::endl;
-                strm.str ("");
-                strm.clear ();
-                rval = EXIT_FAILURE;
-                break;
-            }
-            if (EXIT_SUCCESS == rval)
-            {
-                if (MI_RESULT_OK == MI_Instance_SetElement (
-                        pInstanceOut, name.c_str (), &val,
-                        static_cast<MI_Type>(type), 0))
-                {
-                    strm << "value added - name: \"" << name << "\" - type: "
-                         << static_cast<int>(type);
+                case MI_BOOLEAN:
+                    {
+                        //SCX_BOOKEND ("recv (BOOLEAN)");
+                        unsigned char temp;
+                        rval = recv (&temp);
+                        if (EXIT_SUCCESS == rval)
+                        {
+                            val.boolean = temp ? MI_TRUE : MI_FALSE;
+                        }
+                    }
+                    break;
+                case MI_UINT8:
+                    rval = TypeHelper<MI_Uint8>::recv (this, &(val.uint8));
+                    break;
+                case MI_SINT8:
+                    rval = TypeHelper<MI_Sint8>::recv (this, &(val.sint8));
+                    break;
+                case MI_UINT16:
+                    rval = TypeHelper<MI_Uint16>::recv (this, &(val.uint16));
+                    break;
+                case MI_SINT16:
+                    rval = TypeHelper<MI_Sint16>::recv (this, &(val.sint16));
+                    break;
+                case MI_UINT32:
+                    rval = TypeHelper<MI_Uint32>::recv (this, &(val.uint32));
+                    break;
+                case MI_SINT32:
+                    rval = TypeHelper<MI_Sint32>::recv (this, &(val.sint32));
+                    break;
+                case MI_UINT64:
+                    rval = TypeHelper<MI_Uint64>::recv (this, &(val.uint64));
+                    break;
+                case MI_SINT64:
+                    rval = TypeHelper<MI_Sint64>::recv (this, &(val.sint64));
+                    break;
+                case MI_REAL32:
+                    rval = TypeHelper<MI_Real32>::recv (this, &(val.real32));
+                    break;
+                case MI_REAL64:
+                    rval = TypeHelper<MI_Real64>::recv (this, &(val.real64));
+                    break;
+                case MI_CHAR16:
+                    rval = TypeHelper<MI_Char16>::recv (this, &(val.char16));
+                    break;
+                case MI_DATETIME:
+                    rval = TypeHelper<MI_Datetime>::recv (this, &(val.datetime));
+                    break;
+                case MI_STRING:
+                    rval = recv (&tempStr);
+                    val.string = const_cast<MI_Char*>(tempStr.c_str ());
+                    break;
+                case MI_BOOLEANA:
+                    {
+                        SCX_BOOKEND ("recv (BOOLEANA)");
+                        int length;
+                        rval = recv (&length);
+                        if (EXIT_SUCCESS == rval)
+                        {
+                            pArray.reset (
+                                new char[length * sizeof (MI_Boolean)]);
+                            MI_Boolean* const pTemp =
+                                reinterpret_cast<MI_Boolean* const> (
+                                    pArray.get ());
+                            for (int i = 0;
+                                 EXIT_SUCCESS == rval && length > i;
+                                 ++i)
+                            {
+                                unsigned char temp;
+                                rval = recv (&temp);
+                                if (EXIT_SUCCESS == rval)
+                                {
+                                    pTemp[i] = temp ? MI_TRUE : MI_FALSE;
+                                }
+                            }
+                            if (EXIT_SUCCESS == rval)
+                            {
+                                val.booleana.data = pTemp;
+                                val.booleana.size =
+                                    static_cast<MI_Uint32> (length);
+                            }
+                        }
+                    }
+                    break;
+                case MI_UINT8A:
+                    rval = TypeHelper<MI_Uint8>::recv_array (
+                        this, &(val.uint8a), &pArray);
+                    break;
+                case MI_SINT8A:
+                    rval = TypeHelper<MI_Sint8>::recv_array (
+                        this, &(val.sint8a), &pArray);
+                    break;
+                case MI_UINT16A:
+                    rval = TypeHelper<MI_Uint16>::recv_array (
+                            this, &(val.uint16a), &pArray);
+                    break;
+                case MI_SINT16A:
+                    rval = TypeHelper<MI_Sint16>::recv_array (
+                            this, &(val.sint16a), &pArray);
+                    break;
+                case MI_UINT32A:
+                    rval = TypeHelper<MI_Uint32>::recv_array (
+                            this, &(val.uint32a), &pArray);
+                    break;
+                case MI_SINT32A:
+                    rval = TypeHelper<MI_Sint32>::recv_array (
+                            this, &(val.sint32a), &pArray);
+                    break;
+                case MI_UINT64A:
+                    rval = TypeHelper<MI_Uint64>::recv_array (
+                            this, &(val.uint64a), &pArray);
+                    break;
+                case MI_SINT64A:
+                    rval = TypeHelper<MI_Sint64>::recv_array (
+                            this, &(val.sint64a), &pArray);
+                    break;
+                case MI_REAL32A:
+                    rval = TypeHelper<MI_Real32>::recv_array (
+                            this, &(val.real32a), &pArray);
+                    break;
+                case MI_REAL64A:
+                    rval = TypeHelper<MI_Real64>::recv_array (
+                            this, &(val.real64a), &pArray);
+                    break;
+                case MI_CHAR16A:
+                    rval = TypeHelper<MI_Char16>::recv_array (
+                            this, &(val.char16a), &pArray);
+                    break;
+                case MI_DATETIMEA:
+                    rval = TypeHelper<MI_Datetime>::recv_array (
+                            this, &(val.datetimea), &pArray);
+                    break;
+                case MI_STRINGA:
+                    {
+                        SCX_BOOKEND ("recv (STRINGA)");
+                        int length;
+                        int rval = recv (&length);
+                        if (EXIT_SUCCESS == rval)
+                        {
+                            pArray.reset (
+                                new char[length * sizeof (MI_Char*)]);
+                            MI_Char** const pTemp =
+                                reinterpret_cast<MI_Char** const> (
+                                    pArray.get ());
+                            pStrArray.reset (new std::string[length]);
+                            for (int i = 0;
+                                 EXIT_SUCCESS == rval && length > i;
+                                 ++i)
+                            {
+                                rval = recv (pStrArray.get () + i);
+                                if (EXIT_SUCCESS == rval)
+                                {
+                                    pTemp[i] = const_cast<MI_Char*>(
+                                        pStrArray[i].c_str ());
+                                }
+                            }
+                            if (EXIT_SUCCESS == rval)
+                            {
+                                val.stringa.data = pTemp;
+                                val.stringa.size =
+                                    static_cast<MI_Uint32> (length);
+                            }
+                        }
+                    }
+                    break;
+                case MI_REFERENCE:
+                case MI_INSTANCE:
+                case MI_REFERENCEA:
+                case MI_INSTANCEA:
+                    strm << __FILE__ << '[' << __LINE__ << ']'
+                         << "encountered a non-standard param type: " << type;
                     SCX_BOOKEND_PRINT (strm.str ());
+                    std::cerr << strm.str () << std::endl;
                     strm.str ("");
                     strm.clear ();
+                    rval = EXIT_FAILURE;
+                    break;
+                default:
+                    strm << __FILE__ << '[' << __LINE__ << ']'
+                         << "encountered an unknown param type: " << type;
+                    SCX_BOOKEND_PRINT (strm.str ());
+                    std::cerr << strm.str () << std::endl;
+                    strm.str ("");
+                    strm.clear ();
+                    rval = EXIT_FAILURE;
+                    break;
+                }
+                if (EXIT_SUCCESS == rval)
+                {
+                    if (MI_RESULT_OK == MI_Instance_SetElement (
+                            pInstanceOut, name.c_str (), &val,
+                            static_cast<MI_Type>(type), 0))
+                    {
+                        strm << "value added - name: \"" << name
+                             << "\" - type: " << static_cast<int>(type);
+                        SCX_BOOKEND_PRINT (strm.str ());
+                        strm.str ("");
+                        strm.clear ();
+                    }
+                    else
+                    {
+                        SCX_BOOKEND_PRINT ("failed to add value to instance");
+                        rval = EXIT_FAILURE;
+                    }
                 }
                 else
                 {
-                    SCX_BOOKEND_PRINT ("failed to add value to instance");
-                    rval = EXIT_FAILURE;
+                    SCX_BOOKEND_PRINT ("Failed to read value");
                 }
             }
             else
             {
-                SCX_BOOKEND_PRINT ("Failed to read value");
+                SCX_BOOKEND_PRINT ("Value is NULL.");
             }
         }
         else
