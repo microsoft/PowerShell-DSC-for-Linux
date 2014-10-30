@@ -32,7 +32,7 @@
 #if defined(_MSC_VER)
 #define DSCENGINE_NAMESPACE MI_T("root\\microsoft\\windows\\desiredstateconfiguration")
 #else
-#define DSCENGINE_NAMESPACE MI_T("/dsc")
+#define DSCENGINE_NAMESPACE MI_T("root/Microsoft/Windows/DesiredStateConfiguration")
 #endif
 
 int main(int argc, char *argv[])
