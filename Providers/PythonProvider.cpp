@@ -680,15 +680,16 @@ PythonProvider::recv_MI_Value (
                     {
                         strm << "value added - name: \"" << name
                              << "\" - type: " << static_cast<int>(type);
-                        SCX_BOOKEND_PRINT (strm.str ());
-                        strm.str ("");
-                        strm.clear ();
                     }
                     else
                     {
-                        SCX_BOOKEND_PRINT ("failed to add value to instance");
+                        strm << "Failed to add value: \"" << name << "\" type: "
+                             << static_cast<int>(type) << " to instance";
                         rval = EXIT_FAILURE;
                     }
+                    SCX_BOOKEND_PRINT (strm.str ());
+                    strm.str ("");
+                    strm.clear ();
                 }
                 else
                 {

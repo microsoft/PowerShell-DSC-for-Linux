@@ -64,10 +64,14 @@ GENERATED_OBJS:=$(GENERATED_SOURCES:.c=.o)
 
 # list of providers
 PROVIDERS:=nxFile
-#PROVIDERS+=nxScript
-#PROVIDERS+=nxUser
-#PROVIDERS+=nxGroup
-#PROVIDERS+=nxService
+PROVIDERS+=nxScript
+PROVIDERS+=nxUser
+PROVIDERS+=nxGroup
+PROVIDERS+=nxService
+#PROVIDERS+=nxIPAddress
+#PROVIDERS+=nxComputer
+#PROVIDERS+=nxFirewall
+#PROVIDERS+=nxDNSServerAddress
 
 # this is used to enable the printing of xml style tags for help in debugging
 PRINT_BOOKENDS?=0
