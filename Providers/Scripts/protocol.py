@@ -68,7 +68,7 @@ class MI_Value:
     def write (self, fd):
         trace ('  <MI_Value::write>')
         val = self.type
-        if self.value is not None:
+        if self.value is None:
             val = val | MI_NULL_FLAG
         trace ('    type: {0} ({1})'.format (
             self.type, 'None' if self.value is None else 'Not None'))
@@ -517,18 +517,26 @@ class MI_Timestamp (MI_Datetime):
                   second = None,
                   microseconds = None,
                   utc = None):
-        if year is not None:
-            MI_Datetime.__init__ (self, True)
-            self.year = ctypes.c_uint (year)
-            self.month = ctypes.c_uint (month)
-            self.day = ctypes.c_uint (day)
-            self.hour = ctypes.c_uint (hour)
-            self.minute = ctypes.c_uint (minute)
-            self.second = ctypes.c_uint (second)
-            self.microseconds = ctypes.c_uint32 (microseconds)
-            self.utc = ctypes.c_int (utc)
-        else:
+        if year is None and \
+               month is None and \
+               day is None and \
+               hour is None and \
+               minute is None and \
+               second is None and \
+               microseconds is None and \
+               utc is None:
             MI_Datetime.__init__ (self, None)
+        else:
+            MI_Datetime.__init__ (self, True)
+        self.year = ctypes.c_uint (year if year is not None else 0)
+        self.month = ctypes.c_uint (month if month is not None else 0)
+        self.day = ctypes.c_uint (day if day is not None else 0)
+        self.hour = ctypes.c_uint (hour if hour is not None else 0)
+        self.minute = ctypes.c_uint (minute if minute is not None else 0)
+        self.second = ctypes.c_uint (second if second is not None else 0)
+        self.microseconds = ctypes.c_uint32 (
+            microseconds if microseconds is not None else 0)
+        self.utc = ctypes.c_int (utc if utc is not None else 0)
 
     def write (self, fd):
         trace ('<MI_Timestamp.write>')
@@ -599,7 +607,7 @@ class MI_Timestamp (MI_Datetime):
         trace ('<MI_Timestamp.from_time>')
         tm = time.gmtime (seconds)
         ts = MI_Timestamp (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour,
-                           tm.tm_min, tm.tm_sec, 0, time.timezone)
+                           tm.tm_min, tm.tm_sec, 0, time.timezone / 60)
         trace ('</MI_Timestamp.from_time>')
         return ts
 
@@ -611,15 +619,20 @@ class MI_Interval (MI_Datetime):
                   minutes = None,
                   seconds = None,
                   microseconds = None):
-        if days is not None:
-            MI_Datetime.__init__ (self, True)
-            self.days = ctypes.c_uint (days)
-            self.hours = ctypes.c_uint (hours)
-            self.minutes = ctypes.c_uint (minutes)
-            self.seconds = ctypes.c_uint (seconds)
-            self.microseconds = ctypes.c_uint (microseconds)
-        else:
+        if days is None and \
+               hours is None and \
+               minutes is None and \
+               seconds is None and \
+               microseconds is None:
             MI_Datetime.__init__ (self, None)
+        else:
+            MI_Datetime.__init__ (self, True)
+        self.days = ctypes.c_uint (day if days is not None else 0)
+        self.hours = ctypes.c_uint (hour if hours is not None else 0)
+        self.minutes = ctypes.c_uint (minute if minutes is not None else 0)
+        self.seconds = ctypes.c_uint (second if seconds is not None else 0)
+        self.microseconds = ctypes.c_uint32 (
+            microseconds if microseconds is not None else 0)
 
     def write (self, fd):
         trace ('<MI_Interval.write>')
