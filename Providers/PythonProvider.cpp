@@ -7,13 +7,14 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <errno.h>
+#include <fcntl.h>
 #include <functional>
-#include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <errno.h>
 
 
 namespace
@@ -210,6 +211,43 @@ PythonProvider::forkExec ()
         SCX_BOOKEND_PRINT ("already initialized");
     }
     return rval;
+}
+
+
+int
+PythonProvider::verifySocketState ()
+{
+    //SCX_BOOKEND ("PythonProvider::verifySocketState");
+    int result = EXIT_SUCCESS;
+    // test for socket
+    // if there is a socket...
+    //     test that the socket has no readable data
+    //     if there is data...
+    //         close the socket
+    // if there is no socket..
+    //     attempt to open a socket
+    if (INVALID_SOCKET != m_FD)
+    {
+        // there should be no data on the socket
+        // set the file to non-blocking and attempt to read
+        // if there is data to read, the socket stream is in a bad state
+        int flags = fcntl (m_FD, F_GETFL, 0);
+        char buf[4];
+        if (-1 == flags ||
+            -1 == fcntl (m_FD, F_SETFL, flags | O_NONBLOCK) ||
+            -1 != read (m_FD, buf, 1) ||
+            EAGAIN != errno ||
+            -1 == fcntl (m_FD, F_SETFL, flags))
+        {
+            // reset the socket
+            handleSocketClosed ();
+        }
+    }
+    if (INVALID_SOCKET == m_FD)
+    {
+        result = init ();
+    }
+    return result;
 }
 
 

@@ -55,6 +55,7 @@ private:
 
     int forkExec ();
 
+    int verifySocketState ();
     void handleSocketClosed ();
 
     template<typename T>
@@ -350,6 +351,7 @@ PythonProvider::sendRequest (
     strm.str ("");
     strm.clear ();
 #endif
+    int result = verifySocketState ();
     // 1: write the header
     //     a: (unsigned char) OP_TYPE
     //     b: (string) OP_NAME
@@ -359,7 +361,6 @@ PythonProvider::sendRequest (
         pResource->__instance.classDecl->properties;
     MI_Uint32 const numProperties =
         pResource->__instance.classDecl->numProperties;
-    int result = EXIT_SUCCESS;
     if (EXIT_SUCCESS == result)
     {
         result = send (opType);
