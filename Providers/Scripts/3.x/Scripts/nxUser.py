@@ -11,6 +11,8 @@ import sys
 import datetime
 import grp
 import codecs
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[Key] string UserName;
 # 	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
@@ -26,49 +28,105 @@ global show_mof
 show_mof=False
 
 def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    UserName = UserName.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    FullName = FullName.decode("utf-8")
-    Description = Description.decode("utf-8")
-    Password = Password.decode("utf-8")
-    HomeDirectory = HomeDirectory.decode("utf-8")
-    GroupID = GroupID.decode("utf-8")
+    if UserName == None :
+        UserName = ''
+    if Ensure == None :
+        Ensure = ''
+    if FullName == None :
+        FullName = ''
+    if Description == None :
+        Description = ''
+    if Password == None :
+        Password = ''
+    if Disabled == None :
+        Disabled = False
+    if PasswordChangeRequired == None :
+        PasswordChangeRequired = False
+    if HomeDirectory == None :
+        HomeDirectory = ''
+    if GroupID == None :
+        GroupID = ''
 
     retval = Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
 
 def Test_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    UserName = UserName.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    FullName = FullName.decode("utf-8")
-    Description = Description.decode("utf-8")
-    Password = Password.decode("utf-8")
-    HomeDirectory = HomeDirectory.decode("utf-8")
-    GroupID = GroupID.decode("utf-8")
+    if UserName == None :
+        UserName = ''
+    if Ensure == None :
+        Ensure = ''
+    if FullName == None :
+        FullName = ''
+    if Description == None :
+        Description = ''
+    if Password == None :
+        Password = ''
+    if Disabled == None :
+        Disabled = False
+    if PasswordChangeRequired == None :
+        PasswordChangeRequired = False
+    if HomeDirectory == None :
+        HomeDirectory = ''
+    if GroupID == None :
+        GroupID = ''
+    sys.stderr.write('UserName ' +  UserName+'\n')
+    sys.stderr.write('Ensure ' +  Ensure+'\n')
+    sys.stderr.write('FullName ' +  FullName+'\n')
+    sys.stderr.write('PasswordChangeRequired ' +  str(PasswordChangeRequired)+'\n')
+    sys.stderr.write('Disabled ' +  str(Disabled)+'\n')
+    sys.stderr.write('Description ' +  Description+'\n')
+    sys.stderr.write('Password ' +  Password+'\n')
+    sys.stderr.write('HomeDirectory ' +  HomeDirectory+'\n')
+    sys.stderr.write('GroupID ' +  GroupID+'\n')
+
     
     retval = Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
 
 def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    arg_names=locals().keys()
-    UserName = UserName.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    FullName = FullName.decode("utf-8")
-    Description = Description.decode("utf-8")
-    Password = Password.decode("utf-8")
-    HomeDirectory = HomeDirectory.decode("utf-8")
-    GroupID = GroupID.decode("utf-8")
+    arg_names=list(locals().keys())
+    if UserName == None :
+        UserName = ''
+    if Ensure == None :
+        Ensure = ''
+    if FullName == None :
+        FullName = ''
+    if Description == None :
+        Description = ''
+    if Password == None :
+        Password = ''
+    if Disabled == None :
+        Disabled = False
+    if PasswordChangeRequired == None :
+        PasswordChangeRequired = False
+    if HomeDirectory == None :
+        HomeDirectory = ''
+    if GroupID == None :
+        GroupID = ''
 
     retval = 0
     (retval, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
 
-    UserName = UserName.encode("utf-8")
-    Ensure = Ensure.encode("utf-8")
-    FullName = FullName.encode("utf-8")
-    Description = Description.encode("utf-8")
-    Password = Password.encode("utf-8")
-    HomeDirectory = HomeDirectory.encode("utf-8")
-    GroupID = GroupID.encode("utf-8")
+    UserName = protocol.MI_String( UserName)
+    Ensure = protocol.MI_String( Ensure)
+    FullName = protocol.MI_String( FullName)
+    PasswordChangeRequired = protocol.MI_Boolean(PasswordChangeRequired)
+    Disabled = protocol.MI_Boolean(Disabled)
+    Description = protocol.MI_String( Description)
+    Password = protocol.MI_String( Password)
+    HomeDirectory = protocol.MI_String( HomeDirectory)
+    GroupID = protocol.MI_String( GroupID)
+
+    sys.stderr.write('UserName ' +  UserName.value+'\n')
+    sys.stderr.write('Ensure ' +  Ensure.value+'\n')
+    sys.stderr.write('FullName ' +  FullName.value+'\n')
+    sys.stderr.write('PasswordChangeRequired ' +  str(PasswordChangeRequired.value)+'\n')
+    sys.stderr.write('Disabled ' +  str(Disabled.value)+'\n')
+    sys.stderr.write('Description ' +  Description.value+'\n')
+    sys.stderr.write('Password ' +  Password.value+'\n')
+    sys.stderr.write('HomeDirectory ' +  HomeDirectory.value+'\n')
+    sys.stderr.write('GroupID ' +  GroupID.value+'\n')
+
 
     retd={}
     ld=locals()
