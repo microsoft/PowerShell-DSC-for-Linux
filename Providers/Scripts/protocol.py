@@ -70,8 +70,7 @@ class MI_Value:
         val = self.type
         if self.value is None:
             val = val | MI_NULL_FLAG
-        trace ('    type: {0} ({1})'.format (
-            self.type, 'None' if self.value is None else 'Not None'))
+        trace ('    type: ' + str(self.type) +  ' ' + repr(self.value) )
         buf = struct.pack ('@B', val)
         fd.sendall (buf)
         trace ('  </MI_Value::write>')
@@ -83,8 +82,7 @@ class MI_Value:
         type = struct.unpack ('@B', buf)[0]
         switch = type & ~(MI_NULL_FLAG)
         
-        trace ('  type: {0} ({1})'.format (
-            switch, 'None' if type & MI_NULL_FLAG else 'Not None'))
+        trace ('  type: ' + str(switch) )
         val = None
         if MI_BOOLEAN == switch:
             val = MI_Boolean.read (fd, type)
@@ -143,7 +141,7 @@ class MI_Value:
         elif MI_STRINGA == switch:
             val = MI_StringA.read (fd, type)
         else:
-            print 'Received unexpected type: {0}'.format (type)
+            trace ('Received unexpected type: ' + str(type))
         trace ('</MI_Value::read>')
         return val
 
@@ -152,14 +150,21 @@ class MI_Boolean (MI_Value):
     def __init__ (self, val):
         MI_Value.__init__ (self, MI_BOOLEAN)
         if val is not None:
-            self.value = ctypes.c_bool (val)
-
+            #ctypes.c_bool not available if python < 2.6.6
+            try:
+                self.value = ctypes.c_bool (val)
+            except:
+                self.value = ctypes.c_int (val)
     def write (self, fd):
         verbose_trace ('<MI_Boolean.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            verbose_trace ('  value: {0}'.format (self.value.value))
-            buf = struct.pack ('@B', 1 if self.value.value else 0)
+            verbose_trace ('  value: ' + str (self.value.value))
+            if self.value.value : 
+                tmp=1 
+            else:
+                tmp=0
+            buf = struct.pack ('@B', tmp)
             fd.sendall (buf)
         verbose_trace ('</MI_Boolean.write>')
 
@@ -170,8 +175,11 @@ class MI_Boolean (MI_Value):
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (1)
             val = struct.unpack ('@B', buf)[0]
-            verbose_trace ('  value: {0}'.format (
-                'True' if self.value.value else 'False'))
+            if val.value :
+                tmp='True'
+            else:
+                tmp='False'
+            verbose_trace ('  value: ' + tmp)
         rval = MI_Boolean (val)
         verbose_trace ('</MI_Boolean.read>')
         return rval
@@ -187,7 +195,7 @@ class MI_Uint8 (MI_Value):
         trace ('<MI_Uint8.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@B', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Uint8.write>')
@@ -214,7 +222,7 @@ class MI_Sint8 (MI_Value):
         trace ('<MI_Sint8.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@b', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Sint8.write>')
@@ -241,7 +249,7 @@ class MI_Uint16 (MI_Value):
         trace ('<MI_Uint16.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@H', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Uint16.write>')
@@ -268,7 +276,7 @@ class MI_Sint16 (MI_Value):
         trace ('<MI_Sint16.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@h', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Sint16.write>')
@@ -295,7 +303,7 @@ class MI_Uint32 (MI_Value):
         trace ('<MI_Uint32.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@I', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Uint32.write>')
@@ -322,7 +330,7 @@ class MI_Sint32 (MI_Value):
         trace ('<MI_Sint32.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@i', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Sint32.write>')
@@ -349,7 +357,7 @@ class MI_Uint64 (MI_Value):
         trace ('<MI_Uint64.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@Q', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Uint64.write>')
@@ -376,7 +384,7 @@ class MI_Sint64 (MI_Value):
         trace ('<MI_Sint64.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@q', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Sint64.write>')
@@ -403,7 +411,7 @@ class MI_Real32 (MI_Value):
         trace ('<MI_Real32.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@f', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Real32.write>')
@@ -430,7 +438,7 @@ class MI_Real64 (MI_Value):
         trace ('<MI_Real64.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@d', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Real64.write>')
@@ -457,7 +465,7 @@ class MI_Char16 (MI_Value):
         trace ('<MI_Char16.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: {0}'.format (self.value.value))
+            trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@H', self.value.value)
             fd.sendall (buf)
         trace ('</MI_Char16.write>')
@@ -477,7 +485,10 @@ class MI_Char16 (MI_Value):
 class MI_Datetime (MI_Value):
     def __init__ (self, isTimestamp):
         MI_Value.__init__ (self, MI_DATETIME)
-        self.value = ctypes.c_bool (isTimestamp)
+        try:
+            self.value = ctypes.c_bool (isTimestamp)
+        except:
+            self.value = ctypes.c_int (isTimestamp)
 
     def write (self, fd):
         trace ('  <MI_Datetime.write>')
@@ -498,7 +509,11 @@ class MI_Datetime (MI_Value):
         trace ('  <MI_Datetime.read_data>')
         rval = None
         buf = fd.recv (1)
-        isTimestamp = ctypes.c_bool (struct.unpack ('@B', buf)[0])
+        isTimestamp=None
+        try:
+            isTimestamp = ctypes.c_bool (struct.unpack ('@B', buf)[0])
+        except:
+            isTimestamp = ctypes.c_int (struct.unpack ('@B', buf)[0])
         if isTimestamp:
             rval = MI_Timestamp.read_data (fd)
         else:
@@ -528,15 +543,46 @@ class MI_Timestamp (MI_Datetime):
             MI_Datetime.__init__ (self, None)
         else:
             MI_Datetime.__init__ (self, True)
-        self.year = ctypes.c_uint (year if year is not None else 0)
-        self.month = ctypes.c_uint (month if month is not None else 0)
-        self.day = ctypes.c_uint (day if day is not None else 0)
-        self.hour = ctypes.c_uint (hour if hour is not None else 0)
-        self.minute = ctypes.c_uint (minute if minute is not None else 0)
-        self.second = ctypes.c_uint (second if second is not None else 0)
-        self.microseconds = ctypes.c_uint32 (
-            microseconds if microseconds is not None else 0)
-        self.utc = ctypes.c_int (utc if utc is not None else 0)
+        if year != None :
+            t=year
+        else:
+            t=0
+        self.year = ctypes.c_uint (t)
+        if month != None :
+            t=month
+        else:
+            t=0
+        self.month = ctypes.c_uint (t)
+        if day != None :
+            t=day
+        else:
+            t=0
+        self.day = ctypes.c_uint (t)
+        if hour != None :
+            t=hour
+        else:
+            t=0
+        self.hour = ctypes.c_uint (t)
+        if minute != None :
+            t=minute
+        else:
+            t=0
+        self.minute = ctypes.c_uint (t)
+        if second != None :
+            t=second
+        else:
+            t=0
+        self.second = ctypes.c_uint (t)
+        if microseconds != None :
+            t=microseconds
+        else:
+            t=0
+        self.microseconds = ctypes.c_uint32 (t)
+        if utc != None :
+            t=utc
+        else:
+            t=0
+        self.utc = ctypes.c_int(int(t))
 
     def write (self, fd):
         trace ('<MI_Timestamp.write>')
@@ -547,15 +593,15 @@ class MI_Timestamp (MI_Datetime):
 
     def write_data (self, fd):
         trace ('  <MI_Timestamp.write_data>')
-        trace ('    isTimestamp: {0}'.format (self.value.value))
-        trace ('    year: {0}'.format (self.year.value))
-        trace ('    month: {0}'.format (self.month.value))
-        trace ('    day: {0}'.format (self.day.value))
-        trace ('    hour: {0}'.format (self.hour.value))
-        trace ('    minute: {0}'.format (self.minute.value))
-        trace ('    second: {0}'.format (self.second.value))
-        trace ('    microseconds: {0}'.format (self.microseconds.value))
-        trace ('    utc: {0}'.format (self.utc.value))
+        trace ('    isTimestamp:' + str (self.value.value))
+        trace ('    year:' + str (self.year.value))
+        trace ('    month:' + str (self.month.value))
+        trace ('    day:' + str (self.day.value))
+        trace ('    hour:' + str (self.hour.value))
+        trace ('    minute:' + str (self.minute.value))
+        trace ('    second:' + str (self.second.value))
+        trace ('    microseconds:' + str (self.microseconds.value))
+        trace ('    utc:' + str (self.utc.value))
         buf = struct.pack ('@B', self.value.value)
         buf += struct.pack ('@I', self.year.value)
         buf += struct.pack ('@I', self.month.value)
@@ -591,14 +637,14 @@ class MI_Timestamp (MI_Datetime):
         rval = MI_Timestamp (year, month, day, hour, minute, second,
                              microseconds, utc)
         trace ('      isTimestamp: True')
-        trace ('      year: {0}'.format (year))
-        trace ('      month: {0}'.format (month))
-        trace ('      day: {0}'.format (day))
-        trace ('      hour: {0}'.format (hour))
-        trace ('      minute: {0}'.format (minute))
-        trace ('      second: {0}'.format (second))
-        trace ('      microseconds: {0}'.format (microseconds))
-        trace ('      utc: {0}'.format (utc))
+        trace ('      year:' + str (year))
+        trace ('      month:' + str (month))
+        trace ('      day:' + str (day))
+        trace ('      hour:' + str (hour))
+        trace ('      minute:' + str (minute))
+        trace ('      second:' + str (second))
+        trace ('      microseconds:' + str (microseconds))
+        trace ('      utc:' + str (utc))
         trace ('    </MI_Timestamp.read_data>')
         return rval
 
@@ -627,12 +673,31 @@ class MI_Interval (MI_Datetime):
             MI_Datetime.__init__ (self, None)
         else:
             MI_Datetime.__init__ (self, True)
-        self.days = ctypes.c_uint (day if days is not None else 0)
-        self.hours = ctypes.c_uint (hour if hours is not None else 0)
-        self.minutes = ctypes.c_uint (minute if minutes is not None else 0)
-        self.seconds = ctypes.c_uint (second if seconds is not None else 0)
-        self.microseconds = ctypes.c_uint32 (
-            microseconds if microseconds is not None else 0)
+        if days != None :
+            t=day
+        else:
+            t=0
+        self.days = ctypes.c_uint (t)
+        if hours != None :
+            t=hour
+        else:
+            t=0
+        self.hours = ctypes.c_uint (t)
+        if minutes != None :
+            t=minute
+        else:
+            t=0
+        self.minutes = ctypes.c_uint (t)
+        if seconds != None :
+            t=second
+        else:
+            t=0
+        self.seconds = ctypes.c_uint (t)
+        if microseconds != None :
+            t=microsecond
+        else:
+            t=0
+        self.microseconds = ctypes.c_uint32 (t)
 
     def write (self, fd):
         trace ('<MI_Interval.write>')
@@ -643,12 +708,12 @@ class MI_Interval (MI_Datetime):
 
     def write_data (self, fd):
         trace ('  <MI_Interval.write_data>')
-        trace ('    isTimestamp: {0}'.format (self.value.value))
-        trace ('    days: {0}'.format (self.days.value))
-        trace ('    hours: {0}'.format (self.hours.value))
-        trace ('    minutes: {0}'.format (self.minutes.value))
-        trace ('    seconds: {0}'.format (self.seconds.value))
-        trace ('    microseconds: {0}'.format (self.microseconds.value))
+        trace ('    isTimestamp:' + str (self.value.value))
+        trace ('    days:' + str (self.days.value))
+        trace ('    hours:' + str (self.hours.value))
+        trace ('    minutes:' + str (self.minutes.value))
+        trace ('    seconds:' + str (self.seconds.value))
+        trace ('    microseconds:' + str (self.microseconds.value))
         buf = struct.pack ('@B', self.value.value)
         buf += struct.pack ('@I', self.days.value)
         buf += struct.pack ('@I', self.hours.value)
@@ -674,11 +739,11 @@ class MI_Interval (MI_Datetime):
         buf = fd.recv (4)
         rval = MI_Timestamp (days, hours, minutes, seconds, microseconds)
         trace ('      isTimestamp: False')
-        trace ('      days: {0}'.format (days))
-        trace ('      hours: {0}'.format (hours))
-        trace ('      minutes: {0}'.format (minutes))
-        trace ('      seconds: {0}'.format (seconds))
-        trace ('      microseconds: {0}'.format (microseconds))
+        trace ('      days:' + str (days))
+        trace ('      hours:' + str (hours))
+        trace ('      minutes:' + str (minutes))
+        trace ('      seconds:' + str (seconds))
+        trace ('      microseconds:' + str (microseconds))
         trace ('    </MI_Interval.read_data>')
         return rval
 
@@ -686,17 +751,18 @@ class MI_Interval (MI_Datetime):
 class MI_String (MI_Value):
     def __init__ (self, val):
         MI_Value.__init__ (self, MI_STRING)
-        if val is not None:
-            self.value = str (val)
-
+        if val is not None :
+            if type(val) != str:
+                self.value=str(val)
+            else:
+                self.value=val
     def write (self, fd):
         verbose_trace ('<MI_String.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            verbose_trace ('  len: {0}, value: "{1}"'.format (
-                len (self.value), self.value))
+            verbose_trace ('  len: ' + str(len (self.value)) + ', value: ' + self.value)
             buf = struct.pack ('@i', len (self.value))
-            if type (buf) != str:
+            if type(buf) != str:
                 buf += bytes (self.value, 'utf8')
             else:
                 buf += self.value
@@ -706,15 +772,15 @@ class MI_String (MI_Value):
     @staticmethod
     def read (fd, flags):
         verbose_trace ('<MI_String.read>')
-        str = None
+        strg = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
             if len > 0:
                 buf = fd.recv (len)
-                str = buf.decode ('utf8')
-            verbose_trace ('  len: {0}, value: "{1}"'.format (len, str))
-        rval = MI_String (str)
+                strg = buf.decode ('utf8')
+            verbose_trace ('  len: ' + str(len) + ', value: ' + str(strg))
+        rval = MI_String (strg)
         verbose_trace ('</MI_String.read>')
         return rval
 
@@ -725,23 +791,30 @@ class MI_BooleanA (MI_Value):
         self.value = []
         if vals is not None:
             for val in vals:
-                self.value.append (ctypes.c_bool (val))
+                try:
+                    self.value.append (ctypes.c_bool (val))
+                except:
+                    self.value.append (ctypes.c_int (val))
 
     def write (self, fd):
         trace ('<MI_BooleanA.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: {0}'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: "{0}"'.format (val.value))
-                buf = struct.pack ('@B', 1 if val.value else 0)
+                trace ('      value: ' + str(val.value))
+                if self.value.value : 
+                    tmp=1 
+                else:
+                    tmp=0
+                buf = struct.pack ('@B',tmp)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_BooleanA.write>')
 
@@ -753,11 +826,11 @@ class MI_BooleanA (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (1)
                 val = struct.unpack ('@B', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_BooleanA (vals)
         trace ('</MI_BooleanA.read>')
@@ -776,17 +849,17 @@ class MI_Uint8A (MI_Value):
         trace ('<MI_Uint8A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@B', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Uint8A.write>')
 
@@ -798,11 +871,11 @@ class MI_Uint8A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (1)
                 val = struct.unpack ('@B', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Uint8A (vals)
         trace ('</MI_Uint8A.read>')
@@ -821,17 +894,17 @@ class MI_Sint8A (MI_Value):
         trace ('<MI_Sint8A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@b', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Sint8A.write>')
 
@@ -843,11 +916,11 @@ class MI_Sint8A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (1)
                 val = struct.unpack ('@b', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Sint8A (vals)
         trace ('</MI_Sint8A.read>')
@@ -866,17 +939,17 @@ class MI_Uint16A (MI_Value):
         trace ('<MI_Uint16A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@H', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Uint16A.write>')
 
@@ -888,11 +961,11 @@ class MI_Uint16A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (2)
                 val = struct.unpack ('@H', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Uint16A (vals)
         trace ('</MI_Uint16A.read>')
@@ -911,17 +984,17 @@ class MI_Sint16A (MI_Value):
         trace ('<MI_Sint16A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@h', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Sint16A.write>')
 
@@ -933,11 +1006,11 @@ class MI_Sint16A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (2)
                 val = struct.unpack ('@h', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Sint16A (vals)
         trace ('</MI_Sint16A.read>')
@@ -956,17 +1029,17 @@ class MI_Uint32A (MI_Value):
         trace ('<MI_Uint32A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@I', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Uint32A.write>')
 
@@ -978,11 +1051,11 @@ class MI_Uint32A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (4)
                 val = struct.unpack ('@I', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Uint32A (vals)
         trace ('</MI_Uint32A.read>')
@@ -1001,17 +1074,17 @@ class MI_Sint32A (MI_Value):
         trace ('<MI_Sint32A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('    len: "{0}"'.format (len (self.value)))
+            trace ('    len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@i', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Sint32A.write>')
 
@@ -1023,11 +1096,11 @@ class MI_Sint32A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (4)
                 val = struct.unpack ('@i', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Sint32A (vals)
         trace ('</MI_Sint32A.read>')
@@ -1046,17 +1119,17 @@ class MI_Uint64A (MI_Value):
         trace ('<MI_Uint64A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@Q', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Uint64A.write>')
 
@@ -1068,11 +1141,11 @@ class MI_Uint64A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (8)
                 val = struct.unpack ('@Q', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Uint64A (vals)
         trace ('</MI_Uint64A.read>')
@@ -1091,17 +1164,17 @@ class MI_Sint64A (MI_Value):
         trace ('<MI_Sint64A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@q', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Sint64A.write>')
 
@@ -1113,11 +1186,11 @@ class MI_Sint64A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (8)
                 val = struct.unpack ('@q', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Sint64A (vals)
         trace ('</MI_Sint64A.read>')
@@ -1136,17 +1209,17 @@ class MI_Real32A (MI_Value):
         trace ('<MI_Real32A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@f', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Real32A.write>')
 
@@ -1158,11 +1231,11 @@ class MI_Real32A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (4)
                 val = struct.unpack ('@f', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Real32A (vals)
         trace ('</MI_Real32A.read>')
@@ -1181,17 +1254,17 @@ class MI_Real64A (MI_Value):
         trace ('<MI_Real64A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('    <values>')
             for val in self.value:
-                trace ('      value: {0}'.format (val.value))
+                trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@d', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Real64A.write>')
 
@@ -1203,11 +1276,11 @@ class MI_Real64A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (8)
                 val = struct.unpack ('@d', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Real64A (vals)
         trace ('</MI_Real64A.read>')
@@ -1226,17 +1299,17 @@ class MI_Char16A (MI_Value):
         trace ('<MI_Char16A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: {0}'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('  <values>')
             for val in self.value:
-                trace ('    value: {0}'.format (val.value))
+                trace ('    value: ' + str(val.value))
                 buf = struct.pack ('@H', val.value)
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
+            trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
         trace ('</MI_Char16A.write>')
 
@@ -1248,11 +1321,11 @@ class MI_Char16A (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (2)
                 val = struct.unpack ('@H', buf)[0]
-                trace ('  value: {0}'.format (val))
+                trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Char16A (vals)
         trace ('</MI_Char16A.read>')
@@ -1269,7 +1342,7 @@ class MI_DatetimeA (MI_Value):
     def write (self, fd):
         trace ('<MI_DatetimeA.write>')
         MI_Value.write (self, fd)
-        trace ('  len: "{0}"'.format (len (self.values)))
+        trace ('  len:' + str (len (self.values)))
         buf = struct.pack ('@i', len (self.values))
         fd.sendall (buf)
         for val in self.values:
@@ -1284,7 +1357,7 @@ class MI_DatetimeA (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 val = MI_Datetime.read_data (fd)
                 vals.append (val)
@@ -1305,12 +1378,12 @@ class MI_StringA (MI_Value):
         trace ('<MI_StringA.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len: "{0}"'.format (len (self.value)))
+            trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
             trace ('  <values>')
             for val in self.value:
-                trace ('    len: {0}, value: "{1}"'.format (len (val), val))
+                trace('  len: ' + str(len (val)) + ', value: ' + str(val))
                 buf = struct.pack ('@i', len (val))
                 if type (buf) != str:
                     buf += bytes (val, 'utf8')
@@ -1319,8 +1392,8 @@ class MI_StringA (MI_Value):
                 fd.sendall (buf)
             trace ('  </values>')
         else:
-            trace ('    type: {0} (None)'.format (self.type))
-            fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
+            trace ('    type: ' + str(self.type))
+            fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG)) 
         trace ('</MI_StringA.write>')
 
     @staticmethod
@@ -1331,15 +1404,15 @@ class MI_StringA (MI_Value):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len: {0}'.format (len))
+            trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (4)
                 len = struct.unpack ('@i', buf)[0]
-                str = ''
+                strg = ''
                 if len > 0:
                     buf = fd.recv (len)
-                    str = buf.decode ('utf8')
-                trace ('  value: "{0}"'.format (str))
+                    strg = buf.decode ('utf8')
+                trace ('  value: ' + str(strg))
                 vals.append (str)
         rval = MI_StringA (vals)
         trace ('</MI_StringA.read>')

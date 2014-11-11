@@ -13,6 +13,8 @@ import pwd
 import shutil
 import grp
 import codecs
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[Key] string DestinationPath; 
 # 	[Write] string SourcePath;
@@ -58,7 +60,7 @@ def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     if Recurse == None :
         Recurse = False
     if Links == None :
-        Links = ''
+        Links = 'follow'
     if Owner == None :
         Owner = ''
     if Group == None :
@@ -87,7 +89,7 @@ def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Ch
     if Recurse == None :
         Recurse = False
     if Links == None :
-        Links = ''
+        Links = 'follow'
     if Owner == None :
         Owner = ''
     if Group == None :
@@ -117,7 +119,7 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     if Recurse == None :
         Recurse = False
     if Links == None :
-        Links = ''
+        Links = 'follow'
     if Owner == None :
         Owner = ''
     if Group == None :
@@ -127,7 +129,48 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
 
     retval = 0
     (retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate) = Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
-
+    sys.stderr.write( 'retval ' + repr(retval)+'\n')
+    sys.stderr.write( 'DestinationPath ' + repr(DestinationPath)+'\n')
+    sys.stderr.write( 'SourcePath ' + repr(SourcePath)+'\n')
+    sys.stderr.write( 'Ensure ' + repr(Ensure)+'\n')
+    sys.stderr.write( 'Type ' + repr(Type)+'\n')
+    sys.stderr.write( 'Force ' + repr(Force)+'\n')
+    sys.stderr.write( 'Contents ' + repr(Contents)+'\n')
+    sys.stderr.write( 'Checksum ' + repr(Checksum)+'\n')
+    sys.stderr.write( 'Recurse ' + repr(Recurse)+'\n')
+    sys.stderr.write( 'Links ' + repr(Links)+'\n')
+    sys.stderr.write( 'Owner ' + repr(Owner)+'\n')
+    sys.stderr.write( 'Group ' + repr(Group)+'\n')
+    sys.stderr.write( 'Mode ' + repr(Mode)+'\n')
+    sys.stderr.write( 'ModifiedDate ' + repr(ModifiedDate)+'\n')
+    DestinationPath = protocol.MI_String (DestinationPath)
+    SourcePath = protocol.MI_String (SourcePath)
+    Ensure = protocol.MI_String (Ensure)
+    Type = protocol.MI_String (Type)
+    Force = protocol.MI_Boolean (Force)
+    Contents = protocol.MI_String (Contents)
+    Checksum = protocol.MI_String (Checksum)
+    Recurse = protocol.MI_Boolean (Recurse)
+    Links = protocol.MI_String (Links)
+    Owner = protocol.MI_String (Owner)
+    Group = protocol.MI_String (Group)
+    Mode = protocol.MI_String (Mode)
+    ModifiedDate = protocol.MI_Timestamp.from_time (ModifiedDate)
+    sys.stderr.write( 'retval ' + str(retval)+'\n')
+    sys.stderr.write( 'DestinationPath ' + DestinationPath.value+'\n')
+    sys.stderr.write( 'SourcePath ' + SourcePath.value+'\n')
+    sys.stderr.write( 'Ensure ' + (Ensure.value)+'\n')
+    sys.stderr.write( 'Type ' + Type.value+'\n')
+    sys.stderr.write( 'Force ' + str(Force.value)+'\n')
+    sys.stderr.write( 'Contents ' + Contents.value+'\n')
+    sys.stderr.write( 'Checksum ' + Checksum.value+'\n')
+    sys.stderr.write( 'Recurse ' + str(Recurse.value)+'\n')
+    sys.stderr.write( 'Links ' + Links.value+'\n')
+    sys.stderr.write( 'Owner ' + Owner.value+'\n')
+    sys.stderr.write( 'Group ' + Group.value+'\n')
+    sys.stderr.write( 'Mode ' + Mode.value+'\n')
+    sys.stderr.write( 'ModifiedDate ' + repr(ModifiedDate.value)+'\n')
+    arg_names.append('ModifiedDate')
     retd={}
     ld=locals()
     for k in arg_names :
@@ -276,7 +319,7 @@ def ListDir(path):
 def Symlink(spath,dpath):
     error=None
     try:
-        os.symlink(os.readlink(spath), dpath)
+        os.symlink(spath, dpath)
     except OSError as error:
         Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror,file=sys.stderr)
     except IOError as error:
@@ -837,9 +880,12 @@ def TestLink(DestinationPath, SourcePath, fc):
             elif fc.Links == "ignore":
                 return True
         else:
+            if not os.path.exists(DestinationPath) or not os.path.exists(SourcePath) :
+                return False
             if os.readlink(DestinationPath) != SourcePath:
                 return False
-
+    if os.path.exists(DestinationPath) != True:
+        return False            
     if TestOwnerGroupMode(DestinationPath, SourcePath, fc) == False:
         return False
 
@@ -848,7 +894,6 @@ def TestLink(DestinationPath, SourcePath, fc):
 def Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     ShowMof('TEST', DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     fc = FileContext(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
-
     if not DestinationPath:
         return [-1]
 
@@ -874,12 +919,14 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
     ShowMof('GET', DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     if not DestinationPath:
         Ensure = "Absent"
-        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ModifiedDate = ""
+        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ""
+        ModifiedDate = None
         return [-1, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
     if not os.path.exists(DestinationPath):
         Ensure = "Absent"
-        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ModifiedDate = ""
+        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ""
+        ModifiedDate = None
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
     fc = FileContext(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
 
@@ -887,7 +934,6 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
     Checksum = ""
     Force = False
     Recurse = False
-    Links = ""
 
     stat_info = os.lstat(DestinationPath)
 
@@ -901,9 +947,15 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
     elif os.path.isdir(DestinationPath):
         Type = "directory"
         
-    ModifiedDate = str(int(stat_info.st_mtime))
+    ModifiedDate = stat_info.st_mtime
     if Type == "directory":
-        Contents = ListDir(DestinationPath)
+        Contents = repr(ListDir(DestinationPath))
+    elif Type == 'link':
+        if Links == 'manage' :
+            Contents=LStatFile(DestinationPath)
+            Contents=repr(Contents)
+        elif Links == 'follow': 
+            Contents,error=ReadFile(DestinationPath)
     else :
         Contents,error=ReadFile(DestinationPath)
     return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
@@ -916,8 +968,8 @@ class FileContext:
             Type = "file"
         if not Ensure:
             Ensure = "present"
-        if not Links:
-            Links = "manage"
+        if not Links or len(Links) == 0:
+            Links = "follow"
         self.DestinationPath = DestinationPath
         self.SourcePath = SourcePath
         self.Ensure = Ensure.lower()
@@ -929,7 +981,7 @@ class FileContext:
         self.Links = Links.lower()
         self.Owner = Owner
         self.Group = Group
-        self.ModifiedDate=''
+        self.ModifiedDate=None
         error=None
 
         if Mode:
