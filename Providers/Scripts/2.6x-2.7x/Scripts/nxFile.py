@@ -13,7 +13,8 @@ import pwd
 import shutil
 import grp
 import codecs
-import protocol
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[Key] string DestinationPath; 
 # 	[Write] string SourcePath;
@@ -62,6 +63,10 @@ def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
         Force = Force
     else:
         Force = False
+    if Contents  != None :
+        Contents = Contents.decode("utf-8")
+    else:
+        Contents=''
     if Checksum != None :
         Checksum = Checksum.decode("utf-8")
     else:
@@ -70,10 +75,10 @@ def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
         Recurse = Recurse
     else:
         Recurse = False
-    if Links != None :
+    if Links != None and len(Links) > 0:
         Links = Links.decode("utf-8")
     else:
-        Links = ''
+        Links = 'follow'
     if Owner != None :
         Owner = Owner.decode("utf-8")
     else:
@@ -111,6 +116,10 @@ def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Ch
         Force = Force
     else:
         Force = False
+    if Contents  != None :
+        Contents = Contents.decode("utf-8")
+    else:
+        Contents=''
     if Checksum != None :
         Checksum = Checksum.decode("utf-8")
     else:
@@ -119,10 +128,10 @@ def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Ch
         Recurse = Recurse
     else:
         Recurse = False
-    if Links != None :
+    if Links != None and len(Links) > 0:
         Links = Links.decode("utf-8")
     else:
-        Links = ''
+        Links = 'follow'
     if Owner != None :
         Owner = Owner.decode("utf-8")
     else:
@@ -141,7 +150,7 @@ def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Ch
     return retval
 
 def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if DestinationPath != None :
         DestinationPath = DestinationPath.decode("utf-8")
     else:
@@ -162,6 +171,10 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
         Force = Force
     else:
         Force = False
+    if Contents  != None :
+        Contents = Contents.decode("utf-8")
+    else:
+        Contents=''
     if Checksum != None :
         Checksum = Checksum.decode("utf-8")
     else:
@@ -170,10 +183,10 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
         Recurse = Recurse
     else:
         Recurse = False
-    if Links != None :
+    if Links != None and len(Links) > 0:
         Links = Links.decode("utf-8")
     else:
-        Links = ''
+        Links = 'follow'
     if Owner != None :
         Owner = Owner.decode("utf-8")
     else:
@@ -189,7 +202,20 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
 
     retval = 0
     (retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate) = Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
-
+    sys.stderr.write( 'retval ' + repr(retval)+'\n')
+    sys.stderr.write( 'DestinationPath ' + repr(DestinationPath)+'\n')
+    sys.stderr.write( 'SourcePath ' + repr(SourcePath)+'\n')
+    sys.stderr.write( 'Ensure ' + repr(Ensure)+'\n')
+    sys.stderr.write( 'Type ' + repr(Type)+'\n')
+    sys.stderr.write( 'Force ' + repr(Force)+'\n')
+    sys.stderr.write( 'Contents ' + repr(Contents)+'\n')
+    sys.stderr.write( 'Checksum ' + repr(Checksum)+'\n')
+    sys.stderr.write( 'Recurse ' + repr(Recurse)+'\n')
+    sys.stderr.write( 'Links ' + repr(Links)+'\n')
+    sys.stderr.write( 'Owner ' + repr(Owner)+'\n')
+    sys.stderr.write( 'Group ' + repr(Group)+'\n')
+    sys.stderr.write( 'Mode ' + repr(Mode)+'\n')
+    sys.stderr.write( 'ModifiedDate ' + repr(ModifiedDate)+'\n')
     DestinationPath = protocol.MI_String (DestinationPath.encode("utf-8"))
     SourcePath = protocol.MI_String (SourcePath.encode("utf-8"))
     Ensure = protocol.MI_String (Ensure.encode("utf-8"))
@@ -203,7 +229,21 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     Group = protocol.MI_String (Group.encode("utf-8"))
     Mode = protocol.MI_String (Mode.encode("utf-8"))
     ModifiedDate = protocol.MI_Timestamp.from_time (ModifiedDate)
-
+    sys.stderr.write( 'retval ' + str(retval)+'\n')
+    sys.stderr.write( 'DestinationPath ' + DestinationPath.value+'\n')
+    sys.stderr.write( 'SourcePath ' + SourcePath.value+'\n')
+    sys.stderr.write( 'Ensure ' + (Ensure.value)+'\n')
+    sys.stderr.write( 'Type ' + Type.value+'\n')
+    sys.stderr.write( 'Force ' + str(Force.value)+'\n')
+    sys.stderr.write( 'Contents ' + Contents.value+'\n')
+    sys.stderr.write( 'Checksum ' + Checksum.value+'\n')
+    sys.stderr.write( 'Recurse ' + str(Recurse.value)+'\n')
+    sys.stderr.write( 'Links ' + Links.value+'\n')
+    sys.stderr.write( 'Owner ' + Owner.value+'\n')
+    sys.stderr.write( 'Group ' + Group.value+'\n')
+    sys.stderr.write( 'Mode ' + Mode.value+'\n')
+    sys.stderr.write( 'ModifiedDate ' + repr(ModifiedDate.value)+'\n')
+    arg_names.append('ModifiedDate')
     retd={}
     ld=locals()
     for k in arg_names :
@@ -352,7 +392,7 @@ def ListDir(path):
 def Symlink(spath,dpath):
     error=None
     try:
-        os.symlink(os.readlink(spath), dpath)
+        os.symlink(spath, dpath)
     except OSError, error:
         Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
@@ -913,9 +953,12 @@ def TestLink(DestinationPath, SourcePath, fc):
             elif fc.Links == "ignore":
                 return True
         else:
+            if not os.path.exists(DestinationPath) or not os.path.exists(SourcePath) :
+                return False
             if os.readlink(DestinationPath) != SourcePath:
                 return False
-
+    if os.path.exists(DestinationPath) != True:
+        return False            
     if TestOwnerGroupMode(DestinationPath, SourcePath, fc) == False:
         return False
 
@@ -924,7 +967,6 @@ def TestLink(DestinationPath, SourcePath, fc):
 def Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     ShowMof('TEST', DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     fc = FileContext(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
-
     if not DestinationPath:
         return [-1]
 
@@ -963,7 +1005,6 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
     Checksum = ""
     Force = False
     Recurse = False
-    Links = ""
 
     stat_info = os.lstat(DestinationPath)
 
@@ -977,9 +1018,17 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
     elif os.path.isdir(DestinationPath):
         Type = "directory"
         
-    #ModifiedDate = str(int(stat_info.st_mtime))
     ModifiedDate = stat_info.st_mtime
-    Contents,error=ReadFile(DestinationPath)
+    if Type == "directory":
+        Contents = repr(ListDir(DestinationPath))
+    elif Type == 'link':
+        if Links == 'manage' :
+            Contents=LStatFile(DestinationPath)
+            Contents=repr(Contents)
+        elif Links == 'follow': 
+            Contents,error=ReadFile(DestinationPath)
+    else :
+        Contents,error=ReadFile(DestinationPath)
     return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
 class FileContext:
@@ -990,8 +1039,8 @@ class FileContext:
             Type = "file"
         if not Ensure:
             Ensure = "present"
-        if not Links:
-            Links = "manage"
+        if not Links or len(Links) == 0:
+            Links = "follow"
         self.DestinationPath = DestinationPath
         self.SourcePath = SourcePath
         self.Ensure = Ensure.lower()
