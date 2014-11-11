@@ -9,6 +9,8 @@ from contextlib import contextmanager
 import os
 import sys
 import codecs
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[Key] string GroupName;
 # 	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
@@ -22,7 +24,7 @@ show_mof=False
 
 
 def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
-    if  GroupName != None :
+    if GroupName != None :
         GroupName=GroupName.decode("utf-8")
     else:
         GroupName = ''
@@ -30,22 +32,17 @@ def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members != None :
-        Members=Members.decode("utf-8")
-    else:
-        Members = ''
-    if MembersToInclude != None :
-        MembersToInclude=MembersToInclude.decode("utf-8")
-    else:
-        MembersToInclude = ''
-    if MembersToExclude != None :
-        MembersToExclude=MembersToExclude.decode("utf-8")
-    else:
-        MembersToExclude = ''
+    if Members == None :
+        Members = ['']
+    if MembersToInclude == None :
+        MembersToInclude = ['']
+    if MembersToExclude == None :
+        MembersToExclude = ['']
     if PreferredGroupID != None :
         PreferredGroupID=PreferredGroupID.decode("utf-8")
     else:
         PreferredGroupID = ''
+
 
     retval = Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     return retval
@@ -59,18 +56,12 @@ def Test_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members != None :
-        Members=Members.decode("utf-8")
-    else:
-        Members = ''
-    if MembersToInclude != None :
-        MembersToInclude=MembersToInclude.decode("utf-8")
-    else:
-        MembersToInclude = ''
-    if MembersToExclude != None :
-        MembersToExclude=MembersToExclude.decode("utf-8")
-    else:
-        MembersToExclude = ''
+    if Members == None :
+        Members = ['']
+    if MembersToInclude == None :
+        MembersToInclude = ['']
+    if MembersToExclude == None :
+        MembersToExclude = ['']
     if PreferredGroupID != None :
         PreferredGroupID=PreferredGroupID.decode("utf-8")
     else:
@@ -80,7 +71,7 @@ def Test_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude
     return retval
 
 def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if GroupName != None :
         GroupName=GroupName.decode("utf-8")
     else:
@@ -89,26 +80,26 @@ def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members != None :
-        Members=Members.decode("utf-8")
+    if Members == None :
+        Members = ['']
+    if MembersToInclude == None :
+        MembersToInclude = ['']
+    if MembersToExclude == None :
+        MembersToExclude = ['']
+    if PreferredGroupID != None :
+        PreferredGroupID=PreferredGroupID.decode("utf-8")
     else:
-        Members = ''
-    if MembersToInclude != None :
-        MembersToInclude=MembersToInclude.decode("utf-8")
-    else:
-        MembersToInclude = ''
-    MembersToExclude = MembersToExclude.decode("utf-8")
-    PreferredGroupID = PreferredGroupID.decode("utf-8")
+        PreferredGroupID = ''
 
     retval = 0
     (retval, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
 
-    GroupName = GroupName.encode("utf-8")
-    Ensure = Ensure.encode("utf-8")
-    Members = Members.encode("utf-8")
-    MembersToInclude = MembersToInclude.encode("utf-8")
-    MembersToExclude = MembersToExclude.encode("utf-8")
-    PreferredGroupID = PreferredGroupID.encode("utf-8")
+    GroupName = protocol.MI_String(GroupName.encode("utf-8"))
+    Ensure = protocol.MI_String(Ensure.encode("utf-8"))
+    Members = protocol.MI_StringA(Members)
+    MembersToInclude = protocol.MI_StringA(MembersToInclude)
+    MembersToExclude = protocol.MI_StringA(MembersToExclude)
+    PreferredGroupID = protocol.MI_String(PreferredGroupID.encode("utf-8"))
 
     retd={}
     ld=locals()
@@ -201,12 +192,6 @@ def ReadPasswd(filename):
 
     return entries
 
-def ParseList(s):
-    if type(s) == 'str':
-        return s.strip('\n')
-    else:
-        return s
-    
 def get_GID(n):
     return int(n[1][1])
 
@@ -236,25 +221,14 @@ def GetGroupMembers(GroupName, group_entries):
         group_members = []
     return group_members
 
-class Params:
-    def __init__(self,GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
-        self.Ensure = Ensure
-        self.GroupName = GroupName
-        self.MembersToExclude = MembersToExclude
-        self.MembersToInclude = MembersToInclude
-        self.Members = Members
-        self.PreferredGroupID = PreferredGroupID
-        
 def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     ShowMof('SET', GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
-    p=Params(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     if not Ensure:
         Ensure = "present"
     group_entries=None
     group_entries = ReadPasswd("/etc/group")
     if group_entries == None:
         return [-1]
-    Members_list = ParseList(Members)
 
     if Ensure.lower() == "absent":
         if GroupName in group_entries:
@@ -275,19 +249,19 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
             # Reread /etc/group
             group_entries = ReadPasswd("/etc/group")
 
-        if Members:
-            if MembersToInclude or MembersToExclude:
+        if len(Members[0]):
+            if len(MembersToInclude[0]) or len(MembersToExclude[0]):
                 Print("If Members is provided, Include and Exclude are not allowed.",file=sys.stderr)
                 return [-1]
 
             group_members = GetGroupMembers(GroupName, group_entries)
-            for member in Members_list:
+            for member in Members:
                 if member not in group_members:
                     Print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.",file=sys.stderr)
                     if AddUserToGroup(member, GroupName) == False:
                         return [-1]
             for member in group_members:
-                if member not in Members_list:
+                if member not in Members:
                     Print("Member: " + member + " is in the member list for group: " + GroupName + " but not speficied in Members.  Removing.",file=sys.stderr)
                     if DeleteUserFromGroup(member, GroupName) == False:
                         return [-1]
@@ -295,16 +269,14 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
 
         else:
             group_members = GetGroupMembers(GroupName, group_entries)
-            if MembersToInclude:
-                MembersToInclude_list = ParseList(MembersToInclude)
-                for member in MembersToInclude_list:
+            if len(MembersToInclude[0]):
+                for member in MembersToInclude:
                     if member not in group_members:
                         Print("Member: " + member + " not in member list for group: " + GroupName + ".  Adding.",file=sys.stderr)
                         if AddUserToGroup(member, GroupName) == False:
                             return [-1]
-            if MembersToExclude:
-                MembersToExclude_list = ParseList(MembersToExclude)
-                for member in MembersToExclude_list:
+            if len(MembersToExclude[0]):
+                for member in MembersToExclude:
                     if member in group_members:
                         Print("Member: " + member + " is in member list for group: " + GroupName + ".  Removing.",file=sys.stderr)
                         if DeleteUserFromGroup(member, GroupName) == False:
@@ -315,12 +287,12 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
 
 def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     ShowMof('TEST', GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
-    p=Params(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     if not Ensure:
         Ensure = "present"
 
     group_entries = ReadPasswd("/etc/group")
-    Members_list = ParseList(Members)
+    if group_entries == None:
+        return [-1]
 
     if Ensure.lower() == "absent":
         if GroupName not in group_entries:
@@ -332,34 +304,31 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
             Print("Group does not exist.",file=sys.stderr)
             return [-1]
         
-        if Members:
-            if MembersToInclude or MembersToExclude:
+        if len(Members[0]):
+            if len(MembersToInclude[0]) or len(MembersToExclude[0]):
                 Print("If Members is provided, Include and Exclude are not allowed.",file=sys.stderr)
                 return [-1]
 
             group_members = GetGroupMembers(GroupName, group_entries)
 
-            for member in Members_list:
+            for member in Members:
                 if member not in group_members:
                     Print("Member: " + member + " not in member list for group: " + GroupName,file=sys.stderr)
                     return [-1]
             for member in group_members:
-                if member not in Members_list:
+                if member not in Members:
                     Print("Member: " + member + " is in the member list for group: " + GroupName + " but not speficied in Members",file=sys.stderr)
                     return [-1]
                 
         else:
             group_members = GetGroupMembers(GroupName, group_entries)
-
-            if MembersToInclude:
-                MembersToInclude_list = ParseList(MembersToInclude)
-                for member in MembersToInclude_list:
+            if len(MembersToInclude[0]):
+                for member in MembersToInclude:
                     if member not in group_members:
                         Print("Member: " + member + " not in member list for group: " + GroupName,file=sys.stderr)
                         return [-1]
-            if MembersToExclude:
-                MembersToExclude_list = ParseList(MembersToExclude)
-                for member in MembersToExclude_list:
+            if len(MembersToExclude[0]):
+                for member in MembersToExclude:
                     if member in group_members:
                         Print("Member: " + member + " is in member list for group: " + GroupName,file=sys.stderr)
                         return [-1]
@@ -369,9 +338,10 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
 
 def Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     ShowMof('GET', GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
-    p=Params(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     group_entries = ReadPasswd("/etc/group")
-    Members = MembersToInclude = MembersToExclude = ""
+    Members = ['']
+    MembersToInclude = ['']
+    MembersToExclude = ['']
 
     if GroupName not in group_entries:
         Ensure = "Absent"

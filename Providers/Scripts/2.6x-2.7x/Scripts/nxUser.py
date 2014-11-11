@@ -11,6 +11,8 @@ import sys
 import datetime
 import grp
 import codecs
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[Key] string UserName;
 # 	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
@@ -100,7 +102,7 @@ def Test_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, P
     return retval
 
 def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if UserName != None :
         UserName=UserName.decode("utf-8")
     else:
@@ -137,13 +139,15 @@ def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
     retval = 0
     (retval, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
 
-    UserName = UserName.encode("utf-8")
-    Ensure = Ensure.encode("utf-8")
-    FullName = FullName.encode("utf-8")
-    Description = Description.encode("utf-8")
-    Password = Password.encode("utf-8")
-    HomeDirectory = HomeDirectory.encode("utf-8")
-    GroupID = GroupID.encode("utf-8")
+    UserName = protocol.MI_String( UserName.encode("utf-8"))
+    Ensure = protocol.MI_String( Ensure.encode("utf-8"))
+    FullName = protocol.MI_String( FullName.encode("utf-8"))
+    PasswordChangeRequired = protocol.MI_Boolean(PasswordChangeRequired)
+    Disabled = protocol.MI_Boolean(Disabled)
+    Description = protocol.MI_String( Description.encode("utf-8"))
+    Password = protocol.MI_String( Password.encode("utf-8"))
+    HomeDirectory = protocol.MI_String( HomeDirectory.encode("utf-8"))
+    GroupID = protocol.MI_String( GroupID.encode("utf-8"))
 
 
     retd={}
