@@ -342,7 +342,7 @@ def Chown(path,owner,group):
 
 def Chmod(path,mode):
     error=None
-    if type(mode) == str:
+    if type(mode) != int:
         mode=int(mode,8)
     try:
         os.chmod(path,mode)
@@ -989,12 +989,14 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
     ShowMof('GET', DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     if not DestinationPath:
         Ensure = "Absent"
-        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ModifiedDate = ""
+        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ""
+        ModifiedDate = 0
         return [-1, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
     if not os.path.exists(DestinationPath):
         Ensure = "Absent"
-        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ModifiedDate = ""
+        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ""
+        ModifiedDate = 0
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
     fc = FileContext(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
 

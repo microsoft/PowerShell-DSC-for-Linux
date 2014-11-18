@@ -7,7 +7,7 @@ import socket
 import struct
 import sys
 import traceback
-
+import ctypes
 
 DO_TRACE = True
 DO_VERBOSE_TRACE  = False
@@ -160,12 +160,18 @@ def translate_input (d):
         removed when the handlers are updated."""
     verbose_trace ('<translate_input>')
     oldStyleD = dict ()
-    if sys.version > '2':
+    if sys.version > '2.9':
         for key, value in d.items():
-            oldStyleD[key] = value.value
+            if hasattr(value,'value') and hasattr(value.value,'value') :
+                oldStyleD[key] = value.value.value
+            else :
+                oldStyleD[key] = value.value
     else:
         for key, value in d.iteritems():
-            oldStyleD[key] = value.value
+            if hasattr(value,'value') and hasattr(value.value,'value') :
+                oldStyleD[key] = value.value.value
+            else:
+                oldStyleD[key] = value.value
     verbose_trace ('</translate_input>')
     return oldStyleD
 
