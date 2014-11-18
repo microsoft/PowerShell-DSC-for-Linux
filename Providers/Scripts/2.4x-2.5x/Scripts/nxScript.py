@@ -12,6 +12,8 @@ import sys
 import stat
 import tempfile
 import codecs
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[Key] string GetScript;
 # 	[Key] string SetScript;
@@ -74,7 +76,7 @@ def Test_Marshall(GetScript, SetScript, TestScript, User, Group):
     return retval
 
 def Get_Marshall(GetScript, SetScript, TestScript, User, Group):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if GetScript != None :
         GetScript=GetScript.decode("utf-8")
     else:
@@ -99,12 +101,12 @@ def Get_Marshall(GetScript, SetScript, TestScript, User, Group):
     retval = 0
     (retval, GetScript, SetScript, TestScript, User, Group, Result) = Get(GetScript, SetScript, TestScript, User, Group)
 
-    GetScript = GetScript.encode("utf-8")
-    SetScript = SetScript.encode("utf-8")
-    TestScript = TestScript.encode("utf-8")
-    User = User.encode("utf-8")
-    Group = Group.encode("utf-8")
-    Result = Result.encode("utf-8")
+    GetScript = protocol.MI_String (GetScript.encode("utf-8"))
+    SetScript = protocol.MI_String (SetScript.encode("utf-8"))
+    TestScript = protocol.MI_String (TestScript.encode("utf-8"))
+    User = protocol.MI_String (User.encode("utf-8"))
+    Group = protocol.MI_String (Group.encode("utf-8"))
+    Result = protocol.MI_String (Result.encode("utf-8"))
 
     retd={}
     ld=locals()
@@ -140,7 +142,7 @@ def ShowMof(op, GetScript, SetScript, TestScript, User, Group):
 def Print(s,file=sys.stdout):
     file.write(s+'\n')
 
-def opened_w_error(filename, mode="a"):
+def opened_w_error(filename, mode="r"):
     """
     This context ensures the file is closed.
     """
@@ -224,8 +226,8 @@ def Set(GetScript, SetScript, TestScript, User, Group):
 
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
-    Print("stdout: " + proc.stdout.read().decode("utf-8"))
-    Print("stderr: " + proc.stderr.read().decode("utf-8"))
+    Print("stdout: " + proc.stdout.read())
+    Print("stderr: " + proc.stderr.read())
 
     os.remove(path)
     return [exit_code]
@@ -256,8 +258,8 @@ def Test(GetScript, SetScript, TestScript, User, Group):
 
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
-    Print("stdout: " + proc.stdout.read().decode("utf-8"))
-    Print("stderr: " + proc.stderr.read().decode("utf-8"))
+    Print("stdout: " + proc.stdout.read())
+    Print("stderr: " + proc.stderr.read())
 
     os.remove(path)
     return [exit_code]
@@ -288,9 +290,9 @@ def Get(GetScript, SetScript, TestScript, User, Group):
 
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=PreExec(uid,gid,User))
     exit_code = proc.wait()
-    Result = proc.stdout.read().decode("utf-8")
+    Result = proc.stdout.read()
     Print("stdout: " + Result)
-    Print("stderr: " + proc.stderr.read().decode("utf-8"))
+    Print("stderr: " + proc.stderr.read())
 
     os.remove(path)
     return [exit_code, GetScript, SetScript, TestScript, User, Group, Result]

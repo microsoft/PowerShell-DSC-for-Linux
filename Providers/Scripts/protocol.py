@@ -175,7 +175,8 @@ class MI_Boolean (MI_Value):
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (1)
             val = struct.unpack ('@B', buf)[0]
-            if val.value :
+            verbose_trace ('val is ' +str(int(val))+'\n')
+            if val :
                 tmp='True'
             else:
                 tmp='False'

@@ -8,6 +8,8 @@ import sys
 import glob
 import codecs
 import platform
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[key] string Name;
 # 	[write,required,ValueMap{"init", "upstart", "systemd"},Values{"init","upstart","systemd"}] string Controller;
@@ -57,7 +59,7 @@ def Test_Marshall(Name, Controller, Enabled, State):
     return retval
 
 def Get_Marshall(Name, Controller, Enabled, State):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if Name != None :
         Name=Name.decode("utf-8")
     else:
@@ -72,16 +74,15 @@ def Get_Marshall(Name, Controller, Enabled, State):
         State=State.decode("utf-8")
     else:
         State = ''
-
     retval = 0
     (retval, Name, Controller, Enabled, State, Path) = Get(Name, Controller, Enabled, State)
 
-    Name = Name.encode("utf-8")
-    Controller = Controller.encode("utf-8")
-    Enabled = Enabled
-    State = State.encode("utf-8")
-    Path = Path.encode("utf-8")
-
+    Name = protocol.MI_String (Name.encode("utf-8"))
+    Controller = protocol.MI_String (Controller.encode("utf-8"))
+    Enabled = protocol.MI_Boolean (Enabled)
+    State = protocol.MI_String (State.encode("utf-8"))
+    Path = protocol.MI_String (Path.encode("utf-8"))
+    arg_names.append('Path')
     retd={}
     ld=locals()
     for k in arg_names :
@@ -116,7 +117,7 @@ def Print(s,file=sys.stdout):
     file.write(s+'\n')
     
 
-def opened_w_error(filename, mode="a"):
+def opened_w_error(filename, mode="r"):
     """
     This context ensures the file is closed.
     """
@@ -855,6 +856,3 @@ class ServiceContext:
         self.Enabled = Enabled
         self.State = State.lower()
         self.Path = ''
-
-
-
