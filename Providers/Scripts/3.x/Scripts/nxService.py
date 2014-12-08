@@ -701,42 +701,42 @@ def ModifyInitService(sc):
         if sc.Enabled == True:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, "-f", sc.Name, "enable"])
             if retval != 0:
-                Print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
+                Print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + str(process_stderr),file=sys.stderr)
                 return [-1]
         elif sc.Enabled == False:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, "-f", sc.Name, "disable"])
             if retval != 0:
-                Print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
+                Print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + str(process_stderr),file=sys.stderr)
                 return [-1]   
     else:
         if sc.Enabled == True:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, sc.Name, "on"])
             if retval != 0:
-                Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
+                Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + str(process_stderr),file=sys.stderr)
                 return [-1]
         elif sc.Enabled == False:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, sc.Name, "off"])
             if retval != 0:
-                Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
+                Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + str(process_stderr),file=sys.stderr)
                 return [-1]   
 
     if sc.State == "running":
         # don't try to read stdout or stderr as 'service start' comand re-directs them, causing a hang in subprocess.communicate()
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "start"],True) 
         if retval != 0:
-            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + process_stderr,file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + str(process_stderr),file=sys.stderr)
             return [-1]
         if not IsServiceRunning(sc):
-            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + process_stderr,file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + str(process_stderr),file=sys.stderr)
             return [-1]
             
     elif sc.State == "stopped":
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "stop"])
         if retval != 0:
-            Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + process_stderr,file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + str(process_stderr),file=sys.stderr)
             return [-1]
         if IsServiceRunning(sc):
-            Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + process_stderr,file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + str(process_stderr),file=sys.stderr)
             return [-1]
 
     return [0]

@@ -15,14 +15,13 @@ import time
 import codecs
 import re
 
-def Set_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
+def Set_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
     Ensure = Ensure.decode('utf-8')
     PackageManager = PackageManager.decode('utf-8')
     Name = Name.decode('utf-8')
     Path = Path.decode('utf-8')
     PackageGroup = PackageGroup.decode('utf-8')
     Arguments = Arguments.decode('utf-8')
-    RepoUpdate = RepoUpdate.decode('utf-8')
     ReturnCode = ReturnCode.decode('utf-8')
     LogPath = LogPath.decode('utf-8')
     PackageDescription = PackageDescription.decode('utf-8')
@@ -32,17 +31,16 @@ def Set_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpda
     Version = Version.decode('utf-8')
     Installed = Installed.decode('utf-8')
 
-    retval = Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
+    retval = Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
     return retval
 
-def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
+def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
     Ensure = Ensure.decode('utf-8')
     PackageManager = PackageManager.decode('utf-8')
     Name = Name.decode('utf-8')
     Path = Path.decode('utf-8')
     PackageGroup = PackageGroup.decode('utf-8')
     Arguments = Arguments.decode('utf-8')
-    RepoUpdate = RepoUpdate.decode('utf-8')
     ReturnCode = ReturnCode.decode('utf-8')
     LogPath = LogPath.decode('utf-8')
     PackageDescription = PackageDescription.decode('utf-8')
@@ -52,17 +50,16 @@ def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpd
     Version = Version.decode('utf-8')
     Installed = Installed.decode('utf-8')
 
-    retval = Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
+    retval = Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
     return retval
 
-def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
+def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
     Ensure = Ensure.decode('utf-8')
     PackageManager = PackageManager.decode('utf-8')
     Name = Name.decode('utf-8')
     Path = Path.decode('utf-8')
     PackageGroup = PackageGroup.decode('utf-8')
     Arguments = Arguments.decode('utf-8')
-    RepoUpdate = RepoUpdate.decode('utf-8')
     ReturnCode = ReturnCode.decode('utf-8')
     LogPath = LogPath.decode('utf-8')
     PackageDescription = PackageDescription.decode('utf-8')
@@ -73,9 +70,9 @@ def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpda
     Installed = Installed.decode('utf-8')
 
     retval = 0
-    retval,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
+    retval,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
 
-    return [retval,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,
+    return [retval,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,
             LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed]
 
 
@@ -114,7 +111,7 @@ def ParseArguments(a):
     return program_arg,cmd_arg
 
 class Params:
-    def __init__(self,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,
+    def __init__(self,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,
      LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
 
         if not ( "Present" in Ensure or "Absent" in Ensure ):
@@ -138,10 +135,6 @@ class Params:
             print('ERROR: Param PackageGroup must be true or false.',file=sys.stderr)
             Log(LogPath,'ERROR: Param PackageGroup must be true or false.')
             raise Exception('BadParameter')
-        if not ( "true" in RepoUpdate or "false" in RepoUpdate ):
-            print('ERROR: Param RepoUpdate must be true or false.',file=sys.stderr)
-            Log(LogPath,'ERROR: Param RepoUpdate must be true or false.')
-            raise Exception('BadParameter')
         
         self.Ensure = Ensure
         self.PackageManager = PackageManager.lower()
@@ -149,7 +142,6 @@ class Params:
         self.Path = Path
         self.PackageGroup = PackageGroup
         self.Arguments,self.CommandArguments=ParseArguments(Arguments)
-        self.RepoUpdate = RepoUpdate
         self.ReturnCode = ReturnCode
         self.LogPath = LogPath
         self.PackageDescription = None
@@ -180,28 +172,23 @@ class Params:
         self.cmds['dpkg']['Present']='dpkg % -i '
         self.cmds['dpkg']['Absent']='dpkg % -r '
         self.cmds['dpkg']['stat']="dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}\n' "
-        self.cmds['dpkg']['update_repo']=None
         self.cmds['dpkg']['stat_group']=None
         self.cmds['rpm']['Present']='rpm % -i '
         self.cmds['rpm']['Absent']='rpm % -e '
         self.cmds['rpm']['stat']='rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed\n" '
-        self.cmds['rpm']['update_repo']=None
         self.cmds['rpm']['stat_group']=None
         self.cmds['apt']['Present']='apt-get % install ^ --yes '
         self.cmds['apt']['Absent']='apt-get % remove ^--yes '
         self.cmds['apt']['stat']=self.cmds['dpkg']['stat']
-        self.cmds['apt']['update_repo']=None
         self.cmds['apt']['stat_group']=None
         self.cmds['yum']['Present']='yum -y % install ^ '
         self.cmds['yum']['Absent']='yum -y % remove ^ '
         self.cmds['yum']['GroupPresent']='yum -y % groupinstall ^ '
         self.cmds['yum']['GroupAbsent']='yum -y % groupremove ^ '
-        self.cmds['yum']['update_repo']='yum makecache '
         self.cmds['yum']['stat_group']='yum grouplist ' # the group mode is implemented when using YUM only.  
         self.cmds['yum']['stat']=self.cmds['rpm']['stat']
         self.cmds['zypper']['Present']='zypper --non-interactive % install ^'
         self.cmds['zypper']['Absent']='zypper --non-interactive  % remove ^'
-        self.cmds['zypper']['update_repo']='zypper --non-interactive --no-gpg-checks refresh'
         self.cmds['zypper']['stat']=self.cmds['rpm']['stat']
         self.cmds['zypper']['stat_group']=None
     
@@ -284,18 +271,9 @@ def DoEnableDisable(p):
         return False,out
     return True,out
     
-def DoUpdateRepo(p):
-    cmd=p.cmds[p.PackageManager]['update_repo']
-    if cmd == None :
-        return True,None
-    code,out=RunGetOutput(cmd,False)
-    if code != 0:
-        return False,out
-    return True,out
-
-def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
+def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
+        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
     except Exception,e:
         print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
@@ -303,7 +281,6 @@ def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,Return
     installed,out = IsPackageInstalled(p)
     if ( installed and Ensure == 'Present' ) or ( not installed and Ensure == 'Absent') : # Nothing to do
         return [0]
-    DoUpdateRepo(p) # only updates if the flag RepoUpdate is true.
     result,out=DoEnableDisable(p)
     if result == False :
         op=''
@@ -316,9 +293,9 @@ def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,Return
         return [-1]
     return [0]
    
-def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
+def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
+        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
     except Exception,e:
         print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
@@ -328,10 +305,10 @@ def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,Retur
         return [0]
     return [-1]
 
-def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
+def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
     retval=-1
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
+        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath,PackageDescription,Publisher,InstalledOn,Size,Version,Installed)
     except Exception,e:
         print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
@@ -347,7 +324,7 @@ def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,Return
     else :
         Installed='false'
         
-    return [retval,p.Ensure,p.PackageManager,p.Name,p.Path,p.PackageGroup,p.RepoUpdate,p.ReturnCode,p.LogPath,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,Installed]
+    return [retval,p.Ensure,p.PackageManager,p.Name,p.Path,p.PackageGroup,p.ReturnCode,p.LogPath,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,Installed]
 
 @contextmanager
 def opened_w_error(filename, mode="r"):
