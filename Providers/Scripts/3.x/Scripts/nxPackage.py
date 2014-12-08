@@ -20,7 +20,6 @@ import re
 #   [write] string Path;
 #   [write] Boolean PackageGroup;
 #   [write] string Arguments;
-#   [write] Boolean RepoUpdate;
 #   [write] uint32 ReturnCode;
 #   [write] string LogPath;
 #   [read] string PackageDescription;
@@ -34,7 +33,7 @@ import re
 global show_mof
 show_mof=False
 
-def Set_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath):
+def Set_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
     if Ensure == None :
         Ensure=''
     if PackageManager == None :
@@ -47,20 +46,18 @@ def Set_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpda
         PackageGroup=False
     if Arguments == None:
         Arguments=''
-    if RepoUpdate == None :
-        RepoUpdate=False
     if ReturnCode == None :
         ReturnCode =0 
     if LogPath == None:
         LogPath=''
 
-    retval = Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)
+    retval = Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
     return retval
 
-def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath):
+def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
     if Ensure == None :
         Ensure=''
     if PackageManager == None :
@@ -73,20 +70,18 @@ def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpd
         PackageGroup=False
     if Arguments == None:
         Arguments=''
-    if RepoUpdate == None :
-        RepoUpdate=False
     if ReturnCode == None :
         ReturnCode =0 
     if LogPath == None:
         LogPath=''
 
-    retval = Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)
+    retval = Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
     return retval
 
-def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath):
+def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
     arg_names=locals().keys()
     if Ensure == None :
         Ensure=''
@@ -100,15 +95,13 @@ def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpda
         PackageGroup=False
     if Arguments == None:
         Arguments=''
-    if RepoUpdate == None :
-        RepoUpdate=False
     if ReturnCode == None :
         ReturnCode =0 
     if LogPath == None:
         LogPath=''
 
     retval = 0
-    retval,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)
+    retval,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
@@ -154,7 +147,7 @@ def ParseArguments(a):
     return program_arg,cmd_arg
 
 class Params:
-    def __init__(self,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,
+    def __init__(self,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,
      LogPath):
 
         if not ( "Present" in Ensure or "Absent" in Ensure ):
@@ -179,10 +172,6 @@ class Params:
             Print('ERROR: Param PackageGroup must be true or false.',file=sys.stderr)
             Log(LogPath,'ERROR: Param PackageGroup must be true or false.')
             raise Exception('BadParameter')
-        if not ( True == RepoUpdate or False == RepoUpdate ):
-            Print('ERROR: Param RepoUpdate must be true or false.',file=sys.stderr)
-            Log(LogPath,'ERROR: Param RepoUpdate must be true or false.')
-            raise Exception('BadParameter')
         
         self.Ensure = Ensure
         self.PackageManager = PackageManager.lower()
@@ -190,7 +179,6 @@ class Params:
         self.Path = Path
         self.PackageGroup = PackageGroup
         self.Arguments,self.CommandArguments=ParseArguments(Arguments)
-        self.RepoUpdate = RepoUpdate
         self.ReturnCode = ReturnCode
         self.LogPath = LogPath
         self.PackageDescription = ''
@@ -221,28 +209,23 @@ class Params:
         self.cmds['dpkg']['Present']='dpkg % -i '
         self.cmds['dpkg']['Absent']='dpkg % -r '
         self.cmds['dpkg']['stat']="dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}\n' "
-        self.cmds['dpkg']['update_repo']=None
         self.cmds['dpkg']['stat_group']=None
         self.cmds['rpm']['Present']='rpm % -i '
         self.cmds['rpm']['Absent']='rpm % -e '
         self.cmds['rpm']['stat']='rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed\n" '
-        self.cmds['rpm']['update_repo']=None
         self.cmds['rpm']['stat_group']=None
         self.cmds['apt']['Present']='apt-get % install ^ --yes '
         self.cmds['apt']['Absent']='apt-get % remove ^--yes '
         self.cmds['apt']['stat']=self.cmds['dpkg']['stat']
-        self.cmds['apt']['update_repo']=None
         self.cmds['apt']['stat_group']=None
         self.cmds['yum']['Present']='yum -y % install ^ '
         self.cmds['yum']['Absent']='yum -y % remove ^ '
         self.cmds['yum']['GroupPresent']='yum -y % groupinstall ^ '
         self.cmds['yum']['GroupAbsent']='yum -y % groupremove ^ '
-        self.cmds['yum']['update_repo']='yum makecache '
         self.cmds['yum']['stat_group']='yum grouplist ' # the group mode is implemented when using YUM only.  
         self.cmds['yum']['stat']=self.cmds['rpm']['stat']
         self.cmds['zypper']['Present']='zypper --non-interactive % install ^'
         self.cmds['zypper']['Absent']='zypper --non-interactive  % remove ^'
-        self.cmds['zypper']['update_repo']='zypper --non-interactive --no-gpg-checks refresh'
         self.cmds['zypper']['stat']=self.cmds['rpm']['stat']
         self.cmds['zypper']['stat_group']=None
     
@@ -250,7 +233,7 @@ def SetShowMof(a):
     global show_mof
     show_mof=a
 
-def ShowMof(op, Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath):
+def ShowMof(op, Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
     if not show_mof:
         return
     mof='\n'
@@ -262,7 +245,6 @@ def ShowMof(op, Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdat
     mof+='    Path = "' + Path + '"\n'
     mof+='    PackageGroup = "' + str(PackageGroup) + '"\n'
     mof+='    Arguments = "' + Arguments + '"\n'
-    mof+='    RepoUpdate = "' + str(RepoUpdate) + '"\n'
     mof+='    ReturnCode = ' + str(ReturnCode) + '\n'
     mof+='    LogPath = "' + LogPath + '"\n'
     mof+='}\n'
@@ -349,21 +331,10 @@ def DoEnableDisable(p):
         return False,out
     return True,out
     
-def DoUpdateRepo(p):
-    if p.RepoUpdate == False:
-        return True,''
-    cmd=p.cmds[p.PackageManager]['update_repo']
-    if cmd == None :
-        return True,None
-    code,out=RunGetOutput(cmd,False)
-    if code != 0:
-        return False,out
-    return True,out
-
-def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath):
-    ShowMof('SET', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)
+def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
+    ShowMof('SET', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)
+        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
         Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
@@ -371,7 +342,6 @@ def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,Return
     installed,out = IsPackageInstalled(p)
     if ( installed and Ensure == 'Present' ) or ( not installed and Ensure == 'Absent') : # Nothing to do
         return [0]
-    DoUpdateRepo(p) # only updates if the flag RepoUpdate is true.
     result,out=DoEnableDisable(p)
     if result == False :
         op=''
@@ -384,10 +354,10 @@ def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,Return
         return [-1]
     return [0]
    
-def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath):
-    ShowMof('TEST', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)
+def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
+    ShowMof('TEST', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)
+        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
         Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
@@ -397,11 +367,11 @@ def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,Retur
         return [0]
     return [-1]
 
-def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath):
+def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
     retval=-1
-    ShowMof('GET', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)  
+    ShowMof('GET', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)  
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,RepoUpdate,ReturnCode,LogPath)
+        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
         Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)

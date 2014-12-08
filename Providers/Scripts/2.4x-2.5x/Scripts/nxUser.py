@@ -293,16 +293,17 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
         elif Disabled == True:
             usermodonly_string += " -L"
         elif Disabled == False:
-            cur_pass = shadow_entries[UserName][0]
-            if cur_pass == "!!":
-                Print("Unable to unlock user: " + UserName + ".  Password is not set.",file=sys.stderr)
-                return [-1]
-            elif cur_pass[0] == '!':
-                if len(cur_pass) > 1:
-                    usermodonly_string += " -U"
-                else:
-                    Print("Unable to unlock user: " + UserName + ".  Doing so would result in a passwordless account.",file=sys.stderr)
+            if UserName in shadow_entries:
+                cur_pass = shadow_entries[UserName][0]
+                if cur_pass == "!!":
+                    Print("Unable to unlock user: " + UserName + ".  Password is not set.",file=sys.stderr)
                     return [-1]
+                elif cur_pass[0] == '!':
+                    if len(cur_pass) > 1:
+                        usermodonly_string += " -U"
+                    else:
+                        Print("Unable to unlock user: " + UserName + ".  Doing so would result in a passwordless account.",file=sys.stderr)
+                        return [-1]
             
         if HomeDirectory:
             usermod_string += " -m -d \"" + HomeDirectory + "\""

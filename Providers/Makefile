@@ -68,6 +68,7 @@ PROVIDERS+=nxScript
 PROVIDERS+=nxUser
 PROVIDERS+=nxGroup
 PROVIDERS+=nxService
+PROVIDERS+=nxPackage
 #PROVIDERS+=nxIPAddress
 #PROVIDERS+=nxComputer
 #PROVIDERS+=nxFirewall
