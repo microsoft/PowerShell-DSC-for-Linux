@@ -229,6 +229,7 @@ void MI_CALL MSFT_nxFileResource_Invoke_SetTargetResource(
         result = self->set (in->InputResource.value, &setResult);
         if (MI_RESULT_OK == result)
         {
+            result = setResult;
             MSFT_nxFileResource_SetTargetResource out;
             MSFT_nxFileResource_SetTargetResource_Construct (&out, context);
             MSFT_nxFileResource_SetTargetResource_Set_MIReturn (

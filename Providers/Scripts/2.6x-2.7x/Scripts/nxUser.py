@@ -442,18 +442,18 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
     shadow_entries = None
     passwd_entries = ReadPasswd("/etc/passwd")
     if passwd_entries == None:
-        return [-1]
+        return [-1, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
     shadow_entries = ReadPasswd("/etc/shadow")
     if shadow_entries == None:
-        return [-1]
+        return [-1], UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID
 
     exit_code = 0
 
     if UserName not in passwd_entries:
         FullName = Description = Password = HomeDirectory = GroupID = ""
-        Ensure = "Absent"
-    else:
-        Ensure = "Present"
+        if Ensure != "Absent":
+            exit_code = -1
+        return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
         
         extra_fields = passwd_entries[UserName][3].split(",")
         FullName = extra_fields[0]
