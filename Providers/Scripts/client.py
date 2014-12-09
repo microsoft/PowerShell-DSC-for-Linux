@@ -206,7 +206,7 @@ def handle_request (fd, req):
     if rval == 0:
         write_success (fd, ret)
     else:
-        write_failed (fd, rval, 'Error occurred processing '+ repr (req))
+        write_failed (fd,1, 'Error occurred processing '+ repr (req))
     trace ('</handle_request>')
 
 

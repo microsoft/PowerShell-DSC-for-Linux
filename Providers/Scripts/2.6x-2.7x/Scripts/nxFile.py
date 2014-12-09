@@ -765,20 +765,21 @@ def SetDirectory(DestinationPath, SourcePath, fc):
         if fc.Force == True:
             RemovePath(DestinationPath)
         else:
+            Print("Error: Unable to overwrite currently existing non-directory object at " + DestinationPath + " without the Force option being true.")
             return False
 
     return SetDirectoryRecursive(DestinationPath, SourcePath, fc)
 
 def SetLink(DestinationPath, SourcePath, fc):
-    if not SourcePath:
+    if SourcePath == None or len(SourcePath)<1 or not os.path.exists(SourcePath) :
         Print("Error: Need a source path in order to create a new symbolic link.")
         return False
 
-    if os.path.exists(DestinationPath):
-        if os.path.islink(DestinationPath) or fc.Force == True:
+    if os.path.exists(DestinationPath) and not os.path.islink(DestinationPath) :
+        if fc.Force == True:
             RemovePath(DestinationPath)
         else:
-            Print("Error: Unable to overwrite currently existing file at " + DestinationPath + " without the Force option being true.")
+            Print("Error: Unable to overwrite currently existing non-link object at " + DestinationPath + " without the Force option being true.")
             return False
 
     if os.path.islink(SourcePath):
@@ -953,7 +954,7 @@ def TestLink(DestinationPath, SourcePath, fc):
             elif fc.Links == "ignore":
                 return True
         else:
-            if not os.path.exists(DestinationPath) or not os.path.exists(SourcePath) :
+            if not os.path.exists(DestinationPath) or not os.path.exists(SourcePath) or not os.path.islink(DestinationPath) :
                 return False
             if os.readlink(DestinationPath) != SourcePath:
                 return False
@@ -1031,6 +1032,10 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
             Contents,error=ReadFile(DestinationPath)
     else :
         Contents,error=ReadFile(DestinationPath)
+
+    if Contents == None:
+        Contents = ''
+
     return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
 class FileContext:
