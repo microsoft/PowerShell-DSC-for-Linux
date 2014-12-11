@@ -229,6 +229,7 @@ void MI_CALL MSFT_nxScriptResource_Invoke_SetTargetResource(
         result = self->set (in->InputResource.value, &setResult);
         if (MI_RESULT_OK == result)
         {
+            result = setResult;
             MSFT_nxScriptResource_SetTargetResource out;
             MSFT_nxScriptResource_SetTargetResource_Construct (&out, context);
             MSFT_nxScriptResource_SetTargetResource_Set_MIReturn (

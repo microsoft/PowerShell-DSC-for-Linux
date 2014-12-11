@@ -229,6 +229,7 @@ void MI_CALL MSFT_nxServiceResource_Invoke_SetTargetResource(
         result = self->set (in->InputResource.value, &setResult);
         if (MI_RESULT_OK == result)
         {
+            result = setResult;
             MSFT_nxServiceResource_SetTargetResource out;
             MSFT_nxServiceResource_SetTargetResource_Construct (&out, context);
             MSFT_nxServiceResource_SetTargetResource_Set_MIReturn (
