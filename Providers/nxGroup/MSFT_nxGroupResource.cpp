@@ -229,6 +229,7 @@ void MI_CALL MSFT_nxGroupResource_Invoke_SetTargetResource(
         result = self->set (in->InputResource.value, &setResult);
         if (MI_RESULT_OK == result)
         {
+            result = setResult;
             MSFT_nxGroupResource_SetTargetResource out;
             MSFT_nxGroupResource_SetTargetResource_Construct (&out, context);
             MSFT_nxGroupResource_SetTargetResource_Set_MIReturn (
