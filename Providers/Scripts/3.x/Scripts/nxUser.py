@@ -69,16 +69,6 @@ def Test_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, P
         HomeDirectory = ''
     if GroupID == None :
         GroupID = ''
-    sys.stderr.write('UserName ' +  UserName+'\n')
-    sys.stderr.write('Ensure ' +  Ensure+'\n')
-    sys.stderr.write('FullName ' +  FullName+'\n')
-    sys.stderr.write('PasswordChangeRequired ' +  str(PasswordChangeRequired)+'\n')
-    sys.stderr.write('Disabled ' +  str(Disabled)+'\n')
-    sys.stderr.write('Description ' +  Description+'\n')
-    sys.stderr.write('Password ' +  Password+'\n')
-    sys.stderr.write('HomeDirectory ' +  HomeDirectory+'\n')
-    sys.stderr.write('GroupID ' +  GroupID+'\n')
-
     
     retval = Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
@@ -116,16 +106,6 @@ def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
     Password = protocol.MI_String( Password)
     HomeDirectory = protocol.MI_String( HomeDirectory)
     GroupID = protocol.MI_String( GroupID)
-
-    sys.stderr.write('UserName ' +  UserName.value+'\n')
-    sys.stderr.write('Ensure ' +  Ensure.value+'\n')
-    sys.stderr.write('FullName ' +  FullName.value+'\n')
-    sys.stderr.write('PasswordChangeRequired ' +  str(PasswordChangeRequired.value)+'\n')
-    sys.stderr.write('Disabled ' +  str(Disabled.value)+'\n')
-    sys.stderr.write('Description ' +  Description.value+'\n')
-    sys.stderr.write('Password ' +  Password.value+'\n')
-    sys.stderr.write('HomeDirectory ' +  HomeDirectory.value+'\n')
-    sys.stderr.write('GroupID ' +  GroupID.value+'\n')
 
 
     retd={}
@@ -432,7 +412,6 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
         if Ensure != "Absent":
             exit_code = -1
         return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
-
         
         extra_fields = passwd_entries[UserName][3].split(",")
         FullName = extra_fields[0]

@@ -13,6 +13,8 @@ import sys
 import time
 import codecs
 import re
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 #   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
 #   [write,ValueMap{"Yum", "Apt", "Zypper"},Values{"Yum", "Apt", "Zypper"}] string PackageManager;
@@ -82,7 +84,7 @@ def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnC
     return retval
 
 def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if Ensure == None :
         Ensure=''
     if PackageManager == None :
@@ -105,6 +107,27 @@ def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCo
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
+    Ensure = protocol.MI_String(Ensure)
+    PackageManager = protocol.MI_String(PackageManager)
+    Name = protocol.MI_String(Name)
+    Path = protocol.MI_String(Path)
+    PackageGroup= protocol.MI_Boolean(PackageGroup)
+    Arguments = protocol.MI_String(Arguments)
+    ReturnCode= protocol.MI_Uint32(ReturnCode)
+    LogPath = protocol.MI_String(LogPath)
+    PackageDescription = protocol.MI_String(PackageDescription)
+    Publisher = protocol.MI_String(Publisher)
+    InstalledOn = protocol.MI_String(InstalledOn)
+    Size = protocol.MI_Uint32(int(Size))
+    Version = protocol.MI_String(Version)
+    Installed = protocol.MI_Boolean(Installed)
+    arg_names.append('PackageDescription')
+    arg_names.append('Publisher')
+    arg_names.append('InstalledOn')
+    arg_names.append('Size')
+    arg_names.append('Version')
+    arg_names.append('Installed')
+
     retd={}
     ld=locals()
     for k in arg_names :
@@ -147,8 +170,7 @@ def ParseArguments(a):
     return program_arg,cmd_arg
 
 class Params:
-    def __init__(self,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,
-     LogPath):
+    def __init__(self,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
 
         if not ( "Present" in Ensure or "Absent" in Ensure ):
             Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
@@ -342,6 +364,7 @@ def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPat
     installed,out = IsPackageInstalled(p)
     if ( installed and Ensure == 'Present' ) or ( not installed and Ensure == 'Absent') : # Nothing to do
         return [0]
+
     result,out=DoEnableDisable(p)
     if result == False :
         op=''
@@ -375,7 +398,7 @@ def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPat
     except Exception as e:
         Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
-        return [-1]
+        return [retval,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,installed]
     installed,out = IsPackageInstalled(p)
     ParseInfo(p,out)
     if  installed and Ensure == 'Present'  :

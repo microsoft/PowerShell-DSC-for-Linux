@@ -338,8 +338,6 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
 
         if PasswordChangeRequired == True:
-            exit_code = os.system(chage_path + " -d 0 " + UserName)
-        else:
             # Set last password change to today
             day_0 = datetime.datetime.utcfromtimestamp(0)
             day_now = datetime.datetime.today()
@@ -445,7 +443,7 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
         return [-1, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
     shadow_entries = ReadPasswd("/etc/shadow")
     if shadow_entries == None:
-        return [-1], UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID
+        return [-1, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
 
     exit_code = 0
 

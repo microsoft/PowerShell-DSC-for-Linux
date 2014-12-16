@@ -299,7 +299,7 @@ def WriteFile(path,contents):
         F.close()
     return error
 
-def Print(s,file=sys.stdout):
+def Print(s,file=sys.stderr):
     file.write(s+'\n')
     
 def LStatFile(path):

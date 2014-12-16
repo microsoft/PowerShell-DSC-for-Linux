@@ -12,6 +12,8 @@ import sys
 import glob
 import codecs
 import platform
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[key] string Name;
 # 	[write,required,ValueMap{"init", "upstart", "systemd"},Values{"init","upstart","systemd"}] string Controller;
@@ -49,7 +51,7 @@ def Test_Marshall(Name, Controller, Enabled, State):
     return retval
 
 def Get_Marshall(Name, Controller, Enabled, State):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if Name == None:
         Name=''
     if Controller == None:
@@ -62,11 +64,11 @@ def Get_Marshall(Name, Controller, Enabled, State):
     retval = 0
     (retval, Name, Controller, Enabled, State, Path) = Get(Name, Controller, Enabled, State)
 
-    Name = Name.encode("utf-8")
-    Controller = Controller.encode("utf-8")
-    Enabled = Enabled
-    State = State.encode("utf-8")
-    Path = Path.encode("utf-8")
+    Name = protocol.MI_String (Name)
+    Controller = protocol.MI_String (Controller)
+    Enabled = protocol.MI_Boolean (Enabled)
+    State = protocol.MI_String (State)
+    Path = protocol.MI_String (Path)
 
     retd={}
     ld=locals()
@@ -701,42 +703,42 @@ def ModifyInitService(sc):
         if sc.Enabled == True:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, "-f", sc.Name, "enable"])
             if retval != 0:
-                Print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + str(process_stderr),file=sys.stderr)
+                Print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
                 return [-1]
         elif sc.Enabled == False:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, "-f", sc.Name, "disable"])
             if retval != 0:
-                Print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + str(process_stderr),file=sys.stderr)
+                Print("Error: " + check_enabled_program + " -f " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
                 return [-1]   
     else:
         if sc.Enabled == True:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, sc.Name, "on"])
             if retval != 0:
-                Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + str(process_stderr),file=sys.stderr)
+                Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
                 return [-1]
         elif sc.Enabled == False:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, sc.Name, "off"])
             if retval != 0:
-                Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + str(process_stderr),file=sys.stderr)
+                Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
                 return [-1]   
 
     if sc.State == "running":
         # don't try to read stdout or stderr as 'service start' comand re-directs them, causing a hang in subprocess.communicate()
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "start"],True) 
         if retval != 0:
-            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + str(process_stderr),file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + process_stderr,file=sys.stderr)
             return [-1]
         if not IsServiceRunning(sc):
-            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + str(process_stderr),file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + process_stderr,file=sys.stderr)
             return [-1]
             
     elif sc.State == "stopped":
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "stop"])
         if retval != 0:
-            Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + str(process_stderr),file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + process_stderr,file=sys.stderr)
             return [-1]
         if IsServiceRunning(sc):
-            Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + str(process_stderr),file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + process_stderr,file=sys.stderr)
             return [-1]
 
     return [0]
@@ -845,6 +847,3 @@ class ServiceContext:
         self.Enabled = Enabled
         self.State = State.lower()
         self.Path = ''
-
-
-
