@@ -13,6 +13,8 @@ import sys
 import time
 import codecs
 import re
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 #   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
 #   [write,ValueMap{"Yum", "Apt", "Zypper"},Values{"Yum", "Apt", "Zypper"}] string PackageManager;
@@ -106,7 +108,7 @@ def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnC
     return retval
 
 def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if Ensure != None :
         Ensure=Ensure.decode('utf-8')
     else:
@@ -141,7 +143,27 @@ def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCo
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
-    
+    Ensure = protocol.MI_String(Ensure.encode("utf-8"))
+    PackageManager = protocol.MI_String(PackageManager.encode("utf-8"))
+    Name = protocol.MI_String(Name.encode("utf-8"))
+    Path = protocol.MI_String(Path.encode("utf-8"))
+    PackageGroup= protocol.MI_Boolean(PackageGroup)
+    Arguments = protocol.MI_String(Arguments.encode("utf-8"))
+    ReturnCode= protocol.MI_Uint32(ReturnCode)
+    LogPath = protocol.MI_String(LogPath.encode("utf-8"))
+    PackageDescription = protocol.MI_String(PackageDescription.encode("utf-8"))
+    Publisher = protocol.MI_String(Publisher.encode("utf-8"))
+    InstalledOn = protocol.MI_String(InstalledOn.encode("utf-8"))
+    Size = protocol.MI_Uint32(int(Size))
+    Version = protocol.MI_String(Version.encode("utf-8"))
+    Installed = protocol.MI_Boolean(Installed)
+    arg_names.append('PackageDescription')
+    arg_names.append('Publisher')
+    arg_names.append('InstalledOn')
+    arg_names.append('Size')
+    arg_names.append('Version')
+    arg_names.append('Installed')
+
     retd={}
     ld=locals()
     for k in arg_names :
@@ -412,7 +434,7 @@ def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPat
     except Exception,e:
         Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
-        return [-1]
+        return [retval,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,installed]
     installed,out = IsPackageInstalled(p)
     ParseInfo(p,out)
     if  installed and Ensure == 'Present'  :

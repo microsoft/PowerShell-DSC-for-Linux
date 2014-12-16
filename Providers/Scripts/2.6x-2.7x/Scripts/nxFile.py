@@ -305,7 +305,7 @@ def WriteFile(path,contents):
             F.write(contents)
     return error
 
-def Print(s,file=sys.stdout):
+def Print(s,file=sys.stderr):
     file.write(s+'\n')
     
 def LStatFile(path):
@@ -772,7 +772,7 @@ def SetDirectory(DestinationPath, SourcePath, fc):
 
 def SetLink(DestinationPath, SourcePath, fc):
     if SourcePath == None or len(SourcePath)<1 or not os.path.exists(SourcePath) :
-        Print("Error: Need a source path in order to create a new symbolic link.")
+        Print("Error: Need a valid source path in order to create a new symbolic link.")
         return False
 
     if os.path.exists(DestinationPath) and not os.path.islink(DestinationPath) :
