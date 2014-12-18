@@ -32,17 +32,16 @@ def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members == None :
+    if Members == None or len(Members) < 1 :
         Members = ['']
-    if MembersToInclude == None :
+    if MembersToInclude == None or len(MembersToInclude) < 1:
         MembersToInclude = ['']
-    if MembersToExclude == None :
+    if MembersToExclude == None or len(MembersToExclude) < 1:
         MembersToExclude = ['']
     if PreferredGroupID != None :
         PreferredGroupID=PreferredGroupID.decode("utf-8")
     else:
         PreferredGroupID = ''
-
 
     retval = Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     return retval
@@ -56,11 +55,11 @@ def Test_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members == None :
+    if Members == None or len(Members) < 1 :
         Members = ['']
-    if MembersToInclude == None :
+    if MembersToInclude == None or len(MembersToInclude) < 1:
         MembersToInclude = ['']
-    if MembersToExclude == None :
+    if MembersToExclude == None or len(MembersToExclude) < 1:
         MembersToExclude = ['']
     if PreferredGroupID != None :
         PreferredGroupID=PreferredGroupID.decode("utf-8")
@@ -80,11 +79,11 @@ def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members == None :
+    if Members == None or len(Members) < 1 :
         Members = ['']
-    if MembersToInclude == None :
+    if MembersToInclude == None  or len(MembersToInclude) < 1:
         MembersToInclude = ['']
-    if MembersToExclude == None :
+    if MembersToExclude == None  or len(MembersToExclude) < 1:
         MembersToExclude = ['']
     if PreferredGroupID != None :
         PreferredGroupID=PreferredGroupID.decode("utf-8")
@@ -248,7 +247,6 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
 
             # Reread /etc/group
             group_entries = ReadPasswd("/etc/group")
-
         if len(Members[0]):
             if len(MembersToInclude[0]) or len(MembersToExclude[0]):
                 Print("If Members is provided, Include and Exclude are not allowed.",file=sys.stderr)

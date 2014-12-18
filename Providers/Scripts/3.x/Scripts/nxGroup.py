@@ -28,12 +28,12 @@ def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         GroupName=''
     if Ensure == None:
         Ensure=''
-    if Members == None:
-        Members= ['']
-    if MembersToInclude == None:
-        MembersToInclude=''
-    if MembersToExclude == None:
-        MembersToExclude=''
+    if Members == None or len(Members) < 1 :
+        Members = ['']
+    if MembersToInclude == None or len(MembersToInclude) < 1:
+        MembersToInclude = ['']
+    if MembersToExclude == None or len(MembersToExclude) < 1:
+        MembersToExclude = ['']
     if PreferredGroupID == None:
         PreferredGroupID=''
 
@@ -45,12 +45,12 @@ def Test_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude
         GroupName=''
     if Ensure == None:
         Ensure=''
-    if Members == None:
-        Members= ['']
-    if MembersToInclude == None:
-        MembersToInclude=''
-    if MembersToExclude == None:
-        MembersToExclude=''
+    if Members == None or len(Members) < 1 :
+        Members = ['']
+    if MembersToInclude == None or len(MembersToInclude) < 1:
+        MembersToInclude = ['']
+    if MembersToExclude == None or len(MembersToExclude) < 1:
+        MembersToExclude = ['']
     if PreferredGroupID == None:
         PreferredGroupID=''
 
@@ -63,12 +63,12 @@ def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         GroupName=''
     if Ensure == None:
         Ensure=''
-    if Members == None:
-        Members= ['']
-    if MembersToInclude == None:
-        MembersToInclude=''
-    if MembersToExclude == None:
-        MembersToExclude=''
+    if Members == None or len(Members) < 1 :
+        Members = ['']
+    if MembersToInclude == None or len(MembersToInclude) < 1:
+        MembersToInclude = ['']
+    if MembersToExclude == None or len(MembersToExclude) < 1:
+        MembersToExclude = ['']
     if PreferredGroupID == None:
         PreferredGroupID=''
 
