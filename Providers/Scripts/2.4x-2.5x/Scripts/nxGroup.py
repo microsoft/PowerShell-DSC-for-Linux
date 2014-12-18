@@ -28,11 +28,11 @@ def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members == None :
+    if Members == None or len(Members) < 1 :
         Members = ['']
-    if MembersToInclude == None :
+    if MembersToInclude == None or len(MembersToInclude) < 1:
         MembersToInclude = ['']
-    if MembersToExclude == None :
+    if MembersToExclude == None or len(MembersToExclude) < 1:
         MembersToExclude = ['']
     if PreferredGroupID != None :
         PreferredGroupID=PreferredGroupID.decode("utf-8")
@@ -51,11 +51,11 @@ def Test_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members == None :
+    if Members == None or len(Members) < 1 :
         Members = ['']
-    if MembersToInclude == None :
+    if MembersToInclude == None or len(MembersToInclude) < 1:
         MembersToInclude = ['']
-    if MembersToExclude == None :
+    if MembersToExclude == None or len(MembersToExclude) < 1:
         MembersToExclude = ['']
     if PreferredGroupID != None :
         PreferredGroupID=PreferredGroupID.decode("utf-8")
@@ -75,11 +75,11 @@ def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         Ensure=Ensure.decode("utf-8")
     else:
         Ensure = ''
-    if Members == None :
+    if Members == None or len(Members) < 1 :
         Members = ['']
-    if MembersToInclude == None :
+    if MembersToInclude == None  or len(MembersToInclude) < 1:
         MembersToInclude = ['']
-    if MembersToExclude == None :
+    if MembersToExclude == None  or len(MembersToExclude) < 1:
         MembersToExclude = ['']
     if PreferredGroupID != None :
         PreferredGroupID=PreferredGroupID.decode("utf-8")
@@ -131,7 +131,7 @@ def ShowMof(op, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, 
 def Print(s,file=sys.stdout):
     file.write(s+'\n')
     
-def opened_w_error(filename, mode="a"):
+def opened_w_error(filename, mode="r"):
     """
     This context ensures the file is closed.
     """
