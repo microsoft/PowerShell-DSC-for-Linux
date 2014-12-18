@@ -12,6 +12,8 @@ import sys
 import pwd
 import re
 import time
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # [Key] string KeyComment;
 # [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
@@ -49,7 +51,7 @@ def Test_Marshall(KeyComment,Ensure,UserName,Key):
     return retval
 
 def Get_Marshall(KeyComment,Ensure,UserName,Key):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if Ensure == None:
         Ensure=''
     if KeyComment == None:

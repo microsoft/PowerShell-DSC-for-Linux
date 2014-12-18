@@ -10,6 +10,8 @@ import os
 import sys
 import re
 import time
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 global show_mof
 show_mof=False
@@ -46,7 +48,7 @@ def Test_Marshall(Name,Value,Ensure,Path):
     return retval
 
 def Get_Marshall(Name,Value,Ensure,Path):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if Name == None:
         Name=''
     if Value == None:
@@ -57,6 +59,10 @@ def Get_Marshall(Name,Value,Ensure,Path):
         Path=False
     retval = 0
     retval,Name,Value,Ensure,Path = Get(Name,Value,Ensure,Path)
+    Name = protocol.MI_String(Name)
+    Value = protocol.MI_String(Value)
+    Ensure = protocol.MI_String(Ensure)
+    Path = protocol.MI_Boolean(Path)
 
     retd={}
     ld=locals()
@@ -174,14 +180,13 @@ def Test(Name,Value,Ensure,Path):
     return [retval]
 
 def Get(Name,Value,Ensure,Path):
-#    import pdb; pdb.set_trace()
     retval=-1
     try:
         p=Params(Name,Value,Ensure,Path)
     except Exception as e:
         Print('ERROR - Unable to initialize nxEnvironmentProvider.  ',file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxEnvironmentProvider. ')
-        return [retval]
+        return [retval,Name,Value,Ensure,Path]
     ShowMof('GET', Name,Value,Ensure,Path)
     found,error=FindVar(p)
     if  found and p.Ensure == 'Present'  :
