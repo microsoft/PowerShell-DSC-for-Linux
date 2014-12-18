@@ -11,6 +11,8 @@ import sys
 import time
 import re
 import shlex 
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 LogPath='/tmp/nxExec.log'
 
 #   [key] string Command;
@@ -88,7 +90,7 @@ def Test_Marshall(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCo
     return retval
 
 def Get_Marshall(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if Command != None :
         Command=Command.decode("utf-8")
     else:
@@ -117,6 +119,16 @@ def Get_Marshall(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCom
         TestCommand = ''
 
     (retval,Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand) = Get(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
+
+    Command = protocol.MI_String(Command.decode("utf-8"))
+    Environment = protocol.MI_String(Environment.decode("utf-8"))
+    Shell = protocol.MI_Boolean(Shell)
+    Returncode = protocol.MI_Uint16(Returncode)
+    Timeout = protocol.MI_Uint32(Timeout)
+    User = protocol.MI_String(User.decode("utf-8"))
+    Group = protocol.MI_String(Group.decode("utf-8"))
+    TestCommand = protocol.MI_String(TestCommand.decode("utf-8"))
+
     retd={}
     ld=locals()
     for k in arg_names :
@@ -199,23 +211,13 @@ class Params:
             raise Exception('BadParameter')
         self.Shell = Shell
 
-        if type(Returncode) == str:
-            if len(Returncode)<1:
-                Print('ERROR: Mandatory Param Returncode missing.',file=sys.stderr)
-                Log(LogPath,'ERROR: Mandatory Param Returncode missing.')
-                raise Exception('BadParameter')
-        self.Returncode = int(Returncode)
+        self.Returncode = Returncode
 
         self.User = User
 
         self.Group = Group
 
-        if type(Timeout) == str:
-            if len(Timeout)<1:
-                Print('ERROR: Mandatory Param Timeout missing.',file=sys.stderr)
-                Log(LogPath,'ERROR: Mandatory Param Timeout missing.')
-                raise Exception('BadParameter')
-        self.Timeout = int(Timeout)
+        self.Timeout = Timeout
 
         if len(TestCommand)<1:
             Print('ERROR: Mandatory Param TestCommand missing.',file=sys.stderr)
@@ -266,6 +268,7 @@ def Exec(p,is_test):
             return exit_code
     exit_code = proc.wait()
     Result = proc.stdout.read().decode("utf-8")
+    Print("exit_code: " + str(exit_code))
     Print("stdout: " + Result)
     Print("stderr: " + proc.stderr.read().decode("utf-8"))
     retcode=-1
@@ -308,6 +311,7 @@ def PreExec(uid, gid, User, Environment):
             for e in Environment.split(','):
                 n,v=e.split('=')
                 os.environ[n]=v
+                Print('Setting ' + n + ' to ' + v,file=sys.stderr)
     return SetIDs_callback
 
 
@@ -354,7 +358,7 @@ def Get(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
     try:
         p=Params(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
     except :
-        return [retcode]
+        return [retcode,Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand]
     is_test=True
     code=Exec(p,is_test)
     if code== 0:
@@ -367,7 +371,7 @@ def Get(Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand):
         Print("Test command failed:"+p.TestCommand+" return code of "+ str(code)   ,file=sys.stderr)
         Log(LogPath,"Test command failed:"+p.TestCommand+" return code of "+ str(code) )
         retcode=0
-    return [ retcode ]
+    return [ retcode,Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand ]
 
 
 
