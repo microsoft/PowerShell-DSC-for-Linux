@@ -297,7 +297,7 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
         if Disabled == True:
             disabled_user_string = "!"
 
-        if Password:
+        if len(Password)>0:
             usermod_string += " -p \"" + disabled_user_string + Password.replace("$", "\$") + "\""
         elif Disabled == True:
             usermodonly_string += " -L"
@@ -406,7 +406,7 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
             Print("GroupID does not match",file=sys.stderr)
             return [-1]
 
-        if Password:
+        if len(Password)>0:
             read_password = shadow_entries[UserName][0]
             if len(read_password) == 0:
                 Print("Password does not match",file=sys.stderr)
@@ -453,23 +453,23 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
             exit_code = -1
         return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
         
-        extra_fields = passwd_entries[UserName][3].split(",")
-        FullName = extra_fields[0]
-        if len(extra_fields) > 1:
-            Description = extra_fields[1]
+    extra_fields = passwd_entries[UserName][3].split(",")
+    FullName = extra_fields[0]
+    if len(extra_fields) > 1:
+        Description = extra_fields[1]
 
-        HomeDirectory = passwd_entries[UserName][4]
-        GroupID = passwd_entries[UserName][2]
-        
-        Password = shadow_entries[UserName][0]
-        Disabled = False
-        if len(Password) > 0:
-            if Password[0] == "!":
-                Disabled = True
-                Password = Password[1:]
-        if PasswordExpired(shadow_entries[UserName]):
-            PasswordChangeRequired = True
-        else:
-            PasswordChangeRequired = False
+    HomeDirectory = passwd_entries[UserName][4]
+    GroupID = passwd_entries[UserName][2]
+    
+    Password = shadow_entries[UserName][0]
+    Disabled = False
+    if len(Password) > 0:
+        if Password[0] == "!":
+            Disabled = True
+            Password = Password[1:]
+    if PasswordExpired(shadow_entries[UserName]):
+        PasswordChangeRequired = True
+    else:
+        PasswordChangeRequired = False
 
     return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
