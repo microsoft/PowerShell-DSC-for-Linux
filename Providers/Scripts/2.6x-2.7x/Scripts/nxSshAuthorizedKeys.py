@@ -12,6 +12,8 @@ import sys
 import pwd
 import re
 import time
+import imp
+protocol=imp.load_source('protocol','../protocol.py')
 
 # [Key] string KeyComment;
 # [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
@@ -65,7 +67,7 @@ def Test_Marshall(KeyComment,Ensure,UserName,Key):
     return retval
 
 def Get_Marshall(KeyComment,Ensure,UserName,Key):
-    arg_names=locals().keys()
+    arg_names=list(locals().keys())
     if Ensure != None :
         Ensure=Ensure.decode('utf-8')
     else:
@@ -85,6 +87,10 @@ def Get_Marshall(KeyComment,Ensure,UserName,Key):
 
     retval = 0
     retval,KeyComment,Ensure,UserName,Key = Get(KeyComment,Ensure,UserName,Key)
+    KeyComment = protocol.MI_String(KeyComment.decode("utf-8"))
+    Ensure = protocol.MI_String(Ensure.decode("utf-8"))
+    UserName = protocol.MI_String(UserName.decode("utf-8"))
+    Key = protocol.MI_String(Key.decode("utf-8"))
 
     retd={}
     ld=locals()
@@ -175,7 +181,7 @@ def Get(KeyComment,Ensure,UserName,Key):
     except Exception,e:
         Print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ e.message)
-        return [retval]
+        return [retval,KeyComment,Ensure,UserName,Key]
     found,error=FindKey(p)
     if  found and p.Ensure == 'Present'  :
         retval = 0
@@ -300,7 +306,7 @@ def FindKey(p):
     error=None
     found=False
     if not os.path.isfile(path):
-        return found
+        return found,error
     with opened_w_error(path,'rb') as (F,error):
         if error:
             Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
