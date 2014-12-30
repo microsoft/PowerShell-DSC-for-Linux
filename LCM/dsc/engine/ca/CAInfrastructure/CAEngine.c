@@ -42,6 +42,35 @@
 
 volatile MI_Operation *g_CurrentWmiv2Operation = NULL;
 
+/* BEGIN STUBS */
+
+MI_Result MI_CALL Pull_GetConfiguration(_In_ LCMProviderContext *lcmContext,
+                                _In_ MI_Instance *metaConfig,
+                                _Outptr_result_maybenull_z_  MI_Char** mofFileName,
+                                _Outptr_result_maybenull_z_  MI_Char** result,
+                                _Out_ MI_Uint32* getActionStatusCode,
+                                _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    fprintf(stderr, "In Pull_GetConfiguration");
+    return MI_RESULT_OK;
+}
+
+MI_Result MI_CALL Pull_GetAction(_In_ LCMProviderContext *lcmContext,
+                                _In_ MI_Instance *metaConfig,
+                                _In_z_ const MI_Char *checkSum,
+                                _In_ MI_Boolean complianceStatus,
+                                _In_ MI_Uint32 lastGetActionStatusCode,
+                                _Outptr_result_maybenull_z_  MI_Char** result,
+                                _Out_ MI_Uint32* getActionStatusCode,
+                                _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    fprintf(stderr, "In Pull_GetAction");
+    return MI_RESULT_OK;
+}
+
+/* END STUBS */
+
+
 MI_Result GetDocumentEncryptionSetting( _In_ MI_Instance *documentIns, 
                                         _Inout_ MI_Boolean *bEncryptionEnabled,
                                         _Outptr_result_maybenull_z_ MI_Char **certificateid,
@@ -457,7 +486,7 @@ MI_Result DependentResourceFailed( _In_ MI_Uint32 index,
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
-    *extendedError = NULL;	// Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.	
+    *extendedError = NULL;      // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.       
     *bDependentFailed = MI_FALSE;
     if( index >= instanceA->size || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -541,7 +570,7 @@ MI_Result AddToList(_Inout_ ExecutionOrderContainer *container,
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
-    *extendedError = NULL;	// Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.	
+    *extendedError = NULL;      // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.       
         
     for( xCount = 0; xCount < container->executionListSize; xCount++)
     {

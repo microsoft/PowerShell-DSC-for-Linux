@@ -78,6 +78,31 @@ MI_Result MI_CALL Pull_GetAction(_In_ LCMProviderContext *lcmContext,
                                 _Out_ MI_Uint32* getActionStatusCode,
                                 _Outptr_result_maybenull_ MI_Instance **extendedError);
 
+MI_Result MI_CALL Pull_GetModules(_In_ LCMProviderContext *lcmContext,
+                                                      _In_ MI_Instance *metaConfig, 
+                                                      _In_z_  MI_Char* downloadLocation,
+                                                      _In_z_  MI_Char* mofFileName,
+                                                      _In_ MI_Boolean allowModuleOverwrite,
+                                                      _Out_ MI_Uint32* getActionStatusCode,
+                                                      _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+
+MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContext *lcmContext,
+                                _In_ MI_Instance *metaConfig,
+                                _Outptr_result_maybenull_z_  MI_Char** mofFileName,
+                                _Outptr_result_maybenull_z_  MI_Char** result,
+                                _Out_ MI_Uint32* getActionStatusCode,
+                                _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmContext,
+                                _In_ MI_Instance *metaConfig,
+                                _In_z_ const MI_Char *checkSum,
+                                _In_ MI_Boolean complianceStatus,
+                                _In_ MI_Uint32 lastGetActionStatusCode,
+                                _Outptr_result_maybenull_z_  MI_Char** result,
+                                _Out_ MI_Uint32* getActionStatusCode,
+                                _Outptr_result_maybenull_ MI_Instance **extendedError);
+
 void SetMessageInContext(MI_Uint32 msgOperation,MI_Uint32 msgItem,LCMProviderContext *lcmContext);
 
 

@@ -41,7 +41,7 @@
 #define GET_ACTION_STATUS_CODE_SUCCESS 0
 
 // Constants used only for API tests
-#define LCM_STATUSCODE_HISTORY_STR_SIZE 3	// 1 for code, 1 for comma seperator, 1 for tailing null
+#define LCM_STATUSCODE_HISTORY_STR_SIZE 3       // 1 for code, 1 for comma seperator, 1 for tailing null
 #define MAX_LCM_STATUSCODE_HISTORY_SIZE 50
 
 typedef struct _RichErrorInformation
@@ -110,7 +110,7 @@ extern "C"
 
     MI_Result DoPullServerRefresh(_In_ MI_Context *context, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-	MI_Result UpdateMetaConfigWithLCMState(_In_z_ MI_Uint32 *lcmStatusCode, _Inout_ MI_Instance *metaConfigInstance);
+        MI_Result UpdateMetaConfigWithLCMState(_In_z_ MI_Uint32 *lcmStatusCode, _Inout_ MI_Instance *metaConfigInstance);
 
     MI_Result UpdateMetaConfigWithCertificateThumbprint(_In_z_ MI_Char *certificateThumbprint, _Inout_ MI_Instance *metaConfigInstance,
                                             _Out_ MI_Boolean *bMetaConfigUpdated, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
@@ -242,13 +242,13 @@ extern "C"
     MI_Result UpdateCurrentStatus(
         _In_opt_ MI_Boolean *complianceStatus,
         _In_opt_ MI_Uint32 *getActionStatusCode,
-		_In_opt_ MI_Uint32 *lcmStatusCode,
+                _In_opt_ MI_Uint32 *lcmStatusCode,
         _Outptr_result_maybenull_ MI_Instance **extendedError);
 
     void GetLatestStatus(
         _Out_ MI_Boolean *complianceStatus,
         _Out_ MI_Uint32 *getActionStatusCode,
-		_Out_ MI_Uint32 *lcmStatusCode);
+                _Out_ MI_Uint32 *lcmStatusCode);
 
     MI_Result InitCacheAndMetaConfig(_Outptr_result_maybenull_ MSFT_DSCMetaConfiguration **metaConfig,
                          _Outptr_result_maybenull_ MI_Instance **DSCInternalCache,
@@ -270,16 +270,16 @@ extern "C"
         _Inout_ MI_Instance **dscCacheInstance, 
         _In_opt_ MI_Boolean* complianceStatus,
         _In_opt_ MI_Uint32* getActionStatusCode,
-		_In_opt_ MI_Uint32* lcmStatusCode,
+                _In_opt_ MI_Uint32* lcmStatusCode,
         _Outptr_result_maybenull_ MI_Instance **extendedError);
 
-	MI_Result UpdateLCMStatusCodeHistory(
-		_In_ MI_Instance **dscInternalCache,
-		_Outptr_result_maybenull_z_ MI_Char **lcmStatusCodeHistory);
+        MI_Result UpdateLCMStatusCodeHistory(
+                _In_ MI_Instance **dscInternalCache,
+                _Outptr_result_maybenull_z_ MI_Char **lcmStatusCodeHistory);
 
-	MI_Result GetLCMStatusCodeHistory(
-		_Outptr_result_maybenull_z_ MI_Char **lcmStatusCodeHistory,
-		_Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+        MI_Result GetLCMStatusCodeHistory(
+                _Outptr_result_maybenull_z_ MI_Char **lcmStatusCodeHistory,
+                _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result SerializeMetaConfig(_In_ const MSFT_DSCMetaConfiguration *metaConfig,
         _In_ ModuleManager *moduleManager,
@@ -314,16 +314,13 @@ extern "C"
 
     const MI_Char *GetConfigPath();
 
-	const MI_Char *GetCurrentLCMStatusCodeHistory();
+        const MI_Char *GetCurrentLCMStatusCodeHistory();
 
-	MI_Result SetLCMStatusBusy();
-	
-	MI_Result SetLCMStatusReady();
-	
-	MI_Result SetLCMStatusReboot();
-
-#if defined(_MSC_VER)
-
+        MI_Result SetLCMStatusBusy();
+        
+        MI_Result SetLCMStatusReady();
+        
+        MI_Result SetLCMStatusReboot();
     
     MI_Result LCM_Pull_GetConfiguration(_In_ LCMProviderContext *lcmContext,
                                _In_ ModuleManager *moduleManager,
@@ -343,9 +340,6 @@ extern "C"
                           _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
      MI_Result MI_CALL LCM_Pull_Execute(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-
-#endif     
-
 
      void ConcatStrings(_Outptr_result_z_ MI_Char** target,_In_ MI_Uint32 padding,_In_z_ MI_Char* source1, _In_z_ MI_Char* source2);
     MI_Result TimeToRunConsistencyCheck(_Out_ MI_Boolean *bRunConsistencyCheck, 

@@ -416,6 +416,35 @@ void DSCFilePutLog(
 #define DSC_EventWriteLCMPullModuleSkippedAsModuleIsAvailable(ModuleName, ModuleVersion, ModulePath) \
     ExpandEvent(LCMPullModuleSkippedAsModuleIsAvailable( g_ConfigurationDetails.jobGuidString, ModuleName, ModuleVersion, ModulePath))
 
+#define DSC_EventWriteWebDownloadManagerDoActionServerUrl(ConfigurationId, ServerUrl) \
+    ExpandEvent(WebDownloadManagerDoActionServerUrl( g_ConfigurationDetails.jobGuidString, ConfigurationId, ServerUrl))
+
+#define DSC_EventWriteWebDownloadManagerDoActionGetUrl(ConfigurationId, RelativeUrl) \
+    ExpandEvent(WebDownloadManagerDoActionGetUrl( g_ConfigurationDetails.jobGuidString, ConfigurationId, RelativeUrl))
+
+#define DSC_EventWriteWebDownloadManagerDoActionGetCall(ConfigurationId, OutputResult) \
+    ExpandEvent(WebDownloadManagerDoActionGetCall( g_ConfigurationDetails.jobGuidString, ConfigurationId, OutputResult))
+
+#define DSC_EventWriteWebDownloadManagerGetDocGetUrl(ConfigurationId, RelativeUrl) \
+    ExpandEvent(WebDownloadManagerGetDocGetUrl( g_ConfigurationDetails.jobGuidString, ConfigurationId, RelativeUrl))
+
+#define DSC_EventWriteWebDownloadManagerGetDocGetCall(ConfigurationId, OutputResult) \
+    ExpandEvent(WebDownloadManagerGetDocGetCall( g_ConfigurationDetails.jobGuidString, ConfigurationId, OutputResult))
+
+#define DSC_EventWriteWebDownloadManagerDoActionCertId(ConfigurationId, CertificateId) \
+    ExpandEvent(WebDownloadManagerDoActionCertId(g_ConfigurationDetails.jobGuidString, ConfigurationId, CertificateId))
+
+#define DSC_EventWriteWebDownloadManagerDoActionHttpClient(ConfigurationId, errorString) \
+    ExpandEvent(WebDownloadManagerDoActionHttpClient(g_ConfigurationDetails.jobGuidString, ConfigurationId, errorString))
+
+#define DSC_EventWriteWebDownloadManagerGetDocHttpClient(ConfigurationId, OutputResult) \
+    ExpandEvent(WebDownloadManagerGetDocHttpClient( g_ConfigurationDetails.jobGuidString, ConfigurationId, OutputResult))
+
+#define DSC_EventWriteWebDownloadManagerGetDocChecksumValidation(ConfigurationId, OutputResult) \
+    ExpandEvent(WebDownloadManagerGetDocChecksumValidation( g_ConfigurationDetails.jobGuidString, ConfigurationId, OutputResult))
+
+#define DSC_EventWriteWebDownloadManagerGetDocFileSave(ConfigurationId, FilePath) \
+    ExpandEvent(WebDownloadManagerGetDocFileSave( g_ConfigurationDetails.jobGuidString, ConfigurationId, FilePath))
 
 #ifdef __cplusplus
 
