@@ -1,0 +1,26 @@
+#!/bin/bash
+
+DEBUG_FLAGS="--enable-debug"
+pkgconfig=`which pkg-config`
+
+if [ -d "/usr/local_ssl_0.9.8" -a -d "/usr/local_ssl_1.0.0" ]; then
+    case "`uname -m`" in    
+	x86_64 )
+            openssl098_libdir=/usr/local_ssl_0.9.8/lib
+            openssl100_libdir=/usr/local_ssl_1.0.0/lib64
+            ;;
+	
+	* )
+            openssl098_libdir=/usr/local_ssl_0.9.8/lib
+            openssl100_libdir=/usr/local_ssl_1.0.0/lib
+            ;;
+    esac
+    openssl098_cflags=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --cflags openssl`
+    openssl098_libs=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --libs openssl`
+    openssl100_cflags=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --cflags openssl`
+    openssl100_libs=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --libs openssl`
+fi
+
+(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $DEBUG_FLAGS --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_0.9.8 --opensslcflags="$openssl098_cflags" --openssllibs="$openssl098_libs" --openssllibdir="$openssl098_libdir")
+
+

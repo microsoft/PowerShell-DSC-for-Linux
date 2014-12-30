@@ -1,0 +1,203 @@
+%Variables
+SHORT_NAME: 'dsc'
+LONG_NAME: 'Windows Powershell Desired State Configuration for Linux'
+SHELL_HEADER: '#!/bin/sh'
+SHORT_NAME_PREFIX: 'MSFT'
+VENDOR: 'MSFT'
+GROUP: 'MSFT'
+LICENSE: 'MSFT'
+MAINTAINER: 'Microsoft'
+PROVIDES: 'dscpackage'
+DESCRIPTION: 'Windows Powershell Desired State Configuration for Linux'
+COPYRIGHT_FILE: 'Copyright Microsoft'
+SHLIB_EXT: 'so'
+PROVIDERS: 'File Script User Group Service Package'
+
+DEV_OMI_DIR: 'omi-1.0.8'
+DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateConfiguration'
+
+
+%Files
+/opt/microsoft/dsc/lib/libdsccore.so; omi-1.0.8/output/lib/libdsccore.so; 755; root; root
+/opt/microsoft/dsc/mof/OMI_BaseResourceUE.mof; LCM/dsc/mof/OMI_BaseResourceUE.mof; 755; root; root
+
+/opt/microsoft/dsc/etc/dsccore.reg; LCM/dsccore.reg; 755; root; root
+/opt/microsoft/dsc/mof/MSFT_DSCMetaConfiguration.mof; LCM/dsc/mof/MSFT_DSCMetaConfiguration.mof; 755; root; root
+/opt/microsoft/dsc/mof/MSFT_LogResource.registration.mof; LCM/dsc/mof/MSFT_LogResource.registration.mof; 755; root; root
+/opt/microsoft/dsc/mof/MSFT_LogResource.schema.mof; LCM/dsc/mof/MSFT_LogResource.schema.mof; 755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxFileResource.so;   Providers/bin/libMSFT_nxFileResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxFileResource.reg;  Providers/nxFile/MSFT_nxFileResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxFileResource.schema.mof;  Providers/nxFile/MSFT_nxFileResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxFileResource.registration.mof;  Providers/nxFile/MSFT_nxFileResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxScriptResource.so;   Providers/bin/libMSFT_nxScriptResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxScriptResource.reg;  Providers/nxScript/MSFT_nxScriptResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxScriptResource.schema.mof;  Providers/nxScript/MSFT_nxScriptResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxScriptResource.registration.mof;  Providers/nxScript/MSFT_nxScriptResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxUserResource.so;   Providers/bin/libMSFT_nxUserResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxUserResource.reg;  Providers/nxUser/MSFT_nxUserResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxUserResource.schema.mof;  Providers/nxUser/MSFT_nxUserResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxUserResource.registration.mof;  Providers/nxUser/MSFT_nxUserResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxGroupResource.so;   Providers/bin/libMSFT_nxGroupResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxGroupResource.reg;  Providers/nxGroup/MSFT_nxGroupResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxGroupResource.schema.mof;  Providers/nxGroup/MSFT_nxGroupResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxGroupResource.registration.mof;  Providers/nxGroup/MSFT_nxGroupResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxServiceResource.so;   Providers/bin/libMSFT_nxServiceResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxServiceResource.reg;  Providers/nxService/MSFT_nxServiceResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxServiceResource.schema.mof;  Providers/nxService/MSFT_nxServiceResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxServiceResource.registration.mof;  Providers/nxService/MSFT_nxServiceResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxPackageResource.so;   Providers/bin/libMSFT_nxPackageResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxPackageResource.reg;  Providers/nxPackage/MSFT_nxPackageResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxPackageResource.schema.mof;  Providers/nxPackage/MSFT_nxPackageResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxPackageResource.registration.mof;  Providers/nxPackage/MSFT_nxPackageResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/Scripts/client.py; Providers/Scripts/client.py; 755; root; root
+/opt/microsoft/dsc/Scripts/protocol.py; Providers/Scripts/protocol.py; 755; root; root
+
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/__init__.py; Providers/Scripts/2.4x-2.5x/Scripts/__init__.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFile.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFile.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxGroup.py; Providers/Scripts/2.4x-2.5x/Scripts/nxGroup.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxPackage.py; Providers/Scripts/2.4x-2.5x/Scripts/nxPackage.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxService.py; Providers/Scripts/2.4x-2.5x/Scripts/nxService.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxUser.py; Providers/Scripts/2.4x-2.5x/Scripts/nxUser.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; Providers/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxExec.py; Providers/Scripts/2.4x-2.5x/Scripts/nxExec.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
+
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/__init__.py; Providers/Scripts/2.6x-2.7x/Scripts/__init__.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxScript.py; Providers/Scripts/2.6x-2.7x/Scripts/nxScript.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFile.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFile.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxGroup.py; Providers/Scripts/2.6x-2.7x/Scripts/nxGroup.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxPackage.py; Providers/Scripts/2.6x-2.7x/Scripts/nxPackage.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxService.py; Providers/Scripts/2.6x-2.7x/Scripts/nxService.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxUser.py; Providers/Scripts/2.6x-2.7x/Scripts/nxUser.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; Providers/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxExec.py; Providers/Scripts/2.6x-2.7x/Scripts/nxExec.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
+
+/opt/microsoft/dsc/Scripts/3.x/Scripts/__init__.py; Providers/Scripts/3.x/Scripts/__init__.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxScript.py; Providers/Scripts/3.x/Scripts/nxScript.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxFile.py; Providers/Scripts/3.x/Scripts/nxFile.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxGroup.py; Providers/Scripts/3.x/Scripts/nxGroup.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxPackage.py; Providers/Scripts/3.x/Scripts/nxPackage.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxService.py; Providers/Scripts/3.x/Scripts/nxService.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxUser.py; Providers/Scripts/3.x/Scripts/nxUser.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxEnvironment.py; Providers/Scripts/3.x/Scripts/nxEnvironment.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxExec.py; Providers/Scripts/3.x/Scripts/nxExec.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
+
+%Directories
+/opt/microsoft;          755; root; root
+/opt/microsoft/dsc;      755; root; root
+/opt/microsoft/dsc/etc;  755; root; root
+/opt/microsoft/dsc/mof;  755; root; root
+/opt/microsoft/dsc/lib;  755; root; root
+/opt/microsoft/dsc/Scripts; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts; 755; root; root
+
+
+%Links
+
+
+%Dependencies
+
+%Preinstall_10
+#if PACKAGE_TYPE == RPM
+rpm -qa | grep omiserver 2> /dev/null 1> /dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: dsc requires the omiserver package to be installed"
+    exit 1
+fi
+#else
+dpkg -s omiserver 2> /dev/null 1> /dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: dsc requires the omiserver package to be installed"
+    exit 1
+fi
+#endif
+
+%Postinstall_10
+# TODO: Detect omi install directory?
+OMI_HOME=/opt/omi
+OMI_REGISTER_DIR=$OMI_HOME/etc/omiregister
+CONFIG_SYSCONFDIR=$OMI_HOME/etc
+CONFIG_DATADIR=$OMI_HOME/share
+OMI_LIB=$OMI_HOME/lib
+
+mkdir -p $CONFIG_SYSCONFDIR/dsc
+mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration
+mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/schema
+mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_LogResource
+mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration
+mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/registration
+mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_LogResource
+mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/BuiltinProvCache
+mkdir -p $CONFIG_DATADIR/dsc
+mkdir -p $CONFIG_DATADIR/dsc/configuration
+mkdir -p $CONFIG_DATADIR/dsc/configuration/schema
+mkdir -p $CONFIG_DATADIR/dsc/configuration/registration      
+
+# Create links for all our providers
+mkdir -p $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
+cp /opt/microsoft/dsc/etc/*.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
+cp /opt/microsoft/dsc/etc/dsccore.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration/
+ln -s /opt/microsoft/dsc/lib/libdsccore.so $OMI_HOME/lib/libdsccore.so
+
+cp /opt/microsoft/dsc/mof/OMI_BaseResourceUE.mof $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration/baseresource.schema.mof
+cp /opt/microsoft/dsc/mof/MSFT_DSCMetaConfiguration.mof $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration/MSFT_DSCMetaConfiguration.mof
+cp /opt/microsoft/dsc/mof/MSFT_LogResource.registration.mof  $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_LogResource
+cp /opt/microsoft/dsc/mof/MSFT_LogResource.schema.mof  $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_LogResource
+
+
+
+for prov in ${{PROVIDERS}}; do
+    cp /opt/microsoft/dsc/etc/MSFT_nx${prov}Resource.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
+    mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_nx${prov}Resource/ $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_nx${prov}Resource/
+    cp /opt/microsoft/dsc/mof/MSFT_nx${prov}Resource.schema.mof $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_nx${prov}Resource/
+    cp /opt/microsoft/dsc/mof/MSFT_nx${prov}Resource.registration.mof $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_nx${prov}Resource/
+    ln -s /opt/microsoft/dsc/lib/libMSFT_nx${prov}Resource.so $OMI_LIB/libMSFT_nx${prov}Resource.so
+done
+
+ln -s $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
+ln -s /opt/microsoft/dsc/Scripts $OMI_LIB/Scripts
+
+%Preuninstall_999
+# TODO: Detect omi install directory?
+OMI_HOME=/opt/omi
+OMI_REGISTER_DIR=$OMI_HOME/etc/omiregister
+CONFIG_SYSCONFDIR=$OMI_HOME/etc
+CONFIG_DATADIR=$OMI_HOME/share
+OMI_LIB=$OMI_HOME/lib
+
+# Remove all DSC specific data
+rm -rf $OMI_ETC_DIR/conf/omiregister/root-Microsoft-DesiredStateConfiguration
+rm $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
+rm -rf $CONFIG_SYSCONFDIR/dsc
+rm -rf $CONFIG_DATADIR/dsc
+rm -rf $OMI_LIB/Scripts
+
+rm $OMI_LIB/libdsccore.so    
+for prov in ${{PROVIDERS}}; do
+    rm $OMI_LIB/libMSFT_nx${prov}Resource.so
+done
+
+%Preinstall_0
+${{SHELL_HEADER}}
+%Postinstall_0
+${{SHELL_HEADER}}
+%Preuninstall_0
+${{SHELL_HEADER}}
+%Postuninstall_0
+${{SHELL_HEADER}}
+

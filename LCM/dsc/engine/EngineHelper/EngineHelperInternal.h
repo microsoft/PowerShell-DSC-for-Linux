@@ -101,7 +101,7 @@
 #define MSFT_PSConfigurationProviderRegistration_BaseProperty_Count    3
 
 /* MSFT_DSCMetaConfiguration*/
-#define MSFT_DSCMetaConfiguration_LocalConfigurationManagerState			MI_T("LocalConfigurationManagerState")
+#define MSFT_DSCMetaConfiguration_LocalConfigurationManagerState                        MI_T("LocalConfigurationManagerState")
 #define MSFT_DSCMetaConfiguration_ResourceId                                MI_T("ResourceId")
 #define MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins            MI_T("ConfigurationModeFrequencyMins")
 #define MSFT_DSCMetaConfiguration_RebootNodeIfNeeded                        MI_T("RebootNodeIfNeeded")
@@ -115,21 +115,21 @@
 #define MSFT_DSCMetaConfiguration_DeleteCertificateOnInstallation           MI_T("DeleteCertificateOnInstallation")
 #define MSFT_DSCMetaConfiguration_DownloadManagerName                       MI_T("DownloadManagerName")
 #define MSFT_DSCMetaConfiguration_DownloadManagerCustomData                 MI_T("DownloadManagerCustomData")
-#define MSFT_DSCMetaConfiguration_RefreshFrequencyMins						MI_T("RefreshFrequencyMins")
-#define MSFT_DSCMetaConfiguration_AllowModuleOverwrite						MI_T("AllowModuleOverwrite")
+#define MSFT_DSCMetaConfiguration_RefreshFrequencyMins                                          MI_T("RefreshFrequencyMins")
+#define MSFT_DSCMetaConfiguration_AllowModuleOverwrite                                          MI_T("AllowModuleOverwrite")
 
 #define MSFT_DSCMetaConfiguration_BaseProperty_Count    0
 
 /* MSFT_DSCLocalConfigManager */
-#define MSFT_DSCLocalConfigManager_SendConfiguration					MI_T("SendConfiguration")
-#define MSFT_DSCLocalConfigManager_SendConfigurationApply				MI_T("SendConfigurationApply")
-#define MSFT_DSCLocalConfigManager_GetConfiguration						MI_T("GetConfiguration")
-#define MSFT_DSCLocalConfigManager_ApplyConfiguration					MI_T("ApplyConfiguration")
-#define MSFT_DSCLocalConfigManager_SendMetaConfigurationApply			MI_T("SendMetaConfigurationApply")
-#define MSFT_DSCLocalConfigManager_GetMetaConfiguration					MI_T("GetMetaConfiguration")
-#define MSFT_DSCLocalConfigManager_RollBack								MI_T("RollBack")
-#define MSFT_DSCLocalConfigManager_PerformRequiredConfigurationChecks	MI_T("PerformRequiredConfigurationChecks")
-#define MSFT_DSCLocalConfigManager_StopConfiguration					MI_T("StopConfiguration")
+#define MSFT_DSCLocalConfigManager_SendConfiguration                                    MI_T("SendConfiguration")
+#define MSFT_DSCLocalConfigManager_SendConfigurationApply                               MI_T("SendConfigurationApply")
+#define MSFT_DSCLocalConfigManager_GetConfiguration                                             MI_T("GetConfiguration")
+#define MSFT_DSCLocalConfigManager_ApplyConfiguration                                   MI_T("ApplyConfiguration")
+#define MSFT_DSCLocalConfigManager_SendMetaConfigurationApply                   MI_T("SendMetaConfigurationApply")
+#define MSFT_DSCLocalConfigManager_GetMetaConfiguration                                 MI_T("GetMetaConfiguration")
+#define MSFT_DSCLocalConfigManager_RollBack                                                             MI_T("RollBack")
+#define MSFT_DSCLocalConfigManager_PerformRequiredConfigurationChecks   MI_T("PerformRequiredConfigurationChecks")
+#define MSFT_DSCLocalConfigManager_StopConfiguration                                    MI_T("StopConfiguration")
 
 /* MSFT_Credential */
 #define MSFT_Credential_UserName                    MI_T("UserName")
@@ -147,7 +147,7 @@
 /*DSC_InternalStateCache*/
 #define DSC_InternalStateCache_ComplianceStatus     MI_T("ComplianceStatus")
 #define DSC_InternalStateCache_GetActionStatusCode  MI_T("GetActionStatusCode")
-#define DSC_InternalStateCache_LCMStatusCode		MI_T("LCMStatusCode")
+#define DSC_InternalStateCache_LCMStatusCode            MI_T("LCMStatusCode")
 
 #define DSC_RESOURCENAME                MI_T("LCM")
 #define CA_ACTIVITY_NAME                MI_T("LCM")
@@ -157,7 +157,7 @@
 #define DEVICE_NAME_SIZE                MAX_COMPUTERNAME_LENGTH+1 //Maximum computer name length possible is 15
 #define TOKENIZED_OUTPUT_PADDING        50 //Padding required when outputs are tokenized
 
-
+#define DEFAULT_DOWNLOADMANAGER MI_T("WebDownloadManager")
 #define DSC_RESTART_SYSTEM_FLAG         1
 
 #define LCM_SETFLAGS_DEFAULT            0
@@ -238,11 +238,11 @@
 #define DSC_CONFIRMOPTION_SET_VALUE 1    //This is the value at the confirm index, if the confirm option is set.
 
 /*SQM DATA*/
-#define SQM_MACHINEGLOBAL_SESSIONID 13238784	//Session ID for all machine global sessions, present in sqmteam documentation online
-#define SQM_RESOURCECOUNT_DATAPOINTID 12401		//Datapoint ID for PSDSCResourceCount, newly created for DSC , as present in sqmteam documentation online.
-#define SQM_INDEX_PROVIDERNAME 1				//Provider name is the second column in the PSDSCResoururceCount stream datapoint, hence it is indexed as 1
-#define SQM_INDEX_RESOURCECOUNT 0				//The resource count is the first column in the datapoint, indexed as 0.
-#define SQM_PARAMETER_SIZE 2					//Total number of columns in the stream datapoint
+#define SQM_MACHINEGLOBAL_SESSIONID 13238784    //Session ID for all machine global sessions, present in sqmteam documentation online
+#define SQM_RESOURCECOUNT_DATAPOINTID 12401             //Datapoint ID for PSDSCResourceCount, newly created for DSC , as present in sqmteam documentation online.
+#define SQM_INDEX_PROVIDERNAME 1                                //Provider name is the second column in the PSDSCResoururceCount stream datapoint, hence it is indexed as 1
+#define SQM_INDEX_RESOURCECOUNT 0                               //The resource count is the first column in the datapoint, indexed as 0.
+#define SQM_PARAMETER_SIZE 2                                    //Total number of columns in the stream datapoint
 
 
 typedef MI_Instance* MI_InstancePtr;
@@ -348,9 +348,9 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define LCM_STATUSCODE_BUSY 1
 #define LCM_STATUSCODE_REBOOT 2
 
-#define LCM_STATUS_READY	MI_T("Ready")
-#define LCM_STATUS_BUSY		MI_T("Busy")
-#define LCM_STATUS_REBOOT	MI_T("PendingReboot")
+#define LCM_STATUS_READY        MI_T("Ready")
+#define LCM_STATUS_BUSY         MI_T("Busy")
+#define LCM_STATUS_REBOOT       MI_T("PendingReboot")
 
 
 /**************************************
@@ -541,6 +541,12 @@ MI_Result GetCimMIError4Params(MI_Result result ,
 MI_Result  GetCimWin32Error(MI_Uint32 result ,
                       _Outptr_result_maybenull_ MI_Instance **cimErrorDetails,
                       _In_ MI_Uint32 errorStringId );
+
+MI_Result GetCimWin32Error1Param(MI_Uint32 result ,
+                        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails,
+                        _In_ MI_Uint32 errorStringId,
+                        _In_z_ const MI_Char * param1);
+
 
 MI_Result AppendWMIErrorWithResourceID(
                       _Inout_ MI_Instance *cimErrorDetails,

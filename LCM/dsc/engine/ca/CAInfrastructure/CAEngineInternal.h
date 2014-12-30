@@ -169,17 +169,4 @@ void LogCAProgress( _In_ LCMProviderContext *lcmContext,
                        _In_ MI_Uint32 currentResourceIndex,
                        _In_ MI_Uint32 totalResource);
 
-
-/*MP Features supported Methods*/
-
-
-MI_Result Pull_GetModules(_In_ LCMProviderContext *lcmContext,
-                                _In_ MI_Instance *metaConfig,
-                                _In_z_ const MI_Char *downloadedLocation,
-                                _In_ MI_InstanceA *modulesToDownload,
-                                _Inout_ MI_StringA *downloadedModules,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError);
-
-
-
 #endif //_CAENGINEINTERNAL_H

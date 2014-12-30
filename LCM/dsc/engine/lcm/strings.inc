@@ -108,7 +108,7 @@
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_TRUE , ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_TRUE ,"Completed processing test operation. The operation returned True.")
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FALSE , ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FALSE ,"Completed processing test operation. The operation returned False.")
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FAIL , ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FAIL ,"Completed processing test operation. The operation failed.")
-	INTERNAL_Intlstr_Define0( ID_LCMHELPER_METAMOFCORRUPTED , ID_LCMHELPER_METAMOFCORRUPTED ,"Falling back to system defaults because the meta configuration mof has either been corrupted or an invalid mof property has been set.")
+    INTERNAL_Intlstr_Define0( ID_LCMHELPER_METAMOFCORRUPTED , ID_LCMHELPER_METAMOFCORRUPTED ,"Falling back to system defaults because the meta configuration mof has either been corrupted or an invalid mof property has been set.")
     INTERNAL_Intlstr_Define1(ID_LCMHELPER_OVERWROTE_USER_SPECIFIED_REFRESH_FREQUENCY ,
                      ID_LCMHELPER_OVERWROTE_USER_SPECIFIED_REFRESH_FREQUENCY ,
                      _In_z_ const PAL_Char*, firstString,
@@ -343,4 +343,58 @@
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_REBOOT_PENDINGEXIST, ID_LCM_WRITEMESSAGE_REBOOT_PENDINGEXIST, "A pending configuration exists after reboot. DSC will process a set request on the pending configuration.")
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_REBOOT_CURRENTEXIST, ID_LCM_WRITEMESSAGE_REBOOT_CURRENTEXIST, "Checking consistency for current configuration after reboot.")
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_ENDPROCESSREBOOT, ID_LCM_WRITEMESSAGE_ENDPROCESSREBOOT, "Reboot processing completed.")
-
+    INTERNAL_Intlstr_Define0( ID_PULL_CONFIGURATIONIDNOTSPECIFIED,ID_PULL_CONFIGURATIONIDNOTSPECIFIED,"The configuration ID is not in a valid format. Please supply the value in Guid format or specify 'UseSystemUUID' to automatically detect and use the target node's UUID.")
+    INTERNAL_Intlstr_Define1( ID_PULL_INVALIDCONFIGURATIONIDFORMAT ,
+                 ID_PULL_INVALIDCONFIGURATIONIDFORMAT ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "The configuration ID  " Intlstr_tstr(1) " is not in a valid format. Please use a configuration with name in a Guid format.")
+    INTERNAL_Intlstr_Define0( ID_PULL_INVALIDURLINCUSTOMDATA,ID_PULL_INVALIDURLINCUSTOMDATA, "Invalid URL specified in Local Configuration Manager settings.")
+    INTERNAL_Intlstr_Define1( ID_PULL_GETACTIONFAILED ,
+                 ID_PULL_GETACTIONFAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "A generic exception occured during while trying to get the action by Download Manager " Intlstr_tstr(1) ".")    
+    INTERNAL_Intlstr_Define2( ID_PULL_GETACTIONUNEXPECTEDRESULT ,
+                 ID_PULL_GETACTIONUNEXPECTEDRESULT ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "Unexpected result " Intlstr_tstr(1) " while trying to get the action from server "  Intlstr_tstr(2) ".")
+    INTERNAL_Intlstr_Define1( ID_PULL_UNSECURECONNECTIONNOTALLOWED ,
+                 ID_PULL_UNSECURECONNECTIONNOTALLOWED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Cannot download configuration from " Intlstr_tstr(1) ". Downloading over HTTP is not allowed. To ensure security while downloading configurations use an HTTPS address for the ServerUrl in the DownloadMangerCustomData of the LocalConfigurationManager resource for this device. If you understand the security implications of using HTTP and want to allow its use on this device, set AllowUnsecureConnection property to true in the DownloadMangerCustomData of the LocalConfigurationManager resource for this device.")                    
+    INTERNAL_Intlstr_Define1( ID_PULLGETCONFIGURATIONFAILED ,
+                 ID_PULLGETCONFIGURATIONFAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "A generic exception occured during while trying to get the configuration by Download Manager " Intlstr_tstr(1) ".")       
+    INTERNAL_Intlstr_Define1( ID_PULLGETCONFIGURATION_NULLCHECKSUMALGORITHM ,
+                 ID_PULLGETCONFIGURATION_NULLCHECKSUMALGORITHM ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Server " Intlstr_tstr(1) " returned an empty checksum algorithm.")   
+    INTERNAL_Intlstr_Define1( ID_PULLGETCONFIGURATION_NULLCHECKSUM ,
+                 ID_PULLGETCONFIGURATION_NULLCHECKSUM ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Server " Intlstr_tstr(1) " returned an empty checksum.")         
+    INTERNAL_Intlstr_Define2( ID_PULLGETCONFIGURATION_INVALIDCHECKSUMALGORITHM ,
+                 ID_PULLGETCONFIGURATION_INVALIDCHECKSUMALGORITHM ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "Server " Intlstr_tstr(1) " returned an unsupported "  Intlstr_tstr(2) " checksum algorithm.")       
+    INTERNAL_Intlstr_Define1( ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED ,
+                 ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Failed to save the configuration checksum in file " Intlstr_tstr(1) ".")     
+    INTERNAL_Intlstr_Define2( ID_PULLGETCONFIGURATION_BADRESPONSE ,
+                 ID_PULLGETCONFIGURATION_BADRESPONSE ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "The attempt to get the configuration from server " Intlstr_tstr(1) " returned unexpected response code "  Intlstr_tstr(2) ".")                 
+    INTERNAL_Intlstr_Define2( ID_PULLGETACTION_BADRESPONSE ,
+                 ID_PULLGETACTION_BADRESPONSE ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "The attempt to get the action from server " Intlstr_tstr(1) " returned unexpected response code "  Intlstr_tstr(2) ".")  
+    INTERNAL_Intlstr_Define1( ID_PULL_CONFIGURATIONSAVEFAILED ,
+                 ID_PULL_CONFIGURATIONSAVEFAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Failed to save the configuration in file " Intlstr_tstr(1) ".")  
+    INTERNAL_Intlstr_Define0( ID_PULL_CHECKSUMMISMATCH,ID_PULL_CHECKSUMMISMATCH,"Checksum for configuration does not match.")                 

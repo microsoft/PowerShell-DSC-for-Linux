@@ -1,4 +1,0 @@
-# omireg /home/johnkord/dev/imp/dsc/Providers/target/libOMI_nxUserResource.so
-LIBRARY=OMI_nxUserResource
-HOSTING=@requestor@
-CLASS=OMI_nxUserResource:OMI_BaseResource

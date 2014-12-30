@@ -1,4 +1,0 @@
-# omireg /home/johnkord/dev/imp/dsc/Providers/target/libOMI_nxScriptResource.so
-LIBRARY=OMI_nxScriptResource
-HOSTING=@requestor@
-CLASS=OMI_nxScriptResource:OMI_BaseResource

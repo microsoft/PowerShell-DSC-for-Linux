@@ -39,12 +39,19 @@
 
 #if defined(_MSC_VER)
 #include "Win32_LocalConfigManagerHelper.h"
+#include <WinCrypt.h>
+#else
+#include "OMI_LocalConfigManagerHelper.h"
 #endif
 
 
 #define NOT_INITIALIZED         0
 #define INITIALIZED             1
 #define RUNNING_INITIALIZATION  2
+
+// Constants used only for API tests
+#define LCM_STATUSCODE_HISTORY_STR_SIZE 3   // 1 for code, 1 for comma seperator, 1 for tailing null
+#define MAX_LCM_STATUSCODE_HISTORY_SIZE 50
 
 MI_Char* overWroteUserSpecifiedRefreshFreqMins = NULL;
 MI_Char* overWroteUserSpecifiedConfModeFreqMins = NULL;
@@ -140,15 +147,15 @@ MI_Result RegisterStandardTasks(_Outptr_result_maybenull_ MI_Instance **cimError
 
     return result;
 #else
-	result = GetMetaConfig((MSFT_DSCMetaConfiguration **)&currentMetaConfigInstance);
+        result = GetMetaConfig((MSFT_DSCMetaConfiguration **)&currentMetaConfigInstance);
     if (result != MI_RESULT_OK)
     {
         return result;
     }
 
-	result = RegisterConsistencyTask(currentMetaConfigInstance, cimErrorDetails);
+        result = RegisterConsistencyTask(currentMetaConfigInstance, cimErrorDetails);
 
-	MI_Instance_Delete(currentMetaConfigInstance);
+        MI_Instance_Delete(currentMetaConfigInstance);
 
     return result;
 #endif
@@ -227,7 +234,7 @@ MI_Result InitHandler(
     g_MetaConfigTmpFileName = NULL;
     g_ConfigChecksumFileName = NULL;
     g_PullRunLogFileName = NULL;
-	g_LCMStatusCodeHistory = NULL;
+        g_LCMStatusCodeHistory = NULL;
 
     result = InitPath(cimErrorDetails);
     if (result != MI_RESULT_OK)
@@ -241,7 +248,7 @@ MI_Result InitHandler(
         DSC_free(g_MetaConfigTmpFileName);
         DSC_free(g_ConfigChecksumFileName);
         DSC_free(g_PullRunLogFileName);
-		DSC_free(g_LCMStatusCodeHistory);
+                DSC_free(g_LCMStatusCodeHistory);
         g_PendingConfigFileName = NULL;
         g_CurrentConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
@@ -250,7 +257,7 @@ MI_Result InitHandler(
         g_MetaConfigTmpFileName = NULL;
         g_ConfigChecksumFileName = NULL;
         g_PullRunLogFileName = NULL;
-		g_LCMStatusCodeHistory = NULL;
+                g_LCMStatusCodeHistory = NULL;
         RecursiveLock_Release(&g_cs_CurrentWmiv2Operation);
         Sem_Destroy(&g_h_ConfigurationStoppedEvent);
         Atomic_Swap(&g_InitializationState, NOT_INITIALIZED);
@@ -271,7 +278,7 @@ MI_Result InitHandler(
         DSC_free(g_MetaConfigTmpFileName);
         DSC_free(g_ConfigChecksumFileName);
         DSC_free(g_PullRunLogFileName);
-		DSC_free(g_LCMStatusCodeHistory);
+                DSC_free(g_LCMStatusCodeHistory);
         g_PendingConfigFileName = NULL;
         g_CurrentConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
@@ -280,7 +287,7 @@ MI_Result InitHandler(
         g_MetaConfigTmpFileName = NULL;
         g_ConfigChecksumFileName = NULL;
         g_PullRunLogFileName = NULL;
-		g_LCMStatusCodeHistory = NULL;
+                g_LCMStatusCodeHistory = NULL;
         RecursiveLock_Release(&g_cs_CurrentWmiv2Operation);
         Sem_Destroy(&g_h_ConfigurationStoppedEvent);
         Atomic_Swap(&g_InitializationState, NOT_INITIALIZED);
@@ -440,11 +447,11 @@ MI_Result UnInitHandler(
         g_PullRunLogFileName = NULL;
     }
 
-	if (g_LCMStatusCodeHistory != NULL)
-	{
-		DSC_free(g_LCMStatusCodeHistory);
-		g_LCMStatusCodeHistory = NULL;
-	}
+        if (g_LCMStatusCodeHistory != NULL)
+        {
+                DSC_free(g_LCMStatusCodeHistory);
+                g_LCMStatusCodeHistory = NULL;
+        }
 
     if (g_metaConfig != NULL)
     {
@@ -482,13 +489,13 @@ MI_Result CallTestConfiguration(
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,0,0,lcmContext.executionMode);
 
-	SetLCMStatusBusy();
+        SetLCMStatusBusy();
     *testStatus = MI_FALSE;
 
     //If the current configuration file is not found, function ends with a corresponding error message
     if (File_ExistT(GetCurrentConfigFileName()) == -1)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
     }
 
@@ -497,13 +504,13 @@ MI_Result CallTestConfiguration(
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);    
     if (result != MI_RESULT_OK)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return result;
     }
     
     if (moduleManager == NULL || moduleManager->ft == NULL)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails,ID_MODMAN_MODMAN_NULLPARAM);   
     }
 
@@ -533,12 +540,12 @@ MI_Result CallTestConfiguration(
         LCM_BuildMessage(&lcmContext, ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FAIL, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);  
     }
 
-	SetLCMStatusReady();	
+        SetLCMStatusReady();    
 
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
-	return result;
+        return result;
 }
 
 /* caller release outinstances */
@@ -557,7 +564,7 @@ MI_Result CallGetConfiguration(
     BOOL fResult;
     ModuleManager *moduleManager = NULL;
 
-	SetLCMStatusBusy();	
+        SetLCMStatusBusy();     
 
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,0,lcmContext.executionMode);
@@ -573,7 +580,7 @@ MI_Result CallGetConfiguration(
     result = ValidateConfigurationDirectory(cimErrorDetails);
     if (result != MI_RESULT_OK)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
 
@@ -585,7 +592,7 @@ MI_Result CallGetConfiguration(
         fResult = File_RemoveT(GetGetConfigFileName());
         if (fResult || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
-			SetLCMStatusReady();
+                        SetLCMStatusReady();
             return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_GETFILEBEFORE_FAILED);
         } 
     }
@@ -594,7 +601,7 @@ MI_Result CallGetConfiguration(
 
     if (result != MI_RESULT_OK )
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
 
@@ -604,7 +611,7 @@ MI_Result CallGetConfiguration(
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
     if (result != MI_RESULT_OK)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return result;
     }
 
@@ -612,7 +619,7 @@ MI_Result CallGetConfiguration(
     if (result != MI_RESULT_OK)
     {
         moduleManager->ft->Close(moduleManager, NULL);
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
 
@@ -625,7 +632,7 @@ MI_Result CallGetConfiguration(
         if (result != MI_RESULT_OK)
         {
             moduleManager->ft->Close(moduleManager, NULL);
-			SetLCMStatusReady();
+                        SetLCMStatusReady();
             MI_Instance_Delete(documentIns);
             return result;
         }
@@ -634,9 +641,9 @@ MI_Result CallGetConfiguration(
     // Check if at least 1 resource was specified in the instance document
     if (getInstances.size == 0 )
     {
-		MI_Instance_Delete(documentIns);
+                MI_Instance_Delete(documentIns);
         moduleManager->ft->Close(moduleManager, NULL);
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_LCMHELPER_NORESOURCESPECIFIED);
     }
 
@@ -645,15 +652,15 @@ MI_Result CallGetConfiguration(
 
     result = GetConfiguration(&lcmContext, 0, &getInstances, moduleManager, documentIns, &getResultInstances, cimErrorDetails);
 
-	MI_Instance_Delete(documentIns);
+        MI_Instance_Delete(documentIns);
 
     moduleManager->ft->Close(moduleManager, NULL);
 
     CleanUpInstanceCache(&getInstances);
     if (result != MI_RESULT_OK)
     {
-		SetLCMStatusReady();
-		if (cimErrorDetails && *cimErrorDetails)
+                SetLCMStatusReady();
+                if (cimErrorDetails && *cimErrorDetails)
             return result;
 
         return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_GET_CONF_FAILED);
@@ -662,15 +669,15 @@ MI_Result CallGetConfiguration(
     fResult = File_RemoveT(GetGetConfigFileName());
     if (fResult || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_GETFILEAFTER_FAILED);
     } 
 
     outInstances->data = getResultInstances.data;
     outInstances->size = getResultInstances.size;
 
-	SetLCMStatusReady();
-	
+        SetLCMStatusReady();
+        
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -690,7 +697,7 @@ MI_Result CallSetConfiguration(
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,dwFlags,lcmContext.executionMode);
 
-	SetLCMStatusBusy();
+        SetLCMStatusBusy();
 
     lcmContext.executionMode = (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE);
     lcmContext.context = (void*)context;
@@ -703,7 +710,7 @@ MI_Result CallSetConfiguration(
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
     r =  SetConfiguration(ConfigData, dataSize, force, &lcmContext, dwFlags, cimErrorDetails);
 
-	SetLCMStatusReady();
+        SetLCMStatusReady();
 
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
@@ -724,12 +731,12 @@ MI_Result CallRestoreConfiguration(
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,0,dwFlags,lcmContext.executionMode);
 
-	SetLCMStatusBusy();	
+        SetLCMStatusBusy();     
 
     //If the previous configuration file does not exist, output a corresponding error message and return
     if (File_ExistT(GetPreviousConfigFileName())== -1)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_PREVIOUS_NOTFOUND);
     }
 
@@ -737,7 +744,7 @@ MI_Result CallRestoreConfiguration(
     r = ReadFileContent(GetPreviousConfigFileName(), &PreviousConfigValue.data, &PreviousConfigValue.size,cimErrorDetails);
     if (r != MI_RESULT_OK)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return r;
     }
 
@@ -753,9 +760,9 @@ MI_Result CallRestoreConfiguration(
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
     r =  SetConfiguration(PreviousConfigValue.data + bufferIndex, PreviousConfigValue.size - bufferIndex,MI_FALSE,&lcmContext, dwFlags, cimErrorDetails);
 
-	SetLCMStatusReady();
-	
-	//Debug Log 
+        SetLCMStatusReady();
+        
+        //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
     return r;
@@ -773,10 +780,10 @@ MI_Result CallConsistencyEngine(
     MI_Instance *metaConfigInstance = NULL;
     MI_Uint32 flags;
     MI_Value configModeValue;
-	
+        
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,0,0,lcmContext.executionMode);
 
-	SetLCMStatusBusy();
+        SetLCMStatusBusy();
 
     if (cimErrorDetails == NULL)
     {        
@@ -791,7 +798,7 @@ MI_Result CallConsistencyEngine(
     result = ValidateConfigurationDirectory(cimErrorDetails);
     if (result != MI_RESULT_OK)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
 
@@ -801,14 +808,14 @@ MI_Result CallConsistencyEngine(
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);    
     if (result != MI_RESULT_OK)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return result;
     }
 
     result = GetMetaConfig((MSFT_DSCMetaConfiguration **)&metaConfigInstance);
     if (result != MI_RESULT_OK)
     {
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         moduleManager->ft->Close(moduleManager, NULL);
         return result;
     }     
@@ -818,7 +825,7 @@ MI_Result CallConsistencyEngine(
     {
         MSFT_DSCMetaConfiguration_Delete((MSFT_DSCMetaConfiguration *)metaConfigInstance);
         moduleManager->ft->Close(moduleManager, NULL);
-		SetLCMStatusReady();
+                SetLCMStatusReady();
         return result;
     }
 
@@ -829,7 +836,7 @@ MI_Result CallConsistencyEngine(
         result = ApplyPendingConfig(&lcmContext, moduleManager, 0, &resultStatus, cimErrorDetails);
         if (result == MI_RESULT_OK && (resultStatus & DSC_RESTART_SYSTEM_FLAG))
         {
-			SetLCMStatusReboot();			
+                        SetLCMStatusReboot();                   
 #if defined(_MSC_VER)
             result = RegisterRebootTaskIfNeeded(metaConfigInstance, moduleManager, cimErrorDetails);
 #endif
@@ -843,7 +850,7 @@ MI_Result CallConsistencyEngine(
             result = ApplyCurrentConfig(&lcmContext, moduleManager, 0, &resultStatus, cimErrorDetails);
             if (result == MI_RESULT_OK && (resultStatus & DSC_RESTART_SYSTEM_FLAG))
             {
-				SetLCMStatusReboot();				
+                                SetLCMStatusReboot();                           
 #if defined(_MSC_VER)
                 result = RegisterRebootTaskIfNeeded(metaConfigInstance, moduleManager, cimErrorDetails);
 #endif
@@ -879,7 +886,7 @@ MI_Result CallConsistencyEngine(
     MSFT_DSCMetaConfiguration_Delete((MSFT_DSCMetaConfiguration *)metaConfigInstance);
     moduleManager->ft->Close(moduleManager, NULL);
 
-	SetLCMStatusReady();
+        SetLCMStatusReady();
 
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
@@ -1208,7 +1215,7 @@ MI_Result SetConfiguration(
 
         if (resultStatus & DSC_RESTART_SYSTEM_FLAG)
         {
-			SetLCMStatusReboot();			
+                        SetLCMStatusReboot();                   
 #if defined(_MSC_VER)
             result = RegisterRebootTaskIfNeeded((MI_Instance *)metaConfigInstance, moduleManager, cimErrorDetails);
 #endif
@@ -1231,19 +1238,19 @@ MI_Result SetConfiguration(
         }
         overWroteUserSpecifiedRefreshFreqMins = NULL;
     }
-	if (overWroteUserSpecifiedConfModeFreqMins != NULL)
-	{
-		MI_Context* mi_context = (MI_Context*) lcmContext->context;
-		Intlstr pTempStr = Intlstr_Null;
-		GetResourceString1Param(ID_LCMHELPER_OVERWROTE_USER_SPECIFIED_CONFMODE_FREQUENCY, overWroteUserSpecifiedConfModeFreqMins, &pTempStr);
-		MI_Context_WriteWarning(mi_context, pTempStr.str);
-		if (pTempStr.str)
-		{
-			Intlstr_Free(pTempStr);
-		}
-		overWroteUserSpecifiedConfModeFreqMins = NULL;
-	}
-	return result;
+        if (overWroteUserSpecifiedConfModeFreqMins != NULL)
+        {
+                MI_Context* mi_context = (MI_Context*) lcmContext->context;
+                Intlstr pTempStr = Intlstr_Null;
+                GetResourceString1Param(ID_LCMHELPER_OVERWROTE_USER_SPECIFIED_CONFMODE_FREQUENCY, overWroteUserSpecifiedConfModeFreqMins, &pTempStr);
+                MI_Context_WriteWarning(mi_context, pTempStr.str);
+                if (pTempStr.str)
+                {
+                        Intlstr_Free(pTempStr);
+                }
+                overWroteUserSpecifiedConfModeFreqMins = NULL;
+        }
+        return result;
 }
 
 MI_Result ApplyPendingConfig(
@@ -1466,7 +1473,7 @@ const MI_Char *GetPullRunLogFileName()
 
 const MI_Char *GetCurrentLCMStatusCodeHistory()
 {
-	return g_LCMStatusCodeHistory;
+        return g_LCMStatusCodeHistory;
 }
 
 /*this will be configured by meta config*/
@@ -2070,6 +2077,133 @@ void LCM_PromptUserFromProvider(
     return ;
 }
 
+MI_Result GetMofChecksum(
+    _Outptr_result_maybenull_z_  MI_Char** mofChecksum,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_Uint8 *checksumBuffer = NULL;
+    MI_Uint32 checksumBufferSize = 0;
+
+    if (mofChecksum)
+    {
+        *mofChecksum = NULL;
+    }
+
+    if (cimErrorDetails == NULL)
+    {        
+        return MI_RESULT_INVALID_PARAMETER; 
+    }
+    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
+
+    /* Read checksum file if exists.*/
+    if (File_ExistT(GetConfigChecksumFileName()) == 0)
+    {
+        r = ReadFileContent(GetConfigChecksumFileName(), &checksumBuffer, &checksumBufferSize, cimErrorDetails);
+    }
+    else
+    {
+        MI_Uint8 *computedMofChecksum = NULL;
+        MI_Uint8 RawHash[SHA256TRANSFORM_DIGEST_LEN];
+
+        //checksum doesn't exist, we need to compute it.
+        /* Read current.mof file if exists.*/
+        if (File_ExistT(GetCurrentConfigFileName()) == 0)
+        {
+            r = ReadFileContent(GetCurrentConfigFileName(), &checksumBuffer, &checksumBufferSize, cimErrorDetails);
+        }
+        //use empty string if current.mof is not there
+        else
+        {
+            // Allocate space for the null terminator resulting in an empty string.
+            *mofChecksum = (MI_Char*)DSC_malloc( 2 , NitsHere());
+            if( *mofChecksum == NULL)
+                return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);
+            
+            return MI_RESULT_OK;
+        }
+        if (r == MI_RESULT_OK)
+        {
+            PAL_SHA256Transform(checksumBuffer, checksumBufferSize, RawHash);
+#if defined (_MSC_VER)    
+            {
+                MI_Uint32 computedMofChecksumSize = 0;
+                if (!CryptBinaryToStringA( (const BYTE*)RawHash, SHA256TRANSFORM_DIGEST_LEN, CRYPT_STRING_HEXRAW | CRYPT_STRING_NOCRLF,
+                    NULL, (DWORD*)&computedMofChecksumSize))
+                {
+                    DSC_free(checksumBuffer);
+                    return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_ENGINEHELPER_CHECKSUMGEN_ERROR);
+                }
+
+                computedMofChecksum = DSC_malloc( sizeof(MI_Uint8) * computedMofChecksumSize, TLINE);
+                if (computedMofChecksum == NULL)
+                {
+                    DSC_free(checksumBuffer);
+                    return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);                
+                }
+
+                if (!CryptBinaryToStringA( (const BYTE*)RawHash, SHA256TRANSFORM_DIGEST_LEN, CRYPT_STRING_HEXRAW | CRYPT_STRING_NOCRLF,
+                    (LPSTR)computedMofChecksum, (DWORD*)&computedMofChecksumSize) || computedMofChecksumSize != CHECKSUM_SIZE)
+                {
+                    DSC_free(checksumBuffer);
+                    return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_ENGINEHELPER_CHECKSUMGEN_ERROR);
+                }
+            }
+#else
+            computedMofChecksum = DSC_malloc( SHA256TRANSFORM_DIGEST_LEN*2 +1, TLINE);
+            if (computedMofChecksum == NULL)
+            {
+                DSC_free(checksumBuffer);
+                return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);                
+            }
+            {
+                // Calculate HEX representation
+                char const alphabet[] = "0123456789ABCDEF";
+                int iCount = 0;
+                computedMofChecksum[SHA256TRANSFORM_DIGEST_LEN*2] = '\0';
+                for( iCount = 0; iCount < SHA256TRANSFORM_DIGEST_LEN; iCount++)
+                {
+                    computedMofChecksum[iCount*2] = alphabet[RawHash[iCount]/16];
+                    computedMofChecksum[iCount*2+1] = alphabet[RawHash[iCount]%16];                    
+                }
+            }
+#endif
+            DSC_free(checksumBuffer);
+            checksumBuffer = computedMofChecksum;
+            checksumBufferSize = CHECKSUM_SIZE;
+        }
+    }
+
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+
+#if defined(_MSC_VER)
+    {    
+        MI_Uint32 mofChecksumSize = 0;
+        mofChecksumSize = 2* (checksumBufferSize + 1);
+        *mofChecksum = (MI_Char*)DSC_malloc( mofChecksumSize , NitsHere());
+        if (*mofChecksum == NULL)
+        {
+            DSC_free(checksumBuffer);
+            return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);
+        }
+
+        memset(*mofChecksum, 0, mofChecksumSize);
+        if (!MultiByteToWideChar(CP_ACP,0,(LPCSTR)checksumBuffer,checksumBufferSize,*mofChecksum, mofChecksumSize) )    
+        {
+            DSC_free(checksumBuffer);
+            return GetCimWin32Error(GetLastError(), cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);
+        }
+
+        DSC_free(checksumBuffer);
+    }
+#else
+    *mofChecksum = (char *)checksumBuffer;
+#endif
+    return MI_RESULT_OK;
+}
 
 MI_Result RunConsistencyEngine(
     _In_ MI_Context* context,
@@ -2211,10 +2345,10 @@ MI_Result RegisterConsistencyTask(
         /*Update for Consistency task using configurationModeFrequencyMins*/
 #if defined(_MSC_VER)
         result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins, CONSISTENCY_TASKSCHEDULE_NAME,
-        DEFAULT_ConfigurationModeFrequencyMins, cimErrorDetails);
+                              DEFAULT_ConfigurationModeFrequencyMins, cimErrorDetails);
 #else
-		result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins, OMI_CONSISTENCY_TASKSCHEDULE_NAME,
-		DEFAULT_ConfigurationModeFrequencyMins, cimErrorDetails);
+        result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins, OMI_CONSISTENCY_TASKSCHEDULE_NAME,
+                              DEFAULT_ConfigurationModeFrequencyMins, cimErrorDetails);
 #endif
     }
     else
@@ -2222,10 +2356,10 @@ MI_Result RegisterConsistencyTask(
         /*Update for Consistency task using RefreshFrequencyMins*/
 #if defined(_MSC_VER)
         result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_RefreshFrequencyMins, CONSISTENCY_TASKSCHEDULE_NAME,
-        DEFAULT_MinRefreshFrequencyMins, cimErrorDetails);
+                              DEFAULT_MinRefreshFrequencyMins, cimErrorDetails);
 #else
-		result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_RefreshFrequencyMins, OMI_CONSISTENCY_TASKSCHEDULE_NAME,
-        DEFAULT_MinRefreshFrequencyMins, cimErrorDetails);
+        result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_RefreshFrequencyMins, OMI_CONSISTENCY_TASKSCHEDULE_NAME,
+                              DEFAULT_MinRefreshFrequencyMins, cimErrorDetails);
 #endif
     }
 
@@ -2238,15 +2372,11 @@ MI_Result DoPullServerRefresh(
 {
     MI_Result result = MI_RESULT_OK;
 
-	SetLCMStatusBusy();	
-
-#if defined(_MSC_VER)    
+    SetLCMStatusBusy();     
+        
     result = LCM_Pull_Execute(cimErrorDetails);
-#else
-    result = MI_RESULT_NOT_SUPPORTED;
-#endif
-
-	SetLCMStatusReady();
+    
+    SetLCMStatusReady();
 
     return result;
 }
@@ -2256,17 +2386,17 @@ MI_Result GetMetaConfig(
 {
     MI_Result r;
     MI_Boolean bComplianceStatus;
-	MI_Uint32 getActionStatusCode;
-	MI_Uint32 lcmStatusCode;
-	DSC_EventWriteMessageGettingMetaConfig();
+        MI_Uint32 getActionStatusCode;
+        MI_Uint32 lcmStatusCode;
+        DSC_EventWriteMessageGettingMetaConfig();
 
-	GetLatestStatus(&bComplianceStatus, &getActionStatusCode, &lcmStatusCode);
-	
-	r = UpdateMetaConfigWithLCMState(&lcmStatusCode, (MI_Instance *)g_metaConfig);
-	if (r != MI_RESULT_OK)
-	{
-		return r;
-	}
+        GetLatestStatus(&bComplianceStatus, &getActionStatusCode, &lcmStatusCode);
+        
+        r = UpdateMetaConfigWithLCMState(&lcmStatusCode, (MI_Instance *)g_metaConfig);
+        if (r != MI_RESULT_OK)
+        {
+                return r;
+        }
 
     r = DSC_MSFT_DSCMetaConfiguration_Clone(g_metaConfig, metaConfigInstance);
     return r;
@@ -2339,13 +2469,13 @@ MI_Result UpdateDSCCacheInstance(
     _Inout_ MI_Instance **dscCacheInstance, 
     _In_opt_ MI_Boolean* complianceStatus,
     _In_opt_ MI_Uint32* getActionStatusCode,
-	_In_opt_ MI_Uint32* lcmStatusCode,
+        _In_opt_ MI_Uint32* lcmStatusCode,
     _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Value value;
     MI_Instance *cacheElement = NULL;
-	//MI_Char *lcmStatusCodeHistory = NULL;
+        //MI_Char *lcmStatusCodeHistory = NULL;
 
     if (extendedError == NULL)
     {        
@@ -2376,15 +2506,15 @@ MI_Result UpdateDSCCacheInstance(
             }
         }
 
-		if (lcmStatusCode)
-		{
-			value.sint64 = *lcmStatusCode;
-			r = MI_Instance_SetElement(*dscCacheInstance, DSC_InternalStateCache_LCMStatusCode, &value, MI_SINT64, 0);
-			if (r != MI_RESULT_OK)
-			{
-				return r;
-			}
-		}
+                if (lcmStatusCode)
+                {
+                        value.sint64 = *lcmStatusCode;
+                        r = MI_Instance_SetElement(*dscCacheInstance, DSC_InternalStateCache_LCMStatusCode, &value, MI_SINT64, 0);
+                        if (r != MI_RESULT_OK)
+                        {
+                                return r;
+                        }
+                }
     }
     else
     {
@@ -2410,13 +2540,13 @@ MI_Result UpdateDSCCacheInstance(
             return r;
         }
 
-		value.sint64 = lcmStatusCode ? *lcmStatusCode : LCM_STATUSCODE_READY;
-		r = MI_Instance_AddElement(cacheElement, DSC_InternalStateCache_LCMStatusCode, &value, MI_SINT64, 0);
-		if (r != MI_RESULT_OK)
-		{
-			MI_Instance_Delete(cacheElement);
-			return r;
-		}
+                value.sint64 = lcmStatusCode ? *lcmStatusCode : LCM_STATUSCODE_READY;
+                r = MI_Instance_AddElement(cacheElement, DSC_InternalStateCache_LCMStatusCode, &value, MI_SINT64, 0);
+                if (r != MI_RESULT_OK)
+                {
+                        MI_Instance_Delete(cacheElement);
+                        return r;
+                }
         *dscCacheInstance = cacheElement;
     }
 
@@ -2533,7 +2663,7 @@ MI_Result InitCacheAndMetaConfig(
         return r;
     }
 
-	UpdateLCMStatusCodeHistory(&g_DSCInternalCache, &g_LCMStatusCodeHistory);
+        UpdateLCMStatusCodeHistory(&g_DSCInternalCache, &g_LCMStatusCodeHistory);
 
     return MI_RESULT_OK;
 }
@@ -2603,8 +2733,8 @@ MI_Result UpdateDefaultValueForMetaConfig(
     MI_Value refreshFrequencyMins;
     MI_Value configurationModeFrequencyMins;
 
-	overWroteUserSpecifiedRefreshFreqMins=NULL; //Reset this to Null since this function is called by both InitMetaConfig , and SetMetaConfig. 
-	overWroteUserSpecifiedConfModeFreqMins = NULL; //Reset this to Null since this function is called by both InitMetaConfig , and SetMetaConfig. 
+        overWroteUserSpecifiedRefreshFreqMins=NULL; //Reset this to Null since this function is called by both InitMetaConfig , and SetMetaConfig. 
+        overWroteUserSpecifiedConfModeFreqMins = NULL; //Reset this to Null since this function is called by both InitMetaConfig , and SetMetaConfig. 
     r = DSC_MI_Instance_GetElement((MI_Instance*)self, MSFT_DSCMetaConfiguration_RefreshFrequencyMins, &value, NULL, &flags, NULL);
     if (r != MI_RESULT_OK)
     {
@@ -2615,7 +2745,7 @@ MI_Result UpdateDefaultValueForMetaConfig(
         if(value.uint32 < DEFAULT_MinRefreshFrequencyMins)
         {
             value.uint32 = DEFAULT_MinRefreshFrequencyMins;
-			overWroteUserSpecifiedRefreshFreqMins = DEFAULT_MinRefreshFrequencyMinsString;
+                        overWroteUserSpecifiedRefreshFreqMins = DEFAULT_MinRefreshFrequencyMinsString;
              r = MI_Instance_SetElement((MI_Instance*)self, MSFT_DSCMetaConfiguration_RefreshFrequencyMins, &value, MI_UINT32, 0);
              if (r != MI_RESULT_OK)
           {
@@ -2625,7 +2755,7 @@ MI_Result UpdateDefaultValueForMetaConfig(
          else
          {
              value.uint32 = DEFAULT_MaxRefreshFrequencyMins;
-			 overWroteUserSpecifiedRefreshFreqMins = DEFAULT_MaxRefreshFrequencyMinsString;
+                         overWroteUserSpecifiedRefreshFreqMins = DEFAULT_MaxRefreshFrequencyMinsString;
              r = MI_Instance_SetElement((MI_Instance*)self, MSFT_DSCMetaConfiguration_RefreshFrequencyMins, &value, MI_UINT32, 0);
              if(r != MI_RESULT_OK)
              {
@@ -2644,7 +2774,7 @@ MI_Result UpdateDefaultValueForMetaConfig(
     else if (flags & MI_FLAG_NULL || value.uint32 < DEFAULT_ConfigurationModeFrequencyMins)
     {
         value.uint32 = DEFAULT_ConfigurationModeFrequencyMins;
-		overWroteUserSpecifiedConfModeFreqMins = DEFAULT_ConfigurationModueFrequencyMinsString;
+                overWroteUserSpecifiedConfModeFreqMins = DEFAULT_ConfigurationModueFrequencyMinsString;
         r = MI_Instance_SetElement((MI_Instance*)self, MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins, &value, MI_UINT32, 0);
         if (r != MI_RESULT_OK)
         {
@@ -2658,8 +2788,8 @@ MI_Result UpdateDefaultValueForMetaConfig(
     factor = configurationModeFrequencyMins.uint32 % refreshFrequencyMins.uint32;
     if(factor != 0)
     {
-		overWroteUserSpecifiedConfModeFreqMins = DEFAULT_ConfigurationModueFrequencyMinsString;
-		//There are two cases: 1.) configurationModeFrequencyMins > refreshFrequencyMins. In this case, the factor obtained by dividing the two will be greater than 1
+                overWroteUserSpecifiedConfModeFreqMins = DEFAULT_ConfigurationModueFrequencyMinsString;
+                //There are two cases: 1.) configurationModeFrequencyMins > refreshFrequencyMins. In this case, the factor obtained by dividing the two will be greater than 1
     //                 2.) configurationModeFrequencyMins < refreshFrequencyMins. In this case the factor will be 0 and so we should set it to refreshFrequencyMins
     factor = (MI_Uint32)(configurationModeFrequencyMins.uint32 / refreshFrequencyMins.uint32);
         if(factor > 0)
@@ -2949,22 +3079,20 @@ MI_Result DeseralizeMetaConfig(
     r = MI_Deserializer_DeserializeInstance(moduleLoader->deserializer, 0, metaConfigBuffer, bufferSize, &metaSchema.data[0], metaSchema.size, NULL, NULL, &deserializeSize, &newInstance, cimErrorDetails);
     CleanUpClassCache(&metaSchema);
 
-    DSC_free(metaConfigBuffer);
-	//Only if the mof file is correctly deserialiazed, should we attempt to clone it. If not, just fall back on system defaults and return MI_Result_OK like we do in case there is no mof
-	if (r == MI_RESULT_OK)
-	{
-		r = DSC_MSFT_DSCMetaConfiguration_Clone((MSFT_DSCMetaConfiguration*) newInstance, metaConfig);
-		MI_Instance_Delete(newInstance);
-		if (r != MI_RESULT_OK)
-		{
-			return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_LCMHELPER_METASCHEMA_CLONE_FAILED);
-		}
-	}
-	else
-	{
-		MetaMofCorrupted = MI_TRUE;
-	}
+    if (r != MI_RESULT_OK)
+    {
+        DSC_free(metaConfigBuffer);
+        AppendWMIError1ParamID(*cimErrorDetails, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
+        return r;
+    }
 
+    DSC_free(metaConfigBuffer);
+    r = DSC_MSFT_DSCMetaConfiguration_Clone((MSFT_DSCMetaConfiguration*)newInstance, metaConfig);
+    MI_Instance_Delete(newInstance);
+    if (r != MI_RESULT_OK)
+    {
+        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_LCMHELPER_METASCHEMA_CLONE_FAILED);
+    }
 
     return MI_RESULT_OK;
 }
@@ -3210,35 +3338,35 @@ MI_Result UpdateMetaConfigForWebDownloadManager(
 }
 
 MI_Result UpdateMetaConfigWithLCMState(
-	_In_z_ MI_Uint32 *lcmStatusCode,
+        _In_z_ MI_Uint32 *lcmStatusCode,
     _Inout_ MI_Instance *metaConfigInstance)
 {
-	MI_Result r = MI_RESULT_OK;
+        MI_Result r = MI_RESULT_OK;
     MI_Value value;
-	// set default value
-	value.string = LCM_STATUS_READY;
+        // set default value
+        value.string = LCM_STATUS_READY;
 
-	if (*lcmStatusCode == LCM_STATUSCODE_READY)
-	{
-		value.string = LCM_STATUS_READY;
-	}
-	if (*lcmStatusCode == LCM_STATUSCODE_BUSY)
-	{
-		value.string = LCM_STATUS_BUSY;
-	}
-	if (*lcmStatusCode == LCM_STATUSCODE_REBOOT)
-	{
-		value.string = LCM_STATUS_REBOOT;
-	}
-	// extended status should be added here ...
-	
-	r = MI_Instance_SetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_LocalConfigurationManagerState, &value, MI_STRING, 0);
+        if (*lcmStatusCode == LCM_STATUSCODE_READY)
+        {
+                value.string = LCM_STATUS_READY;
+        }
+        if (*lcmStatusCode == LCM_STATUSCODE_BUSY)
+        {
+                value.string = LCM_STATUS_BUSY;
+        }
+        if (*lcmStatusCode == LCM_STATUSCODE_REBOOT)
+        {
+                value.string = LCM_STATUS_REBOOT;
+        }
+        // extended status should be added here ...
+        
+        r = MI_Instance_SetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_LocalConfigurationManagerState, &value, MI_STRING, 0);
     if (r != MI_RESULT_OK)
     {
         return r;
     }
 
-	return MI_RESULT_OK;
+        return MI_RESULT_OK;
 }
 
 MI_Result UpdateMetaConfigWithCertificateThumbprint(
@@ -3313,7 +3441,7 @@ MI_Boolean IsGetConfigurationFirstTime()
 MI_Result UpdateCurrentStatus(
     _In_opt_ MI_Boolean *complianceStatus,
     _In_opt_ MI_Uint32 *getActionStatusCode,
-	_In_opt_ MI_Uint32 *lcmStatusCode,
+        _In_opt_ MI_Uint32 *lcmStatusCode,
     _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Application miApp = MI_APPLICATION_NULL;
@@ -3373,7 +3501,7 @@ MI_Result UpdateCurrentStatus(
     DSC_free(serializerBuffer); 
     DSC_free(fileExpandedPath);
 
-	UpdateLCMStatusCodeHistory(&g_DSCInternalCache, &g_LCMStatusCodeHistory);
+        UpdateLCMStatusCodeHistory(&g_DSCInternalCache, &g_LCMStatusCodeHistory);
 
     return r;
 }
@@ -3381,7 +3509,7 @@ MI_Result UpdateCurrentStatus(
 void GetLatestStatus(
     _Out_ MI_Boolean *complianceStatus,
     _Out_ MI_Uint32 *getActionStatusCode,
-	_Out_ MI_Uint32 *lcmStatusCode)
+        _Out_ MI_Uint32 *lcmStatusCode)
 {
     MI_Value value;
     MI_Type  type;
@@ -3389,7 +3517,7 @@ void GetLatestStatus(
 
     *complianceStatus = MI_FALSE;
     *getActionStatusCode = GET_ACTION_STATUS_CODE_SUCCESS;
-	*lcmStatusCode = LCM_STATUSCODE_READY;
+        *lcmStatusCode = LCM_STATUSCODE_READY;
     if (g_DSCInternalCache)
     {
         if (MI_Instance_GetElement(g_DSCInternalCache, DSC_InternalStateCache_ComplianceStatus, &value, &type, &flags, NULL) == MI_RESULT_OK)
@@ -3402,15 +3530,12 @@ void GetLatestStatus(
             *getActionStatusCode = (MI_Uint32)value.sint64;
         }
 
-		if (MI_Instance_GetElement(g_DSCInternalCache, DSC_InternalStateCache_LCMStatusCode, &value, &type, &flags, NULL) == MI_RESULT_OK)
-		{
-			*lcmStatusCode = (MI_Uint32)value.sint64;
-		}
+                if (MI_Instance_GetElement(g_DSCInternalCache, DSC_InternalStateCache_LCMStatusCode, &value, &type, &flags, NULL) == MI_RESULT_OK)
+                {
+                        *lcmStatusCode = (MI_Uint32)value.sint64;
+                }
     }
 }
-
-
-#if defined(_MSC_VER)
 
 MI_Result MI_CALL LCM_Pull_Execute(
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
@@ -3424,7 +3549,7 @@ MI_Result MI_CALL LCM_Pull_Execute(
     LCMProviderContext lcmContext = {0};
     MI_Boolean bComplianceStatus;
     MI_Uint32 getActionStatusCode;
-	MI_Uint32 lcmStatusCode;
+        MI_Uint32 lcmStatusCode;
     MI_Uint32 resultExecutionStatus = 0;
     MI_Char *checkSumValue = NULL; 
     MI_Instance* updateErrorDetails = NULL;
@@ -3524,12 +3649,25 @@ MI_Result LCM_Pull_GetAction(
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result result = MI_RESULT_OK;
+    MI_Value value;
+    MI_Uint32 flags;
     if (cimErrorDetails )
     {
         *cimErrorDetails = NULL;
     }
-
-    result = Pull_GetAction(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
+    result = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_DownloadManagerName, &value, NULL, &flags, NULL);
+    if( result != MI_RESULT_OK || (flags & MI_FLAG_NULL))
+    {
+        return GetCimMIError(result, cimErrorDetails, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
+    }
+    if( Tcscasecmp(value.string, DEFAULT_DOWNLOADMANAGER)==0 )
+    {
+        result = Pull_GetActionWebDownloadManager(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
+    }
+    else
+    {
+        result = Pull_GetAction(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
+    }
     if (result != MI_RESULT_OK)
     {
         return result;
@@ -3564,15 +3702,28 @@ MI_Result LCM_Pull_GetConfiguration(
     MI_Char* mofFileName = NULL;
     MI_Result result = MI_RESULT_OK;
     MI_Boolean complianceStatus;
+    MI_Value value;
+    MI_Uint32 flags;
 
     if (cimErrorDetails == NULL)
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
-    
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
-
-    result = Pull_GetConfiguration(lcmContext, metaConfigInstance, &mofFileName, resultStatus, getActionStatusCode, cimErrorDetails);
+    
+    result = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_DownloadManagerName, &value, NULL, &flags, NULL);
+    if( result != MI_RESULT_OK || (flags & MI_FLAG_NULL))
+    {
+        return GetCimMIError(result, cimErrorDetails, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
+    }
+    if( Tcscasecmp(value.string, DEFAULT_DOWNLOADMANAGER)==0 )    
+    {
+        result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, &mofFileName, resultStatus, getActionStatusCode, cimErrorDetails);
+    }
+    else
+    {
+        result = Pull_GetConfiguration(lcmContext, metaConfigInstance, &mofFileName, resultStatus, getActionStatusCode, cimErrorDetails);
+    }
     if (result != MI_RESULT_OK)
     {
         return result;
@@ -3597,7 +3748,7 @@ MI_Result LCM_Pull_GetConfiguration(
         result = ApplyPendingConfig(lcmContext,  moduleManager, 0, resultExecutionStatus, cimErrorDetails);
         if (result == MI_RESULT_OK && (*resultExecutionStatus & DSC_RESTART_SYSTEM_FLAG))
         {
-			SetLCMStatusReboot();
+            SetLCMStatusReboot();
 #if defined(_MSC_VER)
             result = RegisterRebootTaskIfNeeded((MI_Instance *)metaConfigInstance, moduleManager, cimErrorDetails);
 #endif
@@ -3626,8 +3777,6 @@ MI_Result LCM_Pull_GetConfiguration(
 
     return result;
 }
-
-#endif
 
 MI_Result ClearBuiltinProvCache(
     _In_z_ const MI_Char* cachePath,
@@ -3799,170 +3948,170 @@ MI_Result TimeToRunConsistencyCheck(
 
 MI_Result SetLCMStatusBusy()
 {
-	MI_Uint32 lcmStatus;
-	MI_Instance *extendedError;
-	MI_Result r;
+        MI_Uint32 lcmStatus;
+        MI_Instance *extendedError;
+        MI_Result r;
 
-	if (!g_LCMPendingReboot)
-	{
-		lcmStatus = LCM_STATUSCODE_BUSY;
-		r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
+        if (!g_LCMPendingReboot)
+        {
+                lcmStatus = LCM_STATUSCODE_BUSY;
+                r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
 #ifdef TEST_BUILD
-		NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
+                NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
-		r = UpdateMetaConfigWithLCMState(&lcmStatus, (MI_Instance *)g_metaConfig);
+                r = UpdateMetaConfigWithLCMState(&lcmStatus, (MI_Instance *)g_metaConfig);
 #ifdef TEST_BUILD
-		NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
+                NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
-	}
+        }
 
-	// errors in above invocation are silently ignored since failure of updating status should not block other operations
-	r = MI_RESULT_OK;
-	return r;
+        // errors in above invocation are silently ignored since failure of updating status should not block other operations
+        r = MI_RESULT_OK;
+        return r;
 }
 
 MI_Result SetLCMStatusReady()
 {
-	MI_Uint32 lcmStatus;
-	MI_Instance *extendedError;
-	MI_Result r;
+        MI_Uint32 lcmStatus;
+        MI_Instance *extendedError;
+        MI_Result r;
 
-	if (!g_LCMPendingReboot)
-	{
-		lcmStatus = LCM_STATUSCODE_READY;
-		r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
+        if (!g_LCMPendingReboot)
+        {
+                lcmStatus = LCM_STATUSCODE_READY;
+                r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
 #ifdef TEST_BUILD
-		NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
+                NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
-		r = UpdateMetaConfigWithLCMState(&lcmStatus, (MI_Instance *)g_metaConfig);
+                r = UpdateMetaConfigWithLCMState(&lcmStatus, (MI_Instance *)g_metaConfig);
 #ifdef TEST_BUILD
-		NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
+                NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
-	}
+        }
 
-	// errors in above invocation are silently ignored since failure of updating status should not block other operations
-	r = MI_RESULT_OK;
-	return r;
+        // errors in above invocation are silently ignored since failure of updating status should not block other operations
+        r = MI_RESULT_OK;
+        return r;
 }
 
 MI_Result SetLCMStatusReboot()
 {
-	MI_Uint32 lcmStatus;
-	MI_Instance *extendedError;
-	MI_Result r;
+        MI_Uint32 lcmStatus;
+        MI_Instance *extendedError;
+        MI_Result r;
 
-	g_LCMPendingReboot = MI_TRUE;
-	lcmStatus = LCM_STATUSCODE_REBOOT;
-	r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
+        g_LCMPendingReboot = MI_TRUE;
+        lcmStatus = LCM_STATUSCODE_REBOOT;
+        r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
 #ifdef TEST_BUILD
-		NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
+                NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
-	r = UpdateMetaConfigWithLCMState(&lcmStatus, (MI_Instance *)g_metaConfig);
+        r = UpdateMetaConfigWithLCMState(&lcmStatus, (MI_Instance *)g_metaConfig);
 #ifdef TEST_BUILD
-		NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
+                NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
 
-	// errors in above invocation are silently ignored since failure of updating status should not block other operations
-	r = MI_RESULT_OK;
-	return r;
+        // errors in above invocation are silently ignored since failure of updating status should not block other operations
+        r = MI_RESULT_OK;
+        return r;
 }
 
 MI_Result UpdateLCMStatusCodeHistory(
-	_In_ MI_Instance **dscInternalCache,
-	_Outptr_result_maybenull_z_ MI_Char **lcmStatusCodeHistory)
+        _In_ MI_Instance **dscInternalCache,
+        _Outptr_result_maybenull_z_ MI_Char **lcmStatusCodeHistory)
 {
-	MI_Value value;
-	MI_Type  type;
+        MI_Value value;
+        MI_Type  type;
     MI_Uint32 flags;
-	MI_Char tempCodeStr[LCM_STATUSCODE_HISTORY_STR_SIZE];
-	int retValue;
-	
-	if (lcmStatusCodeHistory == NULL || *dscInternalCache == NULL)
-	{
-		return MI_RESULT_INVALID_PARAMETER;
-	}
+        MI_Char tempCodeStr[LCM_STATUSCODE_HISTORY_STR_SIZE];
+        int retValue;
+        
+        if (lcmStatusCodeHistory == NULL || *dscInternalCache == NULL)
+        {
+                return MI_RESULT_INVALID_PARAMETER;
+        }
 
-	if (MI_Instance_GetElement(*dscInternalCache, DSC_InternalStateCache_LCMStatusCode, &value, &type, &flags, NULL) != MI_RESULT_OK)
-	{
-		return MI_RESULT_FAILED;
-	}
-	retValue = Stprintf(tempCodeStr, LCM_STATUSCODE_HISTORY_STR_SIZE, MI_T("%d,"), value.sint64);
-	if (retValue == -1)
-	{
-		return MI_RESULT_FAILED;
-	}
+        if (MI_Instance_GetElement(*dscInternalCache, DSC_InternalStateCache_LCMStatusCode, &value, &type, &flags, NULL) != MI_RESULT_OK)
+        {
+                return MI_RESULT_FAILED;
+        }
+        retValue = Stprintf(tempCodeStr, LCM_STATUSCODE_HISTORY_STR_SIZE, MI_T("%d,"), value.sint64);
+        if (retValue == -1)
+        {
+                return MI_RESULT_FAILED;
+        }
 
-	if (GetCurrentLCMStatusCodeHistory() == NULL)
-	{
-		*lcmStatusCodeHistory = (MI_Char*)DSC_malloc(MAX_LCM_STATUSCODE_HISTORY_SIZE * sizeof(MI_Char), NitsHere());
-		if (*lcmStatusCodeHistory == NULL)
-		{
-			return MI_RESULT_SERVER_LIMITS_EXCEEDED;
-		}
+        if (*lcmStatusCodeHistory == NULL)
+        {
+                *lcmStatusCodeHistory = (MI_Char*)DSC_malloc(MAX_LCM_STATUSCODE_HISTORY_SIZE * sizeof(MI_Char), NitsHere());
+                if (*lcmStatusCodeHistory == NULL)
+                {
+                        return MI_RESULT_SERVER_LIMITS_EXCEEDED;
+                }
 #if defined(_MSC_VER)
-		retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T"), tempCodeStr);
+                retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T"), tempCodeStr);
 #else
-		retValue = TcsStrlcpy(*lcmStatusCodeHistory, tempCodeStr, MAX_LCM_STATUSCODE_HISTORY_SIZE);
+                retValue = TcsStrlcpy(*lcmStatusCodeHistory, tempCodeStr, MAX_LCM_STATUSCODE_HISTORY_SIZE);
 #endif
-	}
-	else
-	{
+        }
+        else
+        {
 #if defined(_MSC_VER)
-		retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T%T"), *lcmStatusCodeHistory, tempCodeStr);
+                retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T%T"), *lcmStatusCodeHistory, tempCodeStr);
 #else
-		retValue = TcsStrlcat(*lcmStatusCodeHistory, tempCodeStr, MAX_LCM_STATUSCODE_HISTORY_SIZE);
+                retValue = TcsStrlcat(*lcmStatusCodeHistory, tempCodeStr, MAX_LCM_STATUSCODE_HISTORY_SIZE);
 #endif
-	}
+        }
 
-	if (retValue == -1)
-	{
-		return MI_RESULT_FAILED;
-	}
+        if (retValue == -1)
+        {
+                return MI_RESULT_FAILED;
+        }
 
-	return MI_RESULT_OK;
+        return MI_RESULT_OK;
 }
 
 MI_Result GetLCMStatusCodeHistory(
-	_Outptr_result_maybenull_z_ MI_Char **lcmStatusCodeHistory,
-	_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+        _Outptr_result_maybenull_z_ MI_Char **lcmStatusCodeHistory,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
-	int retValue;
-	MI_Uint32 lcmStatus;
+        int retValue;
+        MI_Uint32 lcmStatus;
 
-	if (cimErrorDetails == NULL)
-	{
-		return MI_RESULT_INVALID_PARAMETER;
-	}
-	*cimErrorDetails = NULL;
+        if (cimErrorDetails == NULL)
+        {
+                return MI_RESULT_INVALID_PARAMETER;
+        }
+        *cimErrorDetails = NULL;
 
-	if (GetCurrentLCMStatusCodeHistory() == NULL)
-	{
-		*lcmStatusCodeHistory = NULL;
-	}
-	else
-	{
-		*lcmStatusCodeHistory = (MI_Char*)DSC_malloc(MAX_LCM_STATUSCODE_HISTORY_SIZE * sizeof(MI_Char), NitsHere());
-		if (*lcmStatusCodeHistory == NULL)
-		{
-			return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
-		}
+        if (GetCurrentLCMStatusCodeHistory() == NULL)
+        {
+                *lcmStatusCodeHistory = NULL;
+        }
+        else
+        {
+                *lcmStatusCodeHistory = (MI_Char*)DSC_malloc(MAX_LCM_STATUSCODE_HISTORY_SIZE * sizeof(MI_Char), NitsHere());
+                if (*lcmStatusCodeHistory == NULL)
+                {
+                        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
+                }
 #if defined(_MSC_VER)
-		retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T"), GetCurrentLCMStatusCodeHistory());
+                retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T"), GetCurrentLCMStatusCodeHistory());
 #else
-		retValue = TcsStrlcpy(*lcmStatusCodeHistory, GetCurrentLCMStatusCodeHistory(), MAX_LCM_STATUSCODE_HISTORY_SIZE);
+                retValue = TcsStrlcpy(*lcmStatusCodeHistory, GetCurrentLCMStatusCodeHistory(), MAX_LCM_STATUSCODE_HISTORY_SIZE);
 #endif
 
-		if (retValue == -1)
-		{
-			DSC_free(*lcmStatusCodeHistory);
-			*lcmStatusCodeHistory = NULL;
-			return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_PRINTF_ERROR);
-		}
-	}
-	DSC_free(g_LCMStatusCodeHistory);
-	g_LCMStatusCodeHistory = NULL;
+                if (retValue == -1)
+                {
+                        DSC_free(*lcmStatusCodeHistory);
+                        *lcmStatusCodeHistory = NULL;
+                        return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_PRINTF_ERROR);
+                }
+        }
+        DSC_free(g_LCMStatusCodeHistory);
+        g_LCMStatusCodeHistory = NULL;
 
-	lcmStatus = LCM_STATUSCODE_READY;
-	UpdateCurrentStatus(NULL, NULL, &lcmStatus, cimErrorDetails);
-	return MI_RESULT_OK;
+        lcmStatus = LCM_STATUSCODE_READY;
+        UpdateCurrentStatus(NULL, NULL, &lcmStatus, cimErrorDetails);
+        return MI_RESULT_OK;
 }

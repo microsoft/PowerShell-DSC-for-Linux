@@ -9,7 +9,9 @@ SOURCES = \
 	LocalConfigManagerHelper.c \
 	LocalConfigurationManager.c \
         MSFT_DSCLocalConfigurationManager.c \
-		OMI_LocalConfigManagerHelper.c \
+	MSFT_DSCWebPullClient.c \
+	WebPullClientInvoker.c \
+	OMI_LocalConfigManagerHelper.c \
         omi_schema.c 
 
 INCLUDES = \

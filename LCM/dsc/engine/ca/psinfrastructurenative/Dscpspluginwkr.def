@@ -1,0 +1,20 @@
+LIBRARY Dscpspluginwkr
+
+EXPORTS
+
+Get
+
+Set
+
+Test
+
+StopCurrentPSConfiguration
+
+GetResourceProvider
+
+Pull_GetConfiguration_ManagedPlugin
+
+Pull_GetAction_ManagedPlugin
+
+Pull_GetModules_ManagedPlugin
+

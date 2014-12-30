@@ -1,27 +1,3 @@
-/*
-**==============================================================================
-**
-** Open Management Infrastructure (OMI)
-**
-** Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); you may not
-** use this file except in compliance with the License. You may obtain a copy
-** of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-** KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-** WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-** MERCHANTABLITY OR NON-INFRINGEMENT.
-**
-** See the Apache 2 License for the specific language governing permissions
-** and limitations under the License.
-**
-**==============================================================================
-*/
-
 /* @migen@ */
 /*
 **==============================================================================
@@ -32,11 +8,10 @@
 */
 #include <ctype.h>
 #include <MI.h>
-#include "omi_msft_dsclocalconfigurationmanager.h"
+#include "MSFT_DSCLocalConfigurationManager.h"
 #include "MSFT_DSCWebPullClient.h"
 #include "MSFT_DSCMetaConfiguration.h"
 #include "OMI_Error.h"
-#include "MSFT_LogResource.h"
 
 /*
 **==============================================================================
@@ -2288,6 +2263,16 @@ static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_GetConfigurat
     offsetof(MSFT_DSCLocalConfigurationManager_GetConfiguration, configurationData), /* offset */
 };
 
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Stream_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Stream_qual =
+{
+    MI_T("Stream"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Stream_qual_value
+};
+
 static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_EmbeddedInstance_qual_value = MI_T("OMI_BaseResource");
 
 static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_EmbeddedInstance_qual =
@@ -2310,6 +2295,7 @@ static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetConfiguration_
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_quals[] =
 {
+    &MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Stream_qual,
     &MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_EmbeddedInstance_qual,
     &MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Out_qual,
 };
@@ -2317,7 +2303,7 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_GetConf
 /* parameter MSFT_DSCLocalConfigurationManager.GetConfiguration(): configurations */
 static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_param =
 {
-    MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
+    MI_FLAG_PARAMETER|MI_FLAG_OUT|MI_FLAG_STREAM, /* flags */
     0x0063730E, /* code */
     MI_T("configurations"), /* name */
     MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_quals, /* qualifiers */
@@ -2325,7 +2311,7 @@ static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_GetConfigurat
     MI_INSTANCEA, /* type */
     MI_T("OMI_BaseResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_DSCLocalConfigurationManager_GetConfiguration, configurations), /* offset */
+    0xFFFFFFFF, /* offset */
 };
 
 static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_GetConfiguration_MIReturn_Static_qual_value = 1;
@@ -2593,7 +2579,7 @@ static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_ApplyConfiguratio
     &MSFT_DSCLocalConfigurationManager_ApplyConfiguration_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_ApplyConfiguration_Description_qual_value = MI_T("432");
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_ApplyConfiguration_Description_qual_value = MI_T("426");
 
 static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_ApplyConfiguration_Description_qual =
 {
@@ -2609,6 +2595,35 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_ApplyCo
     &MSFT_DSCLocalConfigurationManager_ApplyConfiguration_Description_qual,
 };
 
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_In_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_In_qual =
+{
+    MI_T("In"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_In_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_quals[] =
+{
+    &MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_In_qual,
+};
+
+/* parameter MSFT_DSCLocalConfigurationManager.ApplyConfiguration(): force */
+static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_param =
+{
+    MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
+    0x00666505, /* code */
+    MI_T("force"), /* name */
+    MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_quals), /* numQualifiers */
+    MI_BOOLEAN, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCLocalConfigurationManager_ApplyConfiguration, force), /* offset */
+};
+
 static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_ApplyConfiguration_MIReturn_Static_qual_value = 1;
 
 static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_ApplyConfiguration_MIReturn_Static_qual =
@@ -2619,7 +2634,7 @@ static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_ApplyConfiguratio
     &MSFT_DSCLocalConfigurationManager_ApplyConfiguration_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_ApplyConfiguration_MIReturn_Description_qual_value = MI_T("432");
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_ApplyConfiguration_MIReturn_Description_qual_value = MI_T("426");
 
 static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_ApplyConfiguration_MIReturn_Description_qual =
 {
@@ -2652,6 +2667,7 @@ static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_ApplyConfigur
 static MI_ParameterDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_ApplyConfiguration_params[] =
 {
     &MSFT_DSCLocalConfigurationManager_ApplyConfiguration_MIReturn_param,
+    &MSFT_DSCLocalConfigurationManager_ApplyConfiguration_force_param,
 };
 
 /* method MSFT_DSCLocalConfigurationManager.ApplyConfiguration() */
@@ -6152,97 +6168,6 @@ MI_CONST MI_ClassDecl OMI_Error_rtti =
 /*
 **==============================================================================
 **
-** MSFT_LogResource
-**
-**==============================================================================
-*/
-
-static MI_CONST MI_Boolean MSFT_LogResource_Message_Required_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_LogResource_Message_Required_qual =
-{
-    MI_T("Required"),
-    MI_BOOLEAN,
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_LogResource_Message_Required_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_LogResource_Message_quals[] =
-{
-    &MSFT_LogResource_Message_Required_qual,
-};
-
-/* property MSFT_LogResource.Message */
-static MI_CONST MI_PropertyDecl MSFT_LogResource_Message_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED|MI_FLAG_READONLY, /* flags */
-    0x006D6507, /* code */
-    MI_T("Message"), /* name */
-    MSFT_LogResource_Message_quals, /* qualifiers */
-    MI_COUNT(MSFT_LogResource_Message_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_LogResource, Message), /* offset */
-    MI_T("MSFT_LogResource"), /* origin */
-    MI_T("MSFT_LogResource"), /* propagator */
-    NULL,
-};
-
-static MI_PropertyDecl MI_CONST* MI_CONST MSFT_LogResource_props[] =
-{
-    &MSFT_LogResource_Message_prop,
-};
-
-static MI_CONST MI_Char* MSFT_LogResource_Description_qual_value = MI_T("433");
-
-static MI_CONST MI_Qualifier MSFT_LogResource_Description_qual =
-{
-    MI_T("Description"),
-    MI_STRING,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_LogResource_Description_qual_value
-};
-
-static MI_CONST MI_Char* MSFT_LogResource_ClassVersion_qual_value = MI_T("1.0.0");
-
-static MI_CONST MI_Qualifier MSFT_LogResource_ClassVersion_qual =
-{
-    MI_T("ClassVersion"),
-    MI_STRING,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &MSFT_LogResource_ClassVersion_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_LogResource_quals[] =
-{
-    &MSFT_LogResource_Description_qual,
-    &MSFT_LogResource_ClassVersion_qual,
-};
-
-/* class MSFT_LogResource */
-MI_CONST MI_ClassDecl MSFT_LogResource_rtti =
-{
-    MI_FLAG_CLASS, /* flags */
-    0x006D6510, /* code */
-    MI_T("MSFT_LogResource"), /* name */
-    MSFT_LogResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_LogResource_quals), /* numQualifiers */
-    MSFT_LogResource_props, /* properties */
-    MI_COUNT(MSFT_LogResource_props), /* numProperties */
-    sizeof(MSFT_LogResource), /* size */
-    MI_T("OMI_BaseResource"), /* superClass */
-    &OMI_BaseResource_rtti, /* superClassDecl */
-    NULL, /* methods */
-    0, /* numMethods */
-    &schemaDecl, /* schema */
-    NULL, /* functions */
-    NULL /* owningClass */
-};
-
-/*
-**==============================================================================
-**
 ** __mi_server
 **
 **==============================================================================
@@ -6265,7 +6190,6 @@ static MI_ClassDecl MI_CONST* MI_CONST classes[] =
     &MSFT_DSCMetaConfiguration_rtti,
     &MSFT_DSCWebPullClient_rtti,
     &MSFT_KeyValuePair_rtti,
-    &MSFT_LogResource_rtti,
     &MSFT_ModuleSpecification_rtti,
     &OMI_BaseResource_rtti,
     &OMI_Error_rtti,
