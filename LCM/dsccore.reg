@@ -1,6 +1,5 @@
 # omireg /home/johnkord/dev/imp/dsc/omi-1.0.8/output/lib/libdsccore.so
 LIBRARY=dsccore
-HOSTING=@requestor@
 EXTRACLASS=MSFT_Credential
 CLASS=MSFT_DSCLocalConfigurationManager
 EXTRACLASS=MSFT_DSCMetaConfiguration
