@@ -58,6 +58,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 
 /opt/microsoft/dsc/Scripts/client.py; Providers/Scripts/client.py; 755; root; root
 /opt/microsoft/dsc/Scripts/protocol.py; Providers/Scripts/protocol.py; 755; root; root
+/opt/microsoft/dsc/Scripts/SendConfigurationApply.py; Providers/Extras/Scripts/SCA.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/__init__.py; Providers/Scripts/2.4x-2.5x/Scripts/__init__.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
