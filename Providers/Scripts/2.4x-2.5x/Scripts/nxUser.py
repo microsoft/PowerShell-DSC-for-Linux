@@ -329,13 +329,8 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
 
         if PasswordChangeRequired == True:
-            # Set last password change to today
-            day_0 = datetime.datetime.utcfromtimestamp(0)
-            day_now = datetime.datetime.today()
-            days_since_day_0 = (day_now - day_0).days
-            
-            exit_code = os.system(chage_path + " -d "+ str(days_since_day_0) + " " + UserName)
-           
+            exit_code = os.system(chage_path + " -d  0 "  + UserName)
+
     return [exit_code]
 
 def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
