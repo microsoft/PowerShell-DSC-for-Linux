@@ -391,13 +391,24 @@ def ListDir(path):
 
 def Symlink(spath,dpath):
     error=None
+    #remove the destination 
+    try:
+        os.unlink(dpath)
+    except OSError, error:
+        Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        return error
+    except IOError, error:
+        Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        return error
+        
     try:
         os.symlink(spath, dpath)
     except OSError, error:
         Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        return error
     except IOError, error:
         Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
-    return error
+        return error
     
 def MakeDirs(path):
     error=None
@@ -424,9 +435,9 @@ def CopyFile(spath,dpath):
     try:
         shutil.copyfile(spath,dpath)
     except OSError, error:
-         Print("Exception removing tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception copying tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception removing tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         Print("Exception copying tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def CompareFiles(DestinationPath, SourcePath, Checksum):
@@ -641,7 +652,7 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
         src_uid = pwd.getpwuid(stat_info_src.st_uid)[2]
         if pwd.getpwuid(stat_info.st_uid)[2] != src_uid:
             Print("Changing owner of " + DestinationPath + " to " + str(src_uid))
-            if LChown(DestinationPath, Specified_Owner_ID, -1) != None :
+            if LChown(DestinationPath, src_uid, -1) != None :
                 return False
 
     if fc.Group:
@@ -785,17 +796,23 @@ def SetLink(DestinationPath, SourcePath, fc):
     if os.path.islink(SourcePath):
         if fc.Links == "follow":
             if os.path.isfile(SourcePath):
-                SetFile(DestinationPath, os.path.realpath(SourcePath), fc)
+                if SetFile(DestinationPath, os.path.realpath(SourcePath), fc) != None:
+                    return False
             elif os.path.isdir(SourcePath):
-                SetDirectoryRecursive(DestinationPath, os.path.realpath(SourcePath), fc)
+                if SetDirectoryRecursive(DestinationPath, os.path.realpath(SourcePath), fc) != None:
+                    return False
+                    
         elif fc.Links == "manage":
-            Symlink(os.readlink(SourcePath), DestinationPath)
+            if Symlink(os.readlink(SourcePath), DestinationPath) != None:
+                return False
             
         elif fc.Links == "ignore":
             # Ignore all symlinks
             return True
     else:
-        Symlink(SourcePath, DestinationPath)
+        if Symlink(SourcePath, DestinationPath) != None:
+            return False
+            
 
     SetOwnerGroupMode(DestinationPath, SourcePath, fc)
 
