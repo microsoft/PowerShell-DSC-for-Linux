@@ -12,6 +12,7 @@
 #include "CAEngine.h"
 #include "CAEngineInternal.h"
 #include "EventWrapper.h"
+#include <ctype.h>
 
 #if defined(_MSC_VER)
 
