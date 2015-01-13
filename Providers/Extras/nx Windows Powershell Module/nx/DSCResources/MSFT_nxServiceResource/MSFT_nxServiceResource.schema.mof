@@ -2,7 +2,7 @@
 class MSFT_nxServiceResource : OMI_BaseResource
 {
 	[key] string Name;
-	[write,ValueMap{"init", "upstart", "serviced"},Values{"init","upstart","serviced"}] string Controller;
+	[write,ValueMap{"init", "upstart", "systemd"},Values{"init","upstart","systemd"}] string Controller;
 	[write] boolean Enabled;
 	[write,ValueMap{"Running", "Stopped"},Values{"Running", "Stopped"}] string State;
 	[read] boolean IsEnabled;
