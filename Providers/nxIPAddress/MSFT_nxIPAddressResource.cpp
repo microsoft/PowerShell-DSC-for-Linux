@@ -1,20 +1,22 @@
 /* @migen@ */
-#include <boost/python.hpp>
-#include "debug_tags.hpp"
-#include "python_file_resource.hpp"
-#include "python_helper.hpp"
-#include "python_scoped_context.hpp"
-#include <MI.h>
 #include "MSFT_nxIPAddressResource.h"
+
+
+#include "debug_tags.hpp"
+#include "MI.h"
+#include "PythonProvider.hpp"
 
 
 #include <cstdlib>
 
 
-typedef struct _MSFT_nxIPAddressResource_Self : public scx::PythonFileResource
+typedef struct _MSFT_nxIPAddressResource_Self : public scx::PythonProvider
 {
-    /*ctor*/ _MSFT_nxIPAddressResource_Self (scx::PythonFileResource& base)
-      : scx::PythonFileResource (base) {}
+    /*ctor*/ _MSFT_nxIPAddressResource_Self ()
+        : scx::PythonProvider ("nxIPAddress")
+    {
+        // empty
+    }
 } MSFT_nxIPAddressResource_Self;
 
 
@@ -26,8 +28,20 @@ void MI_CALL MSFT_nxIPAddressResource_Load(
     SCX_BOOKEND_EX ("Load", " name=\"nxIPAddress\"");
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
-    if (0 != self &&
-        EXIT_SUCCESS != scx::PythonFileResource::create (self, "nxIPAddress"))
+    if (0 != self)
+    {
+        if (0 == *self)
+        {
+            *self = new MSFT_nxIPAddressResource_Self;
+            if (EXIT_SUCCESS != (*self)->init ())
+            {
+                delete *self;
+                *self = 0;
+                res = MI_RESULT_FAILED;
+            }
+        }
+    }
+    else
     {
         res = MI_RESULT_FAILED;
     }
@@ -139,101 +153,37 @@ void MI_CALL MSFT_nxIPAddressResource_Invoke_GetTargetResource(
     _In_opt_ const MSFT_nxIPAddressResource_GetTargetResource* in)
 {
     SCX_BOOKEND_EX ("Get", " name=\"nxIPAddress\"");
-    scx::PythonScopedContext lock (self->getThreadState ());
-    MI_Result r = MI_RESULT_OK;
-    MSFT_nxIPAddressResource_GetTargetResource out;
-    MI_Instance *newInstance;
-    MI_Value value;
-
-    r = MSFT_nxIPAddressResource_GetTargetResource_Construct (&out, context);
-    r = MSFT_nxIPAddressResource_GetTargetResource_Set_MIReturn (&out, 0);
-
-    const MSFT_nxIPAddressResource* ipAddress = in->InputResource.value;
-    r = MI_Instance_Clone (&ipAddress->__instance, &newInstance);
-
-    MI_Boolean res = MI_TRUE;
-    boost::python::object retVals;
-std::cerr << "invoking GET" << std::endl;
-    int exitCode = scx::invoke_python_function (
-        &retVals,
-        self->getGetFn (),
-        scx::get_mi_value (ipAddress->InterfaceName),
-        scx::get_mi_value (ipAddress->IPAddress),
-        scx::get_mi_value (ipAddress->BootProtocol),
-        scx::get_mi_value (ipAddress->DefaultGateway),
-        scx::get_mi_value (ipAddress->Ensure),
-        scx::get_mi_value (ipAddress->PrefixLength),
-        scx::get_mi_value (ipAddress->AddressFamily));
-std::cerr << "GET function returns" << std::endl;
-
-    // 1 + 7 represents: result, 7 normal fields, 1 'read' fields
-    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals) &&
-        (1 + 7) == boost::python::len (retVals))
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-std::cerr << "good number of parameters and function succeeded" << std::endl;
-        res = MI_TRUE;
+        MI_Instance* retInstance;
+        MI_Instance_Clone (&in->InputResource.value->__instance, &retInstance);
+        result = self->get (in->InputResource.value->__instance, context,
+                            retInstance);
+        if (MI_RESULT_OK == result)
+        {
+            SCX_BOOKEND_PRINT ("packing succeeded!");
+            MSFT_nxIPAddressResource_GetTargetResource out;
+            MSFT_nxIPAddressResource_GetTargetResource_Construct (&out, context);
+            MSFT_nxIPAddressResource_GetTargetResource_Set_MIReturn (&out, 0);
+            MI_Value value;
+            value.instance = retInstance;
+            MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
+                                    MI_INSTANCE, 0);
+            result = MSFT_nxIPAddressResource_GetTargetResource_Post (&out, context);
+            if (MI_RESULT_OK != result)
+            {
+                SCX_BOOKEND_PRINT ("post Failed");
+            }
+            MSFT_nxIPAddressResource_GetTargetResource_Destruct (&out);
+        }
+        else
+        {
+            SCX_BOOKEND_PRINT ("get FAILED");
+        }
+        MI_Instance_Delete (retInstance);
     }
-    else
-    {
-std::cerr << "parameters failed" << std::endl;
-        SCX_BOOKEND_PRINT ("Failed - 1");
-        MI_Context_PostResult (context, MI_RESULT_FAILED);
-        return;
-    }
-    
-    if (EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "InterfaceName", retVals[1]))
-    {
-std::cerr << "error parsing retVals[1]" << std::endl;
-        SCX_BOOKEND_PRINT ("Failed - 2");
-        MI_Context_PostResult (context, MI_RESULT_FAILED);
-        return;
-
-     }
-     if(   EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "IPAddress", retVals[2]) ||
-        EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "BootProtocol", retVals[3]) ||
-        EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "DefaultGateway", retVals[4]) ||
-        EXIT_SUCCESS != scx::set_mi_string (newInstance, "Ensure", retVals[5]) ||
-        EXIT_SUCCESS != scx::set_mi_uint32 (
-            newInstance, "PrefixLength", retVals[6]) ||
-        EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "AddressFamily", retVals[7]))
-    {
-        SCX_BOOKEND_PRINT ("Failed - 2");
-        MI_Context_PostResult (context, MI_RESULT_FAILED);
-        return;
-    }
-    value.instance = newInstance;
-    r = MI_Instance_SetElement (
-        &out.__instance, "OutputResource", &value, MI_INSTANCE, 0);
-    if (MI_RESULT_OK != r)
-    {
-        SCX_BOOKEND_PRINT ("Failed - 3");
-        MI_Context_PostResult (context, r);
-        return;
-    }
-
-    MI_Instance_Delete (newInstance);
-    r = MSFT_nxIPAddressResource_GetTargetResource_Post (&out, context);
-    if (MI_RESULT_OK != r)
-    {
-        SCX_BOOKEND_PRINT ("Failed - 4");
-        MI_Context_PostResult (context, r);
-        return;
-    }
-
-    r = MSFT_nxIPAddressResource_GetTargetResource_Destruct (&out);
-    if (MI_RESULT_OK != r)
-    {
-        SCX_BOOKEND_PRINT ("Failed - 5");
-        MI_Context_PostResult (context, r);
-        return;
-    }
-
-    MI_Context_PostResult (context, MI_RESULT_OK);
+    MI_Context_PostResult (context, result);
 }
 
 void MI_CALL MSFT_nxIPAddressResource_Invoke_TestTargetResource(
@@ -245,45 +195,23 @@ void MI_CALL MSFT_nxIPAddressResource_Invoke_TestTargetResource(
     _In_ const MSFT_nxIPAddressResource* instanceName,
     _In_opt_ const MSFT_nxIPAddressResource_TestTargetResource* in)
 {
-    SCX_BOOKEND_EX ("Test", " name=\"nxIPAddress\"");
-    if (!self)
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-        MI_Context_PostResult(context, MI_RESULT_OK);
-        return;
+        MI_Boolean testResult = MI_FALSE;
+        result = self->test (in->InputResource.value->__instance, &testResult);
+        if (MI_RESULT_OK == result)
+        {
+            MSFT_nxIPAddressResource_TestTargetResource out;
+            MSFT_nxIPAddressResource_TestTargetResource_Construct (&out, context);
+            MSFT_nxIPAddressResource_TestTargetResource_Set_Result (
+                &out, testResult);
+            MSFT_nxIPAddressResource_TestTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxIPAddressResource_TestTargetResource_Post (&out, context);
+            MSFT_nxIPAddressResource_TestTargetResource_Destruct (&out);
+        }
     }
-    scx::PythonScopedContext lock (self->getThreadState ());
-    MI_Result r = MI_RESULT_OK;
-    MI_Boolean res = MI_TRUE;
-    MSFT_nxIPAddressResource_TestTargetResource out;
-
-    MSFT_nxIPAddressResource const* ipAddress = in->InputResource.value;
-    boost::python::object retVals;
-    int exitCode = scx::invoke_python_function (
-        &retVals,
-        self->getTestFn (),
-        scx::get_mi_value (ipAddress->InterfaceName),
-        scx::get_mi_value (ipAddress->IPAddress),
-        scx::get_mi_value (ipAddress->BootProtocol),
-        scx::get_mi_value (ipAddress->DefaultGateway),
-        scx::get_mi_value (ipAddress->Ensure),
-        scx::get_mi_value (ipAddress->PrefixLength),
-        scx::get_mi_value (ipAddress->AddressFamily));
-    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals))
-    {
-        res = MI_TRUE;
-    }
-    else
-    {
-        res = MI_FALSE;
-    }
-
-    // Why are the results (r) of these functions being captured but not used?
-    r = MSFT_nxIPAddressResource_TestTargetResource_Construct(&out, context);
-    r = MSFT_nxIPAddressResource_TestTargetResource_Set_Result(&out, res);
-    r = MSFT_nxIPAddressResource_TestTargetResource_Set_MIReturn(&out, 0);
-    r = MSFT_nxIPAddressResource_TestTargetResource_Post(&out, context);
-    r = MSFT_nxIPAddressResource_TestTargetResource_Destruct(&out);
-    MI_Context_PostResult(context, MI_RESULT_OK);
+    MI_Context_PostResult (context, result);
 }
 
 void MI_CALL MSFT_nxIPAddressResource_Invoke_SetTargetResource(
@@ -295,43 +223,21 @@ void MI_CALL MSFT_nxIPAddressResource_Invoke_SetTargetResource(
     _In_ const MSFT_nxIPAddressResource* instanceName,
     _In_opt_ const MSFT_nxIPAddressResource_SetTargetResource* in)
 {
-    SCX_BOOKEND_EX ("Set", " name=\"nxIPAddress\"");
-    if (!self)
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-        MI_Context_PostResult(context, MI_RESULT_FAILED);
-        return;
+        MI_Result setResult = MI_RESULT_FAILED;
+        result = self->set (in->InputResource.value->__instance, &setResult);
+        if (MI_RESULT_OK == result)
+        {
+            result = setResult;
+            MSFT_nxIPAddressResource_SetTargetResource out;
+            MSFT_nxIPAddressResource_SetTargetResource_Construct (&out, context);
+            MSFT_nxIPAddressResource_SetTargetResource_Set_MIReturn (
+                &out, setResult);
+            MSFT_nxIPAddressResource_SetTargetResource_Post (&out, context);
+            MSFT_nxIPAddressResource_SetTargetResource_Destruct (&out);
+        }
     }
-    scx::PythonScopedContext lock (self->getThreadState ());
-    MI_Result r = MI_RESULT_OK;
-    MSFT_nxIPAddressResource_SetTargetResource out;
-    MI_Result res = MI_RESULT_OK;
-
-    MSFT_nxIPAddressResource const* ipAddress = in->InputResource.value;
-    boost::python::object retVals;
-    int exitCode = scx::invoke_python_function (
-        &retVals,
-        self->getSetFn (),
-        scx::get_mi_value (ipAddress->InterfaceName),
-        scx::get_mi_value (ipAddress->IPAddress),
-        scx::get_mi_value (ipAddress->BootProtocol),
-        scx::get_mi_value (ipAddress->DefaultGateway),
-        scx::get_mi_value (ipAddress->Ensure),
-        scx::get_mi_value (ipAddress->PrefixLength),
-        scx::get_mi_value (ipAddress->AddressFamily));
-    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals))
-    {
-        res = MI_RESULT_OK;
-    }
-    else
-    {
-        res = MI_RESULT_FAILED;
-    }
-
-    // Why are the results (r) of these functions being captured but not used?
-    r = MSFT_nxIPAddressResource_SetTargetResource_Construct(&out, context);
-    r = MSFT_nxIPAddressResource_SetTargetResource_Set_MIReturn(&out, res);
-    r = MSFT_nxIPAddressResource_SetTargetResource_Post(&out, context);
-    r = MSFT_nxIPAddressResource_SetTargetResource_Destruct(&out);
-    MI_Context_PostResult(context, res);
+    MI_Context_PostResult (context, result);
 }
-

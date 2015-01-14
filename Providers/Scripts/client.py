@@ -33,56 +33,15 @@ def read_uchar (fd):
     return val
 
 
-def read_int (fd):
-    verbose_trace ('<read_int>')
-    buf = fd.recv (4)
-    val = struct.unpack ('@i',buf)[0]
-    verbose_trace ('  val: '+str(int (val)))
-    verbose_trace ('</read_int>')
-    return val
-
-
-def read_string (fd):
-    verbose_trace ('<read_string>')
-    len = read_int (fd)
-    verbose_trace ('  len: '+str(len))
-    text = ''
-    if 0 < len:
-        buf = fd.recv (len)
-        text = buf.decode ('utf8')
-    verbose_trace ('  str: "'+text+'"')
-    verbose_trace ('</read_string>')
-    return text
-
-
-def read_values (fd):
-    verbose_trace ('<read_values>')
-    d = dict ()
-    argc = read_int (fd)
-    verbose_trace ('  argc: '+str(argc))
-    for i in range (argc):
-        name = read_string (fd)
-        # for python2.4x-2.5x unicode strings are illegal for **kwargs
-        if sys.version < '2.6':
-            arg_name = name.encode ('ascii','ignore')
-        else:
-            arg_name = name
-        verbose_trace('  arg_name: "'+ arg_name+'"')
-        arg_val = protocol.MI_Value.read (fd)
-        d[arg_name] = arg_val
-    verbose_trace ('</read_values>')
-    return d
-
-
 def read_request (fd):
     verbose_trace ('<read_request>')
     op_type = read_uchar (fd)
     if op_type == None:
         return None
-    verbose_trace('  op_type: ' + str(op_type))
-    op_name = read_string (fd)
+    verbose_trace ('  op_type: ' + str(op_type))
+    op_name = protocol.read_string (fd)
     verbose_trace ('  op_name: "'+ op_name +'"')
-    d = read_values (fd)
+    d = protocol.read_values (fd)
     verbose_trace ('</read_request>')
     return (op_type, op_name, d)
 
@@ -95,63 +54,18 @@ def write_int (fd, val):
     verbose_trace ('</write_int>')
 
 
-def write_string (fd, st):
-    verbose_trace ('<write_string>')
-    verbose_trace ('  st: "'+ st + '"')
-    verbose_trace (st)
-    buf = struct.pack('@i', len (st))
-    if type(buf) != str:
-        buf += bytes (st,'utf8')
-    else:
-        buf += st
-    fd.send (buf)
-    verbose_trace ('</write_string>')
-
-
-def write_dict (fd, d):
-    verbose_trace ('<write_dict>')
-    write_int (fd, len (d))
-    verbose_trace ('  len: ' + str(len (d)))
-    if sys.version > '2.9':
-        for key, value in d.items ():
-            trace ('  key: '+ key)
-            if not hasattr(value,'value'):
-                sys.stderr.write('\n  key: '+ key + ' is not mi_value\n' )
-            trace ('  value: '+ str(value.value))
-            if value.value is not None:
-                write_string (fd, key)
-                value.write (fd)
-    else:
-        for key, value in d.iteritems():
-            trace ('  key: '+ key)
-            trace ('  value: '+ str(value.value))
-            if value.value is not None:
-                write_string (fd, key)
-                value.write (fd)
-    verbose_trace ('</write_dict>')
-
-
-def write_args (fd, args):
-    verbose_trace ('<write_args>')
-    if type (args) is dict:
-        write_dict (fd, args)
-    else:
-        sys.stderr.write('write_args - was expecting dictionary for args!')
-    verbose_trace ('</write_args>')
-
-
 def write_success (fd, args = None):
     trace ('<write_success>')
     write_int (fd, 0)
     if args is not None:
-        write_args (fd, args)
+        protocol.write_values (fd, args)
     trace ('</write_success>')
 
 
 def write_failed (s, fail_code, text=''):
     trace ('<write_failed>')
     write_int (s, fail_code)
-    write_string (s, text)
+    protocol.write_string (s, text)
     trace ('</write_failed>')
 
 
@@ -181,14 +95,14 @@ def callMOF (req):
     trace ('MOF=' + repr ((req[0], req[1], oldStyleDict)))
     op = ('Test','Set','Get')
     if req[1] not in globals().keys():
-        sys.stderr.write('Unable to find module: ' + md)
+        sys.stderr.write('Unable to find module: ' + req[1])
         return None
     the_module = globals ()[req[1]]
     method_name = op[req[0]] + '_Marshall'
     if not method_name in the_module.__dict__.keys():
         sys.stderr.write ('Unable to find method: ' + method_name)
         return None
-    trace('calling '+ req[1] + '.' + method_name + ' ' + repr (oldStyleDict))
+    trace ('calling '+ req[1] + '.' + method_name + ' ' + repr (oldStyleDict))
     ret = the_module.__dict__[method_name](**oldStyleDict)
     sys.stderr.write (repr(ret))
     return ret
