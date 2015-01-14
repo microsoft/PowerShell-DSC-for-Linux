@@ -1,4 +1,6 @@
-﻿namespace DSC
+﻿using System.IO;
+
+namespace DSC
 {
     using System;
     using System.Text;
@@ -77,6 +79,20 @@
             mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath);
             ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
                 configMofScriptPath));
+
+            // Add the config to the logs
+            StreamReader sr = new StreamReader(configMofScriptPath);
+            string line = null;
+            StringBuilder configFile = new StringBuilder();
+            line = sr.ReadLine();
+            while (line != null)
+            {
+                line = line.Replace("{", "{{").Replace("}", "}}");
+                configFile.Append(line);
+                line = sr.ReadLine();
+            }
+            ctx.Alw(String.Format(configFile.ToString()));
+
 
             ctx.Alw("nxServiceTest Setup End.");
         }

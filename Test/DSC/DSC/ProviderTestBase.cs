@@ -5,6 +5,12 @@
 // <author>v-mifu@microsoft.com</author>
 // <description>A base class about provider test.</description>
 //-----------------------------------------------------------------------
+
+using System.Configuration;
+using System.IO;
+using System.Management.Automation;
+using System.Text;
+
 namespace DSC
 {
     using System;
@@ -72,6 +78,20 @@ namespace DSC
             mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath);
             ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
                 configMofScriptPath));
+
+            // Add the config to the logs
+            StreamReader sr = new StreamReader(configMofScriptPath);
+            string line = null;
+            StringBuilder configFile = new StringBuilder();
+            line = sr.ReadLine();
+            while (line != null)
+            {
+                line = line.Replace("{", "{{").Replace("}","}}");
+                configFile.Append(line);
+                line = sr.ReadLine();
+            }
+            ctx.Alw(String.Format(configFile.ToString()));
+                
         }
 
         public virtual void Run(IContext ctx)
