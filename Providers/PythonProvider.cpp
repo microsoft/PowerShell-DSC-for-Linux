@@ -78,6 +78,89 @@ get_script_path ()
 }
 
 
+class PropertyFinder
+{
+public:
+    /*ctor*/ PropertyFinder (std::string const& name)
+        : m_Name (name)
+    {
+        // empty
+    }
+
+    bool operator () (MI_PropertyDecl const* const pProperty) const
+    {
+        return pProperty->name ? m_Name == pProperty->name : false;
+    }
+
+private:
+    std::string const m_Name;
+};
+
+
+struct MI_Deleter
+{
+    void operator () (
+        MI_Instance*& pInstance)
+    {
+        if (0 != pInstance)
+        {
+            MI_Instance_Delete (pInstance);
+            pInstance = 0;
+        }
+    }
+};
+
+
+typedef util::unique_ptr<MI_Instance, MI_Deleter> MI_InstancePtr;
+
+
+int
+allocate_MI_Instance (
+    MI_Context* pContext,
+    MI_Instance* const pInstance,
+    std::string const name,
+    MI_InstancePtr* ppInstanceOut)
+{
+    //SCX_BOOKEND ("allocate_MI_Instance");
+    int rval = EXIT_FAILURE;
+    // find the property by name
+    MI_PropertyDecl const* const* const ppBegin =
+        pInstance->classDecl->properties;
+    MI_PropertyDecl const* const* const ppEnd =
+        ppBegin + pInstance->classDecl->numProperties;
+    MI_PropertyDecl const* const* const ppProperty =
+        std::find_if (ppBegin, ppEnd, PropertyFinder (name));
+    if (ppEnd != ppProperty)
+    {
+        MI_Instance* pNewInstance = 0;
+        if (MI_RESULT_OK == MI_NewDynamicInstance (
+                pContext, (*ppProperty)->className,
+                (*ppProperty)->flags, &pNewInstance))
+        {
+            ppInstanceOut->reset (pNewInstance);
+            rval = EXIT_SUCCESS;
+        }
+        else
+        {
+            std::ostringstream strm;
+            strm << __FILE__ << '[' << __LINE__ << ']'
+                 << "MI_NewDynamicInstance failed";
+            SCX_BOOKEND_PRINT (strm.str ());
+            std::cerr << strm.str () << std::endl;
+        }
+    }
+    else
+    {
+        std::ostringstream strm;
+        strm << __FILE__ << '[' << __LINE__ << ']' << "encountered a member: "
+             << name << " that is not in the ClassDecl.";
+        SCX_BOOKEND_PRINT (strm.str ());
+        std::cerr << strm.str () << std::endl;
+    }
+    return rval;
+}
+
+
 }
 
 
@@ -88,15 +171,61 @@ namespace scx
 /*static*/ unsigned char const PythonProvider::MI_NULL_FLAG = 64;
 
 
+template<typename T>
+/*static*/ int
+PythonProvider::TypeHelper<T>::recv (
+    PythonProvider* const pProvider,
+    T* const pValueOut)
+{
+    //SCX_BOOKEND ("TypeHelper::recv");
+    T temp;
+    int rval = pProvider->recv (&temp);
+    if (EXIT_SUCCESS == rval)
+    {
+        *pValueOut = temp;
+    }
+    return rval;
+}
+
+
+template<typename T>
+template<typename Array_t>
+/*static*/ int
+PythonProvider::TypeHelper<T>::recv_array (
+    PythonProvider* const pProvider,
+    Array_t* const pValueOut,
+    util::unique_ptr<char[]>* const pStorage)
+{
+    //SCX_BOOKEND ("TypeHelper::recv_array");
+    int length;
+    int rval = pProvider->recv (&length);
+    if (EXIT_SUCCESS == rval)
+    {
+        pStorage->reset (new char[length * sizeof (T)]);
+        T* const pArray = reinterpret_cast<T* const> (pStorage->get ());
+        for (int i = 0;
+             EXIT_SUCCESS == rval && length > i;
+             ++i)
+        {
+            rval = pProvider->recv (pArray + i);
+        }
+        if (EXIT_SUCCESS == rval)
+        {
+            pValueOut->data = pArray;
+            pValueOut->size = static_cast<MI_Uint32> (length);
+        }
+    }
+    return rval;
+}
+
+
 /*dtor*/
 PythonProvider::~PythonProvider ()
 {
-#if PRINT_BOOKENDS
+#if (PRINT_BOOKENDS)
     std::ostringstream strm;
-    strm << " name=\"" << m_Name << '\"';
+    strm << "name: \"" << m_Name << '\"';
     SCX_BOOKEND_EX ("PythonProvider::dtor", strm.str ());
-    strm.str ("");
-    strm.clear ();
 #endif
     if (INVALID_SOCKET != m_FD)
     {
@@ -109,16 +238,159 @@ int
 PythonProvider::init ()
 {
     int rval = EXIT_SUCCESS;
-#if PRINT_BOOKENDS
+#if (PRINT_BOOKENDS)
     std::ostringstream strm;
-    strm << " name=\"" << m_Name << '\"';
+    strm << "name: \"" << m_Name << '\"';
     SCX_BOOKEND_EX ("PythonProvider::init", strm.str ());
-    strm.str ("");
-    strm.clear ();
 #endif
     if (INVALID_SOCKET == m_FD)
     {
         rval = forkExec ();
+    }
+    return rval;
+}
+
+
+MI_Result
+PythonProvider::test (
+    MI_Instance const& instance,
+    MI_Boolean* const pTestResultOut)
+{
+#if PRINT_BOOKENDS
+    std::ostringstream strm;
+    strm << "name: \"" << m_Name << '\"';
+    SCX_BOOKEND_EX ("PythonProvider::test", strm.str ());
+#endif
+    MI_Result rval = MI_RESULT_FAILED;
+    int result = sendRequest (TEST, instance);
+    if (EXIT_SUCCESS == result)
+    {
+        SCX_BOOKEND_PRINT ("send succeeded");
+        result = recvResult (pTestResultOut);
+        if (EXIT_SUCCESS == result)
+        {
+            SCX_BOOKEND_PRINT ("recv succeeded");
+            rval = MI_RESULT_OK;
+        }
+        else
+        {
+            SCX_BOOKEND_PRINT ("recv failed");
+        }
+    }
+    else
+    {
+        SCX_BOOKEND_PRINT ("send failed");
+    }
+    return rval;
+}
+
+
+MI_Result
+PythonProvider::set (
+    MI_Instance const& instance,
+    MI_Result* const pSetResultOut)
+{
+#if PRINT_BOOKENDS
+    std::ostringstream strm;
+    strm << "name: \"" << m_Name << '\"';
+    SCX_BOOKEND_EX ("PythonProvider::set", strm.str ());
+#endif
+    MI_Result rval = MI_RESULT_FAILED;
+    int result = sendRequest (SET, instance);
+    if (EXIT_SUCCESS == result)
+    {
+        SCX_BOOKEND_PRINT ("send succeeded");
+        MI_Boolean boolResult = MI_FALSE;
+        result = recvResult (&boolResult);
+        if (EXIT_SUCCESS == result)
+        {
+            SCX_BOOKEND_PRINT ("recv succeeded");
+            rval = MI_RESULT_OK;
+            *pSetResultOut = boolResult ? MI_RESULT_OK : MI_RESULT_FAILED;
+        }
+        else
+        {
+            SCX_BOOKEND_PRINT ("recv failed");
+        }
+    }
+    else
+    {
+        SCX_BOOKEND_PRINT ("send failed");
+    }
+    return rval;
+}
+
+
+MI_Result
+PythonProvider::get (
+    MI_Instance const& instance,
+    MI_Context* const pContext,
+    MI_Instance* const pInstanceOut)
+{
+    std::ostringstream strm;
+#if PRINT_BOOKENDS
+    strm << "name: \"" << m_Name << '\"';
+    SCX_BOOKEND_EX ("PythonProvider::get", strm.str ());
+    strm.str ("");
+    strm.clear ();
+#endif
+    // 1: send the request
+    // 2: read (int) RESULT
+    //     A: RESULT is affirmative (0)
+    //         i: read (int) ARG_COUNT
+    //         ii: read ARG
+    //         iii: read ARG_TYPE
+    //         iv: read ARG_VALUE
+    //         v: add ARG to new instance
+    //         iv: goto ii
+    //     B: RESULT is negative (non-0)
+    //         i: read (string) error msg
+    //         ii: output error msg
+    MI_Result rval = MI_RESULT_FAILED;
+    int getResult = -1;
+    int result = sendRequest (GET, instance);
+    if (EXIT_SUCCESS == result)
+    {
+        SCX_BOOKEND_PRINT ("send succeeded");
+        result = recv (&getResult);
+        if (EXIT_SUCCESS == result)
+        {
+            if (0 == getResult)
+            {
+                SCX_BOOKEND_PRINT ("recv'd POSITIVE");
+                result = recv (pContext, pInstanceOut);
+                rval = EXIT_SUCCESS == result ? MI_RESULT_OK : MI_RESULT_FAILED;
+            }
+            else
+            {
+                SCX_BOOKEND_PRINT ("recv'd NEGATIVE");
+                std::string errorMsg;
+                result = recv (&errorMsg);
+                if (EXIT_SUCCESS == result)
+                {
+                    if (0 != errorMsg.length ())
+                    {
+                        strm << ": error msg: \"" << errorMsg << '\"';
+                        SCX_BOOKEND_PRINT (strm.str ());
+                        std::cerr << strm.str () << std::endl;
+                        strm.str ("");
+                        strm.clear ();
+                    }
+                    else
+                    {
+                        SCX_BOOKEND_PRINT ("no error msg");
+                    }
+                }
+                else 
+                {
+                    SCX_BOOKEND_PRINT ("failed to receive error msg");
+                }
+            }
+        }
+    }
+    else
+    {
+        SCX_BOOKEND_PRINT ("send failed");
     }
     return rval;
 }
@@ -129,8 +401,8 @@ PythonProvider::forkExec ()
 {
     int rval = EXIT_SUCCESS;
     std::ostringstream strm;
-#if PRINT_BOOKENDS
-    strm << " name=\"" << m_Name << '\"';
+#if (PRINT_BOOKENDS)
+    strm << "name: \"" << m_Name << '\"';
     SCX_BOOKEND_EX ("PythonProvider::forkExec", strm.str ());
     strm.str ("");
     strm.clear ();
@@ -298,7 +570,7 @@ int
 PythonProvider::send (
     MI_Datetime const& datetime)
 {
-    SCX_BOOKEND ("PythonProvider::send (MI_Datetime)");
+    //SCX_BOOKEND ("PythonProvider::send (MI_Datetime)");
     int rval = send (static_cast<unsigned char>(datetime.isTimestamp));
     if (EXIT_SUCCESS == rval)
     {
@@ -333,6 +605,275 @@ PythonProvider::send (
 
 
 int
+PythonProvider::send (
+    MI_Value const& value,
+    MI_Type const type)
+{
+    //SCX_BOOKEND ("PythonProvider::send (value, type)");
+    std::ostringstream strm;
+    int rval = EXIT_SUCCESS;
+    switch (type)
+    {
+    case MI_BOOLEAN:
+        rval = send<unsigned char> (value.boolean);
+        break;
+    case MI_UINT8:
+        rval = send (value.uint8);
+        break;
+    case MI_SINT8:
+        rval = send (value.sint8);
+        break;
+    case MI_UINT16:
+        rval = send (value.uint16);
+        break;
+    case MI_SINT16:
+        rval = send (value.sint16);
+        break;
+    case MI_UINT32:
+        rval = send (value.uint32);
+        break;
+    case MI_SINT32:
+        rval = send (value.sint32);
+        break;
+    case MI_UINT64:
+        rval = send (value.uint64);
+        break;
+    case MI_SINT64:
+        rval = send (value.sint64);
+        break;
+    case MI_REAL32:
+        rval = send (value.real32);
+        break;
+    case MI_REAL64:
+        rval = send (value.real64);
+        break;
+    case MI_CHAR16:
+        rval = send (value.char16);
+        break;
+    case MI_DATETIME:
+        rval = send (value.datetime);
+        break;
+    case MI_STRING:
+        rval = send (static_cast<char const* const> (value.string));
+        break;
+    case MI_INSTANCE:
+        rval = send (*(value.instance));
+        break;
+    case MI_BOOLEANA:
+        {
+            //SCX_BOOKEND ("PythonProvider::send_array (bool)");
+            rval = send<int> (value.booleana.size);
+            for (MI_Uint32 n = 0;
+                 EXIT_SUCCESS == rval && n < value.booleana.size;
+                 ++n)
+            {
+                rval = send<unsigned char> (value.booleana.data[n]);
+            }
+        }
+        break;
+    case MI_UINT8A:
+        rval = send_array (value.uint8a);
+        break;
+    case MI_SINT8A:
+        rval = send_array (value.sint8a);
+        break;
+    case MI_UINT16A:
+        rval = send_array (value.uint16a);
+        break;
+    case MI_SINT16A:
+        rval = send_array (value.sint16a);
+        break;
+    case MI_UINT32A:
+        rval = send_array (value.uint32a);
+        break;
+    case MI_SINT32A:
+        rval = send_array (value.sint32a);
+        break;
+    case MI_UINT64A:
+        rval = send_array (value.uint64a);
+        break;
+    case MI_SINT64A:
+        rval = send_array (value.sint64a);
+        break;
+    case MI_REAL32A:
+        rval = send_array (value.real32a);
+        break;
+    case MI_REAL64A:
+        rval = send_array (value.real64a);
+        break;
+    case MI_CHAR16A:
+        rval = send_array (value.char16a);
+        break;
+    case MI_DATETIMEA:
+        rval = send_array (value.datetimea);
+        break;
+    case MI_STRINGA:
+        rval = send_array (value.stringa);
+        break;
+    case MI_INSTANCEA:
+        rval = send_array (value.instancea);
+        break;
+    default:
+        strm << __FILE__ << '[' << __LINE__ << ']'
+             << "encountered an unhandled param type: " << type;
+        SCX_BOOKEND_PRINT (strm.str ());
+        std::cerr << strm.str () << std::endl;
+        rval = EXIT_FAILURE;
+        break;
+    }
+    return rval;
+}
+
+
+int
+PythonProvider::send (
+    MI_Value const& value,
+    MI_Type const type,
+    MI_Uint32 const flags)
+{
+    //SCX_BOOKEND ("PythonProvider::send (value, type, flags)");
+    int rval = EXIT_SUCCESS;
+    std::ostringstream strm;
+
+    if (MI_REFERENCE != type &&
+        MI_REFERENCEA != type)
+    {
+        if (0 == (MI_FLAG_NULL & flags))
+        {
+            rval = send<unsigned char> (type);
+            if (EXIT_SUCCESS == rval)
+            {
+                rval = send (value, type);
+            }
+        }
+        else
+        {
+            rval = send<unsigned char> (type | MI_NULL_FLAG);
+        }
+    }
+    else
+    {
+        strm << __FILE__ << '[' << __LINE__ << ']'
+             << "encountered an unhandled param type: " << type;
+        SCX_BOOKEND_PRINT (strm.str ());
+        std::cerr << strm.str () << std::endl;
+        rval = EXIT_FAILURE;
+    }
+    return rval;
+}
+
+
+int
+PythonProvider::send (
+    MI_Instance const& instance)
+{
+    //SCX_BOOKEND ("PythonProvider::send (MI_Instance)");
+    std::ostringstream strm;
+    int rval = EXIT_SUCCESS;
+    MI_Uint32 elementCount;
+    if (EXIT_SUCCESS == rval &&
+        MI_RESULT_OK != MI_Instance_GetElementCount (&instance, &elementCount))
+    {
+        SCX_BOOKEND_PRINT ("GetElementCount failed");
+        rval = EXIT_FAILURE;
+    }
+    int nArgs = 0;
+    for (MI_Uint32 n = 0;
+         EXIT_SUCCESS == rval && n < elementCount;
+         ++n)
+    {
+        MI_Char const* elementName;
+        MI_Value value;
+        MI_Type type;
+        MI_Uint32 flags;
+        if (MI_RESULT_OK == MI_Instance_GetElementAt (
+                &instance, n, &elementName, &value, &type, &flags))
+        {
+            if (!(MI_FLAG_READONLY == (MI_FLAG_READONLY & flags) &&
+                  MI_FLAG_KEY != (MI_FLAG_KEY & flags)))
+            {
+                ++nArgs;
+            }
+        }
+        else
+        {
+            SCX_BOOKEND_PRINT ("GetElementAt - failed");
+            rval = EXIT_FAILURE;
+        }
+    }
+    if (EXIT_SUCCESS == rval)
+    {
+        rval = send (nArgs);
+    }
+    for (MI_Uint32 n = 0;
+         EXIT_SUCCESS == rval && n < elementCount;
+         ++n)
+    {
+        MI_Char const* elementName;
+        MI_Value value;
+        MI_Type type;
+        MI_Uint32 flags;
+        if (MI_RESULT_OK == MI_Instance_GetElementAt (
+                &instance, n, &elementName, &value, &type, &flags))
+        {
+            if (!(MI_FLAG_READONLY == (MI_FLAG_READONLY & flags) &&
+                  MI_FLAG_KEY != (MI_FLAG_KEY & flags)))
+            {
+                send (elementName);
+                send (value, type, flags);
+            }
+        }
+        else
+        {
+            SCX_BOOKEND_PRINT ("GetElementAt - failed");
+            rval = EXIT_FAILURE;
+        }
+    }
+    return rval;
+}
+
+
+int
+PythonProvider::send (
+    MI_Instance* const pInstance)
+{
+    return send (*pInstance);
+}
+
+
+int
+PythonProvider::sendRequest (
+    unsigned char const opType,
+    MI_Instance const& instance)
+{
+    std::ostringstream strm;
+#if PRINT_BOOKENDS
+    strm << "name: \"" << m_Name << '\"';
+    SCX_BOOKEND_EX ("PythonProvider::sendRequest", strm.str ());
+#endif
+    int rval = verifySocketState ();
+    // 1: write the header
+    //     a: (unsigned char) OP_TYPE
+    //     b: (string) OP_NAME
+    //     c: (int) ARG_COUNT
+    // 2: write each ARG
+    if (EXIT_SUCCESS == rval)
+    {
+        rval = send (opType);
+    }
+    if (EXIT_SUCCESS == rval)
+    {
+        rval = send (m_Name);
+    }
+    if (EXIT_SUCCESS == rval)
+    {
+        rval = send (instance);
+    }
+    return rval;
+}
+
+
+int
 PythonProvider::recv (
     std::string* const pStrOut)
 {
@@ -344,7 +885,7 @@ PythonProvider::recv (
         if (0 != nStrLen)
         {
             ssize_t nCharsRead = 0;
-            util::unique_ptr<char[]> pBuffer (new char[nStrLen]);
+            char_array pBuffer (new char[nStrLen]);
             while (EXIT_SUCCESS == rval &&
                    nStrLen > nCharsRead)
             {
@@ -373,8 +914,6 @@ PythonProvider::recv (
                          << '\"';
                     SCX_BOOKEND_PRINT (strm.str ());
                     std::cerr << strm.str () << std::endl;
-                    strm.str ("");
-                    strm.clear ();
                 }
             }
             if (EXIT_SUCCESS == rval)
@@ -453,8 +992,8 @@ PythonProvider::recvResult (
 {
     std::ostringstream strm;
     *pResultOut = MI_FALSE;
-#if PRINT_BOOKENDS
-    strm << " name=\"" << m_Name << '\"';
+#if (PRINT_BOOKENDS)
+    strm << "name: \"" << m_Name << '\"';
     SCX_BOOKEND_EX ("PythonProvider::recvResult", strm.str ());
     strm.str ("");
     strm.clear ();
@@ -504,6 +1043,7 @@ PythonProvider::recvResult (
 
 int
 PythonProvider::recv_MI_Value (
+    MI_Context* const pContext,
     MI_Instance* const pInstanceOut)
 {
     //SCX_BOOKEND ("PythonProvider::recv_MI_Value");
@@ -511,22 +1051,23 @@ PythonProvider::recv_MI_Value (
     int rval = recv (&name);
     if (EXIT_SUCCESS == rval)
     {
+        std::ostringstream strm;
         unsigned char type;
         rval = recv (&type);
         if (EXIT_SUCCESS == rval)
         {
             if (0 == (MI_NULL_FLAG & type))
             {
-                std::ostringstream strm;
                 std::string tempStr;
-                util::unique_ptr<char[]> pArray;
+                char_array pArray;
                 util::unique_ptr<std::string[]> pStrArray;
+                util::unique_ptr<MI_InstancePtr[]> ppInstanceArray;
                 MI_Value val;
                 switch (type)
                 {
                 case MI_BOOLEAN:
                     {
-                        //SCX_BOOKEND ("recv (BOOLEAN)");
+                        //SCX_BOOKEND ("recv_MI_Value (BOOLEAN)");
                         unsigned char temp;
                         rval = recv (&temp);
                         if (EXIT_SUCCESS == rval)
@@ -575,9 +1116,23 @@ PythonProvider::recv_MI_Value (
                     rval = recv (&tempStr);
                     val.string = const_cast<MI_Char*>(tempStr.c_str ());
                     break;
+                case MI_INSTANCE:
+                    {
+                        //SCX_BOOKEND ("recv_MI_Value (MI_INSTANCE)");
+                        ppInstanceArray.reset (new MI_InstancePtr[1]);
+                        if (EXIT_SUCCESS == (rval = allocate_MI_Instance (
+                                                 pContext, pInstanceOut, name,
+                                                 &ppInstanceArray[0])) &&
+                            EXIT_SUCCESS == (rval = recv (
+                                                 ppInstanceArray[0].get ())))
+                        {
+                            val.instance = ppInstanceArray[0].get ();
+                        }
+                    }
+                    break;
                 case MI_BOOLEANA:
                     {
-                        SCX_BOOKEND ("recv (BOOLEANA)");
+                        //SCX_BOOKEND ("recv_MI_Value (BOOLEANA)");
                         int length;
                         rval = recv (&length);
                         if (EXIT_SUCCESS == rval)
@@ -657,26 +1212,29 @@ PythonProvider::recv_MI_Value (
                     break;
                 case MI_STRINGA:
                     {
-                        SCX_BOOKEND ("recv (STRINGA)");
+                        //SCX_BOOKEND ("recv_MI_Value (STRINGA)");
                         int length;
                         int rval = recv (&length);
                         if (EXIT_SUCCESS == rval)
                         {
-                            pArray.reset (
-                                new char[length * sizeof (MI_Char*)]);
-                            MI_Char** const pTemp =
-                                reinterpret_cast<MI_Char** const> (
-                                    pArray.get ());
-                            pStrArray.reset (new std::string[length]);
-                            for (int i = 0;
-                                 EXIT_SUCCESS == rval && length > i;
-                                 ++i)
+                            MI_Char** pTemp = 0;
+                            if (0 < length)
                             {
-                                rval = recv (pStrArray.get () + i);
-                                if (EXIT_SUCCESS == rval)
+                                pArray.reset (
+                                    new char[length * sizeof (MI_Char*)]);
+                                pTemp = reinterpret_cast<MI_Char** const> (
+                                        pArray.get ());
+                                pStrArray.reset (new std::string[length]);
+                                for (int i = 0;
+                                     EXIT_SUCCESS == rval && length > i;
+                                     ++i)
                                 {
-                                    pTemp[i] = const_cast<MI_Char*>(
-                                        pStrArray[i].c_str ());
+                                    rval = recv (pStrArray.get () + i);
+                                    if (EXIT_SUCCESS == rval)
+                                    {
+                                        pTemp[i] = const_cast<MI_Char*>(
+                                            pStrArray[i].c_str ());
+                                    }
                                 }
                             }
                             if (EXIT_SUCCESS == rval)
@@ -688,10 +1246,58 @@ PythonProvider::recv_MI_Value (
                         }
                     }
                     break;
-                case MI_REFERENCE:
-                case MI_INSTANCE:
-                case MI_REFERENCEA:
                 case MI_INSTANCEA:
+                    // read the size
+                    // allocate the pointer array
+                    // for each instance
+                    //     allocate an instance
+                    //     read the instance
+                    // set the array
+                    // cleanup the memory
+                    {
+                        //SCX_BOOKEND ("recv_MI_Value (INSTANCEA)");
+                        int length;
+                        int rval = recv (&length);
+                        if (EXIT_SUCCESS == rval)
+                        {
+                            MI_Instance** pTemp = 0;
+                            if (0 < length)
+                            {
+                                pArray.reset (
+                                    new char[length * sizeof (MI_Instance*)]);
+                                pTemp = reinterpret_cast<MI_Instance** const> (
+                                    pArray.get ());
+                                ppInstanceArray.reset (
+                                    new MI_InstancePtr[length]);
+                                for (int i = 0;
+                                     EXIT_SUCCESS == rval && i < length;
+                                     ++i)
+                                {
+                                    rval = allocate_MI_Instance (
+                                        pContext, pInstanceOut, name,
+                                        &ppInstanceArray[i]);
+                                    if (EXIT_SUCCESS == rval)
+                                    {
+                                        rval = recv (pContext,
+                                                     ppInstanceArray[i].get ());
+                                    }
+                                    if (EXIT_SUCCESS == rval)
+                                    {
+                                        pTemp[i] = ppInstanceArray[i].get ();
+                                    }
+                                }
+                            }
+                            if (EXIT_SUCCESS == rval)
+                            {
+                                val.instancea.data = pTemp;
+                                val.instancea.size =
+                                    static_cast<MI_Uint32> (length);
+                            }
+                        }
+                    }
+                    break;
+                case MI_REFERENCE:
+                case MI_REFERENCEA:
                     strm << __FILE__ << '[' << __LINE__ << ']'
                          << "encountered a non-standard param type: " << type;
                     SCX_BOOKEND_PRINT (strm.str ());
@@ -712,9 +1318,24 @@ PythonProvider::recv_MI_Value (
                 }
                 if (EXIT_SUCCESS == rval)
                 {
-                    if (MI_RESULT_OK == MI_Instance_SetElement (
+                    MI_Value tmpVal;
+                    MI_Type tmpType;
+                    MI_Result result = MI_Instance_GetElement (
+                        pInstanceOut, name.c_str (), &tmpVal, &tmpType, NULL,
+                        NULL);
+                    if (MI_RESULT_NO_SUCH_PROPERTY == result)
+                    {
+                        result = MI_Instance_AddElement (
                             pInstanceOut, name.c_str (), &val,
-                            static_cast<MI_Type>(type), 0))
+                            static_cast<MI_Type>(type), 0);
+                    }
+                    else
+                    {
+                        result = MI_Instance_SetElement (
+                            pInstanceOut, name.c_str (), &val,
+                            static_cast<MI_Type>(type), 0);
+                    }
+                    if (MI_RESULT_OK == result)
                     {
                         strm << "value added - name: \"" << name
                              << "\" - type: " << static_cast<int>(type);
@@ -734,10 +1355,6 @@ PythonProvider::recv_MI_Value (
                     SCX_BOOKEND_PRINT ("Failed to read value");
                 }
             }
-            else
-            {
-                SCX_BOOKEND_PRINT ("Value is NULL.");
-            }
         }
         else
         {
@@ -747,6 +1364,22 @@ PythonProvider::recv_MI_Value (
     else
     {
         SCX_BOOKEND_PRINT ("Failed to read name");
+    }
+    return rval;
+}
+
+
+int
+PythonProvider::recv (
+    MI_Context* const pContext,
+    MI_Instance* const pInstanceOut)
+{
+    SCX_BOOKEND ("PythonProvider::recv (MI_Instance)");
+    int nItems;
+    int rval = recv (&nItems);
+    for (int i = 0; EXIT_SUCCESS == rval && i < nItems; ++i)
+    {
+        rval = recv_MI_Value (pContext, pInstanceOut);
     }
     return rval;
 }

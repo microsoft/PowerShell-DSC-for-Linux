@@ -21,7 +21,6 @@ PROVIDER_PATH?=$(TOP)/Providers
 BIN_PATH:=$(PROVIDER_PATH)/bin
 
 # included makefiles for additional definitions
-include $(PROVIDER_PATH)/config.mak
 include $(OMI_PATH)/output/config.mak
 
 # test that configure has been run

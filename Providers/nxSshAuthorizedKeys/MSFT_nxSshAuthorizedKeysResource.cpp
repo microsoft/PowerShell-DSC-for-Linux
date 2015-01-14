@@ -158,7 +158,8 @@ void MI_CALL MSFT_nxSshAuthorizedKeysResource_Invoke_GetTargetResource(
     {
         MI_Instance* retInstance;
         MI_Instance_Clone (&in->InputResource.value->__instance, &retInstance);
-        result = self->get (in->InputResource.value, retInstance);
+        result = self->get (in->InputResource.value->__instance, context,
+                            retInstance);
         if (MI_RESULT_OK == result)
         {
             SCX_BOOKEND_PRINT ("packing succeeded!");
@@ -198,7 +199,7 @@ void MI_CALL MSFT_nxSshAuthorizedKeysResource_Invoke_TestTargetResource(
     if (self)
     {
         MI_Boolean testResult = MI_FALSE;
-        result = self->test (in->InputResource.value, &testResult);
+        result = self->test (in->InputResource.value->__instance, &testResult);
         if (MI_RESULT_OK == result)
         {
             MSFT_nxSshAuthorizedKeysResource_TestTargetResource out;
@@ -226,7 +227,7 @@ void MI_CALL MSFT_nxSshAuthorizedKeysResource_Invoke_SetTargetResource(
     if (self)
     {
         MI_Result setResult = MI_RESULT_FAILED;
-        result = self->set (in->InputResource.value, &setResult);
+        result = self->set (in->InputResource.value->__instance, &setResult);
         if (MI_RESULT_OK == result)
         {
             result = setResult;

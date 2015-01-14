@@ -1,19 +1,22 @@
 /* @migen@ */
-#include "python_file_resource.hpp"
-#include "python_helper.hpp"
-#include "python_scoped_context.hpp"
-#include <MI.h>
-
-
-#include <boost/python.hpp>
-#include <cstdlib>
 #include "MSFT_nxComputerResource.h"
 
 
-typedef struct _MSFT_nxComputerResource_Self : public scx::PythonFileResource
+#include "debug_tags.hpp"
+#include "MI.h"
+#include "PythonProvider.hpp"
+
+
+#include <cstdlib>
+
+
+typedef struct _MSFT_nxComputerResource_Self : public scx::PythonProvider
 {
-    /*ctor*/ _MSFT_nxComputerResource_Self (scx::PythonFileResource& base)
-      : scx::PythonFileResource (base) {}
+    /*ctor*/ _MSFT_nxComputerResource_Self ()
+        : scx::PythonProvider ("nxComputer")
+    {
+        // empty
+    }
 } MSFT_nxComputerResource_Self;
 
 
@@ -23,14 +26,26 @@ void MI_CALL MSFT_nxComputerResource_Load(
     _In_ MI_Context* context)
 {
     SCX_BOOKEND_EX ("Load", " name=\"nxComputer\"");
-    MI_UNREFERENCED_PARAMETER (selfModule);
+    MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
-    if (0 != self &&
-        EXIT_SUCCESS != scx::PythonFileResource::create (self, "nxComputer"))
+    if (0 != self)
+    {
+        if (0 == *self)
+        {
+            *self = new MSFT_nxComputerResource_Self;
+            if (EXIT_SUCCESS != (*self)->init ())
+            {
+                delete *self;
+                *self = 0;
+                res = MI_RESULT_FAILED;
+            }
+        }
+    }
+    else
     {
         res = MI_RESULT_FAILED;
     }
-    MI_Context_PostResult (context, res);
+    MI_Context_PostResult(context, res);
 }
 
 void MI_CALL MSFT_nxComputerResource_Unload(
@@ -42,7 +57,7 @@ void MI_CALL MSFT_nxComputerResource_Unload(
     {
         delete self;
     }
-    MI_Context_PostResult (context, MI_RESULT_OK);
+    MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
 void MI_CALL MSFT_nxComputerResource_EnumerateInstances(
@@ -138,106 +153,37 @@ void MI_CALL MSFT_nxComputerResource_Invoke_GetTargetResource(
     _In_opt_ const MSFT_nxComputerResource_GetTargetResource* in)
 {
     SCX_BOOKEND_EX ("Get", " name=\"nxComputer\"");
-    scx::PythonScopedContext lock (self->getThreadState ());
-    MI_Result r = MI_RESULT_OK;
-    MI_Boolean res = MI_TRUE;
-    MSFT_nxComputerResource_GetTargetResource out;
-    MI_Instance *newInstance;
-    MI_Value value;
-
-    r = MSFT_nxComputerResource_GetTargetResource_Construct (&out, context);
-    r = MSFT_nxComputerResource_GetTargetResource_Set_MIReturn (&out, 0);
-
-    const MSFT_nxComputerResource * computer = in->InputResource.value;
-    r = MI_Instance_Clone (&computer->__instance, &newInstance);
-
-    boost::python::object retVals;
-
-	std::cerr << "Invoking GET" << std::endl;
-    int exitCode = scx::invoke_python_function (
-        &retVals,
-        self->getGetFn (),
-        scx::get_mi_value (computer->Name),
-        scx::get_mi_value (computer->DNSDomainName),
-        scx::get_mi_value (computer->TimeZoneName),
-        scx::get_mi_value (computer->AlternateTimeZoneName));
-    std::cerr << "GET completed" << std::endl;
-    
-    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals) &&
-        (1 + 4) == boost::python::len (retVals))
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-         std::cerr << "Proper number of values returned" << std::endl;
-        res = MI_TRUE;
+        MI_Instance* retInstance;
+        MI_Instance_Clone (&in->InputResource.value->__instance, &retInstance);
+        result = self->get (in->InputResource.value->__instance, context,
+                            retInstance);
+        if (MI_RESULT_OK == result)
+        {
+            SCX_BOOKEND_PRINT ("packing succeeded!");
+            MSFT_nxComputerResource_GetTargetResource out;
+            MSFT_nxComputerResource_GetTargetResource_Construct (&out, context);
+            MSFT_nxComputerResource_GetTargetResource_Set_MIReturn (&out, 0);
+            MI_Value value;
+            value.instance = retInstance;
+            MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
+                                    MI_INSTANCE, 0);
+            result = MSFT_nxComputerResource_GetTargetResource_Post (&out, context);
+            if (MI_RESULT_OK != result)
+            {
+                SCX_BOOKEND_PRINT ("post Failed");
+            }
+            MSFT_nxComputerResource_GetTargetResource_Destruct (&out);
+        }
+        else
+        {
+            SCX_BOOKEND_PRINT ("get FAILED");
+        }
+        MI_Instance_Delete (retInstance);
     }
-    else
-    {
-         std::cerr << "ERROR: Improper number of values returned" << std::endl;
-        MI_Context_PostResult (context, MI_RESULT_FAILED);
-        return;
-    }
-
-    if (EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "Name", retVals[1]))
-    {
-         std::cerr << "ERROR: trying to parse string 1, NAME, on return failed" << std::endl;
-        MI_Context_PostResult (context, MI_RESULT_FAILED);
-        return;
-    }
- 
-    if (    EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "DNSDomainName", retVals[2]))
-
-    {
-         std::cerr << "ERROR: trying to parse string 2, DNSDomainName, on return failed" << std::endl;
-        MI_Context_PostResult (context, MI_RESULT_FAILED);
-        return;
-    }
-
-    if (    EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "TimeZoneName", retVals[3]))
-    {
-         std::cerr << "ERROR: trying to parse string 3, TimeZoneName, on return failed" << std::endl;
-        MI_Context_PostResult (context, MI_RESULT_FAILED);
-        return;
-    }
-
-    if (    EXIT_SUCCESS != scx::set_mi_string (
-            newInstance, "AlternateTimeZoneName", retVals[4]))
-    {
-         std::cerr << "ERROR: trying to parse string 4, AlternateTimeZoneName, on return failed" << std::endl;
-        MI_Context_PostResult (context, MI_RESULT_FAILED);
-        return;
-    }
-
-    value.instance = newInstance;
-    r = MI_Instance_SetElement (
-        &out.__instance, "OutputResource", &value, MI_INSTANCE, 0);
-    if ( r != MI_RESULT_OK )
-    {
-         std::cerr << "ERROR: SetElement failed" << std::endl;
-        MI_Context_PostResult (context, r);
-        return;
-    }
-
-    MI_Instance_Delete (newInstance);
-    r = MSFT_nxComputerResource_GetTargetResource_Post (&out, context);
-    if ( r != MI_RESULT_OK )
-    {
-         std::cerr << "ERROR: Post failed" << std::endl;
-        MI_Context_PostResult (context, r);
-        return;
-    }
-
-    r = MSFT_nxComputerResource_GetTargetResource_Destruct (&out);
-    if ( r != MI_RESULT_OK )
-    {
-         std::cerr << "ERROR: Destruct failed" << std::endl;
-        MI_Context_PostResult (context, r);
-        return;
-    }
-
-         std::cerr << "GET Posting MI_RESULT_OK" << std::endl;
-    MI_Context_PostResult (context, MI_RESULT_OK);
+    MI_Context_PostResult (context, result);
 }
 
 void MI_CALL MSFT_nxComputerResource_Invoke_TestTargetResource(
@@ -249,45 +195,23 @@ void MI_CALL MSFT_nxComputerResource_Invoke_TestTargetResource(
     _In_ const MSFT_nxComputerResource* instanceName,
     _In_opt_ const MSFT_nxComputerResource_TestTargetResource* in)
 {
-    SCX_BOOKEND_EX ("Test", " name=\"nxComputer\"");
-    if (!self)
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-        MI_Context_PostResult (context, MI_RESULT_OK);
-        return;
+        MI_Boolean testResult = MI_FALSE;
+        result = self->test (in->InputResource.value->__instance, &testResult);
+        if (MI_RESULT_OK == result)
+        {
+            MSFT_nxComputerResource_TestTargetResource out;
+            MSFT_nxComputerResource_TestTargetResource_Construct (&out, context);
+            MSFT_nxComputerResource_TestTargetResource_Set_Result (
+                &out, testResult);
+            MSFT_nxComputerResource_TestTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxComputerResource_TestTargetResource_Post (&out, context);
+            MSFT_nxComputerResource_TestTargetResource_Destruct (&out);
+        }
     }
-    scx::PythonScopedContext lock (self->getThreadState ());
-    MI_Result r = MI_RESULT_OK;
-    MI_Boolean res = MI_TRUE;
-    MSFT_nxComputerResource_TestTargetResource out;
-    const MSFT_nxComputerResource * computer = in->InputResource.value;
-
-    boost::python::object retVals;
-
-    int exitCode = scx::invoke_python_function (
-        &retVals,
-        self->getTestFn (),
-        scx::get_mi_value (computer->Name),
-        scx::get_mi_value (computer->DNSDomainName),
-        scx::get_mi_value (computer->TimeZoneName),
-        scx::get_mi_value (computer->AlternateTimeZoneName));
-
-    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals))
-    {
-        SCX_BOOKEND_PRINT ("Succeeded");
-        res = MI_TRUE;
-    }
-    else
-    {
-        SCX_BOOKEND_PRINT ("Failed - 1");
-        res = MI_FALSE;
-    }
-
-    r = MSFT_nxComputerResource_TestTargetResource_Construct (&out, context);
-    r = MSFT_nxComputerResource_TestTargetResource_Set_Result (&out, res);
-    r = MSFT_nxComputerResource_TestTargetResource_Set_MIReturn (&out, 0);
-    r = MSFT_nxComputerResource_TestTargetResource_Post (&out, context);
-    r = MSFT_nxComputerResource_TestTargetResource_Destruct (&out);
-    MI_Context_PostResult (context, MI_RESULT_OK);
+    MI_Context_PostResult (context, result);
 }
 
 void MI_CALL MSFT_nxComputerResource_Invoke_SetTargetResource(
@@ -299,41 +223,21 @@ void MI_CALL MSFT_nxComputerResource_Invoke_SetTargetResource(
     _In_ const MSFT_nxComputerResource* instanceName,
     _In_opt_ const MSFT_nxComputerResource_SetTargetResource* in)
 {
-    SCX_BOOKEND_EX ("Set", " name=\"nxComputer\"");
-    if (!self)
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-        MI_Context_PostResult (context, MI_RESULT_OK);
-        return;
+        MI_Result setResult = MI_RESULT_FAILED;
+        result = self->set (in->InputResource.value->__instance, &setResult);
+        if (MI_RESULT_OK == result)
+        {
+            result = setResult;
+            MSFT_nxComputerResource_SetTargetResource out;
+            MSFT_nxComputerResource_SetTargetResource_Construct (&out, context);
+            MSFT_nxComputerResource_SetTargetResource_Set_MIReturn (
+                &out, setResult);
+            MSFT_nxComputerResource_SetTargetResource_Post (&out, context);
+            MSFT_nxComputerResource_SetTargetResource_Destruct (&out);
+        }
     }
-    scx::PythonScopedContext lock (self->getThreadState ());
-    MI_Result r = MI_RESULT_OK;
-    MSFT_nxComputerResource_SetTargetResource out;
-    const MSFT_nxComputerResource * computer = in->InputResource.value;
-    MI_Result res = MI_RESULT_OK;
-
-    boost::python::object retVals;
-    int exitCode = scx::invoke_python_function (
-        &retVals,
-        self->getSetFn (),
-        scx::get_mi_value (computer->Name),
-        scx::get_mi_value (computer->DNSDomainName),
-        scx::get_mi_value (computer->TimeZoneName),
-        scx::get_mi_value (computer->AlternateTimeZoneName));
-
-    if (EXIT_SUCCESS == scx::did_function_succeed (exitCode, retVals))
-    {
-        res = MI_RESULT_OK;
-    }
-    else
-    {
-        SCX_BOOKEND_PRINT ("Failed - 1");
-        res = MI_RESULT_FAILED;
-    }
-
-    r = MSFT_nxComputerResource_SetTargetResource_Construct (&out, context);
-    r = MSFT_nxComputerResource_SetTargetResource_Set_MIReturn (&out, res);
-    r = MSFT_nxComputerResource_SetTargetResource_Post (&out, context);
-    r = MSFT_nxComputerResource_SetTargetResource_Destruct (&out);
-    MI_Context_PostResult (context, res);
+    MI_Context_PostResult (context, result);
 }
-

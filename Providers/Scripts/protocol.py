@@ -19,7 +19,7 @@ MI_CHAR16 = 11
 MI_DATETIME = 12
 MI_STRING = 13
 #MI_REFERENCE = 14
-#MI_INSTANCE = 15
+MI_INSTANCE = 15
 MI_BOOLEANA = 16
 MI_UINT8A = 17
 MI_SINT8A = 18
@@ -35,7 +35,7 @@ MI_CHAR16A = 27
 MI_DATETIMEA = 28
 MI_STRINGA = 29
 #MI_REFERENCEA = 30
-#MI_INSTANCEA = 31
+MI_INSTANCEA = 31
 
 MI_NULL_FLAG = 64
 
@@ -52,6 +52,81 @@ def verbose_trace (text):
     if DO_VERBOSE_TRACE:
         trace (text)
 
+def read_string (fd):
+    verbose_trace ('<read_string>')
+    buf = fd.recv (4)
+    strl = struct.unpack ('@i', buf)[0]
+    verbose_trace ('  len: ' + str (strl))
+    text = ''
+    if 0 < strl:
+        buf = fd.recv (strl)
+        text = buf.decode ('utf8')
+    verbose_trace ('  str: "' + text + '"')
+    verbose_trace ('</read_string>')
+    return text
+
+def read_arg_name (fd):
+    verbose_trace ('<read_argname>')
+    name = read_string (fd)
+    if sys.version < '2.6':
+        arg_name = name.encode ('ascii', 'ignore')
+    else:
+        arg_name = name
+    verbose_trace ('  arg_name: "' + arg_name + '"')
+    verbose_trace ('</read_argname>')
+    return arg_name
+    
+def read_values (fd):
+    verbose_trace ('<read_values>')
+    d = dict ()
+    buf = fd.recv (4)
+    argc = struct.unpack ('@i', buf)[0]
+    verbose_trace ('  argc: ' + str (argc))
+    for i in range (argc):
+        arg_name = read_arg_name (fd)
+        arg_val = MI_Value.read (fd)
+        d[arg_name] = arg_val
+    verbose_trace ('</read_values>')
+    return d
+
+def write_string (fd, st):
+    verbose_trace ('<write_string>')
+    verbose_trace ('  st: "'+ st + '"')
+    verbose_trace (st)
+    buf = struct.pack('@i', len (st))
+    if type(buf) != str:
+        buf += bytes (st,'utf8')
+    else:
+        buf += st
+    fd.send (buf)
+    verbose_trace ('</write_string>')
+
+def write_values (fd, d):
+    trace ('<write_values>')
+    buf = struct.pack ('@i', len (d))
+    fd.send (buf)
+    verbose_trace ('  len: ' + str(len (d)))
+    if sys.version > '2.9':
+        for key, value in d.items ():
+            verbose_trace ('  key: ' + key)
+            if not hasattr (value, 'value'):
+                sys.stderr.write ('\n  key: ' + key + ' is not mi_value\n' )
+            verbose_trace ('  value: '+ str (value.value))
+            if value.value is not None:
+                write_string (fd, key)
+                value.write (fd)
+    else:
+        for key, value in d.iteritems ():
+            trace ('  key: '+ key)
+            verbose_trace ('  value: '+ str (value.value))
+            if value is not None:
+                verbose_trace ('  writing value')
+                write_string (fd, key)
+                value.write (fd)
+            else:
+                verbose_trace ('  not writing value')
+    trace ('</write_values>')
+
 
 class file_desc:
     def sendall (self, buf):
@@ -66,23 +141,22 @@ class MI_Value:
         self.type = type
 
     def write (self, fd):
-        trace ('  <MI_Value::write>')
+        verbose_trace ('  <MI_Value::write>')
         val = self.type
         if self.value is None:
             val = val | MI_NULL_FLAG
-        trace ('    type: ' + str(self.type) +  ' ' + repr(self.value) )
+        verbose_trace ('    type: ' + str(self.type) +  ' ' + repr(self.value) )
         buf = struct.pack ('@B', val)
         fd.sendall (buf)
-        trace ('  </MI_Value::write>')
+        verbose_trace ('  </MI_Value::write>')
 
     @staticmethod
     def read (fd):
-        trace ('<MI_Value::read>')
+        verbose_trace ('<MI_Value::read>')
         buf = fd.recv (1)
         type = struct.unpack ('@B', buf)[0]
         switch = type & ~(MI_NULL_FLAG)
-        
-        trace ('  type: ' + str(switch) )
+        verbose_trace ('  type: ' + str(switch) )
         val = None
         if MI_BOOLEAN == switch:
             val = MI_Boolean.read (fd, type)
@@ -112,6 +186,8 @@ class MI_Value:
             val = MI_Datetime.read (fd, type)
         elif MI_STRING == switch:
             val = MI_String.read (fd, type)
+        elif MI_INSTANCE == switch:
+            val = MI_Instance.read (fd, type)
         elif MI_BOOLEANA == switch:
             val = MI_BooleanA.read (fd, type)
         elif MI_UINT8A == switch:
@@ -140,9 +216,11 @@ class MI_Value:
             val = MI_DatetimeA.read (fd, type)
         elif MI_STRINGA == switch:
             val = MI_StringA.read (fd, type)
+        elif MI_INSTANCEA == switch:
+            val = MI_InstanceA.read (fd, type)
         else:
             trace ('Received unexpected type: ' + str(type))
-        trace ('</MI_Value::read>')
+        verbose_trace ('</MI_Value::read>')
         return val
 
 
@@ -193,23 +271,23 @@ class MI_Uint8 (MI_Value):
             self.value = ctypes.c_ubyte (val)
 
     def write (self, fd):
-        trace ('<MI_Uint8.write>')
+        verbose_trace ('<MI_Uint8.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@B', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Uint8.write>')
+        verbose_trace ('</MI_Uint8.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Uint8.read>')
+        verbose_trace ('<MI_Uint8.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (1)
             val = struct.unpack ('@B', buf)[0]
         rval = MI_Uint8 (val)
-        trace ('</MI_Uint8.read>')
+        verbose_trace ('</MI_Uint8.read>')
         return rval
 
 
@@ -220,23 +298,23 @@ class MI_Sint8 (MI_Value):
             self.value = ctypes.c_byte (val)
 
     def write (self, fd):
-        trace ('<MI_Sint8.write>')
+        verbose_trace ('<MI_Sint8.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@b', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Sint8.write>')
+        verbose_trace ('</MI_Sint8.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Sint8.read>')
+        verbose_trace ('<MI_Sint8.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (1)
             val = struct.unpack ('@b', buf)[0]
         rval = MI_Sint8 (val)
-        trace ('</MI_Sint8.read>')
+        verbose_trace ('</MI_Sint8.read>')
         return rval
 
 
@@ -247,23 +325,23 @@ class MI_Uint16 (MI_Value):
             self.value = ctypes.c_ushort (val)
 
     def write (self, fd):
-        trace ('<MI_Uint16.write>')
+        verbose_trace ('<MI_Uint16.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@H', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Uint16.write>')
+        verbose_trace ('</MI_Uint16.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Uint16.read>')
+        verbose_trace ('<MI_Uint16.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (2)
             val = struct.unpack ('@H', buf)[0]
         rval = MI_Uint16 (val)
-        trace ('</MI_Uint16.read>')
+        verbose_trace ('</MI_Uint16.read>')
         return rval
 
 
@@ -274,23 +352,23 @@ class MI_Sint16 (MI_Value):
             self.value = ctypes.c_short (val)
 
     def write (self, fd):
-        trace ('<MI_Sint16.write>')
+        verbose_trace ('<MI_Sint16.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@h', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Sint16.write>')
+        verbose_trace ('</MI_Sint16.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Sint16.read>')
+        verbose_trace ('<MI_Sint16.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (2)
             val = struct.unpack ('@h', buf)[0]
         rval = MI_Sint16 (val)
-        trace ('</MI_Sint16.read>')
+        verbose_trace ('</MI_Sint16.read>')
         return rval
 
 
@@ -301,23 +379,23 @@ class MI_Uint32 (MI_Value):
             self.value = ctypes.c_uint (val)
 
     def write (self, fd):
-        trace ('<MI_Uint32.write>')
+        verbose_trace ('<MI_Uint32.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@I', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Uint32.write>')
+        verbose_trace ('</MI_Uint32.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Uint32.read>')
+        verbose_trace ('<MI_Uint32.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (4)
             val = struct.unpack ('@I', buf)[0]
         rval = MI_Uint32 (val)
-        trace ('</MI_Uint32.read>')
+        verbose_trace ('</MI_Uint32.read>')
         return rval
 
 
@@ -328,23 +406,23 @@ class MI_Sint32 (MI_Value):
             self.value = ctypes.c_int (val)
 
     def write (self, fd):
-        trace ('<MI_Sint32.write>')
+        verbose_trace ('<MI_Sint32.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@i', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Sint32.write>')
+        verbose_trace ('</MI_Sint32.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Sint32.read>')
+        verbose_trace ('<MI_Sint32.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (4)
             val = struct.unpack ('@i', buf)[0]
         rval = MI_Sint32 (val)
-        trace ('</MI_Sint32.read>')
+        verbose_trace ('</MI_Sint32.read>')
         return rval
 
 
@@ -355,23 +433,23 @@ class MI_Uint64 (MI_Value):
             self.value = ctypes.c_ulonglong (val)
 
     def write (self, fd):
-        trace ('<MI_Uint64.write>')
+        verbose_trace ('<MI_Uint64.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@Q', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Uint64.write>')
+        verbose_trace ('</MI_Uint64.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Uint64.read>')
+        verbose_trace ('<MI_Uint64.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (8)
             val = struct.unpack ('@Q', buf)[0]
         rval = MI_Uint64 (val)
-        trace ('</MI_Uint64.read>')
+        verbose_trace ('</MI_Uint64.read>')
         return rval
 
 
@@ -382,23 +460,23 @@ class MI_Sint64 (MI_Value):
             self.value = ctypes.c_longlong (val)
 
     def write (self, fd):
-        trace ('<MI_Sint64.write>')
+        verbose_trace ('<MI_Sint64.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@q', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Sint64.write>')
+        verbose_trace ('</MI_Sint64.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Sint64.read>')
+        verbose_trace ('<MI_Sint64.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (8)
             val = struct.unpack ('@q', buf)[0]
         rval = MI_Sint64 (val)
-        trace ('</MI_Sint64.read>')
+        verbose_trace ('</MI_Sint64.read>')
         return rval
 
 
@@ -409,23 +487,23 @@ class MI_Real32 (MI_Value):
             self.value = ctypes.c_float (val)
 
     def write (self, fd):
-        trace ('<MI_Real32.write>')
+        verbose_trace ('<MI_Real32.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@f', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Real32.write>')
+        verbose_trace ('</MI_Real32.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Real32.read>')
+        verbose_trace ('<MI_Real32.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (8)
             val = struct.unpack ('@f', buf)[0]
         rval = MI_Real32 (val)
-        trace ('</MI_Real32.read>')
+        verbose_trace ('</MI_Real32.read>')
         return rval
 
 
@@ -436,23 +514,23 @@ class MI_Real64 (MI_Value):
             self.value = ctypes.c_double (val)
 
     def write (self, fd):
-        trace ('<MI_Real64.write>')
+        verbose_trace ('<MI_Real64.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@d', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Real64.write>')
+        verbose_trace ('</MI_Real64.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Real64.read>')
+        verbose_trace ('<MI_Real64.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (8)
             val = struct.unpack ('@d', buf)[0]
         rval = MI_Real64 (val)
-        trace ('</MI_Real64.read>')
+        verbose_trace ('</MI_Real64.read>')
         return rval
 
 
@@ -463,23 +541,23 @@ class MI_Char16 (MI_Value):
             self.value = ctypes.c_ushort (val)
 
     def write (self, fd):
-        trace ('<MI_Char16.write>')
+        verbose_trace ('<MI_Char16.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            trace ('  value: ' + str(self.value.value))
+            verbose_trace ('  value: ' + str(self.value.value))
             buf = struct.pack ('@H', self.value.value)
             fd.sendall (buf)
-        trace ('</MI_Char16.write>')
+        verbose_trace ('</MI_Char16.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Char16.read>')
+        verbose_trace ('<MI_Char16.read>')
         val = None
         if 0 == (MI_NULL_FLAG & flags):
             buf = fd.recv (2)
             val = struct.unpack ('@H', buf)[0]
         rval = MI_Char16 (val)
-        trace ('</MI_Char16.read>')
+        verbose_trace ('</MI_Char16.read>')
         return rval
 
 
@@ -492,22 +570,22 @@ class MI_Datetime (MI_Value):
             self.value = ctypes.c_int (isTimestamp)
 
     def write (self, fd):
-        trace ('  <MI_Datetime.write>')
+        verbose_trace ('  <MI_Datetime.write>')
         MI_Value.write (self, fd)
-        trace ('  </MI_Datetime.write>')
+        verbose_trace ('  </MI_Datetime.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Datetime.read>')
+        verbose_trace ('<MI_Datetime.read>')
         rval = None
         if 0 == (MI_NULL_FLAG & flags):
             rval = MI_Datetime.read_data (fd)
-        trace ('</MI_Datetime.read>')
+        verbose_trace ('</MI_Datetime.read>')
         return rval
 
     @staticmethod
     def read_data (fd):
-        trace ('  <MI_Datetime.read_data>')
+        verbose_trace ('  <MI_Datetime.read_data>')
         rval = None
         buf = fd.recv (1)
         isTimestamp=None
@@ -519,7 +597,7 @@ class MI_Datetime (MI_Value):
             rval = MI_Timestamp.read_data (fd)
         else:
             rval = MI_Interval.read_data (fd)
-        trace ('  </MI_Datetime.read_data>')
+        verbose_trace ('  </MI_Datetime.read_data>')
         return rval
 
 
@@ -586,23 +664,23 @@ class MI_Timestamp (MI_Datetime):
         self.utc = ctypes.c_int(int(t))
 
     def write (self, fd):
-        trace ('<MI_Timestamp.write>')
+        verbose_trace ('<MI_Timestamp.write>')
         MI_Datetime.write (self, fd)
         if self.value is not None:
             self.write_data (fd)
-        trace ('</MI_Timestamp.write>')
+        verbose_trace ('</MI_Timestamp.write>')
 
     def write_data (self, fd):
-        trace ('  <MI_Timestamp.write_data>')
-        trace ('    isTimestamp:' + str (self.value.value))
-        trace ('    year:' + str (self.year.value))
-        trace ('    month:' + str (self.month.value))
-        trace ('    day:' + str (self.day.value))
-        trace ('    hour:' + str (self.hour.value))
-        trace ('    minute:' + str (self.minute.value))
-        trace ('    second:' + str (self.second.value))
-        trace ('    microseconds:' + str (self.microseconds.value))
-        trace ('    utc:' + str (self.utc.value))
+        verbose_trace ('  <MI_Timestamp.write_data>')
+        verbose_trace ('    isTimestamp:' + str (self.value.value))
+        verbose_trace ('    year:' + str (self.year.value))
+        verbose_trace ('    month:' + str (self.month.value))
+        verbose_trace ('    day:' + str (self.day.value))
+        verbose_trace ('    hour:' + str (self.hour.value))
+        verbose_trace ('    minute:' + str (self.minute.value))
+        verbose_trace ('    second:' + str (self.second.value))
+        verbose_trace ('    microseconds:' + str (self.microseconds.value))
+        verbose_trace ('    utc:' + str (self.utc.value))
         buf = struct.pack ('@B', self.value.value)
         buf += struct.pack ('@I', self.year.value)
         buf += struct.pack ('@I', self.month.value)
@@ -613,11 +691,11 @@ class MI_Timestamp (MI_Datetime):
         buf += struct.pack ('@I', self.microseconds.value)
         buf += struct.pack ('@i', self.utc.value)
         fd.sendall (buf)
-        trace ('  </MI_Timestamp.write_data>')
+        verbose_trace ('  </MI_Timestamp.write_data>')
 
     @staticmethod
     def read_data (fd):
-        trace ('    <MI_Timestamp.read_data>')
+        verbose_trace ('    <MI_Timestamp.read_data>')
         buf = fd.recv (4)
         year = struct.unpack ('@I', buf)[0]
         buf = fd.recv (4)
@@ -637,25 +715,25 @@ class MI_Timestamp (MI_Datetime):
         buf = fd.recv (4)
         rval = MI_Timestamp (year, month, day, hour, minute, second,
                              microseconds, utc)
-        trace ('      isTimestamp: True')
-        trace ('      year:' + str (year))
-        trace ('      month:' + str (month))
-        trace ('      day:' + str (day))
-        trace ('      hour:' + str (hour))
-        trace ('      minute:' + str (minute))
-        trace ('      second:' + str (second))
-        trace ('      microseconds:' + str (microseconds))
-        trace ('      utc:' + str (utc))
-        trace ('    </MI_Timestamp.read_data>')
+        verbose_trace ('      isTimestamp: True')
+        verbose_trace ('      year:' + str (year))
+        verbose_trace ('      month:' + str (month))
+        verbose_trace ('      day:' + str (day))
+        verbose_trace ('      hour:' + str (hour))
+        verbose_trace ('      minute:' + str (minute))
+        verbose_trace ('      second:' + str (second))
+        verbose_trace ('      microseconds:' + str (microseconds))
+        verbose_trace ('      utc:' + str (utc))
+        verbose_trace ('    </MI_Timestamp.read_data>')
         return rval
 
     @staticmethod
     def from_time (seconds):
-        trace ('<MI_Timestamp.from_time>')
+        verbose_trace ('<MI_Timestamp.from_time>')
         tm = time.gmtime (seconds)
         ts = MI_Timestamp (tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour,
                            tm.tm_min, tm.tm_sec, 0, time.timezone / 60)
-        trace ('</MI_Timestamp.from_time>')
+        verbose_trace ('</MI_Timestamp.from_time>')
         return ts
 
 
@@ -701,20 +779,20 @@ class MI_Interval (MI_Datetime):
         self.microseconds = ctypes.c_uint32 (t)
 
     def write (self, fd):
-        trace ('<MI_Interval.write>')
+        verbose_trace ('<MI_Interval.write>')
         MI_Datetime.write (self, fd)
         if self.value is not None:
             self.write_data (fd)
-        trace ('</MI_Interval.write>')
+        verbose_trace ('</MI_Interval.write>')
 
     def write_data (self, fd):
-        trace ('  <MI_Interval.write_data>')
-        trace ('    isTimestamp:' + str (self.value.value))
-        trace ('    days:' + str (self.days.value))
-        trace ('    hours:' + str (self.hours.value))
-        trace ('    minutes:' + str (self.minutes.value))
-        trace ('    seconds:' + str (self.seconds.value))
-        trace ('    microseconds:' + str (self.microseconds.value))
+        verbose_trace ('  <MI_Interval.write_data>')
+        verbose_trace ('    isTimestamp:' + str (self.value.value))
+        verbose_trace ('    days:' + str (self.days.value))
+        verbose_trace ('    hours:' + str (self.hours.value))
+        verbose_trace ('    minutes:' + str (self.minutes.value))
+        verbose_trace ('    seconds:' + str (self.seconds.value))
+        verbose_trace ('    microseconds:' + str (self.microseconds.value))
         buf = struct.pack ('@B', self.value.value)
         buf += struct.pack ('@I', self.days.value)
         buf += struct.pack ('@I', self.hours.value)
@@ -722,11 +800,11 @@ class MI_Interval (MI_Datetime):
         buf += struct.pack ('@I', self.seconds.value)
         buf += struct.pack ('@I', self.microseconds.value)
         fd.sendall (buf)
-        trace ('  </MI_Interval.write>')
+        verbose_trace ('  </MI_Interval.write>')
 
     @staticmethod
     def read_data (fd):
-        trace ('    <MI_Interval.read_data>')
+        verbose_trace ('    <MI_Interval.read_data>')
         buf = fd.recv (4)
         days = struct.unpack ('@I', buf)[0]
         buf = fd.recv (4)
@@ -739,13 +817,13 @@ class MI_Interval (MI_Datetime):
         microseconds = struct.unpack ('@I', buf)[0]
         buf = fd.recv (4)
         rval = MI_Timestamp (days, hours, minutes, seconds, microseconds)
-        trace ('      isTimestamp: False')
-        trace ('      days:' + str (days))
-        trace ('      hours:' + str (hours))
-        trace ('      minutes:' + str (minutes))
-        trace ('      seconds:' + str (seconds))
-        trace ('      microseconds:' + str (microseconds))
-        trace ('    </MI_Interval.read_data>')
+        verbose_trace ('      isTimestamp: False')
+        verbose_trace ('      days:' + str (days))
+        verbose_trace ('      hours:' + str (hours))
+        verbose_trace ('      minutes:' + str (minutes))
+        verbose_trace ('      seconds:' + str (seconds))
+        verbose_trace ('      microseconds:' + str (microseconds))
+        verbose_trace ('    </MI_Interval.read_data>')
         return rval
 
 
@@ -761,9 +839,10 @@ class MI_String (MI_Value):
         verbose_trace ('<MI_String.write>')
         MI_Value.write (self, fd)
         if self.value is not None:
-            verbose_trace ('  len: ' + str(len (self.value)) + ', value: ' + self.value)
+            verbose_trace ('  len: ' + str(len (self.value)) + ', value: ' +
+                           self.value)
             buf = struct.pack ('@i', len (self.value))
-            if type(buf) != str:
+            if type (buf) != str:
                 buf += bytes (self.value, 'utf8')
             else:
                 buf += self.value
@@ -775,14 +854,33 @@ class MI_String (MI_Value):
         verbose_trace ('<MI_String.read>')
         strg = None
         if 0 == (MI_NULL_FLAG & flags):
-            buf = fd.recv (4)
-            len = struct.unpack ('@i', buf)[0]
-            if len > 0:
-                buf = fd.recv (len)
-                strg = buf.decode ('utf8')
-            verbose_trace ('  len: ' + str(len) + ', value: ' + str(strg))
+            strg = read_string (fd)
         rval = MI_String (strg)
         verbose_trace ('</MI_String.read>')
+        return rval
+
+
+class MI_Instance (MI_Value):
+    def __init__ (self, val):
+        MI_Value.__init__ (self, MI_INSTANCE)
+        if val is not None :
+            self.value = dict (val)
+                
+    def write (self, fd):
+        verbose_trace ('<MI_Instance.write>')
+        MI_Value.write (self, fd)
+        if self.value is not None:
+            write_values (fd, self.value)
+        verbose_trace ('</MI_Instance.write>')
+
+    @staticmethod
+    def read (fd, flags):
+        verbose_trace ('<MI_Instance.read>')
+        d = none
+        if 0 == (MI_NULL_FLAG & flags):
+            d = read_values ()
+        rval = MI_Instance (d)
+        verbose_trace ('</MI_Instance.read>')
         return rval
 
 
@@ -798,43 +896,43 @@ class MI_BooleanA (MI_Value):
                     self.value.append (ctypes.c_int (val))
 
     def write (self, fd):
-        trace ('<MI_BooleanA.write>')
+        verbose_trace ('<MI_BooleanA.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str (val.value))
                 if self.value.value : 
                     tmp=1 
                 else:
                     tmp=0
                 buf = struct.pack ('@B',tmp)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str (self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_BooleanA.write>')
+        verbose_trace ('</MI_BooleanA.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_BooleanA.read>')
+        verbose_trace ('<MI_BooleanA.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (1)
                 val = struct.unpack ('@B', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_BooleanA (vals)
-        trace ('</MI_BooleanA.read>')
+        verbose_trace ('</MI_BooleanA.read>')
         return rval
 
 
@@ -847,39 +945,39 @@ class MI_Uint8A (MI_Value):
                 self.value.append (ctypes.c_ubyte (val))
 
     def write (self, fd):
-        trace ('<MI_Uint8A.write>')
+        verbose_trace ('<MI_Uint8A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@B', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Uint8A.write>')
+        verbose_trace ('</MI_Uint8A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_UintA.read>')
+        verbose_trace ('<MI_UintA.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (1)
                 val = struct.unpack ('@B', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Uint8A (vals)
-        trace ('</MI_Uint8A.read>')
+        verbose_trace ('</MI_Uint8A.read>')
         return rval
 
 
@@ -892,84 +990,89 @@ class MI_Sint8A (MI_Value):
                 self.value.append (ctypes.c_byte (val))
 
     def write (self, fd):
-        trace ('<MI_Sint8A.write>')
+        verbose_trace ('<MI_Sint8A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@b', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Sint8A.write>')
+        verbose_trace ('</MI_Sint8A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_SintA.read>')
+        verbose_trace ('<MI_SintA.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (1)
                 val = struct.unpack ('@b', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Sint8A (vals)
-        trace ('</MI_Sint8A.read>')
+        verbose_trace ('</MI_Sint8A.read>')
         return rval
 
 
 class MI_Uint16A (MI_Value):
     def __init__ (self, vals):
+        verbose_trace ('<MI_Uint16A>')
         MI_Value.__init__ (self, MI_UINT16A)
         self.value = []
         if vals is not None:
             for val in vals:
-                self.value.append (ctypes.c_ushort (val))
+                if type (val) is ctypes.c_ushort:
+                    self.value.append (val)
+                else:
+                    self.value.append (ctypes.c_ushort (val))
+        verbose_trace ('</MI_Uint16A>')
 
     def write (self, fd):
-        trace ('<MI_Uint16A.write>')
+        verbose_trace ('<MI_Uint16A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('  <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('    value: ' + str(val.value))
                 buf = struct.pack ('@H', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Uint16A.write>')
+        verbose_trace ('</MI_Uint16A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Uint16A.read>')
+        verbose_trace ('<MI_Uint16A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (2)
                 val = struct.unpack ('@H', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Uint16A (vals)
-        trace ('</MI_Uint16A.read>')
+        verbose_trace ('</MI_Uint16A.read>')
         return rval
 
 
@@ -982,39 +1085,39 @@ class MI_Sint16A (MI_Value):
                 self.value.append (ctypes.c_short (val))
 
     def write (self, fd):
-        trace ('<MI_Sint16A.write>')
+        verbose_trace ('<MI_Sint16A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@h', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Sint16A.write>')
+        verbose_trace ('</MI_Sint16A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Sint16A.read>')
+        verbose_trace ('<MI_Sint16A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (2)
                 val = struct.unpack ('@h', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Sint16A (vals)
-        trace ('</MI_Sint16A.read>')
+        verbose_trace ('</MI_Sint16A.read>')
         return rval
 
 
@@ -1027,39 +1130,39 @@ class MI_Uint32A (MI_Value):
                 self.value.append (ctypes.c_uint (val))
 
     def write (self, fd):
-        trace ('<MI_Uint32A.write>')
+        verbose_trace ('<MI_Uint32A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@I', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Uint32A.write>')
+        verbose_trace ('</MI_Uint32A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Uint32A.read>')
+        verbose_trace ('<MI_Uint32A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (4)
                 val = struct.unpack ('@I', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Uint32A (vals)
-        trace ('</MI_Uint32A.read>')
+        verbose_trace ('</MI_Uint32A.read>')
         return rval
 
 
@@ -1072,39 +1175,39 @@ class MI_Sint32A (MI_Value):
                 self.value.append (ctypes.c_int (val))
 
     def write (self, fd):
-        trace ('<MI_Sint32A.write>')
+        verbose_trace ('<MI_Sint32A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('    len:' + str (len (self.value)))
+            verbose_trace ('    len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@i', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Sint32A.write>')
+        verbose_trace ('</MI_Sint32A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Sint32A.read>')
+        verbose_trace ('<MI_Sint32A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (4)
                 val = struct.unpack ('@i', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Sint32A (vals)
-        trace ('</MI_Sint32A.read>')
+        verbose_trace ('</MI_Sint32A.read>')
         return rval
 
 
@@ -1117,39 +1220,39 @@ class MI_Uint64A (MI_Value):
                 self.value.append (ctypes.c_ulonglong (val))
 
     def write (self, fd):
-        trace ('<MI_Uint64A.write>')
+        verbose_trace ('<MI_Uint64A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@Q', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Uint64A.write>')
+        verbose_trace ('</MI_Uint64A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Uint64A.read>')
+        verbose_trace ('<MI_Uint64A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (8)
                 val = struct.unpack ('@Q', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Uint64A (vals)
-        trace ('</MI_Uint64A.read>')
+        verbose_trace ('</MI_Uint64A.read>')
         return rval
 
 
@@ -1162,39 +1265,39 @@ class MI_Sint64A (MI_Value):
                 self.value.append (ctypes.c_longlong (val))
 
     def write (self, fd):
-        trace ('<MI_Sint64A.write>')
+        verbose_trace ('<MI_Sint64A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@q', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Sint64A.write>')
+        verbose_trace ('</MI_Sint64A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Sint64A.read>')
+        verbose_trace ('<MI_Sint64A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (8)
                 val = struct.unpack ('@q', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Sint64A (vals)
-        trace ('</MI_Sint64A.read>')
+        verbose_trace ('</MI_Sint64A.read>')
         return rval
 
 
@@ -1207,39 +1310,39 @@ class MI_Real32A (MI_Value):
                 self.value.append (ctypes.c_float (val))
 
     def write (self, fd):
-        trace ('<MI_Real32A.write>')
+        verbose_trace ('<MI_Real32A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@f', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Real32A.write>')
+        verbose_trace ('</MI_Real32A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Real32A.read>')
+        verbose_trace ('<MI_Real32A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (4)
                 val = struct.unpack ('@f', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Real32A (vals)
-        trace ('</MI_Real32A.read>')
+        verbose_trace ('</MI_Real32A.read>')
         return rval
 
 
@@ -1252,39 +1355,39 @@ class MI_Real64A (MI_Value):
                 self.value.append (ctypes.c_double (val))
 
     def write (self, fd):
-        trace ('<MI_Real64A.write>')
+        verbose_trace ('<MI_Real64A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('    <values>')
+            verbose_trace ('    <values>')
             for val in self.value:
-                trace ('      value: ' + str(val.value))
+                verbose_trace ('      value: ' + str(val.value))
                 buf = struct.pack ('@d', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Real64A.write>')
+        verbose_trace ('</MI_Real64A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Real64A.read>')
+        verbose_trace ('<MI_Real64A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (8)
                 val = struct.unpack ('@d', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Real64A (vals)
-        trace ('</MI_Real64A.read>')
+        verbose_trace ('</MI_Real64A.read>')
         return rval
 
 
@@ -1297,39 +1400,39 @@ class MI_Char16A (MI_Value):
                 self.value.append (ctypes.c_ushort (val))
 
     def write (self, fd):
-        trace ('<MI_Char16A.write>')
+        verbose_trace ('<MI_Char16A.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('  <values>')
+            verbose_trace ('  <values>')
             for val in self.value:
-                trace ('    value: ' + str(val.value))
+                verbose_trace ('    value: ' + str(val.value))
                 buf = struct.pack ('@H', val.value)
                 fd.sendall (buf)
-            trace ('  </values>')
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG))
-        trace ('</MI_Char16A.write>')
+        verbose_trace ('</MI_Char16A.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_Char16A.read>')
+        verbose_trace ('<MI_Char16A.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 buf = fd.recv (2)
                 val = struct.unpack ('@H', buf)[0]
-                trace ('  value: ' + str(val))
+                verbose_trace ('  value: ' + str(val))
                 vals.append (val)
         rval = MI_Char16A (vals)
-        trace ('</MI_Char16A.read>')
+        verbose_trace ('</MI_Char16A.read>')
         return rval
 
 
@@ -1341,29 +1444,29 @@ class MI_DatetimeA (MI_Value):
             self.values.append (val)
 
     def write (self, fd):
-        trace ('<MI_DatetimeA.write>')
+        verbose_trace ('<MI_DatetimeA.write>')
         MI_Value.write (self, fd)
-        trace ('  len:' + str (len (self.values)))
+        verbose_trace ('  len:' + str (len (self.values)))
         buf = struct.pack ('@i', len (self.values))
         fd.sendall (buf)
         for val in self.values:
             val.write_data (fd)
-        trace ('</MI_Datetime.write>')
+        verbose_trace ('</MI_DatetimeA.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_DatetimeA.read>')
+        verbose_trace ('<MI_DatetimeA.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
                 val = MI_Datetime.read_data (fd)
                 vals.append (val)
         rval = MI_DatetimeA (vals)
-        trace ('</MI_DatetimeA.read>')
+        verbose_trace ('</MI_DatetimeA.read>')
         return rval
 
 
@@ -1376,45 +1479,78 @@ class MI_StringA (MI_Value):
                 self.value.append (str (val))
 
     def write (self, fd):
-        trace ('<MI_StringA.write>')
+        verbose_trace ('<MI_StringA.write>')
         if self.value is not None and 0 < len (self.value):
             MI_Value.write (self, fd)
-            trace ('  len:' + str (len (self.value)))
+            verbose_trace ('  len:' + str (len (self.value)))
             buf = struct.pack ('@i', len (self.value))
             fd.sendall (buf)
-            trace ('  <values>')
+            verbose_trace ('  <values>')
             for val in self.value:
-                trace('  len: ' + str(len (val)) + ', value: ' + str(val))
-                buf = struct.pack ('@i', len (val))
-                if type (buf) != str:
-                    buf += bytes (val, 'utf8')
-                else:
-                    buf += val
-                fd.sendall (buf)
-            trace ('  </values>')
+                write_string (fd, val)
+            verbose_trace ('  </values>')
         else:
-            trace ('    type: ' + str(self.type))
+            verbose_trace ('    type: ' + str(self.type))
             fd.sendall (struct.pack ('@B', self.type | MI_NULL_FLAG)) 
-        trace ('</MI_StringA.write>')
+        verbose_trace ('</MI_StringA.write>')
 
     @staticmethod
     def read (fd, flags):
-        trace ('<MI_StringA.read>')
+        verbose_trace ('<MI_StringA.read>')
         vals = None
         if 0 == (MI_NULL_FLAG & flags):
             vals = []
             buf = fd.recv (4)
             len = struct.unpack ('@i', buf)[0]
-            trace ('  len:' + str (len))
+            verbose_trace ('  len:' + str (len))
             for i in range (len):
-                buf = fd.recv (4)
-                len = struct.unpack ('@i', buf)[0]
-                strg = ''
-                if len > 0:
-                    buf = fd.recv (len)
-                    strg = buf.decode ('utf8')
-                trace ('  value: ' + str(strg))
-                vals.append (str)
+                strg = read_string (fd)
+                vals.append (strg)
         rval = MI_StringA (vals)
-        trace ('</MI_StringA.read>')
+        verbose_trace ('</MI_StringA.read>')
         return rval
+
+
+class MI_InstanceA (MI_Value):
+    def __init__ (self, vals = None):
+        MI_Value.__init__ (self, MI_INSTANCEA)
+        self.value = []
+        if vals is not None:
+            for val in vals:
+                self.value.append (val)
+
+    def write (self, fd):
+        verbose_trace ('<MI_InstanceA.write>')
+        if 0 < len (self.value):
+            MI_Value.write (self, fd)
+            verbose_trace ('  len:' + str (len (self.value)))
+            buf = struct.pack ('@i', len (self.value))
+            fd.sendall (buf)
+            verbose_trace ('  <values>')
+            for val in self.value:
+                write_values (fd, val)
+            verbose_trace ('  </values>')
+        else:
+            verbose_trace ('    len: 0')
+            verbose_trace ('    type: ' + str (self.type | MI_NULL_FLAG))
+            buf = struct.pack ('@B', self.type | MI_NULL_FLAG)
+            fd.sendall (buf)
+        verbose_trace ('</MI_InstanceA.write>')
+
+    @staticmethod
+    def read (fd, flags):
+        verbose_trace ('<MI_InstanceA.read>')
+        vals = None
+        if 0 == (MI_NULL_FLAG & flags):
+            vals = []
+            buf = fd.recv (4)
+            len = struct.unpack ('@i', buf)[0]
+            verbose_trace ('  len:' + str (len))
+            for i in range (len):
+                val = read_values (fd)
+                sys.stderr.write ('....' + repr (val) + '....\n')
+                vals.append (val)
+        rval = MI_InstanceA (vals)
+        verbose_trace ('</MI_InstanceA.read>')
+        return rval
+
