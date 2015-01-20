@@ -1,7 +1,1 @@
-
-
-[ClassVersion("1.0.0"), FriendlyName("nxDNSServerAddress")] 
-class MSFT_nxDNSServerAddressResource : OMI_BaseResource
-{
-  [Required] string Address[];
-};
+[ClassVersion("1.0.0"), FriendlyName("nxDNSServerAddress")]class MSFT_nxDNSServerAddressResource:OMI_BaseResource{  [Key] string Address[];  [Write,ValueMap{"Ensure"},Values{"Present", "Absent"}] string Ensure;  [Write,ValueMap{"IPv4", "IPv6"},Values{"IPv4", "IPv6"}] string AddressFamily;};

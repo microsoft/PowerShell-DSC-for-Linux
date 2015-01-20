@@ -19,6 +19,7 @@
 ** MSFT_nxDNSServerAddressResource [MSFT_nxDNSServerAddressResource]
 **
 ** Keys:
+**    Address
 **
 **==============================================================================
 */
@@ -28,7 +29,9 @@ typedef struct _MSFT_nxDNSServerAddressResource /* extends OMI_BaseResource */
     MI_Instance __instance;
     /* OMI_BaseResource properties */
     /* MSFT_nxDNSServerAddressResource properties */
-    MI_ConstStringAField Address;
+    /*KEY*/ MI_ConstStringAField Address;
+    MI_ConstStringField Ensure;
+    MI_ConstStringField AddressFamily;
 }
 MSFT_nxDNSServerAddressResource;
 
@@ -158,6 +161,70 @@ MI_INLINE MI_Result MI_CALL MSFT_nxDNSServerAddressResource_Clear_Address(
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxDNSServerAddressResource_Set_Ensure(
+    _Inout_ MSFT_nxDNSServerAddressResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxDNSServerAddressResource_SetPtr_Ensure(
+    _Inout_ MSFT_nxDNSServerAddressResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxDNSServerAddressResource_Clear_Ensure(
+    _Inout_ MSFT_nxDNSServerAddressResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        1);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxDNSServerAddressResource_Set_AddressFamily(
+    _Inout_ MSFT_nxDNSServerAddressResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        2,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxDNSServerAddressResource_SetPtr_AddressFamily(
+    _Inout_ MSFT_nxDNSServerAddressResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        2,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxDNSServerAddressResource_Clear_AddressFamily(
+    _Inout_ MSFT_nxDNSServerAddressResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        2);
 }
 
 /*
@@ -617,6 +684,45 @@ MI_EXTERN_C void MI_CALL MSFT_nxDNSServerAddressResource_Load(
 MI_EXTERN_C void MI_CALL MSFT_nxDNSServerAddressResource_Unload(
     _In_opt_ MSFT_nxDNSServerAddressResource_Self* self,
     _In_ MI_Context* context);
+
+MI_EXTERN_C void MI_CALL MSFT_nxDNSServerAddressResource_EnumerateInstances(
+    _In_opt_ MSFT_nxDNSServerAddressResource_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_ const MI_PropertySet* propertySet,
+    _In_ MI_Boolean keysOnly,
+    _In_opt_ const MI_Filter* filter);
+
+MI_EXTERN_C void MI_CALL MSFT_nxDNSServerAddressResource_GetInstance(
+    _In_opt_ MSFT_nxDNSServerAddressResource_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_ const MSFT_nxDNSServerAddressResource* instanceName,
+    _In_opt_ const MI_PropertySet* propertySet);
+
+MI_EXTERN_C void MI_CALL MSFT_nxDNSServerAddressResource_CreateInstance(
+    _In_opt_ MSFT_nxDNSServerAddressResource_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_ const MSFT_nxDNSServerAddressResource* newInstance);
+
+MI_EXTERN_C void MI_CALL MSFT_nxDNSServerAddressResource_ModifyInstance(
+    _In_opt_ MSFT_nxDNSServerAddressResource_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_ const MSFT_nxDNSServerAddressResource* modifiedInstance,
+    _In_opt_ const MI_PropertySet* propertySet);
+
+MI_EXTERN_C void MI_CALL MSFT_nxDNSServerAddressResource_DeleteInstance(
+    _In_opt_ MSFT_nxDNSServerAddressResource_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_ const MSFT_nxDNSServerAddressResource* instanceName);
 
 MI_EXTERN_C void MI_CALL MSFT_nxDNSServerAddressResource_Invoke_GetTargetResource(
     _In_opt_ MSFT_nxDNSServerAddressResource_Self* self,
