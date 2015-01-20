@@ -74,7 +74,7 @@ PROVIDERS+=nxSshAuthorizedKeys
 #PROVIDERS+=nxIPAddress
 #PROVIDERS+=nxComputer
 #PROVIDERS+=nxFirewall
-#PROVIDERS+=nxDNSServerAddress
+PROVIDERS+=nxDNSServerAddress
 
 # this is used to enable the printing of xml style tags for help in debugging
 PRINT_BOOKENDS?=0

@@ -986,25 +986,25 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean MSFT_nxDNSServerAddressResource_Address_Required_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxDNSServerAddressResource_Address_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_Address_Required_qual =
+static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_Address_Key_qual =
 {
-    MI_T("Required"),
+    MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxDNSServerAddressResource_Address_Required_qual_value
+    &MSFT_nxDNSServerAddressResource_Address_Key_qual_value
 };
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxDNSServerAddressResource_Address_quals[] =
 {
-    &MSFT_nxDNSServerAddressResource_Address_Required_qual,
+    &MSFT_nxDNSServerAddressResource_Address_Key_qual,
 };
 
 /* property MSFT_nxDNSServerAddressResource.Address */
 static MI_CONST MI_PropertyDecl MSFT_nxDNSServerAddressResource_Address_prop =
 {
-    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED|MI_FLAG_READONLY, /* flags */
+    MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
     0x00617307, /* code */
     MI_T("Address"), /* name */
     MSFT_nxDNSServerAddressResource_Address_quals, /* qualifiers */
@@ -1018,9 +1018,158 @@ static MI_CONST MI_PropertyDecl MSFT_nxDNSServerAddressResource_Address_prop =
     NULL,
 };
 
+static MI_CONST MI_Boolean MSFT_nxDNSServerAddressResource_Ensure_Write_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_Ensure_Write_qual =
+{
+    MI_T("Write"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxDNSServerAddressResource_Ensure_Write_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_Ensure_ValueMap_qual_data_value[] =
+{
+    MI_T("Ensure"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxDNSServerAddressResource_Ensure_ValueMap_qual_value =
+{
+    MSFT_nxDNSServerAddressResource_Ensure_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxDNSServerAddressResource_Ensure_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_Ensure_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxDNSServerAddressResource_Ensure_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_Ensure_Values_qual_data_value[] =
+{
+    MI_T("2"),
+    MI_T("3"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxDNSServerAddressResource_Ensure_Values_qual_value =
+{
+    MSFT_nxDNSServerAddressResource_Ensure_Values_qual_data_value,
+    MI_COUNT(MSFT_nxDNSServerAddressResource_Ensure_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_Ensure_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_nxDNSServerAddressResource_Ensure_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxDNSServerAddressResource_Ensure_quals[] =
+{
+    &MSFT_nxDNSServerAddressResource_Ensure_Write_qual,
+    &MSFT_nxDNSServerAddressResource_Ensure_ValueMap_qual,
+    &MSFT_nxDNSServerAddressResource_Ensure_Values_qual,
+};
+
+/* property MSFT_nxDNSServerAddressResource.Ensure */
+static MI_CONST MI_PropertyDecl MSFT_nxDNSServerAddressResource_Ensure_prop =
+{
+    MI_FLAG_PROPERTY, /* flags */
+    0x00656506, /* code */
+    MI_T("Ensure"), /* name */
+    MSFT_nxDNSServerAddressResource_Ensure_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxDNSServerAddressResource_Ensure_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxDNSServerAddressResource, Ensure), /* offset */
+    MI_T("MSFT_nxDNSServerAddressResource"), /* origin */
+    MI_T("MSFT_nxDNSServerAddressResource"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Boolean MSFT_nxDNSServerAddressResource_AddressFamily_Write_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_AddressFamily_Write_qual =
+{
+    MI_T("Write"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxDNSServerAddressResource_AddressFamily_Write_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_AddressFamily_ValueMap_qual_data_value[] =
+{
+    MI_T("IPv4"),
+    MI_T("IPv6"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxDNSServerAddressResource_AddressFamily_ValueMap_qual_value =
+{
+    MSFT_nxDNSServerAddressResource_AddressFamily_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxDNSServerAddressResource_AddressFamily_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_AddressFamily_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxDNSServerAddressResource_AddressFamily_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_AddressFamily_Values_qual_data_value[] =
+{
+    MI_T("4"),
+    MI_T("5"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxDNSServerAddressResource_AddressFamily_Values_qual_value =
+{
+    MSFT_nxDNSServerAddressResource_AddressFamily_Values_qual_data_value,
+    MI_COUNT(MSFT_nxDNSServerAddressResource_AddressFamily_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_AddressFamily_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_nxDNSServerAddressResource_AddressFamily_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxDNSServerAddressResource_AddressFamily_quals[] =
+{
+    &MSFT_nxDNSServerAddressResource_AddressFamily_Write_qual,
+    &MSFT_nxDNSServerAddressResource_AddressFamily_ValueMap_qual,
+    &MSFT_nxDNSServerAddressResource_AddressFamily_Values_qual,
+};
+
+/* property MSFT_nxDNSServerAddressResource.AddressFamily */
+static MI_CONST MI_PropertyDecl MSFT_nxDNSServerAddressResource_AddressFamily_prop =
+{
+    MI_FLAG_PROPERTY, /* flags */
+    0x0061790D, /* code */
+    MI_T("AddressFamily"), /* name */
+    MSFT_nxDNSServerAddressResource_AddressFamily_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxDNSServerAddressResource_AddressFamily_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxDNSServerAddressResource, AddressFamily), /* offset */
+    MI_T("MSFT_nxDNSServerAddressResource"), /* origin */
+    MI_T("MSFT_nxDNSServerAddressResource"), /* propagator */
+    NULL,
+};
+
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxDNSServerAddressResource_props[] =
 {
     &MSFT_nxDNSServerAddressResource_Address_prop,
+    &MSFT_nxDNSServerAddressResource_Ensure_prop,
+    &MSFT_nxDNSServerAddressResource_AddressFamily_prop,
 };
 
 static MI_CONST MI_Boolean MSFT_nxDNSServerAddressResource_GetTargetResource_Static_qual_value = 1;
@@ -1033,7 +1182,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_S
     &MSFT_nxDNSServerAddressResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_Description_qual_value = MI_T("2");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_Description_qual_value = MI_T("6");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_Description_qual =
 {
@@ -1069,7 +1218,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_I
     &MSFT_nxDNSServerAddressResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_InputResource_Description_qual_value = MI_T("3");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_InputResource_Description_qual_value = MI_T("7");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_InputResource_Description_qual =
 {
@@ -1110,7 +1259,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_F
     &MSFT_nxDNSServerAddressResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_Flags_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_Flags_Description_qual_value = MI_T("8");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_Flags_Description_qual =
 {
@@ -1160,7 +1309,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_O
     &MSFT_nxDNSServerAddressResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("5");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("9");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_OutputResource_Description_qual =
 {
@@ -1201,7 +1350,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_M
     &MSFT_nxDNSServerAddressResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("2");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("6");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_GetTargetResource_MIReturn_Description_qual =
 {
@@ -1267,7 +1416,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_
     &MSFT_nxDNSServerAddressResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_Description_qual_value = MI_T("10");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_Description_qual =
 {
@@ -1303,7 +1452,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_
     &MSFT_nxDNSServerAddressResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_InputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_InputResource_Description_qual_value = MI_T("11");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_InputResource_Description_qual =
 {
@@ -1344,7 +1493,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_
     &MSFT_nxDNSServerAddressResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_Flags_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_Flags_Description_qual_value = MI_T("12");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_Flags_Description_qual =
 {
@@ -1384,7 +1533,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_
     &MSFT_nxDNSServerAddressResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_Result_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_Result_Description_qual_value = MI_T("13");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_Result_Description_qual =
 {
@@ -1424,7 +1573,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_
     &MSFT_nxDNSServerAddressResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("14");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_ProviderContext_Description_qual =
 {
@@ -1464,7 +1613,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_
     &MSFT_nxDNSServerAddressResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("10");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_TestTargetResource_MIReturn_Description_qual =
 {
@@ -1531,7 +1680,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_S
     &MSFT_nxDNSServerAddressResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_Description_qual_value = MI_T("15");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_Description_qual =
 {
@@ -1567,7 +1716,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_I
     &MSFT_nxDNSServerAddressResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_InputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_InputResource_Description_qual_value = MI_T("11");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_InputResource_Description_qual =
 {
@@ -1608,7 +1757,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_P
     &MSFT_nxDNSServerAddressResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("16");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_ProviderContext_Description_qual =
 {
@@ -1648,7 +1797,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_F
     &MSFT_nxDNSServerAddressResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_Flags_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_Flags_Description_qual_value = MI_T("12");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_Flags_Description_qual =
 {
@@ -1688,7 +1837,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_M
     &MSFT_nxDNSServerAddressResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("15");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_SetTargetResource_MIReturn_Description_qual =
 {
@@ -1755,11 +1904,11 @@ static MI_CONST MI_ProviderFT MSFT_nxDNSServerAddressResource_funcs =
 {
   (MI_ProviderFT_Load)MSFT_nxDNSServerAddressResource_Load,
   (MI_ProviderFT_Unload)MSFT_nxDNSServerAddressResource_Unload,
-  (MI_ProviderFT_GetInstance)NULL,
-  (MI_ProviderFT_EnumerateInstances)NULL,
-  (MI_ProviderFT_CreateInstance)NULL,
-  (MI_ProviderFT_ModifyInstance)NULL,
-  (MI_ProviderFT_DeleteInstance)NULL,
+  (MI_ProviderFT_GetInstance)MSFT_nxDNSServerAddressResource_GetInstance,
+  (MI_ProviderFT_EnumerateInstances)MSFT_nxDNSServerAddressResource_EnumerateInstances,
+  (MI_ProviderFT_CreateInstance)MSFT_nxDNSServerAddressResource_CreateInstance,
+  (MI_ProviderFT_ModifyInstance)MSFT_nxDNSServerAddressResource_ModifyInstance,
+  (MI_ProviderFT_DeleteInstance)MSFT_nxDNSServerAddressResource_DeleteInstance,
   (MI_ProviderFT_AssociatorInstances)NULL,
   (MI_ProviderFT_ReferenceInstances)NULL,
   (MI_ProviderFT_EnableIndications)NULL,
@@ -1789,7 +1938,7 @@ static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_ClassVersion_qual =
     &MSFT_nxDNSServerAddressResource_ClassVersion_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_FriendlyName_qual_value = MI_T("nxDNSServerAddressResource");
+static MI_CONST MI_Char* MSFT_nxDNSServerAddressResource_FriendlyName_qual_value = MI_T("nxDNSServerAddress");
 
 static MI_CONST MI_Qualifier MSFT_nxDNSServerAddressResource_FriendlyName_qual =
 {

@@ -158,8 +158,7 @@ void MI_CALL MSFT_nxDNSServerAddressResource_Invoke_GetTargetResource(
     {
         MI_Instance* retInstance;
         MI_Instance_Clone (&in->InputResource.value->__instance, &retInstance);
-        result = self->get (in->InputResource.value->__instance, context,
-                            retInstance);
+        result = self->get (in->InputResource.value, retInstance);
         if (MI_RESULT_OK == result)
         {
             SCX_BOOKEND_PRINT ("packing succeeded!");
@@ -199,7 +198,7 @@ void MI_CALL MSFT_nxDNSServerAddressResource_Invoke_TestTargetResource(
     if (self)
     {
         MI_Boolean testResult = MI_FALSE;
-        result = self->test (in->InputResource.value->__instance, &testResult);
+        result = self->test (in->InputResource.value, &testResult);
         if (MI_RESULT_OK == result)
         {
             MSFT_nxDNSServerAddressResource_TestTargetResource out;
@@ -227,7 +226,7 @@ void MI_CALL MSFT_nxDNSServerAddressResource_Invoke_SetTargetResource(
     if (self)
     {
         MI_Result setResult = MI_RESULT_FAILED;
-        result = self->set (in->InputResource.value->__instance, &setResult);
+        result = self->set (in->InputResource.value, &setResult);
         if (MI_RESULT_OK == result)
         {
             result = setResult;
