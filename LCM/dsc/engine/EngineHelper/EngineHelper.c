@@ -756,12 +756,17 @@ MI_Result ReadFileContent(_In_z_ const MI_Char *pFileName,
 void CleanupTempDirectory(_In_z_ MI_Char *mofFileName)
 {
     /*It is ok if we fail to cleanup temp directory.*/
+#if defined(_MSC_VER)    
     MI_Char *lastOccurancePointer = Tcsrchr(mofFileName, MI_T('\\'));
+#else
+    MI_Char *lastOccurancePointer = Tcsrchr(mofFileName, MI_T('/'));
+#endif
+
     if( lastOccurancePointer != NULL )
     {
         size_t lastOccuranceIndex = 0; 
         lastOccuranceIndex = lastOccurancePointer - mofFileName;
-        if( Tcslen(mofFileName) <= lastOccuranceIndex+1 )
+        if( Tcslen(mofFileName) > lastOccuranceIndex+1 )
         {
             mofFileName[lastOccuranceIndex] =  MI_T('\0');
             RecursivelyDeleteDirectory(mofFileName);

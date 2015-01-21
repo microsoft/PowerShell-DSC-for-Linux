@@ -43,11 +43,11 @@ providers:
 distclean: clean
 
 clean:
+	make -C Providers clean
 	./configure-release-098
 	make -C omi-1.0.8 distclean
 	./configure-release-100
 	make -C omi-1.0.8 distclean
-	make -C Providers clean
 	rm -rf omi-1.0.8/output
 	rm -rf output
 	rm -rf release

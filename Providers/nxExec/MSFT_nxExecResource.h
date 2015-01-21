@@ -30,7 +30,7 @@ typedef struct _MSFT_nxExecResource /* extends OMI_BaseResource */
     /* OMI_BaseResource properties */
     /* MSFT_nxExecResource properties */
     /*KEY*/ MI_ConstStringField Command;
-    MI_ConstStringField Environment;
+    MI_ConstStringAField Environment;
     MI_ConstBooleanField Shell;
     MI_ConstUint16Field Returncode;
     MI_ConstUint32Field Timeout;
@@ -162,25 +162,33 @@ MI_INLINE MI_Result MI_CALL MSFT_nxExecResource_Clear_Command(
 
 MI_INLINE MI_Result MI_CALL MSFT_nxExecResource_Set_Environment(
     _Inout_ MSFT_nxExecResource* self,
-    _In_z_ const MI_Char* str)
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
 {
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
         1,
-        (MI_Value*)&str,
-        MI_STRING,
+        (MI_Value*)&arr,
+        MI_STRINGA,
         0);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxExecResource_SetPtr_Environment(
     _Inout_ MSFT_nxExecResource* self,
-    _In_z_ const MI_Char* str)
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
 {
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
         1,
-        (MI_Value*)&str,
-        MI_STRING,
+        (MI_Value*)&arr,
+        MI_STRINGA,
         MI_FLAG_BORROW);
 }
 
