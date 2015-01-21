@@ -391,15 +391,16 @@ def ListDir(path):
 
 def Symlink(spath,dpath):
     error=None
-    #remove the destination 
-    try:
-        os.unlink(dpath)
-    except OSError, error:
-        Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
-        return error
-    except IOError, error:
-        Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
-        return error
+    #remove the destination if present
+    if os.path.exists(dpath):
+        try:
+            os.unlink(dpath)
+        except OSError, error:
+            Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            return error
+        except IOError, error:
+            Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            return error
         
     try:
         os.symlink(spath, dpath)
@@ -477,14 +478,12 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
         if src_hash.hexdigest() == dest_hash.hexdigest():
             return 0  
     elif Checksum == "ctime":
-        if stat_src.st_ctime > stat_dest.st_ctime:
-            # Source is newer than Destination
+        if stat_src.st_ctime != stat_dest.st_ctime:
             return -1
         else:
             return 0
     elif Checksum == "mtime":
-        if stat_src.st_mtime > stat_dest.st_mtime:
-            # Source is newer than Destination
+        if stat_src.st_mtime != stat_dest.st_mtime:
             return -1
         else:
             return 0
@@ -690,8 +689,6 @@ def SetDirectoryRecursive(DestinationPath, SourcePath, fc):
         MakeDirs(DestinationPath)
     if SetOwnerGroupMode(DestinationPath, SourcePath, fc) == False:
         return False
-    if fc.Recurse == False:
-        return True
     Destination_subfiles = ListDir(DestinationPath)
     if Destination_subfiles == None:
         return False
@@ -704,12 +701,12 @@ def SetDirectoryRecursive(DestinationPath, SourcePath, fc):
                     if SetOwnerGroupMode(f_destpath, "", fc) == False :
                         return False
                 elif os.path.isdir(f_destpath):
-                    if SetDirectoryRecursive(f_destpath, "", fc) == False :
-                        return False
+                    if fc.Recurse == True:
+                        if SetDirectoryRecursive(f_destpath, "", fc) == False :
+                            return False
         return True
 
     Source_subfiles = ListDir(SourcePath)
-
     # For all files in SourcePath's directory, ensure they exist with proper contents and stat in DestionationPath's directory 
     for f in Source_subfiles:
         f_srcpath = os.path.join(SourcePath, f)
@@ -796,10 +793,10 @@ def SetLink(DestinationPath, SourcePath, fc):
     if os.path.islink(SourcePath):
         if fc.Links == "follow":
             if os.path.isfile(SourcePath):
-                if SetFile(DestinationPath, os.path.realpath(SourcePath), fc) != None:
+                if SetFile(DestinationPath, os.path.realpath(SourcePath), fc) == False:
                     return False
             elif os.path.isdir(SourcePath):
-                if SetDirectoryRecursive(DestinationPath, os.path.realpath(SourcePath), fc) != None:
+                if SetDirectoryRecursive(DestinationPath, os.path.realpath(SourcePath), fc) == False:
                     return False
                     
         elif fc.Links == "manage":
