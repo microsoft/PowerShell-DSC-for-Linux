@@ -13,6 +13,7 @@ import glob
 import codecs
 import platform
 import imp
+import time
 protocol=imp.load_source('protocol','../protocol.py')
 
 # 	[key] string Name;
@@ -761,7 +762,8 @@ def ModifyInitService(sc):
     return [0]
 
 def IsServiceRunning(sc):
-    cmd = "ps -ef | grep -v grep | grep "+  sc.Name 
+    time.sleep(1)
+    cmd = 'ps -ef | grep -v grep | grep -E ".* ' +  sc.Name + '$"'
     code,out=RunGetOutput(cmd,False,False)
     if code != 0:
         return False
