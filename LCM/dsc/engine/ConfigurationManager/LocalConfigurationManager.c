@@ -518,7 +518,7 @@ void Invoke_ApplyConfiguration(
     MI_Uint32 taskMode = TASK_AUTO;
     MI_Value value;
     MI_Uint32 flags = 0;
-	MI_Instance *metaConfigInstance = NULL;
+        MI_Instance *metaConfigInstance = NULL;
 
     if (in->force.exists && in->force.value == MI_TRUE)
     {      
@@ -598,40 +598,40 @@ void Invoke_ApplyConfiguration(
         value.string = METADATA_REFRESHMODE_PUSH;
     }
 
-	// if pending configuration exists
-	if (File_ExistT(GetPendingConfigFileName()) != -1)
-	{
-		if (taskMode == TASK_AUTO)
-		{
-			GetCimMIError(MI_RESULT_ALREADY_EXISTS, &cimErrorDetails, ID_LCMHELPER_OLDCONFPENDING_ERROR);
-			goto ExitWithError;
-		}
-	}
-	else
-	{
-		// no current configuration exists
-		if (File_ExistT(GetCurrentConfigFileName()) == -1)
-		{
-			if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PUSH) == 0)
-			{
-				GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
-				goto ExitWithError;
-			}
-		}
-	}
+        // if pending configuration exists
+        if (File_ExistT(GetPendingConfigFileName()) != -1)
+        {
+                if (taskMode == TASK_AUTO)
+                {
+                        GetCimMIError(MI_RESULT_ALREADY_EXISTS, &cimErrorDetails, ID_LCMHELPER_OLDCONFPENDING_ERROR);
+                        goto ExitWithError;
+                }
+        }
+        else
+        {
+                // no current configuration exists
+                if (File_ExistT(GetCurrentConfigFileName()) == -1)
+                {
+                        if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PUSH) == 0)
+                        {
+                                GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
+                                goto ExitWithError;
+                        }
+                }
+        }
 
     if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PULL) == 0)
     {
-		miResult = DoPullServerRefresh(context, &cimErrorDetails);
-		if (miResult != MI_RESULT_OK)
-		{
-			SetThreadToken(NULL, m_clientThreadToken);
-			CloseHandle(m_clientThreadToken);
-			MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-			MI_Context_PostCimError(context, cimErrorDetails);
-			MI_Instance_Delete(cimErrorDetails);
-			goto ExitWithError;
-		}
+                miResult = DoPullServerRefresh(context, &cimErrorDetails);
+                if (miResult != MI_RESULT_OK)
+                {
+                        SetThreadToken(NULL, m_clientThreadToken);
+                        CloseHandle(m_clientThreadToken);
+                        MI_Instance_Delete((MI_Instance *)metaConfigInstance);
+                        MI_Context_PostCimError(context, cimErrorDetails);
+                        MI_Instance_Delete(cimErrorDetails);
+                        goto ExitWithError;
+                }
     }
     miResult = CallConsistencyEngine(context, TASK_REGULAR, &cimErrorDetails); 
     if (miResult != MI_RESULT_OK)
@@ -813,7 +813,7 @@ void Invoke_GetMetaConfiguration(
     _In_opt_ const MSFT_DSCLocalConfigurationManager_GetMetaConfiguration* in)
 {
     MI_Result miResult;
-	MSFT_DSCMetaConfiguration * metaConfigInstance;
+        MSFT_DSCMetaConfiguration * metaConfigInstance;
     MI_Instance *cimErrorDetails = NULL;
     HANDLE m_clientThreadToken;
     MSFT_DSCLocalConfigurationManager_GetMetaConfiguration outputObject;       
@@ -929,17 +929,17 @@ void Invoke_GetMetaConfiguration(
     }
 
     CloseHandle(m_clientThreadToken);
-	if (MetaMofCorrupted == MI_TRUE)
-	{
-		Intlstr pTempStr = Intlstr_Null;
-		GetResourceString(ID_LCMHELPER_METAMOFCORRUPTED, &pTempStr);
-		MI_Context_WriteWarning(context, pTempStr.str);
-		if (pTempStr.str)
-		{
-			Intlstr_Free(pTempStr);
-		}
-		MetaMofCorrupted = MI_FALSE;
-	}
+        if (MetaMofCorrupted == MI_TRUE)
+        {
+                Intlstr pTempStr = Intlstr_Null;
+                GetResourceString(ID_LCMHELPER_METAMOFCORRUPTED, &pTempStr);
+                MI_Context_WriteWarning(context, pTempStr.str);
+                if (pTempStr.str)
+                {
+                        Intlstr_Free(pTempStr);
+                }
+                MetaMofCorrupted = MI_FALSE;
+        }
     EndLcmOperation();
     MI_Context_PostResult(context, MI_RESULT_OK);
 
@@ -1239,7 +1239,6 @@ void Invoke_PerformRequiredConfigurationChecks(
     HANDLE m_clientThreadToken;
     MI_Instance *cimErrorDetails = NULL;
     MSFT_DSCMetaConfiguration *metaConfigInstance = NULL;
-    MI_Boolean bRunConsistencyCheck = MI_FALSE;
     MI_Value value;
     MI_Uint32 flags = 0;
 
@@ -1344,31 +1343,17 @@ void Invoke_PerformRequiredConfigurationChecks(
             MI_Instance_Delete(cimErrorDetails);
             goto ExitSimple;
         }
-
-        miResult = TimeToRunConsistencyCheck(&bRunConsistencyCheck, &cimErrorDetails);
-        if (miResult != MI_RESULT_OK)
-        {
-            SetThreadToken(NULL, m_clientThreadToken);
-            CloseHandle(m_clientThreadToken);
-            MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-            MI_Context_PostCimError(context, cimErrorDetails);
-            MI_Instance_Delete(cimErrorDetails);
-            goto ExitSimple;
-        }
     }    
 
-    if (bRunConsistencyCheck == MI_TRUE || Tcscasecmp(value.string , METADATA_REFRESHMODE_PUSH) == 0)
+    miResult = RunConsistencyEngine(context, in->Flags.value, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
     {
-        miResult = RunConsistencyEngine(context, in->Flags.value, &cimErrorDetails);
-        if (miResult != MI_RESULT_OK)
-        {
-            SetThreadToken(NULL, m_clientThreadToken);
-            CloseHandle(m_clientThreadToken);
-            MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-            MI_Context_PostCimError(context, cimErrorDetails);
-            MI_Instance_Delete(cimErrorDetails);
-            goto ExitSimple;
-        }
+        SetThreadToken(NULL, m_clientThreadToken);
+        CloseHandle(m_clientThreadToken);
+        MI_Instance_Delete((MI_Instance *)metaConfigInstance);
+        MI_Context_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        goto ExitSimple;
     }
 
     miResult = MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_Construct(&outputObject, context);
@@ -2175,7 +2160,6 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
     MI_Result miResult = MI_RESULT_OK;
     MI_Instance *cimErrorDetails = NULL;
     MSFT_DSCMetaConfiguration *metaConfigInstance = NULL;
-    MI_Boolean bRunConsistencyCheck = MI_FALSE;
     MI_Value value;
     MI_Uint32 flags = 0;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*) param;
@@ -2252,27 +2236,15 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
             MI_Instance_Delete(cimErrorDetails);
             goto ExitSimple;
         }
-
-        miResult = TimeToRunConsistencyCheck(&bRunConsistencyCheck, &cimErrorDetails);
-        if (miResult != MI_RESULT_OK)
-        {
-            MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-            MI_Context_PostCimError(args->context, cimErrorDetails);
-            MI_Instance_Delete(cimErrorDetails);
-            goto ExitSimple;
-        }
     }    
 
-    if (bRunConsistencyCheck == MI_TRUE || Tcscasecmp(value.string , METADATA_REFRESHMODE_PUSH) == 0)
+    miResult = RunConsistencyEngine(args->context, args->flag, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
     {
-        miResult = RunConsistencyEngine(args->context, args->flag, &cimErrorDetails);
-        if (miResult != MI_RESULT_OK)
-        {
-            MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-            MI_Context_PostCimError(args->context, cimErrorDetails);
-            MI_Instance_Delete(cimErrorDetails);
-            goto ExitSimple;
-        }
+        MI_Instance_Delete((MI_Instance *)metaConfigInstance);
+        MI_Context_PostCimError(args->context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        goto ExitSimple;
     }
 
     miResult = MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_Construct(&outputObject, args->context);

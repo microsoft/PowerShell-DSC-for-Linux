@@ -1,5 +1,5 @@
 /* @migen@ */
-#include "MSFT_nxExecResource.h"
+#include "MSFT_nxLogResource.h"
 
 
 #include "debug_tags.hpp"
@@ -10,29 +10,29 @@
 #include <cstdlib>
 
 
-typedef struct _MSFT_nxExecResource_Self : public scx::PythonProvider
+typedef struct _MSFT_nxLogResource_Self : public scx::PythonProvider
 {
-    /*ctor*/ _MSFT_nxExecResource_Self ()
-        : scx::PythonProvider ("nxExec")
+    /*ctor*/ _MSFT_nxLogResource_Self ()
+        : scx::PythonProvider ("nxLog")
     {
         // empty
     }
-} MSFT_nxExecResource_Self;
+} MSFT_nxLogResource_Self;
 
 
-void MI_CALL MSFT_nxExecResource_Load(
-    _Outptr_result_maybenull_ MSFT_nxExecResource_Self** self,
+void MI_CALL MSFT_nxLogResource_Load(
+    _Outptr_result_maybenull_ MSFT_nxLogResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
-    SCX_BOOKEND_EX ("Load", " name=\"nxExec\"");
+    SCX_BOOKEND_EX ("Load", " name=\"nxLog\"");
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
     if (0 != self)
     {
         if (0 == *self)
         {
-            *self = new MSFT_nxExecResource_Self;
+            *self = new MSFT_nxLogResource_Self;
             if (EXIT_SUCCESS != (*self)->init ())
             {
                 delete *self;
@@ -48,11 +48,11 @@ void MI_CALL MSFT_nxExecResource_Load(
     MI_Context_PostResult(context, res);
 }
 
-void MI_CALL MSFT_nxExecResource_Unload(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_Unload(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context)
 {
-    SCX_BOOKEND_EX ("Unload", " name=\"nxExec\"");
+    SCX_BOOKEND_EX ("Unload", " name=\"nxLog\"");
     if (self)
     {
         delete self;
@@ -60,8 +60,8 @@ void MI_CALL MSFT_nxExecResource_Unload(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxExecResource_EnumerateInstances(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_EnumerateInstances(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
@@ -79,12 +79,12 @@ void MI_CALL MSFT_nxExecResource_EnumerateInstances(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxExecResource_GetInstance(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_GetInstance(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxExecResource* instanceName,
+    _In_ const MSFT_nxLogResource* instanceName,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -96,12 +96,12 @@ void MI_CALL MSFT_nxExecResource_GetInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxExecResource_CreateInstance(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_CreateInstance(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxExecResource* newInstance)
+    _In_ const MSFT_nxLogResource* newInstance)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -111,12 +111,12 @@ void MI_CALL MSFT_nxExecResource_CreateInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxExecResource_ModifyInstance(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_ModifyInstance(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxExecResource* modifiedInstance,
+    _In_ const MSFT_nxLogResource* modifiedInstance,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -128,12 +128,12 @@ void MI_CALL MSFT_nxExecResource_ModifyInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxExecResource_DeleteInstance(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_DeleteInstance(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxExecResource* instanceName)
+    _In_ const MSFT_nxLogResource* instanceName)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -143,16 +143,16 @@ void MI_CALL MSFT_nxExecResource_DeleteInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxExecResource_Invoke_GetTargetResource(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_Invoke_GetTargetResource(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxExecResource* instanceName,
-    _In_opt_ const MSFT_nxExecResource_GetTargetResource* in)
+    _In_ const MSFT_nxLogResource* instanceName,
+    _In_opt_ const MSFT_nxLogResource_GetTargetResource* in)
 {
-    SCX_BOOKEND_EX ("Get", " name=\"nxExec\"");
+    SCX_BOOKEND_EX ("Get", " name=\"nxLog\"");
     MI_Result result = MI_RESULT_FAILED;
     if (self)
     {
@@ -162,19 +162,19 @@ void MI_CALL MSFT_nxExecResource_Invoke_GetTargetResource(
         if (MI_RESULT_OK == result)
         {
             SCX_BOOKEND_PRINT ("packing succeeded!");
-            MSFT_nxExecResource_GetTargetResource out;
-            MSFT_nxExecResource_GetTargetResource_Construct (&out, context);
-            MSFT_nxExecResource_GetTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxLogResource_GetTargetResource out;
+            MSFT_nxLogResource_GetTargetResource_Construct (&out, context);
+            MSFT_nxLogResource_GetTargetResource_Set_MIReturn (&out, 0);
             MI_Value value;
             value.instance = retInstance;
             MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
                                     MI_INSTANCE, 0);
-            result = MSFT_nxExecResource_GetTargetResource_Post (&out, context);
+            result = MSFT_nxLogResource_GetTargetResource_Post (&out, context);
             if (MI_RESULT_OK != result)
             {
                 SCX_BOOKEND_PRINT ("post Failed");
             }
-            MSFT_nxExecResource_GetTargetResource_Destruct (&out);
+            MSFT_nxLogResource_GetTargetResource_Destruct (&out);
         }
         else
         {
@@ -185,14 +185,14 @@ void MI_CALL MSFT_nxExecResource_Invoke_GetTargetResource(
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxExecResource_Invoke_TestTargetResource(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_Invoke_TestTargetResource(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxExecResource* instanceName,
-    _In_opt_ const MSFT_nxExecResource_TestTargetResource* in)
+    _In_ const MSFT_nxLogResource* instanceName,
+    _In_opt_ const MSFT_nxLogResource_TestTargetResource* in)
 {
     MI_Result result = MI_RESULT_FAILED;
     if (self)
@@ -201,26 +201,26 @@ void MI_CALL MSFT_nxExecResource_Invoke_TestTargetResource(
         result = self->test (in->InputResource.value, &testResult);
         if (MI_RESULT_OK == result)
         {
-            MSFT_nxExecResource_TestTargetResource out;
-            MSFT_nxExecResource_TestTargetResource_Construct (&out, context);
-            MSFT_nxExecResource_TestTargetResource_Set_Result (
+            MSFT_nxLogResource_TestTargetResource out;
+            MSFT_nxLogResource_TestTargetResource_Construct (&out, context);
+            MSFT_nxLogResource_TestTargetResource_Set_Result (
                 &out, testResult);
-            MSFT_nxExecResource_TestTargetResource_Set_MIReturn (&out, 0);
-            MSFT_nxExecResource_TestTargetResource_Post (&out, context);
-            MSFT_nxExecResource_TestTargetResource_Destruct (&out);
+            MSFT_nxLogResource_TestTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxLogResource_TestTargetResource_Post (&out, context);
+            MSFT_nxLogResource_TestTargetResource_Destruct (&out);
         }
     }
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxExecResource_Invoke_SetTargetResource(
-    _In_opt_ MSFT_nxExecResource_Self* self,
+void MI_CALL MSFT_nxLogResource_Invoke_SetTargetResource(
+    _In_opt_ MSFT_nxLogResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxExecResource* instanceName,
-    _In_opt_ const MSFT_nxExecResource_SetTargetResource* in)
+    _In_ const MSFT_nxLogResource* instanceName,
+    _In_opt_ const MSFT_nxLogResource_SetTargetResource* in)
 {
     MI_Result result = MI_RESULT_FAILED;
     if (self)
@@ -230,12 +230,12 @@ void MI_CALL MSFT_nxExecResource_Invoke_SetTargetResource(
         if (MI_RESULT_OK == result)
         {
             result = setResult;
-            MSFT_nxExecResource_SetTargetResource out;
-            MSFT_nxExecResource_SetTargetResource_Construct (&out, context);
-            MSFT_nxExecResource_SetTargetResource_Set_MIReturn (
+            MSFT_nxLogResource_SetTargetResource out;
+            MSFT_nxLogResource_SetTargetResource_Construct (&out, context);
+            MSFT_nxLogResource_SetTargetResource_Set_MIReturn (
                 &out, setResult);
-            MSFT_nxExecResource_SetTargetResource_Post (&out, context);
-            MSFT_nxExecResource_SetTargetResource_Destruct (&out);
+            MSFT_nxLogResource_SetTargetResource_Post (&out, context);
+            MSFT_nxLogResource_SetTargetResource_Destruct (&out);
         }
     }
     MI_Context_PostResult (context, result);

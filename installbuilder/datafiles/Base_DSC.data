@@ -11,13 +11,14 @@ PROVIDES: 'dscpackage'
 DESCRIPTION: 'Windows Powershell Desired State Configuration for Linux'
 COPYRIGHT_FILE: 'Copyright Microsoft'
 SHLIB_EXT: 'so'
-PROVIDERS: 'File Script User Group Service Package'
+PROVIDERS: 'File Script User Group Service Package Environment Exec SshAuthorizedKeys'
 
 DEV_OMI_DIR: 'omi-1.0.8'
 DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateConfiguration'
 
 
 %Files
+/opt/microsoft/dsc/bin/ConsistencyInvoker; omi-1.0.8/output/bin/ConsistencyInvoker; 755; root; root
 /opt/microsoft/dsc/lib/libdsccore.so; omi-1.0.8/output/lib/libdsccore.so; 755; root; root
 /opt/microsoft/dsc/mof/OMI_BaseResourceUE.mof; LCM/dsc/mof/OMI_BaseResourceUE.mof; 755; root; root
 
@@ -56,9 +57,27 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/mof/MSFT_nxPackageResource.schema.mof;  Providers/nxPackage/MSFT_nxPackageResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxPackageResource.registration.mof;  Providers/nxPackage/MSFT_nxPackageResource.registration.mof;      755; root; root
 
+/opt/microsoft/dsc/lib/libMSFT_nxEnvironmentResource.so;   Providers/bin/libMSFT_nxEnvironmentResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxEnvironmentResource.reg;  Providers/nxEnvironment/MSFT_nxEnvironmentResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxEnvironmentResource.schema.mof;  Providers/nxEnvironment/MSFT_nxEnvironmentResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxEnvironmentResource.registration.mof;  Providers/nxEnvironment/MSFT_nxEnvironmentResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxExecResource.so;   Providers/bin/libMSFT_nxExecResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxExecResource.reg;  Providers/nxExec/MSFT_nxExecResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxExecResource.schema.mof;  Providers/nxExec/MSFT_nxExecResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxExecResource.registration.mof;  Providers/nxExec/MSFT_nxExecResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxSshAuthorizedKeysResource.so;   Providers/bin/libMSFT_nxSshAuthorizedKeysResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxSshAuthorizedKeysResource.reg;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxSshAuthorizedKeysResource.schema.mof;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxSshAuthorizedKeysResource.registration.mof;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.registration.mof;      755; root; root
+
 /opt/microsoft/dsc/Scripts/client.py; Providers/Scripts/client.py; 755; root; root
 /opt/microsoft/dsc/Scripts/protocol.py; Providers/Scripts/protocol.py; 755; root; root
-/opt/microsoft/dsc/Scripts/SendConfigurationApply.py; Providers/Extras/Scripts/SCA.py; 755; root; root
+/opt/microsoft/dsc/Scripts/SendConfigurationApply.py; Providers/Extras/Scripts/SendConfigurationApply.py; 755; root; root
+/opt/microsoft/dsc/Scripts/GetConfiguration.py; Providers/Extras/Scripts/GetConfiguration.py; 755; root; root
+/opt/microsoft/dsc/Scripts/SendMetaConfigurationApply.py; Providers/Extras/Scripts/SendMetaConfigurationApply.py; 755; root; root
+/opt/microsoft/dsc/Scripts/GetMetaConfiguration.py; Providers/Extras/Scripts/GetMetaConfiguration.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/__init__.py; Providers/Scripts/2.4x-2.5x/Scripts/__init__.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
@@ -99,6 +118,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/etc;  755; root; root
 /opt/microsoft/dsc/mof;  755; root; root
 /opt/microsoft/dsc/lib;  755; root; root
+/opt/microsoft/dsc/bin;  755; root; root
 /opt/microsoft/dsc/Scripts; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts; 755; root; root
@@ -149,11 +169,12 @@ mkdir -p $CONFIG_DATADIR/dsc/configuration
 mkdir -p $CONFIG_DATADIR/dsc/configuration/schema
 mkdir -p $CONFIG_DATADIR/dsc/configuration/registration      
 
-# Create links for all our providers
+# Create links in omi's directories for DSC data
 mkdir -p $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
 cp /opt/microsoft/dsc/etc/*.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
 cp /opt/microsoft/dsc/etc/dsccore.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration/
 ln -s /opt/microsoft/dsc/lib/libdsccore.so $OMI_HOME/lib/libdsccore.so
+ln -s /opt/microsoft/dsc/bin/ConsistencyInvoker $OMI_HOME/bin/ConsistencyInvoker
 
 cp /opt/microsoft/dsc/mof/OMI_BaseResourceUE.mof $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration/baseresource.schema.mof
 cp /opt/microsoft/dsc/mof/MSFT_DSCMetaConfiguration.mof $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration/MSFT_DSCMetaConfiguration.mof
@@ -188,6 +209,7 @@ rm -rf $CONFIG_SYSCONFDIR/dsc
 rm -rf $CONFIG_DATADIR/dsc
 rm -rf $OMI_LIB/Scripts
 
+rm $OMI_HOME/bin/ConsistencyInvoker
 rm $OMI_LIB/libdsccore.so    
 for prov in ${{PROVIDERS}}; do
     rm $OMI_LIB/libMSFT_nx${prov}Resource.so

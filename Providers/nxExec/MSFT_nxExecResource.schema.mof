@@ -2,7 +2,7 @@
 class MSFT_nxExecResource:OMI_BaseResource
 {
   [key] string Command;
-  [write] string Environment;
+  [write] string Environment[];
   [write] boolean Shell;
   [write] uint16 Returncode;
   [write] uint32 Timeout;

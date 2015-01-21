@@ -1,0 +1,4 @@
+# omireg /home/johnkord/dev/imp/dsc/Providers/bin/libMSFT_nxEnvironmentResource.so
+LIBRARY=MSFT_nxEnvironmentResource
+HOSTING=@requestor@
+CLASS=MSFT_nxEnvironmentResource:OMI_BaseResource

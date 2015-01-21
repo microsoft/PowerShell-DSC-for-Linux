@@ -2083,6 +2083,7 @@ MI_Result GetMofChecksum(
 {
     MI_Result r = MI_RESULT_OK;
     MI_Uint8 *checksumBuffer = NULL;
+    MI_Uint8 *tmpchecksumBuffer = NULL;
     MI_Uint32 checksumBufferSize = 0;
 
     if (mofChecksum)
@@ -2099,7 +2100,11 @@ MI_Result GetMofChecksum(
     /* Read checksum file if exists.*/
     if (File_ExistT(GetConfigChecksumFileName()) == 0)
     {
-        r = ReadFileContent(GetConfigChecksumFileName(), &checksumBuffer, &checksumBufferSize, cimErrorDetails);
+        r = ReadFileContent(GetConfigChecksumFileName(), &tmpchecksumBuffer, &checksumBufferSize, cimErrorDetails);
+        checksumBuffer = (MI_Uint8*)DSC_malloc(checksumBufferSize + 1, NitsHere());
+        memcpy(checksumBuffer, tmpchecksumBuffer, checksumBufferSize);
+        checksumBuffer[checksumBufferSize] = '\0';
+        DSC_free(tmpchecksumBuffer);
     }
     else
     {
@@ -3660,6 +3665,7 @@ MI_Result LCM_Pull_GetAction(
     {
         return GetCimMIError(result, cimErrorDetails, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
     }
+#if defined(_MSC_VER)
     if( Tcscasecmp(value.string, DEFAULT_DOWNLOADMANAGER)==0 )
     {
         result = Pull_GetActionWebDownloadManager(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
@@ -3668,6 +3674,10 @@ MI_Result LCM_Pull_GetAction(
     {
         result = Pull_GetAction(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
     }
+#else
+    result = Pull_GetActionWebDownloadManager(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
+#endif
+
     if (result != MI_RESULT_OK)
     {
         return result;
@@ -3716,6 +3726,7 @@ MI_Result LCM_Pull_GetConfiguration(
     {
         return GetCimMIError(result, cimErrorDetails, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
     }
+#if defined(_MSC_VER)
     if( Tcscasecmp(value.string, DEFAULT_DOWNLOADMANAGER)==0 )    
     {
         result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, &mofFileName, resultStatus, getActionStatusCode, cimErrorDetails);
@@ -3724,6 +3735,9 @@ MI_Result LCM_Pull_GetConfiguration(
     {
         result = Pull_GetConfiguration(lcmContext, metaConfigInstance, &mofFileName, resultStatus, getActionStatusCode, cimErrorDetails);
     }
+#else
+    result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, &mofFileName, resultStatus, getActionStatusCode, cimErrorDetails);
+#endif
     if (result != MI_RESULT_OK)
     {
         return result;
@@ -4041,7 +4055,7 @@ MI_Result UpdateLCMStatusCodeHistory(
                 return MI_RESULT_FAILED;
         }
 
-        if (*lcmStatusCodeHistory == NULL)
+        if (GetCurrentLCMStatusCodeHistory() == NULL)
         {
                 *lcmStatusCodeHistory = (MI_Char*)DSC_malloc(MAX_LCM_STATUSCODE_HISTORY_SIZE * sizeof(MI_Char), NitsHere());
                 if (*lcmStatusCodeHistory == NULL)

@@ -333,7 +333,7 @@ MI_Char * GetGetActionBodyContent(_In_z_ const MI_Char *checksum, MI_Boolean nod
         return NULL;
     }
 
-    Stprintf(content, length, MI_T("{\"%S\":\"%S\",\"%S\":\"%S\",\"%S\":\"%S\",\"%S\":\"%S\"}"), checksumName, checksum, 
+    Stprintf(content, length, MI_T("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}"), checksumName, checksum, 
                             complianceName, complianceStatus, algorithmName, checksumAlgorithm, statusCodeName, statusCodeValue);
     return content;
 }
@@ -1653,7 +1653,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     MI_Result r = MI_RESULT_OK;
     const char *emptyString = "";
     const char *header1 = "Accept: application/json";
-    const char *header2 = "Content-Type: application/json;charset=utf-8";
+    const char *header2 = "Content-Type: application/json; charset=utf-8";
     size_t bodyContentLength;
     const char *header_strings[3] = {0};
     char contentLengthHeader[DEFAULT_MEMORY_SIZE];
@@ -1869,7 +1869,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     {
         MI_Char checksumFileName[MAX_URL_LENGTH];
         FILE *fp = NULL;
-        Stprintf(checksumFileName, MAX_URL_LENGTH,MI_T("%S.checksum"), directoryPath);
+        Stprintf(checksumFileName, MAX_URL_LENGTH,MI_T("%s.checksum"), directoryPath);
         fp = File_OpenT(checksumFileName,MI_T("w"));
         if( fp != NULL )
         {
@@ -2079,7 +2079,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     if( r != MI_RESULT_OK)
     {
         DSC_free(fileName);  
-        DSC_free(directoryPath);
+        free(directoryPath);
         return r;
     }
     // Install modules as necessary. Do it only for windows for now
@@ -2096,7 +2096,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
          return r;
     }     
 #endif
-    DSC_free(directoryPath);
+    free(directoryPath);
     *mofFileName = fileName;
      DSC_EventWriteLCMPullGetConfigSuccess(webPulginName);    
     return MI_RESULT_OK;
