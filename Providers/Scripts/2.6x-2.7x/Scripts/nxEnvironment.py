@@ -190,6 +190,7 @@ def Test(Name,Value,Ensure,Path):
         Log(LogPath,'ERROR - Unable to initialize nxEnvironmentProvider. '+ e.message)
         return [retval]
     ShowMof('TEST', Name,Value,Ensure,Path)
+
     found,error=FindVar(p)
     if  found and p.Ensure == 'Present'  :
         retval = 0
@@ -253,7 +254,7 @@ def AddOrDelVar(p):
     n=''
     if os.path.isfile(p.file_path):
         st=os.stat(p.file_path)
-    with opened_w_error(p.file_path,'r+') as (F,error):
+    with opened_w_error(p.file_path,'r') as (F,error):
         if error:
             Print("Exception opening file " + p.file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
             Log(LogPath,"Exception opening file " + p.file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
@@ -261,15 +262,16 @@ def AddOrDelVar(p):
         for l in F.readlines():
             if p.Path == True : 
                 if l.startswith(p.Name+p.Value) and p.Ensure == 'Present': # is is already there - keep it if present requested otherwise skip
-                            found=True
-                            n+=l
+                    found=True
+                    n+=l
                 else: # not a match
                     n+=l
             else:
-                if l.startswith(p.Name+'=') and p.Ensure == 'Present': # is is already there - keep it if present requested otherwise skip
+                if l.startswith(p.Name+'=') :
                     found = True
-                    l=p.Name+'="'+p.Value+'"\n' # set the variable to the new values
-                    n+=l
+                    if p.Ensure == 'Present': 
+                        l=p.Name+'="'+p.Value+'"\n' # set the variable to the new values
+                        n+=l
                 else:
                     n+=l
         if not found and p.Ensure == 'Present': # not found - present requested so add it.
@@ -277,7 +279,10 @@ def AddOrDelVar(p):
                 n+=p.Name+p.Value+'"\n'
             else:
                 n+=p.Name+'="'+p.Value+'"\n'
-        F.seek(0,0)
+
+        F.close()
+
+    with opened_w_error(p.file_path,'w') as (F,error):
         F.write(n)
         F.close()
     if st !=None :
