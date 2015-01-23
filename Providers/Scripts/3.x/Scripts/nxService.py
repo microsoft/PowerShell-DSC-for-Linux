@@ -342,9 +342,9 @@ def DetermineInitEnabled(stdout, runlevel):
 def GetSystemdState(sc):
     (process_stdout, process_stderr, retval) = Process([systemctl_path, "status", sc.Name])
     if retval == 0:
-        return "running"
+        return "Running"
     else:
-        return "stopped"
+        return "Stopped"
 
 def TestSystemdState(sc):
     if sc.State and sc.State != GetSystemdState(sc):
@@ -382,9 +382,9 @@ def GetUpstartState(sc):
         return ""
 
     if (sc.Name + " start") in process_stdout:
-        return "running"
+        return "Running"
     else:
-        return "stopped"
+        return "Stopped"
 
 def TestUpstartState(sc):
     if sc.State and sc.State != GetUpstartState(sc):
@@ -482,9 +482,9 @@ def GetInitState(sc):
     (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "status"])
     
     if DetermineInitState(process_stdout):
-        return "running"
+        return "Running"
     else:
-        return "stopped"
+        return "Stopped"
 
 def TestInitState(sc):
     if sc.State and sc.State != GetInitState(sc):
@@ -604,13 +604,13 @@ def ModifySystemdService(sc):
 
     (process_stdout, process_stderr, retval) = Process([systemctl_path, "status", sc.Name + '.service'])
     if retval == 0:
-        Print("running",file=sys.stderr)
-        if sc.State and sc.State != "running":
+        Print("Running",file=sys.stderr)
+        if sc.State and sc.State != "Running":
             return StopService(sc)
             
     else:
-        Print("stopped",file=sys.stderr)
-        if sc.State and sc.State != "stopped":
+        Print("Stopped",file=sys.stderr)
+        if sc.State and sc.State != "Stopped":
             return StartService(sc)
 
     return [0]
@@ -665,7 +665,7 @@ def ModifyUpstartService(sc):
             Print("Error: Failed to modify upstart conf file",file=sys.stderr)
             return [-1]
     
-    if sc.State == "running":
+    if sc.State == "Running":
         (process_stdout, process_stderr, retval) = Process([upstart_start_path, sc.Name])
         
         if retval != 0:
@@ -675,7 +675,7 @@ def ModifyUpstartService(sc):
         if not IsServiceRunning(sc):
             Print("Error: " +  upstart_start_path + " " + sc.Name + " failed: " + process_stderr,file=sys.stderr)
             return [-1]
-    elif sc.State == "stopped":
+    elif sc.State == "Stopped":
         (process_stdout, process_stderr, retval) = Process([upstart_stop_path, sc.Name])
         if retval != 0:
             if "Unknown instance" not in process_stderr:
@@ -723,7 +723,7 @@ def ModifyInitService(sc):
                 Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
                 return [-1]   
 
-    if sc.State == "running":
+    if sc.State == "Running":
         # don't try to read stdout or stderr as 'service start' comand re-directs them, causing a hang in subprocess.communicate()
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "start"],True) 
         if retval != 0:
@@ -733,7 +733,7 @@ def ModifyInitService(sc):
             Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + process_stderr,file=sys.stderr)
             return [-1]
             
-    elif sc.State == "stopped":
+    elif sc.State == "Stopped":
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "stop"])
         if retval != 0:
             Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + process_stderr,file=sys.stderr)
