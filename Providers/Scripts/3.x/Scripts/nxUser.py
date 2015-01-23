@@ -9,7 +9,6 @@ from contextlib import contextmanager
 import os
 import sys
 import datetime
-import grp
 import codecs
 import imp
 protocol=imp.load_source('protocol','../protocol.py')
@@ -223,7 +222,6 @@ def PasswordExpired(shadow_entry):
 
 def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
     ShowMof('SET', UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
-    p=Params(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     passwd_entries = None
     shadow_entries = None
     passwd_entries = ReadPasswd("/etc/passwd")
@@ -235,7 +233,6 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
     usermod_string = ""
     usermodonly_string = ""
-
     if Ensure.lower() == "absent":
         exit_code = os.system(userdel_path + " " + UserName)
     else:
@@ -250,27 +247,6 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
                 usermod_string += "," + Description
         
             usermod_string += "\""
-
-        disabled_user_string = ""
-        if Disabled == True:
-            disabled_user_string = "!"
-
-        if len(Password)>0:
-            usermod_string += " -p \"" + disabled_user_string + Password.replace("$", "\$") + "\""
-        elif Disabled == True:
-            usermodonly_string += " -L"
-        elif Disabled == False:
-            if UserName in shadow_entries:
-                cur_pass = shadow_entries[UserName][0]
-                if cur_pass == "!!":
-                    Print("Unable to unlock user: " + UserName + ".  Password is not set.",file=sys.stderr)
-                    return [-1]
-                elif cur_pass[0] == '!':
-                    if len(cur_pass) > 1:
-                        usermodonly_string += " -U"
-                    else:
-                        Print("Unable to unlock user: " + UserName + ".  Doing so would result in a passwordless account.",file=sys.stderr)
-                        return [-1]
             
         if HomeDirectory:
             usermod_string += " -m -d \"" + HomeDirectory + "\""
@@ -285,24 +261,48 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
             if len(usermodonly_string) > 0:
                 exit_code = os.system(usermod_path + " " + usermodonly_string + " " + UserName)
-                if exit_code != 0:
-                    return [exit_code]
         else:
             Print(usermod_string,file=sys.stderr)
             if len(usermodonly_string + usermod_string) > 0:
                 exit_code = os.system(usermod_path + " " + usermodonly_string + usermod_string + " " + UserName)
-                if exit_code != 0:
-                    return [exit_code]
-
 
         if PasswordChangeRequired == True:
             exit_code = os.system(chage_path + " -d  0 "  + UserName)
-           
+
+        disabled_user_string = ""
+        usermod_string = ""
+        if Disabled == True:
+            disabled_user_string = "!"
+
+        if len(Password)>0:
+            usermod_string += " -p \"" + disabled_user_string + Password.replace("$", "\$") + "\""
+        elif Disabled == True:
+            usermodonly_string += " -L"
+        elif Disabled == False:
+            passwd_entries = ReadPasswd("/etc/passwd")
+            if passwd_entries == None:
+                return [-1]
+            shadow_entries = ReadPasswd("/etc/shadow")
+            if shadow_entries == None:
+                return [-1]
+            if UserName in shadow_entries:
+                cur_pass = shadow_entries[UserName][0]
+                if cur_pass == "!!":
+                    Print("Unable to unlock user: " + UserName + ".  Password is not set.",file=sys.stderr)
+                    return [-1]
+                elif cur_pass[0] == '!':
+                    if len(cur_pass) > 1:
+                        usermodonly_string += " -U"
+                    else:
+                        Print("Unable to unlock user: " + UserName + ".  Doing so would result in a passwordless account.",file=sys.stderr)
+                        return [-1]
+        Print(usermod_string,file=sys.stderr)
+        if len(usermodonly_string + usermod_string) > 0:
+            exit_code = os.system(usermod_path + " " + usermodonly_string + usermod_string + " " + UserName)
     return [exit_code]
 
 def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
     ShowMof('TEST', UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
-    p=Params(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
 
     passwd_entries = None
     shadow_entries = None
@@ -388,7 +388,7 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
 
 def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
     ShowMof('GET', UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
-    p=Params(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
+
     passwd_entries = None
     shadow_entries = None
     passwd_entries = ReadPasswd("/etc/passwd")
