@@ -744,10 +744,10 @@ def ModifyInitService(sc):
         # don't try to read stdout or stderr as 'service start' comand re-directs them, causing a hang in subprocess.communicate()
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "start"],True) 
         if retval != 0:
-            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + process_stderr,file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " ,file=sys.stderr)
             return [-1]
         if not IsServiceRunning(sc):
-            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " + process_stderr,file=sys.stderr)
+            Print("Error: " + check_state_program + " " + sc.Name + " start failed: " ,file=sys.stderr)
             return [-1]
             
     elif sc.State == "Stopped":
@@ -763,7 +763,7 @@ def ModifyInitService(sc):
 
 def IsServiceRunning(sc):
     time.sleep(1)
-    cmd = 'ps -ef | grep -v grep | grep -E ".* ' +  sc.Name + '$"'
+    cmd = 'ps -ef | grep -v grep | grep -E ".*( ' +  sc.Name + '|/' + sc.Name + ')$"'
     code,out=RunGetOutput(cmd,False,False)
     if code != 0:
         return False
@@ -862,7 +862,7 @@ class ServiceContext:
             raise Exception("Error: Controller not specified.")
 
         self.Name = Name
-        self.Controller = Controller.lower()
+        self.Controller = Controller
         self.Enabled = Enabled
-        self.State = State.lower()
+        self.State = State
         self.Path = ''
