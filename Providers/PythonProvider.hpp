@@ -68,6 +68,8 @@ private:
     template<typename T>
     int send_array (T const& value);
 
+    int send_str_array (MI_StringA const& strArray);
+
     int send (MI_Value const& value,
               MI_Type const type,
               MI_Uint32 const flags);
