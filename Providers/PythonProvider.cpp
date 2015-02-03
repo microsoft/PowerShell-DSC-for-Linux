@@ -708,7 +708,7 @@ PythonProvider::send (
         rval = send_array (value.datetimea);
         break;
     case MI_STRINGA:
-        rval = send_array (value.stringa);
+        rval = send_str_array (value.stringa);
         break;
     case MI_INSTANCEA:
         rval = send_array (value.instancea);
@@ -720,6 +720,22 @@ PythonProvider::send (
         std::cerr << strm.str () << std::endl;
         rval = EXIT_FAILURE;
         break;
+    }
+    return rval;
+}
+
+
+int
+PythonProvider::send_str_array (
+    MI_StringA const& strArray)
+{
+    //SCX_BOOKEND ("PythonProvider::send_str_array");
+    int rval = send<int> (strArray.size);
+    for (MI_Uint32 n = 0;
+         EXIT_SUCCESS == rval && n < strArray.size;
+         ++n)
+    {
+        rval = send (static_cast<char const* const> (strArray.data[n]));
     }
     return rval;
 }
