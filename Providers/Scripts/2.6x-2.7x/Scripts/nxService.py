@@ -59,7 +59,6 @@ def Test_Marshall(Name, Controller, Enabled, State):
         State=State.decode("utf-8")
     else:
         State = ''
-
     retval = Test(Name, Controller, Enabled, State)
     return retval
 
@@ -191,7 +190,7 @@ def RunGetOutput(cmd,no_output,chk_err=True):
 
 
 
-systemctl_path = ""
+systemctl_path = "/usr/bin/systemctl"
 upstart_start_path = "/sbin/start"
 upstart_stop_path = "/sbin/stop"
 upstart_status_path = "/sbin/status"
@@ -328,7 +327,7 @@ def GetRunLevel():
     return int(tokens[1])
 
 def DetermineInitState(stdout):
-    if "running" in stdout:
+    if "is running" in stdout or "start/running" in stdout:
         return True
     elif stdout.strip() == "Running":
         return True
@@ -359,9 +358,9 @@ def DetermineInitEnabled(stdout, runlevel):
 def GetSystemdState(sc):
     (process_stdout, process_stderr, retval) = Process([systemctl_path, "status", sc.Name])
     if retval == 0:
-        return "Running"
-    else:
-        return "Stopped"
+        if '(running)' in process_stdout:
+            return "Running"
+    return "Stopped"
 
 def TestSystemdState(sc):
     if sc.State and sc.State != GetSystemdState(sc):
@@ -377,7 +376,7 @@ def GetSystemdEnabled(sc):
         return False
 
 def TestSystemdEnabled(sc):
-    if sc.Enabled and sc.Enabled != GetSystemdEnabled(sc):
+    if sc.Enabled != GetSystemdEnabled(sc):
         return False
     return True
 
@@ -452,7 +451,13 @@ def GetUpstartEnabled(sc):
                 else:
                     return "Complex"
         
-
+        if not start_on_exists and not stop_on_exists:
+            # not upstart
+            (process_stdout, process_stderr, retval) = Process(['chkconfig', sc.Name, ''])
+            if retval == 0:
+                if 'off' not in process_stdout:
+                    return True
+            return False
         if start_on_exists and start_on_is_enabled:
             if stop_on_exists and stop_on_is_enabled:
                 Print("Error: Having trouble determining whether service " + sc.Name + " is enabled or disabled.",file=sys.stderr)
@@ -469,31 +474,27 @@ def GetUpstartEnabled(sc):
         return False
 
 def TestUpstartEnabled(sc):
-    if sc.Enabled:
-        currently_enabled = GetUpstartEnabled(sc)
-        if sc.Enabled == True and currently_enabled == False:
-            return False
-        elif sc.Enabled == False and currently_enabled == True:
-            return False
-        elif currently_enabled == "Complex":
-            Print("Info: Cannot modify 'Enabled' state for service " + sc.Name + ", conf file too complex.  Please use the File provider to write your own conf file for this service.",file=sys.stderr)
-            return True
-    return True
+    currently_enabled = GetUpstartEnabled(sc)
+    if currently_enabled == "Complex":
+        Print("Info: Cannot modify 'Enabled' state for service " + sc.Name + ", conf file too complex.  Please use the File provider to write your own conf file for this service.",file=sys.stderr)
+        return False
+    return currently_enabled
+
 
 def TestUpstart(sc):
     if not UpstartExists():
         return [-1]
     if not TestUpstartState(sc):
         return [-1]
-    if not TestUpstartEnabled(sc):
+    if sc.Enabled != TestUpstartEnabled(sc):
         return [-1]
     return [0]
 
 def GetInitState(sc):
     check_state_program = initd_service
     check_enabled_program = initd_chkconfig
-    if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
-        check_state_program = initd_invokerc
+    if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc): # debian style init. These are missing in redhat.
+        check_state_program = '/usr/sbin/service'
         check_enabled_program = initd_updaterc
 
     (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "status"])
@@ -533,7 +534,7 @@ def GetInitEnabled(sc):
             return False
 
 def TestInitEnabled(sc):
-    if sc.Enabled and sc.Enabled != GetInitEnabled(sc):
+    if sc.Enabled != GetInitEnabled(sc):
         return False
     return True
 
@@ -557,7 +558,7 @@ def SystemdExists():
         return False
 
 def UpstartExists():
-    if os.path.isfile('/sbin/upstart-local-bridge') and os.path.isfile(upstart_start_path) and os.path.isfile(upstart_stop_path) and os.path.isfile(upstart_status_path):
+    if ( os.path.isfile('/sbin/upstart-local-bridge') or  os.path.isfile('/sbin/upstart-udev-bridge') ) and os.path.isfile(upstart_start_path) and os.path.isfile(upstart_stop_path) and os.path.isfile(upstart_status_path):
         return True
     else:
         return False
@@ -637,7 +638,6 @@ def CreateUpstartService(sc):
     return [-1]
 
 def ModifyUpstartConfFile(sc):
-    
     file_lines,error = ReadFile("/etc/init/" + sc.Name + ".conf")
     if len(file_lines) == 0 or error != None:
         Print("Error: Conf file unable to be read for service " + sc.Name,file=sys.stderr)
@@ -645,6 +645,7 @@ def ModifyUpstartConfFile(sc):
 
     outfile = ""
     start_on_exists = False
+    stop_on_exists = False
 
     for full_line in file_lines.splitlines():
         line = full_line.split("#")[0]  
@@ -658,26 +659,30 @@ def ModifyUpstartConfFile(sc):
                 outfile += "stop on runlevel [0123456]\n"
         elif "stop on" in line:
             # Let the 'start on' clause of this if statement handle the insertion of 'stop on'
-            pass
+            start_on_exists = True
         else:
             outfile += full_line + "\n"
-
-    if not start_on_exists:
-        # If there was no "start on", make sure to add one
-        if sc.Enabled == True:
-            outfile += "start on runlevel [2345]\n"
-            outfile += "stop on runlevel [!2345]\n"
-        elif sc.Enabled == False:
-            outfile += "stop on runlevel [0123456]\n"
-
-    if WriteFile("/etc/init/" + sc.Name + ".conf", outfile) != None :
-        Print("Error: Unable to write conf file for service " + sc.Name,file=sys.stderr)
-        return False
-
-    return True
-
+            
+    if start_on_exists or stop_on_exists :
+        if WriteFile("/etc/init/" + sc.Name + ".conf", outfile) != None :
+            Print("Error: Unable to write conf file for service " + sc.Name,file=sys.stderr)
+            return False
+        return True
+    else:    #not an upstart service
+       if sc.Enabled == True:
+           (process_stdout, process_stderr, retval) = Process(['update-rc.d', sc.Name, ' defaults'])
+           if retval != 0:
+               Print("Error: " + process_stdout + " enable " + sc.Name + " failed: " + process_stderr,file=sys.stderr)
+               return False
+       else:
+           (process_stdout, process_stderr, retval) = Process(['update-rc.d -f ', sc.Name, ' remove'])
+           if retval != 0:
+               Print("Error: " + process_stdout + " disable " + sc.Name + " failed: " + process_stderr,file=sys.stderr)
+               return False
+       return True
+           
 def ModifyUpstartService(sc):
-    if sc.Enabled and sc.Enabled != GetUpstartEnabled(sc):
+    if sc.Enabled != TestUpstartEnabled(sc):
         if not ModifyUpstartConfFile(sc):
             Print("Error: Failed to modify upstart conf file",file=sys.stderr)
             return [-1]
@@ -715,8 +720,8 @@ def CreateInitService(sc):
 def ModifyInitService(sc):
     check_state_program = initd_service
     check_enabled_program = initd_chkconfig
-    if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
-        check_state_program = initd_invokerc
+    if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc): # debian style init. These are missing in redhat.
+        check_state_program = '/usr/sbin/service'
         check_enabled_program = initd_updaterc
         if sc.Enabled == True:
             (process_stdout, process_stderr, retval) = Process([check_enabled_program, "-f", sc.Name, "enable"])
@@ -763,7 +768,7 @@ def ModifyInitService(sc):
 
 def IsServiceRunning(sc):
     time.sleep(1)
-    cmd = 'ps -ef | grep -v grep | grep -E ".*( ' +  sc.Name + '|/' + sc.Name + ')$"'
+    cmd = 'ps -ef | grep -v grep | grep -E ".*( ' +  sc.Name + '|/' + sc.Name + ')( |$)"'
     code,out=RunGetOutput(cmd,False,False)
     if code != 0:
         return False
