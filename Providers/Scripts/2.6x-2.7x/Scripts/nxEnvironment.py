@@ -261,16 +261,19 @@ def AddOrDelVar(p):
             return found,error
         for l in F.readlines():
             if p.Path == True : 
-                if l.startswith(p.Name+p.Value) and p.Ensure == 'Present': # is is already there - keep it if present requested otherwise skip
-                    found=True
-                    n+=l
+                if l.startswith('PATH=$PATH:"'+p.Value) :
+                    if p.Ensure == 'Present': # is is already there - keep it if present requested otherwise skip
+                        found=True
+                        n+=l
+                    else:
+                        found=True
                 else: # not a match
                     n+=l
             else:
                 if l.startswith(p.Name+'=') :
                     found = True
                     if p.Ensure == 'Present': 
-                        l=p.Name+'="'+p.Value+'"\n' # set the variable to the new values
+                        l=p.Name+'='+p.Value+'\n' # set the variable to the new values
                         n+=l
                 else:
                     n+=l
@@ -278,7 +281,7 @@ def AddOrDelVar(p):
             if p.Path == True:
                 n+=p.Name+p.Value+'"\n'
             else:
-                n+=p.Name+'="'+p.Value+'"\n'
+                n+=p.Name+'='+p.Value+'\n'
 
         F.close()
 
@@ -301,9 +304,9 @@ def FindVar(p):
             return found,error
         for l in F.readlines():
             if p.Path == True:
-                if p.Name+p.Value in l:
+                if p.Value in l:
                     found = True
-            elif p.Name+ '="' +p.Value+'"' in l:
+            elif p.Name+ '=' +p.Value in l:
                     found = True
         F.close()
     return found,error
