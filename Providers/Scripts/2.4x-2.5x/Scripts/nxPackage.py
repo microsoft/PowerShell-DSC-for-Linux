@@ -3,7 +3,6 @@
 # Copyright (C) Microsoft Corporation, All rights reserved. 
 #============================================================================
 import subprocess
-import platform
 import os
 import sys
 import time
@@ -135,7 +134,7 @@ def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCo
         LogPath = ''
 
     retval = 0
-    retval,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+    retval,PackageManager,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
@@ -310,8 +309,6 @@ def IsPackageInstalled(p):
     if p==None:
         return False
     out=''
-    if len(p.Path)>0:
-        return False,out
     if p.PackageGroup == True:
         if p.cmds[p.PackageManager]['stat_group'] != None:
             cmd=p.cmds[p.PackageManager]['stat_group'] + '"' + p.Name + '"' 
@@ -338,7 +335,7 @@ def ParseInfo(p,info):
     p.PackageDescription=''
     p.Publisher=''
     p.InstalledOn=''
-    p.Size=''
+    p.Size='0'
     p.Version=''
     p.Installed=False
 
@@ -354,9 +351,9 @@ def ParseInfo(p,info):
             p.Version=f[4]
             p.Installed= ( 'install' in f[5] )
             
-    if len(f)!=5:
-        Print('ERROR.   '+ p.PackageManager,file=sys.stderr)
-        Log(p.LogPath,'ERROR.   '+ p.PackageManager)
+        if len(f)!=5:
+            Print('ERROR.   '+ p.PackageManager,file=sys.stderr)
+            Log(p.LogPath,'ERROR.   '+ p.PackageManager)
 
 def DoEnableDisable(p):
     # if the path is set, use the path and self.PackageSystem
@@ -424,6 +421,7 @@ def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPa
 
 def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
     retval=-1
+    installed=False
     ShowMof('GET', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)  
     try:
         p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
@@ -438,7 +436,7 @@ def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPat
     if not installed and Ensure == 'Absent' :
         retval =0
         
-    return [retval,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,installed]
+    return [retval,p.PackageManager,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,installed]
 
 def opened_w_error(filename, mode="r"):
     """
