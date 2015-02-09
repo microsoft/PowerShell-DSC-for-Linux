@@ -11,7 +11,7 @@ PROVIDES: 'dscpackage'
 DESCRIPTION: 'Windows Powershell Desired State Configuration for Linux'
 COPYRIGHT_FILE: 'Copyright Microsoft'
 SHLIB_EXT: 'so'
-PROVIDERS: 'File Script User Group Service Package Environment Exec SshAuthorizedKeys'
+PROVIDERS: 'File Script User Group Service Package Environment SshAuthorizedKeys'
 
 DEV_OMI_DIR: 'omi-1.0.8'
 DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateConfiguration'
@@ -62,11 +62,6 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/mof/MSFT_nxEnvironmentResource.schema.mof;  Providers/nxEnvironment/MSFT_nxEnvironmentResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxEnvironmentResource.registration.mof;  Providers/nxEnvironment/MSFT_nxEnvironmentResource.registration.mof;      755; root; root
 
-/opt/microsoft/dsc/lib/libMSFT_nxExecResource.so;   Providers/bin/libMSFT_nxExecResource.so;       755; root; root
-/opt/microsoft/dsc/etc/MSFT_nxExecResource.reg;  Providers/nxExec/MSFT_nxExecResource.reg;      755; root; root
-/opt/microsoft/dsc/mof/MSFT_nxExecResource.schema.mof;  Providers/nxExec/MSFT_nxExecResource.schema.mof;      755; root; root
-/opt/microsoft/dsc/mof/MSFT_nxExecResource.registration.mof;  Providers/nxExec/MSFT_nxExecResource.registration.mof;      755; root; root
-
 /opt/microsoft/dsc/lib/libMSFT_nxSshAuthorizedKeysResource.so;   Providers/bin/libMSFT_nxSshAuthorizedKeysResource.so;       755; root; root
 /opt/microsoft/dsc/etc/MSFT_nxSshAuthorizedKeysResource.reg;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.reg;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxSshAuthorizedKeysResource.schema.mof;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.schema.mof;      755; root; root
@@ -92,7 +87,6 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxService.py; Providers/Scripts/2.4x-2.5x/Scripts/nxService.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxUser.py; Providers/Scripts/2.4x-2.5x/Scripts/nxUser.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; Providers/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; 755; root; root
-/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxExec.py; Providers/Scripts/2.4x-2.5x/Scripts/nxExec.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxDNSServerAddress.py; Providers/Scripts/2.4x-2.5x/Scripts/nxDNSServerAddress.py; 755; root; root
 
@@ -104,7 +98,6 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxService.py; Providers/Scripts/2.6x-2.7x/Scripts/nxService.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxUser.py; Providers/Scripts/2.6x-2.7x/Scripts/nxUser.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; Providers/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; 755; root; root
-/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxExec.py; Providers/Scripts/2.6x-2.7x/Scripts/nxExec.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxDNSServerAddress.py; Providers/Scripts/2.6x-2.7x/Scripts/nxDNSServerAddress.py; 755; root; root
 
@@ -116,7 +109,6 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxService.py; Providers/Scripts/3.x/Scripts/nxService.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxUser.py; Providers/Scripts/3.x/Scripts/nxUser.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxEnvironment.py; Providers/Scripts/3.x/Scripts/nxEnvironment.py; 755; root; root
-/opt/microsoft/dsc/Scripts/3.x/Scripts/nxExec.py; Providers/Scripts/3.x/Scripts/nxExec.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxDNSServerAddress.py; Providers/Scripts/3.x/Scripts/nxDNSServerAddress.py; 755; root; root
 
