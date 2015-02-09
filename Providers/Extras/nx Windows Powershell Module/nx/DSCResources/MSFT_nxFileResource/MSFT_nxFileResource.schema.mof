@@ -7,8 +7,8 @@ class MSFT_nxFileResource:OMI_BaseResource
        [Write, ValueMap{"file", "directory", "link"}] string Type;
        [Write] string Contents;
        [Write, ValueMap{"md5", "md5lite", "mtime", "ctime", "none"}] string Checksum;
-       [Write, ValueMap{"true", "false"}] string Recurse;
-       [Write, ValueMap{"true", "false", "yes", "no"}] string Force;
+       [Write] boolean Recurse;
+       [Write] boolean Force;
        [Write, ValueMap{"follow", "manage"}] string Links;
        [Write] string Group;
        [Write] string Mode;
