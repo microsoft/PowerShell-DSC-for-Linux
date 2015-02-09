@@ -68,7 +68,6 @@ PROVIDERS+=nxUser
 PROVIDERS+=nxGroup
 PROVIDERS+=nxService
 PROVIDERS+=nxPackage
-PROVIDERS+=nxExec
 PROVIDERS+=nxEnvironment
 PROVIDERS+=nxSshAuthorizedKeys
 #PROVIDERS+=nxIPAddress
