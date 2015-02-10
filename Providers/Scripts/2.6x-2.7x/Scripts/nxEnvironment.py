@@ -131,14 +131,9 @@ class Params:
             Print('ERROR: Param Name must be set if Path <> True.',file=sys.stderr)
             Log(LogPath,'ERROR: Param Name must be set if Path <> True.')
             raise Exception('BadParameter')
+
         self.Name = Name
-
-        if len(Value)<1:
-            Print('ERROR: Mandatory Param Value missing.',file=sys.stderr)
-            Log(LogPath,'ERROR: Mandatory Param Value missing.')
-            raise Exception('BadParameter')
         self.Value = Value
-
 
         self.file_path='/etc/environment'
         if True == self.Path:
