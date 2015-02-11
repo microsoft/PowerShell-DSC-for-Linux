@@ -267,8 +267,8 @@ class Params:
         self.cmds['rpm']['Absent']='rpm % -e '
         self.cmds['rpm']['stat']='rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed\n" '
         self.cmds['rpm']['stat_group']=None
-        self.cmds['apt']['Present']='apt-get % install ^ --yes '
-        self.cmds['apt']['Absent']='apt-get % remove ^--yes '
+        self.cmds['apt']['Present']='apt-get % install ^ --allow-unauthenticated --yes '
+        self.cmds['apt']['Absent']='apt-get % remove ^ --allow-unauthenticated --yes '
         self.cmds['apt']['stat']=self.cmds['dpkg']['stat']
         self.cmds['apt']['stat_group']=None
         self.cmds['yum']['Present']='yum -y % install ^ '
@@ -347,7 +347,8 @@ def ParseInfo(p,info):
             p.InstalledOn=f[2]
             if not p.InstalledOn.isalnum():
                 p.InstalledOn=time.gmtime(int(p.InstalledOn))
-            p.Size=f[3]
+            if len(f[3])>0:
+                p.Size=f[3]
             p.Version=f[4]
             p.Installed= ( 'install' in f[5] )
             
@@ -431,12 +432,7 @@ def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPat
         return [retval,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,installed]
     installed,out = IsPackageInstalled(p)
     ParseInfo(p,out)
-    if  installed and Ensure == 'Present'  :
-        retval = 0
-    if not installed and Ensure == 'Absent' :
-        retval =0
-        
-    return [retval,p.PackageManager,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,installed]
+    return [0,p.PackageManager,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,installed]
 
 def opened_w_error(filename, mode="r"):
     """
