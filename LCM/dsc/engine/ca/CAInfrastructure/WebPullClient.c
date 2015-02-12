@@ -34,6 +34,32 @@
 
 #include "WebPullClient.h"
 
+typedef struct ModuleClassList ModuleClassList;
+struct ModuleClassList {
+    ModuleClassList* next;
+    MI_Char* moduleClass;
+};
+
+typedef struct ModuleVersionClassTuple ModuleVersionClassTuple;
+struct ModuleVersionClassTuple {
+    MI_Char* moduleVersion;
+    ModuleClassList* first;
+};
+
+typedef struct ModuleTableEntry ModuleTableEntry;
+struct ModuleTableEntry {
+    ModuleTableEntry* next;
+    MI_Char* moduleName;
+    ModuleVersionClassTuple* moduleVersionClassTuple;
+};
+
+typedef struct ModuleTable ModuleTable;
+struct ModuleTable {
+    ModuleTableEntry* first;
+};
+
+static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation, 
+                                           ModuleTable* table);
 void HandleStatus(_In_ HttpClient *http, _In_ void *callbackData, MI_Result result);
 MI_Boolean HandleResponse( _In_ HttpClient *http, _In_ void *callbackData, _In_ const HttpClientResponseHeader *headers,
                            MI_Sint64 contentSize, MI_Boolean lastChunk, _In_ Page**data);
@@ -44,7 +70,132 @@ MI_Boolean EscapeValue (_In_reads_z_(size) char *tokenValue, int startValue, int
                     _Inout_ int *currentTokenEndValue,
                     _Inout_ int *nextTokenValue);
 
+void CleanupModuleVersionClassTuple(ModuleVersionClassTuple* moduleVersionClassTuple)
+{
+    ModuleClassList* current;
+    ModuleClassList* previous;
 
+    if (moduleVersionClassTuple == NULL)
+    {
+        return;
+    }
+
+    current = moduleVersionClassTuple->first;
+
+    DSC_free(moduleVersionClassTuple->moduleVersion);
+
+    while (current != NULL)
+    {
+        previous = current;
+        current = current->next;
+        DSC_free(previous->moduleClass);
+        DSC_free(previous);
+    }
+    DSC_free(moduleVersionClassTuple);
+}
+
+void CleanupModuleTableEntry(ModuleTableEntry* moduleTableEntry)
+{
+    if (moduleTableEntry == NULL)
+    {
+        return;
+    }
+
+    CleanupModuleVersionClassTuple(moduleTableEntry->moduleVersionClassTuple);
+    DSC_free(moduleTableEntry->moduleName);
+    DSC_free(moduleTableEntry);
+}
+
+void CleanupModuleTable(ModuleTable moduleTable)
+{
+    ModuleTableEntry* current = moduleTable.first;
+    ModuleTableEntry* previous;
+    while (current != NULL)
+    {
+        previous = current;
+        current = current->next;
+        CleanupModuleTableEntry(previous);
+    }
+}
+
+static int IsModuleVersionValidFormat(MI_Char* string)
+{
+    MI_Char c;
+
+    if (string == NULL)
+    {
+        return 0;
+    }
+
+    // Make sure we don't have some garbage version number here.  It should be just numbers and decimals.
+    while ( (c = *string) != '\0')
+    {
+        if (c == '0' ||
+            c == '1' ||
+            c == '2' ||
+            c == '3' ||
+            c == '4' ||
+            c == '5' ||
+            c == '6' ||
+            c == '7' ||
+            c == '8' ||
+            c == '9' ||
+            c == '.')
+        {
+            ++string;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static ModuleTableEntry** ModuleTableContainsKey(ModuleTable* table, MI_Char* moduleNameToFind)
+{
+    ModuleTableEntry** current;
+
+    if (table == NULL)
+    {
+        return NULL;
+    }
+    
+    current = &table->first;
+    while (*current != NULL)
+    {
+        if ( Tcscasecmp((*current)->moduleName, moduleNameToFind) == 0 )
+        {
+            return current;
+        }
+        else
+        {
+            current = &(*current)->next;
+        }
+    }
+
+    return current;
+}
+
+static ModuleClassList** ClassListContainsClass(ModuleClassList** firstClassListElement, MI_Char* classNameToFind)
+{
+    ModuleClassList** current;
+
+    current = firstClassListElement;
+    while (*current != NULL)
+    {
+        if ( Tcscasecmp((*current)->moduleClass, classNameToFind) == 0 )
+        {
+            return current;
+        }
+        else
+        {
+            current = &(*current)->next;
+        }
+    }
+
+    return current;
+}
 
 MI_Boolean ValidateChecksum(_In_z_ MI_Char *checksum, _In_z_ const MI_Char* path)
 {
@@ -1551,7 +1702,10 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         }
     }    
     if( requestParam.u.config.checkSum)
-        DSC_free(requestParam.u.config.checkSum); 
+    {
+        DSC_free(requestParam.u.config.checkSum);
+    }
+
     *result = outputResult;
     DSC_EventWriteWebDownloadManagerGetDocGetCall(configurationID, *result );
     return MI_RESULT_OK;    
@@ -1581,6 +1735,63 @@ MI_Char *GetSystemUuid()
 }
 
 MI_Boolean HandleGetConfigurationResponse( _In_ void *callbackData, _In_ const HttpClientResponseHeader *headers,
+                MI_Sint64 contentSize, MI_Boolean lastChunk, _In_ Page**data)
+{
+    MI_Uint32 xCount;
+    RequestContainer * requestParam = (RequestContainer*) callbackData;
+    requestParam->statusCode = Success;
+    if( headers)
+    {
+       requestParam->httpError = headers->httpError;
+       if( headers->httpError != HTTP_SUCCESS_CODE ) //Status_OK
+       {
+            return MI_FALSE;
+       }        
+        for(  xCount = 0; xCount < headers->sizeHeaders; xCount++)
+        {
+            if(Strcasecmp(headers->headers[xCount].name, checkSumName) == 0 ) 
+            {
+                requestParam->u.config.checkSum = (char*) DSC_malloc(Strlen(headers->headers[xCount].value)+1, NitsHere());
+                if( requestParam->u.config.checkSum == NULL)
+                {
+                    requestParam->statusCode = GetConfigurationCommandFailure;
+                    requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, ID_ENGINEHELPER_MEMORY_ERROR);
+                    return MI_FALSE;
+                }
+                memcpy(requestParam->u.config.checkSum, headers->headers[xCount].value, Strlen(headers->headers[xCount].value));
+            }
+            else if(Strcasecmp(headers->headers[xCount].name, checksumAlgorithmName) == 0 ) 
+            {
+                requestParam->u.config.checkSumAlgorithm = (char*) DSC_malloc(Strlen(headers->headers[xCount].value) +1, NitsHere());
+                if( requestParam->u.config.checkSumAlgorithm == NULL)
+                {
+                    requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, ID_ENGINEHELPER_MEMORY_ERROR);
+                    requestParam->statusCode = GetConfigurationCommandFailure;
+                    return MI_FALSE;
+                }
+                memcpy(requestParam->u.config.checkSumAlgorithm, headers->headers[xCount].value, Strlen(headers->headers[xCount].value));                
+            }
+        }
+    }
+
+    if( data && *data)
+    {
+        size_t dataSize =(*data)->u.s.size;
+        FILE *fp = File_OpenT(requestParam->u.config.directoryPath, MI_T("a"));
+        if(fp == NULL)
+        {
+            requestParam->internalErrorResult = GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, 
+                                        ID_PULL_CONFIGURATIONSAVEFAILED, requestParam->u.config.directoryPath);
+            requestParam->statusCode = GetConfigurationCommandFailure;
+            return MI_FALSE;            
+        }
+        fwrite( (char*)((*data)+1), 1, dataSize, fp);
+        File_Close(fp);
+    }
+    return MI_TRUE;
+}
+
+MI_Boolean HandleGetModuleResponse( _In_ void *callbackData, _In_ const HttpClientResponseHeader *headers,
                 MI_Sint64 contentSize, MI_Boolean lastChunk, _In_ Page**data)
 {
     MI_Uint32 xCount;
@@ -1793,8 +2004,7 @@ MI_Boolean HandleResponse( _In_ HttpClient *http, _In_ void *callbackData, _In_ 
     }
     else if(requestParam->serverOperation == OPERATION_GETMODULE )
     {
-        // TODO: support getting module.
-        return MI_FALSE;
+        return HandleGetModuleResponse(callbackData, headers, contentSize, lastChunk, data);
     }
     else
     {
@@ -2025,6 +2235,176 @@ MI_Result CreateTmpDirectoryPath(_Outptr_result_maybenull_z_  MI_Char** director
    return MI_RESULT_FAILED;
 }
 
+MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID, 
+                                  _In_z_ const MI_Char *moduleName,
+                                  _In_z_ const MI_Char *moduleVersion,
+                                  _In_z_ const MI_Char *certificateID,
+                                  _In_z_ const MI_Char *filePath,
+                                  _Outptr_result_maybenull_z_  MI_Char** result,
+                                  _Out_ MI_Uint32* getActionStatusCode,
+                                  _In_reads_z_(URL_SIZE) const MI_Char *url,
+                                  _In_ MI_Uint32 port,
+                                  _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
+                                  MI_Boolean bIsHttps,
+                                  _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r = MI_RESULT_OK;
+    RequestContainer requestParam = {0};  
+    HttpClient  *http = NULL;
+    int i=0;
+    MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
+    requestParam.serverOperation = OPERATION_GETMODULE;  
+    *result = NULL;
+    if( outputResult == NULL )
+    {
+        *getActionStatusCode = GetConfigurationCommandFailure;
+        return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
+    }
+    DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);
+    Stprintf(outputResult,3, MI_T("OK"));
+    
+
+    requestParam.u.config.directoryPath = filePath;
+    r = HttpClient_New_Connector( &http, NULL, url, (unsigned short)port, bIsHttps, HandleStatus, HandleResponse, (void*)&requestParam, NULL, NULL, NULL);
+    if( r != MI_RESULT_OK)
+    {
+        *getActionStatusCode = GetConfigurationCommandFailure;
+        DSC_free(outputResult);
+        return GetCimMIError1Param(r, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);
+    }
+    //Create Request
+    {
+        char configurationUrl[MAX_URL_LENGTH];
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "/%s/Module(ConfigurationId='%s',ModuleName='%s',ModuleVersion='%s')/ModuleContent",subUrl, configurationID, moduleName, moduleVersion);
+        r = HttpClient_StartRequest(http, "GET", configurationUrl, NULL, NULL);
+        if( r != MI_RESULT_OK)
+        {
+            *getActionStatusCode = GetConfigurationCommandFailure;
+            HttpClient_Delete(http);
+            DSC_free(outputResult);
+            return GetCimMIError1Param(r, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);          
+        }
+         DSC_EventWriteWebDownloadManagerGetDocGetUrl(configurationID, subUrl);
+        for( i =0; i < 10000 && !requestParam.httpResponseReveived ; i++)
+             HttpClient_Run(http, HTTP_CONNECTION_TIMEOUT * 1000);  
+        
+        HttpClient_Delete(http);        
+    }
+
+    r = ValidateGetConfigurationResult(&requestParam, url, getActionStatusCode, extendedError);
+    DSC_EventWriteLCMPullConfigurationChecksumValidationResult(configurationID, (MI_Uint32)r);        
+    if( r != MI_RESULT_OK)
+    {
+        DSC_free(outputResult);
+        return r;
+    }
+    if( requestParam.u.config.checkSumAlgorithm) 
+        DSC_free(requestParam.u.config.checkSumAlgorithm);    
+  
+    //Create checksumFile
+    {
+        MI_Char checksumFileName[MAX_URL_LENGTH];
+        FILE *fp = NULL;
+        Stprintf(checksumFileName, MAX_URL_LENGTH,MI_T("%s.checksum"), filePath);
+        fp = File_OpenT(checksumFileName,MI_T("w"));
+        if( fp != NULL )
+        {
+            fwrite(requestParam.u.config.checkSum, 1, Strlen(requestParam.u.config.checkSum), fp);
+            File_Close(fp);
+        }
+        else
+        {
+            *getActionStatusCode = GetConfigurationCommandFailure;
+            if( requestParam.u.config.checkSum)
+                DSC_free(requestParam.u.config.checkSum);   
+            DSC_free(outputResult);
+            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED, checksumFileName);            
+        }
+    }
+
+    if( requestParam.u.config.checkSum)
+        DSC_free(requestParam.u.config.checkSum);       
+    *result = outputResult;
+    DSC_EventWriteWebDownloadManagerGetDocGetCall(configurationID, *result );
+    return MI_RESULT_OK;
+}
+
+MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID, 
+                                  const MI_Char *certificateID,
+                                  MI_Char* directoryPath,
+                                  MI_Char* fileName,
+                                  MI_Char** result,                               
+                                  MI_Uint32* getActionStatusCode,
+                                  MI_Boolean bAllowedModuleOverride,
+                                  _In_reads_z_(URL_SIZE) const MI_Char *url,
+                                  _In_ MI_Uint32 port,
+                                  _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
+                                  MI_Boolean bIsHttps,
+                                  MI_Instance **extendedError)
+{
+    ModuleTable moduleTable;
+    ModuleTableEntry* current;
+    MI_Result r;
+    int retval;
+    char zipPath[MAX_URL_LENGTH];
+    char stringBuffer[MAX_URL_LENGTH];
+
+    moduleTable.first = NULL;
+    r = GetModuleNameVersionTable(fileName, &moduleTable);
+    if (r != MI_RESULT_OK)
+    {
+        CleanupModuleTable(moduleTable);
+        DSC_free(fileName);
+        free(directoryPath);
+        return r;
+    }
+
+    // moduleTable now has the modules we need to pull
+    current = moduleTable.first;
+    while (current != NULL)
+    {
+        Snprintf(zipPath, MAX_URL_LENGTH, "%s/%s_%s.zip", directoryPath, current->moduleName, current->moduleVersionClassTuple->moduleVersion);
+        r = IssueGetModuleRequest(configurationID, 
+                                  current->moduleName, 
+                                  current->moduleVersionClassTuple->moduleVersion,
+                                  certificateID,
+                                  zipPath,
+                                  result,
+                                  getActionStatusCode,
+                                  url,
+                                  port,
+                                  subUrl,
+                                  bIsHttps,
+                                  extendedError);
+
+        if (r != MI_RESULT_OK)
+        {
+            CleanupModuleTable(moduleTable);
+            DSC_free(fileName);
+            free(directoryPath);
+            return r;
+        }
+
+        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", "/opt/microsoft/dsc/Scripts/InstallModule.py", zipPath);
+        retval = system(stringBuffer);
+
+        if (retval != 0)
+        {
+            CleanupModuleTable(moduleTable);
+            DSC_free(fileName);
+            free(directoryPath);
+            return MI_RESULT_FAILED; 
+        }
+
+        current = current->next;
+    }
+
+    CleanupModuleTable(moduleTable);
+
+    return MI_RESULT_OK;
+
+}
+
 MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContext *lcmContext,
                                 _In_ MI_Instance *metaConfig,
                                 _Outptr_result_maybenull_z_  MI_Char** mofFileName,
@@ -2041,6 +2421,9 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     MI_Char subUrl[SUBURL_SIZE] = {0};
     MI_Uint32 port = DEFAULT_SERVERPORT;
     MI_Boolean bIsHttps = MI_FALSE;
+    MI_Value value;
+    MI_Uint32 flags;
+    MI_Boolean bAllowedModuleOverride;
 
     if( metaConfig == NULL )
     {
@@ -2073,34 +2456,38 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     // Issue Get Action Request
     r = IssueGetConfigurationRequest( configurationID,  certificateID, fileName, result, 
                     getActionStatusCode, url, port, subUrl, bIsHttps, extendedError);
-
-    DSC_free(configurationID);
       
     if( r != MI_RESULT_OK)
     {
+        DSC_free(configurationID);
         DSC_free(fileName);  
         free(directoryPath);
         return r;
     }
-    // Install modules as necessary. Do it only for windows for now
-#if defined(_MSC_VER)    
+
     r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_AllowModuleOverwrite, &value, NULL, &flags, NULL);
     if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && value.boolean == MI_TRUE)
+    {
         bAllowedModuleOverride = MI_TRUE;
-    
-    r = Pull_GetModules(lcmContext, metaConfig, directoryPath, fileName,  bAllowedModuleOverride, getActionStatusCode, extendedError);
+    }
+
+    r = Pull_GetModules(configurationID,  certificateID, directoryPath, fileName, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
     if( r != MI_RESULT_OK)
     {
-         DSC_free(directoryPath);
-         DSC_free(fileName);  
+         DSC_free(configurationID);
+         free(directoryPath);
+         DSC_free(fileName);
          return r;
-    }     
-#endif
+    }
+
+    DSC_free(configurationID);
     free(directoryPath);
     *mofFileName = fileName;
-     DSC_EventWriteLCMPullGetConfigSuccess(webPulginName);    
+    DSC_EventWriteLCMPullGetConfigSuccess(webPulginName);    
     return MI_RESULT_OK;
 }
+
+
                                  
 MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmContext,
                                 _In_ MI_Instance *metaConfig,
@@ -2162,3 +2549,286 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     
     return MI_RESULT_OK;
 }
+
+static int CompareVersions(MI_Char* a, MI_Char* b)
+{
+    MI_Char* a_token;
+    MI_Char* a_next_token;
+    long a_val;
+
+    MI_Char* b_token;
+    MI_Char* b_next_token;
+    long b_val;
+
+    a_token = Strtok(a, ".", &a_next_token);
+    b_token = Strtok(b, ".", &b_next_token);
+
+    if (a_token == NULL || b_token == NULL)
+    {
+        if (a_token == NULL && b_token == NULL)
+        {
+            return 0;
+        }
+        else if (a_token == NULL)
+        {
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    a_val = Strtol(a,0,10);
+    b_val = Strtol(b,0,10);
+    if ( a_val != b_val )
+    {
+        return a_val - b_val;
+    }
+    else
+    {
+        return CompareVersions(a_next_token, b_next_token);
+    }
+}
+
+static int IsModuleInstalled(MI_Char* moduleName, MI_Char* moduleVersion)
+{
+    int bytesRead;
+    size_t tmpLength;
+    MI_Char buffer[MAX_URL_LENGTH];
+    MI_Char buffer2[MAX_URL_LENGTH];
+    FILE * fp;
+
+    Snprintf(buffer, MAX_URL_LENGTH, "/opt/microsoft/dsc/modules/%s/VERSION", moduleName);
+    
+    fp = File_OpenT(buffer, MI_T("r"));
+    if( fp == NULL )
+    {
+        return 0;
+    }
+
+    bytesRead = fread(buffer, 1, MAX_URL_LENGTH, fp);
+    buffer[bytesRead] = '\0';
+
+    File_Close(fp);
+
+    if (bytesRead == 0)
+    {
+        // Unable to read VERSION.
+        return 0;
+    }
+
+    if (bytesRead == MAX_URL_LENGTH)
+    {
+        // Invalid version size.  It shouldn't be this long!
+        return 0;
+    }
+    
+    // Since we're going to be tokenizing moduleVersion, we should make a copy of it.
+    tmpLength = Tcslen(moduleVersion) + 1;
+    memcpy(buffer2, moduleVersion, tmpLength);
+
+    // If the installed version (buffer) is less than the parsed moduleVersion, we need the latest version.    
+    if (CompareVersions(buffer, buffer2) < 0)
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
+// Remove from the table modules that are installed with a version greater than or equal to the requested version
+static MI_Result FilterUsingCachedModules(ModuleTable* table)
+{
+    ModuleTableEntry** pointsToCurrent = &table->first;
+    ModuleTableEntry* current;
+    ModuleTableEntry* next;
+
+    while (*pointsToCurrent != NULL)
+    {
+        current = *pointsToCurrent;
+        next = current->next;
+
+        // if module is installed, remove it from list
+        if ( IsModuleInstalled( current->moduleName, current->moduleVersionClassTuple->moduleVersion ) == 1 )
+        {
+            *pointsToCurrent = next;
+            CleanupModuleTableEntry(current);
+        }
+        else
+        {
+            pointsToCurrent = &current->next;
+        }
+    }
+
+    return MI_RESULT_OK;
+}
+
+static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation, 
+                                           ModuleTable* table)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_InstanceA *miInstanceArray = NULL;
+    MI_Uint8 *pbuffer = NULL;
+    MI_Uint32 contentSize;
+    MI_Uint32 readBytes;
+    MI_ClassA miClassArray = {0};
+    MI_Application *miApp = NULL;
+    MI_Deserializer deserializer;
+    MI_OperationOptions options;
+    MI_Instance *extendedError;
+    MI_Value moduleName;
+    MI_Value moduleVersion;
+    int i;    
+    size_t tmpLength;
+    ModuleTableEntry* current;
+    ModuleTableEntry** foundEntry;
+    ModuleClassList** foundClassEntry;
+    
+    miApp = (MI_Application *) DSC_malloc( sizeof(MI_Application), NitsHere());
+    memset(miApp,  0, sizeof(MI_Application));
+    r = DSC_MI_Application_Initialize(0, NULL, NULL, miApp);   
+    if( r != MI_RESULT_OK)
+    {
+        DSC_free(miApp);
+        return MI_RESULT_FAILED;
+    }      
+    
+    memset(&deserializer, 0, sizeof(MI_Deserializer));    
+    memset(&options, 0, sizeof(MI_OperationOptions));
+
+    r = DSC_MI_Application_NewOperationOptions(miApp, MI_FALSE, &options);
+    if (r != MI_RESULT_OK)
+    {
+        DSC_free(miApp);
+        return MI_RESULT_FAILED;
+    }
+
+    r = DSC_MI_OperationOptions_SetString(&options, MOFCODEC_SCHEMA_VALIDATION_OPTION_NAME, MOFCODEC_SCHEMA_VALIDATION_IGNORE, 0);
+    if (r!=MI_RESULT_OK )
+    {
+        DSC_free(miApp);
+        return MI_RESULT_FAILED;
+    }
+
+    r = DSC_MI_Application_NewDeserializer_Mof(miApp, 0, MOFCODEC_FORMAT, &deserializer);
+    if (r!=MI_RESULT_OK )
+    {
+        DSC_free(miApp);
+        return MI_RESULT_FAILED;
+    }
+
+    r = ReadFileContent(mofFileLocation, &pbuffer, &contentSize, &extendedError);
+    if(r != MI_RESULT_OK)
+    {
+        DSC_free(miApp);
+        return r;
+    }   
+    miClassArray.size = 0;
+    miClassArray.data = NULL;
+
+    r = MI_Deserializer_DeserializeInstanceArray(&deserializer, 0, &options, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miInstanceArray, &extendedError);
+    if(pbuffer)
+    {
+        DSC_free(pbuffer);
+        pbuffer = NULL;
+    }
+
+    
+    for (i = 0; i < miInstanceArray->size; ++i)
+    {
+        // compare classname with BASE_DOCUMENT_CLASSNAME.  Skip if same
+        if ( Tcscasecmp( miInstanceArray->data[i]->classDecl->name , BASE_DOCUMENT_CLASSNAME) != 0 )
+        {
+
+            r = DSC_MI_Instance_GetElement(miInstanceArray->data[i], MI_T("ModuleName"), &moduleName, NULL, NULL, NULL);
+            if (r != MI_RESULT_OK )
+            {
+                continue;
+            }
+
+            r = DSC_MI_Instance_GetElement(miInstanceArray->data[i], MI_T("ModuleVersion"), &moduleVersion, NULL, NULL, NULL);
+            if (r != MI_RESULT_OK )
+            {
+                continue;
+            }
+
+            if ( IsModuleVersionValidFormat(moduleVersion.string) == 1 )
+            {
+                
+                // foundEntry will be a pointer to the "next" or "first" pointer that points to the ModuleTableEntry we want
+                foundEntry = ModuleTableContainsKey(table, moduleName.string);
+                if ( *foundEntry != NULL )
+                {
+                    // Find VersionClass tuple, append new class if necessary, update version if necessary
+
+                    // compare version? Windows doesn't.
+                    // current->moduleVersionClassTuple->moduleVersion
+
+                    // See if class is in the class list.  If it isn't, add it. if it is, do nothing
+                    foundClassEntry = ClassListContainsClass(&current->moduleVersionClassTuple->first, miInstanceArray->data[i]->classDecl->name );
+                    if (*foundClassEntry == NULL)
+                    {
+                        *foundClassEntry = (ModuleClassList*) DSC_malloc(sizeof(ModuleClassList), NitsHere());
+                        (*foundClassEntry)->next = NULL;
+
+                        // Copy class name
+                        tmpLength = Tcslen(miInstanceArray->data[i]->classDecl->name) + 1;
+                        (*foundClassEntry)->moduleClass = (MI_Char*)DSC_malloc(sizeof(MI_Char) * tmpLength, NitsHere());
+                        memcpy((*foundClassEntry)->moduleClass, miInstanceArray->data[i]->classDecl->name, tmpLength);
+                    }
+                }
+                else
+                {
+                    *foundEntry = (ModuleTableEntry*) DSC_malloc(sizeof(ModuleTableEntry), NitsHere());
+                    current = *foundEntry;
+                    current->next = NULL;
+
+                    // Copy module name
+                    tmpLength = Tcslen(moduleName.string) + 1;
+                    current->moduleName = (MI_Char*)DSC_malloc(sizeof(MI_Char) * tmpLength, NitsHere());
+                    memcpy(current->moduleName, moduleName.string, tmpLength);
+
+                    current->moduleVersionClassTuple = (ModuleVersionClassTuple*) DSC_malloc(sizeof(ModuleVersionClassTuple), NitsHere());
+
+                    // Copy module version
+                    tmpLength = Tcslen(moduleVersion.string) + 1;
+                    current->moduleVersionClassTuple->moduleVersion = (MI_Char*)DSC_malloc(sizeof(MI_Char) * tmpLength, NitsHere());
+                    memcpy(current->moduleVersionClassTuple->moduleVersion, moduleVersion.string, tmpLength);
+
+                    current->moduleVersionClassTuple->first = (ModuleClassList*) DSC_malloc(sizeof(ModuleClassList), NitsHere());
+                    current->moduleVersionClassTuple->first->next = NULL;
+                    
+                    // Copy class name
+                    tmpLength = Tcslen(miInstanceArray->data[i]->classDecl->name) + 1;
+                    current->moduleVersionClassTuple->first->moduleClass = (MI_Char*)DSC_malloc(sizeof(MI_Char) * tmpLength, NitsHere());
+                    memcpy(current->moduleVersionClassTuple->first->moduleClass, miInstanceArray->data[i]->classDecl->name, tmpLength);
+
+                }
+            }
+            else
+            {
+                // Error: Invalid version for module
+            }
+        }
+    }
+
+    r = FilterUsingCachedModules(table);
+
+    MI_Deserializer_Close(&deserializer);
+    MI_OperationOptions_Delete(&options);
+
+    CleanUpDeserializerInstanceCache(miInstanceArray);
+
+    return MI_RESULT_OK;
+}
+
+
+void SaveModule()
+{
+}
+
+void IssueRequest()
+{
+}
+

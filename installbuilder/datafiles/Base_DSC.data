@@ -78,6 +78,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/GetConfiguration.py; Providers/Extras/Scripts/GetConfiguration.py; 755; root; root
 /opt/microsoft/dsc/Scripts/SendMetaConfigurationApply.py; Providers/Extras/Scripts/SendMetaConfigurationApply.py; 755; root; root
 /opt/microsoft/dsc/Scripts/GetMetaConfiguration.py; Providers/Extras/Scripts/GetMetaConfiguration.py; 755; root; root
+/opt/microsoft/dsc/Scripts/InstallModule.py; Providers/Extras/Scripts/InstallModule.py; 755; root; root
+/opt/microsoft/dsc/Scripts/RemoveModule.py; Providers/Extras/Scripts/RemoveModule.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/__init__.py; Providers/Scripts/2.4x-2.5x/Scripts/__init__.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
@@ -119,6 +121,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/mof;  755; root; root
 /opt/microsoft/dsc/lib;  755; root; root
 /opt/microsoft/dsc/bin;  755; root; root
+/opt/microsoft/dsc/modules; 755; root; root
 /opt/microsoft/dsc/Scripts; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts; 755; root; root
@@ -192,7 +195,7 @@ for prov in ${{PROVIDERS}}; do
 done
 
 ln -s $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
-ln -s /opt/microsoft/dsc/Scripts $OMI_LIB/Scripts
+cp -R /opt/microsoft/dsc/Scripts $OMI_LIB/Scripts
 
 %Preuninstall_999
 # TODO: Detect omi install directory?
@@ -203,8 +206,12 @@ CONFIG_DATADIR=$OMI_HOME/share
 OMI_LIB=$OMI_HOME/lib
 
 # Remove all DSC specific data
+for module in `ls /opt/microsoft/dsc/modules`; do
+    /opt/microsoft/dsc/Scripts/RemoveModule.py $module
+done
+
 rm -rf $OMI_ETC_DIR/conf/omiregister/root-Microsoft-DesiredStateConfiguration
-rm $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
+rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
 rm -rf $CONFIG_SYSCONFDIR/dsc
 rm -rf $CONFIG_DATADIR/dsc
 rm -rf $OMI_LIB/Scripts
@@ -214,6 +221,7 @@ rm $OMI_LIB/libdsccore.so
 for prov in ${{PROVIDERS}}; do
     rm $OMI_LIB/libMSFT_nx${prov}Resource.so
 done
+
 
 %Preinstall_0
 ${{SHELL_HEADER}}
