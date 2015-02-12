@@ -149,7 +149,7 @@ try:
         if 'OMI_HOME' in os.environ and len(os.environ['OMI_HOME']):
             omi_home=os.environ['OMI_HOME']
         else:
-            omi_home='/opt/omi-1.0.8'
+            omi_home='/opt/omi'
         if not os.path.isdir(omi_home):
             sys.stderr.write("omi home not found.  Please set OMI_HOME")
             sys.exit(1)

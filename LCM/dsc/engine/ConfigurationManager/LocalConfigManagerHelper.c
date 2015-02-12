@@ -3749,6 +3749,12 @@ MI_Result LCM_Pull_GetConfiguration(
         return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails,ID_LCM_PULL_GETCONF_NORESULTSTATUS);
     }
 
+    result = ModuleManager_Update(moduleManager, cimErrorDetails);
+    if (result != MI_RESULT_OK)
+    {
+        return result;
+    }
+
     if (Tcscasecmp(*resultStatus, PULL_STATUSCODE_OK) == 0)
     {
         result = CopyConfigurationFileFromTemp(mofFileName, GetPendingConfigFileName(), cimErrorDetails);
