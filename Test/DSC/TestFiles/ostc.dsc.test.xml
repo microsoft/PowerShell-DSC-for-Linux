@@ -15,6 +15,8 @@
     <rec key="testServiceName">atd</rec>
     <rec key="invalidServiceName">invalidService</rec>
 
+    <rec key="testManagerName">apt</rec>
+
     <!-- DSC Info. -->
     <rec key="dscHome">/opt</rec>
     <rec key="omiHome">%dscHome%/omi</rec>
@@ -22,6 +24,7 @@
     <rec key="dscLog">/tmp/dsc_out.log</rec>
     <rec key="loadErrorMsg">Loading the instance document from the pending location did not succeed</rec>
     <rec key="funcErrorMsg">The SendConfigurationApply function did not succeed</rec>
+    <rec key="PermisssionErrorMsg">Access to a CIM resource is not available to the client</rec>
 
     <!-- Script Info. -->
     <rec key="scriptLocation">C:\Temp</rec>
@@ -38,6 +41,16 @@
       Get-DscConfiguration -CimSession $demo1;
     </rec>
 
+    <rec key="dscSender-nonRoot">
+      [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+      [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+      $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+      $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+      $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+      $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+      Start-DscConfiguration -CimSession:$demo1 -Path:"%mofPath%" -Wait;
+    </rec>
+    
     <!-- Ssh Commands.-->
     <rec key="getPid">ps -ef | grep omiserver | grep -v grep | awk '{print $2}' | tr -d '\n'</rec>
     <rec key="kill">kill -9 </rec>
@@ -48,7 +61,6 @@
   <!-- All Test Cases. -->
   <section dsc="All tests" cls="DSC.GroupHelper">
     <snipref id="Variables"/>
-
     <section sid="1" dsc="nxFile Provider">
 
       <var set="1" lvl="1" vid="661642"
@@ -864,10 +876,56 @@
         <rec key="expectedValue">0</rec>
       </var>
 
+      <var set="1" lvl="2" vid="814834"
+     dsc="[nxFile] Verify if error out while non-root user runs DSC operation to create a new file"
+     cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+      </var>
+      
+      <var set="1" lvl="2" vid="814836"
+     dsc="[nxFile] Verify if error out while non-root user runs DSC operation to get a file information"
+     cls="DSC.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+      </var>
+      
     </section>
 
     <section sid="2" dsc="nxUser Provider">
-
       <var set="2" lvl="1" vid="661686"
            dsc="[nxUser] Verify a new user is created when provide a new userName and set Ensure to Present"
            cls="DSC.nxUserTest">
@@ -1131,6 +1189,48 @@
         <rec key="successfulMsg">The user '%username%' is updated successfully, its password must be changed in next login</rec>
       </var>
 
+      <var set="2" lvl="2" vid="814144"
+     dsc="[nxUser] Verify if error out while non-root user runs DSC operation to add a new user"
+     cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+      </var>
+
+      <var set="2" lvl="2" vid="814145"
+     dsc="[nxUser] Verify if error out while non-root user runs DSC operation to get a user's information"
+     cls="DSC.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="username">test_user</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+      </var>
+   
     </section>
 
     <section sid="3" dsc="nxGroup Provider">
@@ -1253,6 +1353,45 @@
         <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">The member 'root,scxuser' is removed from '%groupname%'.</rec>
         <rec key="failedMsg">The member 'root,scxuser' failed to remove from '%groupname%'.</rec>
+      </var>
+      
+      <var set="3" lvl="2" vid="814847"
+     dsc="[nxGroup] Verify if error out while non-root user runs DSC operation to add a member in group"
+     cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:Present</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+      </var>
+
+      <var set="3" lvl="2" vid="814848"
+     dsc="[nxGroup] Verify if error out while non-root user runs DSC operation to get group information"
+     cls="DSC.nxGroupTest">
+        <snipref id="Variables" />
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:Present</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
       </var>
 
     </section>
@@ -1584,6 +1723,82 @@
         <rec key="successfulMsg">Error out as invalid group.</rec>
       </var>
 
+      <var set="4" lvl="2" vid="814853"
+     dsc="[nxScript] Verify if error out while non-root user runs DSC operation to execute a script for creating a file"
+     cls="DSC.nxScriptTest">
+        <snipref id="Variables" />
+        <rec key="parentPath">/tmp</rec>
+        <rec key="s_name">set_file</rec>
+        <rec key="s_path">%parentPath%/%s_name%</rec>
+        <rec key="testScript">
+          #!/bin/sh
+          echo "test"
+          exit 1
+        </rec>
+        <rec key="setScript">
+          #!/bin/sh
+          echo "set"
+          touch %s_path%
+        </rec>
+        <rec key="getScript">
+          #!/bin/sh
+          echo "get"
+          exit 0
+        </rec>
+        <rec key="initialCmd">rm -rf %s_path%;</rec>
+        <rec key="finalCmd">rm -rf %s_path%;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">t=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;echo $t | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+      </var>
+
+      <var set="4" lvl="2" vid="814854"
+     dsc="[nxScript] Verify if error out while non-root user runs DSC operation to get script information"
+     cls="DSC.nxScriptTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="parentPath">/tmp</rec>
+        <rec key="s_name">set_file</rec>
+        <rec key="s_path">%parentPath%/%s_name%</rec>
+        <rec key="t_name">set_file</rec>
+        <rec key="t_path">%parentPath%/%t_name%</rec>
+        <rec key="testScript">
+          #!/bin/sh
+          touch %t_path%
+          exit 1
+        </rec>
+        <rec key="setScript">
+          #!/bin/sh
+          touch %s_path%
+        </rec>
+        <rec key="getScript">
+          #!/bin/sh
+          exit 0
+        </rec>
+        <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
+        <rec key="finalCmd">ls /tmp</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">s=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;t=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;echo $t$s | tr -d '\n'</rec>
+        <rec key="expectedValue">11</rec>
+      </var>
+      
     </section>
 
     <section sid="5" dsc="nxService Provider">
@@ -1659,6 +1874,51 @@
         <rec key="verification">%propString%</rec>
         <rec key="expectedValue">%Enabled%</rec>
         <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
+      <var set="5" lvl="2" vid="814855"
+     dsc="[nxService] Verify if error out while non-root user runs DSC operation to start a service"
+     cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%initialState%</rec>
+      </var>
+
+      <var set="5" lvl="2" vid="814856"
+     dsc="[nxService] Verify if error out while non-root user runs DSC operation to get service information"
+     cls="DSC.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">"expectedState"</rec>
       </var>
 
       <!-- Upstart Controller. -->
@@ -1861,8 +2121,691 @@
         <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
         <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
       </var>
-
     </section>
 
+    <section sid="6" dsc="nxEnvironment Provider">
+
+      <var set="6" lvl="1" vid="661727"
+           dsc="[nxEnvironment] Verify if environment variable with value is created if only specify the Name and Value property"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi; if [ -f "%dscProfile%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">env| grep "%varName%=%varValue%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%varName%=\"%varValue%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">11</rec>
+        <rec key="successfulMsg">The environment variable is created successfully.</rec>
+        <rec key="failedMsg">The environment variable is not created.</rec>
+      </var>
+
+      <var set="6" lvl="1" vid="661728"
+           dsc="[nxEnvironment] Verify if Path environment variable with value is created if Path is 'true'"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">/tmp/var_661728</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%dscProfile%" ]; then sed -i '/\/tmp\/var_661728/'d %dscProfile%; source %dscProfile%; fi</rec>
+        <!--rec key="cleanVar">sed -i '/\/tmp\/var_661728/'d %dscProfile%; source %dscProfile%</rec-->
+        <rec key="initialCmd">%cleanVar%; mkdir %varValue%;source %dscProfile%</rec>
+        <rec key="finalCmd">%cleanVar%; rm -rf %varValue%;source %dscProfile%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%;Path:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">source %dscProfile%;env| grep "PATH=\S*:%varValue%"| wc -l |tr -d '\n';cat %dscProfile%| grep "PATH=\$PATH:\"%varValue%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">11</rec>
+        <rec key="successfulMsg">The environment variable is created successfully if Path is true.</rec>
+        <rec key="failedMsg">The environment variable is not created.</rec>
+      </var>
+
+      <var set="6" lvl="2" vid="661729"
+           dsc="[nxEnvironment] Verify if environment variable without value is created if only specify the Name property"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/enviroment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%dscProfile%" ]; then sed -i '/%varValue%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">env| grep "%varName%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%testEnvVar" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">11</rec>
+        <rec key="successfulMsg">The environment variable without value is created successfully.</rec>
+        <rec key="failedMsg">The environment variable without value is not created.</rec>
+      </var>
+
+      <var set="6" lvl="1" vid="661730"
+           dsc="[nxEnvironment] Verify if environment variable is removed if the Ensure is 'absent'"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%dscProfile%" ]; then sed -i '/%varValue%/'d %dscProfile%; source %dscProfile%; fi</rec>
+        <rec key="initialCmd">%cleanVar%; echo "%varName%=\"%varValue%\"" >> %etcEnv%; source %etcEnv%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:absent;Value:%varValue%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">env| grep "%varName%"| wc -l |tr -d '\n';cat %etcEnv%| grep "^%varName%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">00</rec>
+        <rec key="successfulMsg">The environment variable is not removed if the Ensure is 'absent' and the variable is not originally added by DSC.</rec>
+        <rec key="failedMsg">The environment variable is removed successfully.</rec>
+      </var>
+
+      <var set="6" lvl="2" vid="661731"
+             dsc="[nxEnvironment] Verify if Path environment variable which was added by DSC is removed when the Ensure is absent"
+             cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="pathTmp">/tmp/path.tmp</rec>
+        <rec key="initialCmd">echo PATH=\$PATH:\"%pathTmp%\" >> %dscProfile%</rec>
+        <rec key="finalCmd">sed -i '/%pathTmp%/'d %etcEnv%;rm -f %pathTmp%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Absent;Path:True</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">source %dscProfile%;env| grep "PATH=\S*:%pathTmp%"| wc -l |tr -d '\n';cat %dscProfile%| grep "PATH=\$PATH:\"%pathTmp%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">00</rec>
+        <rec key="successfulMsg">The PATH environment variable is not changed or removed.</rec>
+        <rec key="failedMsg">The PATH environment variable is removed successfully.</rec>
+      </var>
+
+      <var set="6" lvl="3" vid="661732"
+           dsc="[nxEnvironment] Verify if Path environment variable which never changed by DSC is not removed when the Ensure is absent"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="pathTmp">/tmp/path.tmp</rec>
+        <rec key="initialCmd">echo $PATH > %pathTmp%</rec>
+        <rec key="finalCmd">rm -f %pathTmp%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Absent;Path:True</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">old=`cat %pathTmp%`;new=`echo $PATH`; if [ $old = $new ]; then echo 0; fi;</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The PATH environment variable is not changed or removed.</rec>
+      </var>
+
+      <var set="6" lvl="2" vid="661737"
+           dsc="[nxEnvironment] Verify if environment variable is updated if the environment variable exists with value"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="orgValue">envVarValue</rec>
+        <rec key="newValue">envVarValue_new</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi</rec>
+        <rec key="initialCmd">%cleanVar%; echo "%varName%=\"%orgValue%\"" >> %etcEnv%; source %etcEnv%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%newValue%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">env| grep "%varName%=%newValue%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%varName%=\"%newValue%\""| wc -l |tr -d '\n';</rec>
+        <rec key="expectedValue">11</rec>
+        <rec key="successfulMsg">The environment variable is updated successfully.</rec>
+        <rec key="failedMsg">The environment variable is not updated.</rec>
+      </var>
+
+      <var set="6" lvl="3" vid="661740"
+           dsc="[nxEnvironment] Verify if environment variable is updated if the environment variable exists without value"
+           cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="orgValue">envVarValue</rec>
+        <rec key="newValue">envVarValue_new</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%dscProfile%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi</rec>
+        <rec key="initialCmd">rm -f %dscProfile%;set %varName%=%orgValue%;unset %varName%;</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%newValue%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">checkEnv=`cat %dscProfile%| grep "%testEnvVar%" | wc -l |tr -d '\n'`; env| grep "%testEnvVar%=%varValue%" &amp;&amp; cat %etcEnv%| grep "%testEnvVar%=%varValue%";echo $?$checkEnv</rec>
+        <rec key="expectedValue">00</rec>
+        <rec key="successfulMsg">The environment variable is updated successfully.</rec>
+        <rec key="failedMsg">The environment variable is not updated.</rec>
+      </var>
+
+      <var set="6" lvl="2" vid="814831"
+     dsc="[nxEnvironment] Verify if error out while non-root user runs DSC operation to create a environment variable"
+     cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi; if [ -f "%dscProfile%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">env| grep "%varName%=%varValue%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%varName%=\"%varValue%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">00</rec>
+      </var>
+
+      <var set="6" lvl="2" vid="814832"
+     dsc="[nxEnvironment] Verify if error out while non-root user runs DSC operation to get environment variable information"
+     cls="DSC.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi; if [ -f "%dscProfile%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">env| grep "%varName%=%varValue%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%varName%=\"%varValue%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">11</rec>
+      </var>
+      
+    </section>
+
+    <section sid="7" dsc="nxPackage Provider">
+
+      <var set="7" lvl="1" vid="665043"
+           dsc="[nxPackage] Verify if specific package is installed successfully by PackageManager"
+           cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="manager">%testManagerName%</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;PackageManager:%manager%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is installed as expected.</rec>
+      </var>
+
+      <var set="7" lvl="1" vid="665044"
+           dsc="[nxPackage] Verify if specific package is installed via Path property"
+           cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">apache*</rec>
+        <rec key="keyword">apache</rec>
+        <rec key="localSrcPath">/tmp</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is installed as expected.</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="665045"
+     dsc="[nxPackage] Verify if specific package is uninstalled successfully by PackageManager"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="manager">%testManagerName%</rec>
+        <rec key="initialInstallState">True</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:absent;PackageManager:%manager%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is uninstalled as expected.</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="665046"
+     dsc="[nxPackage] Verify if specific package is uninstalled via Path Property"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="localSrcPath">/tmp</rec>
+        <rec key="initialInstallState">True</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:absent;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is uninstalled as expected.</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="665047"
+     dsc="[nxPackage] Verify if specific package is installed by default PackageManager if there is no Path and PackageManager property in Configuration MOF"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:present</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is installed by default PackageManager.</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="665048"
+     dsc="[nxPackage] Verify if specific package is installed via Path property successfully if there is both Path and PackageManager are provided"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="manager">%testManagerName%</rec>
+        <rec key="localSrcPath">/tmp</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;PackageManager:%manager%;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is installed via Path property.</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="665049"
+     dsc="[nxPackage] Verify if no error out if the actual return code does match the ReturnCode property"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="localSrcPath">/tmp</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;ReturnCode:0</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%;</rec>
+        <rec key="successfulMsg">The return code matches the ReturnCode property.</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="665050"
+     dsc="[nxPackage] Verify if  error out if the actual return code does not match the ReturnCode property"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="localSrcPath">/tmp</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;ReturnCode:1</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as mismatched return code.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="7" lvl="3" vid="665051"
+     dsc="[nxPackage] Verify if  error out if both Path and PackageGroup are provided"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">testPackage-1-1.0_all</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="localSrcPath">/tmp</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;PackageGroup:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as both Path and PackageGroup are provided.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="7" lvl="3" vid="665052"
+     dsc="[nxPackage] Verify if error out if the specific package name is invalid"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">ErrorTestPackage</rec>
+        <rec key="keyword">%Name%</rec>
+        <rec key="manager">%testManagerName%</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;PackageManager:%manager%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid package name.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="7" lvl="3" vid="665056"
+     dsc="[nxPackage] Verify if error out if the specific path doesn't exist"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">ErrorTestPackage</rec>
+        <rec key="keyword">%Name%</rec>
+        <rec key="localSrcPath">/sthwrong</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid path.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="7" lvl="3" vid="665057"
+     dsc="[nxPackage] Verify if  error out if the package name does not exist under path"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">sthwrong</rec>
+        <rec key="keyword">%Name%</rec>
+        <rec key="localSrcPath">/tmp</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as inexistent package under path.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="7" lvl="3" vid="665058"
+     dsc="[nxPackage] Verify if  error out if the specific package is not supported by the Linux machine"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">test</rec>
+        <rec key="keyword">%Name%</rec>
+        <rec key="localSrcPath">/tmp</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;PackageGroup:true</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as unsupported package.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="814851"
+     dsc="[nxPackage] Verify if error out while non-root user runs DSC operation to install a package"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">yash</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="manager">%testManagerName%</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;PackageManager:%manager%</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%initialInstallState%</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="814852"
+     dsc="[nxPackage] Verify if error out while non-root user runs DSC operation to get package information"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">yash</rec>
+        <rec key="keyword">testPackage</rec>
+        <rec key="manager">%testManagerName%</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;PackageManager:%manager%</rec>
+        <rec key="psScript">%dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+      </var>
+    
+    </section>
+
+    <section sid="8" dsc="nxSshAuthorizedKeys Provider">
+
+      <var set="8" lvl="1" vid="664653"
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key for specific user is stored into ~/.ssh/authorizied_keys."
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Ssh authorized key for user %userName% is stored into %keyFile%.</rec>
+        <rec key="failedMsg">Ssh authorized key for user %userName% didn't store into %keyFile%.</rec>
+      </var>
+
+      <var set="8" lvl="2" vid="664654"
+           dsc="[nxSshAuthorizedKeys] Verify if authorized_keys file is created with specific authorized key if authorized_keys does not exist."
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;rm %keyFile%</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Authorized_keys file is created when it does not exist.</rec>
+        <rec key="failedMsg">Authorized_keys file didn't create when it does not exist.</rec>
+      </var>
+      
+      <var set="8" lvl="2" vid="664655"
+           dsc="[nxSshAuthorizedKeys] Verify if authorized_keys file is created with specific authorized key if .ssh directory does not exist."
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;rm -rf /root/.ssh/</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Authorized_keys file is created when .ssh directory does not exist.</rec>
+        <rec key="failedMsg">Authorized_keys file didn't create when .ssh directory does not exist.</rec>
+      </var>
+      
+      <!--Not sure if the key should be updated.-->
+      <var set="8" lvl="2" vid="664656"
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is updated if the KeyComment does exist."
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!--Linux Initial State.-->
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;echo "#KeyCommentsTest" > %keyFile%;echo "oldkey" >> %keyFile%</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!--MOF Info.-->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Authorized_keys file is updated when the KeyComment does exist.</rec>
+        <rec key="failedMsg">Authorized_keys file didn't update when the KeyComment does exist.</rec>
+      </var>
+
+      <!--Bug-->
+      <var set="8" lvl="2" vid="664658"
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is delete if the Ensure is set to absent."
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Absent</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Ssh authorized key is delete when the Ensure is set to absent.</rec>
+        <rec key="failedMsg">Ssh authorized key didn't delete when the Ensure is set to absent.</rec>
+      </var>
+
+      <var set="8" lvl="2" vid="814858"
+     dsc="[nxSshAuthorizedKeys] Verify if error out while non-root user runs DSC operation to add an authorized key"
+     cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">testUser</rec>
+        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <rec key="initialCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <rec key="finalCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">0</rec>
+      </var>
+
+      <var set="8" lvl="2" vid="814859"
+     dsc="[nxSshAuthorizedKeys] Verify if error out while non-root user runs DSC operation to get a ssh key information"
+     cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">testUser</rec>
+        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <rec key="initialCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <rec key="finalCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="expectedValue">1</rec>
+      </var>
+    </section>
   </section>
 </varmap>
