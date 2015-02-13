@@ -1,6 +1,6 @@
-kit: kit098 kit100
-	rm -rf release; \
+kit: kit098 kit100 nxNetworking
 	mkdir -p release; \
+	rm -rf release/*.{rpm,deb}; \
 	mv omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 kit098: omi098 dsc098
@@ -54,6 +54,7 @@ nxNetworking:
 	done;\
 	cd output/staging; \
 	zip -r nxNetworking_$${VERSION}.zip nxNetworking; \
+	mkdir -p ../../release; \
 	mv nxNetworking_$${VERSION}.zip ../../release/
 
 distclean: clean
