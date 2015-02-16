@@ -325,8 +325,9 @@ def IsPackageInstalled(p):
             return False,out
     # regular packages
     Print('check installed:'+out)
-    if code == 0 and 'deinstall' in out:
-        code=1
+    if code == 0:
+        if 'deinstall' in out or 'not-installed' in out:
+            code=1
     if code != int(p.ReturnCode) :
         return False,out
     return True,out
