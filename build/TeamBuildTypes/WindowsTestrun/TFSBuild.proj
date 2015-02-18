@@ -1,0 +1,231 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="DesktopBuild" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <!-- TO EDIT BUILD TYPE DEFINITION
+
+  To edit the build type, you will need to edit this file which was generated
+  by the Create New Build Type wizard.  This file is under source control and
+  needs to be checked out before making any changes.
+
+  The file is available at -
+      $/{TeamProjectName}/TeamBuildTypes/{BuildTypeName}
+  where you will need to replace TeamProjectName and BuildTypeName with your
+  Team Project and Build Type name that you created
+
+  Checkout the file
+    1. Open Source Control Explorer by selecting View -> Other Windows -> Source Control Explorer
+    2. Ensure that your current workspace has a mapping for the $/{TeamProjectName}/TeamBuildTypes folder and 
+       that you have done a "Get Latest Version" on that folder
+    3. Browse through the folders to {TeamProjectName}->TeamBuildTypes->{BuildTypeName} folder
+    4. From the list of files available in this folder, right click on TfsBuild.Proj. Select 'Check Out For Edit...'
+
+
+  Make the required changes to the file and save
+
+  Checkin the file
+    1. Right click on the TfsBuild.Proj file selected in Step 3 above and select 'Checkin Pending Changes'
+    2. Use the pending checkin dialog to save your changes to the source control
+
+  Once the file is checked in with the modifications, all future builds using
+  this build type will use the modified settings
+  -->
+  <!-- Do not edit this -->
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\TeamBuild\Microsoft.TeamFoundation.Build.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\ExtensionPack\MSBuild.ExtensionPack.tasks"/>
+  
+  <ProjectExtensions>
+    <!--  DESCRIPTION
+     The description is associated with a build type. Edit the value for making changes.
+    -->
+    <Description>Only runs the testrunner. Does not build pegasus etc.</Description>
+    <!--  BUILD MACHINE
+     Name of the machine which will be used to build the solutions selected.
+    -->
+    <BuildMachine>SCX-TFS-BLD1</BuildMachine>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <!--  TEAM PROJECT
+     The team project which will be built using this build type.
+    -->
+    <TeamProject>Apache</TeamProject>
+    <!--  BUILD DIRECTORY
+     The directory on the build machine that will be used to build the
+     selected solutions. The directory must be a local path on the build
+     machine (e.g. c:\build).
+    -->
+    <BuildDirectoryPath>C:\xxx</BuildDirectoryPath>
+    <!--  DROP LOCATION
+      The location to drop (copy) the built binaries and the log files after
+     the build is complete. This location has to be a valid UNC path of the
+     form \\Server\Share. The build machine service account and application
+     tier account need to have read write permission on this share.
+    -->
+    <DropLocation>\\xxx</DropLocation>
+    <!--  TESTING
+     Set this flag to enable/disable running tests as a post build step.
+    -->
+    <RunTest>false</RunTest>
+    <!--  WorkItemFieldValues
+      Add/edit key value pairs to set values for fields in the work item created
+      during the build process. Please make sure the field names are valid 
+      for the work item type being used.
+    -->
+    <WorkItemFieldValues>
+      System.Reason=Build Failure;
+      System.Description=Start the build using Team Build;
+      System.AssignedTo=Build Team;
+      Priority=1;
+      Severity=4 Low;
+      Discipline=Build
+    </WorkItemFieldValues>
+    <!--  CODE ANALYSIS
+       To change CodeAnalysis behavior edit this value. Valid values for this
+       can be Default,Always or Never.
+
+     Default - To perform code analysis as per the individual project settings
+     Always  - To always perform code analysis irrespective of project settings
+     Never   - To never perform code analysis irrespective of project settings
+     -->
+    <RunCodeAnalysis>Never</RunCodeAnalysis>
+    <!--  UPDATE ASSOCIATED WORK ITEMS
+     Set this flag to enable/disable updating associated workitems on a successful build
+    -->
+    <UpdateAssociatedWorkItems>false</UpdateAssociatedWorkItems>
+    <!-- Title for the work item created on build failure -->
+    <WorkItemTitle>Build failure in build:</WorkItemTitle>
+    <!-- Description for the work item created on build failure -->
+    <DescriptionText>This work item was created by Team Build on a build failure.</DescriptionText>
+    <!-- Text pointing to log file location on build failure -->
+    <BuildlogText>The build log file is at:</BuildlogText>
+    <!-- Text pointing to error/warnings file location on build failure -->
+    <ErrorWarningLogText>The errors/warnings log file is at:</ErrorWarningLogText>
+    <!-- Debug or Release build? -->
+  </PropertyGroup>
+
+  <!--Set VSINSTALLDIR env var, if it's not already initialized-->
+  <PropertyGroup Condition="!$(IsDesktopBuild) AND $(VSINSTALLDIR)=='' AND Exists('C:\Program Files (x86)\Microsoft Visual Studio 10.0')">
+    <VSINSTALLDIR>C:\Program Files (x86)\Microsoft Visual Studio 10.0</VSINSTALLDIR>
+  </PropertyGroup>
+  <PropertyGroup Condition="!$(IsDesktopBuild) AND $(VSINSTALLDIR)=='' AND Exists('C:\Program Files\Microsoft Visual Studio 10.0')">
+    <VSINSTALLDIR>C:\Program Files\Microsoft Visual Studio 10.0</VSINSTALLDIR>
+  </PropertyGroup>
+
+  <!--Set WindowsSdkDir env var, if it's not already initialized-->
+  <PropertyGroup Condition="!$(IsDesktopBuild) AND $(WindowsSdkDir)=='' AND Exists('C:\Program Files\Microsoft SDKs\Windows\v6.1')">
+    <WindowsSdkDir>C:\Program Files\Microsoft SDKs\Windows\v6.1</WindowsSdkDir>
+  </PropertyGroup>
+
+  <!--Set WixSdkPath env var, if it's not already initialized-->
+  <PropertyGroup Condition="$(WixSdkPath)=='' AND Exists('C:\Program Files (x86)\Windows Installer XML v3\SDK')">
+    <WixSdkPath>C:\Program Files (x86)\Windows Installer XML v3\SDK</WixSdkPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(WixSdkPath)=='' AND Exists('C:\Program Files\Windows Installer XML v3\SDK')">
+    <WixSdkPath>C:\Program Files\Windows Installer XML v3\SDK</WixSdkPath>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <!--  SOLUTIONS
+     The path of the solutions to build. To add/delete solutions, edit this
+     value. For example, to add a solution MySolution.sln, add following line -
+         <SolutionToBuild Include="$(SolutionRoot)\path\MySolution.sln" />
+
+     To change the order in which the solutions are build, modify the order in
+     which the solutions appear below.
+    -->
+    <SolutionToBuild Include="$(SolutionRoot)\build\SCX.sln" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--  CONFIGURATIONS
+     The list of configurations to build. To add/delete configurations, edit
+     this value. For example, to add a new configuration, add following lines -
+         <ConfigurationToBuild Include="Debug|x86">
+             <FlavorToBuild>Debug</FlavorToBuild>
+             <PlatformToBuild>x86</PlatformToBuild>
+         </ConfigurationToBuild>
+
+     The Include attribute value should be unique for each ConfigurationToBuild node.
+    -->
+    <ConfigurationToBuild Include="Debug|Win32">
+      <FlavorToBuild>Debug</FlavorToBuild>
+      <PlatformToBuild>Win32</PlatformToBuild>
+    </ConfigurationToBuild>
+    <ConfigurationToBuild Include="Release|Win32">
+      <FlavorToBuild>Release</FlavorToBuild>
+      <PlatformToBuild>Win32</PlatformToBuild>
+    </ConfigurationToBuild>
+    <!--<ConfigurationToBuild Include="Bullseye|Win32">
+      <FlavorToBuild>Bullseye</FlavorToBuild>
+      <PlatformToBuild>Win32</PlatformToBuild>
+    </ConfigurationToBuild>-->
+  </ItemGroup>
+  <ItemGroup>
+    <!--  TEST ARGUMENTS
+     If the RunTest is set to true then the following test arguments will be
+     used to run tests.
+
+     To add/delete new testlist or to choose a metadata file (.vsmdi) file, edit this value.
+     For e.g. to run BVT1 and BVT2 type tests mentioned in the Helloworld.vsmdi file, add the following -
+
+     <MetaDataFile Include="$(SolutionRoot)\HelloWorld\HelloWorld.vsmdi">
+         <TestList>BVT1;BVT2</TestList>
+     </MetaDataFile>
+
+     Where BVT1 and BVT2 are valid test types defined in the HelloWorld.vsmdi file.
+     MetaDataFile - Full path to test metadata file.
+     TestList - The test list in the selected metadata file to run.
+
+     Please note that you need to specify the vsmdi file relative to $(SolutionRoot)
+    -->
+    <MetaDataFile Include=" ">
+      <TestList> </TestList>
+    </MetaDataFile>
+  </ItemGroup>
+  <ItemGroup>
+    <!--  ADDITIONAL REFERENCE PATH
+     The list of additional reference paths to use while resolving references.
+     For example,
+         <AdditionalReferencePath Include="C:\MyFolder\" />
+         <AdditionalReferencePath Include="C:\MyFolder2\" />
+    -->
+  </ItemGroup>
+  
+  <Target Name="BeforeGet">
+
+    <ReadLinesFromFile File="$(DropLocation)\..\currentlabel.txt">
+      <Output PropertyName="CurrentLabel" TaskParameter="Lines" />
+    </ReadLinesFromFile>
+
+    <Message Text="CurrentLabel = $(CurrentLabel)" />
+    <Message Text="LabelToGet = $(LabelToGet)" />
+    <Message Text="BuildTip = $(BuildTip)" />
+
+    <!-- 
+      This is a wacko condtional: Would like a simple If LabelToGet is empty use Currentlabel, etc
+      But there does not seem to be a simple condition statement . . .
+    -->
+    <PropertyGroup Condition="'$(LabelToGet)'==''">
+      <GetVersion>L$(CurrentLabel)</GetVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(BuildTip)'=='True'">
+      <GetVersion>T</GetVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(LabelToGet)'!=''">
+      <GetVersion>L$(LabelToGet)</GetVersion>
+    </PropertyGroup>
+
+    <Message Text="GetVersion = $(GetVersion)" />
+
+    <Message Text="Set Bullseye Environment variable" />
+    <MSBuild.ExtensionPack.Computer.EnvironmentVariable TaskAction="Set" Variable="COVFILE" Value="$(BinariesRoot)\SCX.cov"/>
+
+  </Target>
+
+  <Target Name="AfterDropBuild">
+    <!-- Copy currentlabel.txt (From the source) to drop folder so we can easily see what was built 
+    THis might point out discrepancies in what we thought we were getting and what we really get. -->
+    <Copy
+       SourceFiles="$(MSBuildProjectDirectory)\..\sources\build\currentlabel.txt"
+       DestinationFolder="$(DropLocation)\$(BuildNumber)"
+     />
+  </Target>
+  
+</Project>

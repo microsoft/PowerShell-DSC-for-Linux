@@ -1,0 +1,45 @@
+%!PS-Adobe-3.0 Resource-CMap
+%%DocumentNeededResources: ProcSet (CIDInit)
+%%DocumentNeededResources: CMap (B5pc-UCS2)
+%%IncludeResource: ProcSet (CIDInit)
+%%IncludeResource: CMap (B5pc-UCS2C)
+%%BeginResource: CMap (B5pc-UCS2)
+%%Title: (B5pc-UCS2)
+%%Version: 4.002
+%%Copyright: -----------------------------------------------------------
+%%Copyright:
+%%Copyright: Copyright 1990-2002 Adobe Systems Incorporated. All Rights Reserved.
+%%Copyright:
+%%Copyright: PostScript and Display PostScript are trademarks of
+%%Copyright: Adobe Systems Incorporated which may be registered in
+%%Copyright: certain jurisdictions.
+%%Copyright: -----------------------------------------------------------
+%%
+%% This is not a CMap file. This file is intended to be used by Adobe Acrobat or
+%% licensee of the Adobe PDF Library.
+%%EndComments
+
+/CIDInit /ProcSet findresource begin
+
+12 dict begin
+
+begincmap
+
+/B5pc-UCS2C usecmap
+
+/CIDSystemInfo 3 dict dup begin
+  /Registry (Adobe) def
+  /Ordering (B5pc_UCS2) def
+  /Supplement 0 def
+end def
+
+/CMapName /B5pc-UCS2 def
+/CMapVersion 4.002 def
+/CMapType 1 def
+/WMode 0 def
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+%%EndResource
+%%EOF

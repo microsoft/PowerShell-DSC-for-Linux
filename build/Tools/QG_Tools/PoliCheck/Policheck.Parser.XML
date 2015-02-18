@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Policheck.Parser</name>
+    </assembly>
+    <members>
+        <member name="T:Policheck.Parser.Content">
+            <summary>
+            Public Struct that will host the data retrieved from any object reading module.
+            Frequently changing strings inside hence struct
+            </summary>
+        </member>
+        <member name="F:Policheck.Parser.Content.Data">
+            <summary>
+            String data to be scanned.
+            </summary>
+        </member>
+        <member name="F:Policheck.Parser.Content._ContextualInfo">
+            <summary>
+            Underlying variable for Context information property.
+            </summary>
+        </member>
+        <member name="F:Policheck.Parser.Content.FileName">
+            <summary>
+            Absolute path of the target file being read for scanning.
+            </summary>
+        </member>
+        <member name="F:Policheck.Parser.Content.DisplayFileName">
+            <summary>
+            File name wihtout path.
+            </summary>
+        </member>
+        <member name="F:Policheck.Parser.Content.IsSourceComment">
+            <summary>
+            Current data is a code comment abstracted from a target code file.
+            </summary>
+        </member>
+        <member name="M:Policheck.Parser.Content.AddContextInfo(System.String)">
+            <summary>
+            Appends to context information proprerty.
+            </summary>
+        </member>
+        <member name="M:Policheck.Parser.Content.AddContextInfo(System.String,System.String)">
+            <summary>
+            Appends to context information proprerty.
+            </summary>
+            <param name="name"></param>
+            <param name="value"></param>
+        </member>
+        <member name="M:Policheck.Parser.Content.ClearContextInfo">
+            <summary>
+            Clears the context information
+            </summary>
+        </member>
+        <member name="P:Policheck.Parser.Content.ContextualInfo">
+            <summary>
+            Context information to locate Data (scanned string) in the target file.
+            </summary>
+        </member>
+        <member name="F:Policheck.Parser.ContentParser.ReaderContent">
+            <summary>
+            Holds the scan content
+            </summary>
+        </member>
+        <member name="M:Policheck.Parser.ContentParser.Read">
+            <summary>
+            Implemtent to define the file reading logic
+            </summary>
+            <returns>return true if the reading is successful. Otherwise return False if end of stream or any exception.</returns>
+        </member>
+        <member name="M:Policheck.Parser.ContentParser.Close">
+            <summary>
+            Implement to release all the resources for clean up.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Policheck.Parser.ContentParser.ReaderException">
+            <summary>
+            Set and get the exception while reading.
+            </summary>
+        </member>
+    </members>
+</doc>

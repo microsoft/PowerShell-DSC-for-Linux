@@ -1,0 +1,32 @@
+#!/bin/bash
+# // Copyright (c) Microsoft Corporation.  All rights reserved. 
+#
+# Usage: ./PackStagingDir.bsh WorkSpaceName
+# Packs the target/(platform)/staging directory into a tarball
+# 
+. ~/.bash_profile  # Don't assume Bash_profile has been run!
+
+ScriptName=`basename ${0}`
+WorkSpaceName=${1}
+
+echo ${ScriptName} : Starting
+
+echo ${ScriptName} : WorkSpaceName = ${WorkSpaceName}
+
+# use GNU tar if it's available since it's generally more capable
+TarCmd=tar
+gtar --version >/dev/null 2>&1 && TarCmd=gtar
+
+if [ "_${WorkSpaceName}" != "_" ] && [ -d ~/${WorkSpaceName} ]; then
+    cd ${HOME}/${WorkSpaceName}/target
+    cd `ls`
+    echo ${ScriptName} : Packing staging directory ${PWD}/staging into ${PWD}/staging.tar.gz
+    ${TarCmd} -czvf staging.tar.gz staging/
+
+    echo ${ScriptName} : Removing staging directory ${PWD}/staging
+    rm -rf staging/
+fi
+
+echo ${ScriptName} : Exiting with no reported errors
+
+exit 0

@@ -1,0 +1,74 @@
+#!/bin/bash
+# // Copyright (c) Microsoft Corporation.  All rights reserved. 
+# given a the top level folder, a make target, and a "BUILD_TYPE", 
+# run make and 
+# return non zero if make returns non zero. 
+. ~/.bash_profile  # Don't assume Bash_profile has been run!
+
+ScriptName=`basename ${0}`
+UnixWorkSpaceName=${1}
+MakeTargetToBuild=${2}
+ConfigToBuild=${3}
+
+if [ "_${UnixWorkSpaceName}" == "_" ]; then
+    echo ${ScriptName} : ERROR: UnixWorkSpaceName not specified.
+    exit 1
+fi
+
+if [ "_${MakeTargetToBuild}" == "_" ]; then
+    echo ${ScriptName} : ERROR: MakeTargetToBuild not specified.
+    exit 1
+fi
+
+if [ "_${ConfigToBuild}" == "_" ]; then
+    echo ${ScriptName} : ERROR: ConfigToBuild not specified.
+    exit 1
+fi
+
+echo "===================================="
+TheDate=`date`
+echo ${ScriptName} : Starting : ${TheDate}
+echo ${ScriptName} : UnixWorkSpaceName=${UnixWorkSpaceName}
+echo ${ScriptName} : MakeTargetToBuild=${MakeTargetToBuild}
+echo ${ScriptName} : ConfigToBuild=${ConfigToBuild}
+
+cd ~/${UnixWorkSpaceName}/build
+echo ${ScriptName} : Working Dir: ${PWD}
+echo ${ScriptName} : Calling configure script
+
+case $ConfigToBuild in
+    Bullseye)
+        ./configure --enable-bullseye
+    ;;
+    Debug)
+        ./configure --enable-debug
+    ;;
+    *)
+        ./configure --enable-ulinux   
+    ;;
+esac
+
+configretval=$?
+if (( ${configretval} != 0 )); then 
+  echo ${ScriptName} : Exiting 2
+  exit 2
+fi
+
+
+cd ~/${UnixWorkSpaceName}/build
+echo ${ScriptName} : Working Dir: ${PWD}
+echo ${ScriptName} : make ${MakeTargetToBuild}
+make ${MakeTargetToBuild}
+retval=$?
+
+echo ${ScriptName} : Make retval: $retval
+
+TheDate=`date`
+echo ${ScriptName} : Complete: ${TheDate}
+if (( ${retval} != 0 )); then 
+  echo ${ScriptName} : Exiting 1
+  exit 1
+fi
+
+echo ${ScriptName} : Exiting with no reported errors
+exit 0

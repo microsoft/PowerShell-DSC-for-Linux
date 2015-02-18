@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="xmldata" targetNamespace="http://tempuri.org/TasksSchema.xsd" xmlns:mstns="http://tempuri.org/TasksSchema.xsd" xmlns="http://tempuri.org/TasksSchema.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+        </Connections>
+        <Tables>
+        </Tables>
+        <Sources>
+        </Sources>
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="xmldata" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="xmldata" msprop:Generator_DataSetName="xmldata">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="PoliCheckTask" msprop:Generator_UserTableName="PoliCheckTask" msprop:Generator_RowDeletedName="PoliCheckTaskRowDeleted" msprop:Generator_TableClassName="PoliCheckTaskDataTable" msprop:Generator_RowChangedName="PoliCheckTaskRowChanged" msprop:Generator_RowClassName="PoliCheckTaskRow" msprop:Generator_RowChangingName="PoliCheckTaskRowChanging" msprop:Generator_RowEvArgName="PoliCheckTaskRowChangeEvent" msprop:Generator_RowEvHandlerName="PoliCheckTaskRowChangeEventHandler" msprop:Generator_TablePropName="PoliCheckTask" msprop:Generator_TableVarName="tablePoliCheckTask" msprop:Generator_RowDeletingName="PoliCheckTaskRowDeleting">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="TaskID" msprop:Generator_UserColumnName="TaskID" msprop:Generator_ColumnPropNameInRow="TaskID" msprop:Generator_ColumnVarNameInTable="columnTaskID" msprop:Generator_ColumnPropNameInTable="TaskIDColumn" type="xs:string" minOccurs="0" />
+              <xs:element name="TaskName" msprop:Generator_UserColumnName="TaskName" msprop:Generator_ColumnPropNameInRow="TaskName" msprop:Generator_ColumnVarNameInTable="columnTaskName" msprop:Generator_ColumnPropNameInTable="TaskNameColumn" type="xs:string" minOccurs="0" />
+              <xs:element name="Target" msprop:Generator_UserColumnName="Target" msprop:Generator_ColumnPropNameInRow="Target" msprop:Generator_ColumnVarNameInTable="columnTarget" msprop:Generator_ColumnPropNameInTable="TargetColumn" type="xs:string" minOccurs="0" />
+              <xs:element name="Issues" msprop:Generator_UserColumnName="Issues" msprop:Generator_ColumnPropNameInRow="Issues" msprop:Generator_ColumnVarNameInTable="columnIssues" msprop:Generator_ColumnPropNameInTable="IssuesColumn" type="xs:integer" minOccurs="0" />
+              <xs:element name="Size" msprop:Generator_UserColumnName="Size" msprop:Generator_ColumnPropNameInRow="Size" msprop:Generator_ColumnVarNameInTable="columnSize" msprop:Generator_ColumnPropNameInTable="SizeColumn" type="xs:string" minOccurs="0" />
+              <xs:element name="Start" msprop:Generator_UserColumnName="Start" msprop:Generator_ColumnPropNameInRow="Start" msprop:Generator_ColumnVarNameInTable="columnStart" msprop:Generator_ColumnPropNameInTable="StartColumn" type="xs:string" minOccurs="0" />
+              <xs:element name="Duration" msprop:Generator_UserColumnName="Duration" msprop:Generator_ColumnPropNameInRow="Duration" msprop:Generator_ColumnVarNameInTable="columnDuration" msprop:Generator_ColumnPropNameInTable="DurationColumn" type="xs:string" minOccurs="0" />
+              <xs:element name="TermClasses" msprop:Generator_UserColumnName="TermClasses" msprop:Generator_ColumnPropNameInRow="TermClasses" msprop:Generator_ColumnVarNameInTable="columnTermClasses" msprop:Generator_ColumnPropNameInTable="TermClassesColumn" type="xs:string" minOccurs="0" />
+              <xs:element name="HMEnabled" msprop:Generator_UserColumnName="HMEnabled" msprop:Generator_ColumnPropNameInRow="HMEnabled" msprop:Generator_ColumnVarNameInTable="columnHMEnabled" msprop:Generator_ColumnPropNameInTable="HMEnabledColumn" type="xs:string" minOccurs="0" />
+              <xs:element name="ScanType" msprop:Generator_UserColumnName="ScanType" msprop:Generator_ColumnPropNameInRow="ScanType" msprop:Generator_ColumnVarNameInTable="columnScanType" msprop:Generator_ColumnPropNameInTable="ScanTypeColumn" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 
+    Combine the configuration for different unix builds into one file.
+    
+    Project: ScxCore (Main)
+    
+    There are 23 different types of unix builds, the "UnixBuildType" property can have the following values:
+    
+        AIX_5.3_ppc
+        AIX_6.1_ppc
+        AIX_7.1_ppc
+        HPUX_11.23_ia64
+        HPUX_11.23_pa-risc
+        HPUX_11.31_ia64
+        HPUX_11.31_pa-risc
+        REDHAT_4.0_x64
+        REDHAT_4.0_x86
+        REDHAT_5.0_x64
+        REDHAT_5.0_x86
+        REDHAT_6.0_x64
+        REDHAT_6.0_x86
+        SUSE_10.0_x64
+        SUSE_10.0_x86
+        SUSE_11.0_x64
+        SUSE_11.0_x86
+        SUSE_9.0_x86
+        CentOS_5.0_x64
+        CentOS_5.0_x86
+        SunOS_5.11_sparc
+        SunOS_5.11_x86
+        SunOS_5.10_sparc
+        SunOS_5.10_x86
+        SunOS_5.9_sparc
+        Debian_5.0_x64
+        Debian_5.0_x86
+
+    When the UnixBuildType property is set correctly the UnixBuildServer, UnixWorkSpaceName, 
+    DropPath, and sometimes DocumentationGeneration, and DoxygenDropFolder properties will be 
+    set to the appropriate values for that type of build.
+
+  -->
+
+  <PropertyGroup>
+    <!--  The team project which will be built using this build type. -->
+    <TeamProject>CDM_SFE</TeamProject>
+    <!-- Branch specific prefix for labels. -->
+    <BranchLabelPrefix>DSC_SCXDEV</BranchLabelPrefix>
+    <!-- Which config to build, e.g. Debug or Release -->
+    <ConfigToBuild>Release</ConfigToBuild>
+  </PropertyGroup>
+
+  <Choose>
+    <When Condition=" '$(UnixBuildType)'=='AIX_5.3_ppc' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxaix2</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_AIX53_ppc</UnixWorkSpaceName>
+        <DropPath>AIX5.3_ppc</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='AIX_6.1_ppc' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxaix3-4</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_AIX61_ppc</UnixWorkSpaceName>
+        <DropPath>AIX6.1_ppc</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='AIX_7.1_ppc' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld-aix71-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_AIX71_ppc</UnixWorkSpaceName>
+        <DropPath>AIX7.1_ppc</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='HPUX_11.23_ia64' ">
+      <PropertyGroup>
+        <UnixBuildServer>ostcbldia-hpux23-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_HPUX1123_ia64</UnixWorkSpaceName>
+        <DropPath>HPUX11.23_ia64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='HPUX_11.23_pa-risc' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxhpr6</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_HPUX_1123_pa-risc</UnixWorkSpaceName>
+        <DropPath>HPUX11.23_pa-risc</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='HPUX_11.31_ia64' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxhpv3-41</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_HPUX1131_ia64</UnixWorkSpaceName>
+        <DropPath>HPUX11.31_ia64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='HPUX_11.31_pa-risc' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxhpr1</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_HPUX1131_pa-risc</UnixWorkSpaceName>
+        <DropPath>HPUX11.31_pa-risc</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='REDHAT_4.0_x64' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld64-rh40-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_REDHAT40_x64</UnixWorkSpaceName>
+        <DropPath>REDHAT4.0_x64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='REDHAT_4.0_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld-rhe40-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_REDHAT40_x86</UnixWorkSpaceName>
+        <DropPath>REDHAT4.0_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='REDHAT_5.0_x64' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld64-rh5-02</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_REDHAT50_x64</UnixWorkSpaceName>
+        <DropPath>REDHAT5.0_x64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='REDHAT_5.0_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld-rhe50-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_REDHAT50_x86</UnixWorkSpaceName>
+        <DropPath>REDHAT5.0_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='REDHAT_6.0_x64' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld64-rhel6-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_REDHAT60_x64</UnixWorkSpaceName>
+        <DropPath>REDHAT6.0_x64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='REDHAT_6.0_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld-rhel6-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_REDHAT60_x86</UnixWorkSpaceName>
+        <DropPath>REDHAT6.0_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SUSE_10.0_x64' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxom64-sles10-02</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SUSE100_x64</UnixWorkSpaceName>
+        <DropPath>SUSE10.0_x64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SUSE_10.0_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>suse-devbuild</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SUSE100_x86</UnixWorkSpaceName>
+        <DocumentationGeneration>true</DocumentationGeneration>
+        <DoxygenDropFolder>Core/Docs/currentdoxygen</DoxygenDropFolder>
+        <DropPath>SUSE10.0_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SUSE_11.0_x64' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxcr64-sle11-02</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SUSE_110_x64</UnixWorkSpaceName>
+        <DropPath>SUSE11.0_x64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SUSE_11.0_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxcr-sles11-02</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SUSE110_x86</UnixWorkSpaceName>
+        <DropPath>SUSE11.0_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SUSE_9.0_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld-sle9-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SUSE90_x86</UnixWorkSpaceName>
+        <DropPath>SUSE9.0_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='CentOS_5.0_x64' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxombld64-cent5-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_CentOS50_x64</UnixWorkSpaceName>
+        <DropPath>CENTOS5.0_x64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='CentOS_5.0_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxombld-cent5-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_CentOS50_x86</UnixWorkSpaceName>
+        <DropPath>CENTOS5.0_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SunOS_5.10_sparc' ">
+      <PropertyGroup>
+        <UnixBuildServer>ostcbld-sparc10-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SunOS510_sparc</UnixWorkSpaceName>
+        <DropPath>Sun5.10_sparc</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SunOS_5.10_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld-sol10-02</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SunOS510_x86</UnixWorkSpaceName>
+        <DropPath>Sun5.10_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SunOS_5.11_sparc' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld-sparc11-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SunOS511_sparc</UnixWorkSpaceName>
+        <DropPath>Sun5.11_sparc</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SunOS_5.11_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxbld-sol11-04</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SunOS511_x86</UnixWorkSpaceName>
+        <DropPath>Sun5.11_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='SunOS_5.9_sparc' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxsun13</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_SunOS59_sparc</UnixWorkSpaceName>
+        <DropPath>Sun5.9_sparc</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='Debian_5.0_x64' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxomb64-deb5-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_Debian50_x64</UnixWorkSpaceName>
+        <DropPath>Debian5.0_x64</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <When Condition=" '$(UnixBuildType)'=='Debian_5.0_x86' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxomb-deb5-01</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_Debian50_x86</UnixWorkSpaceName>
+        <DropPath>Debian5.0_x86</DropPath>
+      </PropertyGroup>
+    </When>
+
+    <!-- 
+        To Add a new build type (e.g. FooNUXI_17_ARM) you will need to determine a new
+        UnixBuildType string and add a section here along with appropriate values for 
+        the build machine (UnixBuildServer), workspace (UnixWorkSpaceName), and 
+        drop path (DropPath).
+    -->
+    <!-- 
+    <When Condition=" '$(UnixBuildType)'=='FooNUXI_17_ARM' ">
+      <PropertyGroup>
+        <UnixBuildServer>scxnuxi1</UnixBuildServer>
+        <UnixWorkSpaceName>DSC_SCXDEV_FooNUXI17_ARM</UnixWorkSpaceName>
+        <DropPath>Foo17_ARM</DropPath>
+      </PropertyGroup>
+    </When>
+    -->
+    
+    <!-- Default option, set property that indicates no valid UnixBuildType was set. -->
+    <Otherwise>
+      <PropertyGroup>
+        <InvalidUnixBuildType>true</InvalidUnixBuildType>
+      </PropertyGroup>
+    </Otherwise>
+
+  </Choose>
+</Project>

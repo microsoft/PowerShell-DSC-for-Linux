@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <assemblyIdentity name="MS.BGIT.PolicheckW.exe" version="5.3.0.0" processorArchitecture="x86" type="win32" />
+  <dependency>
+    <dependentAssembly asmv2:dependencyType="install" asmv2:codebase="Native.MS.BGIT.Policheck.BL.manifest" asmv2:size="1377">
+      <assemblyIdentity name="Native.MS.BGIT.Policheck.BL" version="1.0.0.0" processorArchitecture="x86" type="win32" />
+      <hash xmlns="urn:schemas-microsoft-com:asm.v2">
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>70LXmSLCHi39NVVD/4vwiY/IvWY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly asmv2:dependencyType="install" asmv2:codebase="Native.MS.BGIT.Policheck.BL.ObjectRead.manifest" asmv2:size="2961">
+      <assemblyIdentity name="Native.MS.BGIT.Policheck.BL.ObjectRead" version="1.0.0.0" processorArchitecture="x86" type="win32" />
+      <hash xmlns="urn:schemas-microsoft-com:asm.v2">
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>ZQFgERZDeut+8osH3LwhhLw0jtk=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+</assembly>

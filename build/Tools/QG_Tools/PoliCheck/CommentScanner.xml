@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--MultiLine/BlockComment-->
+<Comments>
+  <BlockComment id="1" BlockStartComment="/*" BlockEndComment="*/">
+    <lang>c</lang>
+    <lang>cpp</lang>
+    <lang>cxx</lang>
+    <lang>h</lang>
+    <lang>hxx</lang>
+    <lang>hpp</lang>
+    <lang>cs</lang>
+    <lang>js</lang>
+	<lang>rc</lang>
+	<lang>java</lang>
+	<lang>jav</lang>
+  </BlockComment>
+  <!--Single Line Comments -->
+  <SingleLineComment id="1" SingleLineComment="//">
+    <lang>c</lang>
+    <lang>cpp</lang>
+    <lang>cxx</lang>
+    <lang>h</lang>
+    <lang>hxx</lang>
+    <lang>hpp</lang>
+    <lang>cs</lang>
+    <lang>js</lang>
+	<lang>rc</lang>
+	<lang>java</lang>
+	<lang>jav</lang>
+  </SingleLineComment >
+  <SingleLineComment id="2" SingleLineComment="'">
+    <lang>vb</lang>
+    <lang>vbs</lang>
+	<lang>frm</lang>
+	<lang>inc</lang>  
+    <lang>bas</lang>
+    <lang>pl</lang>
+  </SingleLineComment>
+</Comments>

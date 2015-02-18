@@ -1,0 +1,809 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Policheck.Automation</name>
+    </assembly>
+    <members>
+        <member name="T:Policheck.Automation.Message">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.FTS_EMPTY">
+            <summary>
+              Looks up a localized string similar to The FileTypeSettingsFile property cannot be set to empty..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.FTS_FILE_INVALID">
+            <summary>
+              Looks up a localized string similar to Unsupported file format for FileTypeSettings. Please use a valid xml file..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.FTS_FILE_NOT_FOUND">
+            <summary>
+              Looks up a localized string similar to The  File Type Settings file not found..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.FTS_FILE_SCHEMA_INVALID">
+            <summary>
+              Looks up a localized string similar to Invalid File Type Settings file, failed in schema validation..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.PTT_FILE_EXT_INVALID">
+            <summary>
+              Looks up a localized string similar to Invalid file extension. Only .xml, .mdb or .accdb files are allowed..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.PTT_FILE_NOT_FOUND">
+            <summary>
+              Looks up a localized string similar to Personal Term Table file not found or is not accessible..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.PTT_KEYWORD_EMPTY">
+            <summary>
+              Looks up a localized string similar to Blank string is not allowed for terms Keywords..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.PTT_LIST_EMPTY">
+            <summary>
+              Looks up a localized string similar to term tables for the scan is not set..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.PTT_SQL_NOT_FOUND">
+            <summary>
+              Looks up a localized string similar to The term information for the given LCID is not available..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.PTT_WEB_SERVICE_NOT_AVAILABLE">
+            <summary>
+              Looks up a localized string similar to The web service to get the sql term table is not available..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.REMOTING_RUNTIME_ERROR">
+            <summary>
+              Looks up a localized string similar to RemotingException occurred..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.RESULT_WRITE_ERROR">
+            <summary>
+              Looks up a localized string similar to An error occurred in saving results..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.SOCKET_ERROR">
+            <summary>
+              Looks up a localized string similar to Unable to establish remote connection.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.SQL_CONNECTION_STRING_INVALID">
+            <summary>
+              Looks up a localized string similar to The SQLServer connection string that points to your PoliCheck database for storing scan results is invalid..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.SQL_DATABASE_ERROR">
+            <summary>
+              Looks up a localized string similar to Please check the connection string, unable to connect to the target database..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_COMPLETED_ERROR">
+            <summary>
+              Looks up a localized string similar to RemoteController.manager_TaskCompleted(): .
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_INVOKE_SCAN_ERROR">
+            <summary>
+              Looks up a localized string similar to RemoteController.manager_InvokeScan(): .
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_MANAGER_ERROR">
+            <summary>
+              Looks up a localized string similar to An error occurred in Task manager.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_NAME_DUPLICATE">
+            <summary>
+              Looks up a localized string similar to A task with this name is already running. Please provide a unique name to your task..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_NAME_EMPTY">
+            <summary>
+              Looks up a localized string similar to Task Name cannot be empty..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_PROGRESS_ERROR">
+            <summary>
+              Looks up a localized string similar to RemoteController.manager_ProgressChnaged(): .
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_MODE_ISNULL">
+            <summary>
+              Looks up a localized string similar to Please specify SaveResultMode for saving scan results..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_TARGET_DIRECTORY_NOT_FOULD">
+            <summary>
+              Looks up a localized string similar to Result target location is not found or not accessible..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_TARGET_EMPTY">
+            <summary>
+              Looks up a localized string similar to The SaveResultToLocation property cannot be empty..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_TARGET_ERROR">
+            <summary>
+              Looks up a localized string similar to Error occured while validating SaveResultToLocation property. Please see the automation log for more detail..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_TARGET_EXCEL_2003">
+            <summary>
+              Looks up a localized string similar to Result file extension should be .xls..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_TARGET_EXCEL_2007">
+            <summary>
+              Looks up a localized string similar to Result file extension should be .xlsx..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_TARGET_INVALID">
+            <summary>
+              Looks up a localized string similar to The value of SaveResultToLocation property is not a valid file path..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_TARGET_VALID_EXTENSION">
+            <summary>
+              Looks up a localized string similar to SaveResultToLocation property must contains a valid file extension..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_RESULT_TARGET_XML">
+            <summary>
+              Looks up a localized string similar to Result file extension should be .xml..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_SCAN_TYPE_ISNULL">
+            <summary>
+              Looks up a localized string similar to Scan Type property is not set..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_TARGET_ABSOLUTE_PATH">
+            <summary>
+              Looks up a localized string similar to Specify the absolute path for the target..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_TARGET_BATCH_INVALID">
+            <summary>
+              Looks up a localized string similar to The specified target batch file is not valid..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_TARGET_BATCH_NOT_FOUND">
+            <summary>
+              Looks up a localized string similar to Error in reading target data: The specified Target batch file not found or is not accessible..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_TARGET_EMPTY">
+            <summary>
+              Looks up a localized string similar to Target for the scan is not set..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_TARGET_FILE_NOT_FOUND">
+            <summary>
+              Looks up a localized string similar to Error in reading target data: The specified Target file not found or is not accessible..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_TARGET_FOLDER_NOT_FOUND">
+            <summary>
+              Looks up a localized string similar to Error in reading target data: The specified Target folder not found or is not accessible..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_TARGET_TYPE_ISNULL">
+            <summary>
+              Looks up a localized string similar to Target Type property is not set..
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.Message.TASK_VALIDATE_ERROR">
+            <summary>
+              Looks up a localized string similar to RemoteController.IsValidTask(): .
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.FileTask">
+            <summary>
+            This class represents PoliCheck scan task used for automation.
+            </summary>    
+        </member>
+        <member name="T:Policheck.Automation.ITask">
+            <summary>
+            Common interface to be implemented by all specific scan tasks (File)
+            </summary>    
+        </member>
+        <member name="F:Policheck.Automation.FileTask.TermTables">
+            <summary>
+            Collection of term table sources.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._RemoteController">
+            <summary>
+            RemoteController object.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._CheckCodeComments">
+            <summary>
+            Underlying variable for Proprerty: CheckCodeComments
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._FileTypeSettingsFile">
+            <summary>
+            Underlying variable for Proprerty: FileTypeSettingsFile
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._FileTypeSettingsMode">
+            <summary>
+            Underlying variable for Proprerty: FileTypeSettingsMode
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._GlobalExclusions">
+            <summary>
+            Underlying variable for Proprerty:GlobalExclusions
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._IncludeSubDir">
+            <summary>
+            Underlying variable for Proprerty: IncludeSubDir
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._PersonalExclusions">
+            <summary>
+            Underlying variable for Proprerty: PersonalExclusions
+            </summary>        
+        </member>
+        <member name="F:Policheck.Automation.FileTask._ResultMode">
+            <summary>
+            Internal variable for property: SaveResultMode
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._ResultTarget">
+            <summary>
+            Underlying variable for property: SaveResultsToLocation
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._ScanType">
+            <summary>
+            Underlying variable for property: ScanType
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._Severity">
+            <summary>
+            Underlying variable for Proprerty: Severity
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._Target">
+            <summary>
+            Underlying variable for Proprerty: Target
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._TargetType">
+            <summary>
+            Underlying variable for Proprerty: TargetType
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._TaskName">
+            <summary>
+            Underlying variable for Proprerty: TaskName
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask._TermTableList">
+            <summary>
+            Underlying variable for Proprerty: TermTableList
+            </summary>
+        </member>
+        <member name="M:Policheck.Automation.FileTask.SetSeverity(Policheck.Automation.Severity[])">
+            <summary>
+            Set the Severity applicable for the task.
+            </summary>
+            <param name="severity"></param>
+        </member>
+        <member name="M:Policheck.Automation.FileTask.SetGlobalExclusions(Policheck.Automation.GlobalExclusions[])">
+            <summary>
+            Sets the Global Exclusions applicable for the task.
+            </summary>
+            <param name="globalExclusions"></param>
+        </member>
+        <member name="M:Policheck.Automation.FileTask.SetPersonalExclusions(Policheck.Automation.PersonalExclusions[])">
+            <summary>
+            Sets the Personal Exclusions applicable for the task.
+            </summary>
+            <param name="personalExclusions"></param>
+        </member>
+        <member name="M:Policheck.Automation.FileTask.Start(System.String,System.String)">
+            <summary>
+            Starts the execution of task on specified PoliCheck remote host.
+            </summary>
+            <param name="serverName">Machine acting as Remote Host for PoliCheck.</param>
+            <param name="portNumber">Port number on the machine open for listening to remote scan task requests.</param>
+        </member>
+        <member name="M:Policheck.Automation.FileTask.Stop">
+            <summary>
+            Terminates a task that is in progress.
+            </summary>
+            <returns>true if the request to terminate the task was accepted successfully.</returns>
+        </member>
+        <member name="F:Policheck.Automation.FileTask.ProgressEventCall">
+            <summary>
+            Progress chnaged event object for the task to bind the client's progress change event. 
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTask.CompleteEventCall">
+            <summary>
+            Scan complete event object for the task to bind the client's complete event.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.CheckCodeComments">
+            <summary>
+            This option enables PoliCheck to report if the term is in a comment or not. By default it is false.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.FileTypeSettingsFile">
+            <summary>
+            Specify the File Type Settings file path if the FileTypeSettingsMode property is set to CUSTOM.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.FileTypeSettingsMode">
+            <summary>
+            Specify whether Task will use the default File Type Settings File or the Custom on. 
+            By default Task will use the default File Type Settings file.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.GlobalExclusions">
+            <summary>
+            Gets the list of Global Exclusion applied for the task.
+            This Global Exclusion setting works with the SQL term database or XML personal tables only.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.IncludeSubDir">
+            <summary>
+            Set this property to True, to enable scanning of all the sub directories under your target folder
+            By default it is true.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.PersonalExclusions">
+            <summary>
+            Gets the list of Personal exclusions applied on the task. 
+            This Personal Exclusion setting are read from rule.mdb
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.SaveResultsToLocation">
+            <summary>
+            Target location where Policheck will save the scan results. 
+            If the SaveResultMode is SQLSERVER then a valid connection string is required to export the results in sql server.
+            </summary>        
+        </member>
+        <member name="P:Policheck.Automation.FileTask.SaveResultMode">
+            <summary>
+            Get/Set mode for saving scan results.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.ScanType">
+            <summary>
+            Type of scan.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.Severity">
+            <summary>
+            Gets different level of term severity applied. By default only Severity 1 is turned on.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.Target">
+            <summary>
+            Specify the path of target files/Folder/Batch. 
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.TargetType">
+            <summary>
+            Specify the target Type. i.e. files/Folder/Batch. 
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.TaskName">
+            <summary>
+            Specify the name for the task.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.FileTask.TermTableList">
+            <summary>
+            Gets the list of Term tables applied on the task.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.FileTask._TermTables">
+            <summary>
+            Collection class to store all the term sources referred in a PoliCheck Automation Task.
+            </summary>
+        </member>
+        <member name="M:Policheck.Automation.FileTask._TermTables.#ctor(Policheck.Automation.FileTask)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="_PolicheckTask"></param>
+        </member>
+        <member name="M:Policheck.Automation.FileTask._TermTables.AddSQL(System.Int16)">
+            <summary>
+            Specify the sql term tables to be used by the task.
+            The SQL term database is the SQL Server database maintained by the GPS group. Only the GPS group can make changes to it.
+            </summary>
+            <param name="LCID"></param>            
+        </member>
+        <member name="M:Policheck.Automation.FileTask._TermTables.AddPersonal(System.String)">
+            <summary>
+            Specify the personal term tables to be used by the task.
+            The personal term table is either XML or MDB file which contains terms that are sensitive within different groups in Microsoft. 
+            </summary>
+            <param name="filePath"></param>            
+        </member>
+        <member name="M:Policheck.Automation.FileTask._TermTables.AddKeyword(System.String)">
+            <summary>
+            Specify the keywords to be used by the task.
+            Keywords allow the user to enter terms manually during the setup of the task. 
+            These terms will be considered as sensitive terms and will not be saved except in that particular task.
+            </summary>
+            <param name="value"></param>            
+        </member>
+        <member name="T:Policheck.Automation.TaskProgressEventArgs">
+            <summary>
+            This class contains the information about the task progress.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskProgressEventArgs.TaskName">
+            <summary>
+            [Read only]task name
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskProgressEventArgs.ObjectInProgress">
+            <summary>
+            [Read only]name of Object under scanning
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskProgressEventArgs.IssueCount">
+            <summary>
+            [Read only]Total no of issues found
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskProgressEventArgs.TaskUniqueId">
+            <summary>
+            [Read only]task unique id 
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.TaskCompletedEventArgs">
+            <summary>
+            This class contains the information about the task completion.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskCompletedEventArgs.TaskName">
+            <summary>
+            Task name
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskCompletedEventArgs.TaskUniqueId">
+            <summary>
+            Task unique id
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskCompletedEventArgs.IssueCount">
+            <summary>
+            Total issues found
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskCompletedEventArgs.StartTime">
+            <summary>
+            Task start time
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskCompletedEventArgs.NoOfObjectsScanned">
+            <summary>
+            Total no of Objects scanned.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskCompletedEventArgs.Duration">
+            <summary>
+            Total duration of task execution
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskCompletedEventArgs.Error">
+            <summary>
+            Exception object to store any exceptions if occurs.
+            </summary>
+        </member>
+        <member name="P:Policheck.Automation.TaskCompletedEventArgs.Status">
+            <summary>
+            Status of the task
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.ProgressEventWrapper">
+            <summary>
+            Progress change event wrapper.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.CompleteEventWrapper">
+            <summary>
+            Task completion event wrapper.
+            </summary>
+        </member>
+        <member name="M:Policheck.Automation.AutomationLogger.AddLog(System.String,System.Exception)">
+            <summary>
+            Add log to the application trace.
+            </summary>
+            <param name="title"></param>
+            <param name="ex"></param>
+        </member>
+        <member name="T:Policheck.Automation.AutomationLogger.Priority">
+            <summary>
+            Priority
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.AutomationLogger.EventID">
+            <summary>
+            Event ID
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.RemoteController">
+            <summary>
+            Remote Task Controller that handles execution of POliCheck tasks on a remote host.
+            </summary>
+        </member>
+        <member name="M:Policheck.Automation.RemoteController.StopScan(System.String)">
+            <summary>
+            Stop the currently executing task.
+            </summary>
+            <param name="taskName">User specified task name</param>
+        </member>
+        <member name="M:Policheck.Automation.RemoteController.CancelScan(System.String)">
+            <summary>
+            Cancel the currently executing task.
+            </summary>
+            <param name="taskUniqueId"></param>
+        </member>
+        <member name="M:Policheck.Automation.RemoteController.InvokeScan(Policheck.Automation.ITask)">
+            <summary>
+            Invoke the scan for the given task object.
+            </summary>
+            <param name="clientTask"></param>
+        </member>
+        <member name="M:Policheck.Automation.RemoteController.manager_TaskCompleted(System.Object,MS.BGIT.Policheck.BL.TaskCompletedEventArgs)">
+            <summary>
+            collects the task completion event from taskController and pass the event to client applicatiuon after 
+            writing scan results.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:Policheck.Automation.RemoteController.manager_ProgressChanged(System.ComponentModel.ProgressChangedEventArgs)">
+            <summary>
+            collects the progress change events from taskController and pass the event to the client. 
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:Policheck.Automation.RemoteController.IsValidTask(Policheck.Automation.ITask)">
+            <summary>
+            Validate the task object on server side
+            </summary>
+            <param name="clientTask"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Policheck.Automation.RemoteController.IsTaskExists(System.String,System.String@)">
+            <summary>
+            Check whether the task is already exists in the _TaskList
+            </summary>
+            <param name="taskName"></param>
+            <param name="taskUniqueId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Policheck.Automation.RemoteController.IsTaskExists(System.String)">
+            <summary>
+            Check whether the task is already exists in the _TaskList
+            </summary>
+            <param name="taskName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Policheck.Automation.RemoteController.ScanCompletedEventHandler">
+            <summary>
+            Scan complete delegate
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="T:Policheck.Automation.RemoteController.ProgressChangedEventHandler">
+            <summary>
+            Progress chnage delegate
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.ResultMode">
+            <summary>
+            Mode in which scan results are to be written.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.ResultMode.XML">
+            <summary>
+            Scan results in xml file.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.ResultMode.EXCEL_2003">
+            <summary>
+            Scan results in Excel 2003 (.xls) file.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.ResultMode.EXCEL_2007">
+            <summary>
+            Scan results in Excel 2007 (.xlsx) file.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.ResultMode.SQL_SERVER">
+            <summary>
+            Scan results in sql server database.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.GlobalExclusions">
+            <summary>
+            Global Exclusion setting works with the SQL term database or XML personal tables only. 
+            It enables or disables Exclusion string or Exception context.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.GlobalExclusions.EXCLUSIONS">
+            <summary>
+            Enable term exclusion.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.GlobalExclusions.CONTEXT_EXCEPTION">
+            <summary>
+            Enable context exclusion.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.PersonalExclusions">
+            <summary>
+            Personal Exclusion settings are read from rule.mdb. 
+            It enables or disables Exclusion string, Exception file, Exception context, 
+            or both Exception file and context type of exclusions.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.PersonalExclusions.EXCLUSIONS">
+            <summary>
+            Enables term exclusion.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.PersonalExclusions.FILE_EXCEPTION">
+            <summary>
+             Enables file exclusion with term.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.PersonalExclusions.CONTEXT_EXCEPTION">
+            <summary>
+            Enables context exclusion with term. 
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.PersonalExclusions.FILE_CTX_EXCEPTION">
+            <summary>
+            Enables file and context exclusion with term.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.ScanType">
+            <summary>
+            Identifies the type of scan to be perform.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.ScanType.FILE">
+            <summary>
+            Operation to scan windows file/folder
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.Severity">
+            <summary>
+            The term severity for the task.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.Severity.SEV1">
+            <summary>
+            Severity 1
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.Severity.SEV2">
+            <summary>
+            Severity 2
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.Severity.SEV3">
+            <summary>
+            Severity 3
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.Severity.SEV4">
+            <summary>
+            Severity 4
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.TargetType">
+            <summary>
+            Target folder/file or batch file name
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TargetType.FOLDER">
+            <summary>
+            Scan target is a folder.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TargetType.FILE">
+            <summary>
+            Scan target is a file.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TargetType.BATCH">
+            <summary>
+            Scan target is a vbatch file.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.TermTableSource">
+            <summary>
+            Term Table Sources.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TermTableSource.SQL">
+            <summary>
+            Refer sql term table from GPS database.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TermTableSource.PERSONAL">
+            <summary>
+            Refer your personal term table.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TermTableSource.KEYWORD">
+            <summary>
+            Insert a keyword for scanning.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.FileTypeSettingsMode">
+            <summary>
+            To set the File Type settings to be used by the task. 
+            It controls what all file extensions should get scanned out of supported set of file extensions by PoliCheck application.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTypeSettingsMode.DEFAULT">
+            <summary>
+            Use the default File Type Settings file shipped with Policheck
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.FileTypeSettingsMode.CUSTOM">
+            <summary>
+            Use the custom File Type Settings file.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.TaskStatus">
+            <summary>
+            To get the status of task once scanning is complete.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TaskStatus.ERROR">
+            <summary>
+            Error occurrd in the task.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TaskStatus.CANCELLED">
+            <summary>
+            Task cancalled by the user.
+            </summary>
+        </member>
+        <member name="F:Policheck.Automation.TaskStatus.COMPLETED">
+            <summary>
+            Task completed successfully.
+            </summary>
+        </member>
+        <member name="T:Policheck.Automation.PolicheckTermTable">
+            <summary>
+            Struct to store the term table.
+            </summary>
+        </member>
+    </members>
+</doc>

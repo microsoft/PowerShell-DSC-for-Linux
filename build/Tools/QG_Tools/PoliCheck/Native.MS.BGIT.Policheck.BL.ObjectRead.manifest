@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <assemblyIdentity name="Native.MS.BGIT.Policheck.BL.ObjectRead" version="1.0.0.0" processorArchitecture="x86" type="win32" />
+  <file name="dsofile.dll" asmv2:size="109056">
+    <hash xmlns="urn:schemas-microsoft-com:asm.v2">
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+      <dsig:DigestValue>CSPe1cTI1FnTp/iI0rur7j+pMck=</dsig:DigestValue>
+    </hash>
+    <typelib tlbid="{58968145-cf00-4341-995f-2ee093f6aba3}" version="2.1" helpdir="" resourceid="0" flags="HASDISKIMAGE" />
+    <comClass clsid="{58968145-cf05-4341-995f-2ee093f6aba3}" threadingModel="free" tlbid="{58968145-cf00-4341-995f-2ee093f6aba3}" progid="DSOFile.OleDocumentProperties" description="DSOFile OleDocumentProperties" />
+  </file>
+  <file name="ExeReaderWrapper.dll" asmv2:size="74752">
+    <hash xmlns="urn:schemas-microsoft-com:asm.v2">
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+      <dsig:DigestValue>EbVV+vIsL8XZx8UheaW9rBhuWx4=</dsig:DigestValue>
+    </hash>
+    <typelib tlbid="{014d14c2-a57e-4a5a-a33a-1f8c73ce13f3}" version="1.0" helpdir="" resourceid="0" flags="HASDISKIMAGE" />
+    <comClass clsid="{8976263f-77dc-4cd5-8dd9-2d072201a638}" threadingModel="free" tlbid="{014d14c2-a57e-4a5a-a33a-1f8c73ce13f3}" progid="ExeReaderWrapper.ExeReader.1" description="ExeReader Class" />
+  </file>
+  <file name="ISWrapper.dll" asmv2:size="69120">
+    <hash xmlns="urn:schemas-microsoft-com:asm.v2">
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+      <dsig:DigestValue>cyjShfYetGAbTD42WT6yWJy6O48=</dsig:DigestValue>
+    </hash>
+    <typelib tlbid="{6b39affd-7cf9-4bcc-8b64-1b06b92f10b6}" version="1.0" helpdir="" resourceid="0" flags="HASDISKIMAGE" />
+    <comClass clsid="{3e667e5e-7ed1-4ad1-af3c-38273448a078}" threadingModel="free" tlbid="{6b39affd-7cf9-4bcc-8b64-1b06b92f10b6}" progid="ISWrapper.InfotechStorWrapper.1" description="InfotechStorWrapper Class" />
+  </file>
+</assembly>

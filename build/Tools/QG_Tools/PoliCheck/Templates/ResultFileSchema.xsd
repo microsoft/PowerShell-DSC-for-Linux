@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="PLCKRR">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PLCKRS">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="PoliCheckTask" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="TaskName" type="xs:string" />
+										<xs:element name="Target" type="xs:string" />
+										<xs:element name="ResultFile" type="xs:string" />
+										<xs:element name="FileTables" minOccurs="0">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="TableFile" type="xs:string" />
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element maxOccurs="unbounded" name="Keywords" minOccurs="0">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="Keyword" type="xs:string" />
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element maxOccurs="unbounded" name="ServerTables" minOccurs="0">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="TableID" type="xs:unsignedShort" maxOccurs="unbounded" />
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="TermClassFilter" />
+										<xs:element name="Schedule">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="StartRun">
+														<xs:complexType>
+															<xs:simpleContent>
+																<xs:extension base="xs:string">
+																	<xs:attribute name="RunMode" type="xs:string" use="required" />
+																</xs:extension>
+															</xs:simpleContent>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="Version" type="xs:string" use="optional" />
+									<xs:attribute name="TaskID" type="xs:string" use="optional" />
+									<xs:attribute name="ScanType" type="xs:string" use="optional" />
+									<xs:attribute name="TermTblType" type="xs:string" use="optional" />
+									<xs:attribute name="LCID" type="xs:string" use="optional" />
+									<xs:attribute name="CodePage" type="xs:string" use="optional" />
+									<xs:attribute name="Depth" type="xs:string" use="optional" />
+									<xs:attribute name="ContextLength" type="xs:string" use="optional" />
+									<xs:attribute name="IncMode" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="NeedLog" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="Recursive" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="ExclusionRule" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="ExcepF" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="ExcepC" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="ExcepFC" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="ExclusionTbl" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="ExceptTbl" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="WordOnly" type="xs:string" use="optional" />
+									<xs:attribute name="Case" type="xs:string" use="optional" />
+									<xs:attribute name="Severity" type="xs:string" use="optional" />
+									<xs:attribute name="VersionNo" type="xs:string" use="optional" />
+									<xs:attribute name="RootDirectory" type="xs:string" use="optional" />
+									<xs:attribute name="ModelName" type="xs:string" use="optional" />
+									<xs:attribute name="MLEnable" type="xs:string" use="optional" />
+									<xs:attribute name="HMEnable" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="HMEnabled" type="xs:unsignedByte" use="optional" />
+									<xs:attribute name="FRootDirectory" type="xs:string" use="optional" />
+									<xs:attribute name="SourceCodeScan" type="xs:unsignedByte" use="optional" />
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ResultSummary">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="User" type="xs:string" />
+										<xs:element name="Computer" type="xs:string" />
+										<xs:element name="TotalSize" type="xs:string" />
+										<xs:element name="OverSize" />
+										<xs:element name="StartTime" type="xs:string" />
+										<xs:element name="Duration" />
+										<xs:element name="RunState" />
+										<xs:element name="TotalCheckOut">
+											<xs:complexType>
+												<xs:simpleContent>
+													<xs:extension base="xs:string">
+														<xs:attribute name="Sev1Hits" type="xs:string" use="optional" />
+														<xs:attribute name="Sev2Hits" type="xs:string" use="optional" />
+														<xs:attribute name="Sev3Hits" type="xs:string" use="optional" />
+														<xs:attribute name="Sev4Hits" type="xs:string" use="optional" />
+													</xs:extension>
+												</xs:simpleContent>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="TermTbl" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element maxOccurs="unbounded" name="Term" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element minOccurs="0" name="TermTranslation" type="xs:string" nillable="true" />
+										<xs:element name="Comment" type="xs:string"  minOccurs="0" nillable="1"/>
+										<xs:element name="Actions" minOccurs="0" nillable="1">
+											<xs:complexType mixed="true">
+												<xs:sequence>
+													<xs:choice maxOccurs="unbounded" minOccurs="0">
+														<xs:element name="Context" type="xs:string" minOccurs="0" />
+														<xs:element name="ActionRecommendation" type="xs:string" minOccurs="0" />
+													</xs:choice>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="Term" type="xs:string" use="optional" />
+									<xs:attribute name="TermID" type="xs:string" use="optional" />
+									<xs:attribute name="Severity" type="xs:string"  use="optional" />
+									<xs:attribute name="TermClass" type="xs:string" use="optional" />
+									<xs:attribute name="CaseSensitive" type="xs:string" use="optional" />
+									<xs:attribute name="WholeWord" type="xs:string" use="optional" />
+									<xs:attribute name="CommentSearch" type="xs:string" use="optional" />
+									<xs:attribute name="RowCount" type="xs:string" use="optional" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Result">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element maxOccurs="unbounded" name="Object" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Term" type="xs:string" minOccurs="0"/>
+										<xs:element name="Title" minOccurs="0"/>
+										<xs:element name="Position" type="xs:string" minOccurs="0"/>
+										<xs:element name="Context" minOccurs="0">
+											<xs:complexType>
+												<xs:simpleContent>
+													<xs:extension base="xs:string">
+														<xs:attribute name="TermAt" type="xs:string" use="optional" />
+													</xs:extension>
+												</xs:simpleContent>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="Severity" type="xs:string" minOccurs="0"/>
+										<xs:element name="TermClass" type="xs:string" minOccurs="0"/>
+										<xs:element name="Confidence" minOccurs="0"/>
+										<xs:element name="IssueStatus" type="xs:string" minOccurs="0"/>
+										<xs:element name="BugNo" type="xs:string" minOccurs="0"/>
+										<xs:element name="Investigator" minOccurs="0"/>
+										<xs:element name="Version" type="xs:string" minOccurs="0"/>
+										<xs:element name="TeamName" minOccurs="0"/>
+										<xs:element name="Owner" minOccurs="0"/>
+										<xs:element name="Comment" minOccurs="0"/>
+										<xs:element name="Inherit" minOccurs="0"/>
+									</xs:sequence>
+									<xs:attribute name="No." type="xs:string" use="optional" />
+									<xs:attribute name="URL" type="xs:string" use="optional" />
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Logs" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Object" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="Status" type="xs:string"  minOccurs="0" />
+													<xs:element name="Occurences" type="xs:string" minOccurs="0"/>
+												</xs:sequence>
+												<xs:attribute name="No." type="xs:string" use="optional" />
+												<xs:attribute name="URL" type="xs:string" use="optional" />
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="TotalFiles" type="xs:string" use="optional"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="TotalOccurences" type="xs:string" use="required" />
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Logs" minOccurs="0" >
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Object" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Status" type="xs:string"  minOccurs="0" />
+										<xs:element name="Occurences" type="xs:string" minOccurs="0"/>
+									</xs:sequence>
+									<xs:attribute name="No." type="xs:string" use="optional" />
+									<xs:attribute name="URL" type="xs:string" use="optional" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="TotalFiles" type="xs:string" use="optional"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
