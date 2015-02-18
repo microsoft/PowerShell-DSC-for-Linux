@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="DesktopBuild" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+
+  <PropertyGroup>
+
+    <TeamProject>ScxCore</TeamProject>
+
+    <UpdateAssociatedWorkItems>false</UpdateAssociatedWorkItems>
+    <SkipWorkItemCreation>true</SkipWorkItemCreation>
+
+    <RunCodeAnalysis>Never</RunCodeAnalysis>
+
+    <TFSBuildTools>$(SolutionRoot)\build\tools</TFSBuildTools>
+    <TFSBuildTools Condition="'$(IsDesktopBuild)'=='true'">$(SolutionRoot)\tools</TFSBuildTools>
+
+    <BinariesRoot Condition="'$(IsDesktopBuild)'=='true'">$(SolutionRoot)\Target</BinariesRoot>
+
+    <!--If the user did not specify a list of severities to be considered during the scan, consider them all-->
+    <PoliCheckSeverities Condition="$(PoliCheckSeverities)==''">1|2|3|4</PoliCheckSeverities>
+
+    <!--Set the default report name-->
+    <PoliCheckReport>PoliCheckAnalysisReport.xml</PoliCheckReport>
+
+    <!--If the user specified the report type as XML, update the report name-->
+    <PoliCheckReport Condition="$(PoliCheckReportAsXLS)=='true'">PoliCheckAnalysisReport.xls</PoliCheckReport>
+
+    <!--If the user did not specify a list of term tables to load, only load English (9)-->
+    <PoliCheckTermTables Condition="$(PoliCheckTermTables)==''">9</PoliCheckTermTables>
+
+    <PoliCheckScanDir>$(SolutionRoot)\source\code</PoliCheckScanDir>
+    <PoliCheckScanDir Condition="'$(IsDesktopBuild)'=='true'">$(SolutionRoot)\..\source\code</PoliCheckScanDir>
+
+  </PropertyGroup>
+    
+</Project>
