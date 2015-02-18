@@ -1168,33 +1168,33 @@ static MI_CONST MI_PropertyDecl MSFT_nxPackageResource_Name_prop =
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxPackageResource_Path_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxPackageResource_FilePath_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxPackageResource_Path_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxPackageResource_FilePath_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxPackageResource_Path_Write_qual_value
+    &MSFT_nxPackageResource_FilePath_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxPackageResource_Path_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxPackageResource_FilePath_quals[] =
 {
-    &MSFT_nxPackageResource_Path_Write_qual,
+    &MSFT_nxPackageResource_FilePath_Write_qual,
 };
 
-/* property MSFT_nxPackageResource.Path */
-static MI_CONST MI_PropertyDecl MSFT_nxPackageResource_Path_prop =
+/* property MSFT_nxPackageResource.FilePath */
+static MI_CONST MI_PropertyDecl MSFT_nxPackageResource_FilePath_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
-    0x00706804, /* code */
-    MI_T("Path"), /* name */
-    MSFT_nxPackageResource_Path_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxPackageResource_Path_quals), /* numQualifiers */
+    0x00666808, /* code */
+    MI_T("FilePath"), /* name */
+    MSFT_nxPackageResource_FilePath_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxPackageResource_FilePath_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxPackageResource, Path), /* offset */
+    offsetof(MSFT_nxPackageResource, FilePath), /* offset */
     MI_T("MSFT_nxPackageResource"), /* origin */
     MI_T("MSFT_nxPackageResource"), /* propagator */
     NULL,
@@ -1525,7 +1525,7 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxPackageResource_props[] =
     &MSFT_nxPackageResource_Ensure_prop,
     &MSFT_nxPackageResource_PackageManager_prop,
     &MSFT_nxPackageResource_Name_prop,
-    &MSFT_nxPackageResource_Path_prop,
+    &MSFT_nxPackageResource_FilePath_prop,
     &MSFT_nxPackageResource_PackageGroup_prop,
     &MSFT_nxPackageResource_Arguments_prop,
     &MSFT_nxPackageResource_ReturnCode_prop,

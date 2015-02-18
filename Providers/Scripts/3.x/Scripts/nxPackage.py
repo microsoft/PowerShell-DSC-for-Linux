@@ -18,7 +18,7 @@ protocol=imp.load_source('protocol','../protocol.py')
 #   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
 #   [write,ValueMap{"Yum", "Apt", "Zypper"},Values{"Yum", "Apt", "Zypper"}] string PackageManager;
 #   [Key] string Name;
-#   [write] string Path;
+#   [write] string FilePath;
 #   [write] Boolean PackageGroup;
 #   [write] string Arguments;
 #   [write] uint32 ReturnCode;
@@ -34,15 +34,15 @@ protocol=imp.load_source('protocol','../protocol.py')
 global show_mof
 show_mof=False
 
-def Set_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
+def Set_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
     if Ensure == None :
         Ensure=''
     if PackageManager == None :
         PackageManager=''
     if Name == None :
         Name=''
-    if Path == None :
-        Path=''
+    if FilePath == None :
+        FilePath=''
     if PackageGroup == None :
         PackageGroup=False
     if Arguments == None:
@@ -52,21 +52,21 @@ def Set_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCo
     if LogPath == None:
         LogPath=''
 
-    retval = Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+    retval = Set(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
     return retval
 
-def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
+def Test_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
     if Ensure == None :
         Ensure=''
     if PackageManager == None :
         PackageManager=''
     if Name == None :
         Name=''
-    if Path == None :
-        Path=''
+    if FilePath == None :
+        FilePath=''
     if PackageGroup == None :
         PackageGroup=False
     if Arguments == None:
@@ -76,13 +76,13 @@ def Test_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnC
     if LogPath == None:
         LogPath=''
 
-    retval = Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+    retval = Test(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
     return retval
 
-def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
+def Get_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
     arg_names=list(locals().keys())
     if Ensure == None :
         Ensure=''
@@ -90,8 +90,8 @@ def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCo
         PackageManager=''
     if Name == None :
         Name=''
-    if Path == None :
-        Path=''
+    if FilePath == None :
+        FilePath=''
     if PackageGroup == None :
         PackageGroup=False
     if Arguments == None:
@@ -102,14 +102,14 @@ def Get_Marshall(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCo
         LogPath=''
 
     retval = 0
-    retval,PackageManager,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+    retval,PackageManager,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
     Ensure = protocol.MI_String(Ensure)
     PackageManager = protocol.MI_String(PackageManager)
     Name = protocol.MI_String(Name)
-    Path = protocol.MI_String(Path)
+    FilePath = protocol.MI_String(FilePath)
     PackageGroup= protocol.MI_Boolean(PackageGroup)
     Arguments = protocol.MI_String(Arguments)
     ReturnCode= protocol.MI_Uint32(ReturnCode)
@@ -169,7 +169,7 @@ def ParseArguments(a):
     return program_arg,cmd_arg
 
 class Params:
-    def __init__(self,Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
+    def __init__(self,Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
 
         if not ( "Present" in Ensure or "Absent" in Ensure ):
             Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
@@ -180,13 +180,13 @@ class Params:
                 Print('ERROR: Param PackageManager values are Yum, Apt, or Zypper.',file=sys.stderr)
                 Log(LogPath,'ERROR: Param PackageManager values are Yum, Apt, or Zypper.')
                 raise Exception('BadParameter')
-        if len(Name)<1 and len(Path)<1:
-            Print('ERROR: Param Name or Path must be set.',file=sys.stderr)
-            Log(LogPath,'ERROR: Param Name or Path must be set.')
+        if len(Name)<1 and len(FilePath)<1:
+            Print('ERROR: Param Name or FilePath must be set.',file=sys.stderr)
+            Log(LogPath,'ERROR: Param Name or FilePath must be set.')
             raise Exception('BadParameter')
-        if len(Name)>0 and len(Path)>0:
-            Print('Ignoring Name because Path is set.',file=sys.stderr)
-            Log(LogPath,'Ignoring Name because Path is set.')
+        if len(Name)>0 and len(FilePath)>0:
+            Print('Ignoring Name because FilePath is set.',file=sys.stderr)
+            Log(LogPath,'Ignoring Name because FilePath is set.')
         Print('PackageGroup value is '+repr(PackageGroup)) 
         Print('PackageGroup type is '+repr(type(PackageGroup)))
         if not ( True == PackageGroup or False == PackageGroup ):
@@ -197,7 +197,7 @@ class Params:
         self.Ensure = Ensure
         self.PackageManager = PackageManager.lower()
         self.Name = Name
-        self.Path = Path
+        self.FilePath = FilePath
         self.PackageGroup = PackageGroup
         self.Arguments,self.CommandArguments=ParseArguments(Arguments)
         self.ReturnCode = ReturnCode
@@ -254,7 +254,7 @@ def SetShowMof(a):
     global show_mof
     show_mof=a
 
-def ShowMof(op, Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
+def ShowMof(op, Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
     if not show_mof:
         return
     mof='\n'
@@ -263,7 +263,7 @@ def ShowMof(op, Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCod
     mof+='    Name = "' + Name +'"\n'
     mof+='    Ensure = "' + Ensure + '"\n'
     mof+='    PackageManager = "' + PackageManager + '"\n'
-    mof+='    Path = "' + Path + '"\n'
+    mof+='    FilePath = "' + FilePath + '"\n'
     mof+='    PackageGroup = "' + str(PackageGroup) + '"\n'
     mof+='    Arguments = "' + Arguments + '"\n'
     mof+='    ReturnCode = ' + str(ReturnCode) + '\n'
@@ -328,12 +328,12 @@ def ParseInfo(p,info):
 def DoEnableDisable(p):
     # if the path is set, use the path and self.PackageSystem
     cmd=""
-    if len(p.Path) > 1 and 'Present' in p.Ensure : # don't use the path unless installing
-        if not os.path.isfile(p.Path):
-            Print('ERROR.   File '+ p.Path + ' not found.',file=sys.stderr)
-            Log(p.LogPath,'ERROR.   File '+ p.Path + ' not found.')
+    if len(p.FilePath) > 1 and 'Present' in p.Ensure : # don't use the path unless installing
+        if not os.path.isfile(p.FilePath):
+            Print('ERROR.   File '+ p.FilePath + ' not found.',file=sys.stderr)
+            Log(p.LogPath,'ERROR.   File '+ p.FilePath + ' not found.')
             return False,""
-        cmd=p.cmds[p.PackageSystem][p.Ensure] + ' ' + p.Path
+        cmd=p.cmds[p.PackageSystem][p.Ensure] + ' ' + p.FilePath
         cmd=cmd.replace('%',p.Arguments)
     elif p.PackageGroup == True :
         if 'Group'+p.Ensure in p.cmds[p.PackageManager] :
@@ -352,10 +352,10 @@ def DoEnableDisable(p):
         return False,out
     return True,out
     
-def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
-    ShowMof('SET', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+def Set(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
+    ShowMof('SET', Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+        p=Params(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
         Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
@@ -376,10 +376,10 @@ def Set(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPat
         return [-1]
     return [0]
    
-def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
-    ShowMof('TEST', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+def Test(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
+    ShowMof('TEST', Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+        p=Params(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
         Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
@@ -389,12 +389,12 @@ def Test(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPa
         return [0]
     return [-1]
 
-def Get(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath):
+def Get(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
     retval=-1
     installed=False
-    ShowMof('GET', Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)  
+    ShowMof('GET', Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)  
     try:
-        p=Params(Ensure,PackageManager,Name,Path,PackageGroup,Arguments,ReturnCode,LogPath)
+        p=Params(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
         Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
