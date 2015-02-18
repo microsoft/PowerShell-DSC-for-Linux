@@ -32,7 +32,7 @@ typedef struct _MSFT_nxPackageResource /* extends OMI_BaseResource */
     MI_ConstStringField Ensure;
     MI_ConstStringField PackageManager;
     /*KEY*/ MI_ConstStringField Name;
-    MI_ConstStringField Path;
+    MI_ConstStringField FilePath;
     MI_ConstBooleanField PackageGroup;
     MI_ConstStringField Arguments;
     MI_ConstUint32Field ReturnCode;
@@ -230,7 +230,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_Name(
         2);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_Path(
+MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_FilePath(
     _Inout_ MSFT_nxPackageResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -242,7 +242,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_Path(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_SetPtr_Path(
+MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_SetPtr_FilePath(
     _Inout_ MSFT_nxPackageResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -254,7 +254,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_SetPtr_Path(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_Path(
+MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_FilePath(
     _Inout_ MSFT_nxPackageResource* self)
 {
     return self->__instance.ft->ClearElementAt(

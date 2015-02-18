@@ -7,7 +7,7 @@ class MSFT_nxPackageResource : OMI_BaseResource
   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
   [write,ValueMap{"Yum", "Apt", "Zypper"},Values{"Yum", "Apt", "Zypper"}] string PackageManager;
   [Key] string Name;
-  [write] string Path;
+  [write] string FilePath;
   [write] Boolean PackageGroup;
   [write] string Arguments;
   [write] uint32 ReturnCode;
