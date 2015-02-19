@@ -40,7 +40,7 @@
 
 
     <!-- Branch level prefix is used in the label name: For Production builds from
-    MySQL_osm branch it should be just MySQL_osm, for branch builds it should have the
+    DSC_osm branch it should be just DSC_osm, for branch builds it should have the
     branch name associated. -->
     <BranchLabelPrefix>DSC_SCXDEV</BranchLabelPrefix>
 
@@ -137,14 +137,14 @@
 
   </ItemGroup>
 
-  <UsingTask TaskName="Version" AssemblyFile="$(SolutionRoot)\MySQL\build\Tools\MSBuild.Community.Tasks.dll\MSBuild.Community.Tasks.dll" />
-  <UsingTask TaskName="Time" AssemblyFile="$(SolutionRoot)\MySQL\build\Tools\MSBuild.Community.Tasks.dll\MSBuild.Community.Tasks.dll" />
-  <UsingTask TaskName="FileUpdate" AssemblyFile="$(SolutionRoot)\MySQL\build\Tools\MSBuild.Community.Tasks.dll\MSBuild.Community.Tasks.dll" />
+  <UsingTask TaskName="Version" AssemblyFile="$(SolutionRoot)\DSC\build\Tools\MSBuild.Community.Tasks.dll\MSBuild.Community.Tasks.dll" />
+  <UsingTask TaskName="Time" AssemblyFile="$(SolutionRoot)\DSC\build\Tools\MSBuild.Community.Tasks.dll\MSBuild.Community.Tasks.dll" />
+  <UsingTask TaskName="FileUpdate" AssemblyFile="$(SolutionRoot)\DSC\build\Tools\MSBuild.Community.Tasks.dll\MSBuild.Community.Tasks.dll" />
 
   <Target Name="AfterGet">
 
     <PropertyGroup>
-      <SourceDir>$(MSBuildProjectDirectory)\..\sources\MySQL</SourceDir>
+      <SourceDir>$(MSBuildProjectDirectory)\..\sources\DSC</SourceDir>
     </PropertyGroup>
 
     <Message Text="Updating currentlabel.txt, makefile.version, makefile.versionumber and then Applying label" />
@@ -210,7 +210,7 @@
 
     <!-- Checkin currentlabel.txt, makefile.version, makefile.versionnumber -->
     <PropertyGroup>
-      <CheckinComment>AUTOMATIC UPDATE BY MySQL Project BUILD ENVIRONMENT - $(TheLabel)</CheckinComment>
+      <CheckinComment>AUTOMATIC UPDATE BY DSC Project BUILD ENVIRONMENT - $(TheLabel)</CheckinComment>
     </PropertyGroup>
 
     <Exec WorkingDirectory="$(SourceDir)\build"
@@ -252,7 +252,7 @@
               ReplacementText="SCX_BUILDVERSION_STATUS=Developer_Build" />
 
     <PropertyGroup>
-      <CheckinComment>AUTOMATIC UPDATE BY MySQL Project BUILD ENVIRONMENT - $(TipLabel)</CheckinComment>
+      <CheckinComment>AUTOMATIC UPDATE BY DSC Project BUILD ENVIRONMENT - $(TipLabel)</CheckinComment>
     </PropertyGroup>
 
     <Exec WorkingDirectory="$(SourceDir)\build"
