@@ -157,7 +157,7 @@
 
     <When Condition=" '$(UnixBuildType)'=='SUSE_10.0_x64' ">
       <PropertyGroup>
-        <UnixBuildServer>scxom64-sles10-02</UnixBuildServer>
+        <UnixBuildServer>scxvmb64-sle10-02</UnixBuildServer>
         <UnixWorkSpaceName>DSC_SCXDEV_SUSE100_x64</UnixWorkSpaceName>
         <DropPath>SUSE10.0_x64</DropPath>
       </PropertyGroup>
@@ -165,7 +165,7 @@
 
     <When Condition=" '$(UnixBuildType)'=='SUSE_10.0_x86' ">
       <PropertyGroup>
-        <UnixBuildServer>suse-devbuild</UnixBuildServer>
+        <UnixBuildServer>scxvmb-sle10-02</UnixBuildServer>
         <UnixWorkSpaceName>DSC_SCXDEV_SUSE100_x86</UnixWorkSpaceName>
         <DocumentationGeneration>true</DocumentationGeneration>
         <DoxygenDropFolder>Core/Docs/currentdoxygen</DoxygenDropFolder>
