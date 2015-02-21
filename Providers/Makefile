@@ -22,11 +22,7 @@ BIN_PATH:=$(PROVIDER_PATH)/bin
 
 # included makefiles for additional definitions
 include $(OMI_PATH)/output/config.mak
-
-# test that configure has been run
-ifndef ENABLE_DEBUG
-$(error "ENABLE_DEBUG is not set.  Please re-run configure")
-endif
+include ../config.mak
 
 # additional include paths
 INCLUDE_PATH+=$(INCDIR)

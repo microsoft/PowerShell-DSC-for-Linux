@@ -1,6 +1,4 @@
 TOP := $(shell cd ..; pwd)
-BUILD_RPM := 1
-BUILD_DPKG := 1
 
 OUTPUT_DIR := $(TOP)/output
 STAGING_DIR := $(OUTPUT_DIR)/staging

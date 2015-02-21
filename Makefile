@@ -1,31 +1,52 @@
-kit: kit098 kit100 nxNetworking
+include config.mak
+
+ifeq ($(BUILD_LOCAL),1)
+all:
+	make local
+
+else
+all:
+ ifeq ($(BUILD_SSL_098),1)
+	make kit098 
+ endif
+ ifeq ($(BUILD_SSL_100),1)
+	make kit100 
+ endif
+	make nxNetworking
 	mkdir -p release; \
 	rm -rf release/*.{rpm,deb}; \
 	mv omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
+endif
 
 kit098: omi098 dsc098
 
 kit100: omi100 dsc100
 
 dsc098: lcm098 providers
-	make -C installbuilder SSL_VERSION=098
+	make -C installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 dsc100: lcm100 providers
-	make -C installbuilder SSL_VERSION=100
+	make -C installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 omi098:
-	./configure-release-098
+	make configureomi098
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_0.9.8 omi-1.0.8/output
 	make -C omi-1.0.8
-	make -C omi-1.0.8/installbuilder-generic SSL_VERSION=098
+	make -C omi-1.0.8/installbuilder-generic SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 omi100:
-	./configure-release-100
+	make configureomi100
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_1.0.0 omi-1.0.8/output
 	make -C omi-1.0.8
-	make -C omi-1.0.8/installbuilder-generic SSL_VERSION=100
+	make -C omi-1.0.8/installbuilder-generic SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+
+configureomi098:
+	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_0.9.8 --opensslcflags=$(openssl098_cflags) --openssllibs=$(openssl098_libs) --openssllibdir=$(openssl098_libdir))
+
+configureomi100:
+	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_1.0.0 --opensslcflags=$(openssl100_cflags) --openssllibs=$(openssl100_libs) --openssllibdir=$(openssl100_libdir))
 
 lcm098:
 	make -C LCM
@@ -61,9 +82,9 @@ distclean: clean
 
 clean:
 	make -C Providers clean
-	./configure-release-098
+	make configureomi098
 	make -C omi-1.0.8 distclean
-	./configure-release-100
+	make configureomi100
 	make -C omi-1.0.8 distclean
 	rm -rf omi-1.0.8/output
 	rm -rf output
