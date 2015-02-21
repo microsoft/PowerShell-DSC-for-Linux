@@ -1,1 +1,121 @@
-cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure --dev
+#!/bin/bash
+
+BUILD_RPM=1
+BUILD_DPKG=1
+BUILD_SSL_098=1
+BUILD_SSL_100=1
+BUILD_SSL_SYSTEM=0
+BUILD_DEBUG=0
+DEBUG_FLAGS=""
+
+for opt
+do
+
+  arg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
+
+  case $opt in
+    -h | --help)
+      help=1
+    ;;
+    --enable-debug)
+      if [ "$build_type" = "Bullseye" ]; then
+          echo "Cannot build debug if Bullseye is enabled"
+          exit 1
+      fi
+      BUILD_DEBUG=1
+      DEBUG_FLAGS="--enable-debug"
+    ;;
+
+
+    --no-rpm)
+      BUILD_RPM=0
+    ;;
+    --no-dpkg)
+      BUILD_DPKG=0
+    ;;
+
+    --local)
+      BUILD_LOCAL=1
+    ;;
+
+    --no-ssl-098)
+      BUILD_SSL_098=0
+    ;;
+    --no-ssl-100)
+      BUILD_SSL_100=0
+    ;;
+
+    *)
+      echo "configure: invalid option '$opt'"
+      echo "Try configure --help' for more information."
+      exit 1
+    ;;
+
+  esac
+
+done
+
+if [ "$help" = "1" ]; then
+
+    cat<<EOF
+
+Usage: ./configure [OPTIONS]
+
+OVERVIEW:
+
+This script configures DSC for Linux for building.
+
+OPTIONS:
+    -h, --help                  Print this help message.
+    --enable-debug              Perform a debug build.
+
+    --no-rpm                    Do not build an RPM package
+    --no-dpkg                   Do not build a DEB package
+    --no-ssl-098                Do not build for OpenSSL 0.9.8x
+    --no-ssl-100                Do not build for OpenSSL 1.0.x
+
+    --local                     Build without packages and for the OpenSSL installed to the system.
+EOF
+    exit 0
+fi
+
+
+pkgconfig=`which pkg-config`
+
+if [ -d "/usr/local_ssl_0.9.8" -a -d "/usr/local_ssl_1.0.0" ]; then
+    case "`uname -m`" in
+        x86_64 )
+            openssl098_libdir=/usr/local_ssl_0.9.8/lib
+            openssl100_libdir=/usr/local_ssl_1.0.0/lib64
+            ;;
+
+        * )
+            openssl098_libdir=/usr/local_ssl_0.9.8/lib
+            openssl100_libdir=/usr/local_ssl_1.0.0/lib
+            ;;
+    esac
+    openssl098_cflags=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --cflags openssl`
+    openssl098_libs=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --libs openssl`
+    openssl100_cflags=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --cflags openssl`
+    openssl100_libs=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --libs openssl`
+fi
+
+cat <<EOF > config.mak
+BUILD_RPM=$BUILD_RPM
+BUILD_DPKG=$BUILD_DPKG
+BUILD_SSL_098=$BUILD_SSL_098
+BUILD_SSL_100=$BUILD_SSL_100
+BUILD_LOCAL=$BUILD_LOCAL
+
+BUILD_DEBUG=$BUILD_DEBUG
+DEBUG_FLAGS=$DEBUG_FLAGS
+
+openssl098_cflags="$openssl098_cflags"
+openssl098_libs="$openssl098_libs"
+openssl098_libdir="$openssl098_libdir"
+openssl100_cflags="$openssl100_cflags"
+openssl100_libs="$openssl100_libs"
+openssl100_libdir="$openssl100_libdir"
+EOF
+
+echo "Configured DSC"

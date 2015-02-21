@@ -37,14 +37,11 @@ echo ${ScriptName} : Working Dir: ${PWD}
 echo ${ScriptName} : Calling configure script
 
 case $ConfigToBuild in
-    Bullseye)
-        ./configure --enable-bullseye
-    ;;
     Debug)
         ./configure --enable-debug
     ;;
     *)
-        ./configure --enable-ulinux   
+        ./configure
     ;;
 esac
 
