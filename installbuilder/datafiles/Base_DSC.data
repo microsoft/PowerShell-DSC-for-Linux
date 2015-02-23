@@ -72,6 +72,11 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/mof/MSFT_nxDNSServerAddressResource.schema.mof;  Providers/nxDNSServerAddress/MSFT_nxDNSServerAddressResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxDNSServerAddressResource.registration.mof;  Providers/nxDNSServerAddress/MSFT_nxDNSServerAddressResource.registration.mof;      755; root; root
 
+/opt/microsoft/dsc/lib/libMSFT_nxFileLineResource.so;   Providers/bin/libMSFT_nxFileLineResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxFileLineResource.reg;  Providers/nxFileLine/MSFT_nxFileLineResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxFileLineResource.schema.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxFileLineResource.registration.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.registration.mof;      755; root; root
+
 /opt/microsoft/dsc/Scripts/client.py; Providers/Scripts/client.py; 755; root; root
 /opt/microsoft/dsc/Scripts/protocol.py; Providers/Scripts/protocol.py; 755; root; root
 /opt/microsoft/dsc/Scripts/SendConfigurationApply.py; Providers/Extras/Scripts/SendConfigurationApply.py; 755; root; root
@@ -91,6 +96,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; Providers/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxDNSServerAddress.py; Providers/Scripts/2.4x-2.5x/Scripts/nxDNSServerAddress.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFileLine.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFileLine.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/__init__.py; Providers/Scripts/2.6x-2.7x/Scripts/__init__.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxScript.py; Providers/Scripts/2.6x-2.7x/Scripts/nxScript.py; 755; root; root
@@ -102,6 +108,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; Providers/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxDNSServerAddress.py; Providers/Scripts/2.6x-2.7x/Scripts/nxDNSServerAddress.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/3.x/Scripts/__init__.py; Providers/Scripts/3.x/Scripts/__init__.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxScript.py; Providers/Scripts/3.x/Scripts/nxScript.py; 755; root; root
@@ -113,6 +120,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxEnvironment.py; Providers/Scripts/3.x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxDNSServerAddress.py; Providers/Scripts/3.x/Scripts/nxDNSServerAddress.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxFileLine.py; Providers/Scripts/3.x/Scripts/nxFileLine.py; 755; root; root
 
 %Directories
 /opt/microsoft;          755; root; root
