@@ -2354,8 +2354,6 @@ MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
     if (r != MI_RESULT_OK)
     {
         CleanupModuleTable(moduleTable);
-        DSC_free(fileName);
-        free(directoryPath);
         return r;
     }
 
@@ -2380,20 +2378,23 @@ MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
         if (r != MI_RESULT_OK)
         {
             CleanupModuleTable(moduleTable);
-            DSC_free(fileName);
-            free(directoryPath);
             return r;
         }
 
         Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", "/opt/microsoft/dsc/Scripts/InstallModule.py", zipPath);
         retval = system(stringBuffer);
-
+        
         if (retval != 0)
         {
-            CleanupModuleTable(moduleTable);
-            DSC_free(fileName);
-            free(directoryPath);
-            return MI_RESULT_FAILED; 
+            if (retval == -1 && errno == ECHILD)
+            {
+                // This is an OK condition.  We weren't able to find the child process to reap after it completes.
+            }
+            else
+            {
+                CleanupModuleTable(moduleTable);
+                return MI_RESULT_FAILED;
+            }
         }
 
         current = current->next;
