@@ -85,7 +85,7 @@ def Process(params):
     process = subprocess.Popen(params, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (process_stdout, process_stderr) = process.communicate()
 
-    return (process_stdout, process_stderr, process.returncode)
+    return (process_stdout.decode("utf-8"), process_stderr.decode("utf-8"), process.returncode)
 
 
 def StartService(sc):
@@ -393,8 +393,8 @@ def InitExists():
 def ServiceExistsInSystemd(sc):
     (process_stdout, process_stderr, retval) = Process([systemctl_path, "status", sc.Name])
     
-    if sc.Name + ".service" in process_stdout:
-        if "Loaded: not-found" in process_stdout:
+    if sc.Name + ".service" in process_stdout.decode('utf-8'):
+        if "Loaded: not-found" in process_stdout.decode('utf-8'):
             return False
         else:
             return True
