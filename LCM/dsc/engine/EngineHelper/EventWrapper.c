@@ -74,8 +74,9 @@ static int _GetDSCTimeStamp(_Pre_writable_size_(TIMESTAMP_SIZE) char buf[TIMESTA
     time_t t = usec / 1000000;
     struct tm tm;
     localtime_r(&t, &tm);
-    sprintf(
+    snprintf(
         buf,
+        TIMESTAMP_SIZE,
         "%02u/%02u/%02u %02u:%02u:%02u",
         tm.tm_year + 1900,
         tm.tm_mon + 1,

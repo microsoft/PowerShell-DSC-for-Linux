@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     if( argc >= 2 )
     {
         // the argument is the value of the parameter passed to function PerformRequiredConfigurationChecks
-        argValue = atoi(argv[1]);
+        argValue = strtoul(argv[1], NULL, 10);
         if( argValue == 0 || !(argValue == TASK_REGULAR || argValue== TASK_REBOOT || argValue == TASK_BOOTSTRAP))
             argValue = TASK_REGULAR;
     }
