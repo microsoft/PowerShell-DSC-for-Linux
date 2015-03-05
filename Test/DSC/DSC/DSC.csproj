@@ -63,6 +63,8 @@
     <Compile Include="nxEnvironmentProviderTest\nxEnvironmentTest.cs" />
     <Compile Include="nxExecProviderTest\ExecMofHelper.cs" />
     <Compile Include="nxExecProviderTest\nxExecTest.cs" />
+    <Compile Include="nxFileLineProviderTest\FileLineMofHelper.cs" />
+    <Compile Include="nxFileLineProviderTest\nxFileLineTest.cs" />
     <Compile Include="nxGroupProviderTest\GroupMofHelper.cs" />
     <Compile Include="nxGroupProviderTest\nxGroupTest.cs" />
     <Compile Include="nxIPAddressProviderTest\IPAddressMofHelper.cs" />

@@ -2761,19 +2761,20 @@
      cls="DSC.nxSshAuthTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="keyComment">testKeyComments</rec>
-        <rec key="username">testUser</rec>
-        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
-        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
-        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
-        <rec key="initialCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
-        <rec key="finalCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
         <!-- MOF Info. -->
-        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
         <rec key="psScript">%dscSender-nonRoot%</rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
         <rec key="expectedValue">0</rec>
       </var>
 
@@ -2782,15 +2783,16 @@
      cls="DSC.nxSshAuthTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="keyComment">testKeyComments</rec>
-        <rec key="username">testUser</rec>
-        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
-        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
-        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
-        <rec key="initialCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
-        <rec key="finalCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
         <!-- MOF Info. -->
-        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
         <rec key="psScript">
           %dscSender%
           [void] (%configMofScriptPath%);    ########### Generate Mof ###########
@@ -2803,9 +2805,274 @@
         </rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
       </var>
+    </section>
+
+    <section sid="9" dsc="nxFileLine Provider">
+
+      <var set="9" lvl="1" vid="814821"
+           dsc="[nxFileLine] Verify if multiple lines in the file that match the value of DoesNotContainPattern are removed from the file."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="doesNotContainPattern">comments</rec>
+        <rec key="keepLine">This line will be retained.</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %doesNotContainPattern% > %filePath%;echo %doesNotContainPattern% >> %filePath%;echo %keepLine% >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |grep -i %doesNotContainPattern% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Lines that match the value of DoesNotContainPattern are removed from the file.</rec>
+        <rec key="failedMsg">Lines that match the value of DoesNotContainPattern didn't remove from the file.</rec>
+      </var>
+
+      <var set="9" lvl="1" vid="814823"
+           dsc="[nxFileLine] Verify if the file does not contain a line exactly matching the contents of ContainsLine, the line is written."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="containsLine">containsLineTest</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo "Line1" > %filePath%;echo "Line2" >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |grep -i %containsLine% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The line is written into the end of the file.</rec>
+        <rec key="failedMsg">The line isn't written into the end of the file.</rec>
+      </var>
+
+      <var set="9" lvl="1" vid="814824"
+           dsc="[nxFileLine] Verify if the file contains a line exactly matching the contents of ContainsLine, no operation is performed."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="containsLine">containsLineTest</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %containsLine% > %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |tr -d '\n'</rec>
+        <rec key="expectedValue">%containsLine%</rec>
+        <rec key="successfulMsg">No operation is performed when the file contains a line exactly matching the contents of ContainsLine.</rec>
+        <rec key="failedMsg">The file is modified even the file contains a line exactly matching the contents of ContainsLine.</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="814830"
+           dsc="[nxFileLine] Verify if DoesNotContainPattern and ContainsLine are defined, lines match DoesNotContainPattern will be removed if they do not match ContainsLine."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="containsLine">ContainsLineTest</rec>
+        <rec key="doesNotContainPattern">DoesNotContainPatternTest</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %doesNotContainPattern% > %filePath%;echo %doesNotContainPattern% > %filePath%;echo "Keep Line" >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;DoesNotContainPattern:%doesNotContainPattern%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |grep %containsLine% | wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">2</rec>
+        <rec key="successfulMsg">Lines match DoesNotContainPattern are removed when they do not match ContainsLine.</rec>
+        <rec key="failedMsg">Lines match DoesNotContainPattern are not removed when they do not match ContainsLine.</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="814835"
+           dsc="[nxFileLine] Verify if DoesNotContainPattern and ContainsLine are defined, the file contains a line exactly matching ContainsLine, no operation for ContainsLine is performed."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="containsLine">ContainsLineTest</rec>
+        <rec key="doesNotContainPattern">DoesNotContainPatternTest</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %containsLine% > %filePath%;echo "Keep Line" >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;DoesNotContainPattern:%doesNotContainPattern%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |head -1 | tr -d '\n'</rec>
+        <rec key="expectedValue">%containsLine%</rec>
+        <rec key="successfulMsg">No operation for ContainsLine is performed when the file contains a line exactly matching ContainsLine.</rec>
+        <rec key="failedMsg">The file is modified even the file contains a line exactly matching ContainsLine.</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="814839"
+           dsc="[nxFileLine] Verify if DoesNotContainPattern and ContainsLine are defined, the line is appended when the file doesn't contain a line exactly matching ContainsLine."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="containsLine">EndLine</rec>
+        <rec key="doesNotContainPattern">DoesNotContainPatternTest</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo "Line1" > %filePath%;echo "Line2" >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;DoesNotContainPattern:%doesNotContainPattern%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |tail -1 | tr -d '\n'</rec>
+        <rec key="expectedValue">%containsLine%</rec>
+        <rec key="successfulMsg">The line is written into the end of the file when doesn't contain a line exactly matching ContainsLine.</rec>
+        <rec key="failedMsg">The line isn't written into the end of the file when doesn't contain a line exactly matching ContainsLine.</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="816248"
+           dsc="[nxFileLine] Verify if the line match the value of DoesNotContainPattern is removed when the DoesNotContainPattern contains metacharacters."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="doesNotContainPattern">^DoesNotContainPatternTest$</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo "DoesNotContainPatternTest" > %filePath%;echo "Line1" >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |grep -i "DoesNotContainPatternTest" |wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">The line match the value of DoesNotContainPattern is removed when the DoesNotContainPattern contains metacharacters.</rec>
+        <rec key="failedMsg">The line match the value of DoesNotContainPattern is not removed when the DoesNotContainPattern contains metacharacters.</rec>
+      </var>
+
+      <!--Todo-->
+      <var set="9" lvl="2" vid="816249"
+           dsc="[nxFileLine] Verify if ContainsLine can be identified when it contains metacharacters."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="containsLine">^ContainsLineTest$</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo "Line1" > %filePath%;echo "Line2" >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |grep -i "ContainsLineTest" |wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The ContainsLine can be identified when it contains metacharacters.</rec>
+        <rec key="failedMsg">The ContainsLine can't identified when it contains metacharacters.</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="816990"
+           dsc="[nxFileLine] Verify if error out while non-root user runs DSC operation to remove matching line from the file."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="doesNotContainPattern">comments</rec>
+        <rec key="keepLine">This line will be retained.</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %doesNotContainPattern% > %filePath%;echo %keepLine% >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |grep -i %doesNotContainPattern% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Send error out while non-root user runs DSC operation to remove matching line from the file.</rec>
+        <rec key="failedMsg">No error out while non-root user runs DSC operation to remove matching line from the file.</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="816991"
+           dsc="[nxFileLine] Verify if error out while non-root user runs DSC operation to get file line information."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="doesNotContainPattern">comments</rec>
+        <rec key="keepLine">This line will be retained.</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %doesNotContainPattern% > %filePath%;echo %keepLine% >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |grep -i %doesNotContainPattern% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Send error out while non-root user runs DSC operation to get file line information.</rec>
+        <rec key="failedMsg">No error out while non-root user runs DSC operation to get file line information.</rec>
+      </var>
+
+      <var set="9" lvl="3" vid="814843"
+           dsc="[nxFileLine] Verify if no operation is proformed when no lines match the value of DoesNotContainPattern."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="doesNotContainPattern">DoesNotContainPatternTest</rec>
+
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo "Line1" > %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% | tr -d '\n'</rec>
+        <rec key="expectedValue">Line1</rec>
+        <rec key="successfulMsg">No operation is proformed when no lines match the value of DoesNotContainPattern.</rec>
+        <rec key="failedMsg">The file is modified even no lines match the value of DoesNotContainPattern.</rec>
+      </var>
+
+      <!--Todo-->
+      <var set="9" lvl="3" vid="814845"
+           dsc="[nxFileLine] Verify if error out when the FilePath doesn't exist."
+           cls="DSC.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="containsLine">ContainsLineTest</rec>
+
+        <rec key="initialCmd">rm /tmp/test</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out when the FilePath doesn't exist.</rec>
+        <rec key="failedMsg">No error out when the FilePath doesn't exist.</rec>
+      </var>
+      
     </section>
   </section>
 </varmap>
