@@ -1,93 +1,50 @@
-import pwd
-import shutil
-import grp
-import time
+#!/usr/bin/env python
+#============================================================================
+# Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+#============================================================================
 
-
-import socket
-import re
-import csv
 import os
-import subprocess
-import struct
+import sys
+import tempfile
+import re
+import platform
+import imp
+import socket
+protocol=imp.load_source('protocol','../protocol.py')
 
+"""
+MOF:
 
-BLOCK_SIZE = 8192
+[ClassVersion("1.0.0"), FriendlyName("nxIPAddress")] 
+class MSFT_nxIPAddress : OMI_BaseResource
+{
+	[write] string IPAddress;
+	[Key] string InterfaceName;
+	[write,ValueMap{"Automatic", "Static"},Values{"Automatic", "Static"}] string BootProtocol;
+	[write] string DefaultGateway;
+	[write,ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] string Ensure;
+	[write] integer PrefixLength;
+	[Key,write,ValueMap{"IPv4", "IPv6"},Values{"IPv4", "IPv6"}] string AddressFamily;
+};
+"""
 
-def Set_Marshall(InterfaceName, IPAddress, BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily):
-    InterfaceName = InterfaceName.decode("utf-8")
-    IPAddress = IPAddress.decode("utf-8")
-    BootProtocol = BootProtocol.decode("utf-8")
-    DefaultGateway = DefaultGateway.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    PrefixLength = PrefixLength.decode("utf-8")
-    AddressFamily = AddressFamily.decode("utf-8")
-
-    retval = Set(InterfaceName, IPAddress, BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily)
-    return retval
-
-
-def Test_Marshall(InterfaceName, IPAddress, BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily):
-    InterfaceName = InterfaceName.decode("utf-8")
-    IPAddress = IPAddress.decode("utf-8")
-    BootProtocol = BootProtocol.decode("utf-8")
-    DefaultGateway = DefaultGateway.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    PrefixLength = PrefixLength.decode("utf-8")
-    AddressFamily = AddressFamily.decode("utf-8")
-
-    retval = Test(InterfaceName, IPAddress, BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily)
-    return retval
-
-
-def Get_Marshall(InterfaceName, IPAddress, BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily):
-    InterfaceName = InterfaceName.decode("utf-8")
-    IPAddress = IPAddress.decode("utf-8")
-    BootProtocol = BootProtocol.decode("utf-8")
-    DefaultGateway = DefaultGateway.decode("utf-8")
-    Ensure = Ensure.decode("utf-8")
-    PrefixLength = PrefixLength.decode("utf-8")
-    AddressFamily = AddressFamily.decode("utf-8")
-
-    retval = 0
-
-    (retval, InterfaceName, IPAddress, BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily) = Get(InterfaceName, IPAddress,  BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily)
-
-
-    InterfaceName = InterfaceName.encode("utf-8")
-    IPAddress = IPAddress.encode("utf-8")
-    BootProtocol = BootProtocol.encode("utf-8")
-    DefaultGateway = DefaultGateway.encode("utf-8")
-    Ensure = Ensure.encode("utf-8")
-    PrefixLength = str(PrefixLength).encode("utf-8")
-    AddressFamily = AddressFamily.encode("utf-8")
-
-    return [retval, InterfaceName, IPAddress, BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily]
-
-############################################################
-### Begin user defined DSC functions                     ###
-############################################################
-
-def Process(params):
-    process = subprocess.Popen(params, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (process_stdout, process_stderr) = process.communicate()
-    return (process_stdout, process_stderr, process.returncode)
-
-
-def validateIP(ipaddr):
-    try:
-        ip = ipaddr.strip("'")
-        socket.inet_aton(ip)
-        return True
-    except socket.error:
-        print "IP address is not valid."
+def ValidateAddresses(IPAddress,AddressFamily):
+    if 'IPv4' in AddressFamily:
+        ptype=socket.AF_INET
+    elif 'IPv6' in AddressFamily:
+        ptype=socket.AF_INET6
+    else:
         return False
-
+    try:
+        socket.inet_pton(ptype,IPAddress)
+    except:
+        return False
+    return True
 
 def bitNetmaskConversion(PrefixLength):
     N = int(PrefixLength)
     M =  N / 8    #number of 255 sections (full octets)
-    part = N % 8    #number of 1's in odd octet
+#    part = N % 8    #number of 1's in odd octet
     MASK = 255
    
     netmaskIP = ""
@@ -108,9 +65,8 @@ def bitNetmaskConversion(PrefixLength):
        
     return netmaskIP
 
-
 def netmaskBitConversion(netmask):
-    print netmask, "netmask"
+    print( netmask, "netmask")
     arrTmp = netmask.strip("'")
     arr = arrTmp.split(".")
     
@@ -126,839 +82,613 @@ def netmaskBitConversion(netmask):
                 j+=1
     return sumT
 
-
-
-   
-"""                                                    IP ADDRESS                               """
-
-##SLES
-
-def readSlesIPAddr(configFile):
-    return readDict(parseSles(configFile), 'IPADDR')
-
-def openFile_witherror_grabIP(filename):
-    try:
-        readIPAddress()
-    except IOError:
-        print "Error: couldn't find IP address"
-
-
-#parser only sufficient for config files with format: key=value
-
-def parseSles(fileI):
-    openR = open(fileI)
-    md = {}
-    data = openR.read()
-    lines = data.split("\n")
-    for line in lines:
-        keyvals = line.split("=")
-
-        if len(keyvals) == 2:
-            keyvals[1] = keyvals[1].strip("'")
-            md[keyvals[0]] = keyvals[1]
-
-    openR.close()
-
-    return md
-   
-
-def readDict(my_dict, key):
-    try:
-        if key in my_dict: 
-            return my_dict[key]
-    except KeyError:
-        return [-1]
-        
-def write_StaticBootProto(fileI,md, ipAddr, netmaskIP):
-
-    openW = open(fileI, 'w')
-   
-    if 'IPADDR' in md:
-        md['IPADDR'] = ipAddr
-    openW.write('IPADDR' + "=" + "'" + md['IPADDR'] + "'" "\n")
-    
-    if 'NETMASK' in md:
-        md['NETMASK'] = str(netmaskIP)
-    openW.write('NETMASK' + "=" + "'" + md['NETMASK'] + "'" + "\n")
-
-    for key in md.keys():
-        if key != 'IPADDR' and key != 'NETMASK':
-            openW.write(key + "=" + "'" + md[key] + "'"  + "\n")
-   
-    openW.close()
-
-
-def write_StaticIPv6BootProto(fileI,md, ip6Addr, netmaskLen):
-
-    openW = open(fileI, 'w')
-
-    if 'IPV6INIT' in md:
-        md['IPV6INIT'] = "yes"
-    openW.write("IPV6INIT=" + 'yes' + "\n")
-   
-    if 'IPV6ADDR' in md:
-        md['IPV6ADDR'] = ip6Addr
-    openW.write("IPV6ADDR=" + "'" +  ip6Addr + "'" + "\n")
-
-    if 'PREFIXLEN' in md:
-        md['PREFIXLEN'] = netmaskLen
-    openW.write("PREFIXLEN=" + str(netmaskLen) + "\n")
-   
-    for key in md.keys():
-        if key != 'IPV6ADDR' and key != 'IPV6INIT' and key != 'PREFIXLEN':
-            openW.write(key + "=" + "'" + md[key] + "'" + "\n")
- 
-    openW.close()
-
-
-def write_DhcpBootProto(fileI,md):  ##Lines with IPAddress and Netmask are simply deleted
-
-    openW = open(fileI, 'w')
-
-    if 'BOOTPROTO' in md:
-        md['BOOTPROTO'] = "dhcp"
-    else:
-        openW.write('BOOTPROTO' + "=" + 'dhcp' + "\n")
-
-    for key in md.keys():
-
-        if key != 'IPADDR' and key != 'NETMASK':
-            openW.write(key + "=" + "'" +  md[key] + "'" + "\n")
-  
-    openW.close()
-
-
-def write_DhcpIPv6BootProto(fileI,md):
-
-    openW = open(fileI, 'w')
-
-    for key in md.keys():
-        if key != 'IPV6ADDR' and key != 'IPV6_AUTOCONF' and key != 'IP6INIT':
-            openW.write(key + "=" + "'" + md[key] + "'" + "\n")
-        openW.write('IPV6INIT' + "=" + 'yes'+ "\n")
-        openW.write('IPV6_AUTOCONF' + "=" + 'yes'+ "\n")
-       
-    openW.close()
-
-
-def setIPv4Address(filePath, BootProtocol IPAddress, PrefixLength):
-
-    if validateIP(IPAddress):
-        if BootProtocol == "static":
-            write_StaticBootProto(filePath, parseSles(filePath), IPAddress, bitNetmaskConversion(PrefixLength))
-        elif BootProtocol == "automatic":
-            write_DhcpBootProto(filePath, parseSles(filePath))
-
-
-def setIPv6Address(filePath, BootProtocol, IPAddress, PrefixLength):
-
-    if validateIP(IPAddress):
-        if BootProtocol == "static":
-            write_StaticIPv6BootProto(filePath, parseSles(filePath), IPAddress, PrefixLength)
-        elif BootProtocol == "automatic":
-            write_DhcpIPv6BootProto(filePath, parseSles(filePath))
-         
-
-def removeValSlesConfig(fileI, md, valuesToRemoveFromMD): #fileI, md, listVal):
-
-    openW = open(fileI, 'w')
-    for val in valuesToRemoveFromMD:
-        if val in md:
-            del md[val]
-    for key in md:
-        openW.write(key + "=" + "'" + md[key] + "'" + "\n")
-    openW.close()
-    return md
-
-##RHEL/CENTOS/ORACLE
-
-"""
-really quite the same as defined by sles.
-ip address/netmask will be located in the /etc/sysconfig/network-scripts/ifcfg-ethX files
-
-"""
-
-
-##DEBIAN/UBUNTU
-#to see type of network configuration-- either static or dhcp
-#i.e. if parseDeb_BootP("ifcfg-eth0","eth0") == "static", then call other function to set ip address etc
-def findDebBootPStatus(fileI, deviceName):
-    openR = open(fileI)
-    Type = ""
-    lines = openR.read().split("\n")
-    line_arr = []
-    for line in lines:
-        line_arr = line.split()
-        if len(line_arr) >= 4:
-            if line_arr[0] == "iface" and line_arr[1] == deviceName:
-                Type = line_arr[3]
-        line_arr = []
-    openR.close()
-    return Type
-
-def findDebIPStatus(fileI, InterfaceName):   
-    openR = open(fileI)
-    #Type=""
-    lines = openR.read().split("\n")
-    line_arr = []
-    for line in lines:
-       line_arr = line.split()
-       if len(line_arr) >= 4:
-           if line_arr[0] == "iface" and line_arr[1] == InterfaceName:
-               Type = line_arr[3]
-       line_arr = []
-    openR.close()
-    return Type
-
-
-def parseDeb(fileI):
-    openR = open(fileI)
-    keyvals     = {}
-    md          = {}
-    keyvals_arr = []
-    line_arr    = []
-    val_dict    = {}
-    lines = openR.read().split("\n")
-    marker = ""
-    for line in lines:
-        keyLine = line
-        keys = line.split()
-        if len(keys) >= 2:
-           if keys[0] == "iface" or  keys[0] == "#" or keys[0] == "auto" : #this will work for comments that have a space between the "#" and text
-               keyvals_arr.append(keyLine)
-               if keys[0] == "iface":
-                   marker = keys[1]
-           else:
-               if len(keys) >= 2:
-                   md[keys[0]] = keys[1] + "=" + marker
-
-    for key in keyvals_arr:
-        findDevice = key.split()
-        if len(findDevice) >= 2:
-            for k, v in md.iteritems():
-                pairDevice = v.split("=")
-                if len(pairDevice) >= 2:
-                    if findDevice[1] == pairDevice[1]:
-                        val_dict[k] = pairDevice[0]
-                        if len(findDevice) >= 4:
-                            keyvals[key] = val_dict
-                        else:
-                            keyvals[key] = {}
-                    else:
-                        keyvals[key] = {}
-
-    openR.close()
-    return keyvals
-
-""" note, for debian and ubuntu files, can use the two functions below for either searching and setting ip addresses, or default gateways\
-"""
-#can either search for address, netmask or gateway, if they're defined per interface in the network config file
-def readIP_or_GW_Deb(my_dict, InterfaceName, IP_or_GW, inet_or_inet6): 
-
-    for key in my_dict:
-        line = key.split()
-        if len(line) >= 4 and line[0] == "iface" and line[1] == InterfaceName and line[2] == inet_or_inet6:
-            return my_dict[key][IP_or_GW]
-
-
-def set_IP_GW_Deb(fileI, my_dict, InterfaceName, IPAddress, PrefixLength, AddressFamily, DefaultGateway):
-    fileO = open(fileI, 'w')
-    if AddressFamily == "IPv4":
-        inet = "inet"
-    elif AddressFamily == "IPv6":
-        inet = "inet6"
-    for key in my_dict:
-
-        line = key.split()
-        if len(line) >= 4 and line[0] == "iface" and line[1] == InterfaceName and line[2] == inet:
-            if IPAddress != '':
-                my_dict[key]['address'] = IPAddress
-            if PrefixLength != '':
-                my_dict[key]['netmask'] = PrefixLength
-            if DefaultGateway != '':
-                my_dict[key]['gateway'] = DefaultGateway 
-
-    #now to copy new values over to the actual config file
-
-    for key, val in my_dict.iteritems():
-        fileO.write(key + "\n" )
-        for k,v in val.iteritems():
-            fileO.write(str(k) + " " + str(v) + "\n")
-        fileO.write("\n\n")
-   
-    fileO.close()   
-
-def write_Deb(fileI, InterfaceName, IPAddress, BootProtocol, DefaultGateway, PrefixLength, AddressFamily):
-    fileO = open(fileI, 'a')
-    if AddressFamily == "IPv4":
-        fileO.write("iface "+ InterfaceName + " inet " + BootProtocol + "\n")
-    elif addressFamily == "IPv6":
-        fileO.write("iface "+ InterfaceName + " inet6 " + BootProtocol + "\n")
-
-    fileO.write('address ' + IPAddress)
-    fileO.write('netmask ' + PrefixLength)
-    fileO.write('gateway ' + DefaultGateway)
-
-    fileO.close()
-
-
-################ for the function removeValFrom_Deb-Ub() ###########################################################
-##This function needs to be adjusted. For some reason, deletes everything but the values I'd like to delete
-    ##for example, if I have a config file of the format:
-    """
-    auto eth0
-    iface eth0 inet static
-    address 1.1.1.1
-
-    auto eth2
-    iface eth2 inet static
-    address 1.1.1.1
-    netmask 2.2.2.2
-
-    if I wish to delete address from eth0, will delete address and netmask  under eth2 and leave address.
-    unfortunately I did not have enough time to fix this
-
-    Also, if BootP == static and absent,in the case of the above config file, output should be:
-    ...
-    auto eth2
-    iface eth2 inet static
-
-    
-    (no address or netmask here)
-
-
-    if BootP == automtaic, output should be
-    ...
-    auto eth2
-    iface eth2 inet static
-    address
-    netmask
-    """
-####################################################################################################################
-    
-def removeValFrom_Deb_Ub(fileI, my_dict, valuesToRemoveFromMD,AddressFamily, InterfaceName, BootProtocol, Ensure):
-    fileO = open(fileI, 'w')
-    if AddressFamily == "IPv4":
-        inet = "inet"
-    elif AddressFamily == "IPv6":
-        inet = "inet6"
-
-# in this case, want to remove the entire line of either address, gateway, and netmask (any one of those (including all) that are defined)
-    if BootProtocol == "Static" and Ensure == "Absent":
-        for val in valuesToRemoveFromMD:
-            for key1 in my_dict:
-                line = key1.strip()
-                if len(line) >= 4 and line[0] == "iface" and line[1] == InterfaceName and line[2] == inet: 
-                    for key2 in key1:
-                        if  my_dict[key1][key2] == val:
-                            del my_dict[key1][key2]
-
-        for key, val in my_dict.iteritems():
-            fileO.write(key + "\n" )
-            for k,v in val.iteritems():
-                fileO.write(str(k) + " " + str(v) + "\n")
-            fileO.write("\n\n")
-
-#in this case, only want to remove the values of address, netmask, or/and gateway
-    elif BootProtocol == "Automatic":
-        for val in valuesToRemoveFromMD:
-            for key1 in my_dict:
-                line = key1.strip()
-                if len(line) >= 4 and line[0] == "iface" and line[1] == InterfaceName and line[2] == inet: 
-                    for key2 in key1:
-                        if  my_dict[key1][key2] == val:
-                            del my_dict[key1][key2]
-
-        for key, val in my_dict.iteritems():
-            fileO.write(key + "\n" )
-            for k,v in val.iteritems():
-                fileO.write(str(k) + " " + str(v) + "\n")
-            fileO.write("\n\n")        
-   
-    fileO.close()   
-
-
-
-"""                                     DEFAULT GATEWAY                                      """
-
-## SLES
-
-def parse_gwSles(filePath):
-    fOpen = open(filePath)
-   
-    md = []
-    lines = fOpen.read().split("\n")
-    for line in lines:
-        tokens = line.split()
-        md.append(tokens)
-       
-    fOpen.close()
-    return md
-
-def read_gwSles(md):
-    return md[1][1]
-
-def write_gwSles(Interfacename,def_gw,filePath): 
-    md = parse_gwSles(filePath)
-    fOpen = open(filePath, "w")
-    md[1][0] = "default"
-    md[1][1] = def_gw
-    md[1][2] = "255.255.255.255"
-    for cell in md:
-        for val in cell:
-            fOpen.write(val + " ")
-        fOpen.write("\n")
-
-    fOpen.close()
-
-
-## RHEL/CENTOS/ORACLE                   
-
-def read_gwRhel(md, addressType):  
-    if addressType == "IPv4":
-        readDict(md,'GATEWAY')
-    elif addressType == "IPv6":
-        readDict(md, 'IPV6_DEFAULTGW')
-
-def write_gwRhel(filePath, md, gateway, addressType): 
-    openW = open(filePath, 'w')
-    if addressType == "IPv4":
-        
-        if md['GATEWAY'] in md:
-            md['GATEWAY'] = gateway
-        openW.write('GATEWAY' + "=" + md['GATEWAY'] + "\n")
-
-        for key in md.keys():
-            if key != 'GATEWAY':
-                openW.write(key + "=" + md[key] + "\n")
-
-    elif addressType == "IPV6":
-        if md['IPV6_DEFAULTGW'] in md:
-            md['IPV6_DEFAULTGW'] = gateway
-        openW.write('IPV6_DEFAULTGW' + "=" + md['IPV6_DEFAULTGW'] + "\n")
-
-        for key in md.keys():
-            if key != 'IPV6_DEFAULTGW':
-                openW.write(key + "=" + md[key] + "\n")
-
-    openW.close()
-
-
-
-"""                                         TEST/SET/GET FUNCTIONS                                       """
-def Test(InterfaceName, IPAddress,  BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily):
-
-    fileFiller= "/etc/sysconfig/network/ifcfg-%s" %InterfaceName
-    rhelFileFiller = "/etc/sysconfig/network-scripts/ifcfg-%s" %InterfaceName
-    debFileFiller = "/etc/network/interfaces"
-
-        
-    num = 0
-##SLES:
-    if os.path.isdir("/etc/sysconfig/network"):
-
-        filler = parseDeb(fileFiller)
-        print filler, "filler"
-
-        if AddressFamily == "IPv4":
-            if os.path.isfile(fileFiller):                 
-                if readSlesIPAddr(fileFiller) == IPAddress:
-                    num+=1
-                if readDict(filler,'BOOTPROTO') == BootProtocol:
-                    num+=1
-                if read_gwSles(parse_gwSles("/etc/sysconfig/network/ifroute-%s" %InterfaceName)) == DefaultGateway:
-                    num+=1
-                if netmaskBitConversion(readDict(filler,'NETMASK')) == int(PrefixLength):
-                    num+=1
-                if num == 4:
-                    return [0]
-                else:
-                    return [-1]
-            else:
-                print "File does not exist."
-                return [-1]
-        elif AddressFamily == "IPv6":
-            num = 0
-            if os.path.isfile(fileFiller):   
-                if readSlesIPAddr(fileFiller) == IPAddress:
-                    num +=1
-                if readDict(filler, 'BOOTPROTO') == BootProtocol:
-                    num += 1
-                if read_gwSles(parse_gwSles("/etc/sysconfig/network/ifroute-%s" %InterfaceName)) == DefaultGateway:
-                    num += 1
-                if readDict(filler,'PREFIXLEN') == PrefixLength:
-                    num += 1
-                if num == 4:
-                    return [0]
-                else:
-                    return [-1]
-            else:
-                print "File does not exist."
-                return [-1]
-
-##RHEL/CentOs/Oracle
-#####################################
-##### QUESTION
-#######################################
-#so i place default gateway in /etc/sysconfig/network, and ip/netmask in /etc/sysconfig/network-scripts/ifcfg-ethX
-#does that mean I should also look in these respective files for gateway and ip/netmask respectively?
-
- 
-    elif os.path.isdir("/etc/sysconfig/network-scripts"):
-
-        rhelFiller = parseSles(rhelFileFiller)
-        
-        if AddressFamily == "IPv4":
-            num = 0
-            if os.path.isfile(rhelFileFiller):
-                if readSlesIPAddr(rhelFileFiller) == IPAddress:
-                    num += 1
-                if readDict(rhelFiller, 'BOOTPROTO') == BootProtocol:
-                    num += 1
-                if read_gwRhel("/etc/sysconfig/network", AddressFamily)== DefaultGateway:
-                    num += 1
-                if bitNetmaskConversion(readDict(rhelFiller,'NETMASK')) == PrefixLength:
-                    num += 1
-                if num == 4:
-                    return [0]
-                else:
-                    return [-1]
-            else:
-                print "File does not exist"
-                return [-1]
-        elif AddressFamily == "IPv6":
-            num = 0
-            if os.path.isfile(rhelFileFiller):
-                if readSlesIPAddr(rhelFileFiller) == IPAddress:
-                    num += 1
-                if readDict(rhelFiller, 'BOOTPROTO') == BootProtocol:
-                    num += 1
-                if read_gwRhel(rhelFileFiller, AddressFamily)== DefaultGateway:
-                    num += 1
-                if readDict(rhelFileFiller,'PREFIXLEN') == PrefixLength:
-                    num += 1
-                if num == 4:
-                    return [0]
-                else:
-                    return [-1]
-            else:
-                print "File does not exist."
-                return [-1]
-
-    
-    ##Debian/Ubuntu                         
-    elif os.path.isdir("/etc/network"):
-        if os.path.isfile(debFileFiller):
-
-            debFiller = parseDeb(debFileFiller)
-
-            if AddressFamily == "IPv4":
-                num = 0
-                if readIP_or_GW_Deb(debFiller,InterfaceName,'address', 'inet') == IPAddress:
-                    num += 1
-                if findDebBootPStatus(debFileFiller,InterfaceName) == BootProtocol:
-                    num += 1
-                if readIP_or_GW_Deb(debFiller,InterfaceName,'gateway', 'inet') == DefaultGateway:
-                    num += 1
-                if netmaskBitConversion(readIP_or_GW_Deb(debFiller, InterfaceName, 'netmask', 'inet')) == PrefixLength:
-                    num += 1
-                if num == 4:
-                    return [0]
-              
-            elif AddressFamily == "IPv6":
-                num = 0
-                if readIP_or_GW_Deb(debFiller,InterfaceName,'address', 'inet6') == IPAddress:
-                    num += 1
-                if findDebBootPStatus(debFileFiller,InterfaceName) == BootProtocol:
-                    num += 1
-                if readIP_or_GW_Deb(debFiller,InterfaceName,'gateway', 'inet6') == DefaultGateway:
-                    num += 1
-                if readIP_or_GW_Deb(debFiller, InterfaceName, 'netmask', 'inet6') == PrefixLength:
-                    num += 1
-                if num == 4:
-                    return [0]
-        else:
-            print "File does not exist"
+def Set_Marshall(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+    if PrefixLength == None:
+        PrefixLength=''
+    if BootProtocol == None:
+        BootProtocol=''
+    if Ensure == None or len(Ensure)<1:
+        Ensure='Present'
+    if AddressFamily == None or len(AddressFamily)<1:
+        AddressFamily='IPv4'
+    if IPAddress == None:
+        IPAddress=''
+    if len(IPAddress)>0:
+        if ValidateAddresses(IPAddress,AddressFamily) == False:
             return [-1]
-    else:
-        print "ERROR: The network configuration directory could not be found."
-  
-
-
-def Get(InterfaceName, IPAddress,  BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily):
-    return_arr = []
-    fileFiller= "/etc/sysconfig/network/ifcfg-%s" %InterfaceName
-    rhelFileFiller = "/etc/sysconfig/network-scripts/ifcfg-%s" %InterfaceName
-    debFileFiller = "/etc/network/interfaces"
-
-    
-    if os.path.isdir("/etc/sysconfig/network/"):
-        if os.path.isfile(fileFiller):
-            filler = parseSles(fileFiller)
-            if AddressFamily == "IPv4":
-                if 'IPADDR' in filler and readDict(filler, 'IPADDR') != '':
-                        IPAddress = readDict((filler), 'IPADDR')
-                        Ensure = "Present"
-                else:
-                    IPAddress = ''
-                    Ensure = "Absent"
-                if 'NETMASK' in filler and readDict(filler, 'NETMASK') != '':
-                    PrefixLength = netmaskBitConversion(readDict(filler, 'NETMASK'))
-                else:
-                    PrefixLength = ''
-
-            elif AddressFamilly == "IPv6":
-                if 'IPV6ADDR' in filler  and readDict(filler, 'IPV6ADDR')!= '':
-                    IPAddress = readDict(filler, 'IPV6ADDR')
-                    Ensure = "Present"
-                else:
-                    Ensure = "Absent"
-                if 'PREFIXLEN' in filler and readDict(filler, 'PREFIXLEN') != '':
-                    PrefixLength = readDict(filler, 'PREFIXLEN')
-                else:
-                    PrefixLength = ''
-                
-            BootProtocol = readDict(filler, 'BOOTPROTO')
-            DefaultGateway = read_gwSles(parse_gwSles("/etc/sysconfig/network/ifroute-%s" %InterfaceName))
-
-            return_arr = [0, InterfaceName, IPAddress,  BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily]
-            
-            return return_arr
-
-
- #set ensure to absent if ip address is not present, set ensure to present if it is for a given interface
-
-    elif os.path.isdir("/etc/sysconfig/network-scripts"):
-        if os.path.isfile(rhelFileFiller):
-            rhelFiller = parseSles(rhelFileFiller)
-            if AddressFamily == "IPv4":
-                
-                if 'IPADDR' in rhelFiller and readSlesIPAddr(rhelFileFiller) != '':
-                    IPAddress = readSlesIPAddr(rhelFileFiller)
-                    Ensure = "Present"
-                else:
-                    IPAddress = ''
-                    Ensure = "Absent"
-                if 'NETMASK' in rhelFiller and readDict(rhelFiller, 'NETMASK') != '':
-                    PrefixLength = netmaskBitConversion(readDict(filler, 'NETMASK'))
-                else:
-                    PrefixLength = ''
-
-            elif AddressFamily == "IPv6":
-                if 'IPV6ADDR' in rhelFiller and readDict(filler, 'IPV6ADDR') != '':
-                    IPAddress = readDict(filler, 'IPV6ADDR')
-                    Ensure = "Present"
-                else:
-                    IPAddress = ''
-                    Ensure = "Absent"
-                
-                if 'PREFIXLEN' in rhelFiller and readDict(rhelFiller, 'PREFIXLEN') != '':
-                    PrefixLength = readDict(rhelFiller, 'PREFIXLEN')
-                else:
-                    PrefixLength = ''
-
-
-            BootProtocol = readDict(rhelFiller, 'BOOTPROTO')
-            D_gateway = read_gwRhel("/etc/sysconfig/network", AddressFamily)
-
-            return_arr = [0, InterfaceName, IPAddress,  BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily]
-
-            return return_arr
-
-    elif os.path.isdir("/etc/network"):
-        if os.path.isfile(debFileFiller):
-            debFiller =  parseDeb(debFileFiller)
-
-            if AddressFamily == "IPv4":
-                if readIP_or_GW_Deb(debFiller,InterfaceName, "address", 'inet') != '':
-                    IPAddress = readIP_or_GW_Deb(debFiller,InterfaceName, "address", 'inet')
-                    Ensure = "Present"
-                else:
-                    IPAddress = ''
-                    Ensure = "Absent"
-                if readIP_or_GW_Deb(debFiller, InterfaceName, "netmask", "inet") != '':
-                    PrefixLength = netmaskBitConversion(readIP_or_GW_Deb(debFiller, InterfaceName, "netmask", "inet"))
-                else:
-                    PrefixLength = ''
-                    
-            elif AddressFamily == "IPv6":
-                if readIP_or_GW_Deb(debFiller,InterfaceName, "address", "inet6")!= '':
-                    IPAddress = readIP_or_GW_Deb(debFiller,InterfaceName, "address", "inet6")
-                    Ensure = "Present"
-                else:
-                    IPAddress = ''
-                    Ensure = "Absent"
-                if readIP_or_GW_Deb(debFiller, InterfaceName, "netmask", "inet6") != '':
-                    PrefixLength = netmaskBitConversion(readIP_or_GW_Deb(debFiller, InterfaceName, "netmask", "inet6"))
-                else:
-                    PrefixLength = ''
-
-            Netmask = readIP_or_GW_Deb(debFileFiller, InterfaceName, "netmask", "inet")
-            BootProtocol = findDebBootPStatus(debFileFiller, InterfaceName)
-            D_gateway = readIP_or_GW_Deb(debFiller,InterfaceName, "gateway", "inet")
-
-            return_arr = [0, InterfaceName, IPAddress,  BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily]
-
-            return return_arr
-
-"""                SET FUNCTION                       """
-                                     
-def Set(InterfaceName, IPAddress,  BootProtocol, DefaultGateway, Ensure, PrefixLength, AddressFamily):
-
-#SUSE
-    if os.path.isdir("/etc/sysconfig/network"):
-        if os.path.isfile("/etc/sysconfig/network/ifcfg-%s" %InterfaceName):
-            fileFiller = "/etc/sysconfig/network/ifcfg-%s" %InterfaceName
-            filler = parseSles(fileFiller)
-
-
-#The process function was an attempt to create a config file for a respective linux distro if a device for a specified InterfaceName is set up,
-#but no config file exists for it. Essentially, all I wanted to do here was navigate to the right network directory and touch a file with the right
-#name. 
-
-
-#            try: ##THIS WHOLE PROCESS THING DOESN"T WORK> WHY> I DON"T UNDERSTAND
-#               (process_stdout, process_stderr, retval) = Process(["ip","link","show", InterfaceName])
-#                print process_stderr, "PROCESS"
-#                if process_stderr != '':
-#                    (process_stdout, process_stderr, retval) = Process(["touch", "/etc/sysconfig/network/ifcfg-%s" %InterfaceName])
-#            except OSError:
-#                retval = 1
-            
-            
-            if AddressFamily == "IPv4":
-                if Ensure == "Present":
-                    setIPv4Address(fileFiller, BootProtocol, IPAddress, PrefixLength)
-                    write_gwSles(InterfaceName,DefaultGateway, "/etc/sysconfig/network/ifroute-%s" %InterfaceName)
-
-                elif Ensure == "Absent":
-                   if BootProtocol == "static" or BootProtocol == "automatic":
-                       val_list = ['IPADDR','NETMASK','BOOTPROTO']
-                       removeValSlesConfig(fileFiller, filler, val_list) 
-                        
-
-            if AddressFamily == "IPv6":
-                if Ensure == "Present":
-                    setIPv6Address(fileFiller, BootProtocol, IPAddress, PrefixLength)
-            
-                elif Ensure == "Absent":
-                    if BootProtocol == "static" or BootProtocol == "automatic":
-                        val_list = ['IPV6ADDR','PREFIXLEN','IPV6INIT','IPV6AUTOCONF','BOOTPROTO']
-                        removeValSlesConfig(fileFiller, filler, val_list)
-            return [0]
-
-
-##RHEL/ORACLE/CENTOS
-
-    
-    if os.path.isdir("/etc/sysconfig/network-scripts/"):
-        if os.path.isfile("/etc/sysconfig/network-scripts/ifcfg-%s" %InterfaceName):
-            fileFiller = "/etc/sysconfig/network-scripts/ifcfg-%s" %InterfaceName
-            filler = parseSles(fileFiller)
-
-            
-#            try:
-                
-#                (process_stdout3, process_stderr3, retval3) = Process(["ip","link","show", InterfaceName])
-#                if process_stderr3 != '' :
-#                    (process_stdout, process_stderr, retval) = Process(["cd","/etc/sysconfig/network"])
-#                    pipe = subprocess.Popen(["cd","/etc/sysconfig/network-scripts"], stdout = subprocess.PIPE, close_fds=True, shell=True)
-#                    (process_stdout2, process_stderr2, retval2) = Process(["touch", "ifcfg-%s" %InterfaceName])
-#            except OSError:
-#                retval = 1
-
-            
-            if AddressFamily == "IPv4":
-                if Ensure == "Present":
-                    if BootProtocol == "static":
-                        write_StaticBootProto(fileFiller, filler, IPAddress, bitNetmaskConversion(PrefixLength))
-                        write_gwRhel(fileFiller, DefaultGateway)
-                    
-                    elif BootProtocol == "automatic":
-                        write_StaticDhcpBootProto(fileFiller, filler)
-
-                        ##WAITING ON KB TO GIVE ME MATRIX FOR BOOTP AND DG
-
-                elif Ensure == "Absent":
-                    if BootProtocol == "static" or BootProtocol == "automatic":
-                        val_list = ['IPADDR','NETMASK','BOOTPROTO']
-                        removeValSlesConfig(fileFiller, filler,  val_list)
-                  
-            if AddressFamily == "IPv6":
-                if Ensure == "Present":
-                    if BootProtocol == "static":
-                        write_StaticIPv6BootProto(fileFiller, filler, IPAddress, PrefixLength)
-                        write_gwRhel(fileFiller, filler, DefaultGateway, AddressFamily)
-
-                        ##NEED TO WRITE DEFAULT GATEWAY FOR IPV6
-                    if BootProtocol == "automatic":
-                        write_StaticIpv6BootProto(fileFiller, filler)
-
-                elif Ensure == "Absent":
-                    if BootProtocol == "static" or BootProtocol == "automatic":
-                        val_list = ['IPV6ADDR','PREFIXLEN','IPV6INIT','IPV6AUTOCONF','BOOTPROTO']
-                        removeValSlesConfig("/etc/sysconfig/network-scripts/ifcfg-%s" %InterfaceName, parseSles("/etc/sysconfig/network-scripts/ifcfg-%s" %InterfaceName), val_list)
-            return [0]                        
- 
-##DEBIAN/UBUNTU
-
-    if os.path.isdir("/etc/network"):
-
-        if os.path.isfile("/etc/network/interfaces"):
-            fileFiller = "/etc/network/interfaces"
-            filler = parseDeb(fileFiller)
-
-#            try:
-               
-#                (process_stdout3, process_stderr3, retval3) = Process(["ip","link","show", InterfaceName])
-#                if process_stderr3 != '' :
-#                    (process_stdout, process_stderr, retval) = Process(["cd","/etc/sysconfig/network"])
-#                    pipe = subprocess.Popen(["cd","/etc/sysconfig/network-scripts"], stdout = subprocess.PIPE, close_fds=True, shell=True)
-#                    (process_stdout2, process_stderr2, retval2) = Process(["touch", "ifcfg-%s" %InterfaceName])
-#            except OSError:
-#                retval = 1
-#can do something here like write_Deb to configure the file after it has been touched
-
-            if AddressFamily == "IPv4":
-                if Ensure == "Present":
-                    if BootProtocol == "static":
-                        if readIP_or_GW_Deb(fileFiller, InterfaceName, "netmask", "inet") != '':
-                            set_IP_GW_Deb(fileFiller, filler, InterfaceName, IPAddress, bitNetmaskConversion(PrefixLength), AddressFamily, DefaultGateway)
-                        else:
-                            write_Deb(fileI, InterfaceName, IPAddress, BootProtocol, DefaultGateway, bitNetmaskConversion(PrefixLength), AddressFamily)                            
-                    elif BootProtocol == "automatic":
-                        removeValFrom_Deb_Ub(fileFiller, filler, valuesToRemoveFromMD,AddressFamily, InterfaceName,BootProtocol, Ensure)
-
-                elif Ensure == "Absent":
-                    if BootProtocol == "static" or BootProtocol == "automatic":
-                        valuesToRemoveFromMD=['address','netmask','gateway']
-                        removeValFrom_Deb_Ub(fileFiller, filler, valuesToRemoveFromMD,AddressFamily, InterfaceName,BootProtocol, Ensure)
-                            
-                   
-
-            if AddressFamily == "IPv6":
-                if Ensure == "Present":
-                    if BootProtocol == "static":
-                        if readIP_or_GW_Deb(fileFiller, InterfaceName, "netmask", "inet6") != '':
-                            set_IP_GW_Deb(fileFiller, filler, InterfaceName, IPAddress, PrefixLength, AddressFamily, DefaultGateway)
-                        else:
-                            write_Deb(fileI, InterfaceName, IPAddress, BootProtocol, DefaultGateway, PrefixLength, AddressFamily)
-                            
-                    elif BootProtocol == "automatic":
-                        removeValFrom_Deb_Ub(fileFiller, filler, valuesToRemoveFromMD,AddressFamily, InterfaceName, BootProtocol, Ensure)
-
-                elif Ensure == "Absent":
-                    if BootProtocol == "static" or BootProtocol == "automatic":
-                        removeValFrom_Deb_Ub(fileFiller, filler, valuesToRemoveFromMD,AddressFamily, InterfaceName,BootProtocol, Ensure)
-
-            return [0]
+    elif BootProtocol != 'Automatic' and Ensure == 'Present':
+        print('ERROR: BootProtocol != Automatic.  IPAdress is required.',file=sys.stdout)
         return [-1]
-    return [-1]
+    if DefaultGateway == None:
+        DefaultGateway=''
+    if len(DefaultGateway) > 0 and ValidateAddresses(DefaultGateway,AddressFamily) == False:
+        return [-1]
+    MyDistro=GetMyDistro()
+    retval = MyDistro.Set(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+    return retval
 
+def Test_Marshall(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+    if PrefixLength == None:
+        PrefixLength=''
+    if BootProtocol == None:
+        BootProtocol=''
+    if Ensure == None or len(Ensure)<1:
+        Ensure='Present'
+    if AddressFamily == None or len(AddressFamily)<1:
+        AddressFamily='IPv4'
+    if IPAddress == None:
+        IPAddress=''
+    if len(IPAddress)>0:
+        if ValidateAddresses(IPAddress,AddressFamily) == False:
+            return [-1]
+    elif BootProtocol != 'Automatic' and Ensure == 'Present':
+        print('ERROR: BootProtocol != Automatic.  IPAdress is required.',file=sys.stdout)
+        return [-1]
+    if DefaultGateway == None:
+        DefaultGateway=''
+    if len(DefaultGateway) > 0 and ValidateAddresses(DefaultGateway,AddressFamily) == False:
+        return [-1]
+    MyDistro=GetMyDistro()
+    retval = MyDistro.Test(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+    return retval
+
+def Get_Marshall(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+    arg_names=list(locals().keys())
+    if PrefixLength == None:
+        PrefixLength=''
+    if BootProtocol == None:
+        BootProtocol=''
+    if Ensure == None or len(Ensure)<1:
+        Ensure='Absent'
+    if AddressFamily == None or len(AddressFamily)<1:
+        AddressFamily='IPv4'
+    if IPAddress == None:
+        IPAddress=''
+    if len(IPAddress)>0:
+        if ValidateAddresses(IPAddress,AddressFamily) == False:
+            return [-1,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily]
+    elif BootProtocol != 'Automatic' and Ensure == 'Present':
+        print('ERROR: BootProtocol != Automatic.  IPAdress is required.',file=sys.stdout)
+        return [-1,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily]
+    if DefaultGateway == None:
+        DefaultGateway=''
+    if len(DefaultGateway) > 0 and ValidateAddresses(DefaultGateway,AddressFamily) == False:
+        return [-1,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily]
+    retval = 0
+    MyDistro=GetMyDistro()
+    (retval, IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily) = MyDistro.Get(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+    Ensure = protocol.MI_String(Ensure.encode("utf-8"))
+    IPAddress = protocol.MI_String(IPAddress.encode("utf-8"))
+    AddressFamily= protocol.MI_String(AddressFamily.encode("utf-8"))
+    InterfaceName = protocol.MI_String(InterfaceName.encode("utf-8"))
+    BootProtocol = protocol.MI_String(BootProtocol.encode("utf-8"))
+    DefaultGateway = protocol.MI_String(DefaultGateway.encode("utf-8"))
+    if type(PrefixLength) == int:
+        PrefixLength=protocol.MI_Uint32(PrefixLength)
+    else:
+        PrefixLength=protocol.MI_Uint32(int(PrefixLength))
+    retd={}
+    ld=locals()
+    for k in arg_names :
+        retd[k]=ld[k]     
+    return retval, retd
     
+def ReplaceFileContentsAtomic(filepath, contents):
+    """
+    Write 'contents' to 'filepath' by creating a temp file, and replacing original.
+    """
+    handle, temp = tempfile.mkstemp(dir = os.path.dirname(filepath))
+    if type(contents) == str :
+        contents=contents.encode('latin-1')
+    try:
+        os.write(handle, contents)
+    except IOError as e:
+        print('ReplaceFileContentsAtomic','Writing to file ' + filepath + ' Exception is ' + str(e),file=sys.stderr)
+        return None
+    finally:
+        os.close(handle)
+    try:
+        os.rename(temp, filepath)
+        return None
+    except IOError as e:
+        print('ReplaceFileContentsAtomic','Renaming ' + temp+ ' to ' + filepath + ' Exception is ' +str(e),file=sys.stderr)
+    try:
+        os.remove(filepath)
+    except IOError as e:
+        print('ReplaceFileContentsAtomic','Removing '+ filepath + ' Exception is ' +str(e),file=sys.stderr)
+    try:
+        os.rename(temp,filepath)
+    except IOError as e:
+        print('ReplaceFileContentsAtomic','Removing '+ filepath + ' Exception is ' +str(e),file=sys.stderr)
+        return 1
+    return 0
+
+def GetMyDistro(dist_class_name=''):
+    """
+    Return MyDistro object.
+    NOTE: Logging is not initialized at this point.
+    """
+    if dist_class_name == '':
+        if 'Linux' in platform.system():
+            Distro=platform.dist()[0]
+        else : # I know this is not Linux!
+            if 'FreeBSD' in platform.system():
+                Distro=platform.system()
+        Distro=Distro.strip('"')
+        Distro=Distro.strip(' ')
+        dist_class_name=Distro+'Distro'
+    else:
+        Distro=dist_class_name
+    if dist_class_name in globals().keys() == False:
+        print(Distro+' is not a supported distribution.')
+        return None
+    return globals()[dist_class_name]() # the distro class inside this module.
+
+class AbstractDistro(object):
+    def __init__(self): 
+        self.gateway_file='/etc/sysconfig/network'
+        self.gateway_prefix=''
+        self.ifcfg_prefix='/etc/sysconfig/network-scripts/ifcfg-'
+        
+    def init_re_dict(self,src_dict):
+        re_dict=dict()
+        for k in src_dict:
+            re_dict[k]=re.compile(r'\s*'+k+'.*')
+        return re_dict
+
+    def init_src_dicts(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        self.gateway_dict=dict()
+        self.ifcfg_v4_dict=dict()
+        self.ifcfg_v4_dict['ONBOOT=']='yes'
+        self.ifcfg_v4_dict['DEVICE=']=InterfaceName
+        if BootProtocol.lower() == 'static':
+            self.ifcfg_v4_dict['BOOTPROTO=']='none'
+        else:
+            self.ifcfg_v4_dict['BOOTPROTO=']='dhcp'
+        self.ifcfg_v4_dict['DHCPCLASS=']=''
+        self.ifcfg_v4_dict['IPADDR=']=IPAddress
+        if PrefixLength != 0 and PrefixLength  != '':
+            self.ifcfg_v4_dict['NETMASK=']=bitNetmaskConversion(PrefixLength)
+        else:
+            self.ifcfg_v4_dict['NETMASK=']=''            
+        self.ifcfg_v6_dict=dict()
+        self.ifcfg_v6_dict['ONBOOT=']='yes'
+        self.ifcfg_v6_dict['DEVICE=']=InterfaceName
+        if BootProtocol.lower() == 'static':
+            self.ifcfg_v6_dict['BOOTPROTO=']='none'
+        else:
+            self.ifcfg_v6_dict['BOOTPROTO=']='dhcp'
+        self.ifcfg_v6_dict['DHCPCLASS=']=''
+        self.ifcfg_v6_dict['IPV6ADDR=']=IPAddress
+        if BootProtocol.lower() == 'static':
+            self.ifcfg_v6_dict['IPV6_INIT=']='yes'
+            self.ifcfg_v6_dict['IPV6_AUTOCONF=']='no'
+        else :
+            self.ifcfg_v6_dict['IPV6_INIT=']='yes'
+            self.ifcfg_v6_dict['IPV6_AUTOCONF=']='no'
+        if PrefixLength != 0 and PrefixLength != '':
+            self.ifcfg_v6_dict['NETMASK=']=bitNetmaskConversion(PrefixLength)
+        else:
+            self.ifcfg_v6_dict['NETMASK=']=''
+        self.gateway_dict['GATEWAY=']=DefaultGateway
+        if AddressFamily == 'IPv4':
+            self.ifcfg_dict=self.ifcfg_v4_dict
+            self.addr_key='IPADDR='
+        else :
+            self.ifcfg_dict=self.ifcfg_v6_dict
+            self.addr_key='IPV6ADDR='
+
+    def src_dicts_to_params(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        if len(self.ifcfg_dict['NETMASK=']) > 0:
+            PrefixLength=netmaskBitConversion(self.ifcfg_dict['NETMASK='])
+        else:
+            PrefixLength=''
+        if ':' in self.ifcfg_dict[self.addr_key]:
+            AddressFamily='IPv6'
+        else:
+            AddressFamily='IPv4'
+        if self.ifcfg_dict['BOOTPROTO='] == 'dhcp':
+            bootproto='Automatic'
+        else:
+            bootproto='Static'
+        gateway=''
+        if len(self.gateway_dict['GATEWAY=']) >0:
+            gateway=self.gateway_dict['GATEWAY=']
+        return self.ifcfg_dict[self.addr_key],self.ifcfg_dict['DEVICE='],bootproto,gateway,Ensure,PrefixLength,AddressFamily
     
+    def restart_network(self):
+        os.system('service network restart')
+        return [0]
+    
+    def UpdateValuesInFile(self,fname,src_dict,re_dict):
+        updated=''
+        if os.path.exists(fname) != True:
+            # if this file is not here - we will create it
+            with open(fname,'w+') as F:
+                F.write('# Created by Microsoft DSC nxIPAddress Provider\n')
+                F.close()
+        try:
+            with open(fname,'r') as F:
+                for l in F.readlines():
+                    if l[0]=='#':
+                        updated+=l
+                        continue
+                    for k in re_dict:
+                        if re_dict[k]!=None:
+                            if re.match(re_dict[k],l): # re.match is anchored to the line start.
+                                if len(src_dict[k])==0 :
+                                    l=''
+                                    re_dict[k]=None
+                                    break
+                                else:
+                                    l=re.sub(re_dict[k],k+src_dict[k],l)
+                                    re_dict[k]=None
+                    if len(l)>2:
+                        updated+=l
+                for k in re_dict:
+                    if re_dict[k] != None and len(src_dict[k]) > 0 :
+                        l=k+src_dict[k]+'\n'
+                        updated+=l
+                
+        except:
+            raise
+        ReplaceFileContentsAtomic(fname,updated)
+        return [0]
+    
+    def GetValuesFromFile(self,fname,src_dict,re_dict):
+        if os.path.exists(fname) != True:
+            return
+        try:
+            with (open(fname,'r')) as F:  
+                for l in F.readlines():
+                    for k in re_dict:
+                        if re_dict[k]!=None:
+                            if re.match(re_dict[k],l): # re.match is anchored to the line start.
+                                src_dict[k]=l.split(k[-1])[1].strip('\n')
+                                re_dict[k]=None
+        except:
+            raise
 
+    def Set(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        retval=[-1]
+        if len(self.ifcfg_prefix)>0:
+            self.ifcfg_file=self.ifcfg_prefix+InterfaceName
+        if len(self.gateway_prefix)>0:
+            self.gateway_file=self.gateway_prefix+InterfaceName
+        self.init_src_dicts(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+        gateway_re_dict=self.init_re_dict(self.gateway_dict)
+        ifcfg_re_dict=self.init_re_dict(self.ifcfg_dict)
+        if Ensure == 'Absent':
+            if len(self.ifcfg_prefix)>0:
+                if os.path.exists(self.ifcfg_file):
+                    os.remove(self.ifcfg_file)
+                    retval=[0]
+            else:
+                retval=self.UpdateValuesInFile(self.ifcfg_file,self.ifcfg_dict,ifcfg_re_dict)
+            if len(self.gateway_prefix)>0:
+                if os.path.exists(self.gateway_file):
+                    os.remove(self.gateway_file)
+                    retval=[0]
+            else:
+                retval=self.UpdateValuesInFile(self.gateway_file,self.gateway_dict,gateway_re_dict)
+        else:
+            retval=self.UpdateValuesInFile(self.gateway_file,self.gateway_dict,gateway_re_dict)
+            retval=self.UpdateValuesInFile(self.ifcfg_file,self.ifcfg_dict,ifcfg_re_dict)
+        retval=self.restart_network()
+        return retval
+    
+    def Test(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        if len(self.ifcfg_prefix)>0:
+            self.ifcfg_file=self.ifcfg_prefix+InterfaceName
+        if len(self.gateway_prefix)>0:
+            self.gateway_file=self.gateway_prefix+InterfaceName
+        self.init_src_dicts(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+        test_gateway=dict(self.gateway_dict)
+        for k in test_gateway:
+            test_gateway[k]=''
+        test_gateway_re_dict=self.init_re_dict(self.gateway_dict)
+        self.GetValuesFromFile(self.gateway_file,test_gateway,test_gateway_re_dict)
+        for k in self.gateway_dict:
+            if self.gateway_dict[k] != test_gateway[k]:
+                return [-1]
+        test_ifcfg=dict(self.ifcfg_dict)
+        for k in test_ifcfg:
+            if k != 'iface ':
+                test_ifcfg[k]=''
+        test_ifcfg_re_dict=self.init_re_dict(self.ifcfg_dict)
+        self.GetValuesFromFile(self.ifcfg_file,test_ifcfg,test_ifcfg_re_dict)
+        for k in self.ifcfg_dict:
+            if self.ifcfg_dict[k] != test_ifcfg[k]:
+                return [-1]
+        return [0]
+    
+    def Get(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        # calling Test here will fill the dicts with values
+        if self.Test(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily) != [0]:
+            if Ensure=='Absent' :
+                Ensure='Present'
+            else:
+                Ensure='Absent'
+            IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily = self.src_dicts_to_params(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+        if PrefixLength=='':
+            PrefixLength=0
+        return 0,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily
 
+class SuSEDistro(AbstractDistro):
+    def __init__(self):
+        super(SuSEDistro,self).__init__()
+        self.gateway_prefix='/etc/sysconfig/network/ifroute-'
+        self.ifcfg_prefix='/etc/sysconfig/network/ifcfg-'
 
+    def init_src_dicts(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        self.gateway_v4_dict=dict()
+        self.gateway_v6_dict=dict()
+        if BootProtocol.lower() != 'static':
+            self.gateway_v4_dict['default ']=''
+            self.gateway_v6_dict['default ']=''
+        else:
+            self.gateway_v4_dict['default ']=DefaultGateway+' '+bitNetmaskConversion(PrefixLength)+' '+InterfaceName
+            self.gateway_v6_dict['default ']=DefaultGateway+'/'+str(PrefixLength)+' - - '+InterfaceName
+        self.ifcfg_v4_dict=dict()
+        if BootProtocol.lower() != 'static':
+            self.ifcfg_v4_dict['BOOTPROTO=']='dhcp'
+        else:
+            self.ifcfg_v4_dict['BOOTPROTO=']='static'
+        self.ifcfg_v4_dict['STARTMODE=']='auto'
+        self.ifcfg_v4_dict['IPADDR=']=IPAddress
+        self.ifcfg_v4_dict['PREFIXLEN=']=str(PrefixLength)
+        self.ifcfg_v6_dict=dict()
+        if BootProtocol.lower() != 'static':
+            self.ifcfg_v6_dict['BOOTPROTO=']='autoip' 
+        else:
+            self.ifcfg_v6_dict['BOOTPROTO=']='static'
+        self.ifcfg_v6_dict['STARTMODE=']='auto'
+        self.ifcfg_v6_dict['IPADDR=']=IPAddress
+        self.ifcfg_v6_dict['PREFIXLEN=']=str(PrefixLength)
+        if AddressFamily == 'IPv4':
+            self.ifcfg_dict=self.ifcfg_v4_dict
+            self.addr_key='IPADDR='
+            self.gateway_dict=self.gateway_v4_dict
+        else :
+            self.ifcfg_dict=self.ifcfg_v6_dict
+            self.addr_key='IPADDR='
+            self.gateway_dict=self.gateway_v6_dict
 
+    def src_dicts_to_params(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        if len(self.ifcfg_dict['PREFIXLEN=']) > 0:
+            PrefixLength=netmaskBitConversion(self.ifcfg_dict['PREFIXLEN='])
+        else:
+            PrefixLength=''
+        if ':' in self.ifcfg_dict['IPADDR=']:
+            AddressFamily='IPv6'
+        else:
+            AddressFamily='IPv4'
+        if self.ifcfg_v4_dict['BOOTPROTO='] != 'static':
+            bootproto='Automatic'
+        else:
+            bootproto='Static'
+        gateway=''
+        if len(self.gateway_dict['default ']) >0:
+            gateway=self.gateway_dict['default '].split(' ')[1]
+        return self.ifcfg_dict['IPADDR='],self.ifcfg_file.split('-')[-1],bootproto,gateway,Ensure,PrefixLength,AddressFamily
+    
+    def restart_network(self):
+        os.system('/sbin/rcnetwork restart')
+        return [0]
+
+class debianDistro(AbstractDistro):
+    def __init__(self):
+        super(debianDistro,self).__init__()
+        self.ifcfg_prefix=''
+        self.gateway_prefix=''
+        self.ifcfg_file='/etc/network/interfaces'
+        self.gateway_file='/etc/network/interfaces'
+
+    def init_re_dict(self,src_dict): 
+        re_dict=dict()
+        for k in src_dict:
+            re_dict[k]=re.compile(r'\s*'+k+'.*')
+        if 'iface ' in re_dict:
+            re_dict['iface ']=re.compile(r'\s*iface '+src_dict['iface '])
+        if 'inet ' in re_dict:
+            re_dict['inet ']=re.compile(r'\s*iface '+src_dict['iface '] + ' inet .*')
+        return re_dict
+
+    def init_src_dicts(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        self.ifcfg_v4_dict={}
+        self.ifcfg_v6_dict={}
+        self.gateway_dict={}
+        if BootProtocol.lower() == 'static' :
+            self.ifcfg_v4_dict['inet '] = 'static'
+        elif BootProtocol.lower() == 'automatic':
+            self.ifcfg_v4_dict['inet '] = 'dhcp'
+        else:
+            self.ifcfg_v4_dict['inet '] = ''
+        self.ifcfg_v4_dict['iface ']=InterfaceName
+        self.ifcfg_v4_dict['autoconf ']=''
+        self.ifcfg_v4_dict['network ']=''
+        self.ifcfg_v4_dict['address ']=IPAddress
+        if PrefixLength !=0 and PrefixLength != '':
+            self.ifcfg_v4_dict['netmask ']=bitNetmaskConversion(PrefixLength)
+        else:
+            self.ifcfg_v4_dict['netmask ']=''
+        self.ifcfg_v4_dict['gateway ']=DefaultGateway
+        if len(BootProtocol) > 0:
+            self.ifcfg_v6_dict['inet6 ']='static'  # static is used for autoconf as well
+        else:
+            self.ifcfg_v6_dict['inet6 ']='' 
+        self.ifcfg_v6_dict['iface ']=InterfaceName
+        addr=IPAddress
+        if PrefixLength != '' and IPAddress !='' :
+            addr+='/'+str(PrefixLength)
+        self.ifcfg_v6_dict['address ']=addr
+        if PrefixLength !=0 and PrefixLength != '':
+            self.ifcfg_v6_dict['netmask ']=bitNetmaskConversion(PrefixLength)
+        else:
+            self.ifcfg_v6_dict['netmask ']=''
+        self.ifcfg_v6_dict['gateway ']=DefaultGateway
+
+        if AddressFamily == "IPv4":
+            self.ifcfg_dict=self.ifcfg_v4_dict
+            self.inet='inet '
+        else:
+            if BootProtocol.lower() != 'static':
+                self.ifcfg_v6_dict['autoconf ']='1'
+            else:
+                self.ifcfg_v6_dict['autoconf ']='0'
+            self.ifcfg_dict=self.ifcfg_v6_dict
+            self.inet='inet6 '
+        if Ensure == "Absent":
+            auto='auto '+InterfaceName
+            self.ifcfg_dict[auto]=''
+            
+    def src_dicts_to_params(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        if len(self.ifcfg_dict['netmask ']) > 0:
+            PrefixLength=netmaskBitConversion(self.ifcfg_dict['netmask '])
+        else:
+            PrefixLength=''
+        if ':' in self.ifcfg_dict['address ']:
+            AddressFamily='IPv6'
+            if self.ifcfg_dict['autoconf '] == '1' :
+                inet = 'Automatic'
+            else:
+                inet = 'Static'
+        else:
+            AddressFamily='IPv4'
+            if self.ifcfg_dict[self.inet] == 'dhcp':
+                inet = 'Automatic'
+            else:
+                inet = 'Static'
+        gateway=''
+        if len(self.ifcfg_dict['gateway ']) >0:
+            gateway=self.ifcfg_dict['gateway ']
+        return self.ifcfg_dict['address '],self.ifcfg_dict['iface '],inet,gateway,Ensure,PrefixLength,AddressFamily
+
+    def restart_network(self):
+        os.system('ifdown --exclude=lo -a ; ifup --exclude=lo -a')
+        return [0]
+
+    def UpdateValuesInFile(self,fname,src_dict,re_dict):
+        if len(src_dict) == 0:
+            return [0]
+        removing=False
+        if 'inet ' in src_dict.keys() and len(src_dict[self.inet])==0: # we are trying to remove
+            removing=True
+        if removing == False and os.path.exists(fname) != True:
+            # if this file is not here - we will create it
+            with open(fname,'w+') as F:
+                F.write('# Created by nxIPAddress DSC PRovider\n')
+                F.close()
+        with open(fname,'r') as F:
+            txt=F.read()
+        if 'iface ' in src_dict.keys():
+            srch=r'(^auto '+src_dict['iface ']+'$.*?^iface '+src_dict['iface ']+'.*?$|^iface '+src_dict['iface ']+'.*?$).*?((^auto )|(^iface )|(^$))'
+        updated=''
+        r=re.search(srch,txt,flags=re.S|re.M)
+        if r == None:
+            if removing:  #nothing to remove
+                return [0]
+            else : # append values to the end
+                l='auto ' + src_dict['iface '] + '\niface '+src_dict['iface '] + ' ' + self.inet+src_dict[self.inet] + '\n'
+                if len(updated) > 0 and updated[-1] != '\n':
+                    updated+='\n'
+                updated+=l
+                re_dict['iface ']=None
+                re_dict[self.inet]=None
+                for k in re_dict:
+                    if re_dict[k] != None and len(src_dict[k]) > 0 :
+                        l=k+src_dict[k]+'\n'
+                        updated+=l
+                txt=txt+updated
+        else:  #matched      
+            if removing:
+                tail=''
+                txt=re.sub(r.group(0),tail,txt,flags=re.S|re.M)
+                if txt[-2:] == '\n\n':
+                    txt=txt[:-1]
+            else : # replace tags - preserve unknown tags
+                t=r.group(0)
+                for l in t.splitlines():
+                    if len(l)>1:
+                        l+='\n'
+                    else:
+                        continue
+                    if 'iface ' in re_dict.keys() and re_dict['iface '] != None :
+                            if re.match(re_dict['iface '],l) :
+                                l='iface '+src_dict['iface '] + ' ' + self.inet+src_dict[self.inet] + '\n'
+                                re_dict['iface ']=None
+                                re_dict[self.inet]=None
+                                updated+=l
+                                continue
+                    for k in re_dict.keys():
+                        if re_dict[k]!=None:
+                            if re.match(re_dict[k],l): # re.match is anchored to the line start.
+                                if len(src_dict[k])==0 :
+                                    l=''
+                                else:
+                                    l=re.sub(re_dict[k],k+src_dict[k],l)
+                                    if len(l)>0 and l[-1]!='\n':
+                                        l+='\n'
+                                re_dict[k]=None
+                                break
+                    if len(l)>2:
+                        updated+=l
+
+                for k in re_dict:
+                    if re_dict[k] != None and len(src_dict[k]) > 0 :
+                        l=k+src_dict[k]+'\n'
+                        updated+=l
+                tail=''
+                if updated[-1] != '\n':
+                    tail='\n'
+                updated+=tail
+                txt=re.sub(r.group(0),updated,txt,flags=re.S|re.M)
+                if txt[-2:] == '\n\n':
+                    txt=txt[:-1]
+        ReplaceFileContentsAtomic(fname,txt)
+        return [0]
+
+    def GetValuesFromFile(self,fname,src_dict,re_dict):
+        if os.path.exists(fname) != True:
+            return
+        try:
+            with (open(fname,'r')) as F:  
+                txt=F.read()
+                if 'iface ' in src_dict.keys():
+                    srch=r'(^auto '+src_dict['iface ']+'$.*?^iface '+src_dict['iface ']+'.*?$|^iface '+src_dict['iface ']+'.*?$).*?((^auto )|(^iface )|(^$))'
+                    r=re.search(srch,txt,flags=re.S|re.M)
+                    if r == None:
+                        return
+                    txt=r.group(0)
+                for l in txt.splitlines():
+                    for k in re_dict:
+                        if re_dict[k]!=None:
+                            if re.match(re_dict[k],l): # re.match is anchored to the line start.
+                                if k == self.inet:
+                                    src_dict[k]=l.split(k[-1])[3].strip('\n')
+                                else:
+                                    src_dict[k]=l.split(k[-1])[1].strip('\n')
+                                re_dict[k]=None
+        except:
+            raise
+    
+class redhatDistro(AbstractDistro):
+    def __init__(self):
+        super(redhatDistro,self).__init__()
+
+class centosDistro(redhatDistro):
+    def __init__(self):
+        super(centosDistro,self).__init__()
+
+class UbuntuDistro(debianDistro):
+    def __init__(self):
+        super(UbuntuDistro,self).__init__()
+        
+class LinuxMintDistro(UbuntuDistro):
+    def __init__(self):
+        super(LinuxMintDistro,self).__init__()
+        
+class fedoraDistro(redhatDistro):
+    def __init__(self):
+        super(fedoraDistro,self).__init__()
 

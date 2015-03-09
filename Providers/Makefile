@@ -22,7 +22,7 @@ BIN_PATH:=$(PROVIDER_PATH)/bin
 
 # included makefiles for additional definitions
 include $(OMI_PATH)/output/config.mak
-include ../config.mak
+include ./config.mak
 
 # additional include paths
 INCLUDE_PATH+=$(INCDIR)
@@ -66,7 +66,7 @@ PROVIDERS+=nxService
 PROVIDERS+=nxPackage
 PROVIDERS+=nxEnvironment
 PROVIDERS+=nxSshAuthorizedKeys
-#PROVIDERS+=nxIPAddress
+PROVIDERS+=nxIPAddress
 #PROVIDERS+=nxComputer
 #PROVIDERS+=nxFirewall
 PROVIDERS+=nxDNSServerAddress
