@@ -647,8 +647,9 @@ def SetDirectoryRecursive(DestinationPath, SourcePath, fc):
                 if SetFile(f_destpath, f_srcpath, fc) == False:
                     return False
         elif os.path.isdir(f_srcpath):
-            if SetDirectoryRecursive(f_destpath, f_srcpath, fc) == False:
-                return False
+            if fc.Recurse == True:
+                if SetDirectoryRecursive(f_destpath, f_srcpath, fc) == False:
+                    return False
         
     return True
       
