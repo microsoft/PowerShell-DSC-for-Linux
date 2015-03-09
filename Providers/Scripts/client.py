@@ -76,12 +76,16 @@ def translate_input (d):
     oldStyleD = dict ()
     if sys.version > '2.9':
         for key, value in d.items():
+            if type(key) != str:
+                key=str(key)
             if hasattr(value,'value') and hasattr(value.value,'value') :
                 oldStyleD[key] = value.value.value
             else :
                 oldStyleD[key] = value.value
     else:
         for key, value in d.iteritems():
+            if type(key) != str:
+                key=str(key)
             if hasattr(value,'value') and hasattr(value.value,'value') :
                 oldStyleD[key] = value.value.value
             else:
@@ -179,7 +183,7 @@ try:
         from Scripts import *
         
         if __name__ == '__main__':
-                main (sys.argv)
+            main (sys.argv)
     
     
     except:
