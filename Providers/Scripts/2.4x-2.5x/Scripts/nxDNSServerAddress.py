@@ -53,7 +53,7 @@ def Set_Marshall(Address,Ensure,AddressFamily):
         AddressFamily='IPv4'
     if ValidateAddresses(Address,AddressFamily) == False:
         return [-1]
-    MyDistro=GetMyDistro("LinuxMintDistro")
+    MyDistro=GetMyDistro()
     retval = MyDistro.Set(Address,Ensure,AddressFamily)
     return retval
 
@@ -64,7 +64,7 @@ def Test_Marshall(Address,Ensure,AddressFamily):
         AddressFamily='IPv4'
     if ValidateAddresses(Address,AddressFamily) == False:
         return [-1]
-    MyDistro=GetMyDistro("LinuxMintDistro")
+    MyDistro=GetMyDistro()
     retval= MyDistro.Test(Address,Ensure,AddressFamily)
     return retval
 
@@ -78,7 +78,7 @@ def Get_Marshall(Address,Ensure,AddressFamily):
     if ValidateAddresses(Address,AddressFamily) == False:
         return [-1,Address,Ensure,AddressFamily]
     retval = 0
-    MyDistro=GetMyDistro("LinuxMintDistro")
+    MyDistro=GetMyDistro()
     (retval, Address) = MyDistro.Get(Address,Ensure,AddressFamily)
     Ensure = protocol.MI_String(Ensure.encode("utf-8"))
     Address = protocol.MI_StringA(Address)
@@ -97,13 +97,14 @@ def FindStringInFile(fname,matchs,multiline=False):
     Print("%s %s %s"%(fname,matchs,multiline),file=sys.stderr)
     m=None
     try:
-        ms = re.compile(matchs)
         if multiline:
+            ms=re.compile(matchs,re.S|re.M)
             F = open(fname,'r')
             l = F.read()
             F.close()
             m = re.findall(ms,l)
         else:
+            ms=re.compile(matchs)
             F = open(fname,'r')
             for l in F.readlines():
                 m = re.search(ms,l)
@@ -190,24 +191,20 @@ def GetMyDistro(dist_class_name=''):
     else:
         Distro=dist_class_name
     
-    if dist_class_name == "centosDistro":
-        dist_class_name = "redhatDistro"
-
     if not globals().has_key(dist_class_name):
         Print(Distro+' is not a supported distribution.')
         return None
-    Print('Using class ' + Distro)
     return globals()[dist_class_name]() # the distro class inside this module.
 
 
 class AbstractDistro(object):
     def __init__(self): 
-        self.file='/home/ericg/test/resolv.conf'
+        self.file='/etc/resolv.conf'
         self.dns_srch='nameserver '
         self.mode='single'
         
     def get_addrs(self,addrs,mode):
-        lines=FindStringInFile(self.file,'('+self.dns_srch+'.*)',True) # use multiline
+        lines=FindStringInFile(self.file,'('+self.dns_srch+'.*?$)',True) # use multiline
         naddrs=[]
         if len(addrs) == 0:
             for l in lines:
@@ -238,7 +235,6 @@ class AbstractDistro(object):
             for a in addrs:
                 l+=a
                 l+=' '
-            #import pdb; pdb.set_trace()
             if len(FindStringInFile(self.file,'('+self.dns_srch+'.*)',True)) == 0:
                 AppendStringToFile(self.file,l)
             else:
@@ -290,10 +286,8 @@ class AbstractDistro(object):
 class SuSEDistro(AbstractDistro):
     def __init__(self):
         super(SuSEDistro,self).__init__()
-        self.file='/home/ericg/test/sysconfig/network/config'
-        #self.file='/etc/sysconfig/network/resolv.conf'
+        self.file='/etc/sysconfig/network/config'
         self.dns_srch='NETCONFIG_DNS_STATIC_SEARCHLIST="'
-        #self.conf_srch='NETCONFIG_DNS_POLICY="'
         self.mode='single-quoted'
     def Set(self,addrs,Ensure,AddressFamily):
         return super(SuSEDistro,self).Set(addrs,Ensure,AddressFamily)
@@ -301,7 +295,7 @@ class SuSEDistro(AbstractDistro):
 class debianDistro(AbstractDistro):
     def __init__(self):
         super(debianDistro,self).__init__()
-        self.file='/home/ericg/test/network/interfaces'
+        self.file='/etc/network/interfaces'
         self.dns_srch='dns-nameservers '
         
 class redhatDistro(AbstractDistro):
@@ -315,7 +309,7 @@ class UbuntuDistro(debianDistro):
     def __init__(self):
         super(UbuntuDistro,self).__init__()
         
-class LinuxMintDistro(redhatDistro):
+class LinuxMintDistro(UbuntuDistro):
     def __init__(self):
         super(LinuxMintDistro,self).__init__()
         
@@ -326,8 +320,9 @@ class fedoraDistro(redhatDistro):
     def Set(self,addrs,Ensure,AddressFamily):
         return super(fedoraDistro,self).Set(addrs,Ensure,AddressFamily)
 
-    def Test(self,addrs,Ensure,AddressFamily):
-        return super(fedoraDistro,self).Test(addrs,Ensure,AddressFamily)
+class centosDistro(redhatDistro):
+    def __init__(self):
+        super(centosDistro,self).__init__()
 
-    def Get(self,addrs,Ensure,AddressFamily):
-        return super(fedoraDistro,self).Get(addrs,Ensure,AddressFamily)
+    def Set(self,addrs,Ensure,AddressFamily):
+        return super(centosDistro,self).Set(addrs,Ensure,AddressFamily)
