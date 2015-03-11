@@ -189,6 +189,10 @@ def GetMyDistro(dist_class_name=''):
         dist_class_name=Distro+'Distro'
     else:
         Distro=dist_class_name
+    
+    if dist_class_name == "centosDistro":
+        dist_class_name = "redhatDistro"
+
     if not globals().has_key(dist_class_name):
         Print(Distro+' is not a supported distribution.')
         return None
