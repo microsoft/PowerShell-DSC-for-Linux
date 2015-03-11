@@ -13,6 +13,8 @@ import pwd
 import shutil
 import grp
 import codecs
+import urllib2
+import time
 import imp
 protocol=imp.load_source('protocol','../protocol.py')
 
@@ -662,7 +664,15 @@ def SetFile(DestinationPath, SourcePath, fc):
             Print("Error: " + DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
             return False
 
-    if SourcePath:
+    if SourcePath and len(SourcePath)>0:
+        if '://' in SourcePath and fc.LocalPath == '':
+            ret=0
+            ret=GetRemoteFile(fc)
+            if ret != 0:
+                raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
+            else:
+                SourcePath=fc.LocalPath
+
         should_copy_file = False
         if fc.Checksum == "ctime" or fc.Checksum == "mtime":
             if os.path.isfile(DestinationPath):
@@ -845,13 +855,21 @@ def TestDirectory(DestinationPath, SourcePath, fc):
     return True
 
 def TestFile(DestinationPath, SourcePath, fc):
+    if '://' in SourcePath and fc.LocalPath == '':
+        ret=0
+        ret=GetRemoteFile(fc)
+        if ret != 0:
+            raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
+        else:
+            SourcePath=fc.LocalPath
+            
     if not os.path.exists(DestinationPath) or not os.path.isfile(DestinationPath) or os.path.islink(DestinationPath):
         return False
 
     if TestOwnerGroupMode(DestinationPath, SourcePath, fc) == False:
         return False
 
-    if SourcePath:
+    if SourcePath and len(SourcePath)>0:
         if not os.path.isfile(SourcePath):
             return False
 
@@ -943,7 +961,6 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ''
         ModifiedDate = 0
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
-    fc = FileContext(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
 
     Contents = ""
     Checksum = ""
@@ -979,6 +996,58 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
 
     return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
+def GetTimeFromString(s):
+    if s == None or len(s) == 0:
+        return None
+    fmt=[]
+    fmt.append('%a, %d %b %Y %H:%M:%S %Z')
+    st=None
+    for f in fmt:
+        try:
+            st=time.strptime(s,f) 
+        except ValueError:
+            continue
+    return st
+        
+def GetRemoteFile(fc):
+    req = urllib2.Request(fc.SourcePath)
+    try:
+        resp = urllib2.urlopen(req)
+    except urllib2.URLError , e:
+        print e.reason
+        return 1
+    fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
+    with (open(fc.LocalPath+'.headers','w+')) as F:
+        h=resp.info()
+        s=''
+        for k in h.keys():
+            s+=k+'='+h.getheader(k)+'\n'
+        F.write( 'Headers are:\n'+s)
+        F.close()
+    lm=h.getheader('last-modified')
+    lm_mtime=GetTimeFromString(lm)
+    dst_mtime = None
+    dst_st= None
+    data = None
+    if os.path.exists(fc.DestinationPath):
+        dst_st=LStatFile(fc.DestinationPath)
+    if dst_st != None:
+        dst_mtime= dst_st.st_mtime
+    if lm_mtime !=None and dst_mtime != None and dst_mtime>=lm_mtime: 
+        data = ''
+        fc.LocalPath=''
+    else:
+        data = resp.read()
+    if data != None and len(data)>0:
+        try:
+            with (open(fc.LocalPath,'w+')) as F:
+                F.write(data)
+                F.close()
+        except  Exception , e:
+                print repr(e)
+                return 1
+    return 0
+
 class FileContext:
     def __init__(self, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
         if not Checksum:
@@ -991,6 +1060,7 @@ class FileContext:
             Links = "follow"
         self.DestinationPath = DestinationPath
         self.SourcePath = SourcePath
+        self.LocalPath = ''
         self.Ensure = Ensure.lower()
         self.Type = Type.lower()
         self.Force = Force
