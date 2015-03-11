@@ -34,6 +34,9 @@ class MSFT_nxDNSServerAddressResource : OMI_BaseResource
 
 
 def ValidateAddresses(Address,AddressFamily):
+    if len(Address)>3:
+        print("ERROR: Maximum of three entries for Address",sys.stderr)
+        return False
     if 'IPv4' in AddressFamily:
         ptype=socket.AF_INET
     elif 'IPv6' in AddressFamily:
@@ -46,7 +49,6 @@ def ValidateAddresses(Address,AddressFamily):
         except:
             return False
     return True
-
 
 def Set_Marshall(Address,Ensure,AddressFamily):
     if Ensure == None or len(Ensure)<1:
@@ -99,12 +101,13 @@ def FindStringInFile(fname,matchs,multiline=False):
     print("%s %s %s"%(fname,matchs,multiline),file=sys.stderr)
     m=None
     try:
-        ms=re.compile(matchs)
         if multiline:
+            ms=re.compile(matchs,re.S|re.M)
             with (open(fname,'r')) as F:  
                 l = F.read()
                 m=re.findall(ms,l)
         else:
+            ms=re.compile(matchs)
             with (open(fname,'r')) as F:  
                 for l in F.readlines():
                     m=re.search(ms,l)
@@ -174,7 +177,6 @@ def ReplaceFileContentsAtomic(filepath, contents):
 def GetMyDistro(dist_class_name=''):
     """
     Return MyDistro object.
-    NOTE: Logging is not initialized at this point.
     """
     if dist_class_name == '':
         if 'Linux' in platform.system():
@@ -188,9 +190,6 @@ def GetMyDistro(dist_class_name=''):
     else:
         Distro=dist_class_name
     
-    if dist_class_name == "centosDistro":
-        dist_class_name = "redhatDistro"
-
     if not globals().has_key(dist_class_name):
         print(Distro+' is not a supported distribution.')
         return None
@@ -201,85 +200,95 @@ class AbstractDistro(object):
     def __init__(self): 
         self.file='/etc/resolv.conf'
         self.dns_srch='nameserver '
-    
-    def get_addrs(self,addrs):
-        lines=FindStringInFile(self.file,'('+self.dns_srch+')',True) # use multiline
+        self.mode='single'
+        
+    def get_addrs(self,addrs,mode):
+        lines=FindStringInFile(self.file,'('+self.dns_srch+'.*?$)',True) # use multiline
         naddrs=[]
+        if len(addrs) == 0:
+            for l in lines:
+                l=l.replace(self.dns_srch,'')
+                l = l.strip('"')
+                l = l.strip("'")
+                l = l.strip('\n')
+                for a in l.split():
+                    naddrs.append(a)
+            return naddrs
         for a in addrs:
             if a in lines:
                 naddrs.append(a)
         return naddrs
     
-    def add_addrs(self,addrs,mode='single'):
+    def add_addrs(self,addrs,mode):
         # - TODO EXECPTION handlers
-        #import pdb ; pdb.set_trace()
         delim=''
-        ReplaceStringInFile(self.file,'('+self.dns_srch+'.*$)','') 
+        if 'quoted' in mode:
+                delim='"'
         if  'multi' in mode:
+            ReplaceStringInFile(self.file,'('+self.dns_srch+'.*)','') 
             for a in addrs:
+                AppendStringToFile(self.file,self.dns_srch+' '+a)
+        elif 'single' in mode:
+            ReplaceStringInFile(self.file,'('+self.dns_srch+'.*)',self.dns_srch+delim) 
+            l=self.dns_srch
+            for a in addrs:
+                l+=a
+                l+=' '
+            if len(FindStringInFile(self.file,'('+self.dns_srch+'.*)',True)) == 0:
+                AppendStringToFile(self.file,l)
+            else:
+                ReplaceStringInFile(self.file,self.dns_srch,l)
+        return True
+
+    def del_addrs(self,addrs,mode):
+        delim=''
+        cur_addrs = self.get_addrs('',self.mode)
+        new_addrs = []
+        for c in cur_addrs:
+                if c not in addrs:
+                    new_addrs.append(c)
+        if mode == 'multi':
+            ReplaceStringInFile(self.file,self.dns_srch+'.*','') 
+            for a in new_addrs:
                 AppendStringToFile(self.file,self.dns_srch+' '+a)
         elif 'single' in mode:
             if 'quoted' in mode:
                 delim='"'
             l=self.dns_srch
-            for a in addrs:
+            for a in new_addrs:
                 l+=a
                 l+=' '
             l+=delim
-            AppendStringToFile(self.file,l)
-        return True
-
-    def del_addrs(self,addrs,mode='single'):
-        delim=''
-        cur_addrs = self.get_addrs(mode)
-        new_addrs = []
-        for c in cur_addrs:
-            for a in addrs:
-                if a not in c:
-                    new_addrs.append(c)
-        if mode == 'multi':
-            for a in new_addrs:
-                AppendStringToFile(self.file,self.dns_srch+' '+a)
-        elif 'single' in mode:
-            if 'quoted' in mode:
-                delim='"'
-            l=self.dns_srch+delim
-            for a in new_addrs:
-                l+=a
-            l+=delim
-            AppendStringToFile(self.file,l)
+            ReplaceStringInFile(self.file,self.dns_srch+'.*',l)
         return True
             
-    def Set(self,addrs,Ensure,AddressFamily,mode):
+    def Set(self,addrs,Ensure,AddressFamily):
         retval=[-1]
         r=False
         if Ensure=='Absent':
-            r=self.del_addrs(addrs,mode)
+            r=self.del_addrs(addrs,self.mode)
         else:
-            r=self.add_addrs(addrs,mode)
+            r=self.add_addrs(addrs,self.mode)
         if r:
             retval=[0]
         return retval
     
     def Test(self,addrs,Ensure,AddressFamily):
-        if len(self.get_addrs(addrs)) != len(addrs):
+        if len(self.get_addrs(addrs,self.mode)) != len(addrs):
             return [-1]
         return [0]
     
     def Get(self,addrs,Ensure,AddressFamily):
-        return 0,self.get_addrs(addrs)
-            
+        return 0,self.get_addrs(addrs,self.mode)
 
 class SuSEDistro(AbstractDistro):
     def __init__(self):
         super(SuSEDistro,self).__init__()
         self.file='/etc/sysconfig/network/config'
-        #self.file='/etc/sysconfig/network/resolv.conf'
         self.dns_srch='NETCONFIG_DNS_STATIC_SEARCHLIST="'
-        #self.conf_srch='NETCONFIG_DNS_POLICY="'
-
+        self.mode='single-quoted'
     def Set(self,addrs,Ensure,AddressFamily):
-        return super(SuSEDistro,self).Set(addrs,Ensure,AddressFamily,'single-quoted')
+        return super(SuSEDistro,self).Set(addrs,Ensure,AddressFamily)
 
 class debianDistro(AbstractDistro):
     def __init__(self):
@@ -290,15 +299,15 @@ class debianDistro(AbstractDistro):
 class redhatDistro(AbstractDistro):
     def __init__(self):
         super(redhatDistro,self).__init__()
-
+        self.mode='multi'
     def Set(self,addrs,Ensure,AddressFamily):
-        return super(redhatDistro,self).Set(addrs,Ensure,AddressFamily,'multi')
+        return super(redhatDistro,self).Set(addrs,Ensure,AddressFamily)
 
 class UbuntuDistro(debianDistro):
     def __init__(self):
         super(UbuntuDistro,self).__init__()
         
-class LinuxMintDistro(SuSEDistro):
+class LinuxMintDistro(UbuntuDistro):
     def __init__(self):
         super(LinuxMintDistro,self).__init__()
         
@@ -307,10 +316,11 @@ class fedoraDistro(redhatDistro):
         super(fedoraDistro,self).__init__()
 
     def Set(self,addrs,Ensure,AddressFamily):
-        return super(fedoraDistro,self).Set(addrs,Ensure,AddressFamily,'multi')
+        return super(fedoraDistro,self).Set(addrs,Ensure,AddressFamily)
 
-    def Test(self,addrs,Ensure,AddressFamily):
-        return super(fedoraDistro,self).Test(addrs,Ensure,AddressFamily,'multi')
+class centosDistro(redhatDistro):
+    def __init__(self):
+        super(centosDistro,self).__init__()
 
-    def Get(self,addrs,Ensure,AddressFamily):
-        return super(fedoraDistro,self).Get(addrs,Ensure,AddressFamily,'multi')
+    def Set(self,addrs,Ensure,AddressFamily):
+        return super(centosDistro,self).Set(addrs,Ensure,AddressFamily)
