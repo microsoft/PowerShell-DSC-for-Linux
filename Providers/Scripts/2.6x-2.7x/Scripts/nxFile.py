@@ -1088,7 +1088,7 @@ def GetRemoteFile(fc):
     try:
         resp = urllib2.urlopen(req)
     except urllib2.URLError , e:
-        print e.reason
+        print repr(e)
         return 1
     fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
     with (open(fc.LocalPath+'.headers','w+')) as F:

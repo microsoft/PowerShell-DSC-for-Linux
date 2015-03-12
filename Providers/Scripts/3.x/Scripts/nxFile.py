@@ -1013,8 +1013,8 @@ def GetRemoteFile(fc):
     req = urllib2.Request(fc.SourcePath)
     try:
         resp = urllib2.urlopen(req)
-    except urllib2.URLError , e:
-        print e.reason
+    except urllib2.URLError as e:
+        Print(repr(e))
         return 1
     fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
     with (open(fc.LocalPath+'.headers','w+')) as F:
@@ -1043,8 +1043,8 @@ def GetRemoteFile(fc):
             with (open(fc.LocalPath,'w+')) as F:
                 F.write(data)
                 F.close()
-        except  Exception , e:
-                print repr(e)
+        except  Exception as e:
+                Print(repr(e))
                 return 1
     return 0
 
