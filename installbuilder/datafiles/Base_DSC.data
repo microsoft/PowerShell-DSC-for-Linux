@@ -67,21 +67,10 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/mof/MSFT_nxSshAuthorizedKeysResource.schema.mof;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxSshAuthorizedKeysResource.registration.mof;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.registration.mof;      755; root; root
 
-/opt/microsoft/dsc/lib/libMSFT_nxDNSServerAddressResource.so;   Providers/bin/libMSFT_nxDNSServerAddressResource.so;       755; root; root
-/opt/microsoft/dsc/etc/MSFT_nxDNSServerAddressResource.reg;  Providers/nxDNSServerAddress/MSFT_nxDNSServerAddressResource.reg;      755; root; root
-/opt/microsoft/dsc/mof/MSFT_nxDNSServerAddressResource.schema.mof;  Providers/nxDNSServerAddress/MSFT_nxDNSServerAddressResource.schema.mof;      755; root; root
-/opt/microsoft/dsc/mof/MSFT_nxDNSServerAddressResource.registration.mof;  Providers/nxDNSServerAddress/MSFT_nxDNSServerAddressResource.registration.mof;      755; root; root
-
 /opt/microsoft/dsc/lib/libMSFT_nxFileLineResource.so;   Providers/bin/libMSFT_nxFileLineResource.so;       755; root; root
 /opt/microsoft/dsc/etc/MSFT_nxFileLineResource.reg;  Providers/nxFileLine/MSFT_nxFileLineResource.reg;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxFileLineResource.schema.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxFileLineResource.registration.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.registration.mof;      755; root; root
-
-/opt/microsoft/dsc/lib/libMSFT_nxIPAddressResource.so;   Providers/bin/libMSFT_nxIPAddressResource.so;       755; root; root
-/opt/microsoft/dsc/etc/MSFT_nxIPAddressResource.reg;  Providers/nxIPAddress/MSFT_nxIPAddressResource.reg;      755; root; root
-/opt/microsoft/dsc/mof/MSFT_nxIPAddressResource.schema.mof;  Providers/nxIPAddress/MSFT_nxIPAddressResource.schema.mof;      755; root; root
-/opt/microsoft/dsc/mof/MSFT_nxIPAddressResource.registration.mof;  Providers/nxIPAddress/MSFT_nxIPAddressResource.registration.mof;      755; root; root
-
 
 /opt/microsoft/dsc/Scripts/client.py; Providers/Scripts/client.py; 755; root; root
 /opt/microsoft/dsc/Scripts/protocol.py; Providers/Scripts/protocol.py; 755; root; root
@@ -91,8 +80,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/GetMetaConfiguration.py; Providers/Extras/Scripts/GetMetaConfiguration.py; 755; root; root
 /opt/microsoft/dsc/Scripts/InstallModule.py; Providers/Extras/Scripts/InstallModule.py; 755; root; root
 /opt/microsoft/dsc/Scripts/RemoveModule.py; Providers/Extras/Scripts/RemoveModule.py; 755; root; root
+/opt/microsoft/dsc/Scripts/RegenerateInitFiles.py; Providers/Extras/Scripts/RegenerateInitFiles.py; 755; root; root
 
-/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/__init__.py; Providers/Scripts/2.4x-2.5x/Scripts/__init__.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFile.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFile.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxGroup.py; Providers/Scripts/2.4x-2.5x/Scripts/nxGroup.py; 755; root; root
@@ -101,11 +90,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxUser.py; Providers/Scripts/2.4x-2.5x/Scripts/nxUser.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; Providers/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
-/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxDNSServerAddress.py; Providers/Scripts/2.4x-2.5x/Scripts/nxDNSServerAddress.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFileLine.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFileLine.py; 755; root; root
-/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxIPAddress.py; Providers/Scripts/2.4x-2.5x/Scripts/nxIPAddress.py; 755; root; root
 
-/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/__init__.py; Providers/Scripts/2.6x-2.7x/Scripts/__init__.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxScript.py; Providers/Scripts/2.6x-2.7x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFile.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFile.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxGroup.py; Providers/Scripts/2.6x-2.7x/Scripts/nxGroup.py; 755; root; root
@@ -114,11 +100,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxUser.py; Providers/Scripts/2.6x-2.7x/Scripts/nxUser.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; Providers/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
-/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxDNSServerAddress.py; Providers/Scripts/2.6x-2.7x/Scripts/nxDNSServerAddress.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; 755; root; root
-/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxIPAddress.py; Providers/Scripts/2.6x-2.7x/Scripts/nxIPAddress.py; 755; root; root
 
-/opt/microsoft/dsc/Scripts/3.x/Scripts/__init__.py; Providers/Scripts/3.x/Scripts/__init__.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxScript.py; Providers/Scripts/3.x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxFile.py; Providers/Scripts/3.x/Scripts/nxFile.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxGroup.py; Providers/Scripts/3.x/Scripts/nxGroup.py; 755; root; root
@@ -127,9 +110,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxUser.py; Providers/Scripts/3.x/Scripts/nxUser.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxEnvironment.py; Providers/Scripts/3.x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
-/opt/microsoft/dsc/Scripts/3.x/Scripts/nxDNSServerAddress.py; Providers/Scripts/3.x/Scripts/nxDNSServerAddress.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxFileLine.py; Providers/Scripts/3.x/Scripts/nxFileLine.py; 755; root; root
-/opt/microsoft/dsc/Scripts/3.x/Scripts/nxIPAddress.py; Providers/Scripts/3.x/Scripts/nxIPAddress.py; 755; root; root
 
 %Directories
 /opt/microsoft;          755; root; root
@@ -213,6 +194,8 @@ done
 
 ln -s $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
 cp -R /opt/microsoft/dsc/Scripts $OMI_LIB/Scripts
+
+/opt/microsoft/dsc/Scripts/RegenerateInitFiles.py
 
 %Preuninstall_999
 # TODO: Detect omi install directory?

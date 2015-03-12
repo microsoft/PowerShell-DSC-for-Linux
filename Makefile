@@ -63,11 +63,12 @@ nxComputerManagement:
 nxNetworking:
 	rm -rf output/staging; \
 	VERSION="1.0"; \
-	PROVIDERS="nxDNSServerAddress"; \
+	PROVIDERS="nxDNSServerAddress nxIPAddress"; \
 	STAGINGDIR="output/staging/nxNetworking/DSCResources"; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/lib/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
+		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/lib; \
 		cp Providers/Scripts/2.4x-2.5x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/lib/Scripts/2.4x-2.5x/Scripts; \
 		cp Providers/Scripts/2.6x-2.7x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/lib/Scripts/2.6x-2.7x/Scripts; \
