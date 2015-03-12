@@ -7,7 +7,7 @@ import shutil
 def usage():
     print("Usage:")
     print("  InstallModule.py NAME_VERSION.zip")
-    exit(1)
+    sys.exit(1)
 
 def registration_text(resource):
     return '''
@@ -27,14 +27,14 @@ filepath = sys.argv[1]
 
 if not os.path.isfile(filepath):
     print("Error: " + filepath + " is not a file.")
-    exit(1)
+    sys.exit(1)
 
 basename = os.path.basename(filepath)
 last_underscore = basename.rfind("_")
 
 if last_underscore == -1:
     print("Error: Invalid name for zipfile.  Must be NAME_VERSION.zip")
-    exit(1)
+    sys.exit(1)
 
 token1 = basename[0:last_underscore]
 token2 = basename[last_underscore+1:]
@@ -46,22 +46,22 @@ moduleName = token1
 
 if "." not in moduleVersion:
     print("Error: Version does not contain a dot and is thus improperly formed.")
-    exit(1)
+    sys.exit(1)
 
 retval = subprocess.call(["unzip","-o","-d", "/opt/microsoft/dsc/modules", filepath])
 if retval != 0:
     print("Error: Failed to unzip " + filepath)
-    exit(1)
+    sys.exit(1)
 
 modulePath = "/opt/microsoft/dsc/modules/" + moduleName
 
 if not os.path.isdir(modulePath):
     print("Error: After extracting module, unable to find module directory in /opt/microsoft/dsc/modules")
-    exit(1)
+    sys.exit(1)
 
 if not os.path.isdir(modulePath + "/DSCResources"):
     print("Error: After extracting module, unable to find DSCResources directory in " + modulePath)
-    exit(1)
+    sys.exit(1)
 
 f = open(modulePath+ "/VERSION", "w")
 f.write(moduleVersion)
@@ -83,9 +83,10 @@ for resource in resourcelist:
 
     if not os.path.isfile(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof"):
         print("Error: Unable to find schema mof for resource " + resource)
-        exit(1)
+        sys.exit(1)
 
     shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof", "/opt/omi/etc/dsc/configuration/schema/" + resource + "/")
+    shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".reg", "/opt/omi/etc/omiregister/root-Microsoft-DesiredStateConfiguration/")
     f = open("/opt/omi/etc/dsc/configuration/registration/" + resource + "/" + resource + ".registration.mof", "w")
     f.write(registration_text(resource))
     f.close()
@@ -94,7 +95,11 @@ for resource in resourcelist:
     retval = subprocess.call(["cp", "-R", modulePath + "/DSCResources/" + resource + "/lib", "/opt/omi"])
     if retval != 0:
         print("Error: Failed to install module " + moduleName + " on resource " + resource)
-        exit(1)
+        sys.exit(1)
 
-exit(0)
+retval = subprocess.call(["/opt/microsoft/dsc/Scripts/RegenerateInitFiles.py"])
+if retval != 0:
+    print("Error: failed to regenerate init files.")
+    sys.exit(1)
+sys.exit(0)
 

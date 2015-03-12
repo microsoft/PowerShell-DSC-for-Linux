@@ -7,13 +7,13 @@ import shutil
 def usage():
     print("Usage:")
     print("  RemoveModule.py NAME")
-    exit(1)
+    sys.exit(1)
 
 
 def RemoveMirroredDirectory(moduleDir, omiDir):
     if len(moduleDir) < 15 or len(omiDir) < 10:
         print("Error: The parameters to RemoveMirroredDirectory are too short.  This function can do dangerous things, so this is a sanity check.")
-        exit(1)
+        sys.exit(1)
 
     for curFile in os.listdir(moduleDir):
         print("Removing " + moduleDir + "/" + curFile + " and " + omiDir + "/" + curFile)
@@ -40,7 +40,7 @@ modulePath = "/opt/microsoft/dsc/modules/" + moduleName
 
 if not os.path.isdir(modulePath):
     print("Error: unable to find installed module " + moduleName + " at " + modulePath)
-    exit(1)
+    sys.exit(1)
 
 print("Removing module " + moduleName)
 
@@ -64,6 +64,11 @@ for resource in resourcelist:
     os.rmdir(modulePath + "/DSCResources/" + resource + "/lib")
 
 shutil.rmtree(modulePath)
+
+retval = subprocess.call(["/opt/microsoft/dsc/Scripts/RegenerateInitFiles.py"])
+if retval != 0:
+    print("Error: failed to regenerate init files.")
+sys.exit(0)
 
 
 
