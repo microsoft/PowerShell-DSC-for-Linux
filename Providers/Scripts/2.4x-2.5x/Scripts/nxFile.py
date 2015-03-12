@@ -7,7 +7,6 @@ import sys
 import pwd
 import shutil
 import grp
-import codecs
 import urllib2
 import time
 import imp
@@ -1084,7 +1083,7 @@ def GetRemoteFile(fc):
     try:
         resp = urllib2.urlopen(req)
     except urllib2.URLError , e:
-        print e.reason
+        print repr(e)
         return 1
     fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
     F = open(fc.LocalPath+'.headers','w+')
