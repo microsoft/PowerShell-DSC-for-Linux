@@ -163,8 +163,7 @@ def ReplaceFileContentsAtomic(filepath, contents):
     except IOError, e:
         Print('ReplaceFileContentsAtomic','Writing to file ' + filepath + ' Exception is ' + str(e),file=sys.stderr)
         return None
-    finally:
-        os.close(handle)
+    os.close(handle)
     try:
         os.rename(temp, filepath)
         return None
