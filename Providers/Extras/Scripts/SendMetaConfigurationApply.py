@@ -6,7 +6,7 @@ import subprocess
 def usage():
     print("Usage:")
     print("    " + sys.argv[0] + " -configurationmof FILE")
-    exit(1)
+    sys.exit(1)
     
 
 if len(sys.argv) != 3:
