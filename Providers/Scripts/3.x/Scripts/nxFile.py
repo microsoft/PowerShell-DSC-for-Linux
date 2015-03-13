@@ -13,7 +13,7 @@ import pwd
 import shutil
 import grp
 import codecs
-import urllib2
+import urllib.request
 import time
 import imp
 protocol=imp.load_source('protocol','../protocol.py')
@@ -191,6 +191,21 @@ def opened_w_error(filename, mode="r"):
     """
     try:
         f = codecs.open(filename, encoding='utf-8' , mode=mode)
+    except IOError as err:
+        yield None, err
+    else:
+        try:
+            yield f, None
+        finally:
+            f.close()
+
+@contextmanager
+def opened_bin_w_error(filename, mode="rb"):
+    """
+    This context ensures the file is closed.
+    """
+    try:
+        f = open(filename, mode)
     except IOError as err:
         yield None, err
     else:
@@ -384,23 +399,23 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
         dest_error = None
         src_hash = md5const()
         dest_hash = md5const()
-        src_block ='loopme'
-        dest_block ='loopme'
-        with opened_w_error(SourcePath,'r') as (src_file,src_error):
+        src_block =b'loopme'
+        dest_block =b'loopme'
+        with opened_bin_w_error(SourcePath,'rb') as (src_file,src_error):
             if src_error:
                 Print("Exception opening source file " + SourcePath  + " Error Code: " + str(src_error.errno) +
                       " Error: " + src_error.strerror,file=sys.stderr)
                 return -1
-            with opened_w_error(DestinationPath,'r') as (dest_file,dest_error):
+            with opened_bin_w_error(DestinationPath,'rb') as (dest_file,dest_error):
                 if dest_error:
                     Print("Exception opening destination file " + DestinationPath + " Error Code: " + str(dest_error.errno) +
                           " Error: " + dest_error.strerror,file=sys.stderr)
                     return -1
-                while src_block != '' and dest_block != '':
+                while src_block and dest_block :
                     src_block=src_file.read(BLOCK_SIZE)
                     dest_block=dest_file.read(BLOCK_SIZE)
-                    src_hash.update(src_block.encode('utf8'))
-                    dest_hash.update(dest_block.encode('utf8'))
+                    src_hash.update(src_block)
+                    dest_hash.update(dest_block)
                     if src_hash.hexdigest() != dest_hash.hexdigest():
                         return -1  
         if src_hash.hexdigest() == dest_hash.hexdigest():
@@ -1010,21 +1025,15 @@ def GetTimeFromString(s):
     return st
         
 def GetRemoteFile(fc):
-    req = urllib2.Request(fc.SourcePath)
+    req = urllib.request.Request(fc.SourcePath)
     try:
-        resp = urllib2.urlopen(req)
-    except urllib2.URLError as e:
+        resp = urllib.request.urlopen(req)
+    except urllib.error.URLError as e:
         Print(repr(e))
         return 1
     fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
-    with (open(fc.LocalPath+'.headers','w+')) as F:
-        h=resp.info()
-        s=''
-        for k in h.keys():
-            s+=k+'='+h.getheader(k)+'\n'
-        F.write( 'Headers are:\n'+s)
-        F.close()
-    lm=h.getheader('last-modified')
+    h=resp.info()
+    lm=h.get('last-modified')
     lm_mtime=GetTimeFromString(lm)
     dst_mtime = None
     dst_st= None
@@ -1032,15 +1041,16 @@ def GetRemoteFile(fc):
     if os.path.exists(fc.DestinationPath):
         dst_st=LStatFile(fc.DestinationPath)
     if dst_st != None:
-        dst_mtime= dst_st.st_mtime
-    if lm_mtime !=None and dst_mtime != None and dst_mtime>=lm_mtime: 
-        data = ''
-        fc.LocalPath=''
+        dst_mtime= time.gmtime(dst_st.st_mtime)
+    if lm_mtime !=None and dst_mtime != None:
+        if  dst_mtime>=lm_mtime: 
+            data = ''
+            fc.LocalPath=''
     else:
         data = resp.read()
     if data != None and len(data)>0:
         try:
-            with (open(fc.LocalPath,'w+')) as F:
+            with (open(fc.LocalPath,'wb+')) as F:
                 F.write(data)
                 F.close()
         except  Exception as e:
