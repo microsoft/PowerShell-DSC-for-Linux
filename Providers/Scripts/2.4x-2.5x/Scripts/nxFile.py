@@ -261,6 +261,16 @@ def opened_w_error(filename, mode="r"):
         return None, err
     return f, None
 
+def opened_bin_w_error(filename, mode="rb"):
+    """
+    This context ensures the file is closed.
+    """
+    try:
+        f = open(filename, mode=mode)
+    except IOError, err:
+        return None, err
+    return f, None
+
 
 
 def ReadFile(path):
@@ -452,11 +462,11 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
         dest_hash = md5const()
         src_block ='loopme'
         dest_block ='loopme'
-        src_file,src_error = opened_w_error(SourcePath,'r')
+        src_file,src_error = opened_bin_w_error(SourcePath,'rb')
         if src_error:
             Print("Exception opening source file " + SourcePath  + " Error : " + str(src_error),file=sys.stderr)
             return -1
-        dest_file,dest_error = opened_w_error(DestinationPath,'r')
+        dest_file,dest_error = opened_bin_w_error(DestinationPath,'rb')
         if dest_error:
             Print("Exception opening destination file " + DestinationPath + " Error : " + str(dest_error),file=sys.stderr)
             src_file.close()
@@ -1086,13 +1096,7 @@ def GetRemoteFile(fc):
         print repr(e)
         return 1
     fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
-    F = open(fc.LocalPath+'.headers','w+')
     h=resp.info()
-    s=''
-    for k in h.keys():
-        s+=k+'='+h.getheader(k)+'\n'
-    F.write( 'Headers are:\n'+s)
-    F.close()
     lm=h.getheader('last-modified')
     lm_mtime=GetTimeFromString(lm)
     dst_mtime = None
@@ -1101,7 +1105,7 @@ def GetRemoteFile(fc):
     if os.path.exists(fc.DestinationPath):
         dst_st=LStatFile(fc.DestinationPath)
     if dst_st != None:
-        dst_mtime= dst_st.st_mtime
+        dst_mtime =  time.gmtime(dst_st.st_mtime)
     if lm_mtime !=None and dst_mtime != None and dst_mtime>=lm_mtime: 
         data = ''
         fc.LocalPath=''
@@ -1109,7 +1113,7 @@ def GetRemoteFile(fc):
         data = resp.read()
     if data != None and len(data)>0:
         try:
-            F = open(fc.LocalPath,'w+')
+            F = open(fc.LocalPath,'wb+')
             F.write(data)
             F.close()
         except  Exception , e:

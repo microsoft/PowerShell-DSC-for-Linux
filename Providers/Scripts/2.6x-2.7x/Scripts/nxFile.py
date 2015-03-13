@@ -263,7 +263,22 @@ def opened_w_error(filename, mode="r"):
     This context ensures the file is closed.
     """
     try:
-        f = codecs.open(filename, encoding='utf-8' , mode=mode)
+        f = codecs.open(filename, encoding='utf8', mode=mode)
+    except IOError, err:
+        yield None, err
+    else:
+        try:
+            yield f, None
+        finally:
+            f.close()
+
+@contextmanager
+def opened_bin_w_error(filename, mode="rb"):
+    """
+    This context ensures the file is closed.
+    """
+    try:
+        f = open(filename, mode)
     except IOError, err:
         yield None, err
     else:
@@ -458,19 +473,19 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
         dest_error = None
         src_hash = md5const()
         dest_hash = md5const()
-        src_block ='loopme'
-        dest_block ='loopme'
-        with opened_w_error(SourcePath,'r') as (src_file,src_error):
+        src_block =b'loopme'
+        dest_block =b'loopme'
+        with opened_bin_w_error(SourcePath,'rb') as (src_file,src_error):
             if src_error:
                 Print("Exception opening source file " + SourcePath  + " Error Code: " + str(src_error.errno) +
                       " Error: " + src_error.message + src_error.strerror,file=sys.stderr)
                 return -1
-            with opened_w_error(DestinationPath,'r') as (dest_file,dest_error):
+            with opened_bin_w_error(DestinationPath,'rb') as (dest_file,dest_error):
                 if dest_error:
                     Print("Exception opening destination file " + DestinationPath + " Error Code: " + str(dest_error.errno) +
                           " Error: " + dest_error.message + dest_error.strerror,file=sys.stderr)
                     return -1
-                while src_block != '' and dest_block != '':
+                while src_block  and dest_block :
                     src_block=src_file.read(BLOCK_SIZE)
                     dest_block=dest_file.read(BLOCK_SIZE)
                     src_hash.update(src_block)
@@ -957,7 +972,6 @@ def TestFile(DestinationPath, SourcePath, fc):
                     return False
                 if os.readlink(DestinationPath) != os.readlink(SourcePath):
                     return False
-
         elif CompareFiles(DestinationPath, SourcePath,  fc.Checksum) == -1:
             return False
 
@@ -1091,13 +1105,7 @@ def GetRemoteFile(fc):
         print repr(e)
         return 1
     fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
-    with (open(fc.LocalPath+'.headers','w+')) as F:
-        h=resp.info()
-        s=''
-        for k in h.keys():
-            s+=k+'='+h.getheader(k)+'\n'
-        F.write( 'Headers are:\n'+s)
-        F.close()
+    h=resp.info()
     lm=h.getheader('last-modified')
     lm_mtime=GetTimeFromString(lm)
     dst_mtime = None
@@ -1106,7 +1114,7 @@ def GetRemoteFile(fc):
     if os.path.exists(fc.DestinationPath):
         dst_st=LStatFile(fc.DestinationPath)
     if dst_st != None:
-        dst_mtime= dst_st.st_mtime
+        dst_mtime =  time.gmtime(dst_st.st_mtime)
     if lm_mtime !=None and dst_mtime != None and dst_mtime>=lm_mtime: 
         data = ''
         fc.LocalPath=''
@@ -1114,7 +1122,7 @@ def GetRemoteFile(fc):
         data = resp.read()
     if data != None and len(data)>0:
         try:
-            with (open(fc.LocalPath,'w+')) as F:
+            with (open(fc.LocalPath,'wb+')) as F:
                 F.write(data)
                 F.close()
         except  Exception , e:
