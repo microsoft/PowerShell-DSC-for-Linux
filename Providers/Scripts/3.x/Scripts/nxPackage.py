@@ -13,6 +13,18 @@ import time
 import codecs
 import re
 import imp
+import urllib2
+apt=None
+rpm=None
+try:
+    import apt
+except:
+    pass
+if apt==None:
+    try:
+        import rpm
+    except:
+        pass
 protocol=imp.load_source('protocol','../protocol.py')
 
 #   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
@@ -139,7 +151,7 @@ def Get_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,Retu
 ############################################################
 def GetPackageSystem():
     ret=None
-    for b in ('rpm','dpkg'):
+    for b in ('dpkg','rpm'):
         code,out=RunGetOutput('which '+b,False,False)
         if code == 0:
             ret = b
@@ -149,7 +161,7 @@ def GetPackageSystem():
 def GetPackageManager():
     ret=None
     # choose default - almost surely one will match.
-    for b in ('zypper','yum','apt-get'):
+    for b in ('apt-get','zypper','yum'):
         code,out=RunGetOutput('which '+b,False,False)
         if code == 0:
             ret=b
@@ -172,25 +184,25 @@ class Params:
     def __init__(self,Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
 
         if not ( "Present" in Ensure or "Absent" in Ensure ):
-            Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
+            print('ERROR: Param Ensure must be Present or Absent.',file=sys.stdout)
             Log(LogPath,'ERROR: Param Ensure must be Present or Absent.')
             raise Exception('BadParameter')
         if len(PackageManager)>0:
             if not ( "yum" in PackageManager.lower() or  "apt" in PackageManager.lower() or "zypper" in PackageManager.lower() ) :
-                Print('ERROR: Param PackageManager values are Yum, Apt, or Zypper.',file=sys.stderr)
+                print('ERROR: Param PackageManager values are Yum, Apt, or Zypper.',file=sys.stdout)
                 Log(LogPath,'ERROR: Param PackageManager values are Yum, Apt, or Zypper.')
                 raise Exception('BadParameter')
         if len(Name)<1 and len(FilePath)<1:
-            Print('ERROR: Param Name or FilePath must be set.',file=sys.stderr)
+            print('ERROR: Param Name or FilePath must be set.',file=sys.stdout)
             Log(LogPath,'ERROR: Param Name or FilePath must be set.')
             raise Exception('BadParameter')
         if len(Name)>0 and len(FilePath)>0:
-            Print('Ignoring Name because FilePath is set.',file=sys.stderr)
+            print('Ignoring Name because FilePath is set.',file=sys.stdout)
             Log(LogPath,'Ignoring Name because FilePath is set.')
-        Print('PackageGroup value is '+repr(PackageGroup)) 
-        Print('PackageGroup type is '+repr(type(PackageGroup)))
+        print('PackageGroup value is '+repr(PackageGroup)) 
+        print('PackageGroup type is '+repr(type(PackageGroup)))
         if not ( True == PackageGroup or False == PackageGroup ):
-            Print('ERROR: Param PackageGroup must be true or false.',file=sys.stderr)
+            print('ERROR: Param PackageGroup must be true or false.',file=sys.stdout)
             Log(LogPath,'ERROR: Param PackageGroup must be true or false.')
             raise Exception('BadParameter')
         
@@ -217,10 +229,10 @@ class Params:
             self.PackageManager=GetPackageManager()
 
         if len(self.PackageManager)<1 or len(self.PackageSystem)<1 :
-            Print("ERROR: Unable to locate any of 'zypper', 'yum', 'apt-get', 'rpm' or 'dpkg' .",file=sys.stderr)
+            print("ERROR: Unable to locate any of 'zypper', 'yum', 'apt-get', 'rpm' or 'dpkg' .",file=sys.stdout)
             Log(LogPath,"ERROR: Unable to locate any of 'zypper', 'yum', 'apt-get', 'rpm' or 'dpkg' .")
             raise Exception('BadParameter')
-            
+        self.LocalPath=''    
         self.cmds={}
         self.cmds['dpkg']={}
         self.cmds['rpm']={}
@@ -249,6 +261,17 @@ class Params:
         self.cmds['zypper']['Absent']='zypper --non-interactive  % remove ^'
         self.cmds['zypper']['stat']=self.cmds['rpm']['stat']
         self.cmds['zypper']['stat_group']=None
+        if self.PackageGroup == True:
+            if self.cmds[self.PackageManager]['stat_group'] == None:
+                print('ERROR.  PackageGroup is not valid for '+ self.PackageManager,file=sys.stdout)
+                Log(self.LogPath,'ERROR.  PackageGroup is not valid for '+ self.PackageManager)
+                raise Exception('BadParameter')
+            if len(self.FilePath)>0:
+                print('ERROR.  PackageGroup cannot be True if FilePath is set.',file=sys.stdout)
+                Log(self.LogPath,'ERROR.  PackageGroup cannot be True if FilePath is set.')
+                raise Exception('BadParameter')
+                
+        
     
 def SetShowMof(a):
     global show_mof
@@ -270,21 +293,50 @@ def ShowMof(op, Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,Retur
     mof+='    LogPath = "' + LogPath + '"\n'
     mof+='}\n'
     f=open('./test_mofs.log','a')
-    Print(mof,file=f)
+    print(mof,file=f)
     f.close()
     
 def IsPackageInstalled(p):
-    if p==None:
-        return False
     out=''
+    if p==None:
+        return False,out
+    # if the file path is remote - look where we may have just put it, if not clear the FilePath
+    if len(p.FilePath) > 0 and '://' in p.FilePath and p.LocalPath == '': # its a remote file
+        p.LocalPath='/tmp/'+os.path.basename(p.FilePath)
+        if os.path.isfile(p.LocalPath):
+            p.FilePath=p.LocalPath
+        else:
+            p.LocalPath=''
+    if len(p.FilePath) > 0 and os.path.exists(p.FilePath) == True : # FilePath                
+        if apt != None and os.path.splitext(p.FilePath)[-1] == '.deb':
+            from apt.debfile import DebPackage
+            
+            pkg = DebPackage(p.FilePath)
+            p.Name=pkg.pkgname
+        elif rpm != None and os.path.splitext(p.FilePath)[-1] == '.rpm':
+            with open(p.FilePath,'r') as F:
+                ts = rpm.TransactionSet()
+                ts.setVSFlags(-1)
+                try:
+                    pkg = ts.hdrFromFdno(F.fileno())
+                except rpm.error as e:
+                    print(e)
+                    pkg = None
+            if pkg == None:
+                return False,out
+            p.Name=pkg.dsOfHeader().N()
+    if len(p.Name)<1:
+        return False,out
+    
     if p.PackageGroup == True:
         if p.cmds[p.PackageManager]['stat_group'] != None:
             cmd=p.cmds[p.PackageManager]['stat_group'] + '"' + p.Name + '"' 
         else:
-            Print('ERROR.  PackageGroup is not valid for '+ p.PackageManager,file=sys.stderr)
+            print('ERROR.  PackageGroup is not valid for '+ p.PackageManager,file=sys.stdout)
             Log(p.LogPath,'ERROR.  PackageGroup is not valid for '+ p.PackageManager)
             return False,out
-    cmd=p.cmds[p.PackageManager]['stat'] + p.Name
+    else:
+        cmd=p.cmds[p.PackageManager]['stat'] + p.Name
     code,out=RunGetOutput(cmd,False)
     if p.PackageGroup == True: # implemented for YUM only.
         if 'Installed' in out:
@@ -292,7 +344,7 @@ def IsPackageInstalled(p):
         else : 
             return False,out
     # regular packages
-    Print('check installed:'+out)
+    print(u'check installed:'+out)
     if code == 0:
         if 'deinstall' in out or 'not-installed' in out:
             code=1
@@ -322,15 +374,23 @@ def ParseInfo(p,info):
             p.Installed= ( 'install' in f[5] )
             
         if len(f)!=5:
-            Print('ERROR.   '+ p.PackageManager,file=sys.stderr)
+            print('ERROR.   '+ p.PackageManager,file=sys.stdout)
             Log(p.LogPath,'ERROR.   '+ p.PackageManager)
 
 def DoEnableDisable(p):
     # if the path is set, use the path and self.PackageSystem
     cmd=""
     if len(p.FilePath) > 1 and 'Present' in p.Ensure : # don't use the path unless installing
+        if '://' in p.FilePath and p.LocalPath == '': # its a remote file
+            ret=0
+            ret=GetRemoteFile(p)
+            if ret != 0:
+                raise Exception('Unable to retrieve remote resource '+p.FilePath+' Error is ' + str(ret))
+            else:
+                p.FilePath=p.LocalPath
+        
         if not os.path.isfile(p.FilePath):
-            Print('ERROR.   File '+ p.FilePath + ' not found.',file=sys.stderr)
+            print('ERROR.   File '+ p.FilePath + ' not found.',file=sys.stdout)
             Log(p.LogPath,'ERROR.   File '+ p.FilePath + ' not found.')
             return False,""
         cmd=p.cmds[p.PackageSystem][p.Ensure] + ' ' + p.FilePath
@@ -339,7 +399,7 @@ def DoEnableDisable(p):
         if 'Group'+p.Ensure in p.cmds[p.PackageManager] :
             cmd=p.cmds[p.PackageManager]['Group'+p.Ensure] + '"' + p.Name +'"'
         else :
-            Print('Error: Group mode not implemented for ' + p.PackageManager,file=sys.stderr)
+            print('Error: Group mode not implemented for ' + p.PackageManager,file=sys.stdout)
             Log(p.LogPath,'Error: Group mode not implemented for ' + p.PackageManager)
             return False,'Error: Group mode not implemented for ' + p.PackageManager
     else:
@@ -357,7 +417,7 @@ def Set(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,Lo
     try:
         p=Params(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
-        Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
+        print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stdout)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
         return [-1]
     installed,out = IsPackageInstalled(p)
@@ -371,7 +431,7 @@ def Set(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,Lo
             op = 'Install'
         else :
             op='Un-install'
-        Print('Failed to ' + op + ' ' + p.Name + ' output for command was: ' + out)
+        print('Failed to ' + op + ' ' + p.Name + ' output for command was: ' + out)
         Log(p.LogPath,'Failed to ' + op + ' ' + p.Name + ' output for command was: ' + out)
         return [-1]
     return [0]
@@ -381,7 +441,7 @@ def Test(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,L
     try:
         p=Params(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
-        Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
+        print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stdout)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
         return [-1]
     installed,out = IsPackageInstalled(p)
@@ -396,7 +456,7 @@ def Get(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,Lo
     try:
         p=Params(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     except Exception as e:
-        Print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stderr)
+        print('ERROR - Unable to initialize nxPackageProvider.  '+e.message,file=sys.stdout)
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
         return [retval,p.PackageDescription,p.Publisher,p.InstalledOn,p.Size,p.Version,installed]
     installed,out = IsPackageInstalled(p)
@@ -457,9 +517,9 @@ def RunGetOutput(cmd,no_output,chk_err=True):
         output=subprocess.check_output(no_output,cmd,stderr=subprocess.STDOUT,shell=True)
     except subprocess.CalledProcessError as e :
         if chk_err :
-            Print('CalledProcessError.  Error Code is ' + str(e.returncode),file=sys.stderr  )
-            Print('CalledProcessError.  Command string was ' + e.cmd ,file=sys.stderr )
-            Print('CalledProcessError.  Command result was ' + (e.output[:-1]).decode('latin-1'),file=sys.stderr)
+            print('CalledProcessError.  Error Code is ' + str(e.returncode),file=sys.stdout  )
+            print('CalledProcessError.  Command string was ' + e.cmd ,file=sys.stdout )
+            print('CalledProcessError.  Command result was ' + (e.output[:-1]).decode('latin-1'),file=sys.stdout)
         if no_output:
             return e.returncode,None
         else:
@@ -481,8 +541,67 @@ def Log(file_path,message):
     lines=re.sub(re.compile(r'^(.)',re.MULTILINE),t+r'\1',message)
     with opened_w_error(file_path,'a') as (F,error):
         if error:
-            Print("Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            print("Exception opening logfile " + file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stdout)
         else:
             F.write(lines + "\n")
-        
 
+def GetTimeFromString(s):
+    if s == None or len(s) == 0:
+        return None
+    fmt=[]
+    fmt.append('%a, %d %b %Y %H:%M:%S %Z')
+    st=None
+    for f in fmt:
+        try:
+            st=time.strptime(s,f) 
+        except ValueError:
+            continue
+    return st
+
+
+def LStatFile(path):
+    """
+    LStat the file.  Do not follow the symlink.
+    """
+    d=None
+    error=None
+    try:
+        d=os.lstat(path)
+    except OSError as error:
+         print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+    except IOError as error:
+         print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+    return d
+
+def GetRemoteFile(p):
+    req = urllib2.Request(p.FilePath)
+    try:
+        resp = urllib2.urlopen(req)
+    except urllib2.URLError as e:
+        print(repr(e))
+        return 1
+    p.LocalPath='/tmp/'+os.path.basename(p.FilePath)
+    h=resp.info()
+    lm=h.getheader('last-modified')
+    lm_mtime=GetTimeFromString(lm)
+    dst_mtime = None
+    dst_st= None
+    data = None
+    if os.path.exists(p.LocalPath):
+        dst_st=LStatFile(p.LocalPath)
+    if dst_st != None:
+        dst_mtime =  time.gmtime(dst_st.st_mtime)
+    if lm_mtime !=None and dst_mtime != None and dst_mtime>=lm_mtime: 
+        data = ''
+        p.LocalPath=''
+    else:
+        data = resp.read()
+    if data != None and len(data)>0:
+        try:
+            with (open(p.LocalPath,'wb+')) as F:
+                F.write(data)
+                F.close()
+        except  Exception as e:
+                print(repr(e))
+                return 1
+    return 0
