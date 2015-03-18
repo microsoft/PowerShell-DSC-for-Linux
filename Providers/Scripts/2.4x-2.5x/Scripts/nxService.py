@@ -319,7 +319,7 @@ def GetRunLevel():
     return int(tokens[1])
 
 def DetermineInitState(stdout):
-    if "is running" in stdout or "start/running" in stdout:
+    if "is running" in stdout or "start/running" in stdout or "..running" in stdout:
         return True
     elif stdout.strip() == "Running":
         return True
