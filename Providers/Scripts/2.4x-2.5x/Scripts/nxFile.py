@@ -38,207 +38,64 @@ BLOCK_SIZE = 8192
 global show_mof
 show_mof=False
 
-def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
-    if DestinationPath  != None :
-        DestinationPath = DestinationPath.decode("utf-8")
-    else:
+def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
+    if DestinationPath  == None :
         DestinationPath=''
-    if SourcePath != None :
-        SourcePath = SourcePath.decode("utf-8")
-    else:
+    if SourcePath == None :
         SourcePath = ''
-    if Ensure != None :
-        Ensure = Ensure.decode("utf-8")
-    else:
+    if Ensure == None :
         Ensure = ''
-    if Type != None :
-        Type = Type.decode("utf-8")
-    else:
+    if Type == None :
         Type = ''
-    if Force != None :
-        Force = Force
-    else:
+    if Force == None :
         Force = False
-    if Contents  != None :
-        Contents = Contents.decode("utf-8")
-    else:
-        Contents=''
-    if Checksum != None :
-        Checksum = Checksum.decode("utf-8")
-    else:
+    if Contents == None :
+        Contents = ''
+    if Checksum == None :
         Checksum = ''
-    if Recurse != None :
-        Recurse = Recurse
-    else:
+    if Recurse == None :
         Recurse = False
-    if Links != None and len(Links) > 0:
-        Links = Links.decode("utf-8")
-    else:
+    if Links == None :
         Links = 'follow'
-    if Owner != None :
-        Owner = Owner.decode("utf-8")
-    else:
+    if Owner == None :
         Owner = ''
-    if Group != None :
-        Group = Group.decode("utf-8")
-    else:
+    if Group == None :
         Group = ''
-    if Mode != None :
-        Mode = Mode.decode("utf-8")
-    else:
+    if Mode == None :
         Mode = ''
-    
+    return DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode 
+
+def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
+    DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
+                     = init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     retval = Set(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     return retval
 
 def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
-    if DestinationPath != None :
-        DestinationPath = DestinationPath.decode("utf-8")
-    else:
-        DestinationPath = ''
-    if SourcePath != None :
-        SourcePath = SourcePath.decode("utf-8")
-    else:
-        SourcePath = ''
-    if Ensure != None :
-        Ensure = Ensure.decode("utf-8")
-    else:
-        Ensure = ''
-    if Type != None :
-        Type = Type.decode("utf-8")
-    else:
-        Type = ''
-    if Force != None :
-        Force = Force
-    else:
-        Force = False
-    if Contents  != None :
-        Contents = Contents.decode("utf-8")
-    else:
-        Contents=''
-    if Checksum != None :
-        Checksum = Checksum.decode("utf-8")
-    else:
-        Checksum = ''
-    if Recurse != None :
-        Recurse = Recurse
-    else:
-        Recurse = False
-    if Links != None and len(Links) > 0:
-        Links = Links.decode("utf-8")
-    else:
-        Links = 'follow'
-    if Owner != None :
-        Owner = Owner.decode("utf-8")
-    else:
-        Owner = ''
-    if Group != None :
-        Group = Group.decode("utf-8")
-    else:
-        Group = ''
-
-    if Mode != None :
-        Mode = Mode.decode("utf-8")
-    else:
-        Mode = ''
-        
+    DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
+                     = init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     retval = Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     return retval
 
 def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     arg_names=list(locals().keys())
-    if DestinationPath != None :
-        DestinationPath = DestinationPath.decode("utf-8")
-    else:
-        DestinationPath = ''
-    if SourcePath != None :
-        SourcePath = SourcePath.decode("utf-8")
-    else:
-        SourcePath = ''
-    if Ensure != None :
-        Ensure = Ensure.decode("utf-8")
-    else:
-        Ensure = ''
-    if Type != None :
-        Type = Type.decode("utf-8")
-    else:
-        Type = ''
-    if Force != None :
-        Force = Force
-    else:
-        Force = False
-    if Contents  != None :
-        Contents = Contents.decode("utf-8")
-    else:
-        Contents=''
-    if Checksum != None :
-        Checksum = Checksum.decode("utf-8")
-    else:
-        Checksum = ''
-    if Recurse != None :
-        Recurse = Recurse
-    else:
-        Recurse = False
-    if Links != None and len(Links) > 0:
-        Links = Links.decode("utf-8")
-    else:
-        Links = 'follow'
-    if Owner != None :
-        Owner = Owner.decode("utf-8")
-    else:
-        Owner = ''
-    if Group != None :
-        Group = Group.decode("utf-8")
-    else:
-        Group = ''
-    if Mode != None :
-        Mode = Mode.decode("utf-8")
-    else:
-        Mode = ''
-
+    DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
+                     = init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     retval = 0
     (retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate) = Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
-    sys.stderr.write( 'retval ' + repr(retval)+'\n')
-    sys.stderr.write( 'DestinationPath ' + repr(DestinationPath)+'\n')
-    sys.stderr.write( 'SourcePath ' + repr(SourcePath)+'\n')
-    sys.stderr.write( 'Ensure ' + repr(Ensure)+'\n')
-    sys.stderr.write( 'Type ' + repr(Type)+'\n')
-    sys.stderr.write( 'Force ' + repr(Force)+'\n')
-    sys.stderr.write( 'Contents ' + repr(Contents)+'\n')
-    sys.stderr.write( 'Checksum ' + repr(Checksum)+'\n')
-    sys.stderr.write( 'Recurse ' + repr(Recurse)+'\n')
-    sys.stderr.write( 'Links ' + repr(Links)+'\n')
-    sys.stderr.write( 'Owner ' + repr(Owner)+'\n')
-    sys.stderr.write( 'Group ' + repr(Group)+'\n')
-    sys.stderr.write( 'Mode ' + repr(Mode)+'\n')
-    sys.stderr.write( 'ModifiedDate ' + repr(ModifiedDate)+'\n')
-    DestinationPath = protocol.MI_String (DestinationPath.encode("utf-8"))
-    SourcePath = protocol.MI_String (SourcePath.encode("utf-8"))
-    Ensure = protocol.MI_String (Ensure.encode("utf-8"))
-    Type = protocol.MI_String (Type.encode("utf-8"))
+    DestinationPath = protocol.MI_String (DestinationPath)
+    SourcePath = protocol.MI_String (SourcePath)
+    Ensure = protocol.MI_String (Ensure)
+    Type = protocol.MI_String (Type)
     Force = protocol.MI_Boolean (Force)
-    Contents = protocol.MI_String (Contents.encode("utf-8"))
-    Checksum = protocol.MI_String (Checksum.encode("utf-8"))
+    Contents = protocol.MI_String (Contents.decode('ascii','ignore'))
+    Checksum = protocol.MI_String (Checksum)
     Recurse = protocol.MI_Boolean (Recurse)
-    Links = protocol.MI_String (Links.encode("utf-8"))
-    Owner = protocol.MI_String (Owner.encode("utf-8"))
-    Group = protocol.MI_String (Group.encode("utf-8"))
-    Mode = protocol.MI_String (Mode.encode("utf-8"))
+    Links = protocol.MI_String (Links)
+    Owner = protocol.MI_String (Owner)
+    Group = protocol.MI_String (Group)
+    Mode = protocol.MI_String (Mode)
     ModifiedDate = protocol.MI_Timestamp.from_time (ModifiedDate)
-    sys.stderr.write( 'retval ' + str(retval)+'\n')
-    sys.stderr.write( 'DestinationPath ' + DestinationPath.value+'\n')
-    sys.stderr.write( 'SourcePath ' + SourcePath.value+'\n')
-    sys.stderr.write( 'Ensure ' + (Ensure.value)+'\n')
-    sys.stderr.write( 'Type ' + Type.value+'\n')
-    sys.stderr.write( 'Force ' + str(Force.value)+'\n')
-    sys.stderr.write( 'Contents ' + Contents.value+'\n')
-    sys.stderr.write( 'Checksum ' + Checksum.value+'\n')
-    sys.stderr.write( 'Recurse ' + str(Recurse.value)+'\n')
-    sys.stderr.write( 'Links ' + Links.value+'\n')
-    sys.stderr.write( 'Owner ' + Owner.value+'\n')
-    sys.stderr.write( 'Group ' + Group.value+'\n')
-    sys.stderr.write( 'Mode ' + Mode.value+'\n')
-    sys.stderr.write( 'ModifiedDate ' + repr(ModifiedDate.value)+'\n')
     arg_names.append('ModifiedDate')
     retd={}
     ld=locals()
@@ -266,12 +123,31 @@ def opened_bin_w_error(filename, mode="rb"):
     This context ensures the file is closed.
     """
     try:
-        f = open(filename, mode=mode)
+        f = open(filename, mode)
     except IOError, err:
         return None, err
     return f, None
 
 
+def ReadFile65k(path):
+    """
+    Safely attempt to read a file,
+    ensuring file is always closed at exit.
+    Read only 65k.
+    Return the data and the exception object.
+    The data is None if an error occurred.
+    The error is None if the data was read.
+    Log results to stderr.
+    """
+    d=None
+    error=None
+    F,error=opened_bin_w_error(path)
+    if error:
+        Print("Exception opening file " + path + " Error: " + str(error),file=sys.stderr )
+    else:
+        d=F.read(65535)
+        F.close()
+    return d,error
 
 def ReadFile(path):
     """
@@ -284,7 +160,7 @@ def ReadFile(path):
     """
     d=None
     error=None
-    F,Error = opened_w_error(path,'rb')
+    F,error = opened_bin_w_error(path)
     if error:
         Print("Exception opening file " + path + " Error: " + str(error),file=sys.stderr )
     else:
@@ -302,7 +178,7 @@ def WriteFile(path,contents):
     Log results to stderr.
     """
     error=None
-    F,error =  opened_w_error(path,'wb+')
+    F,error =  opened_w_error(path,'w+')
     if error:
         Print("Exception opening file " + path + " Error Code: " + str(error) ,file=sys.stderr)
     else:
@@ -396,6 +272,9 @@ def ListDir(path):
 
 def Symlink(spath,dpath):
     error=None
+    if spath==dpath: # Nothing to Link
+        return error
+
     #remove the destination if present
     if os.path.exists(dpath):
         try:
@@ -437,12 +316,14 @@ def RemoveFile(path):
 
 def CopyFile(spath,dpath):
     error=None
+    if spath==dpath: # Nothing to copy!
+        return error
     try:
         shutil.copyfile(spath,dpath)
     except OSError, error:
-         Print("Exception removing tree" + spath  + ' to ' + dpath + " Error: " + str(error),file=sys.stderr)
+         Print("Exception copying tree" + spath  + ' to ' + dpath + " Error: " + str(error),file=sys.stderr)
     except IOError, error:
-         Print("Exception removing tree" + spath  + ' to ' + dpath + " Error: " + str(error),file=sys.stderr)
+         Print("Exception copying tree" + spath  + ' to ' + dpath + " Error: " + str(error),file=sys.stderr)
     return error
 
 def CompareFiles(DestinationPath, SourcePath, Checksum):
@@ -451,6 +332,8 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
     Reading and computing the hash here is done in a block-by-block manner, 
     in case the file is quite large.
     """
+    if SourcePath==DestinationPath: # Files are the same!
+        return 0
     stat_dest = StatFile(DestinationPath)
     stat_src = StatFile(SourcePath)
     if stat_src.st_size != stat_dest.st_size:
@@ -742,31 +625,26 @@ def SetFile(DestinationPath, SourcePath, fc):
         else:
             Print("Error: " + DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
             return False
-
     if SourcePath and len(SourcePath)>0:
         if '://' in SourcePath and fc.LocalPath == '':
-            ret=0
             ret=GetRemoteFile(fc)
             if ret != 0:
                 raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
             else:
+                if fc.LocalPath == '': # Checksum !='md5' the remote time is not newer that dest's ctime or mtime no download needed
+                    return True
                 SourcePath=fc.LocalPath
-
         should_copy_file = False
-        if fc.Checksum == "ctime" or fc.Checksum == "mtime":
-            if os.path.isfile(DestinationPath):
-                if CompareFiles(DestinationPath, SourcePath,  fc.Checksum) == -1:
-                    should_copy_file = True
-            else:
+        if os.path.isfile(DestinationPath):
+            if CompareFiles(DestinationPath, SourcePath,  fc.Checksum) == -1:
                 should_copy_file = True
+            else:
+                should_copy_file = False
         else:
-            # Just copy the file if this is a resource intensive file comparison
             should_copy_file = True
-
         if should_copy_file:
             if CopyFile(SourcePath, DestinationPath) == False :
                 return False;
-            
     elif fc.Contents:
         if WriteFile(DestinationPath, fc.Contents) != None:
             Print("Error: Unable to write file at " + DestinationPath)
@@ -861,7 +739,6 @@ def ShowMof(op, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Chec
 def Set(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     ShowMof('SET', DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     fc = FileContext(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
-
     if not DestinationPath:
         return [-1]
 
@@ -934,13 +811,8 @@ def TestDirectory(DestinationPath, SourcePath, fc):
     return True
 
 def TestFile(DestinationPath, SourcePath, fc):
-    if '://' in SourcePath and fc.LocalPath == '':
-        ret=0
-        ret=GetRemoteFile(fc)
-        if ret != 0:
-            raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
-        else:
-            SourcePath=fc.LocalPath
+    if '://' in SourcePath and fc.LocalPath == '': # we cannot verify the remote has not changed until the Set
+        return False
             
     if not os.path.exists(DestinationPath) or not os.path.isfile(DestinationPath) or os.path.islink(DestinationPath):
         return False
@@ -962,7 +834,6 @@ def TestFile(DestinationPath, SourcePath, fc):
                     return False
                 if os.readlink(DestinationPath) != os.readlink(SourcePath):
                     return False
-
         elif CompareFiles(DestinationPath, SourcePath,  fc.Checksum) == -1:
             return False
 
@@ -1029,6 +900,8 @@ def Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, R
 
 def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     ShowMof('GET', DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
+    if '://' in SourcePath and Type !='file':
+        raise Exception('ERROR: Remote paths are only valid for Type = "file".')
     if not DestinationPath:
         Ensure = "Absent"
         SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ""
@@ -1057,7 +930,6 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         Type = "file"
     elif os.path.isdir(DestinationPath):
         Type = "directory"
-        
     ModifiedDate = stat_info.st_mtime
     if Type == "directory":
         Contents = repr(ListDir(DestinationPath))
@@ -1066,9 +938,9 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
             Contents=LStatFile(DestinationPath)
             Contents=repr(Contents)
         elif Links == 'follow': 
-            Contents,error=ReadFile(DestinationPath)
+            Contents,error=ReadFile65k(DestinationPath)
     else :
-        Contents,error=ReadFile(DestinationPath)
+        Contents,error=ReadFile65k(DestinationPath)
 
     if Contents == None:
         Contents = ''
@@ -1093,31 +965,35 @@ def GetRemoteFile(fc):
     try:
         resp = urllib2.urlopen(req)
     except urllib2.URLError , e:
-        print repr(e)
+        Print(repr(e))
         return 1
-    fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
+    fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)+'_remote'
     h=resp.info()
-    lm=h.getheader('last-modified')
-    lm_mtime=GetTimeFromString(lm)
-    dst_mtime = None
-    dst_st= None
     data = None
-    if os.path.exists(fc.DestinationPath):
-        dst_st=LStatFile(fc.DestinationPath)
-    if dst_st != None:
-        dst_mtime =  time.gmtime(dst_st.st_mtime)
-    if lm_mtime !=None and dst_mtime != None and dst_mtime>=lm_mtime: 
-        data = ''
-        fc.LocalPath=''
-    else:
-        data = resp.read()
+    if fc.Checksum != 'md5' :  # if not 'md5' check the last_modified header time before we download 
+        lm=h.getheader('last-modified')
+        remote_mtime=GetTimeFromString(lm)
+        destination_mtime = None
+        dst_st= None
+        if os.path.exists(fc.DestinationPath):
+            dst_st=LStatFile(fc.DestinationPath)
+        if dst_st != None:
+            if fc.Checksum == 'ctime':
+                destination_mtime =  time.gmtime(dst_st.st_ctime)
+            else:
+                destination_mtime =  time.gmtime(dst_st.st_mtime)
+        if remote_mtime !=None and destination_mtime != None and destination_mtime>=remote_mtime: 
+            data = ''
+            fc.LocalPath=''
+            return 0
+    data = resp.read()
     if data != None and len(data)>0:
         try:
             F = open(fc.LocalPath,'wb+')
             F.write(data)
             F.close()
         except  Exception , e:
-                print repr(e)
+                Print(repr(e))
                 F.close()
                 return 1
     return 0
@@ -1134,6 +1010,8 @@ class FileContext:
             Links = "follow"
         self.DestinationPath = DestinationPath
         self.SourcePath = SourcePath
+        if len(SourcePath)>0 and '://' in SourcePath and Type !='file':
+            raise Exception('ERROR: Remote paths are only valid for Type = file.')
         self.LocalPath = ''
         self.Ensure = Ensure.lower()
         self.Type = Type.lower()
