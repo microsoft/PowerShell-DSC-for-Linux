@@ -3,7 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 #============================================================================
 
-#from __future__ import print_function
+from __future__ import print_function
 from __future__ import with_statement
 from contextlib import contextmanager
 
@@ -44,207 +44,64 @@ BLOCK_SIZE = 8192
 global show_mof
 show_mof=False
 
-def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
-    if DestinationPath  != None :
-        DestinationPath = DestinationPath.decode("utf-8")
-    else:
+def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
+    if DestinationPath  == None :
         DestinationPath=''
-    if SourcePath != None :
-        SourcePath = SourcePath.decode("utf-8")
-    else:
+    if SourcePath == None :
         SourcePath = ''
-    if Ensure != None :
-        Ensure = Ensure.decode("utf-8")
-    else:
+    if Ensure == None :
         Ensure = ''
-    if Type != None :
-        Type = Type.decode("utf-8")
-    else:
+    if Type == None :
         Type = ''
-    if Force != None :
-        Force = Force
-    else:
+    if Force == None :
         Force = False
-    if Contents  != None :
-        Contents = Contents.decode("utf-8")
-    else:
-        Contents=''
-    if Checksum != None :
-        Checksum = Checksum.decode("utf-8")
-    else:
+    if Contents == None :
+        Contents = ''
+    if Checksum == None :
         Checksum = ''
-    if Recurse != None :
-        Recurse = Recurse
-    else:
+    if Recurse == None :
         Recurse = False
-    if Links != None and len(Links) > 0:
-        Links = Links.decode("utf-8")
-    else:
+    if Links == None :
         Links = 'follow'
-    if Owner != None :
-        Owner = Owner.decode("utf-8")
-    else:
+    if Owner == None :
         Owner = ''
-    if Group != None :
-        Group = Group.decode("utf-8")
-    else:
+    if Group == None :
         Group = ''
-    if Mode != None :
-        Mode = Mode.decode("utf-8")
-    else:
+    if Mode == None :
         Mode = ''
-    
+    return DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode 
+
+def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
+    DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
+                     = init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     retval = Set(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     return retval
 
 def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
-    if DestinationPath != None :
-        DestinationPath = DestinationPath.decode("utf-8")
-    else:
-        DestinationPath = ''
-    if SourcePath != None :
-        SourcePath = SourcePath.decode("utf-8")
-    else:
-        SourcePath = ''
-    if Ensure != None :
-        Ensure = Ensure.decode("utf-8")
-    else:
-        Ensure = ''
-    if Type != None :
-        Type = Type.decode("utf-8")
-    else:
-        Type = ''
-    if Force != None :
-        Force = Force
-    else:
-        Force = False
-    if Contents  != None :
-        Contents = Contents.decode("utf-8")
-    else:
-        Contents=''
-    if Checksum != None :
-        Checksum = Checksum.decode("utf-8")
-    else:
-        Checksum = ''
-    if Recurse != None :
-        Recurse = Recurse
-    else:
-        Recurse = False
-    if Links != None and len(Links) > 0:
-        Links = Links.decode("utf-8")
-    else:
-        Links = 'follow'
-    if Owner != None :
-        Owner = Owner.decode("utf-8")
-    else:
-        Owner = ''
-    if Group != None :
-        Group = Group.decode("utf-8")
-    else:
-        Group = ''
-
-    if Mode != None :
-        Mode = Mode.decode("utf-8")
-    else:
-        Mode = ''
-        
+    DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
+                     = init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     retval = Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     return retval
 
 def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     arg_names=list(locals().keys())
-    if DestinationPath != None :
-        DestinationPath = DestinationPath.decode("utf-8")
-    else:
-        DestinationPath = ''
-    if SourcePath != None :
-        SourcePath = SourcePath.decode("utf-8")
-    else:
-        SourcePath = ''
-    if Ensure != None :
-        Ensure = Ensure.decode("utf-8")
-    else:
-        Ensure = ''
-    if Type != None :
-        Type = Type.decode("utf-8")
-    else:
-        Type = ''
-    if Force != None :
-        Force = Force
-    else:
-        Force = False
-    if Contents  != None :
-        Contents = Contents.decode("utf-8")
-    else:
-        Contents=''
-    if Checksum != None :
-        Checksum = Checksum.decode("utf-8")
-    else:
-        Checksum = ''
-    if Recurse != None :
-        Recurse = Recurse
-    else:
-        Recurse = False
-    if Links != None and len(Links) > 0:
-        Links = Links.decode("utf-8")
-    else:
-        Links = 'follow'
-    if Owner != None :
-        Owner = Owner.decode("utf-8")
-    else:
-        Owner = ''
-    if Group != None :
-        Group = Group.decode("utf-8")
-    else:
-        Group = ''
-    if Mode != None :
-        Mode = Mode.decode("utf-8")
-    else:
-        Mode = ''
-
+    DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
+                     = init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     retval = 0
     (retval, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate) = Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
-    sys.stderr.write( 'retval ' + repr(retval)+'\n')
-    sys.stderr.write( 'DestinationPath ' + repr(DestinationPath)+'\n')
-    sys.stderr.write( 'SourcePath ' + repr(SourcePath)+'\n')
-    sys.stderr.write( 'Ensure ' + repr(Ensure)+'\n')
-    sys.stderr.write( 'Type ' + repr(Type)+'\n')
-    sys.stderr.write( 'Force ' + repr(Force)+'\n')
-    sys.stderr.write( 'Contents ' + repr(Contents)+'\n')
-    sys.stderr.write( 'Checksum ' + repr(Checksum)+'\n')
-    sys.stderr.write( 'Recurse ' + repr(Recurse)+'\n')
-    sys.stderr.write( 'Links ' + repr(Links)+'\n')
-    sys.stderr.write( 'Owner ' + repr(Owner)+'\n')
-    sys.stderr.write( 'Group ' + repr(Group)+'\n')
-    sys.stderr.write( 'Mode ' + repr(Mode)+'\n')
-    sys.stderr.write( 'ModifiedDate ' + repr(ModifiedDate)+'\n')
-    DestinationPath = protocol.MI_String (DestinationPath.encode("utf-8"))
-    SourcePath = protocol.MI_String (SourcePath.encode("utf-8"))
-    Ensure = protocol.MI_String (Ensure.encode("utf-8"))
-    Type = protocol.MI_String (Type.encode("utf-8"))
+    DestinationPath = protocol.MI_String (DestinationPath)
+    SourcePath = protocol.MI_String (SourcePath)
+    Ensure = protocol.MI_String (Ensure)
+    Type = protocol.MI_String (Type)
     Force = protocol.MI_Boolean (Force)
-    Contents = protocol.MI_String (Contents.encode("utf-8"))
-    Checksum = protocol.MI_String (Checksum.encode("utf-8"))
+    Contents = protocol.MI_String (Contents.decode('ascii','ignore'))
+    Checksum = protocol.MI_String (Checksum)
     Recurse = protocol.MI_Boolean (Recurse)
-    Links = protocol.MI_String (Links.encode("utf-8"))
-    Owner = protocol.MI_String (Owner.encode("utf-8"))
-    Group = protocol.MI_String (Group.encode("utf-8"))
-    Mode = protocol.MI_String (Mode.encode("utf-8"))
+    Links = protocol.MI_String (Links)
+    Owner = protocol.MI_String (Owner)
+    Group = protocol.MI_String (Group)
+    Mode = protocol.MI_String (Mode)
     ModifiedDate = protocol.MI_Timestamp.from_time (ModifiedDate)
-    sys.stderr.write( 'retval ' + str(retval)+'\n')
-    sys.stderr.write( 'DestinationPath ' + DestinationPath.value+'\n')
-    sys.stderr.write( 'SourcePath ' + SourcePath.value+'\n')
-    sys.stderr.write( 'Ensure ' + (Ensure.value)+'\n')
-    sys.stderr.write( 'Type ' + Type.value+'\n')
-    sys.stderr.write( 'Force ' + str(Force.value)+'\n')
-    sys.stderr.write( 'Contents ' + Contents.value+'\n')
-    sys.stderr.write( 'Checksum ' + Checksum.value+'\n')
-    sys.stderr.write( 'Recurse ' + str(Recurse.value)+'\n')
-    sys.stderr.write( 'Links ' + Links.value+'\n')
-    sys.stderr.write( 'Owner ' + Owner.value+'\n')
-    sys.stderr.write( 'Group ' + Group.value+'\n')
-    sys.stderr.write( 'Mode ' + Mode.value+'\n')
-    sys.stderr.write( 'ModifiedDate ' + repr(ModifiedDate.value)+'\n')
     arg_names.append('ModifiedDate')
     retd={}
     ld=locals()
@@ -287,6 +144,25 @@ def opened_bin_w_error(filename, mode="rb"):
         finally:
             f.close()
 
+def ReadFile65k(path):
+    """
+    Safely attempt to read a file,
+    ensuring file is always closed at exit.
+    Read only 65k.
+    Return the data and the exception object.
+    The data is None if an error occurred.
+    The error is None if the data was read.
+    Log results to stderr.
+    """
+    d=None
+    error=None
+    with opened_bin_w_error(path) as (F,error):
+        if error:
+            print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+        else:
+            d=F.read(65535)
+    return d,error
+
 def ReadFile(path):
     """
     Safely attempt to read a file,
@@ -300,7 +176,7 @@ def ReadFile(path):
     error=None
     with opened_w_error(path,'r') as (F,error):
         if error:
-            Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
+            print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr )
         else:
             d=F.read()
     return d,error
@@ -317,14 +193,11 @@ def WriteFile(path,contents):
     error=None
     with opened_w_error(path,'w+') as (F,error):
         if error:
-            Print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
         else:
             F.write(contents)
     return error
 
-def Print(s,file=sys.stderr):
-    file.write(s+'\n')
-    
 def LStatFile(path):
     """
     LStat the file.  Do not follow the symlink.
@@ -334,9 +207,9 @@ def LStatFile(path):
     try:
         d=os.lstat(path)
     except OSError, error:
-         Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return d
 
 def StatFile(path):
@@ -348,9 +221,9 @@ def StatFile(path):
     try:
         d=os.stat(path)
     except OSError, error:
-         Print("Exception stating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception stating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception stating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception stating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return d
 
 def Chown(path,owner,group):
@@ -358,9 +231,9 @@ def Chown(path,owner,group):
     try:
         os.chown(path,owner,group)
     except OSError, error:
-         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def Chmod(path,mode):
@@ -370,9 +243,9 @@ def Chmod(path,mode):
     try:
         os.chmod(path,mode)
     except OSError, error:
-         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def LChown(path,owner,group):
@@ -380,9 +253,9 @@ def LChown(path,owner,group):
     try:
         os.lchown(path,owner,group)
     except OSError, error:
-         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def LChmod(path,mode):
@@ -390,9 +263,9 @@ def LChmod(path,mode):
     try:
         os.lchmod(path,mode)
     except OSError, error:
-         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def ListDir(path):
@@ -401,41 +274,43 @@ def ListDir(path):
     try:
         d=os.listdir(path)
     except OSError, error:
-         Print("Exception listing dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception listing dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception listing dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception listing dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return d
 
 def Symlink(spath,dpath):
     error=None
+    if spath==dpath: # Nothing to Link
+        return error
+
     #remove the destination if present
     if os.path.exists(dpath):
         try:
             os.unlink(dpath)
         except OSError, error:
-            Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
             return error
         except IOError, error:
-            Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
             return error
         
     try:
         os.symlink(spath, dpath)
     except OSError, error:
-        Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
-        return error
+        print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-        Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
-        return error
+        print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+    return error
     
 def MakeDirs(path):
     error=None
     try:
         os.makedirs(path)
     except OSError, error:
-         Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def RemoveFile(path):
@@ -443,19 +318,21 @@ def RemoveFile(path):
     try:
         os.remove(path)
     except OSError, error:
-         Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def CopyFile(spath,dpath):
     error=None
+    if spath==dpath: # Nothing to copy!
+        return error
     try:
         shutil.copyfile(spath,dpath)
     except OSError, error:
-         Print("Exception copying tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception copying tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception copying tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+         print("Exception copying tree" + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def CompareFiles(DestinationPath, SourcePath, Checksum):
@@ -464,6 +341,8 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
     Reading and computing the hash here is done in a block-by-block manner, 
     in case the file is quite large.
     """
+    if SourcePath==DestinationPath: # Files are the same!
+        return 0
     stat_dest = StatFile(DestinationPath)
     stat_src = StatFile(SourcePath)
     if stat_src.st_size != stat_dest.st_size:
@@ -477,15 +356,15 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
         dest_block =b'loopme'
         with opened_bin_w_error(SourcePath,'rb') as (src_file,src_error):
             if src_error:
-                Print("Exception opening source file " + SourcePath  + " Error Code: " + str(src_error.errno) +
+                print("Exception opening source file " + SourcePath  + " Error Code: " + str(src_error.errno) +
                       " Error: " + src_error.message + src_error.strerror,file=sys.stderr)
                 return -1
             with opened_bin_w_error(DestinationPath,'rb') as (dest_file,dest_error):
                 if dest_error:
-                    Print("Exception opening destination file " + DestinationPath + " Error Code: " + str(dest_error.errno) +
+                    print("Exception opening destination file " + DestinationPath + " Error Code: " + str(dest_error.errno) +
                           " Error: " + dest_error.message + dest_error.strerror,file=sys.stderr)
                     return -1
-                while src_block  and dest_block :
+                while src_block and dest_block :
                     src_block=src_file.read(BLOCK_SIZE)
                     dest_block=dest_file.read(BLOCK_SIZE)
                     src_hash.update(src_block)
@@ -510,10 +389,10 @@ def RemoveTree(path):
     try:
         shutil.rmtree(path)
     except OSError, error:
-        Print("Exception removing folder " + path + " Error Code: "
+        print("Exception removing folder " + path + " Error Code: "
               + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-        Print("Exception removing folder " + path + " Error Code: "
+        print("Exception removing folder " + path + " Error Code: "
               + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
     
@@ -524,7 +403,7 @@ def RemovePath(path):
     elif os.path.isdir(path):
         RemoveTree(path)
     else:
-        Print("Error: Unknown file type for file: " + path,file=sys.stderr)
+        print("Error: Unknown file type for file: " + path,file=sys.stderr)
     return error
         
 def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
@@ -537,7 +416,7 @@ def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
         try:
             Specified_Owner_ID = pwd.getpwnam(fc.Owner)[2]
         except KeyError, error:
-             Print("Exception obtaining gid from group name " + fc.Group  + " Error: " + error.message,file=sys.stderr)
+             print("Exception obtaining gid from group name " + fc.Group  + " Error: " + error.message,file=sys.stderr)
              return False
         if Specified_Owner_ID != pwd.getpwuid(stat_info.st_uid)[2]:
             return False
@@ -550,7 +429,7 @@ def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
         try:
             Specified_Group_ID = grp.getgrnam(fc.Group)[2]
         except KeyError, error:
-             Print("Exception obtaining gid from group name " + fc.Group  + " Error: " + error.message,file=sys.stderr)
+             print("Exception obtaining gid from group name " + fc.Group  + " Error: " + error.message,file=sys.stderr)
              return False
         if Specified_Group_ID != grp.getgrgid(stat_info.st_gid)[2]:
             return False
@@ -660,21 +539,21 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
     if fc.Owner:
         Specified_Owner_ID = pwd.getpwnam(fc.Owner)[2]
         if Specified_Owner_ID != pwd.getpwuid(stat_info.st_uid)[2]:
-            Print("Changing owner of " + DestinationPath + " to " + str(Specified_Owner_ID))
+            print("Changing owner of " + DestinationPath + " to " + str(Specified_Owner_ID))
             if LChown(DestinationPath, Specified_Owner_ID, -1) != None :
                 return False
 
     elif SourcePath:
         src_uid = pwd.getpwuid(stat_info_src.st_uid)[2]
         if pwd.getpwuid(stat_info.st_uid)[2] != src_uid:
-            Print("Changing owner of " + DestinationPath + " to " + str(src_uid))
+            print("Changing owner of " + DestinationPath + " to " + str(src_uid))
             if LChown(DestinationPath, src_uid, -1) != None :
                 return False
 
     if fc.Group:
         Specified_Group_ID = grp.getgrnam(fc.Group)[2]
         if Specified_Group_ID != grp.getgrgid(stat_info.st_gid)[2]:
-            Print("Changing group of " + DestinationPath + " to " + str(Specified_Group_ID))
+            print("Changing group of " + DestinationPath + " to " + str(Specified_Group_ID))
             if LChown(DestinationPath, -1, Specified_Group_ID) != None :
                 return False
 
@@ -682,7 +561,7 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
     elif SourcePath:
         src_gid = grp.getgrgid(stat_info_src.st_gid)[2]
         if grp.getgrgid(stat_info.st_gid)[2] != src_gid:
-            Print("Changing group of " + DestinationPath + " to " + str(src_gid))
+            print("Changing group of " + DestinationPath + " to " + str(src_gid))
             if LChown(DestinationPath,src_gid , -1) != None :
                 return False
 
@@ -690,13 +569,13 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
     if not os.path.islink(DestinationPath):
         if fc.Mode:
             if str(oct(stat_info.st_mode))[-3:] != fc.Mode:
-                Print("Changing mode of " + DestinationPath + " to " + fc.Mode)
+                print("Changing mode of " + DestinationPath + " to " + fc.Mode)
                 if Chmod(DestinationPath, fc.Mode) != None :
                     return False
         elif SourcePath:
             src_mode = str(oct(stat_info_src.st_mode))[-3:]
             if str(oct(stat_info.st_mode))[-3:] != src_mode:
-                Print("Changing mode of " + DestinationPath + " to " + src_mode)
+                print("Changing mode of " + DestinationPath + " to " + src_mode)
                 if Chmod(DestinationPath, src_mode) != None :
                     return False
     return True
@@ -750,45 +629,40 @@ def SetFile(DestinationPath, SourcePath, fc):
         if fc.Force == True:
             RemovePath(DestinationPath)
         else:
-            Print("Error: " + DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
+            print("Error: " + DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
             return False
-
     if SourcePath and len(SourcePath)>0:
         if '://' in SourcePath and fc.LocalPath == '':
-            ret=0
             ret=GetRemoteFile(fc)
             if ret != 0:
                 raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
             else:
+                if fc.LocalPath == '': # Checksum !='md5' the remote time is not newer that dest's ctime or mtime no download needed
+                    return True
                 SourcePath=fc.LocalPath
-
         should_copy_file = False
-        if fc.Checksum == "ctime" or fc.Checksum == "mtime":
-            if os.path.isfile(DestinationPath):
-                if CompareFiles(DestinationPath, SourcePath,  fc.Checksum) == -1:
-                    should_copy_file = True
-            else:
+        if os.path.isfile(DestinationPath):
+            if CompareFiles(DestinationPath, SourcePath,  fc.Checksum) == -1:
                 should_copy_file = True
+            else:
+                should_copy_file = False
         else:
-            # Just copy the file if this is a resource intensive file comparison
             should_copy_file = True
-
         if should_copy_file:
             if CopyFile(SourcePath, DestinationPath) == False :
                 return False;
-            
     elif fc.Contents:
         if WriteFile(DestinationPath, fc.Contents) != None:
-            Print("Error: Unable to write file at " + DestinationPath)
+            print("Error: Unable to write file at " + DestinationPath)
             return False
     else:
         # Create a file with nothing in it
         try:
             open(DestinationPath, 'a').close()
         except OSError, error:
-            Print("Exception creating file " + DestinationPath  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            print("Exception creating file " + DestinationPath  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
         except IOError, error:
-            Print("Exception creating file " + DestinationPath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            print("Exception creating file " + DestinationPath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
 
     SetOwnerGroupMode(DestinationPath, SourcePath, fc)
 
@@ -799,21 +673,21 @@ def SetDirectory(DestinationPath, SourcePath, fc):
         if fc.Force == True:
             RemovePath(DestinationPath)
         else:
-            Print("Error: Unable to overwrite currently existing non-directory object at " + DestinationPath + " without the Force option being true.")
+            print("Error: Unable to overwrite currently existing non-directory object at " + DestinationPath + " without the Force option being true.")
             return False
 
     return SetDirectoryRecursive(DestinationPath, SourcePath, fc)
 
 def SetLink(DestinationPath, SourcePath, fc):
     if SourcePath == None or len(SourcePath)<1 or not os.path.exists(SourcePath) :
-        Print("Error: Need a valid source path in order to create a new symbolic link.")
+        print("Error: Need a valid source path in order to create a new symbolic link.")
         return False
 
     if os.path.exists(DestinationPath) and not os.path.islink(DestinationPath) :
         if fc.Force == True:
             RemovePath(DestinationPath)
         else:
-            Print("Error: Unable to overwrite currently existing non-link object at " + DestinationPath + " without the Force option being true.")
+            print("Error: Unable to overwrite currently existing non-link object at " + DestinationPath + " without the Force option being true.")
             return False
 
     if os.path.islink(SourcePath):
@@ -865,13 +739,12 @@ def ShowMof(op, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Chec
     mof+='    Owner = "' + Owner + '"\n'
     mof+='}\n'
     f=open('./test_mofs.log','a')
-    Print(mof,file=f)
+    print(mof,file=f)
     f.close()
 
 def Set(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     ShowMof('SET', DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     fc = FileContext(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
-    
     if not DestinationPath:
         return [-1]
 
@@ -925,7 +798,7 @@ def TestDirectory(DestinationPath, SourcePath, fc):
 
     for f in Source_subfiles:
         if f not in Destination_subfiles:
-            Print("File: " + f + " does not exist in: " + SourcePath)
+            print("File: " + f + " does not exist in: " + SourcePath)
             return False
 
         f_destpath = os.path.join(DestinationPath, f)
@@ -944,17 +817,12 @@ def TestDirectory(DestinationPath, SourcePath, fc):
     return True
 
 def TestFile(DestinationPath, SourcePath, fc):
-    if '://' in SourcePath and fc.LocalPath == '':
-        ret=0
-        ret=GetRemoteFile(fc)
-        if ret != 0:
-            raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
-        else:
-            SourcePath=fc.LocalPath
+    if '://' in SourcePath and fc.LocalPath == '': # we cannot verify the remote has not changed until the Set
+        return False
             
     if not os.path.exists(DestinationPath) or not os.path.isfile(DestinationPath) or os.path.islink(DestinationPath):
         return False
-    
+
     if TestOwnerGroupMode(DestinationPath, SourcePath, fc) == False:
         return False
 
@@ -965,7 +833,7 @@ def TestFile(DestinationPath, SourcePath, fc):
         if os.path.islink(SourcePath):
             if fc.Links == "follow":
                 if os.path.isdir(os.path.realpath(SourcePath)):
-                    Print("Error: Expecting a file, but source link points to directory")
+                    print("Error: Expecting a file, but source link points to directory")
                     return False
             else:
                 if not os.path.islink(DestinationPath):
@@ -1038,6 +906,8 @@ def Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, R
 
 def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     ShowMof('GET', DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
+    if '://' in SourcePath and Type !='file':
+        raise Exception('ERROR: Remote paths are only valid for Type = "file".')
     if not DestinationPath:
         Ensure = "Absent"
         SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ""
@@ -1066,7 +936,6 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         Type = "file"
     elif os.path.isdir(DestinationPath):
         Type = "directory"
-        
     ModifiedDate = stat_info.st_mtime
     if Type == "directory":
         Contents = repr(ListDir(DestinationPath))
@@ -1075,9 +944,9 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
             Contents=LStatFile(DestinationPath)
             Contents=repr(Contents)
         elif Links == 'follow': 
-            Contents,error=ReadFile(DestinationPath)
+            Contents,error=ReadFile65k(DestinationPath)
     else :
-        Contents,error=ReadFile(DestinationPath)
+        Contents,error=ReadFile65k(DestinationPath)
 
     if Contents == None:
         Contents = ''
@@ -1102,31 +971,35 @@ def GetRemoteFile(fc):
     try:
         resp = urllib2.urlopen(req)
     except urllib2.URLError , e:
-        print repr(e)
+        print(repr(e))
         return 1
-    fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)
+    fc.LocalPath='/tmp/'+os.path.basename(fc.DestinationPath)+'_remote'
     h=resp.info()
-    lm=h.getheader('last-modified')
-    lm_mtime=GetTimeFromString(lm)
-    dst_mtime = None
-    dst_st= None
     data = None
-    if os.path.exists(fc.DestinationPath):
-        dst_st=LStatFile(fc.DestinationPath)
-    if dst_st != None:
-        dst_mtime =  time.gmtime(dst_st.st_mtime)
-    if lm_mtime !=None and dst_mtime != None and dst_mtime>=lm_mtime: 
-        data = ''
-        fc.LocalPath=''
-    else:
-        data = resp.read()
+    if fc.Checksum != 'md5' :  # if not 'md5' check the last_modified header time before we download 
+        lm=h.getheader('last-modified')
+        remote_mtime=GetTimeFromString(lm)
+        destination_mtime = None
+        dst_st= None
+        if os.path.exists(fc.DestinationPath):
+            dst_st=LStatFile(fc.DestinationPath)
+        if dst_st != None:
+            if fc.Checksum == 'ctime':
+                destination_mtime =  time.gmtime(dst_st.st_ctime)
+            else:
+                destination_mtime =  time.gmtime(dst_st.st_mtime)
+        if remote_mtime !=None and destination_mtime != None and destination_mtime>=remote_mtime: 
+            data = ''
+            fc.LocalPath=''
+            return 0
+    data = resp.read()
     if data != None and len(data)>0:
         try:
             with (open(fc.LocalPath,'wb+')) as F:
                 F.write(data)
                 F.close()
         except  Exception , e:
-                print repr(e)
+                print(repr(e))
                 return 1
     return 0
 
@@ -1142,6 +1015,8 @@ class FileContext:
             Links = "follow"
         self.DestinationPath = DestinationPath
         self.SourcePath = SourcePath
+        if len(SourcePath)>0 and '://' in SourcePath and Type !='file':
+            raise Exception('ERROR: Remote paths are only valid for Type = file.')
         self.LocalPath = ''
         self.Ensure = Ensure.lower()
         self.Type = Type.lower()
@@ -1160,12 +1035,12 @@ class FileContext:
                 try:
                     Mode = ConvertLongModeToNumeric(Mode)
                 except Exception, error:
-                    Print("Exception in ConvertLongModeToNumeric on " + Mode  + " Error: " + error.message,file=sys.stderr)    
+                    print("Exception in ConvertLongModeToNumeric on " + Mode  + " Error: " + error.message,file=sys.stderr)    
             elif len(Mode) == 3:
                 # Already in proper format
                 pass
             else:
-                Print("Error: Invalid Mode: " + Mode)
+                print("Error: Invalid Mode: " + Mode)
                 Mode = ""
 
         self.Mode = Mode
