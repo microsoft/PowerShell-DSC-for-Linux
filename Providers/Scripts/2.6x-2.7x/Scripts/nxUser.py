@@ -272,7 +272,7 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
     shadow_entries = ReadPasswd("/etc/shadow")
     if shadow_entries == None:
         return [-1]
-
+    old_passwd_entries=passwd_entries
     usermod_string = ""
     usermodonly_string = ""
     if Ensure.lower() == "absent":
@@ -308,9 +308,6 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
             if len(usermodonly_string + usermod_string) > 0:
                 exit_code = os.system(usermod_path + " " + usermodonly_string + usermod_string + " " + UserName)
 
-        if PasswordChangeRequired == True:
-            exit_code = os.system(chage_path + " -d  0 "  + UserName)
-
         disabled_user_string = ""
         usermod_string = ""
         if Disabled == True:
@@ -341,6 +338,10 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
         Print(usermod_string,file=sys.stderr)
         if len(usermodonly_string + usermod_string) > 0:
             exit_code = os.system(usermod_path + " " + usermodonly_string + usermod_string + " " + UserName)
+        if PasswordChangeRequired == True and UserName not in old_passwd_entries:  # force password change only if we created the account
+            exit_code = os.system(chage_path + " -d  0 "  + UserName)
+
+
     return [exit_code]
 
 def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
