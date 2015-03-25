@@ -13,7 +13,7 @@ import time
 import codecs
 import re
 import imp
-import urllib2
+import urllib.request
 apt=None
 rpm=None
 try:
@@ -574,15 +574,15 @@ def LStatFile(path):
     return d
 
 def GetRemoteFile(p):
-    req = urllib2.Request(p.FilePath)
+    req = urllib.request.Request(p.FilePath)
     try:
-        resp = urllib2.urlopen(req)
-    except urllib2.URLError as e:
+        resp = urllib.request.urlopen(req)
+    except urllib2.error.URLError as e:
         print(repr(e))
         return 1
     p.LocalPath='/tmp/'+os.path.basename(p.FilePath)
     h=resp.info()
-    lm=h.getheader('last-modified')
+    lm=h.get('last-modified')
     lm_mtime=GetTimeFromString(lm)
     dst_mtime = None
     dst_st= None
