@@ -408,7 +408,17 @@ def TestUpstartState(sc):
     return True
 
 def GetUpstartEnabled(sc):
+#    import pdb; pdb.set_trace()
+
     if os.path.isfile("/etc/init/" + sc.Name + ".conf"):
+        if os.path.islink('/etc/init.d/'+ sc.Name) and os.readlink('/etc/init.d/'+ sc.Name) == '/lib/init/upstart-job' :
+            # this is a 'converted' init script, check the default rc2.d for smylink to conf file. if so its enabled.
+            file_list=os.listdir('/etc/rc2.d')
+            for f in file_list:
+                f='/etc/rc2.d/'+f
+                if os.path.islink(f) and os.readlink(f) ==  "../init.d/" + sc.Name:
+                    return True
+            return False
         file_lines,error = ReadFile("/etc/init/" + sc.Name + ".conf")
         if error != None:
                Print("Error reading:/etc/init/" + sc.Name + ".conf",file=sys.stderr)
@@ -638,6 +648,25 @@ def CreateUpstartService(sc):
     return [-1]
 
 def ModifyUpstartConfFile(sc):
+    if os.path.isfile("/etc/init/" + sc.Name + ".conf"):
+        if os.path.islink('/etc/init.d/'+ sc.Name) and os.readlink('/etc/init.d/'+ sc.Name) == '/lib/init/upstart-job' :
+            # this is a 'converted' init script, check the default rc2.d for smylink to conf file. if so its enabled.
+            file_list=os.listdir('/etc/rc2.d')
+            found=False
+            for f in file_list:
+                f='/etc/rc2.d/'+f
+                if os.path.islink(f) and os.readlink(f) ==  "../init.d/" + sc.Name:
+                    found=True
+                    break
+            if sc.Enabled==True:
+                if not found:
+                    # create the symlink
+                    os.symlink("../init.d/" + sc.Name,"/etc/rc2.d/S22"+sc.Name)
+                    return True
+            else :  
+                if found:
+                    os.unlink(f)
+                    return True
     file_lines,error = ReadFile("/etc/init/" + sc.Name + ".conf")
     if len(file_lines) == 0 or error != None:
         Print("Error: Conf file unable to be read for service " + sc.Name,file=sys.stderr)
