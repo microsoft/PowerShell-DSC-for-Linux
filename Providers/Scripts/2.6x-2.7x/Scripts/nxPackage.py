@@ -42,40 +42,43 @@ protocol=imp.load_source('protocol','../protocol.py')
 #   [read] string Version;
 #   [read] boolean Installed;
 
-
+cache_file_dir='/var/opt/microsoft/dsc/cache/nxPackage'
 global show_mof
 show_mof=False
 
-def Set_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
+def init_vars(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
     if Ensure != None :
-        Ensure=Ensure.decode('utf-8')
+        Ensure=Ensure.encode('ascii','ignore')
     else:
         Ensure = ''
     if PackageManager != None :
-        PackageManager=PackageManager.decode('utf-8')
+        PackageManager=PackageManager.encode('ascii','ignore')
     else:
         PackageManager = ''
     if Name != None :
-        Name=Name.decode('utf-8')
+        Name=Name.encode('ascii','ignore')
     else:
         Name = ''
     if FilePath != None :
-        FilePath=FilePath.decode('utf-8')
+        FilePath=FilePath.encode('ascii','ignore')
     else:
         FilePath = ''
     if PackageGroup == None :
         PackageGroup = False
     if Arguments != None :
-        Arguments=Arguments.decode('utf-8')
+        Arguments=Arguments.encode('ascii','ignore')
     else:
         Arguments = ''
     if ReturnCode == None :
         ReturnCode=0
     if LogPath != None :
-        LogPath=LogPath.decode('utf-8')
+        LogPath=LogPath.encode('ascii','ignore')
     else:
         LogPath = ''
-
+    return Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath 
+    
+def Set_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
+    (Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath) =  init_vars(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     retval = Set(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
@@ -83,35 +86,7 @@ def Set_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,Retu
     return retval
 
 def Test_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
-    if Ensure != None :
-        Ensure=Ensure.decode('utf-8')
-    else:
-        Ensure = ''
-    if PackageManager != None :
-        PackageManager=PackageManager.decode('utf-8')
-    else:
-        PackageManager = ''
-    if Name != None :
-        Name=Name.decode('utf-8')
-    else:
-        Name = ''
-    if FilePath != None :
-        FilePath=FilePath.decode('utf-8')
-    else:
-        FilePath = ''
-    if PackageGroup == None :
-        PackageGroup = False
-    if Arguments != None :
-        Arguments=Arguments.decode('utf-8')
-    else:
-        Arguments = ''
-    if ReturnCode == None :
-        ReturnCode=0
-    if LogPath != None :
-        LogPath=LogPath.decode('utf-8')
-    else:
-        LogPath = ''
-
+    (Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath) =  init_vars(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     retval = Test(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
@@ -120,53 +95,25 @@ def Test_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,Ret
 
 def Get_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
     arg_names=list(locals().keys())
-    if Ensure != None :
-        Ensure=Ensure.decode('utf-8')
-    else:
-        Ensure = ''
-    if PackageManager != None :
-        PackageManager=PackageManager.decode('utf-8')
-    else:
-        PackageManager = ''
-    if Name != None :
-        Name=Name.decode('utf-8')
-    else:
-        Name = ''
-    if FilePath != None :
-        FilePath=FilePath.decode('utf-8')
-    else:
-        FilePath = ''
-    if PackageGroup == None :
-        PackageGroup = False
-    if Arguments != None :
-        Arguments=Arguments.decode('utf-8')
-    else:
-        Arguments = ''
-    if ReturnCode == None :
-        ReturnCode=0
-    if LogPath != None :
-        LogPath=LogPath.decode('utf-8')
-    else:
-        LogPath = ''
-
+    (Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath) =  init_vars(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     retval = 0
     retval,PackageManager,PackageDescription,Publisher,InstalledOn,Size,Version,Installed = Get(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     sys.stdin.flush()
     sys.stderr.flush()
     sys.stdout.flush()
-    Ensure = protocol.MI_String(Ensure.encode("utf-8"))
-    PackageManager = protocol.MI_String(PackageManager.encode("utf-8"))
-    Name = protocol.MI_String(Name.encode("utf-8"))
-    FilePath = protocol.MI_String(FilePath.encode("utf-8"))
+    Ensure = protocol.MI_String(Ensure)
+    PackageManager = protocol.MI_String(PackageManager)
+    Name = protocol.MI_String(Name)
+    FilePath = protocol.MI_String(FilePath)
     PackageGroup= protocol.MI_Boolean(PackageGroup)
-    Arguments = protocol.MI_String(Arguments.encode("utf-8"))
+    Arguments = protocol.MI_String(Arguments)
     ReturnCode= protocol.MI_Uint32(ReturnCode)
-    LogPath = protocol.MI_String(LogPath.encode("utf-8"))
-    PackageDescription = protocol.MI_String(PackageDescription.encode("utf-8"))
-    Publisher = protocol.MI_String(Publisher.encode("utf-8"))
-    InstalledOn = protocol.MI_String(InstalledOn.encode("utf-8"))
+    LogPath = protocol.MI_String(LogPath)
+    PackageDescription = protocol.MI_String(PackageDescription)
+    Publisher = protocol.MI_String(Publisher)
+    InstalledOn = protocol.MI_String(InstalledOn)
     Size = protocol.MI_Uint32(int(Size))
-    Version = protocol.MI_String(Version.encode("utf-8"))
+    Version = protocol.MI_String(Version)
     Installed = protocol.MI_Boolean(Installed)
     arg_names.append('PackageDescription')
     arg_names.append('Publisher')
@@ -336,17 +283,12 @@ def IsPackageInstalled(p):
     out=''
     if p==None:
         return False,out
-    # if the file path is remote - look where we may have just put it, if not clear the FilePath
-    if len(p.FilePath) > 0 and '://' in p.FilePath and p.LocalPath == '': # its a remote file
-        p.LocalPath='/tmp/'+os.path.basename(p.FilePath)
-        if os.path.isfile(p.LocalPath):
-            p.FilePath=p.LocalPath
-        else:
-            p.LocalPath=''
-    if len(p.FilePath) > 0 and os.path.exists(p.FilePath) == True : # FilePath                
+    if len(p.FilePath) > 0 and '://' in p.FilePath : # its a remote - try to file get name from cache
+        if ReadCacheInfo(p) == False:
+            return False,out
+    elif len(p.FilePath) > 0 and os.path.exists(p.FilePath) == True : # FilePath                
         if apt != None and os.path.splitext(p.FilePath)[-1] == '.deb':
             from apt.debfile import DebPackage
-            
             pkg = DebPackage(p.FilePath)
             p.Name=pkg.pkgname
         elif rpm != None and os.path.splitext(p.FilePath)[-1] == '.rpm':
@@ -421,6 +363,7 @@ def DoEnableDisable(p):
             ret=0
             ret=GetRemoteFile(p)
             if ret != 0:
+                p.LocalPath=""
                 raise Exception('Unable to retrieve remote resource '+p.FilePath+' Error is ' + str(ret))
             else:
                 p.FilePath=p.LocalPath
@@ -443,11 +386,68 @@ def DoEnableDisable(p):
     cmd=cmd.replace('%',p.Arguments)
     cmd=cmd.replace('^',p.CommandArguments)
     code,out=RunGetOutput(cmd,False)
-    
+    if len(p.LocalPath) > 1 : # create cache entry and remove the tmp file
+        WriteCacheInfo(p)
+        RemoveFile(p.LocalPath)
     if code != int(p.ReturnCode) :
         return False,out
     return True,out
     
+def WriteCacheInfo(p):
+    if not os.path.isdir(cache_file_dir):
+        if MakeDirs(cache_file_dir) != None:
+            return False
+    if len(p.LocalPath)<1:
+        return False
+    if apt != None and os.path.splitext(p.LocalPath)[-1] == '.deb':
+        from apt.debfile import DebPackage
+        try:
+            pkg = DebPackage(p.LocalPath)
+        except:
+            Print("Exception opening file " + p.LocalPath,file=sys.stderr)
+            return False
+        p.Name=pkg.pkgname
+    elif rpm != None and os.path.splitext(p.LocalPath)[-1] == '.rpm':
+            with opened_with_error(p.LocalPath,'r') as (F,error):
+                if error:
+                    Print("Exception opening file " + p.LocalPath,file=sys.stderr)
+                    return False
+                ts = rpm.TransactionSet()
+                ts.setVSFlags(-1)
+                try:
+                    pkg = ts.hdrFromFdno(F.fileno())
+                except rpm.error, e:
+                    print(e)
+                    pkg = None
+            if pkg == None:
+                return False
+            p.Name=pkg.dsOfHeader().N()
+    if len(p.Name)<1:
+        return False
+    cache_file_path=cache_file_dir+'/'+os.path.basename(p.LocalPath)
+    with opened_w_error(cache_file_path,'w+') as (F,error):
+        if error:
+            print("Exception creating cache file " + cache_file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            return False
+        F.write(p.Name+'\n')
+        F.close()
+    return True
+
+def ReadCacheInfo(p):
+    cache_file_path=cache_file_dir+'/'+os.path.basename(p.FilePath)
+    if not os.path.isfile(cache_file_path):
+        return False
+    with opened_w_error(cache_file_path,'r') as (F,error):
+        if error:
+            print("Exception opening cache file " + cache_file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+            return False
+        t=F.read()
+        F.close()
+        if len(t) < 2:
+            return False
+        p.Name=t.strip()
+    return True
+
 def Set(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
     ShowMof('SET', Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath)
     try:
@@ -591,6 +591,15 @@ def GetTimeFromString(s):
             continue
     return st
 
+def RemoveFile(path):
+    error=None
+    try:
+        os.remove(path)
+    except OSError, error:
+         print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+    except IOError, error:
+         print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+    return error
 
 def LStatFile(path):
     """
@@ -605,6 +614,16 @@ def LStatFile(path):
     except IOError, error:
          print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return d
+
+def MakeDirs(path):
+    error=None
+    try:
+        os.makedirs(path)
+    except OSError, error:
+         print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+    except IOError, error:
+         print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+    return error
 
 def GetRemoteFile(p):
     req = urllib2.Request(p.FilePath)
