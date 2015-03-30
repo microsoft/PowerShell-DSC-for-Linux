@@ -659,7 +659,8 @@ def SetFile(DestinationPath, SourcePath, fc):
             Print("Exception creating file " + DestinationPath + " Error: " + str(error),file=sys.stderr)
 
     SetOwnerGroupMode(DestinationPath, SourcePath, fc)
-
+    if len(fc.LocalPath) >0 :
+        RemoveFile(fc.LocalPath)
     return True
          
 def SetDirectory(DestinationPath, SourcePath, fc):
