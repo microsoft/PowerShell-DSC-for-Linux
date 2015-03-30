@@ -71,6 +71,7 @@ PROVIDERS+=nxIPAddress
 #PROVIDERS+=nxFirewall
 PROVIDERS+=nxDNSServerAddress
 PROVIDERS+=nxFileLine
+PROVIDERS+=nxArchive
 
 # this is used to enable the printing of xml style tags for help in debugging
 PRINT_BOOKENDS?=0
