@@ -149,6 +149,26 @@ if [ $? -ne 0 ]; then
 fi
 #endif
 
+%Preinstall_200
+tmpfile=`mktemp`
+printf "Checking for ctypes python module..."
+cat <<EOF > $tmpfile
+#!/usr/bin/python
+import ctypes
+EOF
+
+chmod u+x $tmpfile
+$tmpfile 1> /dev/null 2> /dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: Python does not support ctypes on this system.  Please install the ctypes module for Python or upgrade to a newer version of python that comes with the ctypes module."
+    echo "Please remove the omiserver package and try again after installing the ctypes module or upgrading Python.  You can check if the ctypes module is installed by starting python and running the command: 'import ctypes'"
+	rm $tmpfile
+    exit 1
+else
+    echo "ok!"
+	rm $tmpfile
+fi
+
 %Postinstall_10
 # TODO: Detect omi install directory?
 OMI_HOME=/opt/omi
