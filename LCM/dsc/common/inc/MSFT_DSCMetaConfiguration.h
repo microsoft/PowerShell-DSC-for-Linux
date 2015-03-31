@@ -12,6 +12,8 @@
 #include <MI.h>
 #include "MSFT_BaseCredential.h"
 #include "MSFT_KeyValuePair.h"
+#include "OMI_ConfigurationDownloadManager.h"
+#include "MSFT_PartialConfiguration.h"
 
 /*
 **==============================================================================
@@ -38,7 +40,9 @@ typedef struct _MSFT_DSCMetaConfiguration
     MSFT_KeyValuePair_ConstArrayRef DownloadManagerCustomData;
     MI_ConstUint32Field RefreshFrequencyMins;
     MI_ConstBooleanField AllowModuleOverwrite;
+    OMI_ConfigurationDownloadManager_ConstArrayRef ConfigurationDownloadManagers;
     MI_ConstStringField LocalConfigurationManagerState;
+    MSFT_PartialConfiguration_ConstArrayRef PartialConfigurations;
 }
 MSFT_DSCMetaConfiguration;
 
@@ -426,13 +430,53 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_AllowModuleOverwrite
     return MI_RESULT_OK;
 }
 
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_ConfigurationDownloadManagers(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const OMI_ConfigurationDownloadManager * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        11,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_ConfigurationDownloadManagers(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const OMI_ConfigurationDownloadManager * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        11,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_ConfigurationDownloadManagers(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        11);
+}
+
 MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_LocalConfigurationManagerState(
     _Inout_ MSFT_DSCMetaConfiguration* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        11,
+        12,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -444,7 +488,7 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_LocalConfigurationM
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        11,
+        12,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -455,8 +499,68 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_LocalConfigurationMa
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        11);
+        12);
 }
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_PartialConfigurations(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const MSFT_PartialConfiguration * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        13,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_PartialConfigurations(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const MSFT_PartialConfiguration * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        13,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_PartialConfigurations(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        13);
+}
+
+/*
+**==============================================================================
+**
+** MSFT_DSCMetaConfiguration provider function prototypes
+**
+**==============================================================================
+*/
+
+/* The developer may optionally define this structure */
+typedef struct _MSFT_DSCMetaConfiguration_Self MSFT_DSCMetaConfiguration_Self;
+
+MI_EXTERN_C void MI_CALL MSFT_DSCMetaConfiguration_Load(
+    _Outptr_result_maybenull_ MSFT_DSCMetaConfiguration_Self** self,
+    _In_opt_ MI_Module_Self* selfModule,
+    _In_ MI_Context* context);
+
+MI_EXTERN_C void MI_CALL MSFT_DSCMetaConfiguration_Unload(
+    _In_opt_ MSFT_DSCMetaConfiguration_Self* self,
+    _In_ MI_Context* context);
 
 
 #endif /* _MSFT_DSCMetaConfiguration_h */

@@ -1,0 +1,28 @@
+// ===============================================================
+//  Configuration Download Manager
+// ===============================================================
+[Abstract, ClassVersion("1.0.0"), 
+ Description("Class defining the configuration download manager" ) ] 
+class OMI_ConfigurationDownloadManager  : OMI_MetaConfigurationResource 
+{
+   [Description ("Name of the configuration download Manager." )  ]
+   string  Name; 
+};
+
+
+[ClassVersion("1.0.0"), 
+ Description("Web download manager class inheriting from OMI_ConfigurationDownloadManager" )] 
+class MSFT_WebDownloadManager : OMI_ConfigurationDownloadManager
+{
+   [Description ("String URL of the download manager location" )  , Key]
+   string  ServerURL;    
+
+   
+   [Description ("The certificate ID used to locate the certificate." )  ]
+   string  CertificateID;
+   
+
+   [Description ("Boolean variable to allow unsecure connections" )  ]
+   boolean AllowUnsecureConnection;
+   
+};

@@ -622,7 +622,7 @@ void Invoke_ApplyConfiguration(
 
     if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PULL) == 0)
     {
-                miResult = DoPullServerRefresh(context, &cimErrorDetails);
+                miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
                 if (miResult != MI_RESULT_OK)
                 {
                         SetThreadToken(NULL, m_clientThreadToken);
@@ -1333,7 +1333,7 @@ void Invoke_PerformRequiredConfigurationChecks(
 
     if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PULL) == 0)
     {
-        miResult = DoPullServerRefresh(context, &cimErrorDetails);
+        miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
             SetThreadToken(NULL, m_clientThreadToken);
@@ -2228,7 +2228,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
 
     if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PULL) == 0)
     {
-        miResult = DoPullServerRefresh(args->context, &cimErrorDetails);
+        miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
             MI_Instance_Delete((MI_Instance *)metaConfigInstance);

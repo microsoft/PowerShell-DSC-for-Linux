@@ -102,6 +102,12 @@ MI_Result MI_CALL InitializeModuleManager( MI_Uint32 flags, _Outptr_result_maybe
 MI_Result MI_CALL LoadModuleManager(_Inout_ ModuleManager *moduleManager,
                                     _Outptr_result_maybenull_ MI_Instance **extendedError);
 
+MI_Result GetArrayInstancesFromSingleMof(_In_ ModuleManager *moduleManager,
+                                         MI_Uint32 flags,
+                                         _In_z_  const MI_Char *documentLocation,
+                                         MI_InstanceA * miInstanceArray,
+                                         MI_Instance **extendedError,
+                                         MI_Boolean shouldUseStrictOptions);
 
 #ifdef __cplusplus
 

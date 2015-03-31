@@ -6,6 +6,7 @@ LIBRARY = ConfigurationManager
 
 SOURCES = \
 	BeginEndLcmOperation.c \
+	hashmap.c \
 	LocalConfigManagerHelper.c \
 	LocalConfigurationManager.c \
         MSFT_DSCLocalConfigurationManager.c \

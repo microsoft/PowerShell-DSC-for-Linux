@@ -7,6 +7,7 @@ class OMI_BaseResource
   [write] string DependsOn[];
   [required] string ModuleName;
   [required] string ModuleVersion;
+  [write] string ConfigurationName;
 };
 
 [Abstract, ClassVersion("1.0.0")]
@@ -49,6 +50,9 @@ class OMI_ConfigurationDocument
   String ContentType;
   String GenerationDate;
   String GenerationHost;
+  String Name;
+  String MinimumCompatibleVersion;
+  String CompatibleVersionAdditionalProperties[];
 };
 
 [ClassVersion("1.0.0")]
@@ -59,6 +63,55 @@ class MSFT_Credential
     string Password;
 };
 
+[Abstract,ClassVersion("1.0.0")] 
+class OMI_MetaConfigurationResource
+{
+  [required] string ResourceId;
+  [write] string SourceInfo;
+  [required] string ModuleName;
+  [required] string ModuleVersion;
+};
 
+
+[Abstract,ClassVersion("1.0.0")] 
+class OMI_ConfigurationDownloadManager : OMI_MetaConfigurationResource
+{
+  string Name;
+};
+
+[ClassVersion("1.0.0"), 
+ Description("Web download manager class inheriting from OMI_ConfigurationDownloadManager" )] 
+class MSFT_WebDownloadManager : OMI_ConfigurationDownloadManager
+{
+   [Description ("String URL of the download manager location" )  , Key]
+   string  ServerURL;    
+
+   
+   [Description ("The certificate ID used to locate the certificate." )  ]
+   string  CertificateID;
+   
+
+   [Description ("Boolean variable to allow unsecure connections" )  ]
+   boolean AllowUnsecureConnection;
+   
+};
+
+[Description(
+	"This represents a Partial Configuration class."),
+	ClassVersion("1.0.0")]
+class MSFT_PartialConfiguration : OMI_MetaConfigurationResource 
+{
+	[Description ("Description of the partial configuration" )  , Write] 
+	String Description ; 
+
+	[Description ("Defines the resources that are exclusive to this particular partial configuration" )  , Write] 
+	String ExclusiveResources[]; 
+ 
+	[Description ("The configuration repository source that this partial configuration will use" )  , Write] 
+	String ConfigurationSource; 
+
+	[Description ("A dependency variable indicating which partial configuration must be applied prior to this" )  , Write] 
+	String DependsOn[];        
+};
 
 

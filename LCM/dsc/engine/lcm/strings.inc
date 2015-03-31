@@ -398,3 +398,4 @@
                  _In_z_ const PAL_Char*, firstString,
                  "Failed to save the configuration in file " Intlstr_tstr(1) ".")  
     INTERNAL_Intlstr_Define0( ID_PULL_CHECKSUMMISMATCH,ID_PULL_CHECKSUMMISMATCH,"Checksum for configuration does not match.")                 
+    INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_DOCINS , ID_MODMAN_VALIDATE_DOCINS ,"There is no document instance inside the metaconfiguration. Please create the configuration with an instance of OMI_ConfigurationDocument and try again.")

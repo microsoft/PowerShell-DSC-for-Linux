@@ -342,38 +342,39 @@ MI_Boolean ConnectionAllowed(_In_ MI_InstanceA *customParam, _In_z_ const MI_Cha
     return MI_FALSE;
 }
 MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig, 
+                                  _In_ MI_Char* partialConfigName,
                                   _Outptr_opt_result_maybenull_    MI_Instance **credential,
                                   _Inout_    MI_InstanceA *customParam,
                                   _Outptr_result_maybenull_z_ MI_Char **configurationID,
                                   _Outptr_result_maybenull_z_ MI_Char **certificateID,
+                                  _Inout_updates_(URL_SIZE) MI_Char *url, 
+                                  _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl, 
+                                  _Out_ MI_Uint32 *port, 
+                                  _Out_ MI_Boolean *bIsHttps,
                                   _Out_ MI_Uint32* getActionStatusCode,
                                   _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Value value;
+    MI_Value value2;
+    MI_Char serverURL[MAX_URL_LENGTH];
     MI_Uint32 flags;
     MI_Uint32 xCount;
+    MI_Char* configurationSource = NULL;
+    MI_Boolean allowUnsecureConnection;
+    MI_InstanceA customData;
     *credential = NULL;
     *extendedError = NULL;
     *getActionStatusCode = Success;
     *configurationID = NULL;
     *certificateID = NULL;
+    *bIsHttps = MI_FALSE;
+    *port = DEFAULT_SERVERPORT;
+    *getActionStatusCode = Success;
+    *extendedError = NULL;
+    *serverURL = '\0';
 
-     // 1. Get Credential.
-    r = MI_Instance_GetElement(metaConfig, MetaConfig_Credential, &value, NULL, &flags, NULL);
-    if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
-    {
-        *credential = value.instance;
-    }     
-
-    // 2. Get custom arguments.
-    r = MI_Instance_GetElement(metaConfig, MetaConfigDownloadManagerCustomData, &value, NULL, &flags, NULL);
-    if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
-    {
-        customParam->size = value.instancea.size;
-        customParam->data = value.instancea.data;
-    }      
-    // 3. Get Configuration ID.
+    // 1. Get Configuration ID.
     r = MI_Instance_GetElement(metaConfig, MetaConfigConfigurationId, &value, NULL, &flags, NULL);
     if( r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
     {
@@ -381,9 +382,10 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
         r = GetCimMIError(r, extendedError, ID_PULL_CONFIGURATIONIDNOTSPECIFIED);
         return r;
     }
-     /* We will use System UUID only if user has explicitly asked for.*/
-     if( Tcscasecmp(value.string, UseSystemUUIDValue) == 0 )
-     {
+
+    /* We will use System UUID only if user has explicitly asked for.*/
+    if( Tcscasecmp(value.string, UseSystemUUIDValue) == 0 )
+    {
         //Get System GUID
         MI_Char *systemUuid = GetSystemUuid();
         if( systemUuid == NULL || !IsValidUuid(systemUuid))
@@ -395,9 +397,9 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
             return r;            
         }
         *configurationID = systemUuid;
-     }
-     else
-     {
+    }
+    else
+    {
         *configurationID = (MI_Char*)DSC_malloc((Tcslen(value.string)+1) * sizeof(MI_Char), NitsHere());
         if( *configurationID == NULL)
         {
@@ -406,43 +408,216 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
             return r;              
         }
         memcpy(*configurationID, value.string, Tcslen(value.string)* sizeof(MI_Char));
-         /* Validate the Uuid.*/
-         if( !IsValidUuid(*configurationID))
-         {
-             *getActionStatusCode = InvalidConfigurationIdFormat;
-             r = GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDCONFIGURATIONIDFORMAT, *configurationID);
-             DSC_free(*configurationID);             
-             return r;            
-         }
-
-     }
-     // 4. Get certificate ID.
-    for( xCount =0; xCount < customParam->size; xCount++)
-    {
-        MI_Value value;
-        MI_Uint32 flags;
-        r = MI_Instance_GetElement(customParam->data[xCount], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
-        if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(CertificateIdParamName, value.string) == 0 )
+        /* Validate the Uuid.*/
+        if( !IsValidUuid(*configurationID))
         {
-            r = MI_Instance_GetElement(customParam->data[xCount], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
-            if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) )
+            *getActionStatusCode = InvalidConfigurationIdFormat;
+            r = GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDCONFIGURATIONIDFORMAT, *configurationID);
+            DSC_free(*configurationID);             
+            return r;            
+        }
+        
+    }
+
+    // 2. Get Credential.
+    r = MI_Instance_GetElement(metaConfig, MetaConfig_Credential, &value, NULL, &flags, NULL);
+    if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+    {
+        *credential = value.instance;
+    }     
+    
+
+
+    // If partialConfigName is defined, get the ConfigurationDownloadManagers, else get the DownloadManagerCustomData
+    if ( partialConfigName != NULL )
+    {
+        r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_PartialConfigurations, &value, NULL, &flags, NULL);
+        if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
+        {
+            return MI_RESULT_NO_SUCH_PROPERTY;
+        }
+
+        for (xCount = 0; xCount < value.instancea.size; ++xCount)
+        {
+            MI_Instance_GetElement(value.instancea.data[xCount], OMI_MetaConfigurationResource_ResourceId, &value2, NULL, &flags, NULL);
+            if ( Tcscasecmp(value2.string, partialConfigName) == 0 )
             {
-                *certificateID = (MI_Char*)DSC_malloc((Tcslen(value.string)+1) * sizeof(MI_Char), NitsHere());
-                if( *certificateID == NULL)
+                // Found our partial config! Now let's get 
+                MI_Instance_GetElement(value.instancea.data[xCount], MSFT_PartialConfiguration_ConfigurationSource, &value2, NULL, &flags, NULL);
+                if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
                 {
-                    *getActionStatusCode = InvalidConfigurationIdInMetaConfig;
-                    r = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-                    if( *configurationID )
-                        DSC_free(*configurationID);
-                    *configurationID = NULL;
-                    return r;              
+                    return MI_RESULT_NO_SUCH_PROPERTY;
                 }
-                memcpy(*certificateID, value.string, Tcslen(value.string)* sizeof(MI_Char));  
+
+                configurationSource = value2.string;
                 break;
             }
         }
-    }              
-     return MI_RESULT_OK;
+        if (configurationSource == NULL)
+        {
+            // Unable to find partial configuration with this name.
+            return MI_RESULT_NO_SUCH_PROPERTY;
+        }
+
+        r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, &value, NULL, &flags, NULL);
+        if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
+        {
+            // Unable to get the config download managers
+            return MI_RESULT_NO_SUCH_PROPERTY;
+        }
+
+        for (xCount = 0; xCount < value.instancea.size; ++xCount)
+        {
+            MI_Instance_GetElement(value.instancea.data[xCount], OMI_MetaConfigurationResource_ResourceId, &value2, NULL, &flags, NULL);   
+            if ( Tcscasecmp(value2.string, configurationSource) == 0 )
+            {
+                // Found the WebDownloadManager with the proper resource ID.
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("ServerURL"), &value2, NULL, &flags, NULL);   
+                if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
+                {
+                    return MI_RESULT_NO_SUCH_PROPERTY;
+                }
+
+                memcpy(serverURL, value2.string, (Tcslen(value2.string) + 1) * sizeof(MI_Char));
+
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("CertificateID"), &value2, NULL, &flags, NULL);   
+                if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+                {
+                    memcpy(*certificateID, value2.string, Tcslen(value2.string) * sizeof(MI_Char));  
+                }
+
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("AllowUnsecureConnection"), &value2, NULL, &flags, NULL);   
+                if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+                {
+                    allowUnsecureConnection = value2.boolean;
+                }
+
+                //Check if connection is secure and if unsecure user explicitly asks for it.
+                if( Tcsncasecmp(serverURL, MI_T("https"), 5) != 0 && allowUnsecureConnection == MI_FALSE )
+                {
+                    *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
+                    r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, serverURL);
+                    return r;     
+                }
+            }
+        }
+    }
+    else
+    {
+        // 3. Get custom arguments.
+        r = MI_Instance_GetElement(metaConfig, MetaConfigDownloadManagerCustomData, &value, NULL, &flags, NULL);
+        if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+        {
+            customParam->size = value.instancea.size;
+            customParam->data = value.instancea.data;
+        }
+
+        
+        // 4. Get certificate ID.
+        for( xCount =0; xCount < customParam->size; xCount++)
+        {
+            MI_Value value;
+            MI_Uint32 flags;
+            r = MI_Instance_GetElement(customParam->data[xCount], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
+            if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(CertificateIdParamName, value.string) == 0 )
+            {
+                r = MI_Instance_GetElement(customParam->data[xCount], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
+                if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) )
+                {
+                    *certificateID = (MI_Char*)DSC_malloc((Tcslen(value.string)+1) * sizeof(MI_Char), NitsHere());
+                    if( *certificateID == NULL)
+                    {
+                        *getActionStatusCode = InvalidConfigurationIdInMetaConfig;
+                        r = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
+                        if( *configurationID )
+                            DSC_free(*configurationID);
+                        *configurationID = NULL;
+                        return r;              
+                    }
+                    memcpy(*certificateID, value.string, Tcslen(value.string)* sizeof(MI_Char));  
+                    break;
+                }
+            }
+        }         
+    }
+
+    if (*serverURL == '\0')
+    {
+        r = MI_Instance_GetElement(metaConfig, MetaConfigDownloadManagerCustomData, &value, NULL, &flags, NULL);
+        if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+        {
+            customData.size = value.instancea.size;
+            customData.data = value.instancea.data;
+        }      
+
+        // Get Server Url.
+        for( xCount =0; xCount < customData.size; xCount++)
+        {
+            MI_Value value;
+            MI_Uint32 flags;
+            r = MI_Instance_GetElement(customData.data[xCount], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
+            if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(ServerUrlParamName, value.string) == 0 )
+            {
+                r = MI_Instance_GetElement(customData.data[xCount], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
+                if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) )
+                {
+                    // Found ServerUrl in value.string
+                    memcpy(serverURL, value.string, (Tcslen(value2.string) + 1) * sizeof(MI_Char));
+
+                    //Check if connection is secure and if unsecure user explicitly asks for it.
+                    if( !ConnectionAllowed(&customData, serverURL) )
+                    {
+                        *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
+                        r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, serverURL);
+                        return r;   
+                    }   
+  
+                    break;
+                }
+            }
+        }
+
+    }
+
+    if (*serverURL != '\0')
+    {       
+#if defined (_MSC_VER)                
+        //format is: http://server:port/suburl or http://server/suburl
+        if( swscanf_s(serverURL, MI_T("http://%99[^:]:%d/%199[^\n]"), url, URL_SIZE, port, subUrl, SUBURL_SIZE) == 3 || 
+            swscanf_s(serverURL, MI_T("http://%99[^/]/%199[^\n]"), url, URL_SIZE, subUrl, SUBURL_SIZE) == 2 )
+        {
+            //success
+        }
+        //format is: http://server:port/suburl or http://server/suburl
+        else if( swscanf_s(serverURL, MI_T("https://%99[^:]:%d/%199[^\n]"), url, URL_SIZE, port, subUrl, SUBURL_SIZE) == 3 || 
+                 swscanf_s(serverURL, MI_T("https://%99[^/]/%199[^\n]"), url, URL_SIZE, subUrl, SUBURL_SIZE) == 2 )
+        {
+            //success
+            *bIsHttps = MI_TRUE;
+        }
+#else
+        if( sscanf(serverURL, MI_T("http://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
+            sscanf(serverURL, MI_T("http://%99[^/]/%199[^\n]"), url, subUrl) == 2 )
+        {
+            //success
+        }
+        //format is: http://server:port/suburl or http://server/suburl
+        else if( sscanf(serverURL, MI_T("https://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
+                 sscanf(serverURL, MI_T("https://%99[^/]/%199[^\n]"), url, subUrl) == 2 )
+        {
+            //success
+            *bIsHttps = MI_TRUE;
+        }
+#endif                      
+    }
+    else
+    {
+        // Not found
+        *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
+        return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);   
+    }
+    
+    return MI_RESULT_OK;
    
 }
 
@@ -1934,7 +2109,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
             return GetCimMIError1Param(r, extendedError, ID_PULL_GETACTIONFAILED, webPulginName);            
         }
          DSC_EventWriteWebDownloadManagerDoActionGetUrl(configurationID, subUrl);
-        for( i =0; i < 10000 && !requestParam.httpResponseReveived;i++)
+        for( i =0; i < 120 && !requestParam.httpResponseReveived;i++)
             HttpClient_Run(http, HTTP_CONNECTION_TIMEOUT * 1000);    
 
         HttpClient_Delete(http);
@@ -2059,7 +2234,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
             return GetCimMIError1Param(r, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);          
         }
          DSC_EventWriteWebDownloadManagerGetDocGetUrl(configurationID, subUrl);
-        for( i =0; i < 10000 && !requestParam.httpResponseReveived ; i++)
+        for( i =0; i < 120 && !requestParam.httpResponseReveived ; i++)
              HttpClient_Run(http, HTTP_CONNECTION_TIMEOUT * 1000);  
         
         HttpClient_Delete(http);        
@@ -2104,6 +2279,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
 }
 
 #endif
+
 
 MI_Result GetUrlParam(_In_ MI_InstanceA *customData, 
     _Inout_updates_(URL_SIZE) MI_Char *url, 
@@ -2182,26 +2358,22 @@ MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
 
 
 MI_Result GetRequestParam(_In_ MI_Instance *metaConfig, 
-              _Inout_updates_(URL_SIZE) MI_Char *url,
-             _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl,
-             _Out_ MI_Uint32 *port,
-             _Out_ MI_Boolean *bIsHttps,
-                                  _Outptr_result_maybenull_z_ MI_Char **configurationID,
-                                  _Outptr_result_maybenull_z_ MI_Char **certificateID,
-                                  _Out_ MI_Uint32* getActionStatusCode,
-                                  _Outptr_result_maybenull_ MI_Instance **extendedError)
+                          _In_ MI_Char * partialConfigName,
+                          _Inout_updates_(URL_SIZE) MI_Char *url,
+                          _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl,
+                          _Out_ MI_Uint32 *port,
+                          _Out_ MI_Boolean *bIsHttps,
+                          _Outptr_result_maybenull_z_ MI_Char **configurationID,
+                          _Outptr_result_maybenull_z_ MI_Char **certificateID,
+                          _Out_ MI_Uint32* getActionStatusCode,
+                          _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Instance *credential = NULL;
     MI_InstanceA customParam = {0};
     *bIsHttps = MI_FALSE;
      //Get meta configuration elements
-    r = GetMetaConfigParameters(metaConfig, &credential, &customParam, configurationID, certificateID, getActionStatusCode, extendedError);
-    if( r != MI_RESULT_OK)
-    {
-        return r;
-    }
-    r = GetUrlParam(&customParam, url, subUrl, port, bIsHttps, getActionStatusCode, extendedError);
+    r = GetMetaConfigParameters(metaConfig, partialConfigName, &credential, &customParam, configurationID, certificateID, url, subUrl, port, bIsHttps, getActionStatusCode, extendedError);
     return r;
 }
 
@@ -2285,7 +2457,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
             return GetCimMIError1Param(r, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);          
         }
          DSC_EventWriteWebDownloadManagerGetDocGetUrl(configurationID, subUrl);
-        for( i =0; i < 10000 && !requestParam.httpResponseReveived ; i++)
+        for( i =0; i < 120 && !requestParam.httpResponseReveived ; i++)
              HttpClient_Run(http, HTTP_CONNECTION_TIMEOUT * 1000);  
         
         HttpClient_Delete(http);        
@@ -2407,11 +2579,12 @@ MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
 }
 
 MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContext *lcmContext,
-                                _In_ MI_Instance *metaConfig,
-                                _Outptr_result_maybenull_z_  MI_Char** mofFileName,
-                                _Outptr_result_maybenull_z_  MI_Char** result,
-                                _Out_ MI_Uint32* getActionStatusCode,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError)
+                                                          _In_ MI_Instance *metaConfig,
+                                                          _In_opt_z_ MI_Char *partialConfigName,
+                                                          _Outptr_result_maybenull_z_  MI_Char** mofFileName,
+                                                          _Outptr_result_maybenull_z_  MI_Char** result,
+                                                          _Out_ MI_Uint32* getActionStatusCode,
+                                                          _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Char *configurationID = NULL;
@@ -2431,7 +2604,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         return MI_RESULT_INVALID_PARAMETER;
     }
 
-    r = GetRequestParam(metaConfig, (MI_Char*)url, (MI_Char*)subUrl, &port, &bIsHttps, &configurationID, &certificateID, getActionStatusCode, extendedError);
+    r = GetRequestParam(metaConfig, partialConfigName, (MI_Char*)url, (MI_Char*)subUrl, &port, &bIsHttps, &configurationID, &certificateID, getActionStatusCode, extendedError);
     //Get meta configuration elements
     if( r != MI_RESULT_OK)
     {
@@ -2491,13 +2664,14 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
 
                                  
 MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmContext,
-                                _In_ MI_Instance *metaConfig,
-                                _In_z_ const MI_Char *checkSum,
-                                _In_ MI_Boolean complianceStatus,
-                                _In_ MI_Uint32 lastGetActionStatusCode,
-                                _Outptr_result_maybenull_z_  MI_Char** result,
-                                _Out_ MI_Uint32* getActionStatusCode,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError)
+                                                   _In_ MI_Instance *metaConfig,
+                                                   _In_opt_z_ MI_Char *partialConfigName,
+                                                   _In_z_ const MI_Char *checkSum,
+                                                   _In_ MI_Boolean complianceStatus,
+                                                   _In_ MI_Uint32 lastGetActionStatusCode,
+                                                   _Outptr_result_maybenull_z_  MI_Char** result,
+                                                   _Out_ MI_Uint32* getActionStatusCode,
+                                                   _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Char *configurationID = NULL;
@@ -2519,7 +2693,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     }
     memcpy(tmpChecksum, checkSum, Tcslen(checkSum)* sizeof(MI_Char));
 
-    r = GetRequestParam(metaConfig, (MI_Char*)url, (MI_Char*)subUrl, &port, &bIsHttps, &configurationID, &certificateID, getActionStatusCode, extendedError);
+    r = GetRequestParam(metaConfig, partialConfigName, (MI_Char*)url, (MI_Char*)subUrl, &port, &bIsHttps, &configurationID, &certificateID, getActionStatusCode, extendedError);
     if( r != MI_RESULT_OK)
     {
         DSC_free(tmpChecksum);

@@ -14,5 +14,11 @@ class MSFT_DSCMetaConfiguration
   [EmbeddedInstance("MSFT_KeyValuePair")] string DownloadManagerCustomData[];
   uint32 RefreshFrequencyMins;
   boolean AllowModuleOverwrite;
+  
+  [Description ("Array of configuration download manager objects that contain location information to download configurations" ) ,
+  EmbeddedInstance("OMI_ConfigurationDownloadManager")]
+  string  ConfigurationDownloadManagers[];    
+
   [Read,ValueMap{"Ready","Busy","PendingReboot"}, Values{"Ready","Busy","PendingReboot"}] string LocalConfigurationManagerState;
+  [EmbeddedInstance("MSFT_PartialConfiguration")] string PartialConfigurations[];
 };

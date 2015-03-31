@@ -108,12 +108,12 @@ typedef struct _RequestContainer
 #define webPulginName MI_T("WebDownloadManager")
 
 MI_Result GetUrlParam(_In_ MI_InstanceA *customData, 
-    _Inout_updates_(URL_SIZE) MI_Char *url, 
-    _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl, 
-    _Out_ MI_Uint32 *port, 
-    _Out_ MI_Boolean *bIsHttps,
-    _Out_ MI_Uint32* getActionStatusCode,
-    _Outptr_result_maybenull_ MI_Instance **extendedError);
+                      _Inout_updates_(URL_SIZE) MI_Char *url, 
+                      _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl, 
+                      _Out_ MI_Uint32 *port, 
+                      _Out_ MI_Boolean *bIsHttps,
+                      _Out_ MI_Uint32* getActionStatusCode,
+                      _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID, 
                                  _In_z_ const MI_Char *certificateID,
