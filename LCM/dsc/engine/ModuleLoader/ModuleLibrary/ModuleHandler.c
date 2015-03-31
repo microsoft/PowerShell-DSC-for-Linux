@@ -1745,3 +1745,44 @@ const ModuleManagerFT g_ModuleManagerFT = {
 };
 
 
+
+/*Function to get all the instances in a single array from a file*/
+MI_Result GetArrayInstancesFromSingleMof(_In_ ModuleManager *moduleManager,
+    MI_Uint32 flags,
+    _In_z_  const MI_Char *documentLocation,
+    MI_InstanceA * miInstanceArray,
+    MI_Instance **extendedError,
+    MI_Boolean shouldUseStrictOptions)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_ClassA miClassArray = { 0 };
+    ModuleLoaderObject *moduleLoader = NULL;
+    DSC_EventWriteMessageLoadingInstance(documentLocation);
+
+    /*Load the manager*/
+    r = LoadModuleManager(moduleManager, extendedError);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+
+
+    moduleLoader = (ModuleLoaderObject*)moduleManager->reserved2;
+    miClassArray.size = moduleLoader->schemaCount;
+    miClassArray.data = moduleLoader->providerSchema;
+    if (shouldUseStrictOptions == MI_TRUE)
+    {
+        r = GetInstanceFromSingleMOF(moduleManager, flags | VALIDATE_DOCUMENT_INSTANCE,
+            moduleLoader->application, moduleLoader->deserializer,
+            moduleLoader->options, moduleLoader->strictOptions, &miClassArray,
+            documentLocation, miInstanceArray, extendedError);
+    }
+    else
+    {
+        r = GetInstanceFromSingleMOF(NULL, flags | VALIDATE_DOCUMENT_INSTANCE,
+            moduleLoader->application, moduleLoader->deserializer,
+            moduleLoader->options, moduleLoader->options, &miClassArray,
+            documentLocation, miInstanceArray, extendedError);
+    }
+    return r;
+}

@@ -45,7 +45,8 @@ BaseResourceConfiguration g_BaseResourceConfiguration[] =
     {MI_T("SourceInfo"),         MI_STRING},
     {MI_T("DependsOn"),          MI_STRINGA},
     {MI_T("ModuleName"),         MI_STRING},
-    {MI_T("ModuleVersion"),      MI_STRING},        
+    {MI_T("ModuleVersion"),      MI_STRING},  
+    {MI_T("ConfigurationName"), MI_STRING},
     {NULL,                  0}
 };
 
@@ -871,5 +872,163 @@ void SQMLogResourceCountData(_In_z_ const MI_Char* providerName,_In_ MI_Uint32 r
     WinSqmEndSession(sqmSession);
 
 #endif
+}
+
+void DSC_WriteWarning1Param(_In_ MI_Context* context,
+                      _In_ MI_Uint32 messageID,
+                      _In_z_ MI_Char* param1)
+{
+    
+    Intlstr pTempStr = Intlstr_Null;
+    GetResourceString1Param(messageID, param1, &pTempStr);
+    if (pTempStr.str)
+    {
+        MI_Context_WriteWarning(context, pTempStr.str);
+        DSC_EventWriteCUMethodWarning(pTempStr.str);
+        Intlstr_Free(pTempStr);
+    }
+}
+
+void DSC_WriteWarning2Param(_In_ MI_Context* context,
+    _In_ MI_Uint32 messageID,
+    _In_z_ MI_Char* param1,
+    _In_z_ MI_Char* param2)
+{
+
+    Intlstr pTempStr = Intlstr_Null;
+    GetResourceString2Param(messageID, param1, param2, &pTempStr);
+    if (pTempStr.str)
+    {
+        MI_Context_WriteWarning(context, pTempStr.str);
+        DSC_EventWriteCUMethodWarning(pTempStr.str);
+        Intlstr_Free(pTempStr);
+    }
+}
+
+void DSC_WriteWarningFromError1Param(_In_ MI_Context* context,
+    _In_ MI_Instance ** cimErrorDetails,
+    _In_ MI_Uint32 messageID,
+    _In_z_ MI_Char* param1)
+{
+
+    Intlstr pTempStr = Intlstr_Null;
+    MI_Result r = MI_RESULT_OK;
+    MI_Value value;
+    //First get the error message, which will be the second parameter of the warnings
+    if (cimErrorDetails != NULL && *cimErrorDetails != NULL)
+    {
+        r = DSC_MI_Instance_GetElement(*cimErrorDetails, MSFT_WMIERROR_MESSAGE, &value, NULL, NULL, NULL);
+        if (r == MI_RESULT_OK)
+        {
+            GetResourceString2Param(messageID, param1, value.string, &pTempStr);
+            if (pTempStr.str)
+            {
+                MI_Context_WriteWarning(context, pTempStr.str);
+                DSC_EventWriteCUMethodWarning(pTempStr.str);
+                Intlstr_Free(pTempStr);
+            }
+        }
+    }
+}
+
+/*Function that returns true if the instance contains a defined value for the property passed in*/
+MI_Boolean InstanceContainsProperty(_In_ MI_Instance* instance,
+    _In_z_ const MI_Char* property)
+{
+    MI_Value value;
+    MI_Result r;
+    MI_Uint32 flags;
+    if (instance == NULL || property == NULL)
+        return MI_RESULT_INVALID_PARAMETER;
+    r = DSC_MI_Instance_GetElement(instance, property, &value, NULL, &flags, NULL);
+    if (r != MI_RESULT_OK)
+        return MI_FALSE;
+    //Check if the property is defined
+    if (flags & MI_FLAG_NULL)
+    {
+        return MI_FALSE;
+    }
+    return MI_TRUE;
+}
+
+
+/*Function to validate if a directory has files.*/
+MI_Result ValidateDirectoryHasFiles(_In_z_ const MI_Char* directoryName)
+{
+    MI_Result result;
+    MI_Char *pwConfigDir = NULL;
+    MI_Instance* cimErrorDetails = NULL;
+    Internal_Dir *dirHandle = NULL;
+    Internal_DirEnt *dirEntry = NULL;
+    result = ExpandPath(directoryName, &pwConfigDir, &cimErrorDetails);
+    RETURN_RESULT_IF_FAILED(result); //Result is being written by expand path, so just returning it as is
+
+    if (Directory_ExistT(pwConfigDir) == -1)
+    {
+        DSC_free(pwConfigDir);
+        return MI_RESULT_NOT_FOUND;
+    }
+    dirHandle = Internal_Dir_Open(pwConfigDir, NitsMakeCallSite(-3, NULL, NULL, 0));
+    DSC_free(pwConfigDir);
+    if (dirHandle != NULL)
+    {
+        dirEntry = Internal_Dir_Read(dirHandle, MOF_EXTENSION);
+        if (dirEntry != NULL)
+        {
+            //That means the first file was got, and it contains files.
+            Internal_Dir_Close(dirHandle);
+            return MI_RESULT_OK;
+        }
+    }
+    return MI_RESULT_NOT_FOUND;
+}
+
+
+/*Function to return true if we should use partial configurations instead of full. If shouldCheckPartialConfigDirectoryForFiles is set to true, then it will also check for non empty directory status before returning*/
+MI_Boolean ShouldUsePartialConfigurations(_In_ MI_Instance* metaConfigInstance,
+    _In_ MI_Boolean shouldCheckPartialConfigDirectoryForFiles)
+{
+    if (InstanceContainsProperty(metaConfigInstance, MSFT_DSCMetaConfiguration_PartialConfigurations))
+    {
+        if (shouldCheckPartialConfigDirectoryForFiles)
+        {
+            //Check for partial config directory, if it has files
+            if (ValidateDirectoryHasFiles(CONFIGURATION_PARTIALCONFIG_STORE) == MI_RESULT_OK)
+            {
+                return MI_TRUE;
+            }
+
+        }
+        else
+        {
+            return MI_TRUE;
+        }
+    }
+    return MI_FALSE;
+}
+
+/*Function to concatenate two strings - Must free the target string after use*/
+MI_Result DSCConcatStrings(_Outptr_result_z_ MI_Char** target, _In_ MI_Uint32 padding, _In_z_ const MI_Char* source1, _In_z_ const MI_Char* source2, _In_z_ const MI_Char* pattern)
+{
+    MI_Result result = MI_RESULT_FAILED;
+    *target = NULL;
+    if (source1 && source2)
+    {
+        size_t targetLength = Tcslen(source1) + Tcslen(source2) + 1 + padding; //+1 for "\0"
+        *target = (MI_Char*)DSC_malloc(targetLength*sizeof(MI_Char), NitsMakeCallSite(-3, NULL, NULL, 0));
+        if (*target != NULL)
+        {
+            if (Stprintf(*target, targetLength, pattern, source1, source2) <= 0)
+            {
+                DSC_free(*target);
+                *target = NULL;
+            }
+            else
+            {
+                result = MI_RESULT_OK;
+            }
+        }
+    }
+    return result;
 }
 

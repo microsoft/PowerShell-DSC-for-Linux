@@ -39,6 +39,23 @@
 #define OMI_BaseResource_SetMethodCount 4
 
 
+BaseResourceConfiguration g_MetaConfigurationResourceProperties[] =
+{
+    { OMI_MetaConfigurationResource_ResourceId, MI_STRING },
+    { OMI_MetaConfigurationResource_SourceInfo, MI_STRING },
+    { OMI_MetaConfigurationResource_ModuleName, MI_STRING },
+    { OMI_MetaConfigurationResource_ModuleVersion, MI_STRING },
+    { NULL, 0 }
+};
+
+BaseResourceConfiguration g_WebDownloadManagerProperties[] =
+{
+    { "ServerURL", MI_STRING },
+    { "CertificateID", MI_STRING },
+    { "AllowUnsecureConnection" , MI_BOOLEAN },
+    { NULL, 0 }
+};
+
 
 InfraSchemaValidator g_InfraSchemaValidators[] = 
 {
@@ -50,19 +67,34 @@ InfraSchemaValidator g_InfraSchemaValidators[] =
     {METACONFIG_CLASSNAME, ValidateMetaConfigurationClass},
     {MSFT_BASECREDENTIAL_CLASSNAME, ValidateBaseCredClass},
     {MSFT_KEYVALUEPAIR_CLASSNAME, ValidateKeyValuePairClass},        
+    { MSFT_PARTIALCONFIGURATION_CLASSNAME,            ValidateClassPropertiesForMetaConfResourceChildren },
+    { METACONF_RESOURCE_CLASSNAME,                    ValidateMetaConfResourceProperties},
+    { OMI_CONFIGURATIONDOWNLOADMANAGER_CLASSNAME,     ValidateConfigurationDownloadManagerProperties },
+    { MSFT_WEBCONFIGURATIONDOWNLOADMANAGER_CLASSNAME, ValidateWebDownloadManagerProperties },
+
     {NULL, NULL}
 };
 
 BaseResourceConfiguration g_ConfigurationDocumentProperties[] =
 {
-    {OMI_ConfigurationDocument_Version,        MI_STRING},
-    {OMI_ConfigurationDocument_Author,         MI_STRING},
-    {OMI_ConfigurationDocument_Copyright,      MI_STRING},
-    {OMI_ConfigurationDocument_HelpInfoUri,    MI_STRING},
-    {OMI_ConfigurationDocument_ContentType,    MI_STRING},
-    {OMI_ConfigurationDocument_GenerationDate, MI_STRING},
-    {OMI_ConfigurationDocument_GenerationHost, MI_STRING},
+    { OMI_ConfigurationDocument_Version,        MI_STRING},
+    { OMI_ConfigurationDocument_Author,         MI_STRING},
+    { OMI_ConfigurationDocument_Copyright,      MI_STRING},
+    { OMI_ConfigurationDocument_HelpInfoUri,    MI_STRING},
+    { OMI_ConfigurationDocument_ContentType,    MI_STRING},
+    { OMI_ConfigurationDocument_GenerationDate, MI_STRING},
+    { OMI_ConfigurationDocument_GenerationHost, MI_STRING },
+    { OMI_ConfigurationDocument_Name,           MI_STRING },
+    { OMI_ConfigurationDocument_MinimumCompatibleVersion,                          MI_STRING },
+    { OMI_ConfigurationDocument_CompatibleVersionAdditionalProperties, MI_STRINGA },
+
     {NULL,                                      0}
+};
+
+BaseResourceConfiguration g_ConfigurationDownloadManagerProperties[] =
+{
+    {OMI_ConfigurationDownloadManager_Name,         MI_STRING},
+    {NULL,                                                        0}
 };    
 
 BaseResourceConfiguration g_PSResourceProperties[] =
@@ -92,16 +124,18 @@ BaseResourceConfiguration g_BaseResourceProperties[] =
     {OMI_BaseResource_DependsOn,           MI_STRINGA},
     {OMI_BaseResource_ModuleName,         MI_STRING},
     {OMI_BaseResource_ModuleVersion,      MI_STRING},        
+    {OMI_BaseResource_ConfigurationName,    MI_STRING}, 
     {NULL,                                              0}
 };    
 
 PropertyQualifier g_BaseResourceQualifiers[] =
 {
-    {OMI_BaseResource_ResourceId,         QUALIFIER_REQUIRED},
-    {OMI_BaseResource_SourceInfo,         QUALIFIER_WRITE},
-    {OMI_BaseResource_DependsOn,           QUALIFIER_WRITE},
-    {OMI_BaseResource_ModuleName,         QUALIFIER_REQUIRED},
-    {OMI_BaseResource_ModuleVersion,      QUALIFIER_REQUIRED}, 
+    {OMI_BaseResource_ResourceId,           QUALIFIER_REQUIRED},
+    {OMI_BaseResource_SourceInfo,           QUALIFIER_WRITE},
+    {OMI_BaseResource_DependsOn,            QUALIFIER_WRITE},
+    {OMI_BaseResource_ModuleName,           QUALIFIER_REQUIRED},
+    {OMI_BaseResource_ModuleVersion,        QUALIFIER_REQUIRED}, 
+    {OMI_BaseResource_ConfigurationName,    QUALIFIER_WRITE}, 
     {NULL,                                              NULL}
 };
 
@@ -118,9 +152,21 @@ BaseResourceConfiguration g_MetaConfigProperties[] =
     { MSFT_DSCMetaConfiguration_DownloadManagerCustomData,                  MI_INSTANCEA},   
     { MSFT_DSCMetaConfiguration_RefreshFrequencyMins,                       MI_UINT32},
     { MSFT_DSCMetaConfiguration_AllowModuleOverwrite,                       MI_BOOLEAN},
-	{ MSFT_DSCMetaConfiguration_LocalConfigurationManagerState,				MI_STRING},
+    { MSFT_DSCMetaConfiguration_LocalConfigurationManagerState,             MI_STRING},
+    { MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers,              MI_INSTANCEA },
+    { MSFT_DSCMetaConfiguration_PartialConfigurations,                      MI_INSTANCEA },
     {NULL,                                                                  0}
 };    
+
+BaseResourceConfiguration g_PartialConfigurationProperties[] =
+{
+    { MSFT_PartialConfiguration_Description,            MI_STRING },
+    { MSFT_PartialConfiguration_ExclusiveResources,     MI_STRINGA },
+    { MSFT_PartialConfiguration_ConfigurationSource,    MI_STRING },
+    { MSFT_PartialConfiguration_DependsOn,              MI_STRINGA },
+    { NULL, 0 }
+};
+
 
 BaseResourceConfiguration g_BaseCredProperties[] =
 {
@@ -486,6 +532,15 @@ MI_Result ValidateDSCDocumentInstance(_In_ MI_InstanceA *miInstanceArray,
         if(Tcscasecmp(instanceToCheck->classDecl->name, METACONFIG_CLASSNAME) == 0 )
         {
             hasMetaConfig = MI_TRUE;
+            if (flags & VALIDATE_METACONFIG_INSTANCE)
+            {
+                //If it has to validate partial configuration definition, do so.
+                if (ShouldUsePartialConfigurations(instanceToCheck, MI_FALSE))
+                {
+                    r = ValidatePartialConfigMetaConfDefinition(instanceToCheck, extendedError);
+                    RETURN_RESULT_IF_FAILED(r);
+                }
+            }
         }
         for( yCount = 0; yCount < instanceToCheck->classDecl->numProperties ; yCount++)
         {
@@ -999,7 +1054,648 @@ MI_Result ValidateDocumentInstance(_In_ MI_Instance *docInstance,
     return r;    
 }
 
+/*Function that validates if the version of the metaconfiguration is in accordance with the properties that it supports*/
+/* For now, we're just going to verify that it has some valid version number.  For the V2 port, we'll validate everything else */
+MI_Result ValidateVersionNumbersCompatibility(_In_ MI_InstanceA *instanceA,
+                                            _In_z_ const MI_Char* versionNumber,
+                                            _In_ LCMProviderContext *lcmContext,
+                                            _Outptr_result_maybenull_ MI_Instance **extendedError )
+{
+    
+    MI_Result r = MI_RESULT_OK;
+    MI_Uint32 Flags;
+    MI_Value value;
+    MI_Uint32 i=0;
+    MSFT_DSCMetaConfiguration *metaConfigInstance=NULL;
+    MI_Instance *tempInstance;
+    MI_Context* mi_context = NULL;
+    Intlstr pTempStr = Intlstr_Null;
+    if (instanceA == 0 || instanceA->size == 0 || NitsShouldFault(NitsHere(), NitsAutomatic))
+        {
+                return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_CAINFRA_DEPENDCY_NULLPARAM);
+        }
+
+        if (extendedError == NULL)
+        {
+                return MI_RESULT_INVALID_PARAMETER;
+        }
+        *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.  
+    //get the metaconfiguration instance first
+
+    for (i = 0; i < instanceA->size; i++)
+    {
+        tempInstance = instanceA->data[i];
+        if (tempInstance->classDecl != NULL &&Tcscasecmp(tempInstance->classDecl->name, METACONFIG_CLASSNAME) == 0)
+        {
+            metaConfigInstance=(MSFT_DSCMetaConfiguration*)tempInstance;
+            break;
+        }
+    }
+    if(metaConfigInstance==NULL)
+    {
+        //No metaconfiguration object was found - this isn't supported
+        return GetCimMIError(MI_RESULT_NOT_SUPPORTED, extendedError, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
+    }
+    
+    if (Tcscasecmp(versionNumber, OMI_ConfigurationDocument_VersionV1) == 0)
+    {
+        // We're okay here
+    }
+    else if(Tcscasecmp(versionNumber, OMI_ConfigurationDocument_VersionV2) == 0)
+    {
+        // We're okay here
+    }
+    else
+    {
+        //It isn't in the right version format
+        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_VERSIONNUMBER);
+    }
+    return r;    
+}
+
+
+/*Function to check if the partial config name passed is present among the partial configuraions defined in metaconfig*/
+MI_Result ValidatePartialConfigurationName(_In_z_ const MI_Char* partialConfigName,
+    _In_ MI_Instance* metaConfigInstance,
+    _Outptr_result_maybenull_ MI_Instance** partialConfigMetaInstance,
+    _Inout_ MI_StringA* otherExclusiveResources,//These are exclusive resources of other partial configurations which is returned
+    _Outptr_result_maybenull_ MI_Instance** cimErrorDetails)
+{
+    //TODO : Get all metaconfiguration partial config instances
+    MI_Uint32 count = 0;
+    MI_Uint32 innerCount = 0; 
+    MI_Value value;
+    MI_Char* qualifiedPartialConfName = NULL;
+    MI_Boolean isValidPartialConfig = MI_FALSE;
+    MI_Value valuePartialConfig;
+    MI_Result result = MI_RESULT_OK;
+    MI_Uint32 flags;
+    MI_Char** tempArray = NULL;
+    MI_Uint32 tempNewSize = 0;
+    MI_Uint32 tempOldSize = 0;
+    MI_Char** tempOtherExclusiveResources = NULL;
+    MI_Boolean flagProcessExclusiveResources = MI_TRUE;
+    if (metaConfigInstance == NULL || partialConfigName == NULL || cimErrorDetails == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+    *partialConfigMetaInstance = NULL;
+    DSC_EventWriteLCMValidatingPartialConfigName(partialConfigName);
+    result = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_PartialConfigurations, &value, NULL, NULL, NULL);
+    GOTO_CLEANUP_IF_FAILED(result, Cleanup);
+    if (value.instancea.data == NULL)
+    {
+        result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCMHELPER_ERROR_PARTIALCONFIG_UNDEFINED);
+        goto Cleanup;
+    }
+    if (otherExclusiveResources == NULL)
+    {
+        flagProcessExclusiveResources = MI_FALSE;//In this case you only want to validate the partial config name
+    }
+    //Iterate through all metaconfig partial config definitions and find the matching partial config name
+    for (count = 0; count < value.instancea.size; count++)
+    {
+        result = MI_Instance_GetElement(value.instancea.data[count], OMI_MetaConfigurationResource_ResourceId, &valuePartialConfig, NULL,NULL,NULL);
+        GOTO_CLEANUP_IF_FAILED(result, Cleanup);
+        //The string would be [PartialConfiguration]SomeName - So we need to concatenate the suffix first.
+        result = DSCConcatStrings(&qualifiedPartialConfName, 3, MSFT_PartialConfiguration_FriendlyName, partialConfigName, MI_T("[%T]%T")); //Padding=3 2 for [] and 1 for \0
+        GOTO_CLEANUP_IF_FAILED(result, Cleanup);
+        if (valuePartialConfig.string != NULL && Tcscasecmp(valuePartialConfig.string, qualifiedPartialConfName) == 0)
+        {
+            //This means there was a match between metaconfig and partial config name passed
+            isValidPartialConfig = MI_TRUE;
+            *partialConfigMetaInstance = value.instancea.data[count];     
+            DSCFREE_IF_NOT_NULL(qualifiedPartialConfName);
+            continue;//So that you don't count the exclusive resources of its own instance in themeta config.
+        }
+        //Reset qualified partialconfname back
+        DSCFREE_IF_NOT_NULL(qualifiedPartialConfName);
+        if (flagProcessExclusiveResources)
+        {
+            //Get exclusive resources of all other partial configs 
+            result = MI_Instance_GetElement(value.instancea.data[count], MSFT_PartialConfiguration_ExclusiveResources, &valuePartialConfig, NULL, &flags, NULL);
+            GOTO_CLEANUP_IF_FAILED(result, Cleanup);
+            //Check the exclusive resources, if they're present, add it to the ongoing array
+            if (!(flags & MI_FLAG_NULL) || valuePartialConfig.stringa.data != NULL && valuePartialConfig.stringa.size > 0)
+            {
+                //Copy both arrays into a tempArray
+                tempNewSize = valuePartialConfig.stringa.size + tempOldSize;
+                tempArray = (MI_Char**)DSC_malloc(tempNewSize*sizeof(MI_Char*), NitsHere());
+                for (innerCount = 0; innerCount < tempOldSize && innerCount < tempNewSize; innerCount++)
+                {
+                    tempArray[innerCount] = tempOtherExclusiveResources[innerCount];
+                }
+                for (innerCount = 0; innerCount < valuePartialConfig.stringa.size && innerCount < tempNewSize; innerCount++)
+                {
+                    tempArray[innerCount + tempOldSize] = valuePartialConfig.stringa.data[innerCount];
+                }
+                //Delete the tempOtherExclusive Array and point it to the new temparray
+                DSCFREE_IF_NOT_NULL(tempOtherExclusiveResources);
+                tempOtherExclusiveResources = tempArray;
+                tempOldSize = tempNewSize;
+            }
+        }
+    }
+    if (!isValidPartialConfig)
+    {
+        result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF, partialConfigName);
+    }
+    if (flagProcessExclusiveResources)
+    {
+        otherExclusiveResources->data = tempOtherExclusiveResources;
+        otherExclusiveResources->size = tempNewSize;
+    }
+    tempOtherExclusiveResources = NULL;
+    tempArray = NULL;
+
+Cleanup:
+    DSCFREE_IF_NOT_NULL(qualifiedPartialConfName);
+    DSCFREE_IF_NOT_NULL(tempArray);
+    DSCFREE_IF_NOT_NULL(tempOtherExclusiveResources);
+    return result;
+}
 
 
 
+/*Function to check if the partial config name passed is present among the partial configuraions defined in metaconfig*/
+MI_Result ValidatePartialConfigMetaConfDefinition(_In_ MI_Instance* metaConfigInstance,
+    _Outptr_result_maybenull_ MI_Instance** cimErrorDetails)
+{
+    //TODO : Get all metaconfiguration partial config instances
+    MI_Uint32 count = 0;
+    MI_Value value;
+    MI_Result result = MI_RESULT_OK;
+    MI_StringA arrayOfAllExclusiveResources={ 0 };
+    if (metaConfigInstance == NULL || cimErrorDetails == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+    result = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_PartialConfigurations, &value, NULL, NULL, NULL);
+    GOTO_CLEANUP_IF_FAILED(result, Cleanup);
+    if (value.instancea.data == NULL)
+    {
+        result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCMHELPER_ERROR_PARTIALCONFIG_UNDEFINED);
+        return result;
+    }
+    DSC_EventWriteLCMValidatingMetaConfPartial();
+    //Iterate through all metaconfig partial config definitions and find if their properties are correctly defined
+    for (count = 0; count < value.instancea.size; count++)
+    {
+        //Check if configuration download anager is properly named
+        result = ValidatePartialMeta_ConfigDownloadMgr(value.instancea.data[count], metaConfigInstance, cimErrorDetails);
+        GOTO_CLEANUP_IF_FAILED(result, Cleanup);//Result and cimerror is set by the function above
 
+        result = ValidatePartialMeta_ExclusiveResources(value.instancea.data[count], &arrayOfAllExclusiveResources, cimErrorDetails);
+        GOTO_CLEANUP_IF_FAILED(result, Cleanup);//Result and cimerror is set by the function above
+
+    }
+Cleanup:
+    if (arrayOfAllExclusiveResources.size > 0)
+    {
+        DSC_free(arrayOfAllExclusiveResources.data);
+        arrayOfAllExclusiveResources.data = NULL;
+    }
+    return result;
+}
+
+/*Function to check the following :
+  - Each resource in the partial config document has the same configuration document name
+  - Each resource does not disobey the exclusive resource rule */
+MI_Result ValidatePartialConfigFile(_In_z_ const MI_Char* partialConfigName,
+    _In_ MI_InstanceA resourceInstanceArray,
+    _In_ MI_Instance * partialConfigIntance,
+    _In_ MI_StringA *ExcludedResourcesList,
+    _Outptr_result_maybenull_ MI_Instance** cimErrorDetails)
+{
+    //TODO : Get all metaconfiguration partial config instances
+    MI_Uint32 count = 0;
+    MI_Value valuePartialConfig;
+    MI_Result result = MI_RESULT_OK;
+    MI_Uint32 innerCount = 0;
+    MI_Boolean obeysExclusiveResourceRule = MI_FALSE;
+    if (partialConfigName == NULL || cimErrorDetails== NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+    //Iterate through all metaconfig partial config definitions and find the matching partial config name
+    for (count = 0; count < resourceInstanceArray.size; count++)
+    {
+        result = MI_Instance_GetElement(resourceInstanceArray.data[count], OMI_BaseResource_ConfigurationName, &valuePartialConfig, NULL, NULL, NULL);
+        if (result != MI_RESULT_OK)
+        {
+            result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_PARTIALCONFIG_CONFIGURATIONNAME_MISSING, resourceInstanceArray.data[count]->classDecl->name);
+            return result;
+        }
+        if (valuePartialConfig.string == NULL || Tcscasecmp(valuePartialConfig.string, partialConfigName) != 0)
+        {
+            //If even one of the configuration name values doesn't match the partial configuration name, throw error
+            result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCMHELPER_INVALID_PARTIALCONFIG_INCONSISTENCY, partialConfigName);
+            return result;
+        }        
+        //Check that the resource name in the array is not present inside any of the other partial configurations' exclusive resources.
+        if (ExcludedResourcesList != NULL && ExcludedResourcesList->data != NULL)
+        {
+            
+            //For each exluded resource, check if there's a match with this resources class name
+            for (innerCount = 0; innerCount < ExcludedResourcesList->size; innerCount++)
+            {
+                result = ValidateResourceObeysExclusiveResourcesRule(ExcludedResourcesList->data[innerCount], resourceInstanceArray.data[count], &obeysExclusiveResourceRule, cimErrorDetails);
+                RETURN_RESULT_IF_FAILED(result);
+                if (!obeysExclusiveResourceRule)
+                {
+                    result = GetCimMIError2Params(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_MODMAN_PARTIALCONFIG_EXCLUSIVERESOURCE_DISOBEYED, partialConfigName, ExcludedResourcesList->data[innerCount]);
+                    return result;
+                }
+                
+            }
+        }
+    }    
+    return result;
+}
+
+
+/*Function to check if the configurationsource exists as a defined download manatger*/
+MI_Result ValidatePartialMeta_ConfigDownloadMgr(_In_ MI_Instance* partialInstance,
+    _In_ MI_Instance* metaConfInstance,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Uint32 flags = 0;
+    MI_Uint32 count = 0;
+    MI_Value valueConfigSource;
+    MI_Value valueDownloadMgrs;
+    MI_Value valueConfigDownloadMgrName;
+    MI_Boolean isValidPartialConfig = MI_FALSE;
+    if (cimErrorDetails == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+    DSC_EventWriteLCMValidatingPartialConfigMetaConfDownloadMgr();
+    //Get the property from the instance
+    result = MI_Instance_GetElement(partialInstance, MSFT_PartialConfiguration_ConfigurationSource, &valueConfigSource, NULL, &flags, 0);
+    if (result != MI_RESULT_OK)
+    {
+        result = GetCimMIError2Params(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_PartialConfiguration_ExclusiveResources, MSFT_PARTIALCONFIGURATION_CLASSNAME);
+        return result;
+    }
+    if (flags & MI_FLAG_NULL)
+    {
+        return MI_RESULT_OK;//Since we don't have to bother if its not defined
+    }
+    //Get the configuration download managers
+    result = MI_Instance_GetElement(metaConfInstance, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, &valueDownloadMgrs, NULL, &flags, 0);
+    if (result != MI_RESULT_OK)
+    {
+        result = GetCimMIError2Params(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, METACONFIG_CLASSNAME);
+        return result;
+    }
+    if (valueDownloadMgrs.instancea.size != 0 && valueDownloadMgrs.instancea.data != NULL)
+    {
+        for (count = 0; count < valueDownloadMgrs.instancea.size; count++)
+        {
+            result = MI_Instance_GetElement(valueDownloadMgrs.instancea.data[count], OMI_MetaConfigurationResource_ResourceId, &valueConfigDownloadMgrName, NULL, &flags, NULL);
+            RETURN_RESULT_IF_FAILED(result);
+            
+            if (valueConfigSource.string != NULL && valueConfigDownloadMgrName.string != NULL && Tcscasecmp(valueConfigSource.string, valueConfigDownloadMgrName.string) == 0)
+            {
+                //This means there was a match between metaconfig config download manager and partial config's configsource
+                isValidPartialConfig = MI_TRUE;
+                break;
+            }
+        }
+        if (!isValidPartialConfig)
+        {
+            result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE, valueConfigSource.string);
+        }
+    }
+    else
+    {
+        result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE, valueConfigSource.string);
+    }
+    return result;
+}
+
+/*Function to check if exclusive resource definitions are not overlapp[ing on another in the metaconfig instance*/
+MI_Result ValidatePartialMeta_ExclusiveResources(_In_ MI_Instance* partialInstance,
+    _Inout_ MI_StringA* arrayOutput,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Uint32 flags = 0;
+    MI_Uint32 count = 0;
+    MI_Uint32 innerCount = 0;
+    MI_Uint32 newSize = 0;
+    MI_Value value;
+    MI_Uint32 newIndexOfArrayOutput = 0;
+    MI_Char** tempArrayOutput = NULL;
+    MI_Boolean alreadyCopiedArrayOutputIntoTemp = MI_TRUE;
+    if (cimErrorDetails == NULL || arrayOutput == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+    DSC_EventWriteLCMValidatingPartialConfigMetaConfExclusiveResources();
+    //Get the property from the instance
+    result = MI_Instance_GetElement(partialInstance, MSFT_PartialConfiguration_ExclusiveResources, &value, NULL, &flags, 0);
+    GOTO_CLEANUP_AND_THROW_ERROR2PARAMS_IF_FAILED(result, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, cimErrorDetails, MSFT_PartialConfiguration_ExclusiveResources, MSFT_PARTIALCONFIGURATION_CLASSNAME, Cleanup);
+    if (!(flags & MI_FLAG_NULL) && value.stringa.data != NULL )
+    {
+        //Assign size of new array and allocate it
+        newSize = arrayOutput->size + value.stringa.size;
+        tempArrayOutput = DSC_malloc(newSize*sizeof(MI_Char*), NitsHere());
+        
+        for (count = 0; count < value.stringa.size; count++)
+        {
+            for (innerCount = 0; innerCount < arrayOutput->size && innerCount < newSize; innerCount++)
+            {
+                if (Tcscasecmp(value.stringa.data[count], arrayOutput->data[innerCount]) == 0)
+                {
+                    //This means there was a match for exclusive resources between two partial config definitions
+                    result = GetCimMIError1Param(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_MODMAN_PARTIALCONFIG_DUPLICATE_EXCLUSIVERESOURCE, value.stringa.data[count]);
+                    break;
+                }
+                //Add this element into temparrayOutput only if not already copied
+                if (!alreadyCopiedArrayOutputIntoTemp)
+                {
+                    tempArrayOutput[innerCount] = arrayOutput->data[innerCount];
+                }
+                
+            }
+            GOTO_CLEANUP_IF_FAILED(result, Cleanup);
+            //Mark that you've already copied the arrayOutput fully into temporary array
+            alreadyCopiedArrayOutputIntoTemp = MI_TRUE;
+            //Have to copy each element from value.stringa as well
+            newIndexOfArrayOutput = arrayOutput->size + count;
+            tempArrayOutput[newIndexOfArrayOutput] = value.stringa.data[count];
+        }
+        //Now make arrayOutput point to tempArrayOutput which is the new combined array
+        if (arrayOutput->size != 0)
+        {//Avoiding DSCFree when its not initialized at all.
+            DSC_free(arrayOutput->data);
+        }
+        arrayOutput->data = tempArrayOutput;
+        arrayOutput->size = newSize;
+        
+    }
+    return result;
+    //Check the property if empty - if not, then save each string into stringA
+Cleanup:
+    DSCFREE_IF_NOT_NULL(tempArrayOutput);
+    return result;
+}
+/*Function that calls all other validation functions for partial configuration*/
+MI_Result ValidatePartialConfiguration(_In_ ModuleManager* moduleManager,
+    _In_z_ const MI_Char* partialConfigLocation,
+    _In_ MI_Instance* metaConfigInstance,
+    _Outptr_result_maybenull_ MI_Instance ** cimErrorDetails)
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Instance* partialConfigMetaInstance = NULL;
+    MI_StringA* OthersExclusiveResourceList = NULL;
+    MI_InstanceA resourceInstances = { 0 };
+    MI_InstanceA miInstanceArray = { 0 };
+    MI_Instance* documentIns = NULL;
+    MI_Uint32 flags = 0;
+    MI_Value value;
+    if (metaConfigInstance == NULL || partialConfigLocation == NULL || cimErrorDetails == NULL || moduleManager==NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+    //Get the partial configuration's name
+    result = GetArrayInstancesFromSingleMof(moduleManager, flags | VALIDATE_DOCUMENT_INSTANCE,
+        partialConfigLocation, &miInstanceArray, cimErrorDetails, MI_FALSE);
+    if (result != MI_RESULT_OK)
+    {
+        return result;
+    }
+    result = FilterForConfigurationResource(&miInstanceArray, &resourceInstances, &documentIns, cimErrorDetails);
+    GOTO_CLEANUP_IF_FAILED(result, Cleanup);
+    result = DSC_MI_Instance_GetElement(documentIns, OMI_ConfigurationDocument_Name, &value, NULL, &flags, NULL);
+    if (result != MI_RESULT_OK || (flags & MI_FLAG_NULL))
+    {
+        //Output error that there is no name present
+        result = GetCimMIError2Params(MI_RESULT_INVALID_CLASS, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, OMI_ConfigurationDocument_Name, BASE_DOCUMENT_CLASSNAME);
+        goto Cleanup;
+    }
+    DSC_EventWriteLCMValidatingPartialConfiguration(value.string);
+    OthersExclusiveResourceList = (MI_StringA*)DSC_malloc(sizeof(MI_StringA), NitsHere());
+    OthersExclusiveResourceList->data = NULL;
+    OthersExclusiveResourceList->size = 0;
+    //First check if this is a valid partial config name, and get back the partial config metaconfig instance
+    result = ValidatePartialConfigurationName(value.string, metaConfigInstance, &partialConfigMetaInstance, OthersExclusiveResourceList, cimErrorDetails);
+    GOTO_CLEANUP_IF_FAILED(result,Cleanup);
+
+    //Validate if the file was written correctly
+    result = ValidatePartialConfigFile(value.string, resourceInstances, partialConfigMetaInstance, OthersExclusiveResourceList, cimErrorDetails);
+    GOTO_CLEANUP_IF_FAILED(result, Cleanup);
+
+ Cleanup:
+    if (OthersExclusiveResourceList != NULL)
+    {
+        DSCFREE_IF_NOT_NULL(OthersExclusiveResourceList->data);
+        DSC_free(OthersExclusiveResourceList);
+    }
+    CleanUpInstanceCache(&resourceInstances);
+    INSTANCE_DELETE_IF_NOT_NULL(documentIns);
+
+    return result;
+}
+
+/*Function to validate a mof instance based on the flags passed in*/
+MI_Result ValidatePartialConfigMergedFile(_In_ ModuleManager *moduleManager,
+    _In_z_ const MI_Char * mofFilePath,
+    _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_Uint32 flags = 0;
+    /*Form full path to mof file*/
+    MI_InstanceA *miTempInstanceArray = NULL;
+    MI_Uint8 *pbuffer = NULL;
+    MI_Uint32 contentSize=0;
+    MI_Uint32 readBytes;
+    MI_ClassA miClassArray = { 0 };
+    ModuleLoaderObject *moduleLoader = NULL;
+
+    if (extendedError == NULL || moduleManager==NULL || mofFilePath == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.        
+    //If the provided moffile path is not null, only then read the file's contents, else check the 
+
+    /*Load the manager*/
+    DSC_EventWriteLCMValidatingMergedPartial();
+    r = LoadModuleManager(moduleManager, extendedError);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+    r = ReadFileContent(mofFilePath, &pbuffer, &contentSize, extendedError);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+    
+    moduleLoader = (ModuleLoaderObject*)moduleManager->reserved2;
+    miClassArray.size = moduleLoader->schemaCount;
+    miClassArray.data = moduleLoader->providerSchema; 
+    r = MI_Deserializer_DeserializeInstanceArray(moduleLoader->deserializer, 0, moduleLoader->strictOptions, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miTempInstanceArray, extendedError);
+    GOTO_CLEANUP_IF_FAILED(r, Exit);
+    
+    r = ValidateDSCDocumentInstance(miTempInstanceArray, flags | VALIDATE_DOCUMENT_INSTANCE, extendedError);
+    if (r != MI_RESULT_OK)
+    {
+        //Appending the underlying errors to this error ID
+        AppendWMIError1ParamID(*extendedError, ID_LCM_PARTIALCONFIG_MERGED_VALIDATION_FAILED);
+    }
+    GOTO_CLEANUP_IF_FAILED(r, Exit);
+
+Exit:
+    DSCFREE_IF_NOT_NULL(pbuffer);
+    if (miTempInstanceArray != NULL)
+    {
+        CleanUpDeserializerInstanceCache(miTempInstanceArray);
+    }
+    return r;
+
+
+}
+
+MI_Result ValidateClassPropertiesForMetaConfResourceChildren(_In_ MI_Class *configDocumentClass,
+                                                             _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r;
+    r = ValidateClassProperties(configDocumentClass, g_PartialConfigurationProperties, OMI_MetaConfigurationResource_Property_Count, extendedError);
+
+    return r;
+}
+
+
+//Function to validate if the given module and resource name match as per the convention to the given partial configuration file. If matchFound = true,its bad.
+MI_Result ValidateResourceObeysExclusiveResourcesRule(_In_z_ MI_Char* exclusiveResourceString,
+    _In_ MI_Instance* resourceInstance,
+    _Inout_ MI_Boolean * obeysExclusiveResources,
+    _Outptr_result_maybenull_ MI_Instance** cimErrorDetails)
+{
+    /*
+    Three ways in which we can represent module/resource
+    1. Module\*
+    2. Modulename\resourcename
+    3. ResourceName
+    */
+    MI_Uint32 numCharactersBeforeDelimiter = 0;
+    MI_Boolean gotDelimiter = MI_FALSE;
+    MI_Boolean matchFound = MI_FALSE;
+    MI_Char* resourceName = NULL;
+    //MI_Char* token = NULL;
+    MI_Char* moduleName = NULL;
+    MI_Value valueModuleName;
+    MI_Char* travelPtr = NULL;
+    //MI_Char* delimiter = L"\\";
+    MI_Result result = MI_RESULT_OK;
+    if (cimErrorDetails == NULL || exclusiveResourceString==NULL)
+    {
+        return MI_RESULT_NOT_FOUND;
+    }
+    *cimErrorDetails = NULL;
+    if (resourceInstance == NULL || resourceInstance->classDecl == NULL || resourceInstance->classDecl->name == NULL)
+    {
+        result = GetCimMIError(MI_RESULT_INVALID_CLASS, cimErrorDetails, ID_LCM_INVALID_RESOURCEINSTANCE);
+        return result;
+    }
+    DSC_EventWriteLCMValidatingPartialExclusiveResourceStringDefintion(exclusiveResourceString);
+    //Get the module name from the resource instance
+    result = MI_Instance_GetElement(resourceInstance, OMI_BaseResource_ModuleName, &valueModuleName, NULL, NULL, NULL);
+    if (result != MI_RESULT_OK)
+    {
+        result = GetCimMIError1Param(MI_RESULT_INVALID_CLASS, cimErrorDetails, ID_LCM_MODULENAME_NOTFOUND, resourceInstance->classDecl->name);
+        return result;
+    }
+    moduleName = exclusiveResourceString;
+
+    travelPtr = exclusiveResourceString;
+    while (*travelPtr)
+    {
+        while (*travelPtr == '\\')
+        {
+            travelPtr++;//Just don't count delimiter
+            gotDelimiter = MI_TRUE;
+        }
+        if (gotDelimiter)
+        {
+            //This means module is correctly identified, but resource name is yet to be assigned.
+            resourceName = travelPtr;
+            break;
+        }
+        travelPtr++;
+        numCharactersBeforeDelimiter++;
+    }
+    //Check for error cases
+    if ((gotDelimiter && (resourceName == NULL  || numCharactersBeforeDelimiter == 0 ))) //Case:  \ResourceName , \ and ModuleName  
+    {
+        result = GetCimMIError2Params(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_PARTIALCONFIG_INVALID_EXCLUSIVERESOURCESTRING, exclusiveResourceString, resourceInstance->classDecl->name);
+        return result;
+    }
+
+    //Case by Case basis.Case1: Module
+    if (moduleName != NULL && Tcscasecmp(resourceName, L"*") == 0)
+    {
+        if (Tcsncasecmp(valueModuleName.string, moduleName, numCharactersBeforeDelimiter) == 0)
+        {
+            matchFound = MI_TRUE;
+        }
+    }
+    
+    //Case 2 ModuleName/ResourceName, 
+    else if (resourceName!=NULL)
+    {
+        if (Tcscasecmp(resourceInstance->classDecl->name, resourceName) == 0)
+        {
+            matchFound = MI_TRUE;
+        }
+    }
+    else if (resourceName == NULL) //Case 3 : ResourceName
+    {
+        if (Tcscasecmp(resourceInstance->classDecl->name, exclusiveResourceString) == 0)
+        {
+            matchFound = MI_TRUE;
+        }
+    }
+    //It obeys exclusive resource rule as long as match isn't found.
+    *obeysExclusiveResources = !matchFound;
+    return result;
+}
+
+
+MI_Result ValidateMetaConfResourceProperties(_In_ MI_Class *configDocumentClass, 
+                                             _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r;
+    r = ValidateClassProperties(configDocumentClass, g_MetaConfigurationResourceProperties, 0, extendedError);
+   
+    return r;
+}
+
+MI_Result  ValidateConfigurationDownloadManagerProperties(_In_ MI_Class *configDocumentClass, 
+                                                          _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r;
+    r = ValidateClassProperties(configDocumentClass, g_ConfigurationDownloadManagerProperties, OMI_MetaConfigurationResource_Property_Count, extendedError);
+   
+    return r;
+}
+
+
+MI_Result  ValidateWebDownloadManagerProperties(_In_ MI_Class *configDocumentClass, 
+                                                _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r;
+    r = ValidateClassProperties(configDocumentClass,  g_WebDownloadManagerProperties, OMI_MetaConfigurationResource_Property_Count + 1, extendedError);
+   
+    return r;
+}

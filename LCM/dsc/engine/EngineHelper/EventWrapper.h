@@ -446,6 +446,52 @@ void DSCFilePutLog(
 #define DSC_EventWriteWebDownloadManagerGetDocFileSave(ConfigurationId, FilePath) \
     ExpandEvent(WebDownloadManagerGetDocFileSave( g_ConfigurationDetails.jobGuidString, ConfigurationId, FilePath))
 
+//*********************PARTIAL CONFIGURATION EVENTS ********************//
+#define DSC_EventWriteLCMPullingPartial(partialConfigName) \
+    ExpandEvent(LCMPullingPartial(g_ConfigurationDetails.jobGuidString, partialConfigName))
+
+#define DSC_EventWriteLCMApplyingPartial(PartialConfigName) \
+    ExpandEvent(LCMApplyingPartial(g_ConfigurationDetails.jobGuidString, PartialConfigName))
+
+#define DSC_EventWriteLCMIdentifiedModePartial() \
+    ExpandEvent(LCMIdentifiedModePartial(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMAboutToMergePartial() \
+    ExpandEvent(LCMAboutToMergePartial(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMMergingPartialConfiguration(PartialConfigurationName) \
+    ExpandEvent(LCMMergingPartialConfiguration(g_ConfigurationDetails.jobGuidString, PartialConfigurationName))
+
+#define DSC_EventWriteLCMValidatingPartialConfiguration(PartialConfigurationName) \
+    ExpandEvent(LCMValidatingPartialConfiguration(g_ConfigurationDetails.jobGuidString, PartialConfigurationName))
+        
+#define DSC_EventWriteLCMValidatingMergedPartial() \
+    ExpandEvent(LCMValidatingMergedPartial(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMValidatingMetaConfPartial() \
+    ExpandEvent(LCMValidatingMetaConfPartial(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMValidatingPartialConfigName(partialConfigName) \
+    ExpandEvent(LCMValidatingPartialConfigName(g_ConfigurationDetails.jobGuidString, partialConfigName))
+
+#define DSC_EventWriteLCMValidatingPartialConfigMetaConfDownloadMgr() \
+    ExpandEvent(LCMValidatingPartialConfigMetaConfDownloadMgr(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMValidatingPartialConfigMetaConfExclusiveResources() \
+    ExpandEvent(LCMValidatingPartialConfigMetaConfExclusiveResources(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMValidatingPartialExclusiveResourceStringDefintion(exclusiveResourceString) \
+    ExpandEvent(LCMValidatingPartialExclusiveResourceStringDefintion(g_ConfigurationDetails.jobGuidString, exclusiveResourceString))
+
+#define DSC_EventWritePartialConfigurationNotAvailable(PartialConfigurationName) \
+    ExpandEvent(PartialConfigurationNotAvailable( g_ConfigurationDetails.jobGuidString, PartialConfigurationName))
+
+
+#define DSC_EventWriteCUMethodWarning(WarningMessage) \
+        ExpandEvent(CUMethodWarning( g_ConfigurationDetails.jobGuidString, WarningMessage))
+
+
+
 #ifdef __cplusplus
 
 }

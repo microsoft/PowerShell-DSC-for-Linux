@@ -5,6 +5,101 @@
 
 #include <oi/oi_file.h>
 
+#if defined(CONFIG_ENABLE_DEBUG)
+#define CUMethodWarning(a0, a1) CUMethodWarning_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define CUMethodWarning(a0, a1) CUMethodWarning_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4253, CUMethodWarning_Impl, LOG_WARNING, PAL_T("Job %1 : \nWarningMessage %2"), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMAboutToMergePartial(a0) LCMAboutToMergePartial_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define LCMAboutToMergePartial(a0) LCMAboutToMergePartial_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4277, LCMAboutToMergePartial_Impl, LOG_INFO, PAL_T("Job %s : \nLooking into the partial configuration store to merge any present partial configurations."), const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMApplyingPartial(a0, a1) LCMApplyingPartial_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMApplyingPartial(a0, a1) LCMApplyingPartial_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4275, LCMApplyingPartial_Impl, LOG_INFO, PAL_T("Job %s : \nStarting to apply partial configuration %s."), const TChar*, const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMIdentifiedModePartial(a0) LCMIdentifiedModePartial_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define LCMIdentifiedModePartial(a0) LCMIdentifiedModePartial_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4276, LCMIdentifiedModePartial_Impl, LOG_INFO, PAL_T("Job %s : \nHandling application of configurations in partial configuration mode based on the meta configuration definition."), const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMMergingPartialConfiguration(a0, a1) LCMMergingPartialConfiguration_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMMergingPartialConfiguration(a0, a1) LCMMergingPartialConfiguration_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4278, LCMMergingPartialConfiguration_Impl, LOG_INFO, PAL_T("Job %s : \nMerging partial configuration %s into pending.mof"), const TChar*, const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMPullingPartial(a0, a1) LCMPullingPartial_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMPullingPartial(a0, a1) LCMPullingPartial_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4274, LCMPullingPartial_Impl, LOG_INFO, PAL_T("Job %s : \nPulling partial configuration %s from the server."), const TChar*, const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define PartialConfigurationNotAvailable(a0, a1) PartialConfigurationNotAvailable_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define PartialConfigurationNotAvailable(a0, a1) PartialConfigurationNotAvailable_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4267, PartialConfigurationNotAvailable_Impl, LOG_WARNING, PAL_T("Job %s : \nPartial Configuration %s not available on configuration server."), const TChar*, const TChar*)
+
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMValidatingMergedPartial(a0) LCMValidatingMergedPartial_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define LCMValidatingMergedPartial(a0) LCMValidatingMergedPartial_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4280, LCMValidatingMergedPartial_Impl, LOG_INFO, PAL_T("Job %s : \nValidating the document got from merging all partial configurations"), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMValidatingMetaConfPartial(a0) LCMValidatingMetaConfPartial_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define LCMValidatingMetaConfPartial(a0) LCMValidatingMetaConfPartial_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4281, LCMValidatingMetaConfPartial_Impl, LOG_INFO, PAL_T("Job %s : \nValidating the partial configuration definition blocks inside the meta configuration."), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMValidatingPartialConfigName(a0, a1) LCMValidatingPartialConfigName_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMValidatingPartialConfigName(a0, a1) LCMValidatingPartialConfigName_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4282, LCMValidatingPartialConfigName_Impl, LOG_INFO, PAL_T("Job %s : \nValidating that the name of the partial configuration %s is consistent across the partial configuration ."), const TChar*, const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMValidatingPartialConfigMetaConfDownloadMgr(a0) LCMValidatingPartialConfigMetaConfDownloadMgr_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define LCMValidatingPartialConfigMetaConfDownloadMgr(a0) LCMValidatingPartialConfigMetaConfDownloadMgr_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4283, LCMValidatingPartialConfigMetaConfDownloadMgr_Impl, LOG_INFO, PAL_T("Job %s : \nValidating that the configuration source defined in each partial configuration inside the meta configuration are defined as configuration download managers as well ."), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMValidatingPartialConfigMetaConfExclusiveResources(a0) LCMValidatingPartialConfigMetaConfExclusiveResources_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define LCMValidatingPartialConfigMetaConfExclusiveResources(a0) LCMValidatingPartialConfigMetaConfExclusiveResources_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4284, LCMValidatingPartialConfigMetaConfExclusiveResources_Impl, LOG_INFO, PAL_T("Job %s : \nValidating that the exclusive resources are not conflicting in the meta configuration definition ."), const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMValidatingPartialConfiguration(a0, a1) LCMValidatingPartialConfiguration_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMValidatingPartialConfiguration(a0, a1) LCMValidatingPartialConfiguration_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4279, LCMValidatingPartialConfiguration_Impl, LOG_INFO, PAL_T("Job %s : \nValidating the partial configuration %s for consistency in configuration Name and exclusive resources"), const TChar*, const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMValidatingPartialExclusiveResourceStringDefintion(a0, a1) LCMValidatingPartialExclusiveResourceStringDefintion_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMValidatingPartialExclusiveResourceStringDefintion(a0, a1) LCMValidatingPartialExclusiveResourceStringDefintion_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4285, LCMValidatingPartialExclusiveResourceStringDefintion_Impl, LOG_INFO, PAL_T("Job %s : \nValidating if the exclusive resource %s is written in the correct format"), const TChar*, const TChar*)
+
 
 #if defined(CONFIG_ENABLE_DEBUG)
 #define LCMSendConfigurationError(a0, a1, a2, a3, a4, a5, a6) LCMSendConfigurationError_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), a2, tcs(a3), tcs(a4), tcs(a5), tcs(a6))
