@@ -23,64 +23,42 @@ show_mof=False
 #   [Write] boolean Path;
   
 LogPath='/tmp/nxEnvironment.log'
-def Set_Marshall(Name,Value,Ensure,Path):
+
+def init_vars(Name,Value,Ensure,Path):
     if Name != None :
-        Name=Name.decode('utf-8')
+        Name=Name.encode('ascii','ignore')
     else:
         Name = ''
     if Value != None :
-        Value = Value.decode('utf-8')
+        Value = Value.encode('ascii','ignore')
     else:
         Value = ''
     if Ensure != None :
-        Ensure = Ensure.decode('utf-8')
+        Ensure = Ensure.encode('ascii','ignore')
     else:
         Ensure = ''
     if Path == None :
         Path = False
-        
+    return Name,Value,Ensure.lower(),Path
+    
+def Set_Marshall(Name,Value,Ensure,Path):
+    (Name,Value,Ensure,Path) = init_vars(Name,Value,Ensure,Path)
     retval = Set(Name,Value,Ensure,Path)
     return retval
 
 def Test_Marshall(Name,Value,Ensure,Path):
-    if Name != None :
-        Name=Name.decode('utf-8')
-    else:
-        Name = ''
-    if Value != None :
-        Value = Value.decode('utf-8')
-    else:
-        Value = ''
-    if Ensure != None :
-        Ensure = Ensure.decode('utf-8')
-    else:
-        Ensure = ''
-    if Path == None :
-        Path = False
+    (Name,Value,Ensure,Path) = init_vars(Name,Value,Ensure,Path)
     retval = Test(Name,Value,Ensure,Path)
     return retval
 
 def Get_Marshall(Name,Value,Ensure,Path):
     arg_names=list(locals().keys())
-    if Name != None :
-        Name=Name.decode('utf-8')
-    else:
-        Name = ''
-    if Value != None :
-        Value = Value.decode('utf-8')
-    else:
-        Value = ''
-    if Ensure != None :
-        Ensure = Ensure.decode('utf-8')
-    else:
-        Ensure = ''
-    if Path == None :
-        Path = False
+    (Name,Value,Ensure,Path) = init_vars(Name,Value,Ensure,Path)
     retval = 0
     retval,Name,Value,Ensure,Path = Get(Name,Value,Ensure,Path)
-    Name = protocol.MI_String(Name.encode("utf-8"))
-    Value = protocol.MI_String(Value.encode("utf-8"))
-    Ensure = protocol.MI_String(Ensure.encode("utf-8"))
+    Name = protocol.MI_String(Name)
+    Value = protocol.MI_String(Value)
+    Ensure = protocol.MI_String(Ensure)
     Path = protocol.MI_Boolean(Path)
 
     retd={}
@@ -116,9 +94,9 @@ def ShowMof(op, Name,Value,Ensure,Path):
 class Params:
     def __init__(self,Name,Value,Ensure,Path):
 
-        if not ( "Present" in Ensure or "Absent" in Ensure ):
-            Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
-            Log(LogPath,'ERROR: Param Ensure must be Present or Absent.')
+        if not ( "present" in Ensure or "absent" in Ensure ):
+            Print('ERROR: Param Ensure must be "Present" or "Absent".',file=sys.stderr)
+            Log(LogPath,'ERROR: Param Ensure must be "Present" or "Absent".')
             raise Exception('BadParameter')
         self.Ensure = Ensure
 
@@ -187,9 +165,9 @@ def Test(Name,Value,Ensure,Path):
     ShowMof('TEST', Name,Value,Ensure,Path)
 
     found,error=FindVar(p)
-    if  found and p.Ensure == 'Present'  :
+    if  found and p.Ensure == 'present'  :
         retval = 0
-    if not found and p.Ensure == 'Absent' :
+    if not found and p.Ensure == 'absent' :
         retval =0
     
     return [retval]
@@ -204,9 +182,9 @@ def Get(Name,Value,Ensure,Path):
         return [retval,Name,Value,Ensure,Path]
     ShowMof('GET', Name,Value,Ensure,Path)
     found,error=FindVar(p)
-    if  found and p.Ensure == 'Present'  :
+    if  found and p.Ensure == 'present'  :
         retval = 0
-    if not found and p.Ensure == 'Absent' :
+    if not found and p.Ensure == 'absent' :
         retval =0
     return [retval,Name,Value,Ensure,Path]
 
@@ -257,7 +235,7 @@ def AddOrDelVar(p):
         for l in F.readlines():
             if p.Path == True : 
                 if l.startswith('PATH=$PATH:"'+p.Value) :
-                    if p.Ensure == 'Present': # is is already there - keep it if present requested otherwise skip
+                    if p.Ensure == 'present': # is is already there - keep it if present requested otherwise skip
                         found=True
                         n+=l
                     else:
@@ -267,12 +245,12 @@ def AddOrDelVar(p):
             else:
                 if l.startswith(p.Name+'=') :
                     found = True
-                    if p.Ensure == 'Present': 
+                    if p.Ensure == 'present': 
                         l=p.Name+'='+p.Value+'\n' # set the variable to the new values
                         n+=l
                 else:
                     n+=l
-        if not found and p.Ensure == 'Present': # not found - present requested so add it.
+        if not found and p.Ensure == 'present': # not found - present requested so add it.
             if p.Path == True:
                 n+=p.Name+p.Value+'"\n'
             else:
