@@ -63,7 +63,10 @@ def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Chec
         Group = ''
     if Mode == None :
         Mode = ''
-    return DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode 
+    return DestinationPath.encode('ascii','ignore'), SourcePath.encode('ascii','ignore'), \
+           Ensure.encode('ascii','ignore').lower(), Type.encode('ascii','ignore').lower(), Force,\
+           Contents, Checksum.encode('ascii','ignore').lower(), Recurse, \
+           Links.encode('ascii','ignore').lower(), Owner, Group, Mode 
 
 def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
     DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
@@ -904,13 +907,13 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
     if '://' in SourcePath and Type !='file':
         raise Exception('ERROR: Remote paths are only valid for Type = "file".')
     if not DestinationPath:
-        Ensure = "Absent"
+        Ensure = "absent"
         SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ""
         ModifiedDate=0
         return [-1, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
     if not os.path.exists(DestinationPath):
-        Ensure = "Absent"
+        Ensure = "absent"
         SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ''
         ModifiedDate = 0
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
