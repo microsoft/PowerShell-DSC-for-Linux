@@ -47,22 +47,34 @@ global show_mof
 show_mof=False
 
 def init_vars(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
-    if Ensure == None :
-        Ensure=''
-    if PackageManager == None :
-        PackageManager=''
-    if Name == None :
-        Name=''
-    if FilePath == None :
-        FilePath=''
+    if Ensure != None :
+        Ensure=Ensure.encode('ascii','ignore').lower()
+    else:
+        Ensure = ''
+    if PackageManager != None :
+        PackageManager=PackageManager.encode('ascii','ignore').lower()
+    else:
+        PackageManager = ''
+    if Name != None :
+        Name=Name.encode('ascii','ignore')
+    else:
+        Name = ''
+    if FilePath != None :
+        FilePath=FilePath.encode('ascii','ignore')
+    else:
+        FilePath = ''
     if PackageGroup == None :
-        PackageGroup=False
-    if Arguments == None:
-        Arguments=''
+        PackageGroup = False
+    if Arguments != None :
+        Arguments=Arguments.encode('ascii','ignore')
+    else:
+        Arguments = ''
     if ReturnCode == None :
-        ReturnCode =0 
-    if LogPath == None:
-        LogPath=''
+        ReturnCode=0
+    if LogPath != None :
+        LogPath=LogPath.encode('ascii','ignore')
+    else:
+        LogPath = ''
     return Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath 
 
 def Set_Marshall(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
@@ -154,14 +166,14 @@ def ParseArguments(a):
 class Params:
     def __init__(self,Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,LogPath):
 
-        if not ( "Present" in Ensure or "Absent" in Ensure ):
-            print('ERROR: Param Ensure must be Present or Absent.',file=sys.stdout)
-            Log(LogPath,'ERROR: Param Ensure must be Present or Absent.')
+        if not ( "present" in Ensure or "absent" in Ensure ):
+            print('ERROR: Param Ensure must be "Present" or "Absent".',file=sys.stdout)
+            Log(LogPath,'ERROR: Param Ensure must be "Present" or "Absent".')
             raise Exception('BadParameter')
         if len(PackageManager)>0:
-            if not ( "yum" in PackageManager.lower() or  "apt" in PackageManager.lower() or "zypper" in PackageManager.lower() ) :
-                print('ERROR: Param PackageManager values are Yum, Apt, or Zypper.',file=sys.stdout)
-                Log(LogPath,'ERROR: Param PackageManager values are Yum, Apt, or Zypper.')
+            if not ( "yum" in PackageManager or  "apt" in PackageManager or "zypper" in PackageManager ) :
+                print('ERROR: Param PackageManager values are "Yum", "Apt", or "Zypper".',file=sys.stdout)
+                Log(LogPath,'ERROR: Param PackageManager values are "Yum", "Apt", or "Zypper".')
                 raise Exception('BadParameter')
         if len(Name)<1 and len(FilePath)<1:
             print('ERROR: Param Name or FilePath must be set.',file=sys.stdout)
@@ -178,7 +190,7 @@ class Params:
             raise Exception('BadParameter')
         
         self.Ensure = Ensure
-        self.PackageManager = PackageManager.lower()
+        self.PackageManager = PackageManager
         self.Name = Name
         self.FilePath = FilePath
         self.PackageGroup = PackageGroup
@@ -210,26 +222,26 @@ class Params:
         self.cmds['apt']={}
         self.cmds['yum']={}
         self.cmds['zypper']={}
-        self.cmds['dpkg']['Present']='dpkg % -i '
-        self.cmds['dpkg']['Absent']='dpkg % -r '
+        self.cmds['dpkg']['present']='dpkg % -i '
+        self.cmds['dpkg']['absent']='dpkg % -r '
         self.cmds['dpkg']['stat']="dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}\n' "
         self.cmds['dpkg']['stat_group']=None
-        self.cmds['rpm']['Present']='rpm % -i '
-        self.cmds['rpm']['Absent']='rpm % -e '
+        self.cmds['rpm']['present']='rpm % -i '
+        self.cmds['rpm']['absent']='rpm % -e '
         self.cmds['rpm']['stat']='rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed\n" '
         self.cmds['rpm']['stat_group']=None
-        self.cmds['apt']['Present']='apt-get % install ^ --allow-unauthenticated --yes '
-        self.cmds['apt']['Absent']='apt-get % remove ^ --allow-unauthenticated --yes '
+        self.cmds['apt']['present']='apt-get % install ^ --allow-unauthenticated --yes '
+        self.cmds['apt']['absent']='apt-get % remove ^ --allow-unauthenticated --yes '
         self.cmds['apt']['stat']=self.cmds['dpkg']['stat']
         self.cmds['apt']['stat_group']=None
-        self.cmds['yum']['Present']='yum -y % install ^ '
-        self.cmds['yum']['Absent']='yum -y % remove ^ '
-        self.cmds['yum']['GroupPresent']='yum -y % groupinstall ^ '
-        self.cmds['yum']['GroupAbsent']='yum -y % groupremove ^ '
+        self.cmds['yum']['present']='yum -y % install ^ '
+        self.cmds['yum']['absent']='yum -y % remove ^ '
+        self.cmds['yum']['grouppresent']='yum -y % groupinstall ^ '
+        self.cmds['yum']['groupabsent']='yum -y % groupremove ^ '
         self.cmds['yum']['stat_group']='yum grouplist ' # the group mode is implemented when using YUM only.  
         self.cmds['yum']['stat']=self.cmds['rpm']['stat']
-        self.cmds['zypper']['Present']='zypper --non-interactive % install ^'
-        self.cmds['zypper']['Absent']='zypper --non-interactive  % remove ^'
+        self.cmds['zypper']['present']='zypper --non-interactive % install ^'
+        self.cmds['zypper']['absent']='zypper --non-interactive  % remove ^'
         self.cmds['zypper']['stat']=self.cmds['rpm']['stat']
         self.cmds['zypper']['stat_group']=None
         if self.PackageGroup == True:
@@ -346,7 +358,7 @@ def ParseInfo(p,info):
 def DoEnableDisable(p):
     # if the path is set, use the path and self.PackageSystem
     cmd=""
-    if len(p.FilePath) > 1 and 'Present' in p.Ensure : # don't use the path unless installing
+    if len(p.FilePath) > 1 and 'present' in p.Ensure : # don't use the path unless installing
         if '://' in p.FilePath and p.LocalPath == '': # its a remote file
             ret=0
             ret=GetRemoteFile(p)
@@ -363,8 +375,8 @@ def DoEnableDisable(p):
         cmd=p.cmds[p.PackageSystem][p.Ensure] + ' ' + p.FilePath
         cmd=cmd.replace('%',p.Arguments)
     elif p.PackageGroup == True :
-        if 'Group'+p.Ensure in p.cmds[p.PackageManager] :
-            cmd=p.cmds[p.PackageManager]['Group'+p.Ensure] + '"' + p.Name +'"'
+        if 'group'+p.Ensure in p.cmds[p.PackageManager] :
+            cmd=p.cmds[p.PackageManager]['group'+p.Ensure] + '"' + p.Name +'"'
         else :
             print('Error: Group mode not implemented for ' + p.PackageManager,file=sys.stdout)
             Log(p.LogPath,'Error: Group mode not implemented for ' + p.PackageManager)
@@ -445,13 +457,13 @@ def Set(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,Lo
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
         return [-1]
     installed,out = IsPackageInstalled(p)
-    if ( installed and Ensure == 'Present' ) or ( not installed and Ensure == 'Absent') : # Nothing to do
+    if ( installed and Ensure == 'present' ) or ( not installed and Ensure == 'absent') : # Nothing to do
         return [0]
 
     result,out=DoEnableDisable(p)
     if result == False :
         op=''
-        if Ensure == 'Present' :
+        if Ensure == 'present' :
             op = 'Install'
         else :
             op='Un-install'
@@ -469,7 +481,7 @@ def Test(Ensure,PackageManager,Name,FilePath,PackageGroup,Arguments,ReturnCode,L
         Log(LogPath,'ERROR - Unable to initialize nxPackageProvider. '+ e.message)
         return [-1]
     installed,out = IsPackageInstalled(p)
-    if ( installed and Ensure == 'Present' ) or ( not installed and Ensure == 'Absent') :
+    if ( installed and Ensure == 'present' ) or ( not installed and Ensure == 'absent') :
         return [0]
     return [-1]
 
@@ -554,9 +566,6 @@ def RunGetOutput(cmd,no_output,chk_err=True):
     else :
         return 0,output.decode('latin-1')
 
-def Print(s,file=sys.stdout):
-    file.write(s+'\n')
-    
 def Log(file_path,message):
     if len(file_path)<1 or len(message) < 1:
         return
