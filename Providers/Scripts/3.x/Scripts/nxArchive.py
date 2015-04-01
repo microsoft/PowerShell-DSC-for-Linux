@@ -41,7 +41,7 @@ def init_vars(DestinationPath, SourcePath, Ensure, Force, Checksum):
         Force = False
     if Checksum == None :
         Checksum = ''
-    return DestinationPath, SourcePath, Ensure, Force, Checksum
+    return DestinationPath, SourcePath, Ensure.lower(), Force, Checksum.lower()
 
 def Set_Marshall(DestinationPath, SourcePath, Ensure, Force, Checksum):
     (DestinationPath, SourcePath, Ensure, Force, Checksum) = init_vars(DestinationPath, SourcePath, Ensure, Force, Checksum)
@@ -208,7 +208,7 @@ def CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum):
             return True
 
 def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
-    if Ensure == 'Absent': # Do nothing.  Set should not get called as previous Test will evaluate to True
+    if Ensure == 'absent': # Do nothing.  Set should not get called as previous Test will evaluate to True
         return False
     if not os.path.isfile(SourcePath):     # if the sourcepath is not valid file return False
         print('ERROR: SourcePath<'+SourcePath+'> is not a valid file')
@@ -272,21 +272,21 @@ def Test(DestinationPath, SourcePath, Ensure, Force, Checksum):
     if not os.path.isdir(DestinationPath):
         return False
     if CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum) == True:
-        if Ensure == 'Present':
+        if Ensure == 'present':
             return True
         else:
             return False
     else:
-        if Ensure == 'Present':
+        if Ensure == 'present':
             return False
         else:
             return True 
 
 def Get(DestinationPath, SourcePath, Ensure, Force, Checksum):
     if Test(DestinationPath, SourcePath, Ensure, Force, Checksum) == False:
-        if Ensure == 'Present':
-            Ensure='Absent'
+        if Ensure == 'present':
+            Ensure='absent'
         else:
-            Ensure='Present'
+            Ensure='present'
     return DestinationPath, SourcePath, Ensure, Force, Checksum
 
