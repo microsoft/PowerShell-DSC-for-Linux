@@ -23,40 +23,37 @@ show_mof=False
 #   [Write] boolean Path;
   
 LogPath='/tmp/nxEnvironment.log'
+
+def init_vars(Name,Value,Ensure,Path):
+    if Name != None :
+        Name=Name.encode('ascii','ignore')
+    else:
+        Name = ''
+    if Value != None :
+        Value = Value.encode('ascii','ignore')
+    else:
+        Value = ''
+    if Ensure != None :
+        Ensure = Ensure.encode('ascii','ignore')
+    else:
+        Ensure = ''
+    if Path == None :
+        Path = False
+    return Name,Value,Ensure.lower(),Path
+
 def Set_Marshall(Name,Value,Ensure,Path):
-    if Name == None:
-        Name =''
-    if Value == None:
-        Value=''
-    if Ensure == None:
-        Ensure=''
-    if Path == None:
-        Path=False
+    (Name,Value,Ensure,Path) = init_vars(Name,Value,Ensure,Path)
     retval = Set(Name,Value,Ensure,Path)
     return retval
 
 def Test_Marshall(Name,Value,Ensure,Path):
-    if Name == None:
-        Name=''
-    if Value == None:
-        Value=''
-    if Ensure == None:
-        Ensure=''
-    if Path == None:
-        Path=False
+    (Name,Value,Ensure,Path) = init_vars(Name,Value,Ensure,Path)
     retval = Test(Name,Value,Ensure,Path)
     return retval
 
 def Get_Marshall(Name,Value,Ensure,Path):
     arg_names=list(locals().keys())
-    if Name == None:
-        Name=''
-    if Value == None:
-        Value=''
-    if Ensure == None:
-        Ensure=''
-    if Path == None:
-        Path=False
+    (Name,Value,Ensure,Path) = init_vars(Name,Value,Ensure,Path)
     retval = 0
     retval,Name,Value,Ensure,Path = Get(Name,Value,Ensure,Path)
     Name = protocol.MI_String(Name)
@@ -98,8 +95,8 @@ class Params:
     def __init__(self,Name,Value,Ensure,Path):
 
         if not ( "Present" in Ensure or "Absent" in Ensure ):
-            Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
-            Log(LogPath,'ERROR: Param Ensure must be Present or Absent.')
+            Print('ERROR: Param Ensure must be "Present" or "Absent".',file=sys.stderr)
+            Log(LogPath,'ERROR: Param Ensure must be "Present" or "Absent".')
             raise Exception('BadParameter')
         self.Ensure = Ensure
 
@@ -149,7 +146,7 @@ def Set(Name,Value,Ensure,Path):
     retval=-1
     try:
         p=Params(Name,Value,Ensure,Path)
-    except Exception as e:
+    except :
         Print('ERROR - Unable to initialize nxEnvironmentProvider.  ',file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxEnvironmentProvider. ')
         return [retval]
@@ -162,7 +159,7 @@ def Test(Name,Value,Ensure,Path):
     retval=-1
     try:
         p=Params(Name,Value,Ensure,Path)
-    except Exception as e:
+    except :
         Print('ERROR - Unable to initialize nxEnvironmentProvider.  ',file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxEnvironmentProvider. ')
         return [retval]
@@ -180,7 +177,7 @@ def Get(Name,Value,Ensure,Path):
     retval=-1
     try:
         p=Params(Name,Value,Ensure,Path)
-    except Exception as e:
+    except :
         Print('ERROR - Unable to initialize nxEnvironmentProvider.  ',file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxEnvironmentProvider. ')
         return [retval,Name,Value,Ensure,Path]
