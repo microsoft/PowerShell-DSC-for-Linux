@@ -22,65 +22,53 @@ protocol=imp.load_source('protocol','../protocol.py')
 global show_mof
 show_mof=False
 
-
-def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
-    if  GroupName == None:
-        GroupName=''
-    if Ensure == None:
-        Ensure=''
+def init_vars(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
+    if GroupName != None :
+        GroupName=GroupName.encode('ascii','ignore')
+    else:
+        GroupName = ''
+    if Ensure != None :
+        Ensure=Ensure.encode('ascii','ignore').lower()
+    else:
+        Ensure = ''
     if Members == None or len(Members) < 1 :
         Members = ['']
     if MembersToInclude == None or len(MembersToInclude) < 1:
         MembersToInclude = ['']
     if MembersToExclude == None or len(MembersToExclude) < 1:
         MembersToExclude = ['']
-    if PreferredGroupID == None:
-        PreferredGroupID=''
+    if PreferredGroupID != None :
+        PreferredGroupID=PreferredGroupID.encode('ascii','ignore')
+    else:
+        PreferredGroupID = ''
+    return GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID
 
+def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
+    (GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = \
+                init_vars(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     retval = Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     return retval
 
 def Test_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
-    if  GroupName == None:
-        GroupName=''
-    if Ensure == None:
-        Ensure=''
-    if Members == None or len(Members) < 1 :
-        Members = ['']
-    if MembersToInclude == None or len(MembersToInclude) < 1:
-        MembersToInclude = ['']
-    if MembersToExclude == None or len(MembersToExclude) < 1:
-        MembersToExclude = ['']
-    if PreferredGroupID == None:
-        PreferredGroupID=''
-
+    (GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = \
+                init_vars(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     retval = Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     return retval
 
 def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
     arg_names=list(locals().keys())
-    if  GroupName == None:
-        GroupName=''
-    if Ensure == None:
-        Ensure=''
-    if Members == None or len(Members) < 1 :
-        Members = ['']
-    if MembersToInclude == None or len(MembersToInclude) < 1:
-        MembersToInclude = ['']
-    if MembersToExclude == None or len(MembersToExclude) < 1:
-        MembersToExclude = ['']
-    if PreferredGroupID == None:
-        PreferredGroupID=''
-
+    (GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = \
+                init_vars(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     retval = 0
-    (retval, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
+    (retval, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = \
+             Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
 
-    GroupName = protocol.MI_String(GroupName.encode("utf-8"))
-    Ensure = protocol.MI_String(Ensure.encode("utf-8"))
+    GroupName = protocol.MI_String(GroupName)
+    Ensure = protocol.MI_String(Ensure)
     Members = protocol.MI_StringA(Members)
     MembersToInclude = protocol.MI_StringA(MembersToInclude)
     MembersToExclude = protocol.MI_StringA(MembersToExclude)
-    PreferredGroupID = protocol.MI_String(PreferredGroupID.encode("utf-8"))
+    PreferredGroupID = protocol.MI_String(PreferredGroupID)
 
     retd={}
     ld=locals()
@@ -211,7 +199,7 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
     if group_entries == None:
         return [-1]
 
-    if Ensure.lower() == "absent":
+    if Ensure == "absent":
         if GroupName in group_entries:
             # Delete group
             Print("Deleting group",file=sys.stderr)
@@ -229,7 +217,6 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
 
             # Reread /etc/group
             group_entries = ReadPasswd("/etc/group")
-
         if len(Members[0]):
             if len(MembersToInclude[0]) or len(MembersToExclude[0]):
                 Print("If Members is provided, Include and Exclude are not allowed.",file=sys.stderr)
@@ -275,7 +262,7 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
     if group_entries == None:
         return [-1]
 
-    if Ensure.lower() == "absent":
+    if Ensure == "absent":
         if GroupName not in group_entries:
             return [0]
         else:
@@ -287,7 +274,7 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
         
         if len(Members[0]):
             if len(MembersToInclude[0]) or len(MembersToExclude[0]):
-                Print("If Members is provided, Include and Exclude are not allowed.",file=sys.stderr)
+                Print("If Members is provided, MembersToInclude and MembersToExclude are not allowed.",file=sys.stderr)
                 return [-1]
 
             group_members = GetGroupMembers(GroupName, group_entries)
@@ -325,10 +312,10 @@ def Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
     MembersToExclude = ['']
 
     if GroupName not in group_entries:
-        Ensure = "Absent"
+        Ensure = "absent"
         PreferredGroupID = ""
     else:
-        Ensure = "Present"
+        Ensure = "present"
         PreferredGroupID = group_entries[GroupName][1]
         Members = GetGroupMembers(GroupName, group_entries)
 
