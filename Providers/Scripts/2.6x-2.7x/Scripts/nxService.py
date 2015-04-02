@@ -11,7 +11,6 @@ import os
 import sys
 import glob
 import codecs
-import platform
 import imp
 import time
 protocol=imp.load_source('protocol','../protocol.py')
@@ -25,74 +24,50 @@ protocol=imp.load_source('protocol','../protocol.py')
 global show_mof
 show_mof=False
 
-def Set_Marshall(Name, Controller, Enabled, State):
+def init_vars(Name, Controller, Enabled, State):
     if Name != None :
-        Name=Name.decode("utf-8")
+        Name=Name.encode('ascii','ignore')
     else:
         Name = ''
     if Controller != None :
-        Controller=Controller.decode("utf-8")
+        Controller=Controller.encode('ascii','ignore').lower()
     else:
         Controller = ''
     if Enabled == None :
         Enabled=False
     if State != None :
-        State=State.decode("utf-8")
+        State=State.encode('ascii','ignore').lower()
     else:
         State = ''
+    return Name, Controller, Enabled, State
 
+def Set_Marshall(Name, Controller, Enabled, State):
+    (Name, Controller, Enabled, State) = init_vars(Name, Controller, Enabled, State)
     retval = Set(Name, Controller, Enabled, State)
     return retval
 
 def Test_Marshall(Name, Controller, Enabled, State):
-    if Name != None :
-        Name=Name.decode("utf-8")
-    else:
-        Name = ''
-    if Controller != None :
-        Controller=Controller.decode("utf-8")
-    else:
-        Controller = ''
-    if Enabled == None :
-        Enabled=False
-    if State != None :
-        State=State.decode("utf-8")
-    else:
-        State = ''
+    (Name, Controller, Enabled, State) = init_vars(Name, Controller, Enabled, State)
     retval = Test(Name, Controller, Enabled, State)
     return retval
 
 def Get_Marshall(Name, Controller, Enabled, State):
     arg_names=list(locals().keys())
-    if Name != None :
-        Name=Name.decode("utf-8")
-    else:
-        Name = ''
-    if Controller != None :
-        Controller=Controller.decode("utf-8")
-    else:
-        Controller = ''
-    if Enabled == None :
-        Enabled=False
-    if State != None :
-        State=State.decode("utf-8")
-    else:
-        State = ''
+    (Name, Controller, Enabled, State) = init_vars(Name, Controller, Enabled, State)
     retval = 0
     (retval, Name, Controller, Enabled, State, Path) = Get(Name, Controller, Enabled, State)
 
-    Name = protocol.MI_String (Name.encode("utf-8"))
-    Controller = protocol.MI_String (Controller.encode("utf-8"))
+    Name = protocol.MI_String (Name)
+    Controller = protocol.MI_String (Controller)
     Enabled = protocol.MI_Boolean (Enabled)
-    State = protocol.MI_String (State.encode("utf-8"))
-    Path = protocol.MI_String (Path.encode("utf-8"))
-    arg_names.append('Path')
+    State = protocol.MI_String (State)
+    Path = protocol.MI_String (Path)
+
     retd={}
     ld=locals()
     for k in arg_names :
         retd[k]=ld[k] 
     return retval, retd
-
 
 ############################################################
 ### Begin user defined DSC functions
@@ -134,7 +109,6 @@ def opened_w_error(filename, mode="r"):
             yield f, None
         finally:
             f.close()
-
 
 def RunGetOutput(cmd,no_output,chk_err=True):
     """
@@ -329,7 +303,7 @@ def GetRunLevel():
 def DetermineInitState(stdout):
     if "is running" in stdout or "start/running" in stdout or "..running" in stdout:
         return True
-    elif stdout.strip() == "Running":
+    elif stdout.strip() == "running":
         return True
     elif "(running)" in stdout:
         return True
@@ -359,8 +333,8 @@ def GetSystemdState(sc):
     (process_stdout, process_stderr, retval) = Process([systemctl_path, "status", sc.Name])
     if retval == 0:
         if '(running)' in process_stdout:
-            return u"Running"
-    return u"Stopped"
+            return "running"
+    return "stopped"
 
 def TestSystemdState(sc):
     if sc.State and sc.State != GetSystemdState(sc):
@@ -398,9 +372,9 @@ def GetUpstartState(sc):
         return ""
 
     if (sc.Name + " start") in process_stdout:
-        return u"Running"
+        return "running"
     else:
-        return u"Stopped"
+        return "stopped"
 
 def TestUpstartState(sc):
     if sc.State and sc.State != GetUpstartState(sc):
@@ -408,8 +382,6 @@ def TestUpstartState(sc):
     return True
 
 def GetUpstartEnabled(sc):
-#    import pdb; pdb.set_trace()
-
     if os.path.isfile("/etc/init/" + sc.Name + ".conf"):
         if os.path.islink('/etc/init.d/'+ sc.Name) and os.readlink('/etc/init.d/'+ sc.Name) == '/lib/init/upstart-job' :
             # this is a 'converted' init script, check the default rc2.d for smylink to conf file. if so its enabled.
@@ -502,17 +474,14 @@ def TestUpstart(sc):
 
 def GetInitState(sc):
     check_state_program = initd_service
-    check_enabled_program = initd_chkconfig
     if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc): # debian style init. These are missing in redhat.
         check_state_program = '/usr/sbin/service'
-        check_enabled_program = initd_updaterc
-
     (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "status"])
     
     if DetermineInitState(process_stdout):
-        return u"Running"
+        return "running"
     else:
-        return u"Stopped"
+        return "stopped"
 
 def TestInitState(sc):
     if sc.State and sc.State != GetInitState(sc):
@@ -530,7 +499,6 @@ def GetInitEnabled(sc):
                 return True
         return False
     else:
-        check_state_program = initd_service
         check_enabled_program = initd_chkconfig
         (process_stdout, process_stderr, retval) = Process([check_enabled_program, "--list", sc.Name])
 
@@ -633,12 +601,12 @@ def ModifySystemdService(sc):
     (process_stdout, process_stderr, retval) = Process([systemctl_path, "status", sc.Name + '.service'])
     if retval == 0:
         Print("Running",file=sys.stderr)
-        if sc.State and sc.State != u"Running":
+        if sc.State and sc.State != "running":
             return StopService(sc)
             
     else:
         Print("Stopped",file=sys.stderr)
-        if sc.State and sc.State != u"Stopped":
+        if sc.State and sc.State != "stopped":
             return StartService(sc)
 
     return [0]
@@ -716,7 +684,7 @@ def ModifyUpstartService(sc):
             Print("Error: Failed to modify upstart conf file",file=sys.stderr)
             return [-1]
     
-    if sc.State == u"Running":
+    if sc.State == "running":
         (process_stdout, process_stderr, retval) = Process([upstart_start_path, sc.Name])
         
         if retval != 0:
@@ -726,7 +694,7 @@ def ModifyUpstartService(sc):
         if not IsServiceRunning(sc):
             Print("Error: " +  upstart_start_path + " " + sc.Name + " failed: " + process_stderr,file=sys.stderr)
             return [-1]
-    elif sc.State == u"Stopped":
+    elif sc.State == "stopped":
         (process_stdout, process_stderr, retval) = Process([upstart_stop_path, sc.Name])
         if retval != 0:
             if "Unknown instance" not in process_stderr:
@@ -774,7 +742,7 @@ def ModifyInitService(sc):
                 Print("Error: " + check_enabled_program + " " + sc.Name + " on failed: " + process_stderr,file=sys.stderr)
                 return [-1]   
 
-    if sc.State == u"Running":
+    if sc.State == "running":
         # don't try to read stdout or stderr as 'service start' comand re-directs them, causing a hang in subprocess.communicate()
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "start"],True) 
         if retval != 0:
@@ -784,7 +752,7 @@ def ModifyInitService(sc):
             Print("Error: " + check_state_program + " " + sc.Name + " start failed: " ,file=sys.stderr)
             return [-1]
             
-    elif sc.State == u"Stopped":
+    elif sc.State == "stopped":
         (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "stop"])
         if retval != 0:
             Print("Error: " + check_state_program + " " + sc.Name + " stop failed: " + process_stderr,file=sys.stderr)
