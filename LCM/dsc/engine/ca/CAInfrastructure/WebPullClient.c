@@ -562,7 +562,7 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
                 if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) )
                 {
                     // Found ServerUrl in value.string
-                    memcpy(serverURL, value.string, (Tcslen(value2.string) + 1) * sizeof(MI_Char));
+                    memcpy(serverURL, value.string, (Tcslen(value.string) + 1) * sizeof(MI_Char));
 
                     //Check if connection is secure and if unsecure user explicitly asks for it.
                     if( !ConnectionAllowed(&customData, serverURL) )
@@ -1664,7 +1664,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         requestFlags = WINHTTP_FLAG_SECURE;
     requestParam.serverOperation = OPERATION_GETACTION;
     if( checkSum != NULL)
-    checkSumFinalValue = checkSum;  
+        checkSumFinalValue = checkSum;  
     *result = NULL;
 
     DSC_EventWriteWebDownloadManagerDoActionServerUrl(configurationID, url);
@@ -2691,7 +2691,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     {
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
     }
-    memcpy(tmpChecksum, checkSum, Tcslen(checkSum)* sizeof(MI_Char));
+    memcpy(tmpChecksum, checkSum, (Tcslen(checkSum) + 1)* sizeof(MI_Char));
 
     r = GetRequestParam(metaConfig, partialConfigName, (MI_Char*)url, (MI_Char*)subUrl, &port, &bIsHttps, &configurationID, &certificateID, getActionStatusCode, extendedError);
     if( r != MI_RESULT_OK)
