@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0"), FriendlyName("nxArchiveResource")] 
+[ClassVersion("1.0.0"), FriendlyName("nxArchive")] 
 class MSFT_nxArchiveResource : OMI_BaseResource
 {
   [Key] string SourcePath;
