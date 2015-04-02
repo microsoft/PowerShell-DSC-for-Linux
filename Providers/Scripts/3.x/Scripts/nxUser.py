@@ -2,14 +2,11 @@
 #============================================================================
 # Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 #============================================================================
-#from __future__ import print_function
-
 from contextlib import contextmanager
 
 import os
 import sys
 import datetime
-import codecs
 import imp
 protocol=imp.load_source('protocol','../protocol.py')
 
@@ -26,76 +23,61 @@ protocol=imp.load_source('protocol','../protocol.py')
 global show_mof
 show_mof=False
 
-def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    if UserName == None :
+def init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    if UserName != None :
+        UserName=UserName.encode('ascii','ignore')
+    else:
         UserName = ''
-    if Ensure == None :
+    if Ensure != None :
+        Ensure=Ensure.encode('ascii','ignore').lower()
+    else:
         Ensure = ''
-    if FullName == None :
+    if FullName != None :
+        FullName=FullName.encode('ascii','ignore')
+    else:
         FullName = ''
-    if Description == None :
+    if Description != None :
+        Description=Description.encode('ascii','ignore')
+    else:
         Description = ''
-    if Password == None :
+    if Password != None :
+        Password=Password.encode('ascii','ignore')
+    else:
         Password = ''
     if Disabled == None :
         Disabled = False
     if PasswordChangeRequired == None :
         PasswordChangeRequired = False
-    if HomeDirectory == None :
+    if HomeDirectory != None :
+        HomeDirectory=HomeDirectory.encode('ascii','ignore')
+    else:
         HomeDirectory = ''
-    if GroupID == None :
+    if GroupID != None :
+        GroupID=GroupID.encode('ascii','ignore')
+    else:
         GroupID = ''
 
+    return UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID
+    
+
+def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
+               init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     retval = Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
 
 def Test_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    if UserName == None :
-        UserName = ''
-    if Ensure == None :
-        Ensure = ''
-    if FullName == None :
-        FullName = ''
-    if Description == None :
-        Description = ''
-    if Password == None :
-        Password = ''
-    if Disabled == None :
-        Disabled = False
-    if PasswordChangeRequired == None :
-        PasswordChangeRequired = False
-    if HomeDirectory == None :
-        HomeDirectory = ''
-    if GroupID == None :
-        GroupID = ''
-    
+    (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
+               init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     retval = Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
 
 def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
     arg_names=list(locals().keys())
-    if UserName == None :
-        UserName = ''
-    if Ensure == None :
-        Ensure = ''
-    if FullName == None :
-        FullName = ''
-    if Description == None :
-        Description = ''
-    if Password == None :
-        Password = ''
-    if Disabled == None :
-        Disabled = False
-    if PasswordChangeRequired == None :
-        PasswordChangeRequired = False
-    if HomeDirectory == None :
-        HomeDirectory = ''
-    if GroupID == None :
-        GroupID = ''
-
+    (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
+               init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     retval = 0
     (retval, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
-
     UserName = protocol.MI_String( UserName)
     Ensure = protocol.MI_String( Ensure)
     FullName = protocol.MI_String( FullName)
@@ -105,8 +87,6 @@ def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
     Password = protocol.MI_String( Password)
     HomeDirectory = protocol.MI_String( HomeDirectory)
     GroupID = protocol.MI_String( GroupID)
-
-
     retd={}
     ld=locals()
     for k in arg_names :
@@ -164,7 +144,7 @@ def opened_w_error(filename, mode="r"):
     This context ensures the file is closed.
     """
     try:
-        f = codecs.open(filename, encoding='utf-8' , mode=mode)
+        f = open(filename, mode=mode)
     except IOError as err:
         yield None, err
     else:
@@ -233,7 +213,7 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
     old_passwd_entries=passwd_entries
     usermod_string = ""
     usermodonly_string = ""
-    if Ensure.lower() == "absent":
+    if Ensure == "absent":
         exit_code = os.system(userdel_path + " " + UserName)
     else:
         usermod_string = ""
@@ -315,15 +295,15 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
         return [-1]
 
     if not Ensure:
-        Ensure = "Present"
+        Ensure = "present"
 
-    if Ensure.lower() == "absent":
+    if Ensure == "absent":
         if UserName not in passwd_entries:
             return [0]
         else:
             Print(UserName + " in passwd_entries",file=sys.stderr)
             return [-1]
-    elif Ensure.lower() == "present":
+    elif Ensure == "present":
         if UserName not in passwd_entries:
             Print(UserName + " not in passwd_entries",file=sys.stderr)
             return [-1]
@@ -403,7 +383,7 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
     if UserName not in passwd_entries:
         FullName = Description = Password = HomeDirectory = GroupID = ""
-        if Ensure != "Absent":
+        if Ensure != "absent":
             exit_code = -1
         return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
         
