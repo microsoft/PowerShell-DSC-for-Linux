@@ -11,7 +11,7 @@ PROVIDES: 'dscpackage'
 DESCRIPTION: 'Windows Powershell Desired State Configuration for Linux'
 COPYRIGHT_FILE: 'Copyright Microsoft'
 SHLIB_EXT: 'so'
-PROVIDERS: 'File Script User Group Service Package Environment SshAuthorizedKeys'
+PROVIDERS: 'File Script User Group Service Package Environment SshAuthorizedKeys Archive FileLine'
 
 DEV_OMI_DIR: 'omi-1.0.8'
 DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateConfiguration'
@@ -31,6 +31,11 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/etc/MSFT_nxFileResource.reg;  Providers/nxFile/MSFT_nxFileResource.reg;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxFileResource.schema.mof;  Providers/nxFile/MSFT_nxFileResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxFileResource.registration.mof;  Providers/nxFile/MSFT_nxFileResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxArchiveResource.so;   Providers/bin/libMSFT_nxArchiveResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxArchiveResource.reg;  Providers/nxArchive/MSFT_nxArchiveResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxArchiveResource.schema.mof;  Providers/nxArchive/MSFT_nxArchiveResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxArchiveResource.registration.mof;  Providers/nxArchive/MSFT_nxArchiveResource.registration.mof;      755; root; root
 
 /opt/microsoft/dsc/lib/libMSFT_nxScriptResource.so;   Providers/bin/libMSFT_nxScriptResource.so;       755; root; root
 /opt/microsoft/dsc/etc/MSFT_nxScriptResource.reg;  Providers/nxScript/MSFT_nxScriptResource.reg;      755; root; root
@@ -84,6 +89,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFile.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFile.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxArchive.py; Providers/Scripts/2.4x-2.5x/Scripts/nxArchive.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxGroup.py; Providers/Scripts/2.4x-2.5x/Scripts/nxGroup.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxPackage.py; Providers/Scripts/2.4x-2.5x/Scripts/nxPackage.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxService.py; Providers/Scripts/2.4x-2.5x/Scripts/nxService.py; 755; root; root
@@ -94,6 +100,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxScript.py; Providers/Scripts/2.6x-2.7x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFile.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFile.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxArchive.py; Providers/Scripts/2.6x-2.7x/Scripts/nxArchive.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxGroup.py; Providers/Scripts/2.6x-2.7x/Scripts/nxGroup.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxPackage.py; Providers/Scripts/2.6x-2.7x/Scripts/nxPackage.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxService.py; Providers/Scripts/2.6x-2.7x/Scripts/nxService.py; 755; root; root
@@ -104,6 +111,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxScript.py; Providers/Scripts/3.x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxFile.py; Providers/Scripts/3.x/Scripts/nxFile.py; 755; root; root
+/opt/microsoft/dsc/Scripts/3.x/Scripts/nxArchive.py; Providers/Scripts/3.x/Scripts/nxArchive.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxGroup.py; Providers/Scripts/3.x/Scripts/nxGroup.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxPackage.py; Providers/Scripts/3.x/Scripts/nxPackage.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxService.py; Providers/Scripts/3.x/Scripts/nxService.py; 755; root; root
