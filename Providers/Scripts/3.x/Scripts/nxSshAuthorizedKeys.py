@@ -23,43 +23,38 @@ global show_mof
 show_mof=False
 
 LogPath='/tmp/nxSshAuthorizedKeys.log'
-def Set_Marshall(KeyComment,Ensure,UserName,Key):
-    if Ensure == None:
-        Ensure=''
-    if KeyComment == None:
-        KeyComment=''
-    if UserName == None:
-        UserName=''
-    if Key == None:
-        Key=''
+def init_vars(KeyComment,Ensure,UserName,Key):
+    if Ensure != None :
+        Ensure=Ensure.encode('ascii','ignore').lower()
+    else:
+        Ensure = ''
+    if KeyComment != None :
+        KeyComment=KeyComment.encode('ascii','ignore')
+    else:
+        KeyComment = ''
+    if UserName != None :
+        UserName=UserName.encode('ascii','ignore')
+    else:
+        UserName = ''
+    if Key != None :
+        Key=Key
+    else:
+        Key = ''
+    return KeyComment,Ensure,UserName,Key
 
+def Set_Marshall(KeyComment,Ensure,UserName,Key):
+    (KeyComment,Ensure,UserName,Key) = init_vars(KeyComment,Ensure,UserName,Key)
     retval = Set(KeyComment,Ensure,UserName,Key)
     return retval
 
 def Test_Marshall(KeyComment,Ensure,UserName,Key):
-    if Ensure == None:
-        Ensure=''
-    if KeyComment == None:
-        KeyComment=''
-    if UserName == None:
-        UserName=''
-    if Key == None:
-        Key=''
-
+    (KeyComment,Ensure,UserName,Key) = init_vars(KeyComment,Ensure,UserName,Key)
     retval = Test(KeyComment,Ensure,UserName,Key)
     return retval
 
 def Get_Marshall(KeyComment,Ensure,UserName,Key):
     arg_names=list(locals().keys())
-    if Ensure == None:
-        Ensure=''
-    if KeyComment == None:
-        KeyComment=''
-    if UserName == None:
-        UserName=''
-    if Key == None:
-        Key=''
-
+    (KeyComment,Ensure,UserName,Key) = init_vars(KeyComment,Ensure,UserName,Key)
     retval = 0
     retval,KeyComment,Ensure,UserName,Key = Get(KeyComment,Ensure,UserName,Key)
     KeyComment = protocol.MI_String(KeyComment)
@@ -81,9 +76,9 @@ def Get_Marshall(KeyComment,Ensure,UserName,Key):
 class Params:
     def __init__(self,KeyComment,Ensure,UserName,Key):
 
-        if not ( "Present" in Ensure or "Absent" in Ensure ):
-            Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
-            Log(LogPath,'ERROR: Param Ensure must be Present or Absent.')
+        if not ( "present" in Ensure or "absent" in Ensure ):
+            Print('ERROR: Param Ensure must be "Present" or "Absent".',file=sys.stderr)
+            Log(LogPath,'ERROR: Param Ensure must be "Present" or "Absent".')
             raise Exception('BadParameter')
         self.Ensure = Ensure
 
@@ -114,14 +109,14 @@ def Set(KeyComment,Ensure,UserName,Key):
     ShowMof('SET', KeyComment,Ensure,UserName,Key)
     try:
         p=Params(KeyComment,Ensure,UserName,Key)
-    except Exception as e:
+    except :
         Print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  ',file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. ')
         return [retval]
-    if  p.Ensure == 'Present'  :
+    if  p.Ensure == 'present'  :
         if AddKey(p) == None:
             retval = 0
-    if  p.Ensure == 'Absent' :
+    if  p.Ensure == 'absent' :
         if DelKey(p) == None:
             retval = 0
     return [retval]
@@ -131,14 +126,14 @@ def Test(KeyComment,Ensure,UserName,Key):
     ShowMof('TEST', KeyComment,Ensure,UserName,Key)
     try:
         p=Params(KeyComment,Ensure,UserName,Key)
-    except Exception as e:
+    except :
         Print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  ',file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. ')
         return [retval]
     found,error=FindKey(p)
-    if  found and p.Ensure == 'Present'  :
+    if  found and p.Ensure == 'present'  :
         retval = 0
-    if not found and p.Ensure == 'Absent' :
+    if not found and p.Ensure == 'absent' :
         retval =0
     
     return [retval]
@@ -148,15 +143,15 @@ def Get(KeyComment,Ensure,UserName,Key):
     ShowMof('GET', KeyComment,Ensure,UserName,Key)
     try:
         p=Params(KeyComment,Ensure,UserName,Key)
-    except Exception as e:
+    except :
         Print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  ',file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. ')
         return [retval,KeyComment,Ensure,UserName,Key]
     found,error=FindKey(p)
     if found :
-        p.Ensure == 'Present' 
+        p.Ensure == 'present' 
     else:
-        p.Ensure == 'Absent'
+        p.Ensure == 'absent'
     return [retval,KeyComment,Ensure,UserName,Key]
 
 def SetShowMof(a):
