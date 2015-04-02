@@ -2,7 +2,6 @@
 #============================================================================
 # Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 #============================================================================
-
 import os
 import sys
 import datetime
@@ -22,25 +21,25 @@ protocol=imp.load_source('protocol','../protocol.py')
 global show_mof
 show_mof=False
 
-def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+def init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
     if UserName != None :
-        UserName=UserName.decode("utf-8")
+        UserName=UserName.encode('ascii','ignore')
     else:
         UserName = ''
     if Ensure != None :
-        Ensure=Ensure.decode("utf-8")
+        Ensure=Ensure.encode('ascii','ignore').lower()
     else:
         Ensure = ''
     if FullName != None :
-        FullName=FullName.decode("utf-8")
+        FullName=FullName.encode('ascii','ignore')
     else:
         FullName = ''
     if Description != None :
-        Description=Description.decode("utf-8")
+        Description=Description.encode('ascii','ignore')
     else:
         Description = ''
     if Password != None :
-        Password=Password.decode("utf-8")
+        Password=Password.encode('ascii','ignore')
     else:
         Password = ''
     if Disabled == None :
@@ -48,103 +47,44 @@ def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
     if PasswordChangeRequired == None :
         PasswordChangeRequired = False
     if HomeDirectory != None :
-        HomeDirectory=HomeDirectory.decode("utf-8")
+        HomeDirectory=HomeDirectory.encode('ascii','ignore')
     else:
         HomeDirectory = ''
     if GroupID != None :
-        GroupID=GroupID.decode("utf-8")
+        GroupID=GroupID.encode('ascii','ignore')
     else:
         GroupID = ''
 
+    return UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID
+    
+
+def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
+               init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     retval = Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
 
 def Test_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    if UserName != None :
-        UserName=UserName.decode("utf-8")
-    else:
-        UserName = ''
-    if Ensure != None :
-        Ensure=Ensure.decode("utf-8")
-    else:
-        Ensure = ''
-    if FullName != None :
-        FullName=FullName.decode("utf-8")
-    else:
-        FullName = ''
-    if Description != None :
-        Description=Description.decode("utf-8")
-    else:
-        Description = ''
-    if Password != None :
-        Password=Password.decode("utf-8")
-    else:
-        Password = ''
-    if Disabled == None :
-        Disabled = False
-    if PasswordChangeRequired == None :
-        PasswordChangeRequired = False
-    if HomeDirectory != None :
-        HomeDirectory=HomeDirectory.decode("utf-8")
-    else:
-        HomeDirectory = ''
-    if GroupID != None :
-        GroupID=GroupID.decode("utf-8")
-    else:
-        GroupID = ''
-    
+    (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
+               init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     retval = Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     return retval
 
 def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
     arg_names=list(locals().keys())
-    if UserName != None :
-        UserName=UserName.decode("utf-8")
-    else:
-        UserName = ''
-    if Ensure != None :
-        Ensure=Ensure.decode("utf-8")
-    else:
-        Ensure = ''
-    if FullName != None :
-        FullName=FullName.decode("utf-8")
-    else:
-        FullName = ''
-    if Description != None :
-        Description=Description.decode("utf-8")
-    else:
-        Description = ''
-    if Password != None :
-        Password=Password.decode("utf-8")
-    else:
-        Password = ''
-    if Disabled == None :
-        Disabled = False
-    if PasswordChangeRequired == None :
-        PasswordChangeRequired = False
-    if HomeDirectory != None :
-        HomeDirectory=HomeDirectory.decode("utf-8")
-    else:
-        HomeDirectory = ''
-    if GroupID != None :
-        GroupID=GroupID.decode("utf-8")
-    else:
-        GroupID = ''
-
+    (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
+               init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     retval = 0
     (retval, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
-
-    UserName = protocol.MI_String( UserName.encode("utf-8"))
-    Ensure = protocol.MI_String( Ensure.encode("utf-8"))
-    FullName = protocol.MI_String( FullName.encode("utf-8"))
+    UserName = protocol.MI_String( UserName)
+    Ensure = protocol.MI_String( Ensure)
+    FullName = protocol.MI_String( FullName)
     PasswordChangeRequired = protocol.MI_Boolean(PasswordChangeRequired)
     Disabled = protocol.MI_Boolean(Disabled)
-    Description = protocol.MI_String( Description.encode("utf-8"))
-    Password = protocol.MI_String( Password.encode("utf-8"))
-    HomeDirectory = protocol.MI_String( HomeDirectory.encode("utf-8"))
-    GroupID = protocol.MI_String( GroupID.encode("utf-8"))
-
-
+    Description = protocol.MI_String( Description)
+    Password = protocol.MI_String( Password)
+    HomeDirectory = protocol.MI_String( HomeDirectory)
+    GroupID = protocol.MI_String( GroupID)
     retd={}
     ld=locals()
     for k in arg_names :
@@ -266,7 +206,7 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
     old_passwd_entries=passwd_entries
     usermod_string = ""
     usermodonly_string = ""
-    if Ensure.lower() == "absent":
+    if Ensure == "absent":
         exit_code = os.system(userdel_path + " " + UserName)
     else:
         usermod_string = ""
@@ -348,15 +288,15 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
         return [-1]
 
     if not Ensure:
-        Ensure = "Present"
+        Ensure = "present"
 
-    if Ensure.lower() == "absent":
+    if Ensure == "absent":
         if UserName not in passwd_entries:
             return [0]
         else:
             Print(UserName + " in passwd_entries",file=sys.stderr)
             return [-1]
-    elif Ensure.lower() == "present":
+    elif Ensure == "present":
         if UserName not in passwd_entries:
             Print(UserName + " not in passwd_entries",file=sys.stderr)
             return [-1]
@@ -436,7 +376,7 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
     if UserName not in passwd_entries:
         FullName = Description = Password = HomeDirectory = GroupID = ""
-        if Ensure != "Absent":
+        if Ensure != "absent":
             exit_code = -1
         return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
         
