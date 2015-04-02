@@ -23,73 +23,44 @@ global show_mof
 show_mof=False
 
 LogPath='/tmp/nxSshAuthorizedKeys.log'
-def Set_Marshall(KeyComment,Ensure,UserName,Key):
+def init_vars(KeyComment,Ensure,UserName,Key):
     if Ensure != None :
-        Ensure=Ensure.decode('utf-8')
+        Ensure=Ensure.encode('ascii','ignore').lower()
     else:
         Ensure = ''
     if KeyComment != None :
-        KeyComment=KeyComment.decode('utf-8')
+        KeyComment=KeyComment.encode('ascii','ignore')
     else:
         KeyComment = ''
     if UserName != None :
-        UserName=UserName.decode('utf-8')
+        UserName=UserName.encode('ascii','ignore')
     else:
         UserName = ''
     if Key != None :
-        Key=Key.decode('utf-8')
+        Key=Key
     else:
         Key = ''
+    return KeyComment,Ensure,UserName,Key
 
+def Set_Marshall(KeyComment,Ensure,UserName,Key):
+    (KeyComment,Ensure,UserName,Key) = init_vars(KeyComment,Ensure,UserName,Key)
     retval = Set(KeyComment,Ensure,UserName,Key)
     return retval
 
 def Test_Marshall(KeyComment,Ensure,UserName,Key):
-    if Ensure != None :
-        Ensure=Ensure.decode('utf-8')
-    else:
-        Ensure = ''
-    if KeyComment != None :
-        KeyComment=KeyComment.decode('utf-8')
-    else:
-        KeyComment = ''
-    if UserName != None :
-        UserName=UserName.decode('utf-8')
-    else:
-        UserName = ''
-    if Key != None :
-        Key=Key.decode('utf-8')
-    else:
-        Key = ''
-
+    (KeyComment,Ensure,UserName,Key) = init_vars(KeyComment,Ensure,UserName,Key)
     retval = Test(KeyComment,Ensure,UserName,Key)
     return retval
 
 def Get_Marshall(KeyComment,Ensure,UserName,Key):
     arg_names=list(locals().keys())
-    if Ensure != None :
-        Ensure=Ensure.decode('utf-8')
-    else:
-        Ensure = ''
-    if KeyComment != None :
-        KeyComment=KeyComment.decode('utf-8')
-    else:
-        KeyComment = ''
-    if UserName != None :
-        UserName=UserName.decode('utf-8')
-    else:
-        UserName = ''
-    if Key != None :
-        Key=Key.decode('utf-8')
-    else:
-        Key = ''
-
+    (KeyComment,Ensure,UserName,Key) = init_vars(KeyComment,Ensure,UserName,Key)
     retval = 0
     retval,KeyComment,Ensure,UserName,Key = Get(KeyComment,Ensure,UserName,Key)
-    KeyComment = protocol.MI_String(KeyComment.decode("utf-8"))
-    Ensure = protocol.MI_String(Ensure.decode("utf-8"))
-    UserName = protocol.MI_String(UserName.decode("utf-8"))
-    Key = protocol.MI_String(Key.decode("utf-8"))
+    KeyComment = protocol.MI_String(KeyComment)
+    Ensure = protocol.MI_String(Ensure)
+    UserName = protocol.MI_String(UserName)
+    Key = protocol.MI_String(Key)
 
     retd={}
     ld=locals()
@@ -105,9 +76,9 @@ def Get_Marshall(KeyComment,Ensure,UserName,Key):
 class Params:
     def __init__(self,KeyComment,Ensure,UserName,Key):
 
-        if not ( "Present" in Ensure or "Absent" in Ensure ):
-            Print('ERROR: Param Ensure must be Present or Absent.',file=sys.stderr)
-            Log(LogPath,'ERROR: Param Ensure must be Present or Absent.')
+        if not ( "present" in Ensure or "absent" in Ensure ):
+            Print('ERROR: Param Ensure must be "Present" or "Absent".',file=sys.stderr)
+            Log(LogPath,'ERROR: Param Ensure must be "Present" or "Absent".')
             raise Exception('BadParameter')
         self.Ensure = Ensure
 
@@ -115,7 +86,7 @@ class Params:
             Print('ERROR: Mandatory Param KeyComment missing.',file=sys.stderr)
             Log(LogPath,'ERROR: Mandatory Param KeyComment missing.')
             raise Exception('BadParameter')
-        self.KeyComment = KeyComment.encode('ascii','replace') 
+        self.KeyComment = KeyComment
 
         if len(UserName)<1:
             Print('ERROR: Mandatory Param UserName missing.',file=sys.stderr)
@@ -142,10 +113,10 @@ def Set(KeyComment,Ensure,UserName,Key):
         Print('ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  '+e.message,file=sys.stderr)
         Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ e.message)
         return [retval]
-    if  p.Ensure == 'Present'  :
+    if  p.Ensure == 'present'  :
         if AddKey(p) == None:
             retval = 0
-    if  p.Ensure == 'Absent' :
+    if  p.Ensure == 'absent' :
         if DelKey(p) == None:
             retval = 0
     return [retval]
@@ -160,9 +131,9 @@ def Test(KeyComment,Ensure,UserName,Key):
         Log(LogPath,'ERROR - Unable to initialize nxSshAuthorizedKeysProvider. '+ e.message)
         return [retval]
     found,error=FindKey(p)
-    if  found and p.Ensure == 'Present'  :
+    if  found and p.Ensure == 'present'  :
         retval = 0
-    if not found and p.Ensure == 'Absent' :
+    if not found and p.Ensure == 'absent' :
         retval =0
     
     return [retval]
@@ -178,9 +149,9 @@ def Get(KeyComment,Ensure,UserName,Key):
         return [retval,KeyComment,Ensure,UserName,Key]
     found,error=FindKey(p)
     if found :
-        p.Ensure == 'Present' 
+        p.Ensure == 'present' 
     else:
-        p.Ensure == 'Absent'
+        p.Ensure == 'absent'
     return [retval,KeyComment,Ensure,UserName,Key]
 
 def SetShowMof(a):
