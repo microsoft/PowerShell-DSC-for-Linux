@@ -254,15 +254,24 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
     else : # tarfile
         if not tarfile.is_tarfile(SourcePath):
             print('ERROR: SourcePath<'+SourcePath+'> is not a valid tarfile')
-        with tarfile.open(SourcePath,'r') as arch:
-            for n in arch.getnames():
-                if n.startswith('/') or n.startswith('..'):
-                    raise Exception('Error: corrupted filename "'+n+'" in tarfile!')
-            try:
-                arch.extractall(DestinationPath)
-            except Exception, error:
-                print("Exception extracting tarfile" + SourcePath + " to " + DestinationPath  + " Error: " + error.message ,file=sys.stderr)
-                return False
+        try:
+            arch = tarfile.open(SourcePath,'r')
+        except  Exception, error:
+            if arch != None:
+                arch.close()
+            print("Exception opening tarfile" + SourcePath + " Error: " + error.message ,file=sys.stderr)
+            return False
+        for n in arch.getnames():
+            if n.startswith('/') or n.startswith('..'):
+                arch.close()
+                raise Exception('Error: corrupted filename "'+n+'" in tarfile!')
+        try:
+            arch.extractall(DestinationPath)
+        except Exception, error:
+            arch.close()
+            print("Exception extracting tarfile" + SourcePath + " to " + DestinationPath  + " Error: " + error.message ,file=sys.stderr)
+            return False
+        arch.close()
     if WriteCacheInfo(SourcePath, DestinationPath) == False:
         return False
     return True
