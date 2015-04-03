@@ -90,9 +90,9 @@ def LStatFile(path):
     try:
         d=os.lstat(path)
     except OSError as error:
-         print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError as error:
-         print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return d,error
 
 def MakeDirs(path):
@@ -100,9 +100,9 @@ def MakeDirs(path):
     try:
         os.makedirs(path)
     except OSError as error:
-         print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError as error:
-         print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def RemoveFile(path):
@@ -110,9 +110,9 @@ def RemoveFile(path):
     try:
         os.remove(path)
     except OSError as error:
-         print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError as error:
-         print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 @contextmanager
@@ -197,12 +197,12 @@ def CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum):
         else:
             return False
     elif Checksum == "ctime":
-        if stat_src.st_ctime != stat_cache_st_ctime:
+        if stat_src.st_ctime > stat_cache_st_ctime:
             return False
         else:
             return True
     elif Checksum == "mtime":
-        if stat_src.st_mtime != stat_cache_st_mtime:
+        if stat_src.st_mtime > stat_cache_st_mtime:
             return False
         else:
             return True

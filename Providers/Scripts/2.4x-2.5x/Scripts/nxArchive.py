@@ -91,9 +91,9 @@ def LStatFile(path):
     try:
         d=os.lstat(path)
     except OSError, error:
-         Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Print("Exception lstating file " + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return d,error
 
 def MakeDirs(path):
@@ -101,9 +101,9 @@ def MakeDirs(path):
     try:
         os.makedirs(path)
     except OSError, error:
-         Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
 def RemoveFile(path):
@@ -111,17 +111,17 @@ def RemoveFile(path):
     try:
         os.remove(path)
     except OSError, error:
-         Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     except IOError, error:
-         Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
+        Print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror,file=sys.stderr)
     return error
 
-def opened_w_error(filename, mode="r"):
+def opened_w_error(filename, mode="rb"):
     """
     This context ensures the file is closed.
     """
     try:
-        f = open(filename, mode=mode)
+        f = open(filename, mode)
     except IOError, err:
         return None, err
     return f, None
@@ -197,12 +197,12 @@ def CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum):
         else:
             return False
     elif Checksum == "ctime":
-        if stat_src.st_ctime != stat_cache_st_ctime:
+        if stat_src.st_ctime > stat_cache_st_ctime:
             return False
         else:
             return True
     elif Checksum == "mtime":
-        if stat_src.st_mtime != stat_cache_st_mtime:
+        if stat_src.st_mtime > stat_cache_st_mtime:
             return False
         else:
             return True
@@ -233,15 +233,15 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
     if archive_type == 'zip':
         try:
             arch=zipfile.ZipFile(SourcePath)
+            for n in arch.namelist(): # Exploit check - make sure no names start with '/' or '..'
+                if n.startswith('/') or n.startswith('..'):
+                    raise Exception('Error: corrupted filename "'+n+'" in zipfile!')
+            bad=arch.testzip()
+            if bad != None:
+                    raise Exception('Error: First bad filename is "'+bad+'"')
         except Exception, error:
             Print("Exception opening zipfile" + SourcePath  + " Error: " + error.message ,file=sys.stderr)
             return False
-        for n in arch.namelist(): # Exploit check - make sure no names start with '/' or '..'
-            if n.startswith('/') or n.startswith('..'):
-                raise Exception('Error: corrupted filename "'+n+'" in zipfile!')
-        bad=arch.testzip()
-        if bad != None:
-                raise Exception('Error: First bad filename is "'+bad+'"')
         # extract archive to destinationpath if error return False
         try:
             arch.extractall(DestinationPath)
