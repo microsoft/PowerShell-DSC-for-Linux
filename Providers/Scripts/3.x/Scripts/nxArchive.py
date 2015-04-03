@@ -214,7 +214,7 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
         print('ERROR: SourcePath<'+SourcePath+'> is not a valid file')
         return False
     if not os.path.exists(DestinationPath):
-        if MakeDirs(DestinationPath) == False:
+        if MakeDirs(DestinationPath) != None :
             return False
     if not os.path.isdir(DestinationPath):
         if Force == 'False':  # Force is False, return False
@@ -223,7 +223,7 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
         if RemoveFile(DestinationPath) != None : # error
             return False
     if not os.path.isdir(cache_file_dir) : # if the dircache is not present create if error return False
-        if not MakeDirs(cache_file_dir) :
+        if MakeDirs(cache_file_dir) != None :
             return False
     # is the sourcepath a valid archive?
     archive_type='tar'
