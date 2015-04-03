@@ -3,7 +3,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 #============================================================================
 
-
 import os
 import sys
 import tempfile
@@ -63,11 +62,11 @@ def Set(FilePath,DoesNotContainPattern,ContainsLine):
     if not os.path.isfile(FilePath):
         print("Error: " + FilePath + " not found!\n",file=sys.stdout)
         return [-1]
-    if len(DoesNotContainPattern) > 1 and FindStringInFile(FilePath,DoesNotContainPattern) != None :
+    if DoesNotContainPattern != None and len(DoesNotContainPattern) > 1 and FindStringInFile(FilePath,DoesNotContainPattern) != None :
         if ReplaceStringInFile(FilePath,'^.*'+DoesNotContainPattern+'.*','') == False :
             print("Error calling ReplaceStringInFile\n",file=sys.stdout)
             retval=[-1]
-    if len(ContainsLine) > 1 and FindStringInFile(FilePath,'^'+ContainsLine+'$') == None :
+    if ContainsLine != None and len(ContainsLine) > 1 and FindStringInFile(FilePath,'^'+ContainsLine+'$') == None :
         if AppendStringToFile(FilePath,ContainsLine) == False :
             print("Error calling AppendStringToFile\n",file=sys.stdout)
             retval=[-1]
@@ -77,25 +76,23 @@ def Test(FilePath,DoesNotContainPattern,ContainsLine):
     if not os.path.isfile(FilePath):
         print("Error: " + FilePath + " not found!\n",file=sys.stdout)
         return [-1]
-    if len(DoesNotContainPattern) > 1 and FindStringInFile(FilePath,DoesNotContainPattern) != None :
+    if DoesNotContainPattern != None and len(DoesNotContainPattern) > 1 and FindStringInFile(FilePath,DoesNotContainPattern) != None :
         return [-1]
-    if len(ContainsLine) > 1 and FindStringInFile(FilePath,'^'+ContainsLine+'$') == None :
+    if ContainsLine != None and len(ContainsLine) > 1 and FindStringInFile(FilePath,'^'+ContainsLine+'$') == None :
         return [-1]
     return [0]
 
 def Get(FilePath,DoesNotContainPattern,ContainsLine):
-    retval=-1
+    m=None
     if not os.path.isfile(FilePath):
         print("Error: " + FilePath + " not found!\n",file=sys.stdout)
-        return retval,FilePath,DoesNotContainPattern,ContainsLine
-    if len(ContainsLine) > 1:
+        return 0,FilePath,DoesNotContainPattern,ContainsLine
+    if ContainsLine != None and len(ContainsLine) > 1:
         m=FindStringInFile(FilePath,'^'+ContainsLine+'$')
-    print("Get returned " + repr(m),file=sys.stdout)
-    if m != None:
-        ContainsLine=m.group(0)
-        retval=0
-    print("Get returned " + ContainsLine,file=sys.stdout)
-    return retval,FilePath,DoesNotContainPattern,ContainsLine
+        if m != None:
+            ContainsLine=m.group(0)
+            print("Get returned " + ContainsLine,file=sys.stdout)
+    return 0,FilePath,DoesNotContainPattern,ContainsLine
 
 
 def FindStringInFile(fname,matchs,multiline=False):
