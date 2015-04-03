@@ -13,7 +13,7 @@ protocol=imp.load_source('protocol','../protocol.py')
 # [ClassVersion("1.0.0"), FriendlyName("nxFileLine")]
 # class OMI_nxFileLine : OMI_BaseResource
 # {
-#        [required] string FilePath;
+#        [key,required] string FilePath;
 #        [write] string DoesNotContainPattern;
 #        [write] string ContainsLine;
 # };
@@ -62,11 +62,11 @@ def Set(FilePath,DoesNotContainPattern,ContainsLine):
     if not os.path.isfile(FilePath):
         Print("Error: " + FilePath + " not found!\n",file=sys.stdout)
         return [-1]
-    if len(DoesNotContainPattern) > 1 and FindStringInFile(FilePath,DoesNotContainPattern) != None :
+    if DoesNotContainPattern != None and len(DoesNotContainPattern) > 1 and FindStringInFile(FilePath,DoesNotContainPattern) != None :
         if ReplaceStringInFile(FilePath,'^.*'+DoesNotContainPattern+'.*','') == False :
             Print("Error calling ReplaceStringInFile\n",file=sys.stdout)
             retval=[-1]
-    if len(ContainsLine) > 1 and FindStringInFile(FilePath,'^'+ContainsLine+'$') == None :
+    if ContainsLine != None and len(ContainsLine) > 1 and FindStringInFile(FilePath,'^'+ContainsLine+'$') == None :
         if AppendStringToFile(FilePath,ContainsLine) == False :
             Print("Error calling AppendStringToFile\n",file=sys.stdout)
             retval=[-1]
@@ -76,26 +76,23 @@ def Test(FilePath,DoesNotContainPattern,ContainsLine):
     if not os.path.isfile(FilePath):
         Print("Error: " + FilePath + " not found!\n",file=sys.stdout)
         return [-1]
-    if len(DoesNotContainPattern) > 1 and FindStringInFile(FilePath,DoesNotContainPattern) != None :
+    if DoesNotContainPattern != None and len(DoesNotContainPattern) > 1 and FindStringInFile(FilePath,DoesNotContainPattern) != None :
         return [-1]
-    if len(ContainsLine) > 1 and FindStringInFile(FilePath,'^'+ContainsLine+'$') == None :
+    if ContainsLine != None and len(ContainsLine) > 1 and FindStringInFile(FilePath,'^'+ContainsLine+'$') == None :
         return [-1]
     return [0]
 
 def Get(FilePath,DoesNotContainPattern,ContainsLine):
-    retval=-1
+    m=None
     if not os.path.isfile(FilePath):
         Print("Error: " + FilePath + " not found!\n",file=sys.stdout)
-        return retval,FilePath,DoesNotContainPattern,ContainsLine
-    if len(ContainsLine) > 1:
+        return 0,FilePath,DoesNotContainPattern,ContainsLine
+    if ContainsLine != None and len(ContainsLine) > 1:
         m=FindStringInFile(FilePath,'^'+ContainsLine+'$')
-    Print("Get returned " + repr(m),file=sys.stdout)
-    if m != None:
-        ContainsLine=m.group(0)
-        retval=0
-    Print("Get returned " + ContainsLine,file=sys.stdout)
-    return retval,FilePath,DoesNotContainPattern,ContainsLine
-
+        if m != None:
+            ContainsLine=m.group(0)
+            Print("Get returned " + ContainsLine,file=sys.stdout)
+    return 0,FilePath,DoesNotContainPattern,ContainsLine
 
 def Print(s,file=sys.stderr):
     file.write(s+'\n')
