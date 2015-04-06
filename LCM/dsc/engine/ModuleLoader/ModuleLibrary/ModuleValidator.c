@@ -57,7 +57,7 @@ BaseResourceConfiguration g_WebDownloadManagerProperties[] =
 };
 
 
-InfraSchemaValidator g_InfraSchemaValidators[] = 
+InfraSchemaValidator g_InfraSchemaValidators[] =
 {
     {BASE_RESOURCE_CLASSNAME, ValidateBaseResourceConfigurationClass},
     {BASE_DOCUMENT_CLASSNAME, ValidateConfigurationDocumentClass},
@@ -66,7 +66,7 @@ InfraSchemaValidator g_InfraSchemaValidators[] =
     {BASE_REGISTRATION_PSPROVIDER, ValidatePSResourceRegistrationClass},
     {METACONFIG_CLASSNAME, ValidateMetaConfigurationClass},
     {MSFT_BASECREDENTIAL_CLASSNAME, ValidateBaseCredClass},
-    {MSFT_KEYVALUEPAIR_CLASSNAME, ValidateKeyValuePairClass},        
+    {MSFT_KEYVALUEPAIR_CLASSNAME, ValidateKeyValuePairClass},
     { MSFT_PARTIALCONFIGURATION_CLASSNAME,            ValidateClassPropertiesForMetaConfResourceChildren },
     { METACONF_RESOURCE_CLASSNAME,                    ValidateMetaConfResourceProperties},
     { OMI_CONFIGURATIONDOWNLOADMANAGER_CLASSNAME,     ValidateConfigurationDownloadManagerProperties },
@@ -95,19 +95,19 @@ BaseResourceConfiguration g_ConfigurationDownloadManagerProperties[] =
 {
     {OMI_ConfigurationDownloadManager_Name,         MI_STRING},
     {NULL,                                                        0}
-};    
+};
 
 BaseResourceConfiguration g_PSResourceProperties[] =
 {
     {MSFT_PSConfigurationProviderRegistration_ModuleName,         MI_STRING},
     {NULL,                                                        0}
-};    
+};
 
 BaseResourceConfiguration g_CimResourceProperties[] =
 {
     {MSFT_CimConfigurationProviderRegistration_Namespace,         MI_STRING},
     {NULL,                                                        0}
-};    
+};
 
 BaseResourceConfiguration g_BaseRegistrationProperties[] =
 {
@@ -115,7 +115,7 @@ BaseResourceConfiguration g_BaseRegistrationProperties[] =
     {MSFT_BaseConfigurationProviderRegistration_DSCEngineCompatVersion,     MI_STRING},
     {MSFT_BaseConfigurationProviderRegistration_DSCModuleVersion,           MI_STRING},
     {NULL,                  0}
-};    
+};
 
 BaseResourceConfiguration g_BaseResourceProperties[] =
 {
@@ -123,10 +123,10 @@ BaseResourceConfiguration g_BaseResourceProperties[] =
     {OMI_BaseResource_SourceInfo,         MI_STRING},
     {OMI_BaseResource_DependsOn,           MI_STRINGA},
     {OMI_BaseResource_ModuleName,         MI_STRING},
-    {OMI_BaseResource_ModuleVersion,      MI_STRING},        
-    {OMI_BaseResource_ConfigurationName,    MI_STRING}, 
+    {OMI_BaseResource_ModuleVersion,      MI_STRING},
+    {OMI_BaseResource_ConfigurationName,    MI_STRING},
     {NULL,                                              0}
-};    
+};
 
 PropertyQualifier g_BaseResourceQualifiers[] =
 {
@@ -134,29 +134,29 @@ PropertyQualifier g_BaseResourceQualifiers[] =
     {OMI_BaseResource_SourceInfo,           QUALIFIER_WRITE},
     {OMI_BaseResource_DependsOn,            QUALIFIER_WRITE},
     {OMI_BaseResource_ModuleName,           QUALIFIER_REQUIRED},
-    {OMI_BaseResource_ModuleVersion,        QUALIFIER_REQUIRED}, 
-    {OMI_BaseResource_ConfigurationName,    QUALIFIER_WRITE}, 
+    {OMI_BaseResource_ModuleVersion,        QUALIFIER_REQUIRED},
+    {OMI_BaseResource_ConfigurationName,    QUALIFIER_WRITE},
     {NULL,                                              NULL}
 };
 
 BaseResourceConfiguration g_MetaConfigProperties[] =
 {
     { MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins,             MI_UINT32},
-    { MSFT_DSCMetaConfiguration_RebootNodeIfNeeded,                         MI_BOOLEAN},        
+    { MSFT_DSCMetaConfiguration_RebootNodeIfNeeded,                         MI_BOOLEAN},
     { MSFT_DSCMetaConfiguration_Credential,                                 MI_INSTANCE},
     { MSFT_DSCMetaConfiguration_ConfigurationMode,                          MI_STRING},
     { MSFT_DSCMetaConfiguration_RefreshMode,                                MI_STRING},
-    { MSFT_DSCMetaConfiguration_CertificateID,                              MI_STRING},           
-    { MSFT_DSCMetaConfiguration_ConfigurationID,                            MI_STRING},             
+    { MSFT_DSCMetaConfiguration_CertificateID,                              MI_STRING},
+    { MSFT_DSCMetaConfiguration_ConfigurationID,                            MI_STRING},
     { MSFT_DSCMetaConfiguration_DownloadManagerName,                        MI_STRING},
-    { MSFT_DSCMetaConfiguration_DownloadManagerCustomData,                  MI_INSTANCEA},   
+    { MSFT_DSCMetaConfiguration_DownloadManagerCustomData,                  MI_INSTANCEA},
     { MSFT_DSCMetaConfiguration_RefreshFrequencyMins,                       MI_UINT32},
     { MSFT_DSCMetaConfiguration_AllowModuleOverwrite,                       MI_BOOLEAN},
     { MSFT_DSCMetaConfiguration_LocalConfigurationManagerState,             MI_STRING},
     { MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers,              MI_INSTANCEA },
     { MSFT_DSCMetaConfiguration_PartialConfigurations,                      MI_INSTANCEA },
     {NULL,                                                                  0}
-};    
+};
 
 BaseResourceConfiguration g_PartialConfigurationProperties[] =
 {
@@ -183,7 +183,7 @@ BaseResourceConfiguration g_KeyValuePairProperties[] =
 };
 
 
-MI_Result ValidateInfrastructureSchema(_In_ MI_ClassA *miClassArray, 
+MI_Result ValidateInfrastructureSchema(_In_ MI_ClassA *miClassArray,
                                        _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r = MI_RESULT_OK;
@@ -205,13 +205,13 @@ MI_Result ValidateInfrastructureSchema(_In_ MI_ClassA *miClassArray,
 
         if( g_InfraSchemaValidators[yCount].wszClassName == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
-            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_INFRASCHEMA); 
+            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_INFRASCHEMA);
         }
 
         r = g_InfraSchemaValidators[yCount].Validator(miClassArray->data[xCount], extendedError);
         if( r != MI_RESULT_OK)
         {
-            return r; 
+            return r;
         }
     }
     return r;
@@ -231,17 +231,17 @@ MI_Result ValidateProviderRegistrationAgainstSchema(_In_ MI_ClassA *miClassArray
     MI_Value value;
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     DSC_EventWriteValidatingProviderRegistration(miClassArray->size,miRegistrationArray->size);
 
     //Test1 : only 1 registration per class
     //Test2 : no class left out without registration(except for meta config), also validates that registration not targeting more than 1 class.
     //Test3: no registration instance left out without class
-    //Test4 : no two classes with same name    
+    //Test4 : no two classes with same name
 
     for (xCount = 0 ; xCount < miClassArray->size ; xCount++)
     {
@@ -256,7 +256,7 @@ MI_Result ValidateProviderRegistrationAgainstSchema(_In_ MI_ClassA *miClassArray
         {
             if (Tcscasecmp(miClassArray->data[yCount]->classDecl->name, miClassArray->data[xCount]->classDecl->name) == 0  || NitsShouldFault(NitsHere(), NitsAutomatic))
             {
-                return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVREG_MULTI);  
+                return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVREG_MULTI);
             }
         }
     }
@@ -269,8 +269,8 @@ MI_Result ValidateProviderRegistrationAgainstSchema(_In_ MI_ClassA *miClassArray
                  Tcscasecmp(miClassArray->data[yCount]->classDecl->superClass, BASE_RESOURCE_CLASSNAME) == 0) ||
                  Tcscasecmp(miClassArray->data[xCount]->classDecl->name, METACONFIG_CLASSNAME) == 0)
             {
-                r = DSC_MI_Instance_GetElement(miRegistrationArray->data[xCount], MSFT_BaseConfigurationProviderRegistration_ClassName, 
-                    &value, NULL, NULL, NULL); 
+                r = DSC_MI_Instance_GetElement(miRegistrationArray->data[xCount], MSFT_BaseConfigurationProviderRegistration_ClassName,
+                    &value, NULL, NULL, NULL);
                 if (r != MI_RESULT_OK )
                 {
                     return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_PROVREG_MANDATORY);
@@ -288,7 +288,7 @@ MI_Result ValidateProviderRegistrationAgainstSchema(_In_ MI_ClassA *miClassArray
         // Test3
         if (yCount == miClassArray->size  || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
-            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVREG_NOCLASS);    
+            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVREG_NOCLASS);
         }
     }
 
@@ -302,16 +302,16 @@ MI_Result ValidateProviderRegistrationAgainstSchema(_In_ MI_ClassA *miClassArray
 }
 
 
-MI_Result ValidateSchema(_In_ MI_ClassA *miClassArray, 
-                         _In_ MI_Uint32 classIndex, 
-                         _Inout_updates_(resSize) MI_Boolean *bResourceVisited, 
+MI_Result ValidateSchema(_In_ MI_ClassA *miClassArray,
+                         _In_ MI_Uint32 classIndex,
+                         _Inout_updates_(resSize) MI_Boolean *bResourceVisited,
                          _In_ MI_Uint32 resSize,
                          _In_ MI_Boolean bConfigurationResource,
                          _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
-    MI_Uint32 xCount = 0, yCount = 0;    
-    const MI_ClassDecl *classToCheck = NULL; 
+    MI_Uint32 xCount = 0, yCount = 0;
+    const MI_ClassDecl *classToCheck = NULL;
     MI_Uint32 keyPropertyCount = 0;
     MI_Uint32 propertyBitMask = 0; // 1 = Read, 2 = Write, 4 = Key, 8 = Required
      if( extendedError )
@@ -321,12 +321,12 @@ MI_Result ValidateSchema(_In_ MI_ClassA *miClassArray,
 
     if( classIndex >= miClassArray->size || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
-        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_SCHEMA_INVPARAM);        
+        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_SCHEMA_INVPARAM);
     }
 
     classToCheck = miClassArray->data[classIndex]->classDecl;
     DSC_EventWriteValidatingSchema(classToCheck->name,classIndex,miClassArray->size);
-   
+
     /*Test7*/
     if( classToCheck->numMethods != 0  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -349,9 +349,9 @@ MI_Result ValidateSchema(_In_ MI_ClassA *miClassArray,
 
     /*Test 2*/
     /*Rule1: Read and (Key or Required or Write) can't coexist*/
-    /*Rule2: Write and (Read) can't coexist*/    
-    /*Rule3: Key and (Read) can't coexist*/    
-    /*Rule4: Required and (Read) can't coexist*/        
+    /*Rule2: Write and (Read) can't coexist*/
+    /*Rule3: Key and (Read) can't coexist*/
+    /*Rule4: Required and (Read) can't coexist*/
     for( xCount = 0 ; xCount < classToCheck->numProperties; xCount++)
     {
         propertyBitMask = 0;
@@ -417,7 +417,7 @@ MI_Result ValidateSchema(_In_ MI_ClassA *miClassArray,
 
         }
     }
-    if( bConfigurationResource && 
+    if( bConfigurationResource &&
         Tcscasecmp(miClassArray->data[classIndex]->classDecl->name, METACONFIG_CLASSNAME) != 0 &&
         Tcscasecmp(miClassArray->data[classIndex]->classDecl->name, MSFT_LOGRESOURCENAME) != 0)
     {
@@ -431,13 +431,13 @@ MI_Result ValidateSchema(_In_ MI_ClassA *miClassArray,
 
 }
 
-MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray, 
+MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray,
                                     _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r = MI_RESULT_OK;
     MI_Uint32 xCount = 0;
-    MI_Uint32 configurationResourceCount = 0; 
-    MI_Boolean *bResourceVisited = NULL; 
+    MI_Uint32 configurationResourceCount = 0;
+    MI_Boolean *bResourceVisited = NULL;
     // Test1: Exactly 1 resource per MOF file
     // Test2: All properties should contain qualifiers read, write, required or write and at least 1 key property.
     // Test3: Embedded object and its associated property validation
@@ -447,10 +447,10 @@ MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray,
     // Test7: Class shouldn't contain any method.
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     if (miClassArray == NULL || miClassArray->size == 0  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -458,7 +458,7 @@ MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray,
     }
 
     DSC_EventWriteValidatingDSCProviderSchema(miClassArray->size);
-    
+
     bResourceVisited = (MI_Boolean*)DSC_malloc(sizeof(MI_Boolean) * miClassArray->size, NitsHere());
     if (bResourceVisited == NULL )
     {
@@ -496,7 +496,7 @@ MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray,
     }
 
     DSC_free(bResourceVisited);
-    
+
     /*Test1*/
     if (configurationResourceCount != 1  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -506,7 +506,7 @@ MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray,
     return r;
 }
 
-MI_Result ValidateDSCDocumentInstance(_In_ MI_InstanceA *miInstanceArray, 
+MI_Result ValidateDSCDocumentInstance(_In_ MI_InstanceA *miInstanceArray,
                                       _In_ MI_Uint32 flags,
                                       _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
@@ -516,15 +516,15 @@ MI_Result ValidateDSCDocumentInstance(_In_ MI_InstanceA *miInstanceArray,
     MI_Uint32 instanceFlags;
     const MI_Char* resourceID;
     MI_Boolean hasMetaConfig = MI_FALSE;
-    
+
     // Test1 : should contain all key and required properties.
     if( extendedError )
-        *extendedError = NULL;    
+        *extendedError = NULL;
 
     if( miInstanceArray == NULL || miInstanceArray->size == 0  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NORES);
-    }      
+    }
     DSC_EventWriteValidatingDSCDocInstance(miInstanceArray->size,flags);
     for( xCount = 0; xCount < miInstanceArray->size; xCount++)
     {
@@ -555,7 +555,7 @@ MI_Result ValidateDSCDocumentInstance(_In_ MI_InstanceA *miInstanceArray,
                 }
             }
         }
-        
+
     }
 
     //check meta configuration, which should not be merged with other configurations (> 2 because we always have the OMI_ConfigurationDocument)
@@ -586,13 +586,13 @@ MI_Result ValidateDSCDocumentInstance(_In_ MI_InstanceA *miInstanceArray,
                 return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_MODMAN_DUPLICATE_RESOURCEID, resourceID);
             }
         }
-        
+
     }
     return r;
 }
 
 
-MI_Result ValidateDSCProviderRegistrationInstance(_In_ MI_InstanceA *miInstanceArray, 
+MI_Result ValidateDSCProviderRegistrationInstance(_In_ MI_InstanceA *miInstanceArray,
                                                   _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r = MI_RESULT_OK;
@@ -613,9 +613,9 @@ MI_Result ValidateDSCProviderRegistrationInstance(_In_ MI_InstanceA *miInstanceA
     if( miInstanceArray == NULL || miInstanceArray->size != 1  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_ONERES);
-    }    
+    }
     instanceToCheck = miInstanceArray->data[0];
-    
+
     /*Test2*/
     r = DSC_MI_Instance_GetClassName(instanceToCheck, &className);
     if( r != MI_RESULT_OK )
@@ -631,7 +631,7 @@ MI_Result ValidateDSCProviderRegistrationInstance(_In_ MI_InstanceA *miInstanceA
     {
         bWMIv2ProviderRegistration = MI_FALSE;
     }
-    else 
+    else
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVREGINS_TYPE);
     }
@@ -651,7 +651,7 @@ MI_Result ValidateDSCProviderRegistrationInstance(_In_ MI_InstanceA *miInstanceA
     if( r != MI_RESULT_OK )
     {
         return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_PROVREGINS_PROP_MODULEVERSION);
-    }    
+    }
 
     if( bWMIv2ProviderRegistration)
     {
@@ -669,13 +669,13 @@ MI_Result ValidateDSCProviderRegistrationInstance(_In_ MI_InstanceA *miInstanceA
         if( r != MI_RESULT_OK )
         {
             return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_PROVREGINS_PROP_MODULENAME);
-        }    
+        }
     }
 
     return r;
 }
 
-MI_Result ValidateClassProperties(_In_ MI_Class *classInfo, 
+MI_Result ValidateClassProperties(_In_ MI_Class *classInfo,
                                   _In_ BaseResourceConfiguration *properties,
                                   _In_ MI_Uint32 basePropertyCount,
                                   _Outptr_result_maybenull_ MI_Instance **extendedError )
@@ -687,7 +687,7 @@ MI_Result ValidateClassProperties(_In_ MI_Class *classInfo,
     if( extendedError )
         *extendedError = NULL;
 
-    
+
     /*Start Test*/
     for (count = 0; properties[count].wszPropName != NULL; count++)
     {
@@ -719,7 +719,7 @@ MI_Result ValidateClassProperties(_In_ MI_Class *classInfo,
     return r;
 }
 
-MI_Result ValidateBaseResourceConfigurationClass(_In_ MI_Class *baseResourceClass, 
+MI_Result ValidateBaseResourceConfigurationClass(_In_ MI_Class *baseResourceClass,
                                                  _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r;
@@ -736,7 +736,7 @@ MI_Result ValidateBaseResourceConfigurationClass(_In_ MI_Class *baseResourceClas
         return r;
     }
 
-    /* validate qualifier */ 
+    /* validate qualifier */
     for (xCount = 0; g_BaseResourceQualifiers[xCount].wszPropName != NULL; xCount++)
     {
         r = DSC_MI_Class_GetElement(baseResourceClass, g_BaseResourceQualifiers[xCount].wszPropName, NULL, NULL, NULL, NULL, &qualifierSet, NULL, NULL);
@@ -755,7 +755,7 @@ MI_Result ValidateBaseResourceConfigurationClass(_In_ MI_Class *baseResourceClas
     return r;
 }
 
-MI_Result ValidateBaseResourceRegistrationClass(_In_ MI_Class *baseRegistrationClass, 
+MI_Result ValidateBaseResourceRegistrationClass(_In_ MI_Class *baseRegistrationClass,
                                                 _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r;
@@ -782,7 +782,7 @@ MI_Result ValidateBaseResourceRegistrationClass(_In_ MI_Class *baseRegistrationC
     return r;
 }
 
-MI_Result ValidateCimResourceRegistrationClass(_In_ MI_Class *cimRegistrationClass, 
+MI_Result ValidateCimResourceRegistrationClass(_In_ MI_Class *cimRegistrationClass,
                                                _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r;
@@ -802,7 +802,7 @@ MI_Result ValidateCimResourceRegistrationClass(_In_ MI_Class *cimRegistrationCla
     return r;
 }
 
-MI_Result ValidatePSResourceRegistrationClass(_In_ MI_Class *psRegistrationClass, 
+MI_Result ValidatePSResourceRegistrationClass(_In_ MI_Class *psRegistrationClass,
                                               _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r;
@@ -822,7 +822,7 @@ MI_Result ValidatePSResourceRegistrationClass(_In_ MI_Class *psRegistrationClass
     return r;
 }
 
-MI_Result ValidateConfigurationDocumentClass(_In_ MI_Class *configDocumentClass, 
+MI_Result ValidateConfigurationDocumentClass(_In_ MI_Class *configDocumentClass,
                                              _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r;
@@ -834,7 +834,7 @@ MI_Result ValidateConfigurationDocumentClass(_In_ MI_Class *configDocumentClass,
     return r;
 }
 
-MI_Result ValidateMetaConfigurationClass(_In_ MI_Class *configDocumentClass, 
+MI_Result ValidateMetaConfigurationClass(_In_ MI_Class *configDocumentClass,
                                          _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r;
@@ -846,7 +846,7 @@ MI_Result ValidateMetaConfigurationClass(_In_ MI_Class *configDocumentClass,
     return r;
 }
 
-MI_Result ValidateBaseCredClass(_In_ MI_Class *configDocumentClass, 
+MI_Result ValidateBaseCredClass(_In_ MI_Class *configDocumentClass,
                                 _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r;
@@ -858,7 +858,7 @@ MI_Result ValidateBaseCredClass(_In_ MI_Class *configDocumentClass,
     return r;
 }
 
-MI_Result ValidateKeyValuePairClass(_In_ MI_Class *configDocumentClass, 
+MI_Result ValidateKeyValuePairClass(_In_ MI_Class *configDocumentClass,
                                    _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
     MI_Result r;
@@ -867,23 +867,23 @@ MI_Result ValidateKeyValuePairClass(_In_ MI_Class *configDocumentClass,
     {
         return r;
     }
-    return r;    
+    return r;
 }
 
 
-MI_Result ValidateDSCProviderMapping(_In_ MI_Instance *regInstance, 
+MI_Result ValidateDSCProviderMapping(_In_ MI_Instance *regInstance,
                                      _In_ MI_Class *regClass,
                                      _In_ MI_Session *miSession,
                                      _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Value namespaceName;
-    
+
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     /*Validation only for configuration classes which are registered as wmiv2 provider.
            MSFT_LogResource is a special class.*/
@@ -921,7 +921,7 @@ MI_Result ValidateDSCProviderMappingForWMIV2Provider( _In_z_ const MI_Char *name
     MI_Boolean moreResults;
     MI_Result result;
     const MI_Char *errorMessage;
-    const MI_Instance *completionDetails = NULL;     
+    const MI_Instance *completionDetails = NULL;
     MI_Operation operation = MI_OPERATION_NULL;
     MI_Uint32 xCount, usefulMethodCount =0 ;
     const MI_Class *resultClass;
@@ -935,7 +935,7 @@ MI_Result ValidateDSCProviderMappingForWMIV2Provider( _In_z_ const MI_Char *name
     if( result != MI_RESULT_OK)
     {
         r = result;
-    }     
+    }
     if( r != MI_RESULT_OK)
     {
         if( completionDetails != NULL)
@@ -968,7 +968,7 @@ MI_Result ValidateDSCProviderMappingForWMIV2Provider( _In_z_ const MI_Char *name
             if( methodDecl->numParameters != OMI_BaseResource_TestMethodCount  || NitsShouldFault(NitsHere(), NitsAutomatic))
             {
                 MI_Operation_Close(&operation);
-                return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_VALIDATE_MAPPING_PARAM_TEST);                
+                return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_VALIDATE_MAPPING_PARAM_TEST);
             }
             usefulMethodCount++;
         }
@@ -977,7 +977,7 @@ MI_Result ValidateDSCProviderMappingForWMIV2Provider( _In_z_ const MI_Char *name
             if( methodDecl->numParameters != OMI_BaseResource_SetMethodCount  || NitsShouldFault(NitsHere(), NitsAutomatic) )
             {
                 MI_Operation_Close(&operation);
-                return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_VALIDATE_MAPPING_PARAM_SET);                
+                return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_VALIDATE_MAPPING_PARAM_SET);
             }
             usefulMethodCount++;
         }
@@ -1027,17 +1027,17 @@ MI_Boolean ValidateABCFormatVersion(_In_z_ const MI_Char *str)
 MI_Result ValidateDocumentInstance(_In_ MI_Instance *docInstance,
                                     _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
-    
+
     MI_Result r = MI_RESULT_OK;
     MI_Uint32 yCount = 0;
     MI_Uint32 Flags;
     MI_Value value;
     DSC_EventWriteValidatingDocInstance();
-    
+
     // Test1 : should have 'Version' property with correct format.
     if( extendedError )
-        *extendedError = NULL;    
-    
+        *extendedError = NULL;
+
     for( yCount = 0; yCount < docInstance->classDecl->numProperties ; yCount++)
     {
         r = DSC_MI_Instance_GetElement(docInstance, OMI_ConfigurationDocument_Version, &value, NULL, &Flags, NULL);
@@ -1051,7 +1051,7 @@ MI_Result ValidateDocumentInstance(_In_ MI_Instance *docInstance,
             return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_DOCINS_VERSION);
         }
     }
-    return r;    
+    return r;
 }
 
 /*Function that validates if the version of the metaconfiguration is in accordance with the properties that it supports*/
@@ -1061,14 +1061,13 @@ MI_Result ValidateVersionNumbersCompatibility(_In_ MI_InstanceA *instanceA,
                                             _In_ LCMProviderContext *lcmContext,
                                             _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
-    
+
     MI_Result r = MI_RESULT_OK;
     MI_Uint32 Flags;
     MI_Value value;
     MI_Uint32 i=0;
     MSFT_DSCMetaConfiguration *metaConfigInstance=NULL;
     MI_Instance *tempInstance;
-    MI_Context* mi_context = NULL;
     Intlstr pTempStr = Intlstr_Null;
     if (instanceA == 0 || instanceA->size == 0 || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
@@ -1079,7 +1078,7 @@ MI_Result ValidateVersionNumbersCompatibility(_In_ MI_InstanceA *instanceA,
         {
                 return MI_RESULT_INVALID_PARAMETER;
         }
-        *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.  
+        *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
     //get the metaconfiguration instance first
 
     for (i = 0; i < instanceA->size; i++)
@@ -1096,7 +1095,7 @@ MI_Result ValidateVersionNumbersCompatibility(_In_ MI_InstanceA *instanceA,
         //No metaconfiguration object was found - this isn't supported
         return GetCimMIError(MI_RESULT_NOT_SUPPORTED, extendedError, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
     }
-    
+
     if (Tcscasecmp(versionNumber, OMI_ConfigurationDocument_VersionV1) == 0)
     {
         // We're okay here
@@ -1110,7 +1109,7 @@ MI_Result ValidateVersionNumbersCompatibility(_In_ MI_InstanceA *instanceA,
         //It isn't in the right version format
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_VERSIONNUMBER);
     }
-    return r;    
+    return r;
 }
 
 
@@ -1123,7 +1122,7 @@ MI_Result ValidatePartialConfigurationName(_In_z_ const MI_Char* partialConfigNa
 {
     //TODO : Get all metaconfiguration partial config instances
     MI_Uint32 count = 0;
-    MI_Uint32 innerCount = 0; 
+    MI_Uint32 innerCount = 0;
     MI_Value value;
     MI_Char* qualifiedPartialConfName = NULL;
     MI_Boolean isValidPartialConfig = MI_FALSE;
@@ -1165,7 +1164,7 @@ MI_Result ValidatePartialConfigurationName(_In_z_ const MI_Char* partialConfigNa
         {
             //This means there was a match between metaconfig and partial config name passed
             isValidPartialConfig = MI_TRUE;
-            *partialConfigMetaInstance = value.instancea.data[count];     
+            *partialConfigMetaInstance = value.instancea.data[count];
             DSCFREE_IF_NOT_NULL(qualifiedPartialConfName);
             continue;//So that you don't count the exclusive resources of its own instance in themeta config.
         }
@@ -1173,7 +1172,7 @@ MI_Result ValidatePartialConfigurationName(_In_z_ const MI_Char* partialConfigNa
         DSCFREE_IF_NOT_NULL(qualifiedPartialConfName);
         if (flagProcessExclusiveResources)
         {
-            //Get exclusive resources of all other partial configs 
+            //Get exclusive resources of all other partial configs
             result = MI_Instance_GetElement(value.instancea.data[count], MSFT_PartialConfiguration_ExclusiveResources, &valuePartialConfig, NULL, &flags, NULL);
             GOTO_CLEANUP_IF_FAILED(result, Cleanup);
             //Check the exclusive resources, if they're present, add it to the ongoing array
@@ -1294,11 +1293,11 @@ MI_Result ValidatePartialConfigFile(_In_z_ const MI_Char* partialConfigName,
             //If even one of the configuration name values doesn't match the partial configuration name, throw error
             result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCMHELPER_INVALID_PARTIALCONFIG_INCONSISTENCY, partialConfigName);
             return result;
-        }        
+        }
         //Check that the resource name in the array is not present inside any of the other partial configurations' exclusive resources.
         if (ExcludedResourcesList != NULL && ExcludedResourcesList->data != NULL)
         {
-            
+
             //For each exluded resource, check if there's a match with this resources class name
             for (innerCount = 0; innerCount < ExcludedResourcesList->size; innerCount++)
             {
@@ -1309,10 +1308,10 @@ MI_Result ValidatePartialConfigFile(_In_z_ const MI_Char* partialConfigName,
                     result = GetCimMIError2Params(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_MODMAN_PARTIALCONFIG_EXCLUSIVERESOURCE_DISOBEYED, partialConfigName, ExcludedResourcesList->data[innerCount]);
                     return result;
                 }
-                
+
             }
         }
-    }    
+    }
     return result;
 }
 
@@ -1359,7 +1358,7 @@ MI_Result ValidatePartialMeta_ConfigDownloadMgr(_In_ MI_Instance* partialInstanc
         {
             result = MI_Instance_GetElement(valueDownloadMgrs.instancea.data[count], OMI_MetaConfigurationResource_ResourceId, &valueConfigDownloadMgrName, NULL, &flags, NULL);
             RETURN_RESULT_IF_FAILED(result);
-            
+
             if (valueConfigSource.string != NULL && valueConfigDownloadMgrName.string != NULL && Tcscasecmp(valueConfigSource.string, valueConfigDownloadMgrName.string) == 0)
             {
                 //This means there was a match between metaconfig config download manager and partial config's configsource
@@ -1388,7 +1387,7 @@ MI_Result ValidatePartialMeta_ExclusiveResources(_In_ MI_Instance* partialInstan
     MI_Uint32 flags = 0;
     MI_Uint32 count = 0;
     MI_Uint32 innerCount = 0;
-    MI_Uint32 newSize = 0;
+    size_t newSize = 0;
     MI_Value value;
     MI_Uint32 newIndexOfArrayOutput = 0;
     MI_Char** tempArrayOutput = NULL;
@@ -1406,8 +1405,18 @@ MI_Result ValidatePartialMeta_ExclusiveResources(_In_ MI_Instance* partialInstan
     {
         //Assign size of new array and allocate it
         newSize = arrayOutput->size + value.stringa.size;
+        // arrayOutput->size is a Uint32, Fail now if newSize would be truncated later on
+        if (newSize > 0xFFFFFFFF)
+        {
+            return MI_RESULT_SERVER_LIMITS_EXCEEDED;
+        }
+
         tempArrayOutput = DSC_malloc(newSize*sizeof(MI_Char*), NitsHere());
-        
+        if (!tempArrayOutput)
+        {
+            return MI_RESULT_SERVER_LIMITS_EXCEEDED;
+        }
+
         for (count = 0; count < value.stringa.size; count++)
         {
             for (innerCount = 0; innerCount < arrayOutput->size && innerCount < newSize; innerCount++)
@@ -1423,7 +1432,7 @@ MI_Result ValidatePartialMeta_ExclusiveResources(_In_ MI_Instance* partialInstan
                 {
                     tempArrayOutput[innerCount] = arrayOutput->data[innerCount];
                 }
-                
+
             }
             GOTO_CLEANUP_IF_FAILED(result, Cleanup);
             //Mark that you've already copied the arrayOutput fully into temporary array
@@ -1439,7 +1448,7 @@ MI_Result ValidatePartialMeta_ExclusiveResources(_In_ MI_Instance* partialInstan
         }
         arrayOutput->data = tempArrayOutput;
         arrayOutput->size = newSize;
-        
+
     }
     return result;
     //Check the property if empty - if not, then save each string into stringA
@@ -1525,8 +1534,8 @@ MI_Result ValidatePartialConfigMergedFile(_In_ ModuleManager *moduleManager,
     {
         return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.        
-    //If the provided moffile path is not null, only then read the file's contents, else check the 
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+    //If the provided moffile path is not null, only then read the file's contents, else check the
 
     /*Load the manager*/
     DSC_EventWriteLCMValidatingMergedPartial();
@@ -1540,13 +1549,13 @@ MI_Result ValidatePartialConfigMergedFile(_In_ ModuleManager *moduleManager,
     {
         return r;
     }
-    
+
     moduleLoader = (ModuleLoaderObject*)moduleManager->reserved2;
     miClassArray.size = moduleLoader->schemaCount;
-    miClassArray.data = moduleLoader->providerSchema; 
+    miClassArray.data = moduleLoader->providerSchema;
     r = MI_Deserializer_DeserializeInstanceArray(moduleLoader->deserializer, 0, moduleLoader->strictOptions, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miTempInstanceArray, extendedError);
     GOTO_CLEANUP_IF_FAILED(r, Exit);
-    
+
     r = ValidateDSCDocumentInstance(miTempInstanceArray, flags | VALIDATE_DOCUMENT_INSTANCE, extendedError);
     if (r != MI_RESULT_OK)
     {
@@ -1636,7 +1645,7 @@ MI_Result ValidateResourceObeysExclusiveResourcesRule(_In_z_ MI_Char* exclusiveR
         numCharactersBeforeDelimiter++;
     }
     //Check for error cases
-    if ((gotDelimiter && (resourceName == NULL  || numCharactersBeforeDelimiter == 0 ))) //Case:  \ResourceName , \ and ModuleName  
+    if ((gotDelimiter && (resourceName == NULL  || numCharactersBeforeDelimiter == 0 ))) //Case:  \ResourceName , \ and ModuleName
     {
         result = GetCimMIError2Params(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_PARTIALCONFIG_INVALID_EXCLUSIVERESOURCESTRING, exclusiveResourceString, resourceInstance->classDecl->name);
         return result;
@@ -1650,8 +1659,8 @@ MI_Result ValidateResourceObeysExclusiveResourcesRule(_In_z_ MI_Char* exclusiveR
             matchFound = MI_TRUE;
         }
     }
-    
-    //Case 2 ModuleName/ResourceName, 
+
+    //Case 2 ModuleName/ResourceName,
     else if (resourceName!=NULL)
     {
         if (Tcscasecmp(resourceInstance->classDecl->name, resourceName) == 0)
@@ -1672,30 +1681,30 @@ MI_Result ValidateResourceObeysExclusiveResourcesRule(_In_z_ MI_Char* exclusiveR
 }
 
 
-MI_Result ValidateMetaConfResourceProperties(_In_ MI_Class *configDocumentClass, 
+MI_Result ValidateMetaConfResourceProperties(_In_ MI_Class *configDocumentClass,
                                              _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r;
     r = ValidateClassProperties(configDocumentClass, g_MetaConfigurationResourceProperties, 0, extendedError);
-   
+
     return r;
 }
 
-MI_Result  ValidateConfigurationDownloadManagerProperties(_In_ MI_Class *configDocumentClass, 
+MI_Result  ValidateConfigurationDownloadManagerProperties(_In_ MI_Class *configDocumentClass,
                                                           _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r;
     r = ValidateClassProperties(configDocumentClass, g_ConfigurationDownloadManagerProperties, OMI_MetaConfigurationResource_Property_Count, extendedError);
-   
+
     return r;
 }
 
 
-MI_Result  ValidateWebDownloadManagerProperties(_In_ MI_Class *configDocumentClass, 
+MI_Result  ValidateWebDownloadManagerProperties(_In_ MI_Class *configDocumentClass,
                                                 _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r;
     r = ValidateClassProperties(configDocumentClass,  g_WebDownloadManagerProperties, OMI_MetaConfigurationResource_Property_Count + 1, extendedError);
-   
+
     return r;
 }

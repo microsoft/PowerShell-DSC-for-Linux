@@ -646,11 +646,18 @@ static int yygrowstack(YYSTACKDATA *data, Batch *batch)
     YYSTYPE *newvs;
 
     if ((newsize = data->stacksize) == 0)
+    {
         newsize = YYINITSTACKSIZE;
+    }
     else if (newsize >= YYMAXDEPTH)
+    {
         return -1;
+    }
     else if ((newsize *= 2) > YYMAXDEPTH)
+    {
+        // Prevent the stack from growing indefinitely and overflowing
         newsize = YYMAXDEPTH;
+    }
 
     i = data->s_mark - data->s_base;
     newss = (short *)MOF_Realloc(batch, data->s_base, data->stacksize*sizeof(*newss), newsize * sizeof(*newss));
@@ -841,7 +848,7 @@ case 1:
 break;
 case 2:
 #line 140 "mof.y"
-	{ 
+	{
     }
 break;
 case 3:
@@ -863,7 +870,7 @@ case 5:
         yystack.l_mark[0].classDeclaration->flags |= GetQualFlags(state, yystack.l_mark[0].classDeclaration->qualifiers, yystack.l_mark[0].classDeclaration->numQualifiers);
         if (FinalizeClass(state, yystack.l_mark[0].classDeclaration) != 0)
             YYABORT;
-            
+
         if (AddClassDecl(state, yystack.l_mark[0].classDeclaration) != 0)
             YYABORT;
     }
@@ -909,7 +916,7 @@ case 8:
         }
         else
         {
-            yywarnf(state->errhandler, ID_UNKNOWN_PRAGMA, 
+            yywarnf(state->errhandler, ID_UNKNOWN_PRAGMA,
                 "warning: unknown pragma: %s=%s", yystack.l_mark[-3].string, yystack.l_mark[-1].string);
 
             if (state->pragmaCallback)
@@ -923,7 +930,7 @@ case 9:
         /* Check whether class already exists */
         if (FindClassDeclBufferOnly(state, yystack.l_mark[-1].string))
         {
-            yyerrorf(state->errhandler, ID_CLASS_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_CLASS_ALREADY_DEFINED,
                 "class already defined: \"%s\"", yystack.l_mark[-1].string);
             YYABORT;
         }
@@ -945,17 +952,17 @@ case 10:
         /* Check whether class already exists */
         if (FindClassDeclBufferOnly(state, yystack.l_mark[-3].string))
         {
-            yyerrorf(state->errhandler, ID_CLASS_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_CLASS_ALREADY_DEFINED,
                 "class already defined: \"%s\"", yystack.l_mark[-3].string);
             YYABORT;
         }
- 
+
         /* Check whether superclass exists */
         scd = FindClassDecl(state, yystack.l_mark[-1].string);
 
         if (!scd)
         {
-            yyerrorf(state->errhandler, ID_UNDEFINED_SUPERCLASS, 
+            yyerrorf(state->errhandler, ID_UNDEFINED_SUPERCLASS,
                 "super class of \"%s\" is undefined: \"%s\"", yystack.l_mark[-3].string, yystack.l_mark[-1].string);
             YYABORT;
         }
@@ -981,7 +988,7 @@ case 11:
         /* Check whether class already exists */
         if (FindClassDeclBufferOnly(state, yystack.l_mark[-1].string))
         {
-            yyerrorf(state->errhandler, ID_CLASS_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_CLASS_ALREADY_DEFINED,
                 "class already defined: \"%s\"", yystack.l_mark[-1].string);
             YYABORT;
         }
@@ -1009,7 +1016,7 @@ case 12:
         /* Check whether class already exists */
         if (FindClassDeclBufferOnly(state, yystack.l_mark[-3].string))
         {
-            yyerrorf(state->errhandler, ID_CLASS_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_CLASS_ALREADY_DEFINED,
                 "class already defined: \"%s\"", yystack.l_mark[-3].string);
             YYABORT;
         }
@@ -1019,7 +1026,7 @@ case 12:
 
         if (!scd)
         {
-            yyerrorf(state->errhandler, ID_UNDEFINED_SUPERCLASS, 
+            yyerrorf(state->errhandler, ID_UNDEFINED_SUPERCLASS,
                 "super class of \"%s\" is undefined: \"%s\"", yystack.l_mark[-3].string, yystack.l_mark[-1].string);
             YYABORT;
         }
@@ -1111,7 +1118,7 @@ case 18:
 
         if (FindProperty(&yystack.l_mark[-1].featureList.propertySet, yystack.l_mark[0].property->name))
         {
-            yyerrorf(state->errhandler, ID_CLASS_FEATURE_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_CLASS_FEATURE_ALREADY_DEFINED,
                 "class feature already defined: \"%s\"", yystack.l_mark[0].property->name);
             YYABORT;
         }
@@ -1129,7 +1136,7 @@ case 19:
 	{
         if (FindMethod(&yystack.l_mark[-1].featureList.methodList, yystack.l_mark[0].methodDecl->name))
         {
-            yyerrorf(state->errhandler, ID_CLASS_FEATURE_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_CLASS_FEATURE_ALREADY_DEFINED,
                 "class feature already defined: \"%s\"", yystack.l_mark[0].methodDecl->name);
             YYABORT;
         }
@@ -1147,7 +1154,7 @@ case 20:
 	{
         if (FindProperty(&yystack.l_mark[-1].featureList.propertySet, yystack.l_mark[0].property->name))
         {
-            yyerrorf(state->errhandler, ID_CLASS_FEATURE_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_CLASS_FEATURE_ALREADY_DEFINED,
                 "class feature already defined: \"%s\"", yystack.l_mark[0].property->name);
             YYABORT;
         }
@@ -1182,7 +1189,7 @@ case 23:
 	{
         if (FindQualifier(&yystack.l_mark[-2].qualifierList, yystack.l_mark[0].qualifier->name))
         {
-            yyerrorf(state->errhandler, ID_DUPLICATE_QUALIFIER, 
+            yyerrorf(state->errhandler, ID_DUPLICATE_QUALIFIER,
                 "duplicate qualifier: \"%s\"", yystack.l_mark[0].qualifier->name);
             YYABORT;
         }
@@ -1209,12 +1216,12 @@ case 24:
 
         if (qd->type != MI_BOOLEAN)
         {
-            yyerrorf(state->errhandler, ID_MISSING_QUALIFIER_INITIALIZER, 
+            yyerrorf(state->errhandler, ID_MISSING_QUALIFIER_INITIALIZER,
                 "qualifier is missing initializer: \"%s\"", yystack.l_mark[0].string);
             YYABORT;
         }
-        
-        
+
+
         q = CALLOC_T(MI_Qualifier, 1);
         q->name = qd->name; /* use casing of qualifier declaration name */
         q->type = qd->type;
@@ -1240,11 +1247,11 @@ case 25:
 
         if (InitializerToValue(state, &yystack.l_mark[0].initializer, qd->type, &value) != 0)
         {
-            yyerrorf(state->errhandler, ID_INVALID_QUALIFIER_INITIALIZER, 
+            yyerrorf(state->errhandler, ID_INVALID_QUALIFIER_INITIALIZER,
                 "invalid initializer for qualifer: \"%s\"", yystack.l_mark[-1].string);
             YYABORT;
         }
-        
+
         q = CALLOC_T(MI_Qualifier, 1);
         q->name = qd->name; /* use casing of qualifier declaration name */
         q->type = qd->type;
@@ -1269,11 +1276,11 @@ case 26:
 
         if (qd->type != MI_BOOLEAN)
         {
-            yyerrorf(state->errhandler, ID_MISSING_QUALIFIER_INITIALIZER, 
+            yyerrorf(state->errhandler, ID_MISSING_QUALIFIER_INITIALIZER,
                 "qualifier is missing initializer: \"%s\"", yystack.l_mark[-2].string);
             YYABORT;
         }
-        
+
         q = CALLOC_T(MI_Qualifier, 1);
         q->name = qd->name; /* use casing of qualifier declaration name */
         q->type = qd->type;
@@ -1299,11 +1306,11 @@ case 27:
 
         if (InitializerToValue(state, &yystack.l_mark[-2].initializer, qd->type, &value) != 0)
         {
-            yyerrorf(state->errhandler, ID_INVALID_QUALIFIER_INITIALIZER, 
+            yyerrorf(state->errhandler, ID_INVALID_QUALIFIER_INITIALIZER,
                 "invalid initializer for qualifer: \"%s\"", yystack.l_mark[-3].string);
             YYABORT;
         }
-        
+
         q = CALLOC_T(MI_Qualifier, 1);
         q->name = qd->name; /* use casing of qualifier declaration name */
         q->type = qd->type;
@@ -1727,7 +1734,7 @@ case 70:
 	{
         if (FindParameter(&yystack.l_mark[-2].parameterList, yystack.l_mark[0].parameter->name))
         {
-            yyerrorf(state->errhandler, ID_PARAMETER_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_PARAMETER_ALREADY_DEFINED,
                 "parameter already defined: \"%s\"", yystack.l_mark[0].parameter->name);
             YYABORT;
         }
@@ -1841,7 +1848,7 @@ case 79:
 	{
         if (yystack.l_mark[-1].integer <= 0)
         {
-            yyerrorf(state->errhandler, ID_ILLEGAL_ARRAY_SUBSCRIPT, 
+            yyerrorf(state->errhandler, ID_ILLEGAL_ARRAY_SUBSCRIPT,
                 "illegal array subscript: " SINT64_FMT, yystack.l_mark[-1].integer);
             YYABORT;
         }
@@ -2114,7 +2121,7 @@ case 113:
         /* Reject incompatiable ToSubclass and Restricted flavors */
         if (yystack.l_mark[-1].flags & MI_FLAG_TOSUBCLASS && yystack.l_mark[-1].flags & MI_FLAG_RESTRICTED)
         {
-            yyerrorf(state->errhandler, ID_INCOMPATIBLE_FLAVORS, "incompatible flavors: %s/%s", 
+            yyerrorf(state->errhandler, ID_INCOMPATIBLE_FLAVORS, "incompatible flavors: %s/%s",
                 "ToSubclass", "Restricted");
             YYABORT;
         }
@@ -2122,7 +2129,7 @@ case 113:
         /* Reject incompatiable EnableOverride and DisableOverride flavors */
         if (yystack.l_mark[-1].flags & MI_FLAG_ENABLEOVERRIDE && yystack.l_mark[-1].flags & MI_FLAG_DISABLEOVERRIDE)
         {
-            yyerrorf(state->errhandler, ID_INCOMPATIBLE_FLAVORS, "incompatible flavors: %s/%s", 
+            yyerrorf(state->errhandler, ID_INCOMPATIBLE_FLAVORS, "incompatible flavors: %s/%s",
                 "EnableOverride", "DisableOverride");
             YYABORT;
         }
@@ -2209,7 +2216,7 @@ case 121:
 	{
         if (FindProperty(&yystack.l_mark[-1].featureList.propertySet, yystack.l_mark[0].property->name))
         {
-            yyerrorf(state->errhandler, ID_CLASS_FEATURE_ALREADY_DEFINED, 
+            yyerrorf(state->errhandler, ID_CLASS_FEATURE_ALREADY_DEFINED,
                 "instance property already defined: \"%s\"", yystack.l_mark[0].property->name);
             YYABORT;
         }
