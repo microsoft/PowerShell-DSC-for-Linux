@@ -40,8 +40,8 @@
 extern const ModuleManagerFT g_ModuleManagerFT;
 
 
-MI_Result MI_CALL InitializeModuleManager( MI_Uint32 flags, 
-                                          _Outptr_result_maybenull_ MI_Instance **extendedError, 
+MI_Result MI_CALL InitializeModuleManager( MI_Uint32 flags,
+                                          _Outptr_result_maybenull_ MI_Instance **extendedError,
                                           _Outptr_result_maybenull_ ModuleManager **moduleManager)
 {
     MI_Result r = MI_RESULT_OK;
@@ -53,17 +53,17 @@ MI_Result MI_CALL InitializeModuleManager( MI_Uint32 flags,
     SetJobId();
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.       
-    
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+
     *moduleManager = NULL;
 
-    tempModuleManager = (ModuleManager *) DSC_malloc( sizeof(ModuleManager), NitsHere()); 
+    tempModuleManager = (ModuleManager *) DSC_malloc( sizeof(ModuleManager), NitsHere());
     if( tempModuleManager == NULL)
-    {    
-        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);        
+    {
+        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
     }
 
     tempModuleManager->reserved2 = (ptrdiff_t) NULL;
@@ -78,11 +78,11 @@ MI_Result MI_CALL LoadModuleManager(_Inout_ ModuleManager *moduleManager,
                                     _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
-    
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+
     if( moduleManager->reserved1 == MODULEHANDLER_LOADED)
     {
         return MI_RESULT_OK;
@@ -90,7 +90,7 @@ MI_Result MI_CALL LoadModuleManager(_Inout_ ModuleManager *moduleManager,
     else
     {
         MI_Application *miApp = NULL;
-        ModuleLoaderObject *moduleLoader = NULL; 
+        ModuleLoaderObject *moduleLoader = NULL;
         MI_Result r = MI_RESULT_OK;
         /*Create MI_Application object*/
         miApp = (MI_Application *) DSC_malloc( sizeof(MI_Application), NitsHere());
@@ -99,17 +99,17 @@ MI_Result MI_CALL LoadModuleManager(_Inout_ ModuleManager *moduleManager,
             return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
         }
         memset(miApp,  0, sizeof(MI_Application));
-        r = DSC_MI_Application_Initialize(0, NULL, NULL, miApp);   
+        r = DSC_MI_Application_Initialize(0, NULL, NULL, miApp);
         if( r != MI_RESULT_OK)
         {
             DSC_free(miApp);
             return GetCimMIError(r, extendedError,ID_MODMAN_APPINIT_FAILED);
-        }        
+        }
         r = GetModuleLoader(miApp, &moduleLoader, extendedError);
         if( r != MI_RESULT_OK)
         {
             MI_Application_Close(miApp);
-            DSC_free(miApp);              
+            DSC_free(miApp);
             return r;
         }
         moduleManager->reserved2 = (ptrdiff_t) moduleLoader;
@@ -130,7 +130,7 @@ MI_Result MI_CALL ModuleManager_Close(_Inout_ ModuleManager *moduleManager,
         *extendedError = NULL;
     }
 
-    if( moduleManager == NULL || 
+    if( moduleManager == NULL ||
         moduleManager->ft == NULL)
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_PARAM_INVALID);
@@ -156,14 +156,14 @@ MI_Result MI_CALL ModuleManager_Close(_Inout_ ModuleManager *moduleManager,
         MI_OperationOptions_Delete(moduleLoader->strictOptions);
         MI_Deserializer_Close(moduleLoader->deserializer);
         MI_Application_Close(moduleLoader->application);
-        DSC_free(moduleLoader->application);    
+        DSC_free(moduleLoader->application);
         DSC_free(moduleLoader->deserializer);
         DSC_free(moduleLoader->options);
         DSC_free(moduleLoader->strictOptions);
         DSC_free(moduleLoader);
     }
 
-    DSC_free(moduleManager);    
+    DSC_free(moduleManager);
     return MI_RESULT_OK;
 }
 
@@ -181,14 +181,14 @@ MI_Result ModuleManager_LoadInstanceDocument (
     MI_Result r = MI_RESULT_OK;
     MI_InstanceA miInstanceArray = {0};
     MI_ClassA miClassArray = {0};
-    ModuleLoaderObject *moduleLoader = NULL; 
+    ModuleLoaderObject *moduleLoader = NULL;
 
 
     if( moduleManager == NULL || document == NULL || resources == NULL || documentInstance == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_LOADDOC_NULLPARAM);
     }
-    
+
     memset(resources, 0, sizeof(MI_InstanceA));
     *documentInstance = NULL;
 
@@ -197,7 +197,7 @@ MI_Result ModuleManager_LoadInstanceDocument (
     if( r != MI_RESULT_OK)
     {
         return r;
-    }    
+    }
 
     moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
     miClassArray.size = moduleLoader->schemaCount;
@@ -226,9 +226,9 @@ MI_Result ModuleManager_LoadInstanceDocumentFromLocation (
     MI_Result r = MI_RESULT_OK;
     MI_InstanceA miInstanceArray = {0};
     MI_ClassA miClassArray = {0};
-    ModuleLoaderObject *moduleLoader = NULL; 
+    ModuleLoaderObject *moduleLoader = NULL;
     DSC_EventWriteMessageLoadingInstance(documentLocation);
-    
+
     if( moduleManager == NULL || documentLocation == NULL || documentInstance == NULL || resources == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_LOADDOC_NULLPARAM);
@@ -241,24 +241,24 @@ MI_Result ModuleManager_LoadInstanceDocumentFromLocation (
     {
         return r;
     }
-        
+
 
     moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
     miClassArray.size = moduleLoader->schemaCount;
     miClassArray.data = moduleLoader->providerSchema;
 
-    r = GetInstanceFromSingleMOF( moduleManager, flags | VALIDATE_DOCUMENT_INSTANCE, 
-                moduleLoader->application, moduleLoader->deserializer, 
-                moduleLoader->options, moduleLoader->strictOptions, &miClassArray, 
+    r = GetInstanceFromSingleMOF( moduleManager, flags | VALIDATE_DOCUMENT_INSTANCE,
+                moduleLoader->application, moduleLoader->deserializer,
+                moduleLoader->options, moduleLoader->strictOptions, &miClassArray,
                 documentLocation, &miInstanceArray, extendedError);
-    
+
     if( r != MI_RESULT_OK)
     {
         return r;
     }
     r = FilterForConfigurationResource(&miInstanceArray, resources, documentInstance,extendedError);
-    
-    return r;    
+
+    return r;
 }
 
 
@@ -270,7 +270,7 @@ MI_Result  ModuleManager_GetRegistrationInstance (
 {
     MI_Uint32 xCount = 0;
     MI_Result r = MI_RESULT_OK;
-    ModuleLoaderObject *moduleLoader = NULL; 
+    ModuleLoaderObject *moduleLoader = NULL;
     if( moduleManager == NULL || className == NULL || registrationInstance == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_GETREG_NULLPARAM);
@@ -281,18 +281,18 @@ MI_Result  ModuleManager_GetRegistrationInstance (
     if( r != MI_RESULT_OK)
     {
         return r;
-    }    
+    }
 
-    moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;    
+    moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.      
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     *registrationInstance = NULL;
-    //special case for meta configuration where we don't need the registration 
+    //special case for meta configuration where we don't need the registration
     if(Tcscasecmp(className, METACONFIG_CLASSNAME) == 0)
     {
         return r;
@@ -326,7 +326,7 @@ _Return_type_success_(return == MI_RESULT_OK)
     _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
-    ModuleLoaderObject *moduleLoader = NULL; 
+    ModuleLoaderObject *moduleLoader = NULL;
     MI_Instance * filteredInstance = NULL;
 
     if( moduleManager == NULL || inInstance == NULL || outInstance == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
@@ -341,9 +341,9 @@ _Return_type_success_(return == MI_RESULT_OK)
     if( r != MI_RESULT_OK)
     {
         return r;
-    }    
-    moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;    
-    // Remove non-provider properties.    
+    }
+    moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
+    // Remove non-provider properties.
     r = GetFilteredResource(moduleLoader->application ,inInstance, &filteredInstance, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -363,7 +363,7 @@ MI_Result ModuleManager_Update (
     ModuleLoaderObject *inModuleLoader = NULL;
     ModuleLoaderObject *outModuleLoader = NULL;
 
-    if( moduleManager == NULL || 
+    if( moduleManager == NULL ||
         moduleManager->ft == NULL  || NitsShouldFault(NitsHere(), NitsAutomatic) )
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_PARAM_INVALID);
@@ -378,18 +378,18 @@ MI_Result ModuleManager_Update (
             return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
         }
         memset(miApp,  0, sizeof(MI_Application));
-        r = DSC_MI_Application_Initialize(0, NULL, NULL, miApp );   
+        r = DSC_MI_Application_Initialize(0, NULL, NULL, miApp );
         if( r != MI_RESULT_OK)
         {
             DSC_free(miApp);
             return GetCimMIError(r, extendedError,ID_MODMAN_APPINIT_FAILED);
-        }        
+        }
     }
     else
     {
         miApp = inModuleLoader->application;
     }
-    /*First get new registration information. If we fail, user can still use old data.*/    
+    /*First get new registration information. If we fail, user can still use old data.*/
     r = GetModuleLoader(miApp, &outModuleLoader, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -432,16 +432,16 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
 {
     MI_Result r = MI_RESULT_OK;
     MI_ClassA miClassArray = {0};
-    MI_InstanceA miInstanceArray = {0};    
+    MI_InstanceA miInstanceArray = {0};
     MI_Deserializer *de;
     MI_OperationOptions *options;
     MI_OperationOptions *strictOptions;
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.      
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     r = GetMofDeserializer(miApp, &de, &options, &strictOptions, extendedError);
     if( r != MI_RESULT_OK)
@@ -472,9 +472,9 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
         CleanUpClassCache(&miClassArray);
         CleanUpInstanceCache(&miInstanceArray);
         return r;
-    }    
+    }
 
-    /*Perform registration against schema validation*/    
+    /*Perform registration against schema validation*/
     r = ValidateProviderRegistrationAgainstSchema(&miClassArray, &miInstanceArray, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -484,10 +484,10 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
         DSC_free(options);
         CleanUpClassCache(&miClassArray);
         CleanUpInstanceCache(&miInstanceArray);
-        return r;        
+        return r;
     }
 
-    /*Form mapping tables*/    
+    /*Form mapping tables*/
 
     r = GetMappingTable(miApp, &miClassArray, &miInstanceArray, moduleLoader, extendedError);
     if( r != MI_RESULT_OK)
@@ -498,29 +498,29 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
         DSC_free(options);
         CleanUpClassCache(&miClassArray);
         CleanUpInstanceCache(&miInstanceArray);
-        return r;        
+        return r;
     }
 
     (*moduleLoader)->deserializer = de;
     (*moduleLoader)->options = options;
     (*moduleLoader)->strictOptions = strictOptions;
-    return r; 
+    return r;
 }
 
 /*caller will cleanup miClassArray*/
 MI_Result GetCoreSchema(_In_ MI_Application *miApp,
                         _In_ MI_Deserializer *deserializer,
                         _In_ MI_OperationOptions * options,
-                        _Inout_ MI_ClassA *miClassArray, 
+                        _Inout_ MI_ClassA *miClassArray,
                         _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     return GetSystemSchema(miApp, deserializer, options, BASESCHEMA_FILENAME, NULL, miClassArray, extendedError);
 }
 
-MI_Result GetMetaConfigSchema(_In_ MI_Application *miApp,                           
+MI_Result GetMetaConfigSchema(_In_ MI_Application *miApp,
                               _In_ MI_Deserializer *deserializer,
                               _In_ MI_OperationOptions * options,
-                              _Inout_ MI_ClassA *miClassArray, 
+                              _Inout_ MI_ClassA *miClassArray,
                               _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
@@ -532,7 +532,7 @@ MI_Result GetMetaConfigSchema(_In_ MI_Application *miApp,
     return GetSystemSchema(miApp, deserializer, options, METACONFIGSCHEMA_FILENAME, miClassArray, miClassArray, extendedError);
 }
 
-MI_Result GetMappingTable(_In_ MI_Application *miApp, 
+MI_Result GetMappingTable(_In_ MI_Application *miApp,
                           _In_ MI_ClassA *miClassArray,
                           _In_ MI_InstanceA *miInstanceArray,
                           _Out_ ModuleLoaderObject **moduleLoader,
@@ -544,10 +544,10 @@ MI_Result GetMappingTable(_In_ MI_Application *miApp,
     MI_Session miSession = MI_SESSION_NULL;
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     /*Allocate structures*/
     *moduleLoader = (ModuleLoaderObject *)DSC_malloc(sizeof(ModuleLoaderObject), NitsHere());
@@ -570,7 +570,7 @@ MI_Result GetMappingTable(_In_ MI_Application *miApp,
     {
         DSC_free(*moduleLoader);
         *moduleLoader = NULL;
-        return GetCimMIError(r, extendedError, ID_CAINFRA_NEWSESSION_FAILED);        
+        return GetCimMIError(r, extendedError, ID_CAINFRA_NEWSESSION_FAILED);
     }
 
     /* Create Mapping*/
@@ -589,7 +589,7 @@ MI_Result GetMappingTable(_In_ MI_Application *miApp,
             if( Tcscasecmp( miClassArray->data[xCount]->classDecl->name , className.string) == 0 )
             {
                 // disable validation for non-windows for now. Add it back once OMI team supports getting full RTTI in binary protocol.
-#if defined(_MSC_VER)                
+#if defined(_MSC_VER)
                 // Validate the mapping and provider registration
                 r = ValidateDSCProviderMapping(miInstanceArray->data[yCount], miClassArray->data[xCount], &miSession, extendedError);
                 if( r != MI_RESULT_OK)
@@ -598,8 +598,8 @@ MI_Result GetMappingTable(_In_ MI_Application *miApp,
                     *moduleLoader = NULL;
                     MI_Session_Close(&miSession, NULL, NULL);
                     return r;
-                }              
-#endif                
+                }
+#endif
                 ((*moduleLoader)->schemaToRegistrationMapping)[xCount] = yCount;
                 break;
             }
@@ -613,11 +613,11 @@ MI_Result GetMappingTable(_In_ MI_Application *miApp,
     (*moduleLoader)->providerSchema = miClassArray->data;
     (*moduleLoader)->schemaCount = miClassArray->size;
     (*moduleLoader)->registrationSchema = miInstanceArray->data;
-    (*moduleLoader)->regisrationCount = miInstanceArray->size;    
+    (*moduleLoader)->regisrationCount = miInstanceArray->size;
     return MI_RESULT_OK;
 }
 
-MI_Result GetFilteredResource( _In_ MI_Application *miApp, 
+MI_Result GetFilteredResource( _In_ MI_Application *miApp,
                               _In_ MI_Instance *inInstance,
                               _Outptr_result_maybenull_ MI_Instance **outInstance,
                               _Outptr_result_maybenull_ MI_Instance **extendedError)
@@ -629,14 +629,14 @@ MI_Result GetFilteredResource( _In_ MI_Application *miApp,
     MI_Uint32 flags;
     if( miApp == NULL || inInstance == NULL || outInstance == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
-        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_FILTER_ARGNULL);        
+        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_FILTER_ARGNULL);
     }
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     *outInstance = NULL;
 
@@ -664,7 +664,7 @@ MI_Result GetFilteredResource( _In_ MI_Application *miApp,
             {
                 MI_Instance_Delete(*outInstance);
                 *outInstance = NULL;
-                return GetCimMIError(r, extendedError,ID_MODMAN_GETELEMENT_FAILED); 
+                return GetCimMIError(r, extendedError,ID_MODMAN_GETELEMENT_FAILED);
             }
             // Not base resource property, add it
             r = DSC_MI_Instance_AddElement(*outInstance, inInstance->classDecl->properties[xCount]->name,
@@ -672,8 +672,8 @@ MI_Result GetFilteredResource( _In_ MI_Application *miApp,
             if( r != MI_RESULT_OK)
             {
                 *outInstance = NULL;
-                return GetCimMIError(r, extendedError,ID_MODMAN_GETELEMENT_FAILED); 
-            }            
+                return GetCimMIError(r, extendedError,ID_MODMAN_GETELEMENT_FAILED);
+            }
 
         }
     }
@@ -686,34 +686,34 @@ MI_Result GetInstanceFromBuffer(_In_opt_ ModuleManager *moduleManager,
                                 _In_ MI_Deserializer *deserializer,
                                 _In_ MI_OperationOptions * options,
                                 _In_ MI_ClassA *classArray,
-                                _In_count_(instanceBufferSize) MI_Uint8 *instanceBuffer, 
+                                _In_count_(instanceBufferSize) MI_Uint8 *instanceBuffer,
                                 _In_ MI_Uint32 instanceBufferSize,
                                 _Inout_ MI_InstanceA *miInstanceArray,
                                 _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
-    MI_InstanceA *miTempInstanceArray = NULL;  
+    MI_InstanceA *miTempInstanceArray = NULL;
     MI_Uint32 readBytes;
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.        
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     r = MI_Deserializer_DeserializeInstanceArray(deserializer, 0, options, 0, instanceBuffer, instanceBufferSize, classArray, &readBytes, &miTempInstanceArray, extendedError);
     if( r != MI_RESULT_OK || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
         return r;
-    } 
+    }
     /*Update actual cache*/
-    r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE); 
+    r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
-    }    
-    return r;        
+    }
+    return r;
 }
 
 MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
@@ -723,7 +723,7 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
                                    _In_ MI_OperationOptions * options,
                                    _In_ MI_OperationOptions * strictOptions,
                                    _In_ MI_ClassA *classArray,
-                                   _In_z_ const MI_Char *mofModuleFilePath, 
+                                   _In_z_ const MI_Char *mofModuleFilePath,
                                    _Inout_ MI_InstanceA *miInstanceArray,
                                    _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
@@ -736,22 +736,22 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
     MI_ClassA miClassArray = {0};
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.        
-    
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+
     r = ReadFileContent(mofModuleFilePath, &pbuffer, &contentSize, extendedError);
     if(r != MI_RESULT_OK)
     {
         return r;
-    }   
+    }
     miClassArray.size = classArray->size;
     miClassArray.data = classArray->data;
-// We will discover PS schema only if we are running in windows.         
+// We will discover PS schema only if we are running in windows.
 
-#if defined(_MSC_VER)    
-    
+#if defined(_MSC_VER)
+
     r = MI_Deserializer_DeserializeInstanceArray(deserializer, 0, options, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miTempInstanceArray, extendedError);
 
     if( r != MI_RESULT_OK )
@@ -762,9 +762,9 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
     if( moduleManager)
     {
         MI_Result innerResult = MI_RESULT_OK;
-        MI_Uint32 xCount = 0, classCount = 0, yCount = 0;        
+        MI_Uint32 xCount = 0, classCount = 0, yCount = 0;
         MI_Value value;
-        MI_Uint32 valueFlags;         
+        MI_Uint32 valueFlags;
         for( xCount = 0 ; xCount < miTempInstanceArray->size ; xCount++)
         {
             for( yCount = 0 ; yCount < classArray->size ; yCount++)
@@ -812,7 +812,7 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
                  DSC_free(moduleNames.data);
                 CleanUpDeserializerInstanceCache(miTempInstanceArray);
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
-            }      
+            }
             memset(moduleVersions.data, 0, sizeof(MI_Char*) * classCount);
             for( xCount = 0, classCount = 0; xCount < miTempInstanceArray->size ; xCount++)
             {
@@ -822,7 +822,7 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
                     {
                         break;
                     }
-                }                    
+                }
                 if(classArray->size == yCount)
                 {
                     classNames.data[classCount] = (MI_Char*)miTempInstanceArray->data[xCount]->classDecl->name;
@@ -843,10 +843,10 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
                     if( innerResult == MI_RESULT_OK && !(valueFlags & MI_FLAG_NULL) && value.string != NULL)
                     {
                         moduleVersions.data[classCount] = value.string;
-                    }                   
+                    }
                     classCount++;
                 }
-            }        
+            }
             r = UpdateAndReloadInMemoryCache(moduleManager, &classNames, &moduleNames, &moduleVersions, extendedError);
             DSC_free(classNames.data);
             DSC_free(moduleNames.data);
@@ -858,20 +858,20 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
                 return r;
             }
             {
-                    ModuleLoaderObject *moduleLoader = NULL;   
+                    ModuleLoaderObject *moduleLoader = NULL;
                 //call the method again with strict to enforce schema validation
                 moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
                 miClassArray.size = moduleLoader->schemaCount;
-                miClassArray.data = moduleLoader->providerSchema;            
+                miClassArray.data = moduleLoader->providerSchema;
             }
         }
     }
     else
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
-    }    
-#endif    
-    
+    }
+#endif
+
     miTempInstanceArray = NULL;
 
     r = MI_Deserializer_DeserializeInstanceArray(deserializer, 0, strictOptions, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miTempInstanceArray, extendedError);
@@ -898,7 +898,7 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
         {
             CleanUpDeserializerInstanceCache(miTempInstanceArray);
             return r;
-        }    
+        }
     }
     else if( flags & VALIDATE_DOCUMENT_INSTANCE )
     {
@@ -908,21 +908,21 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
         {
             CleanUpDeserializerInstanceCache(miTempInstanceArray);
             return r;
-        }          
+        }
     }
     /*Update actual cache*/
-    r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE); 
+    r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
-    }    
-    return r;        
+    }
+    return r;
 }
 
-MI_Result MI_CALL SchemaCallback(_In_opt_ void *context, 
-                                 _In_opt_z_ const MI_Char *serverName, 
-                                 _In_opt_z_ const MI_Char *namespaceName, 
-                                 _In_z_ const MI_Char *className, 
+MI_Result MI_CALL SchemaCallback(_In_opt_ void *context,
+                                 _In_opt_z_ const MI_Char *serverName,
+                                 _In_opt_z_ const MI_Char *namespaceName,
+                                 _In_z_ const MI_Char *className,
                                  _Outptr_ MI_Class **requestedClassObject)
 {
     MI_ClassA *classContainer = NULL;
@@ -959,14 +959,14 @@ MI_Result FilterForConfigurationResource(_Inout_ MI_InstanceA *inputInstanceArra
     MI_Boolean bDocumentInstance = MI_FALSE;
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     *documentInstance = NULL;
 
-    //if there are embedded resource we won't copy them to inputInstanceArray so need to release them ourselves 
+    //if there are embedded resource we won't copy them to inputInstanceArray so need to release them ourselves
     embeddedResourceMap = (MI_Uint8 *)DSC_malloc( inputInstanceArray->size * sizeof(MI_Uint8), NitsHere());
     if( embeddedResourceMap == NULL)
     {
@@ -1021,7 +1021,7 @@ MI_Result FilterForConfigurationResource(_Inout_ MI_InstanceA *inputInstanceArra
         CleanUpInstanceCache(inputInstanceArray);
         DSC_free(embeddedResourceMap);
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_FILTER_NOINSTANCE);
-          
+
     }
     tempOutput = (MI_Instance **)DSC_malloc( resourceCount * sizeof(MI_Instance*), NitsHere());
     if( tempOutput == NULL)
@@ -1059,10 +1059,10 @@ MI_Result GetMofDeserializer(_In_ MI_Application *miApp,
     MI_Result r;
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     *operationOptions = NULL;
 
@@ -1086,7 +1086,7 @@ MI_Result GetMofDeserializer(_In_ MI_Application *miApp,
     {
         DSC_free(*deserializer);
         DSC_free(*operationOptions);
-        return GetCimMIError(r, extendedError, ID_MODMAN_NEWOO_FAILED);        
+        return GetCimMIError(r, extendedError, ID_MODMAN_NEWOO_FAILED);
     }
 
     r = DSC_MI_OperationOptions_SetString(*operationOptions, MOFCODEC_SCHEMA_VALIDATION_OPTION_NAME, MOFCODEC_SCHEMA_VALIDATION_IGNORE, 0);
@@ -1095,7 +1095,7 @@ MI_Result GetMofDeserializer(_In_ MI_Application *miApp,
         MI_OperationOptions_Delete(*operationOptions);
         DSC_free(*deserializer);
         DSC_free(*operationOptions);
-       return GetCimMIError(r, extendedError, ID_MODMAN_OOSET_FAILED);        
+       return GetCimMIError(r, extendedError, ID_MODMAN_OOSET_FAILED);
     }
 
     *strictOperationOptions = (MI_OperationOptions*) DSC_malloc(sizeof(MI_OperationOptions), NitsHere());
@@ -1115,7 +1115,7 @@ MI_Result GetMofDeserializer(_In_ MI_Application *miApp,
         DSC_free(*deserializer);
         DSC_free(*operationOptions);
         DSC_free(*strictOperationOptions);
-        return GetCimMIError(r, extendedError, ID_MODMAN_NEWOO_FAILED);        
+        return GetCimMIError(r, extendedError, ID_MODMAN_NEWOO_FAILED);
     }
 
     r = DSC_MI_OperationOptions_SetString(*strictOperationOptions, MOFCODEC_SCHEMA_VALIDATION_OPTION_NAME, MOFCODEC_SCHEMA_VALIDATION_STRICT, 0);
@@ -1126,7 +1126,7 @@ MI_Result GetMofDeserializer(_In_ MI_Application *miApp,
         DSC_free(*deserializer);
         DSC_free(*operationOptions);
         DSC_free(*strictOperationOptions);
-       return GetCimMIError(r, extendedError, ID_MODMAN_OOSET_FAILED);        
+       return GetCimMIError(r, extendedError, ID_MODMAN_OOSET_FAILED);
     }
 
     r = DSC_MI_Application_NewDeserializer_Mof(miApp, 0, MOFCODEC_FORMAT, *deserializer);
@@ -1137,19 +1137,19 @@ MI_Result GetMofDeserializer(_In_ MI_Application *miApp,
         DSC_free(*deserializer);
         DSC_free(*operationOptions);
         DSC_free(*strictOperationOptions);
-        return GetCimMIError(r, extendedError, ID_LCMHELPER_DESERIALIZER_CREATE_FAILED);        
+        return GetCimMIError(r, extendedError, ID_LCMHELPER_DESERIALIZER_CREATE_FAILED);
     }
 
     return MI_RESULT_OK;
 }
 
 /*caller will cleanup miClassArray*/
-MI_Result GetSystemSchema(_In_ MI_Application *miApp,                           
+MI_Result GetSystemSchema(_In_ MI_Application *miApp,
                           _In_ MI_Deserializer *deserializer,
                           _In_ MI_OperationOptions * options,
-                          _In_z_ const MI_Char* schemaName, 
+                          _In_z_ const MI_Char* schemaName,
                           _In_opt_ MI_ClassA *inputClasses,
-                          _Inout_ MI_ClassA *miClassArray, 
+                          _Inout_ MI_ClassA *miClassArray,
                           _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Char *envResolvedPath = NULL;
@@ -1163,26 +1163,26 @@ MI_Result GetSystemSchema(_In_ MI_Application *miApp,
     if( miClassArray == NULL || miApp == NULL  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_SYSTEMCACHE_INVALIDPARAM);
-    }    
-    
-    if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.     
+
+    if (extendedError == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     /* Resolve schema search path*/
     r = ResolvePath(&envResolvedPath, &filePath, GetCoreSchemaPath(), schemaName, extendedError);
     if( r != MI_RESULT_OK)
     {
         return r;
-    }    
+    }
 
     if( envResolvedPath)
     {
         DSC_free(envResolvedPath);
     }
-    
+
     r = ReadFileContent(filePath, &pbuffer, &contentSize, extendedError);
     if(r != MI_RESULT_OK )
     {
@@ -1198,9 +1198,9 @@ MI_Result GetSystemSchema(_In_ MI_Application *miApp,
 
     if(pbuffer)
     {
-        DSC_free(pbuffer);   
+        DSC_free(pbuffer);
     }
-    
+
     if( r != MI_RESULT_OK || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         CleanUpDeserializerClassCache(miTempClassArray);
@@ -1211,31 +1211,31 @@ MI_Result GetSystemSchema(_In_ MI_Application *miApp,
         return r;
     }
 
-    
+
     /*Validate Schema*/
-    
+
     r = ValidateInfrastructureSchema(miTempClassArray, extendedError);
     if( r != MI_RESULT_OK)
     {
         CleanUpDeserializerClassCache(miTempClassArray);
         return r;
-    } 
+    }
 
-    
+
     /*Update actual cache*/
-    r = UpdateClassArray(miTempClassArray, miClassArray, extendedError, MI_TRUE);  
+    r = UpdateClassArray(miTempClassArray, miClassArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerClassCache(miTempClassArray);
-    }    
+    }
     return r;
 }
 
 MI_Result GetSchemaFromSingleMOF(_In_ MI_Application *miApp,
                                  _In_ MI_Deserializer *deserializer,
                                  _In_ MI_OperationOptions * options,
-                                 _In_z_ MI_Char *mofModulePath, 
-                                 _In_z_ MI_Char *schemaFileName, 
+                                 _In_z_ MI_Char *mofModulePath,
+                                 _In_z_ MI_Char *schemaFileName,
                                  _Inout_ MI_ClassA *miClassArray,
                                  _In_opt_ MI_ClassA *miDiscoverdSchema,
                                  _Outptr_result_maybenull_ MI_Instance **extendedError)
@@ -1248,31 +1248,31 @@ MI_Result GetSchemaFromSingleMOF(_In_ MI_Application *miApp,
     MI_Uint8 *pbuffer = NULL;
     MI_Uint32 contentSize;
     MI_Uint32 readBytes;
-    MI_Uint32 fullPathLength = (MI_Uint32)(Tcslen(mofModulePath) + 1 + Tcslen(schemaFileName) + 1) ; // mofModulePath\schemaFileName
+    size_t fullPathLength = Tcslen(mofModulePath) + 1 + Tcslen(schemaFileName) + 1; // mofModulePath\schemaFileName
     MI_DeserializerCallbacks cb;
-    
+
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.      
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     fullPath = (MI_Char*)DSC_malloc(fullPathLength* sizeof(MI_Char), NitsHere());
     if( fullPath == NULL)
     {
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
     }
-#if defined(_MSC_VER)    
+#if defined(_MSC_VER)
     result = Stprintf(fullPath, fullPathLength, MI_T("%T\\%T"), mofModulePath, schemaFileName);
 #else
     result = Stprintf(fullPath, fullPathLength, MI_T("%T/%T"), mofModulePath, schemaFileName);
 #endif
 
     if( result <= 0|| NitsShouldFault(NitsHere(), NitsAutomatic))
-    {       
+    {
         DSC_free(fullPath);
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_LCMHELPER_PRINTF_ERROR);
-    }   
+    }
 
     r = ReadFileContent(fullPath, &pbuffer, &contentSize, extendedError);
     if(r != MI_RESULT_OK)
@@ -1292,7 +1292,7 @@ MI_Result GetSchemaFromSingleMOF(_In_ MI_Application *miApp,
 
     cb.classObjectNeeded = SchemaCallback;
     r = MI_Deserializer_DeserializeClassArray(deserializer, 0, options, &cb, pbuffer, contentSize, NULL, NULL, NULL, &readBytes, &miTempClassArray, extendedError);
-    DSC_free(fullPath);    
+    DSC_free(fullPath);
     DSC_free(pbuffer);
     if( r != MI_RESULT_OK || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -1305,41 +1305,41 @@ MI_Result GetSchemaFromSingleMOF(_In_ MI_Application *miApp,
     }
 
     /*Validate Schema*/
-    
+
     r = ValidateDSCProviderSchema(miTempClassArray, extendedError);
     if( r != MI_RESULT_OK)
     {
         CleanUpDeserializerClassCache(miTempClassArray);
         return r;
-    }    
-    
+    }
+
 
     /*Update actual cache*/
-    r = UpdateClassArray(miTempClassArray, miClassArray, extendedError, MI_TRUE);  
+    r = UpdateClassArray(miTempClassArray, miClassArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerClassCache(miTempClassArray);
     }
-    return r;    
+    return r;
 
 }
 
 /*Caller will free up miInstanceArray*/
 MI_Result GetRegistrationInstanceFromMOFs(_In_opt_ ModuleManager *moduleManager,
-                                          _In_ MI_Application *miApp,       
+                                          _In_ MI_Application *miApp,
                                           _In_ MI_Deserializer *deserializer,
                                           _In_ MI_OperationOptions * options,
                                           _In_ MI_OperationOptions * strictOptions,
                                           _In_ MI_ClassA *classArray,
-                                          _Inout_ MI_InstanceA *miInstanceArray, 
+                                          _Inout_ MI_InstanceA *miInstanceArray,
                                           _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    MI_Result r = MI_RESULT_OK;    
+    MI_Result r = MI_RESULT_OK;
     MI_Char **pathsForRegistration;
     MI_Uint32 count=0;
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
     pathsForRegistration = (MI_Char**)DSC_malloc(NUM_PATHS_TO_LOOK_FOR_PROVIDERS * sizeof(MI_Char*), NitsHere());
@@ -1352,31 +1352,31 @@ MI_Result GetRegistrationInstanceFromMOFs(_In_opt_ ModuleManager *moduleManager,
     for (count = 0; count < NUM_PATHS_TO_LOOK_FOR_PROVIDERS; count++)
     {
         r= GetEachRegistrationInfo(moduleManager,miApp,deserializer,options,strictOptions,classArray,miInstanceArray, extendedError,pathsForRegistration[count]);
-        if(r != MI_RESULT_OK)           
+        if(r != MI_RESULT_OK)
         {
-            DSC_free(pathsForRegistration);    
+            DSC_free(pathsForRegistration);
             return r;
         }
     }
     DSC_free(pathsForRegistration);
-    return r;    
+    return r;
 }
 
 MI_Result GetEachRegistrationInfo(_In_opt_ ModuleManager *moduleManager,
-                                          _In_ MI_Application *miApp,       
+                                          _In_ MI_Application *miApp,
                                           _In_ MI_Deserializer *deserializer,
                                           _In_ MI_OperationOptions * options,
                                           _In_ MI_OperationOptions * strictOptions,
                                           _In_ MI_ClassA *classArray,
-                                          _Inout_ MI_InstanceA *miInstanceArray, 
+                                          _Inout_ MI_InstanceA *miInstanceArray,
                                           _Outptr_result_maybenull_ MI_Instance **extendedError,
                                           _In_z_ const MI_Char * registrationPath)
 {
     Internal_Dir *dirHandle = NULL;
     Internal_DirEnt *dirEntry = NULL;
     MI_Result r = MI_RESULT_OK;
-    MI_Char *envResolvedPath = NULL; 
-            
+    MI_Char *envResolvedPath = NULL;
+
     /* Resolve schema search path*/
     r = ResolvePath(&envResolvedPath, NULL, registrationPath, NULL, extendedError);
     if( r != MI_RESULT_OK)
@@ -1389,7 +1389,7 @@ MI_Result GetEachRegistrationInfo(_In_opt_ ModuleManager *moduleManager,
     dirHandle = Internal_Dir_Open(envResolvedPath, NitsHere() );
     if(dirHandle == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
-        DSC_free(envResolvedPath);   
+        DSC_free(envResolvedPath);
         if( dirHandle != NULL )
             Internal_Dir_Close( dirHandle);
 
@@ -1397,7 +1397,7 @@ MI_Result GetEachRegistrationInfo(_In_opt_ ModuleManager *moduleManager,
     }
     dirEntry =  Internal_Dir_Read(dirHandle, NULL);
     while( dirEntry != NULL )
-    {    
+    {
         /* Only process directories as modules are expected to have a directory per module.*/
         if( dirEntry->isDir &&
             (Tcscasecmp(MI_T(".."), dirEntry->name)!=0) &&
@@ -1406,49 +1406,49 @@ MI_Result GetEachRegistrationInfo(_In_opt_ ModuleManager *moduleManager,
             r = UpdateRegistrationInstanceCache(moduleManager, miApp, deserializer, options, strictOptions, classArray, envResolvedPath, dirEntry->name, miInstanceArray, extendedError);
             if( r != MI_RESULT_OK)
             {
-                DSC_free(envResolvedPath);   
+                DSC_free(envResolvedPath);
                 Internal_Dir_Close( dirHandle);
                 return r;
             }
-        }    
+        }
         dirEntry =  Internal_Dir_Read(dirHandle, NULL);
     }
 
     /*Cleanup*/
     Internal_Dir_Close( dirHandle);
-    DSC_free(envResolvedPath);   
-    return MI_RESULT_OK;    
+    DSC_free(envResolvedPath);
+    return MI_RESULT_OK;
 }
 
 /*caller will cleanup miClassArray*/
 MI_Result GetSchemaFromMOFs(_In_ MI_Application *miApp,
                             _In_ MI_Deserializer *deserializer,
                             _In_ MI_OperationOptions * options,
-                            _Inout_ MI_ClassA *miClassArray, 
+                            _Inout_ MI_ClassA *miClassArray,
                             _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Uint32 count=0;
-    MI_Char *envResolvedPath = NULL; 
+    MI_Char *envResolvedPath = NULL;
     MI_Char **pathsForSchemas;
-    
+
     if( miClassArray == NULL || miApp == NULL  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_SCHEMAFROMMOF_INVALIDPARAM);
     }
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.     
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     /*Get DSC core schema first*/
     r = GetCoreSchema(miApp, deserializer, options, miClassArray, extendedError);
     if( r != MI_RESULT_OK)
     {
         return r;
-    }    
+    }
 
     /* Resolve meta schema search path*/
     r = ResolvePath(&envResolvedPath, NULL, GetCoreSchemaPath(), SEARCH_PATTERN_DIRECTORY, extendedError);
@@ -1459,7 +1459,7 @@ MI_Result GetSchemaFromMOFs(_In_ MI_Application *miApp,
 
     //Update the cache with meta schema
     r = GetSchemaFromSingleMOF(miApp, deserializer, options, envResolvedPath, METACONFIGSCHEMA_FILENAME, miClassArray, NULL, extendedError);
-    DSC_free(envResolvedPath);   
+    DSC_free(envResolvedPath);
     if( r != MI_RESULT_OK)
     {
         return r;
@@ -1476,26 +1476,26 @@ MI_Result GetSchemaFromMOFs(_In_ MI_Application *miApp,
         r= UpdateClassCacheWithSchemas(miApp,deserializer,options,miClassArray,extendedError,pathsForSchemas[count]);
         if( r != MI_RESULT_OK)
         {
-            DSC_free(pathsForSchemas);    
+            DSC_free(pathsForSchemas);
             return r;
         }
     }
-    DSC_free(pathsForSchemas);    
+    DSC_free(pathsForSchemas);
     return MI_RESULT_OK;
 }
 
 MI_Result UpdateClassCacheWithSchemas(_In_ MI_Application *miApp,
                             _In_ MI_Deserializer *deserializer,
                             _In_ MI_OperationOptions * options,
-                            _Inout_ MI_ClassA *miClassArray, 
+                            _Inout_ MI_ClassA *miClassArray,
                             _Outptr_result_maybenull_ MI_Instance **extendedError,
                             _In_z_ const MI_Char * schemaPath)
 {
-    MI_Char *envResolvedPath = NULL; 
+    MI_Char *envResolvedPath = NULL;
     Internal_Dir *dirHandle = NULL;
     MI_Result r = MI_RESULT_OK;
     Internal_DirEnt *dirEntry = NULL;
-    
+
     /* Resolve schema search path*/
     r = ResolvePath(&envResolvedPath, NULL, schemaPath, NULL, extendedError);
     if( r != MI_RESULT_OK)
@@ -1508,7 +1508,7 @@ MI_Result UpdateClassCacheWithSchemas(_In_ MI_Application *miApp,
     dirHandle = Internal_Dir_Open(envResolvedPath, NitsHere() );
     if(dirHandle == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
-        DSC_free(envResolvedPath);   
+        DSC_free(envResolvedPath);
         if( dirHandle != NULL )
             Internal_Dir_Close( dirHandle);
 
@@ -1516,7 +1516,7 @@ MI_Result UpdateClassCacheWithSchemas(_In_ MI_Application *miApp,
     }
     dirEntry =  Internal_Dir_Read(dirHandle, NULL);
     while( dirEntry != NULL )
-    {        
+    {
         /* Only process directories as modules are expected to have a directory per module.*/
         if( (dirEntry->isDir) &&
             (Tcscasecmp(MI_T(".."), dirEntry->name)!=0) &&
@@ -1525,11 +1525,11 @@ MI_Result UpdateClassCacheWithSchemas(_In_ MI_Application *miApp,
             r = UpdateClassCache(miApp, deserializer, options, envResolvedPath, dirEntry->name, miClassArray, extendedError);
             if( r != MI_RESULT_OK)
             {
-                DSC_free(envResolvedPath);   
+                DSC_free(envResolvedPath);
                 Internal_Dir_Close( dirHandle);
                 return r;
             }
-        } 
+        }
         dirEntry =  Internal_Dir_Read(dirHandle, NULL);
     }
 
@@ -1545,8 +1545,8 @@ MI_Result UpdateClassCacheWithSchemas(_In_ MI_Application *miApp,
 MI_Result UpdateClassCache(_In_ MI_Application *miApp,
                            _In_ MI_Deserializer *deserializer,
                            _In_ MI_OperationOptions * options,
-                           _In_z_ MI_Char *rootPath, 
-                           _In_z_ MI_Char *directoryPath, 
+                           _In_z_ MI_Char *rootPath,
+                           _In_z_ MI_Char *directoryPath,
                            _Inout_ MI_ClassA *miClassArray,
                            _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
@@ -1560,33 +1560,33 @@ MI_Result UpdateClassCache(_In_ MI_Application *miApp,
     MI_Uint32 fullPathLength = (MI_Uint32) (Tcslen(rootPath) + 1 + Tcslen(directoryPath) + 1) ; // rootpath\directorypath
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     fullPath = (MI_Char*)DSC_malloc(fullPathLength* sizeof(MI_Char), NitsHere());
     if( fullPath == NULL)
     {
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
     }
-#if defined(_MSC_VER)    
+#if defined(_MSC_VER)
     result = Stprintf(fullPath, fullPathLength, MI_T("%T\\%T"), rootPath, directoryPath);
 #else
     result = Stprintf(fullPath, fullPathLength, MI_T("%T/%T"), rootPath, directoryPath);
 #endif
 
     if( result <= 0 || NitsShouldFault(NitsHere(), NitsAutomatic))
-    {   
+    {
         DSC_free(fullPath);
         return GetCimMIError(result, extendedError, ID_LCMHELPER_PRINTF_ERROR);
-    }          
+    }
     /*Find schema files*/
-    dirHandle = Internal_Dir_Open(fullPath, NitsHere() );     
+    dirHandle = Internal_Dir_Open(fullPath, NitsHere() );
 
     if(dirHandle == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
-    {     
-        DSC_free(fullPath);      
+    {
+        DSC_free(fullPath);
         if( dirHandle != NULL )
             Internal_Dir_Close( dirHandle);
 
@@ -1594,7 +1594,7 @@ MI_Result UpdateClassCache(_In_ MI_Application *miApp,
     }
     dirEntry =  Internal_Dir_Read(dirHandle, SEARCH_PATTERN_SCHEMA);
     while(dirEntry != NULL)
-    {         
+    {
         /* Only process files*/
         if( !dirEntry->isDir)
         {
@@ -1605,13 +1605,13 @@ MI_Result UpdateClassCache(_In_ MI_Application *miApp,
                 Internal_Dir_Close( dirHandle);
                 return r;
             }
-        } 
+        }
         dirEntry =  Internal_Dir_Read(dirHandle, SEARCH_PATTERN_SCHEMA);
     }
 
     /*Update Cache*/
     DSC_free(fullPath);
-    Internal_Dir_Close( dirHandle);     
+    Internal_Dir_Close( dirHandle);
 
     return MI_RESULT_OK;
 }
@@ -1623,8 +1623,8 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
                                           _In_ MI_OperationOptions * options,
                                           _In_ MI_OperationOptions * strictOptions,
                                           _In_ MI_ClassA *classArray,
-                                          _In_z_ MI_Char *rootPath, 
-                                          _In_z_ MI_Char *directoryPath, 
+                                          _In_z_ MI_Char *rootPath,
+                                          _In_z_ MI_Char *directoryPath,
                                           _Inout_ MI_InstanceA *miInstanceArray,
                                           _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
@@ -1632,7 +1632,7 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
     int result = 0;
     Internal_Dir *dirHandle = NULL;
     Internal_DirEnt *dirEntry = NULL;
-    MI_InstanceA miTempInstanceArray = {0};   
+    MI_InstanceA miTempInstanceArray = {0};
 
     /*Form full path to schema module*/
     MI_Char *fullPath = NULL;
@@ -1641,42 +1641,42 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
     MI_Char *fullFilePath = NULL;
 
     if (extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     fullPath = (MI_Char*)DSC_malloc(fullPathLength* sizeof(MI_Char), NitsHere());
     if( fullPath == NULL)
     {
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
     }
-#if defined(_MSC_VER)    
+#if defined(_MSC_VER)
     result = Stprintf(fullPath, fullPathLength, MI_T("%T\\%T"), rootPath, directoryPath);
 #else
     result = Stprintf(fullPath, fullPathLength, MI_T("%T/%T"), rootPath, directoryPath);
 #endif
 
     if( result <=0 || NitsShouldFault(NitsHere(), NitsAutomatic))
-    {   
+    {
         DSC_free(fullPath);
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_LCMHELPER_PRINTF_ERROR);
-    }       
-   
+    }
+
     /*Find schema files*/
-    dirHandle = Internal_Dir_Open(fullPath, NitsHere() );    
+    dirHandle = Internal_Dir_Open(fullPath, NitsHere() );
 
     if(dirHandle == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
-    {   
-        DSC_free(fullPath); 
+    {
+        DSC_free(fullPath);
         if( dirHandle != NULL )
             Internal_Dir_Close( dirHandle);
-        
+
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_MODMAN_FINDFIRST_FAILED);
     }
     dirEntry =  Internal_Dir_Read(dirHandle, SEARCH_PATTERN_REGISTRATIONINSTANCE);
     while( dirEntry != NULL)
-    {       
+    {
         /* Only process files*/
         if( !dirEntry->isDir)
         {
@@ -1686,17 +1686,17 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
             {
                 CleanUpInstanceCache(&miTempInstanceArray);
                 DSC_free(fullPath);
-                Internal_Dir_Close( dirHandle);           
+                Internal_Dir_Close( dirHandle);
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
-            }          
-#if defined(_MSC_VER)            
+            }
+#if defined(_MSC_VER)
             result = Stprintf(fullFilePath, fullFilePathLength, MI_T("%T\\%T"), fullPath, dirEntry->name);
 #else
             result = Stprintf(fullFilePath, fullFilePathLength, MI_T("%T/%T"), fullPath, dirEntry->name);
 #endif
 
             if( result <=0 || NitsShouldFault(NitsHere(), NitsAutomatic))
-            {       
+            {
                 DSC_free(fullFilePath);
                 CleanUpInstanceCache(&miTempInstanceArray);
                 DSC_free(fullPath);
@@ -1712,14 +1712,14 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
                 Internal_Dir_Close( dirHandle);
                 return r;
             }
-        }     
+        }
         dirEntry =  Internal_Dir_Read(dirHandle, SEARCH_PATTERN_REGISTRATIONINSTANCE);
     }
 
     /*Update Cache*/
     DSC_free(fullPath);
     Internal_Dir_Close( dirHandle);
-   
+
     if( r == MI_RESULT_OK)
     {
         r = UpdateInstanceArray(&miTempInstanceArray, miInstanceArray, extendedError, MI_FALSE);
@@ -1730,7 +1730,7 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
         return r;
     }
 
-    return MI_RESULT_OK;    
+    return MI_RESULT_OK;
 }
 
 

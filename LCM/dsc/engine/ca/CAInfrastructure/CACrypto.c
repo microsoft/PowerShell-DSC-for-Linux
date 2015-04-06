@@ -85,41 +85,41 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     DWORD dwCharCount = 0;
     DWORD dwCipherLen = 0;
 
-    BYTE* pbHashBlob = NULL; 
+    BYTE* pbHashBlob = NULL;
     CRYPT_DATA_BLOB blob;
 
     if (extendedError == NULL || certificateid == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;	// Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.	
+    *extendedError = NULL;	// Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     if (result)
     {
         *result = NULL;
     }
 
-    if(CryptStringToBinary(certificateid, 0, CRYPT_STRING_HEX, NULL, &dwBinaryLen, NULL, NULL) && 
+    if(CryptStringToBinary(certificateid, 0, CRYPT_STRING_HEX, NULL, &dwBinaryLen, NULL, NULL) &&
         dwBinaryLen > 0)
     {
         // Create a buffer for the byte hash
         pbHashBlob = (BYTE *)DSC_malloc(dwBinaryLen, NitsHere());
 
         if(pbHashBlob)
-        {            
-            if(!CryptStringToBinary(certificateid, 0, CRYPT_STRING_HEX, pbHashBlob, &dwBinaryLen, 
+        {
+            if(!CryptStringToBinary(certificateid, 0, CRYPT_STRING_HEX, pbHashBlob, &dwBinaryLen,
                 NULL, NULL))
             {
                 DSC_free(pbHashBlob);
                 pbHashBlob = NULL;
 
-                return MI_RESULT_INVALID_PARAMETER; 
+                return MI_RESULT_INVALID_PARAMETER;
             }
         }
     }
     else
     {
-        return MI_RESULT_INVALID_PARAMETER; 
+        return MI_RESULT_INVALID_PARAMETER;
     }
 
     blob.cbData = dwBinaryLen;
@@ -135,12 +135,12 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
 
     // Get a certificate that matches the search criteria (Thumbprint could be MD5 or SHA1 but
     // MD5 has been cracked so most often it'll be SHA1 so check it first)
-    pCert = CertFindCertificateInStore(hStoreHandle, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING , 0, 
+    pCert = CertFindCertificateInStore(hStoreHandle, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING , 0,
         CERT_FIND_SHA1_HASH, &blob, NULL);
 
     if(!pCert)
     {
-        pCert = CertFindCertificateInStore(hStoreHandle, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, 
+        pCert = CertFindCertificateInStore(hStoreHandle, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
             CERT_FIND_MD5_HASH, &blob, NULL);
     }
 
@@ -162,7 +162,7 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     pbHashBlob = NULL;
 
     // Acquire the Private Key
-    if(!CryptAcquireCertificatePrivateKey(pCert, CRYPT_ACQUIRE_SILENT_FLAG | CRYPT_ACQUIRE_COMPARE_KEY_FLAG, 0, 
+    if(!CryptAcquireCertificatePrivateKey(pCert, CRYPT_ACQUIRE_SILENT_FLAG | CRYPT_ACQUIRE_COMPARE_KEY_FLAG, 0,
         &hCryptProv, &dwKeySpec, &fCallerFreeProv))
     {
         if(pCert)
@@ -201,7 +201,7 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     dwCipherLen = (DWORD)wcslen(cipher);
 
     // Convert the base64 encoded string to a byte array
-    if(!CryptStringToBinary(cipher, dwCipherLen, CRYPT_STRING_BASE64, NULL, &dwEncodedLen, 
+    if(!CryptStringToBinary(cipher, dwCipherLen, CRYPT_STRING_BASE64, NULL, &dwEncodedLen,
         NULL, NULL) && dwEncodedLen > 0)
     {
         int lastError = GetLastError();
@@ -238,11 +238,11 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
             hStoreHandle = NULL;
         }
 
-        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, 
+        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError,
             ID_CA_CRYPTO_DECRYPTED_MALLOC_FAILED);
     }
 
-    if(!CryptStringToBinary(cipher, dwCipherLen, CRYPT_STRING_BASE64, pbData, &dwEncodedLen, 
+    if(!CryptStringToBinary(cipher, dwCipherLen, CRYPT_STRING_BASE64, pbData, &dwEncodedLen,
         NULL, NULL))
     {
         int lastError = GetLastError();
@@ -327,7 +327,7 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     *result = (MI_Char*)DSC_malloc(sizeof(MI_Char) * (dwCharCount+1), NitsHere());
 
     if(*result)
-    {  
+    {
         memcpy(*result, pbData, sizeof(MI_Char) * (dwCharCount+1));
 
         r = MI_RESULT_OK;
@@ -352,7 +352,7 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
             hStoreHandle = NULL;
         }
 
-        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, 
+        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError,
             ID_CA_CRYPTO_DECRYPTED_MALLOC_FAILED);
     }
 
@@ -382,15 +382,18 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
 int Decrypt_Base64DecCallback( const void *data, size_t size, void *callbackData)
 {
     MI_Uint8A *oldData = (MI_Uint8A*)callbackData;
-    size_t oldLen = oldData->size;
-    char *newData = (char*)DSC_malloc(oldLen+size, NitsHere());
+    size_t newLen = oldData->size + size;
+    // oldData->size is a Uint32. Fail if newLen would be truncated later on
+    if (newLen > 0xFFFFFFFF)
+        return -1;
+    char *newData = (char*)DSC_malloc(newLen, NitsHere());
     if(newData == NULL)
         return -1;
     memcpy(newData, oldData->data, oldData->size * sizeof(MI_Char));
     memcpy(newData+oldData->size, data, size);
     DSC_free(oldData->data);
     oldData->data = (MI_Uint8*)newData;
-    oldData->size = oldLen+size;
+    oldData->size = newLen;
     return 0;
 }
 
@@ -409,7 +412,7 @@ MI_Boolean DecodeBase64(_In_z_ const void *data, size_t size, _Outptr_result_z_ 
     *decodedBuffer = (char*)strArray.data;
     *decodedBufferLength = strArray.size;
     return MI_TRUE;
-    
+
 }
 
 MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
@@ -425,8 +428,8 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     size_t decodedBufferLength = 0;
     int xCount = 0;
 
-    
-    // Open file to read the private key.    
+
+    // Open file to read the private key.
     FILE *fp = NULL;
     if( *result)
     {
@@ -435,7 +438,7 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     if( *extendedError)
     {
        *extendedError = NULL;
-    }    
+    }
     Stprintf(cerFilePath, CER_PATH_LENGTH, MI_T("%s/%s"), CONFIG_CERTSDIR, certificateid) ;
     fp = File_OpenT(cerFilePath, MI_T("r"));
     if( fp == NULL)
@@ -446,11 +449,11 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     OpenSSL_add_all_algorithms();
     // Read private key
     privKey = PEM_read_PrivateKey(fp, NULL, NULL, NULL);
-    fclose(fp);    
+    fclose(fp);
     if (privKey == NULL )
     {
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_CRYPTO_CERT_NOTFOUND);
-    }   
+    }
     // Decode BASE64 encoding.
     if(!DecodeBase64(cipher, Tcslen(cipher), &decodedBuffer, &decodedBufferLength) )
     {
@@ -477,8 +480,8 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     // Decrypt the buffer using private key.
     decryptedBufferLength = RSA_private_decrypt(decodedBufferLength, (unsigned const char*)decodedBuffer, (unsigned char*)decryptedBuffer, privKey->pkey.rsa, RSA_PKCS1_PADDING);
     EVP_PKEY_free(privKey);
-    DSC_free(decodedBuffer);    
-    
+    DSC_free(decodedBuffer);
+
     if( decryptedBufferLength == -1 )
     {
         DSC_free(decryptedBuffer);
@@ -511,12 +514,12 @@ MI_Result MI_CALL Decrypt(_In_z_ const MI_Char *certificateid,
     {
         DSC_free(decodedBuffer);
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_CA_CRYPTO_DECRYPTED_MALLOC_FAILED);
-        
+
     }
 #else
     *result = decryptedBuffer;
 #endif
-    
+
     return MI_RESULT_OK;
 }
 
