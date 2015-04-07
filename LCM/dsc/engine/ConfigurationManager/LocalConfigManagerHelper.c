@@ -3443,7 +3443,11 @@ MI_Result GetMofChecksum(
     /* Read checksum file if exists.*/
     if (File_ExistT(checkSumFile) == 0)
     {
-        r = ReadFileContent(checkSumFile, &checksumBuffer, &checksumBufferSize, cimErrorDetails);
+        r = ReadFileContent(checkSumFile, &tmpchecksumBuffer, &checksumBufferSize, cimErrorDetails);
+        checksumBuffer = (MI_Uint8*)DSC_malloc(checksumBufferSize + 1, NitsHere());
+        memcpy(checksumBuffer, tmpchecksumBuffer, checksumBufferSize);
+        checksumBuffer[checksumBufferSize] = '\0';
+        DSC_free(tmpchecksumBuffer);
     }
     else
     {

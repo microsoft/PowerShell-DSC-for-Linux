@@ -98,76 +98,6 @@ MI_Result GetDocumentEncryptionSetting( _In_ MI_Instance *documentIns,
     return MI_RESULT_OK;
 }
 
-MI_Result DecryptPasswords( _In_z_ MI_Char *certificateid,
-                            _In_ MI_Instance* instance,
-                            _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r = MI_RESULT_OK;
-    MI_Uint32 yCount = 0;
-
-    if (instance == NULL || certificateid == NULL || extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
-    }
-
-    *extendedError = NULL;     
-
-    for (yCount = 0 ; yCount < instance->classDecl->numProperties; yCount++)            
-    {
-        const MI_PropertyDecl * miProp = instance->classDecl->properties[yCount];
-        if( miProp->className != NULL && Tcscasecmp(miProp->className, MSFT_BASECREDENTIAL_CLASSNAME) == 0)
-        {
-            MI_Value credentialInstance;
-            MI_Type type;
-            MI_Uint32 flags;
-            r = MI_Instance_GetElement(instance,  miProp->name, &credentialInstance, &type, &flags, NULL);
-            if (r != MI_RESULT_OK)
-            {                        
-                return GetCimMIError(r, extendedError, ID_MODMAN_GETELEMENT_FAILED);
-            }   
-            if( (type == MI_INSTANCE ) && !( flags & MI_FLAG_NULL) && credentialInstance.instance != NULL)
-            {
-                const MI_Char *password = NULL;
-                        
-                MI_Value value;
-                MI_Value result;
-
-                r = MI_Instance_GetElement(credentialInstance.instance,  MSFT_Credential_Password, &value, NULL, &flags, NULL);
-                if (r != MI_RESULT_OK)
-                {
-                    return GetCimMIError(r, extendedError, ID_MODMAN_GETELEMENT_FAILED);
-                }
-                if( !(flags & MI_FLAG_NULL))
-                {
-                    password = value.string;
-                    r = Decrypt(certificateid, password, &result.string, extendedError);
-                    if (r != MI_RESULT_OK)
-                    {
-                        return r;
-                    }
-
-                    r = MI_Instance_SetElement(credentialInstance.instance,  MSFT_Credential_Password, &result, MI_STRING, 0);
-                    if (r != MI_RESULT_OK)
-                    {
-                        DSC_free(result.string);
-                        return GetCimMIError(r, extendedError, ID_CA_CRYPTO_DECRYPTION_FAILED);
-                    }
-
-                    r = MI_Instance_SetElement(instance,  miProp->name, &credentialInstance, MI_INSTANCE, 0);
-                    if (r != MI_RESULT_OK)
-                    {                        
-                        return GetCimMIError(r, extendedError, ID_MODMAN_GETELEMENT_FAILED);
-                    }   
-
-                    DSC_free(result.string);
-                }
-            }
-        }
-    }
-
-    return r;
-}
-
 MI_Result InitCAHandler(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     if (cimErrorDetails == NULL)
@@ -677,22 +607,6 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
             return r;
         }        
 
-        if (bEncryptionEnabled == MI_TRUE && certificateid != NULL)
-        {
-            /*Decrypt passwords if necessary */
-            r = DecryptPasswords(certificateid, instanceA->data[index], extendedError);
-            if (r != MI_RESULT_OK)
-            {                        
-                if(certificateid != NULL)
-                {
-                    DSC_free(certificateid);
-                    certificateid = NULL;
-                }
-                MI_Instance_Delete(filteredInstance);
-                return r;
-            }
-        }
-
         /*Get provider compatible instance*/
         r = moduleManager->ft->GetProviderCompatibleInstance(moduleManager, instanceA->data[index], &filteredInstance, extendedError);
         if (r != MI_RESULT_OK)
@@ -934,22 +848,6 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
             MI_Session_Close(&miSession, NULL, NULL);
             return r;
         }        
-
-        if (bEncryptionEnabled == MI_TRUE && certificateid != NULL)
-        {
-            /*Decrypt passwords if necessary */
-            r = DecryptPasswords(certificateid, instanceA->data[index], extendedError);
-            if (r != MI_RESULT_OK)
-            {                        
-                if(certificateid != NULL)
-                {
-                    DSC_free(certificateid);
-                    certificateid = NULL;
-                }
-                MI_Instance_Delete(filteredInstance);
-                return r;
-            }
-        }
 
         /*Get provider compatible instance*/
         r = moduleManager->ft->GetProviderCompatibleInstance(moduleManager, instanceA->data[xCount], &filteredInstance, extendedError);
