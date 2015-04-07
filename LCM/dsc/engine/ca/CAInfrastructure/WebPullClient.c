@@ -3,8 +3,6 @@
 //#include "LocalConfigManagerHelperForCA.h"
 #include "EngineHelper.h"
 #include "Resources_LCM.h"
-#include "http/httpcommon.h"
-#include "http/httpclient.h"
 #include <pal/format.h>
 #include <pal/file.h>
 #include <pal/dir.h>
@@ -30,6 +28,7 @@
 #else
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <curl/curl.h>
 #endif
 
 #include "WebPullClient.h"
@@ -60,9 +59,234 @@ struct ModuleTable {
 
 static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation, 
                                            ModuleTable* table);
-void HandleStatus(_In_ HttpClient *http, _In_ void *callbackData, MI_Result result);
-MI_Boolean HandleResponse( _In_ HttpClient *http, _In_ void *callbackData, _In_ const HttpClientResponseHeader *headers,
-                           MI_Sint64 contentSize, MI_Boolean lastChunk, _In_ Page**data);
+
+struct Chunk 
+{
+    size_t size;
+    char * data;
+};
+
+struct HeaderChunk 
+{
+    size_t size;
+    char ** headerKeys;
+    char ** headerValues;
+};
+
+static void InitHeaderChunk(struct HeaderChunk* chunk)
+{
+    chunk->size = 0;
+    chunk->headerKeys = malloc(sizeof(char*));
+    chunk->headerValues = malloc(sizeof(char*));
+
+    if (chunk->headerKeys == NULL || chunk->headerValues == NULL)
+    {
+        fprintf(stderr, "Error: Out of memory in InitHeaderChunk");
+        abort();
+    }
+}
+
+static void CleanupHeaderChunk(struct HeaderChunk * chunk)
+{
+    size_t i;
+    for (i = 0; i < chunk->size; ++i)
+    {
+        free(chunk->headerKeys[i]);
+        free(chunk->headerValues[i]);
+    }
+
+    chunk->size = 0;
+    free(chunk->headerKeys);
+    free(chunk->headerValues);
+    chunk->headerKeys = NULL;
+    chunk->headerValues = NULL;
+    
+}
+
+
+static void GetSSLv3Option(_In_ MI_InstanceA *customData,
+                           _Inout_ MI_Boolean * NoSSLv3)
+{
+    MI_Uint32 i;
+    MI_Boolean outBoolean = MI_FALSE;
+    MI_Value value;
+    MI_Uint32 flags;
+    MI_Result result;
+
+    for (i = 0; i < customData->size; ++i)
+    {
+        result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
+        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(value.string, MI_T("NoSSLv3")) == 0 )
+        {
+            result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
+            if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+            {
+                if ( Tcscasecmp(value.string, MI_T("true")) == 0 )
+                {
+                    outBoolean = MI_TRUE;
+                }
+                else
+                {
+                    outBoolean = MI_FALSE;
+                }
+            }
+            break;
+        }
+    }
+
+    *NoSSLv3 = outBoolean;
+    return;
+}
+
+static const char * defaultCipherList = "HIGH";
+
+static void GetCipherList(_In_ MI_InstanceA *customData,
+                       _Inout_ char ** cipherList)
+{
+    MI_Uint32 i;
+    MI_Value value;
+    MI_Uint32 flags;
+    MI_Result result;
+    size_t length;
+
+    length = strlen(defaultCipherList);
+    *cipherList = (char*)calloc(length + 1, 1);
+    memcpy(*cipherList, defaultCipherList, length);
+
+    // if not found in customData, use defaultCipherList
+    for (i = 0; i < customData->size; ++i)
+    {
+        result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
+        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(value.string, MI_T("sslcipherlist")) == 0 )
+        {
+            result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
+            if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+            {
+                free(*cipherList);
+                length = (size_t)Tcslen(value.string);
+                *cipherList = (char*)calloc(length + 1, 1);
+                memcpy(*cipherList, value.string, length);
+            }
+            break;
+        }
+    }
+
+    return;
+}
+
+
+
+static void GetDoNotCheckCertificateOption(_In_ MI_InstanceA *customData,
+                                           _Inout_ MI_Boolean * DoNotCheckCertificate)
+{
+    MI_Uint32 i;
+    MI_Boolean outBoolean = MI_FALSE;
+    MI_Value value;
+    MI_Uint32 flags;
+    MI_Result result;
+
+    for (i = 0; i < customData->size; ++i)
+    {
+        result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
+        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(value.string, MI_T("DoNotCheckCertificate")) == 0 )
+        {
+            result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
+            if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+            {
+                if ( Tcscasecmp(value.string, MI_T("true")) == 0 )
+                {
+                    outBoolean = MI_TRUE;
+                }
+                else
+                {
+                    outBoolean = MI_FALSE;
+                }
+            }
+            break;
+        }
+    }
+
+    *DoNotCheckCertificate = outBoolean;
+    return;
+}
+
+static CURLcode ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *userptr)
+{
+    struct SSLOptions * sslOptions = (struct SSLOptions*)userptr;
+
+    SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
+    
+    if (sslOptions->NoSSLv3 == MI_TRUE)
+    {
+        SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv3);
+    }
+    
+    SSL_CTX_set_cipher_list(ssl_ctx, sslOptions->cipherList);
+    free(sslOptions->cipherList);
+
+    return CURLE_OK;
+}
+
+static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  size_t realsize = size * nmemb;
+  struct HeaderChunk *chunk = (struct HeaderChunk *)userp; 
+  char* colonPointer;
+  long key_length;
+  long value_length;
+  char *charContents = (char*)calloc(realsize, 1);
+  
+  // We have to do a silly memcpy here because there's no safe version of "strstr", used below.
+  memcpy(charContents, contents, realsize);
+
+  // Parse out key+value
+  colonPointer = strstr((char*)charContents, ":");
+  if (colonPointer == NULL)
+  {
+      // Not a valid key/value header, ignore and return.
+      free(charContents);
+      return realsize;
+  }
+
+  key_length = (long)(colonPointer - charContents);
+  value_length = realsize - key_length - 4;
+
+  if (value_length < 0)
+  {
+      // Value doesn't exist or has an odd length. Ignore this header line.
+      free(charContents);
+      return realsize;
+  }
+
+  chunk->headerKeys = realloc(chunk->headerKeys, (chunk->size + 1) * sizeof(char*) );
+  chunk->headerValues = realloc(chunk->headerValues, (chunk->size + 1) * sizeof(char*) );
+
+  chunk->headerKeys[chunk->size] = malloc( key_length + 1 );
+  chunk->headerValues[chunk->size] = malloc( value_length + 1);
+  
+  memcpy(chunk->headerKeys[chunk->size], charContents, key_length);
+  chunk->headerKeys[chunk->size][key_length] = '\0';
+  memcpy(chunk->headerValues[chunk->size], colonPointer + 2, value_length);
+  chunk->headerValues[chunk->size][value_length] = '\0';
+
+  chunk->size += 1;
+  free(charContents);
+  return realsize;
+}
+ 
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  size_t realsize = size * nmemb;
+  struct Chunk *mem = (struct Chunk *)userp;
+ 
+  mem->data = realloc(mem->data, mem->size + realsize + 1);
+  memcpy(&(mem->data[mem->size]), contents, realsize);
+  mem->size += realsize;
+  mem->data[mem->size] = 0;
+ 
+  return realsize;
+}
+
 
 MI_Char *GetSystemUuid();
 MI_Boolean EscapeValue (_In_reads_z_(size) char *tokenValue, int startValue, int size, 
@@ -891,145 +1115,6 @@ MI_Boolean GetGetActionData( _In_reads_z_(size) char *start, int size, _Out_ cha
     return MI_FALSE;
 }
 
-
-MI_Result ValidateGetActionResult(_In_ RequestContainer *requestParam,
-                                         _In_z_ const MI_Char * url,
-                                         _Inout_ MI_Uint32* getActionStatusCode,
-                                         _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r = MI_RESULT_OK;
-    // We got something from server, validate it.
-    if(extendedError)
-        *extendedError  = NULL;
-    if( requestParam->internalError != NULL)
-    {
-        *getActionStatusCode = requestParam->statusCode;
-        if( requestParam->u.action.getActionStatus) 
-            DSC_free(requestParam->u.action.getActionStatus);   
-        *extendedError = requestParam->internalError;
-        return requestParam->internalErrorResult;
-    }
-    if( requestParam->httpResponseResult != MI_RESULT_OK || requestParam->statusCode != Success)
-    {
-        MI_Uint32 response = requestParam->httpResponseResult == MI_RESULT_OK ? MI_RESULT_FAILED : requestParam->httpResponseResult;        
-        *getActionStatusCode = GetDscActionCommandFailure;
-        if( requestParam->u.action.getActionStatus) 
-            DSC_free(requestParam->u.action.getActionStatus);
-        
-        if( requestParam->httpError != HTTP_SUCCESS_CODE )
-        {
-            MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};
-            Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), requestParam->httpError);
-            r = GetCimMIError2Params( response, extendedError, ID_PULLGETACTION_BADRESPONSE, statusCodeValue, url);
-            return r;
-        }        
-        return GetCimMIError1Param(response, extendedError, ID_PULL_GETACTIONFAILED, webPulginName); 
-    }
-    if( requestParam->u.action.getActionStatus == NULL)
-    {
-        MI_Uint32 response = requestParam->httpResponseResult == MI_RESULT_OK ? MI_RESULT_FAILED : requestParam->httpResponseResult;    
-        *getActionStatusCode = GetDscActionCommandFailure;
-        return GetCimMIError1Param(response, extendedError, ID_PULL_GETACTIONFAILED, webPulginName);         
-    }
-
-    // output should be either "OK" or "GETCONFIGURATION"
-    if (! (Strcasecmp( requestParam->u.action.getActionStatus, GetActionResultOk) == 0 ||
-        Strcasecmp( requestParam->u.action.getActionStatus, GetActionResultGetConfiguration) == 0 ) )
-    {
-        MI_Char *actionStatus = NULL;
-#if defined(_MSC_VER)
-        AsciiToUCS2(requestParam->u.action.getActionStatus, &actionStatus);
-
-#else
-        actionStatus = requestParam->u.action.getActionStatus;
-#endif
-        *getActionStatusCode = GetDscActionCommandFailure;
-        r = GetCimMIError2Params(MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_GETACTIONUNEXPECTEDRESULT, actionStatus, url);
-#if defined(_MSC_VER)        
-        DSC_free(actionStatus);
-#endif
-        DSC_free(requestParam->u.action.getActionStatus);
-        return r;
-    }    
-    return MI_RESULT_OK;
-}
-
-
-MI_Result ValidateGetConfigurationResult(_In_ RequestContainer *requestParam,
-                                         _In_z_ const MI_Char * url,
-                                         _Inout_ MI_Uint32* getActionStatusCode,
-                                         _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r = MI_RESULT_OK;
-    if(extendedError)
-        *extendedError  = NULL;    
-    // We got something from server, validate it.
-    if( requestParam->internalError != NULL)
-    {
-        *getActionStatusCode = requestParam->statusCode;
-        if( requestParam->u.config.checkSumAlgorithm) 
-            DSC_free(requestParam->u.config.checkSumAlgorithm);
-        if( requestParam->u.config.checkSum)
-            DSC_free(requestParam->u.config.checkSum);   
-
-        *extendedError = requestParam->internalError;
-        return requestParam->internalErrorResult;
-    }    
-    if( requestParam->httpResponseResult != MI_RESULT_OK || requestParam->statusCode != Success)
-    {
-        MI_Uint32 response = requestParam->httpResponseResult == MI_RESULT_OK ? MI_RESULT_FAILED : requestParam->httpResponseResult;    
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        if( requestParam->u.config.checkSumAlgorithm) 
-            DSC_free(requestParam->u.config.checkSumAlgorithm);
-        if( requestParam->u.config.checkSum)
-            DSC_free(requestParam->u.config.checkSum);   
-
-        if( requestParam->httpError != HTTP_SUCCESS_CODE )
-        {
-            MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};             
-            Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), requestParam->httpError);
-            r = GetCimMIError2Params(response , extendedError, ID_PULLGETCONFIGURATION_BADRESPONSE, statusCodeValue, url);    
-            return r;            
-        }
-        return GetCimMIError1Param(response, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);   
-    }    
-
-    if( requestParam->u.config.checkSumAlgorithm == NULL || requestParam->u.config.checkSum == NULL)
-    {
-        MI_Uint32 resourceId = requestParam->u.config.checkSumAlgorithm == NULL ? ID_PULLGETCONFIGURATION_NULLCHECKSUMALGORITHM : ID_PULLGETCONFIGURATION_NULLCHECKSUM;       
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        if( requestParam->u.config.checkSumAlgorithm) 
-            DSC_free(requestParam->u.config.checkSumAlgorithm);
-        if( requestParam->u.config.checkSum)
-            DSC_free(requestParam->u.config.checkSum);   
-        r = GetCimMIError1Param(MI_RESULT_FAILED, extendedError, resourceId, url);    
-        return r;
-    }
-    // Check checksum algorithm. 
-    if( Tcscasecmp(requestParam->u.config.checkSumAlgorithm, AllowedChecksumAlgorithm) != 0 )
-    {             
-        *getActionStatusCode = InvalidChecksumAlgorithm;
-        GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_INVALIDCHECKSUMALGORITHM, url, requestParam->u.config.checkSumAlgorithm);                
-        if( requestParam->u.config.checkSumAlgorithm) 
-            DSC_free(requestParam->u.config.checkSumAlgorithm);
-        if( requestParam->u.config.checkSum)
-            DSC_free(requestParam->u.config.checkSum);   
-        return MI_RESULT_FAILED;
-    }
-    //Validate checksum
-    if( !ValidateChecksum(requestParam->u.config.checkSum, requestParam->u.config.directoryPath) )
-    {
-        DSC_EventWriteWebDownloadManagerGetDocChecksumValidation(NULL, NULL);
-        *getActionStatusCode = ConfigurationChecksumValidationFailure;
-        if( requestParam->u.config.checkSumAlgorithm) 
-            DSC_free(requestParam->u.config.checkSumAlgorithm);
-        if( requestParam->u.config.checkSum)
-            DSC_free(requestParam->u.config.checkSum);               
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CHECKSUMMISMATCH);
-    }
-    return MI_RESULT_OK;
-}
-
 MI_Boolean ValidateContentTypeHeader(_Inout_updates_z_(size)  MI_Char *buffer, MI_Uint32 size, _In_z_ const MI_Char *header)
 {
     MI_Uint32 startIndex = 0;
@@ -1060,832 +1145,6 @@ MI_Boolean ValidateContentTypeHeader(_Inout_updates_z_(size)  MI_Char *buffer, M
     return MI_FALSE;
 }
 
-#if defined(_MSC_VER)
-
-MI_Char *GetSystemUuid()
-{
-    MI_Application app = MI_APPLICATION_NULL;
-    MI_Session session = MI_SESSION_NULL;
-    MI_Operation operation = MI_OPERATION_NULL;
-    MI_Result r = MI_RESULT_OK;
-    MI_Char *resultSystemUuid = NULL;
-
-    r = DSC_MI_Application_Initialize(0, NULL, NULL, &app);   
-    if( r != MI_RESULT_OK)
-    {
-       return resultSystemUuid;
-    }  
-
-    r = DSC_MI_Application_NewSession(&app, NULL, NULL, NULL, NULL, NULL, &session);
-    if (r != MI_RESULT_OK)
-    {
-        MI_Application_Close(&app);
-       return resultSystemUuid;
-    }        
-    {
-       const MI_Instance *resultInstance = NULL;
-        MI_Boolean moreResults = MI_TRUE;
-        MI_Result result;
-        const MI_Char *errorMessage;
-        const MI_Instance *completionDetails;
-        MI_Value value;
-        MI_Uint32 flags;
-        MI_Session_EnumerateInstances(&session, 0, NULL, MI_T("root\\cimv2"), MI_T("Win32_ComputerSystemProduct"), MI_FALSE, NULL, &operation);
-        r = MI_Operation_GetInstance(&operation, &resultInstance, &moreResults, &result, &errorMessage, &completionDetails);
-        // We are interested in only 1st instance.
-        if( r == MI_RESULT_OK && result == MI_RESULT_OK && resultInstance != NULL )
-        {
-            r = MI_Instance_GetElement(resultInstance, MI_T("UUID"), &value, NULL, &flags, NULL);
-            if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) )
-            {
-                resultSystemUuid = (MI_Char*)DSC_malloc( (Tcslen(value.string)+1)* sizeof(MI_Char), NitsHere());
-                if( resultSystemUuid )
-                    memcpy(resultSystemUuid, value.string, (Tcslen(value.string)+1)* sizeof(MI_Char));
-            }
-        }
-        MI_Operation_Close(&operation);
-        MI_Session_Close(&session, NULL, NULL);
-        MI_Application_Close(&app);
-    }
-    return resultSystemUuid;
-    
-}
-
-
-void ProcessResponseHeaders( _In_ RequestContainer *requestParam, void *info, DWORD length)
-{
-    DWORD bufferLength = 2048;
-    MI_Char buffer[2048] = {0};
-    if(!WinHttpQueryHeaders((HINTERNET)requestParam->httpRequest, WINHTTP_QUERY_CONTENT_TYPE, WINHTTP_HEADER_NAME_BY_INDEX, buffer, &bufferLength, WINHTTP_NO_HEADER_INDEX) )
-    {
-            requestParam->internalErrorResult = GetCimWin32Error1Param(GetLastError(), &requestParam->internalError, 
-                        ID_PULL_GETACTIONFAILED, webPulginName);
-            requestParam->statusCode = GetDscActionCommandFailure;      
-            return;        
-    }
-    //buffer[ Strlen(buffer)] = '\0';
-    if( requestParam->serverOperation == OPERATION_GETACTION )
-    {
-        if( !ValidateContentTypeHeader(buffer, bufferLength, MI_T("application/json")))
-        {
-            requestParam->internalErrorResult = GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, 
-                        ID_PULL_GETACTIONFAILED, webPulginName);
-            requestParam->statusCode = GetDscActionCommandFailure;      
-            return;            
-        }
-    }
-    else if( requestParam->serverOperation == OPERATION_GETCONFIGURATION )
-    {
-        MI_Uint32 dwSize = 0;      
-        if( !ValidateContentTypeHeader(buffer, bufferLength, MI_T("application/octet-stream")))
-        {
-            requestParam->internalErrorResult = GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, 
-                        ID_PULL_GETACTIONFAILED, webPulginName);
-            requestParam->statusCode = GetDscActionCommandFailure;      
-            return;            
-        }        
-        // Get Checksum value;
-        if(!WinHttpQueryHeaders((HINTERNET)requestParam->httpRequest, WINHTTP_QUERY_CUSTOM, checkSumName, NULL, (LPDWORD)&dwSize , WINHTTP_NO_HEADER_INDEX))
-        {
-            if( GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-            {
-                // Caller will validate the result, ignore it here.
-                return;
-            }
-        }
-        requestParam->u.config.checkSum = (MI_Char*) DSC_malloc(dwSize+sizeof(MI_Char), NitsHere());
-        if( requestParam->u.config.checkSum == NULL)
-        {
-            requestParam->statusCode = GetConfigurationCommandFailure;
-            requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, ID_ENGINEHELPER_MEMORY_ERROR);
-            return;
-        }
-        if( !WinHttpQueryHeaders((HINTERNET)requestParam->httpRequest, WINHTTP_QUERY_CUSTOM, checkSumName, requestParam->u.config.checkSum, 
-                (LPDWORD)&dwSize , WINHTTP_NO_HEADER_INDEX))
-        {
-            DSC_free(requestParam->u.config.checkSum);
-            requestParam->u.config.checkSum = NULL;
-            // Caller will validate the result, ignore it here.
-        }  
-
-        // Get Checksum algorithm;
-        if(!WinHttpQueryHeaders((HINTERNET)requestParam->httpRequest, WINHTTP_QUERY_CUSTOM, checksumAlgorithmName, NULL, (LPDWORD)&dwSize , WINHTTP_NO_HEADER_INDEX))
-        {
-            if( GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-            {
-                // Caller will validate the result, ignore it here.
-                return;
-            }
-        }
-        requestParam->u.config.checkSumAlgorithm = (MI_Char*) DSC_malloc(dwSize+ sizeof(MI_Char), NitsHere());
-        if( requestParam->u.config.checkSumAlgorithm == NULL)
-        {
-            requestParam->statusCode = GetConfigurationCommandFailure;
-            requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, ID_ENGINEHELPER_MEMORY_ERROR);
-            return;
-        }
-        if( !WinHttpQueryHeaders((HINTERNET)requestParam->httpRequest, WINHTTP_QUERY_CUSTOM, checksumAlgorithmName, requestParam->u.config.checkSumAlgorithm, 
-                (LPDWORD)&dwSize , WINHTTP_NO_HEADER_INDEX))
-        {
-            DSC_free(requestParam->u.config.checkSumAlgorithm);
-            requestParam->u.config.checkSumAlgorithm = NULL;
-            return;
-            // Caller will validate the result, ignore it here.
-        }           
-    }
-}
-
-void ProcessResponseData( _In_ RequestContainer *requestParam, void *info, DWORD length)
-{
-    if( requestParam->serverOperation == OPERATION_GETACTION )
-    {
-        char *buffer = DSC_malloc(*((LPDWORD)info), NitsHere());
-        if( buffer == NULL)
-        {
-            requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, 
-                        ID_ENGINEHELPER_MEMORY_ERROR);
-            requestParam->statusCode = GetDscActionCommandFailure;
-            return;
-
-        }
-        if (!WinHttpReadData((HINTERNET)requestParam->httpRequest, buffer, *((LPDWORD)info), NULL))
-        {
-            DSC_free(buffer);
-            requestParam->internalErrorResult = GetCimWin32Error1Param(GetLastError(), &requestParam->internalError, 
-                        ID_PULL_GETACTIONFAILED, webPulginName);
-            requestParam->statusCode = GetDscActionCommandFailure;      
-            return;            
-        }
-        if( !GetGetActionData(buffer, *((LPDWORD)info), &requestParam->u.action.getActionStatus) )
-        {
-            GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, ID_PULL_GETACTIONFAILED, webPulginName);  
-            DSC_free(buffer);
-            requestParam->statusCode = GetDscActionCommandFailure;
-            return;
-        }
-        DSC_free(buffer);
-        if( requestParam->u.action.getActionStatus == NULL )
-        {
-            requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, 
-                        ID_ENGINEHELPER_MEMORY_ERROR);
-            requestParam->statusCode = GetDscActionCommandFailure;
-            return;
-            
-        }        
-    }
-    else if( requestParam->serverOperation == OPERATION_GETCONFIGURATION )
-    {
-        size_t dataSize =*((LPDWORD)info);
-        char *buffer = DSC_malloc(*((LPDWORD)info), NitsHere());
-        if( buffer == NULL)
-        {
-            requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, 
-                        ID_ENGINEHELPER_MEMORY_ERROR);
-            requestParam->statusCode = GetConfigurationCommandFailure;
-            return;
-
-        }
-        if (!WinHttpReadData((HINTERNET)requestParam->httpRequest, buffer, *((LPDWORD)info), NULL))
-        {
-            DSC_free(buffer);
-            requestParam->internalErrorResult = GetCimWin32Error1Param(GetLastError(), &requestParam->internalError, 
-                        ID_PULLGETCONFIGURATIONFAILED, webPulginName);
-            requestParam->statusCode = GetConfigurationCommandFailure;      
-            return;            
-        }   
-        {
-            FILE *fp = File_OpenT(requestParam->u.config.directoryPath, MI_T("a"));
-            if(fp == NULL)
-            {
-                DSC_free(buffer);
-                requestParam->internalErrorResult = GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, 
-                                            ID_PULL_CONFIGURATIONSAVEFAILED, requestParam->u.config.directoryPath);
-                requestParam->statusCode = GetConfigurationCommandFailure;
-                DSC_EventWriteWebDownloadManagerGetDocFileSave(NULL, requestParam->u.config.directoryPath);
-                return;            
-            }
-            fwrite( (char*)buffer, 1, dataSize, fp);
-            File_Close(fp);        
-        }
-        
-    }    
-}
-
-
-void CALLBACK WinHTTP_Callback(HINTERNET handle, DWORD_PTR context, DWORD code, void *info, DWORD length)
-{
-    RequestContainer *requestParam = (RequestContainer *) context;
-    if (code == WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE)
-    {
-        if( requestParam->statusCode == Success)
-            ProcessResponseData(requestParam, info, length);
-        Sem_Post(&requestParam->httpRequestDoneEvent, 1 );        
-    }
-    else if (code == WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE)
-    {
-        ProcessResponseHeaders(requestParam, info, length);
-        // ask for data
-        if(!WinHttpQueryDataAvailable((HINTERNET)requestParam->httpRequest, NULL) )
-        {
-            if( requestParam->serverOperation == OPERATION_GETACTION )
-            {
-                requestParam->internalErrorResult = GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, 
-                            ID_PULL_GETACTIONFAILED, webPulginName);
-                requestParam->statusCode = GetDscActionCommandFailure;      
-            }
-            else
-            {
-                requestParam->internalErrorResult = GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, 
-                            ID_PULLGETCONFIGURATIONFAILED, webPulginName);
-                requestParam->statusCode = GetConfigurationCommandFailure;                   
-            }
-            return;
-        }        
-        
-    }
-    else if (code == WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE)
-    {
-        // Ask for response
-        if(!WinHttpReceiveResponse((HINTERNET)requestParam->httpRequest, NULL))
-        {
-            // Error condition
-        }
-    }
-    else if (code == WINHTTP_CALLBACK_STATUS_READ_COMPLETE)
-    {
-        // Successfully read.
-        // Sem_Post(&requestParam->httpRequestDoneEvent, 1 );
-    }
-    else if (code == WINHTTP_CALLBACK_STATUS_CLOSE_COMPLETE)
-    {
-        //Sem_Post(&requestParam->httpRequestDoneEvent, 1 );        
-    }
-    else if (code == WINHTTP_CALLBACK_STATUS_REQUEST_ERROR)
-    {        
-        WINHTTP_ASYNC_RESULT *result = (WINHTTP_ASYNC_RESULT*)info;
-        if( requestParam->statusCode == Success)
-        {
-            if( requestParam->serverOperation == OPERATION_GETACTION )
-            {
-                requestParam->statusCode = GetDscActionCommandFailure;
-                GetCimWin32Error1Param(result->dwError, &requestParam->internalError, ID_PULL_GETACTIONFAILED, webPulginName);
-            }
-            else if( requestParam->serverOperation == OPERATION_GETCONFIGURATION )
-            {
-                requestParam->statusCode = GetConfigurationCommandFailure;
-                 GetCimWin32Error1Param(result->dwError, &requestParam->internalError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);
-            }
-            Sem_Post(&requestParam->httpRequestDoneEvent, 1 );        
-        }
-    }
-    else if ( code == WINHTTP_CALLBACK_STATUS_SECURE_FAILURE)
-    {
-        // security error
-        if( requestParam->statusCode == Success)
-        {
-            if( requestParam->serverOperation == OPERATION_GETACTION )
-            {
-                requestParam->statusCode = GetDscActionCommandFailure;
-                GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, ID_PULL_GETACTIONFAILED, webPulginName);
-            }
-            else if( requestParam->serverOperation == OPERATION_GETCONFIGURATION )
-            {
-                requestParam->statusCode = GetConfigurationCommandFailure;
-                 GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);
-            }            
-            Sem_Post(&requestParam->httpRequestDoneEvent, 1 );  
-        }
-    }
-    // ignore these status
-    else if( code == WINHTTP_CALLBACK_STATUS_RESOLVING_NAME ||
-             code == WINHTTP_CALLBACK_STATUS_NAME_RESOLVED ||
-             code == WINHTTP_CALLBACK_STATUS_CONNECTING_TO_SERVER ||
-             code == WINHTTP_CALLBACK_STATUS_CONNECTED_TO_SERVER ||
-             code == WINHTTP_CALLBACK_STATUS_SENDING_REQUEST || 
-             code == WINHTTP_CALLBACK_STATUS_REQUEST_SENT ||
-             code == WINHTTP_CALLBACK_STATUS_CLOSING_CONNECTION ||
-             code == WINHTTP_CALLBACK_STATUS_CONNECTION_CLOSED ||
-             code == WINHTTP_CALLBACK_STATUS_HANDLE_CREATED ||
-             code == WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING ||
-             code == WINHTTP_CALLBACK_STATUS_INTERMEDIATE_RESPONSE ||
-             code == WINHTTP_CALLBACK_STATUS_READ_COMPLETE ||
-             code == WINHTTP_CALLBACK_STATUS_RECEIVING_RESPONSE ||
-             code == WINHTTP_CALLBACK_STATUS_REDIRECT || 
-             code == WINHTTP_CALLBACK_STATUS_RESPONSE_RECEIVED ||
-             code == WINHTTP_CALLBACK_STATUS_WRITE_COMPLETE ||
-             code == WINHTTP_CALLBACK_STATUS_GETPROXYFORURL_COMPLETE )
-    {
-    }
-             
-}
-
-MI_Result AddCertificateToRequest(HINTERNET handle, _In_z_ const MI_Char *certificateID, _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    HCERTSTORE hStoreHandle = NULL;
-    PCCERT_CONTEXT pCert = NULL;
-    CRYPT_DATA_BLOB blob;
-    DWORD dwBinaryLen = 0;
-    BYTE* pbHashBlob = NULL;
-    if(extendedError)
-        *extendedError = NULL;
-
-    if(CryptStringToBinary(certificateID, 0, CRYPT_STRING_HEX, NULL, &dwBinaryLen, NULL, NULL) && 
-        dwBinaryLen > 0)
-    {
-        // Create a buffer for the byte hash
-        pbHashBlob = (BYTE *)DSC_malloc(dwBinaryLen, NitsHere());
-
-        if(pbHashBlob)
-        {            
-            if(!CryptStringToBinary(certificateID, 0, CRYPT_STRING_HEX, pbHashBlob, &dwBinaryLen, 
-                NULL, NULL))
-            {
-                DSC_free(pbHashBlob);
-                pbHashBlob = NULL;
-
-                return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_CRYPTO_STORE_UNOPENED);
-            }
-        }
-    }
-    else
-    {
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_CRYPTO_STORE_UNOPENED);
-    }
-
-    blob.cbData = dwBinaryLen;
-    blob.pbData = pbHashBlob;    
-    
-    hStoreHandle = CertOpenStore(CERT_STORE_PROV_SYSTEM, 0, 0, CERT_SYSTEM_STORE_LOCAL_MACHINE, L"My");
-    if(hStoreHandle == NULL)
-    {
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_CRYPTO_STORE_UNOPENED);
-    }   
-    // Get a certificate that matches the search criteria (Thumbprint could be MD5 or SHA1 but
-    // MD5 has been cracked so most often it'll be SHA1 so check it first)
-    pCert = CertFindCertificateInStore(hStoreHandle, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING , 0, 
-        CERT_FIND_SHA1_HASH, &blob, NULL);
-
-    if(!pCert)
-    {
-        pCert = CertFindCertificateInStore(hStoreHandle, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, 
-            CERT_FIND_MD5_HASH, &blob, NULL);
-    }    
-    DSC_free(pbHashBlob);
-    pbHashBlob = NULL;
-
-    if(!pCert)
-    {
-        if(hStoreHandle)
-        {
-            CertCloseStore(hStoreHandle, CERT_CLOSE_STORE_CHECK_FLAG);
-            hStoreHandle = NULL;
-        }
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_CRYPTO_CERT_NOTFOUND);
-    }    
-    if(!WinHttpSetOption(handle, WINHTTP_OPTION_CLIENT_CERT_CONTEXT, (LPVOID) pCert, sizeof(CERT_CONTEXT)))
-    {
-        if(pCert)
-        {
-            CertFreeCertificateContext(pCert);
-        }
-
-        if(hStoreHandle)
-        {
-            CertCloseStore(hStoreHandle, CERT_CLOSE_STORE_CHECK_FLAG);
-        }        
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_CRYPTO_CERT_NOTFOUND);
-    }
-
-    if(pCert)
-    {
-        CertFreeCertificateContext(pCert);
-    }
-
-    if(hStoreHandle)
-    {
-        CertCloseStore(hStoreHandle, CERT_CLOSE_STORE_CHECK_FLAG);
-    }
-    return MI_RESULT_OK;
-}
-
-
-MI_Result GetGetConfigurationHttpConnection(_Inout_ RequestContainer *requestParam,  _In_reads_z_(URL_SIZE) const MI_Char *url, _In_ MI_Uint32 port, MI_Boolean bIsHttps,
-                            _In_z_ const MI_Char *certificateID, _In_z_ const MI_Char *configurationUrl, _In_ MI_Uint32 requestFlags, 
-                            _Out_ MI_Uint32* getActionStatusCode, _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r = MI_RESULT_OK;
-    *getActionStatusCode = Success;
-    if(extendedError)
-        *extendedError = NULL;    
-    
-    /* Create http session*/
-    requestParam->httpSession = WinHttpOpen(0, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-            WINHTTP_NO_PROXY_NAME,
-            WINHTTP_NO_PROXY_BYPASS,
-            WINHTTP_FLAG_ASYNC);  
-    if( requestParam->httpSession == NULL)
-    {
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);
-    }
-
-    /* Create http connection with the server*/
-    requestParam->httpConnection = WinHttpConnect(requestParam->httpSession,
-        url,
-        (INTERNET_PORT)port,
-        0); // reserved    
-    if( requestParam->httpConnection == NULL)
-    {
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        WinHttpCloseHandle(requestParam->httpSession);
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);
-    }   
-
-
-    /* Create winhttp request*/
-    requestParam->httpRequest = WinHttpOpenRequest(requestParam->httpConnection,
-        MI_T("GET"), 
-        configurationUrl,
-        0, // use HTTP version 1.1
-        WINHTTP_NO_REFERER, 
-        NULL,
-        requestFlags); // flags    
-
-    if( requestParam->httpRequest == NULL)
-    {
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        WinHttpCloseHandle(requestParam->httpConnection);
-        WinHttpCloseHandle(requestParam->httpSession);
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);
-    }        
-
-    /* Set the status callbacks to the request*/
-    if(WINHTTP_INVALID_STATUS_CALLBACK == WinHttpSetStatusCallback(requestParam->httpRequest, WinHTTP_Callback, WINHTTP_CALLBACK_FLAG_ALL_NOTIFICATIONS, 0))
-    {
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        WinHttpCloseHandle(requestParam->httpConnection);
-        WinHttpCloseHandle(requestParam->httpSession);
-        WinHttpCloseHandle(requestParam->httpRequest);
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);          
-    }
-    /*Add certificate if needed*/
-    if( bIsHttps && certificateID)
-    {
-        r = AddCertificateToRequest(requestParam->httpRequest, certificateID, extendedError);
-        if( r != MI_RESULT_OK)
-        {
-            *getActionStatusCode = DownloadManagerInitializationFailure;
-            WinHttpCloseHandle(requestParam->httpConnection);
-            WinHttpCloseHandle(requestParam->httpSession);
-            WinHttpCloseHandle(requestParam->httpRequest);        
-            return r;
-        }
-    }    
-    return MI_RESULT_OK;
-}
-
-MI_Result GetGetActionHttpConnection(_Inout_ RequestContainer *requestParam,  _In_reads_z_(URL_SIZE) const MI_Char *url, _In_ MI_Uint32 port, MI_Boolean bIsHttps,
-                            _In_z_ const MI_Char *certificateID, _In_z_ const MI_Char *actionUrl, _In_ MI_Uint32 requestFlags, _In_z_ MI_Char *requestHeader, 
-                            _Out_ MI_Uint32* getActionStatusCode, _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r = MI_RESULT_OK;
-    *getActionStatusCode = Success;
-    if(extendedError)
-        *extendedError = NULL;
-    
-    /* Create http session*/
-    requestParam->httpSession = WinHttpOpen(0, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-            WINHTTP_NO_PROXY_NAME,
-            WINHTTP_NO_PROXY_BYPASS,
-            WINHTTP_FLAG_ASYNC);  
-    if( requestParam->httpSession == NULL)
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULL_GETACTIONFAILED, webPulginName);
-    }
-
-    /* Create http connection with the server*/
-    requestParam->httpConnection = WinHttpConnect(requestParam->httpSession,
-        url,
-        (INTERNET_PORT)port,
-        0); // reserved    
-    if( requestParam->httpConnection == NULL)
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        WinHttpCloseHandle(requestParam->httpSession);
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULL_GETACTIONFAILED, webPulginName);
-    }   
-
-    /* Create winhttp request*/
-    requestParam->httpRequest = WinHttpOpenRequest(requestParam->httpConnection,
-        MI_T("POST"), 
-        actionUrl,
-        0, // use HTTP version 1.1
-        WINHTTP_NO_REFERER, 
-        NULL,
-        requestFlags); // flags    
-
-    if( requestParam->httpRequest == NULL)
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        WinHttpCloseHandle(requestParam->httpConnection);
-        WinHttpCloseHandle(requestParam->httpSession); 
-        WinHttpCloseHandle(requestParam->httpRequest); 
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULL_GETACTIONFAILED, webPulginName);
-    }        
-    /*Add certificate if needed*/
-    if( bIsHttps && certificateID)
-    {
-        r = AddCertificateToRequest(requestParam->httpRequest, certificateID, extendedError);
-        if( r != MI_RESULT_OK)
-        {
-            WinHttpCloseHandle(requestParam->httpConnection);
-            WinHttpCloseHandle(requestParam->httpSession); 
-            WinHttpCloseHandle(requestParam->httpRequest);             
-            *getActionStatusCode = DownloadManagerInitializationFailure;
-            return r;
-        }        
-    }
-
-    /* Add the headers that are requested.*/
-    if(!WinHttpAddRequestHeaders(requestParam->httpRequest, requestHeader, (DWORD)-1L, WINHTTP_ADDREQ_FLAG_ADD))
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        WinHttpCloseHandle(requestParam->httpConnection);
-        WinHttpCloseHandle(requestParam->httpSession); 
-        WinHttpCloseHandle(requestParam->httpRequest); 
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULL_GETACTIONFAILED, webPulginName);        
-    }
-
-    /* Set the status callbacks to the request*/
-    if(WINHTTP_INVALID_STATUS_CALLBACK == WinHttpSetStatusCallback(requestParam->httpRequest, WinHTTP_Callback, WINHTTP_CALLBACK_FLAG_ALL_NOTIFICATIONS, 0))
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        WinHttpCloseHandle(requestParam->httpConnection);
-        WinHttpCloseHandle(requestParam->httpSession); 
-        WinHttpCloseHandle(requestParam->httpRequest);         
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULL_GETACTIONFAILED, webPulginName);          
-    }    
-    return MI_RESULT_OK;
-}
-
-
-MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID, 
-                                 _In_z_ const MI_Char *certificateID,
-                                 _In_z_ const MI_Char *checkSum,
-                                 _In_ MI_Boolean complianceStatus,
-                                _In_ MI_Uint32 lastGetActionStatusCode,
-                                _Outptr_result_maybenull_z_  MI_Char** result,
-                                _Out_ MI_Uint32* getActionStatusCode,
-                                _In_reads_z_(URL_SIZE) const MI_Char *url,
-                                _In_ MI_Uint32 port,
-                                _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
-                                MI_Boolean bIsHttps,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r = MI_RESULT_OK;
-    MI_Char *bodyContent = NULL;
-    char *bodyContentAscii = NULL;
-    DWORD bodyContentLength;
-    const MI_Char *emptyString = MI_T("");
-    const MI_Char *checkSumFinalValue = emptyString;
-    MI_Char requestHeader[MAX_PATH];
-    RequestContainer requestParam = {0};
-    MI_Char actionUrl[MAX_URL_LENGTH];
-    int dwWaitResult;
-    MI_Uint32 requestFlags = 0;
-
-    if(extendedError)
-        *extendedError  = NULL;
-
-    if( bIsHttps)
-        requestFlags = WINHTTP_FLAG_SECURE;
-    requestParam.serverOperation = OPERATION_GETACTION;
-    if( checkSum != NULL)
-        checkSumFinalValue = checkSum;  
-    *result = NULL;
-
-    DSC_EventWriteWebDownloadManagerDoActionServerUrl(configurationID, url);
-    if( certificateID != NULL)
-    {
-        DSC_EventWriteWebDownloadManagerDoActionCertId(configurationID, certificateID);
-    }
-    
-    bodyContent = GetGetActionBodyContent(checkSumFinalValue, complianceStatus, AllowedChecksumAlgorithm, lastGetActionStatusCode);
-    if( bodyContent == NULL )
-    {
-        *getActionStatusCode = DownloadManagerInitializationFailure;
-        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-
-    }    
-    if(UCS2ToAscii(bodyContent,&bodyContentAscii))
-    {
-        DSC_free(bodyContent);
-        *getActionStatusCode = DownloadManagerInitializationFailure;
-        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);        
-    }
-    DSC_free(bodyContent);
-    bodyContentLength = (DWORD)Strlen(bodyContentAscii);
-    Stprintf(requestHeader, MAX_PATH, MI_T("Accept: application/json\r\nContent-Type: application/json;charset=utf-8\r\nContent-Length: %d"), bodyContentLength);
-    Stprintf(actionUrl, MAX_URL_LENGTH, MI_T("/%S/Action(ConfigurationId='%S')/GetAction"),subUrl, configurationID);  
-
-    r = GetGetActionHttpConnection(&requestParam, url, port, bIsHttps, certificateID, actionUrl, requestFlags, requestHeader, getActionStatusCode, extendedError);
-    if( r != MI_RESULT_OK)
-    {
-        DSC_free(bodyContentAscii);
-        DSC_EventWriteWebDownloadManagerDoActionHttpClient(configurationID, NULL);
-        return r;
-    }
-
-    /* Initialize Semaphore*/
-    if(Sem_Init_Injected(&requestParam.httpRequestDoneEvent, SEM_USER_ACCESS_DEFAULT, 1, NitsHere()) == -1)
-    {
-        *getActionStatusCode = DownloadManagerInitializationFailure;
-        DSC_free(bodyContentAscii);
-        WinHttpCloseHandle(requestParam.httpConnection);
-        WinHttpCloseHandle(requestParam.httpSession);
-        WinHttpCloseHandle(requestParam.httpRequest);        
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_LCMHELPER_INIT_FILECRITSEC_FAILED);
-    }      
-    DSC_EventWriteWebDownloadManagerDoActionGetUrl(configurationID, subUrl);
-    /* Send the request.*/
-    if (!WinHttpSendRequest(requestParam.httpRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, bodyContentAscii, bodyContentLength, bodyContentLength, (DWORD_PTR)&requestParam))
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        DSC_free(bodyContentAscii);
-        WinHttpCloseHandle(requestParam.httpConnection);
-        WinHttpCloseHandle(requestParam.httpSession);
-        WinHttpCloseHandle(requestParam.httpRequest);
-        Sem_Destroy(&requestParam.httpRequestDoneEvent);
-        DSC_EventWriteWebDownloadManagerDoActionGetCall(configurationID, NULL);
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULL_GETACTIONFAILED, webPulginName);  
-    }    
-    /* Wait for call to complete*/
-    Sem_TimedWait(&requestParam.httpRequestDoneEvent, (int)0);
-    dwWaitResult = Sem_Wait(&requestParam.httpRequestDoneEvent);
-
-    
-    DSC_free(bodyContentAscii);
-    WinHttpCloseHandle(requestParam.httpConnection);
-    WinHttpCloseHandle(requestParam.httpSession);
-    WinHttpCloseHandle(requestParam.httpRequest);  
-    Sem_Destroy(&requestParam.httpRequestDoneEvent);
-    
-    if (dwWaitResult != 0)
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_FAILED_TO_WAIT_EVENT);
-    }    
-    /* Process results*/
-    r = ValidateGetActionResult(&requestParam, url, getActionStatusCode, extendedError);
-    if( r != MI_RESULT_OK)
-    {
-        DSC_EventWriteWebDownloadManagerDoActionGetCall(configurationID, NULL);
-        return r;
-    }    
-    
-    // Set result as MI_Char
-    if(AsciiToUCS2(requestParam.u.action.getActionStatus, result) )
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        DSC_free(requestParam.u.action.getActionStatus);
-        return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-    }
-    DSC_free(requestParam.u.action.getActionStatus);
-    *getActionStatusCode = Success;       
-    DSC_EventWriteWebDownloadManagerDoActionGetCall(configurationID, *result);    
-    return MI_RESULT_OK;
-    
-}
-
-MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
-                                _In_z_ const MI_Char *certificateID,
-                                _In_z_ const MI_Char *directoryPath, 
-                                _Outptr_result_maybenull_z_  MI_Char** result,
-                                _Out_ MI_Uint32* getActionStatusCode,
-                                _In_reads_z_(URL_SIZE) const MI_Char *url,
-                                _In_ MI_Uint32 port,
-                                _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
-                                MI_Boolean bIsHttps,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r = MI_RESULT_OK;
-    RequestContainer requestParam = {0};
-    MI_Char configurationUrl[MAX_URL_LENGTH];
-    int dwWaitResult;
-    MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
-    MI_Uint32 requestFlags = 0;
-
-    if(extendedError)
-        *extendedError  = NULL;    
-
-    if( bIsHttps)
-        requestFlags = WINHTTP_FLAG_SECURE;
-
-    requestParam.serverOperation = OPERATION_GETCONFIGURATION;    
-    if( certificateID != NULL)
-    {
-        DSC_EventWriteWebDownloadManagerDoActionCertId(configurationID, certificateID);
-    }    
-    *result = NULL;
-    if( outputResult == NULL )
-    {
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-    }    
-    DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);    
-    Stprintf(outputResult,3, MI_T("OK"));
-    requestParam.u.config.directoryPath = directoryPath;
-    Stprintf(configurationUrl, MAX_URL_LENGTH, MI_T("/%S/Action(ConfigurationId='%S')/ConfigurationContent"),subUrl, configurationID);
-
-    r = GetGetConfigurationHttpConnection(&requestParam, url, port, bIsHttps, certificateID, configurationUrl, requestFlags, getActionStatusCode, extendedError);
-    if( r != MI_RESULT_OK)
-    {
-        DSC_EventWriteWebDownloadManagerGetDocHttpClient(configurationID, NULL);
-        return r;        
-    }
-    /* Initialize Semaphore*/
-    if(Sem_Init_Injected(&requestParam.httpRequestDoneEvent, SEM_USER_ACCESS_DEFAULT, 1, NitsHere()) == -1)
-    {
-        *getActionStatusCode = DownloadManagerInitializationFailure;
-        DSC_free(outputResult);
-        WinHttpCloseHandle(requestParam.httpConnection);
-        WinHttpCloseHandle(requestParam.httpSession);
-        WinHttpCloseHandle(requestParam.httpRequest);        
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_LCMHELPER_INIT_FILECRITSEC_FAILED);
-    }      
-    DSC_EventWriteWebDownloadManagerGetDocGetUrl(configurationID, subUrl);
-    /* Send the request.*/
-    if (!WinHttpSendRequest(requestParam.httpRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, (DWORD_PTR)&requestParam))
-    {
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        DSC_free(outputResult);
-        WinHttpCloseHandle(requestParam.httpConnection);
-        WinHttpCloseHandle(requestParam.httpSession);
-        WinHttpCloseHandle(requestParam.httpRequest);
-        Sem_Destroy(&requestParam.httpRequestDoneEvent);
-        return GetCimWin32Error1Param(GetLastError(), extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);  
-    }    
-    /* Wait for call to complete*/
-    Sem_TimedWait(&requestParam.httpRequestDoneEvent, (int)0);
-    dwWaitResult = Sem_Wait(&requestParam.httpRequestDoneEvent);
-    
-    WinHttpCloseHandle(requestParam.httpConnection);
-    WinHttpCloseHandle(requestParam.httpSession);
-    WinHttpCloseHandle(requestParam.httpRequest);  
-    Sem_Destroy(&requestParam.httpRequestDoneEvent);
-    
-    if (dwWaitResult != 0)
-    {
-        DSC_free(outputResult);
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_FAILED_TO_WAIT_EVENT);
-    }
-    /* Validate results*/
-    r = ValidateGetConfigurationResult(&requestParam, url, getActionStatusCode, extendedError);
-    DSC_EventWriteLCMPullConfigurationChecksumValidationResult(configurationID, (MI_Uint32)r);    
-    if( r != MI_RESULT_OK)
-    {
-        DSC_free(outputResult);
-        DSC_EventWriteWebDownloadManagerGetDocGetCall(configurationID, NULL);
-        return r;
-    }    
-    if( requestParam.u.config.checkSumAlgorithm) 
-        DSC_free(requestParam.u.config.checkSumAlgorithm); 
-
-    //Create checksumFile
-    {
-        MI_Char checksumFileName[MAX_URL_LENGTH];
-        FILE *fp = NULL;
-        Stprintf(checksumFileName, MAX_URL_LENGTH,MI_T("%S.checksum"), directoryPath);
-        fp = File_OpenT(checksumFileName,MI_T("w"));
-        if( fp != NULL )
-        {
-            fwrite(requestParam.u.config.checkSum, 1, Tcslen(requestParam.u.config.checkSum) * sizeof(MI_Char), fp);
-            File_Close(fp);
-        }
-        else
-        {
-            *getActionStatusCode = GetConfigurationCommandFailure;
-            if( requestParam.u.config.checkSum)
-                DSC_free(requestParam.u.config.checkSum);   
-            DSC_free(outputResult);
-            DSC_EventWriteWebDownloadManagerGetDocFileSave(configurationID, checksumFileName);
-            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED, checksumFileName);            
-        }
-    }    
-    if( requestParam.u.config.checkSum)
-    {
-        DSC_free(requestParam.u.config.checkSum);
-    }
-
-    *result = outputResult;
-    DSC_EventWriteWebDownloadManagerGetDocGetCall(configurationID, *result );
-    return MI_RESULT_OK;    
-}
-
-
-#else
 
 /* Caller will validate the content.*/
 MI_Char *GetSystemUuid()
@@ -1900,130 +1159,17 @@ MI_Char *GetSystemUuid()
     {
         File_Close(fp);
         return NULL;
-    }
+    }  
     // Caller will validate the contents.
     fread(systemUUid , 1, JOB_UUID_LENGTH, fp);
-    File_Close(fp);
+            File_Close(fp);        
     return systemUUid;
-}
-
-MI_Boolean HandleGetConfigurationResponse( _In_ void *callbackData, _In_ const HttpClientResponseHeader *headers,
-                MI_Sint64 contentSize, MI_Boolean lastChunk, _In_ Page**data)
-{
-    MI_Uint32 xCount;
-    RequestContainer * requestParam = (RequestContainer*) callbackData;
-    requestParam->statusCode = Success;
-    if( headers)
-    {
-       requestParam->httpError = headers->httpError;
-       if( headers->httpError != HTTP_SUCCESS_CODE ) //Status_OK
-       {
-            return MI_FALSE;
-       }        
-        for(  xCount = 0; xCount < headers->sizeHeaders; xCount++)
-        {
-            if(Strcasecmp(headers->headers[xCount].name, checkSumName) == 0 ) 
-            {
-                requestParam->u.config.checkSum = (char*) DSC_malloc(Strlen(headers->headers[xCount].value)+1, NitsHere());
-                if( requestParam->u.config.checkSum == NULL)
-                {
-                    requestParam->statusCode = GetConfigurationCommandFailure;
-                    requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, ID_ENGINEHELPER_MEMORY_ERROR);
-                    return MI_FALSE;
-                }
-                memcpy(requestParam->u.config.checkSum, headers->headers[xCount].value, Strlen(headers->headers[xCount].value));
-            }
-            else if(Strcasecmp(headers->headers[xCount].name, checksumAlgorithmName) == 0 ) 
-            {
-                requestParam->u.config.checkSumAlgorithm = (char*) DSC_malloc(Strlen(headers->headers[xCount].value) +1, NitsHere());
-                if( requestParam->u.config.checkSumAlgorithm == NULL)
-                {
-                    requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, ID_ENGINEHELPER_MEMORY_ERROR);
-                    requestParam->statusCode = GetConfigurationCommandFailure;
-                    return MI_FALSE;
-                }
-                memcpy(requestParam->u.config.checkSumAlgorithm, headers->headers[xCount].value, Strlen(headers->headers[xCount].value));                
-            }
-        }
-    }
-
-    if( data && *data)
-    {
-        size_t dataSize =(*data)->u.s.size;
-        FILE *fp = File_OpenT(requestParam->u.config.directoryPath, MI_T("a"));
-        if(fp == NULL)
-        {
-            requestParam->internalErrorResult = GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, 
-                                        ID_PULL_CONFIGURATIONSAVEFAILED, requestParam->u.config.directoryPath);
-            requestParam->statusCode = GetConfigurationCommandFailure;
-            return MI_FALSE;            
-        }
-        fwrite( (char*)((*data)+1), 1, dataSize, fp);
-        File_Close(fp);
-    }
-    return MI_TRUE;
-}
-
-MI_Boolean HandleGetModuleResponse( _In_ void *callbackData, _In_ const HttpClientResponseHeader *headers,
-                MI_Sint64 contentSize, MI_Boolean lastChunk, _In_ Page**data)
-{
-    MI_Uint32 xCount;
-    RequestContainer * requestParam = (RequestContainer*) callbackData;
-    requestParam->statusCode = Success;
-    if( headers)
-    {
-       requestParam->httpError = headers->httpError;
-       if( headers->httpError != HTTP_SUCCESS_CODE ) //Status_OK
-       {
-            return MI_FALSE;
-       }        
-        for(  xCount = 0; xCount < headers->sizeHeaders; xCount++)
-        {
-            if(Strcasecmp(headers->headers[xCount].name, checkSumName) == 0 ) 
-            {
-                requestParam->u.config.checkSum = (char*) DSC_malloc(Strlen(headers->headers[xCount].value)+1, NitsHere());
-                if( requestParam->u.config.checkSum == NULL)
-                {
-                    requestParam->statusCode = GetConfigurationCommandFailure;
-                    requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, ID_ENGINEHELPER_MEMORY_ERROR);
-                    return MI_FALSE;
-                }
-                memcpy(requestParam->u.config.checkSum, headers->headers[xCount].value, Strlen(headers->headers[xCount].value));
-            }
-            else if(Strcasecmp(headers->headers[xCount].name, checksumAlgorithmName) == 0 ) 
-            {
-                requestParam->u.config.checkSumAlgorithm = (char*) DSC_malloc(Strlen(headers->headers[xCount].value) +1, NitsHere());
-                if( requestParam->u.config.checkSumAlgorithm == NULL)
-                {
-                    requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, ID_ENGINEHELPER_MEMORY_ERROR);
-                    requestParam->statusCode = GetConfigurationCommandFailure;
-                    return MI_FALSE;
-                }
-                memcpy(requestParam->u.config.checkSumAlgorithm, headers->headers[xCount].value, Strlen(headers->headers[xCount].value));                
-            }
-        }
-    }
-
-    if( data && *data)
-    {
-        size_t dataSize =(*data)->u.s.size;
-        FILE *fp = File_OpenT(requestParam->u.config.directoryPath, MI_T("a"));
-        if(fp == NULL)
-        {
-            requestParam->internalErrorResult = GetCimMIError1Param(MI_RESULT_FAILED, &requestParam->internalError, 
-                                        ID_PULL_CONFIGURATIONSAVEFAILED, requestParam->u.config.directoryPath);
-            requestParam->statusCode = GetConfigurationCommandFailure;
-            return MI_FALSE;            
-        }
-        fwrite( (char*)((*data)+1), 1, dataSize, fp);
-        File_Close(fp);
-    }
-    return MI_TRUE;
-}
+        }        
 
 MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID, 
                                  _In_z_ const MI_Char *certificateID,
                                  _In_z_ const MI_Char *checkSum,
+                                  _In_z_ struct SSLOptions sslOptions,
                                  _In_ MI_Boolean complianceStatus,
                                 _In_ MI_Uint32 lastGetActionStatusCode,
                                 _Outptr_result_maybenull_z_  MI_Char** result,
@@ -2036,19 +1182,25 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 {
     MI_Result r = MI_RESULT_OK;
     const char *emptyString = "";
-    const char *header1 = "Accept: application/json";
-    const char *header2 = "Content-Type: application/json; charset=utf-8";
-    size_t bodyContentLength;
     const char *header_strings[3] = {0};
     char contentLengthHeader[DEFAULT_MEMORY_SIZE];
-    HttpClient *http = NULL;
     int i =0;
     char *bodyContent = NULL;
     const char *checkSumFinalValue = emptyString;
     RequestContainer requestParam = {0};
+    MI_Char actionUrl[MAX_URL_LENGTH];
+    char * getActionStatus = NULL;
+    long responseCode;
+
+    CURL *curl;
+    CURLcode res;
+    struct Chunk headerChunk;
+    struct Chunk dataChunk;
+    struct curl_slist *list = NULL;
+
     requestParam.serverOperation = OPERATION_GETACTION;
     if( checkSum != NULL)
-        checkSumFinalValue = checkSum;
+        checkSumFinalValue = checkSum;  
 
     *result = NULL;
 
@@ -2061,134 +1213,113 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     {
         *getActionStatusCode = DownloadManagerInitializationFailure;
         return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
+    }    
 
-    }
-    bodyContentLength = Strlen(bodyContent);
-    Snprintf(contentLengthHeader, DEFAULT_MEMORY_SIZE, "Content-Length: %d", bodyContentLength);
-    //Form headers
-    header_strings[0] = header1;
-    header_strings[1] = header2;
-    header_strings[2] = (const char*)contentLengthHeader;    
 
-    // Create Connector object
-    r = HttpClient_New_Connector( &http, NULL, url, (unsigned short)port, bIsHttps, HandleStatus, HandleResponse, (void*)&requestParam, NULL, NULL, NULL);
-    if( r != MI_RESULT_OK)
-    {
-        *getActionStatusCode = GetDscActionCommandFailure;
-        DSC_free(bodyContent);
-        return GetCimMIError1Param(r, extendedError, ID_PULL_GETACTIONFAILED, webPulginName);
-    }
-
-    //Create the request.
-    {
-        char actionUrl[MAX_URL_LENGTH];
-        HttpClientRequestHeaders headers ;
-        Page *rsp = (Page*) DSC_malloc(sizeof(Page) + bodyContentLength, NitsHere());
-        headers.data = (const char *const*) header_strings;
-        headers.size = 3;        
-        if( rsp == NULL )
-        {
-            *getActionStatusCode = DownloadManagerInitializationFailure;
-            DSC_free(bodyContent);
-            HttpClient_Delete(http);
-            return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);            
-        }
-        
-        rsp->u.s.size = (MI_Uint32)bodyContentLength;
-        memcpy(rsp+1, bodyContent, bodyContentLength);
-        Snprintf(actionUrl, MAX_URL_LENGTH, "/%s/Action(ConfigurationId='%s')/GetAction",subUrl, configurationID);
-        r = HttpClient_StartRequest(http, "POST", actionUrl, &headers, &rsp);
-        if( r != MI_RESULT_OK)
-        {
-            *getActionStatusCode = GetDscActionCommandFailure;
-            DSC_free(bodyContent);
-            DSC_free(rsp);
-            HttpClient_Delete(http);
-            return GetCimMIError1Param(r, extendedError, ID_PULL_GETACTIONFAILED, webPulginName);            
-        }
-         DSC_EventWriteWebDownloadManagerDoActionGetUrl(configurationID, subUrl);
-        for( i =0; i < 120 && !requestParam.httpResponseReveived;i++)
-            HttpClient_Run(http, HTTP_CONNECTION_TIMEOUT * 1000);    
-
-        HttpClient_Delete(http);
-        DSC_free(rsp);
-    }
-    DSC_free(bodyContent);
-    r = ValidateGetActionResult(&requestParam, url, getActionStatusCode, extendedError);
-    if( r != MI_RESULT_OK)
-    {
-        return r;
-    }
-    // Set result as MI_Char
-    {
-#if defined(CONFIG_ENABLE_WCHAR) 
-        AsciiToUCS2(requestParam.u.action.getActionStatus, result);
-        DSC_free(requestParam.u.action.getActionStatus);
-#else
-        *result = requestParam.u.action.getActionStatus;
-
-#endif
-    }
-    *getActionStatusCode = Success;
-    DSC_EventWriteWebDownloadManagerDoActionGetCall(configurationID, requestParam.u.action.getActionStatus);
-    return MI_RESULT_OK;
+    curl_global_init(CURL_GLOBAL_DEFAULT);
     
-}
-
-void HandleStatus(_In_ HttpClient *http, _In_ void *callbackData, MI_Result result)
-{
-    RequestContainer * requestParam = (RequestContainer*) callbackData;
-
-    requestParam->httpResponseResult = result;
-    requestParam->httpResponseReveived = MI_TRUE;
-}
-
-MI_Boolean HandleResponse( _In_ HttpClient *http, _In_ void *callbackData, _In_ const HttpClientResponseHeader *headers,
-                MI_Sint64 contentSize, MI_Boolean lastChunk, _In_ Page**data)
-{
-    RequestContainer * requestParam = (RequestContainer*) callbackData;
-    if(requestParam->serverOperation == OPERATION_GETACTION )
+    curl = curl_easy_init();
+    if (!curl)
     {
-        // Headers are not important
-        if(headers)
-        {
-            requestParam->httpError = headers->httpError;
-           if( headers->httpError != HTTP_SUCCESS_CODE ) //Status_OK
-           {
-                return MI_FALSE;
-           }
-        }
-        if( data && *data)
-        {
-            GetGetActionData((char*)((*data)+1), (*data)->u.s.size, &requestParam->u.action.getActionStatus);
-            if( requestParam->u.action.getActionStatus == NULL )
-            {
-                requestParam->internalErrorResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &requestParam->internalError, 
-                            ID_ENGINEHELPER_MEMORY_ERROR);
-                requestParam->statusCode = GetDscActionCommandFailure;
-                return MI_FALSE;
-            }
-        }
-        return MI_TRUE;
+        // TODO: log that curl failed to initialize
+        return MI_RESULT_FAILED;
     }
-    else if(requestParam->serverOperation == OPERATION_GETCONFIGURATION )
+
+    if (bIsHttps)
     {
-        return HandleGetConfigurationResponse(callbackData, headers, contentSize, lastChunk, data);
+        Snprintf(actionUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Action(ConfigurationId='%s')/GetAction", url, port, subUrl, configurationID);
+        curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+        if (sslOptions.DoNotCheckCertificate == MI_TRUE)
+        {
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     }
-    else if(requestParam->serverOperation == OPERATION_GETMODULE )
-    {
-        return HandleGetModuleResponse(callbackData, headers, contentSize, lastChunk, data);
+        else
+        {
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+            curl_easy_setopt(curl, CURLOPT_CAPATH, "/etc/pki/tls/certs/ca-bundle.crt");
+        }
     }
     else
     {
-        // unrecognized operation
-        return MI_FALSE;
+        Snprintf(actionUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Action(ConfigurationId='%s')/GetAction", url, port, subUrl, configurationID);
+        curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
     }
+
+    headerChunk.data = (char *)malloc(1);
+    headerChunk.size = 0;
+    dataChunk.data = (char *)malloc(1);
+    dataChunk.size = 0;
+
+
+    list = curl_slist_append(list, "Accept: application/json");
+    list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
+
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyContent);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
+    curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, ssl_ctx_callback);
+    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, &sslOptions);
+
+    res = curl_easy_perform(curl);
+
+    if(res != CURLE_OK)
+    {
+        // TODO: log this
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        free(headerChunk.data);
+        free(dataChunk.data);
+        return MI_RESULT_FAILED;
+    }      
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+    curl_slist_free_all(list);
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+
+    if (responseCode != HTTP_SUCCESS_CODE)
+    {
+        *getActionStatusCode = GetDscActionCommandFailure;
+        free(headerChunk.data);
+        free(dataChunk.data);
+        return GetCimMIError1Param(r, extendedError, ID_PULL_GETACTIONFAILED, webPulginName); 
+    }    
+
+    GetGetActionData(dataChunk.data, dataChunk.size, &getActionStatus);
+    
+    free(headerChunk.data);
+    free(dataChunk.data);
+    
+
+    if( getActionStatus == NULL)
+    {
+        *getActionStatusCode = GetDscActionCommandFailure;
+        return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_GETACTIONFAILED, webPulginName);         
+    }    
+    if (! (Strcasecmp( getActionStatus, GetActionResultOk) == 0 ||
+        Strcasecmp( getActionStatus, GetActionResultGetConfiguration) == 0 ) )
+    {
+    
+        *getActionStatusCode = GetDscActionCommandFailure;
+        r = GetCimMIError2Params(MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_GETACTIONUNEXPECTEDRESULT, getActionStatus, url);
+        DSC_free(getActionStatus);
+        return r;
+    }
+
+    *result = getActionStatus;
+    *getActionStatusCode = Success;       
+    DSC_EventWriteWebDownloadManagerDoActionGetCall(configurationID, requestParam.u.action.getActionStatus);
+    
+    return MI_RESULT_OK;
 }
 
-MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID, 
+MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
                                 _In_z_ const MI_Char *certificateID,
                                 _In_z_ const MI_Char *directoryPath, 
+                                         _In_z_ struct SSLOptions sslOptions,
                                 _Outptr_result_maybenull_z_  MI_Char** result,
                                 _Out_ MI_Uint32* getActionStatusCode,
                                 _In_reads_z_(URL_SIZE) const MI_Char *url,
@@ -2198,56 +1329,150 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
                                 _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
-    RequestContainer requestParam = {0};  
-    HttpClient  *http = NULL;
-    int i=0;
+    RequestContainer requestParam = {0};
     MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
-    requestParam.serverOperation = OPERATION_GETCONFIGURATION;  
+
+    CURL *curl;
+    CURLcode res;
+    struct HeaderChunk headerChunk;
+    struct Chunk dataChunk;
+    char configurationUrl[MAX_URL_LENGTH];
+    long responseCode;
+    size_t i;
+    char* checksumResponse = NULL;
+    char* checksumAlgorithmResponse = NULL;
+
     *result = NULL;
     if( outputResult == NULL )
     {
         *getActionStatusCode = GetConfigurationCommandFailure;
         return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-    }
-    DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);
+    }    
+    DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);    
     Stprintf(outputResult,3, MI_T("OK"));
-    requestParam.u.config.directoryPath = directoryPath;
-    r = HttpClient_New_Connector( &http, NULL, url, (unsigned short)port, bIsHttps, HandleStatus, HandleResponse, (void*)&requestParam, NULL, NULL, NULL);
-    if( r != MI_RESULT_OK)
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
+    curl = curl_easy_init();
+    if (!curl)
     {
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        DSC_free(outputResult);
-        return GetCimMIError1Param(r, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);
-    }
-    //Create Request
+        // TODO: log that curl failed to initialize
+        return MI_RESULT_FAILED;
+    }    
+    
+    if (bIsHttps)
     {
-        char configurationUrl[MAX_URL_LENGTH];
-        Snprintf(configurationUrl, MAX_URL_LENGTH, "/%s/Action(ConfigurationId='%s')/ConfigurationContent",subUrl, configurationID);
-        r = HttpClient_StartRequest(http, "GET", configurationUrl, NULL, NULL);
-        if( r != MI_RESULT_OK)
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Action(ConfigurationId='%s')/ConfigurationContent", url, port, subUrl, configurationID);
+        curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+        if (sslOptions.DoNotCheckCertificate == MI_TRUE)
         {
-            *getActionStatusCode = GetConfigurationCommandFailure;
-            HttpClient_Delete(http);
-            DSC_free(outputResult);
-            return GetCimMIError1Param(r, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);          
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         }
-         DSC_EventWriteWebDownloadManagerGetDocGetUrl(configurationID, subUrl);
-        for( i =0; i < 120 && !requestParam.httpResponseReveived ; i++)
-             HttpClient_Run(http, HTTP_CONNECTION_TIMEOUT * 1000);  
-        
-        HttpClient_Delete(http);        
+        else
+        {
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+            curl_easy_setopt(curl, CURLOPT_CAPATH, "/etc/pki/tls/certs/ca-bundle.crt");
+        }
+    }    
+    else
+    {
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Action(ConfigurationId='%s')/ConfigurationContent", url, port, subUrl, configurationID);
+        curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
+}
+
+    InitHeaderChunk(&headerChunk);
+    dataChunk.data = (char *)malloc(1);
+    dataChunk.size = 0;
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
+    curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, ssl_ctx_callback);
+    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, &sslOptions);
+
+    res = curl_easy_perform(curl);
+
+    if(res != CURLE_OK)
+    {
+        // TODO: log this
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        CleanupHeaderChunk(&headerChunk);
+        free(dataChunk.data);
+        DSC_free(outputResult);
+        return MI_RESULT_FAILED;
+}
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+
+    if (responseCode != HTTP_SUCCESS_CODE)
+        {
+        MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};
+        *getActionStatusCode = GetConfigurationCommandFailure;
+        CleanupHeaderChunk(&headerChunk);
+        free(dataChunk.data);
+        DSC_free(outputResult);
+        Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), responseCode);
+        return MI_RESULT_FAILED;
+}
+
+    for (i = 0; i < headerChunk.size; ++i)
+            {
+        if (checksumResponse != NULL && checksumAlgorithmResponse != NULL)
+                {
+            break;
     }
 
-    r = ValidateGetConfigurationResult(&requestParam, url, getActionStatusCode, extendedError);
-    DSC_EventWriteLCMPullConfigurationChecksumValidationResult(configurationID, (MI_Uint32)r);        
-    if( r != MI_RESULT_OK)
+        if ( Tcscasecmp(headerChunk.headerKeys[i], "Checksum") == 0 )
     {
-        DSC_free(outputResult);
-        return r;
+            checksumResponse = headerChunk.headerValues[i];
+        }
+        else if ( Tcscasecmp(headerChunk.headerKeys[i], "ChecksumAlgorithm") == 0 )
+{
+            checksumAlgorithmResponse = headerChunk.headerValues[i];
     }
-    if( requestParam.u.config.checkSumAlgorithm) 
-        DSC_free(requestParam.u.config.checkSumAlgorithm);    
-  
+    }
+    if (checksumResponse == NULL || checksumAlgorithmResponse == NULL)
+    {
+        // TODO: add logging here for invalid response from server
+        return MI_RESULT_FAILED;
+        }
+        
+    if( Tcscasecmp(checksumAlgorithmResponse, AllowedChecksumAlgorithm) != 0 )
+        {
+        // TODO: add logging here for invalid checksum algorithm from server
+        *getActionStatusCode = InvalidChecksumAlgorithm;
+        return MI_RESULT_FAILED;
+        }
+
+    if( dataChunk.size > 0 )
+    {
+        FILE *fp = File_OpenT(directoryPath, MI_T("a"));
+        if(fp == NULL)
+    {
+            *getActionStatusCode = GetConfigurationCommandFailure;
+            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, 
+                                       ID_PULL_CONFIGURATIONSAVEFAILED, directoryPath);
+    }
+        fwrite( dataChunk.data, 1, dataChunk.size, fp);
+        File_Close(fp);
+}
+
+    if( !ValidateChecksum(checksumResponse, directoryPath) )
+{
+        DSC_EventWriteWebDownloadManagerGetDocChecksumValidation(NULL, NULL);
+        *getActionStatusCode = ConfigurationChecksumValidationFailure;
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CHECKSUMMISMATCH);
+}
+
+
+        
+    DSC_EventWriteLCMPullConfigurationChecksumValidationResult(configurationID, (MI_Uint32)MI_RESULT_OK);
+
     //Create checksumFile
     {
         MI_Char checksumFileName[MAX_URL_LENGTH];
@@ -2256,28 +1481,25 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         fp = File_OpenT(checksumFileName,MI_T("w"));
         if( fp != NULL )
         {
-            fwrite(requestParam.u.config.checkSum, 1, Strlen(requestParam.u.config.checkSum), fp);
+            fwrite(checksumResponse, 1, Strlen(checksumResponse), fp);
             File_Close(fp);
         }
         else
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
-            if( requestParam.u.config.checkSum)
-                DSC_free(requestParam.u.config.checkSum);   
             DSC_free(outputResult);
             return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED, checksumFileName);            
         }
     }
 
-    if( requestParam.u.config.checkSum)
-        DSC_free(requestParam.u.config.checkSum);       
+    CleanupHeaderChunk(&headerChunk);
+    free(dataChunk.data);
+
     *result = outputResult;
     DSC_EventWriteWebDownloadManagerGetDocGetCall(configurationID, *result );
+
     return MI_RESULT_OK;
 }
-
-#endif
-
 
 MI_Result GetUrlParam(_In_ MI_InstanceA *customData, 
     _Inout_updates_(URL_SIZE) MI_Char *url, 
@@ -2410,6 +1632,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
                                   _In_z_ const MI_Char *moduleVersion,
                                   _In_z_ const MI_Char *certificateID,
                                   _In_z_ const MI_Char *filePath,
+                                  _In_z_ struct SSLOptions sslOptions,
                                   _Outptr_result_maybenull_z_  MI_Char** result,
                                   _Out_ MI_Uint32* getActionStatusCode,
                                   _In_reads_z_(URL_SIZE) const MI_Char *url,
@@ -2420,10 +1643,19 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
 {
     MI_Result r = MI_RESULT_OK;
     RequestContainer requestParam = {0};  
-    HttpClient  *http = NULL;
-    int i=0;
     MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
-    requestParam.serverOperation = OPERATION_GETMODULE;  
+
+
+    CURL *curl;
+    CURLcode res;
+    struct HeaderChunk headerChunk;
+    struct Chunk dataChunk;
+    char configurationUrl[MAX_URL_LENGTH];
+    long responseCode;
+    size_t i;
+    char* checksumResponse = NULL;
+    char* checksumAlgorithmResponse = NULL;
+
     *result = NULL;
     if( outputResult == NULL )
     {
@@ -2433,43 +1665,129 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);
     Stprintf(outputResult,3, MI_T("OK"));
     
+    curl_global_init(CURL_GLOBAL_DEFAULT);
 
-    requestParam.u.config.directoryPath = filePath;
-    r = HttpClient_New_Connector( &http, NULL, url, (unsigned short)port, bIsHttps, HandleStatus, HandleResponse, (void*)&requestParam, NULL, NULL, NULL);
-    if( r != MI_RESULT_OK)
+    curl = curl_easy_init();
+    if (!curl)
     {
-        *getActionStatusCode = GetConfigurationCommandFailure;
-        DSC_free(outputResult);
-        return GetCimMIError1Param(r, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);
+        // TODO: log that curl failed to initialize
+        return MI_RESULT_FAILED;
     }
-    //Create Request
+
+    InitHeaderChunk(&headerChunk);
+    dataChunk.data = (char *)malloc(1);
+    dataChunk.size = 0;
+
+    if (bIsHttps)
     {
-        char configurationUrl[MAX_URL_LENGTH];
-        Snprintf(configurationUrl, MAX_URL_LENGTH, "/%s/Module(ConfigurationId='%s',ModuleName='%s',ModuleVersion='%s')/ModuleContent",subUrl, configurationID, moduleName, moduleVersion);
-        r = HttpClient_StartRequest(http, "GET", configurationUrl, NULL, NULL);
-        if( r != MI_RESULT_OK)
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Module(ConfigurationId='%s',ModuleName='%s',ModuleVersion='%s')/ModuleContent", url, port, subUrl, configurationID, moduleName, moduleVersion);
+        curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+        if (sslOptions.DoNotCheckCertificate == MI_TRUE)
+        {
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        }
+        else
+        {
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+            curl_easy_setopt(curl, CURLOPT_CAPATH, "/etc/pki/tls/certs/ca-bundle.crt");
+        }
+    }
+    else
+    {
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Module(ConfigurationId='%s',ModuleName='%s',ModuleVersion='%s')/ModuleContent", url, port, subUrl, configurationID, moduleName, moduleVersion);
+        curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
+    }
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
+    curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, ssl_ctx_callback);
+    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, &sslOptions);
+
+
+
+    res = curl_easy_perform(curl);
+
+    if(res != CURLE_OK)
+    {
+        // TODO: log this
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        CleanupHeaderChunk(&headerChunk);
+        free(dataChunk.data);
+        DSC_free(outputResult);
+        return MI_RESULT_FAILED;
+    }
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+
+    if (responseCode != HTTP_SUCCESS_CODE)
+    {
+        MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};
+        *getActionStatusCode = GetConfigurationCommandFailure;
+        CleanupHeaderChunk(&headerChunk);
+        free(dataChunk.data);
+        DSC_free(outputResult);
+        Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), responseCode);
+        return MI_RESULT_FAILED;
+    }
+
+    for (i = 0; i < headerChunk.size; ++i)
+    {
+        if (checksumResponse != NULL && checksumAlgorithmResponse != NULL)
+        {
+            break;
+        }
+
+        if ( Tcscasecmp(headerChunk.headerKeys[i], "Checksum") == 0 )
+        {
+            checksumResponse = headerChunk.headerValues[i];
+        }
+        else if ( Tcscasecmp(headerChunk.headerKeys[i], "ChecksumAlgorithm") == 0 )
+        {
+            checksumAlgorithmResponse = headerChunk.headerValues[i];
+        }
+    }
+    if (checksumResponse == NULL || checksumAlgorithmResponse == NULL)
+    {
+        // TODO: add logging here for invalid response from server
+        return MI_RESULT_FAILED;
+    }
+
+    if( Tcscasecmp(checksumAlgorithmResponse, AllowedChecksumAlgorithm) != 0 )
+    {      
+        // TODO: add logging here for invalid checksum algorithm from server
+        *getActionStatusCode = InvalidChecksumAlgorithm;
+        return MI_RESULT_FAILED;
+    }
+    
+    if( dataChunk.size > 0 )
+    {
+        FILE *fp = File_OpenT(filePath, MI_T("a"));
+        if(fp == NULL)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
-            HttpClient_Delete(http);
-            DSC_free(outputResult);
-            return GetCimMIError1Param(r, extendedError, ID_PULLGETCONFIGURATIONFAILED, webPulginName);          
+            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, 
+                                       ID_PULL_CONFIGURATIONSAVEFAILED, filePath);
         }
-         DSC_EventWriteWebDownloadManagerGetDocGetUrl(configurationID, subUrl);
-        for( i =0; i < 120 && !requestParam.httpResponseReveived ; i++)
-             HttpClient_Run(http, HTTP_CONNECTION_TIMEOUT * 1000);  
-        
-        HttpClient_Delete(http);        
+        fwrite( dataChunk.data, 1, dataChunk.size, fp);
+        File_Close(fp);
     }
 
-    r = ValidateGetConfigurationResult(&requestParam, url, getActionStatusCode, extendedError);
-    DSC_EventWriteLCMPullConfigurationChecksumValidationResult(configurationID, (MI_Uint32)r);        
-    if( r != MI_RESULT_OK)
+    if( !ValidateChecksum(checksumResponse, filePath) )
     {
-        DSC_free(outputResult);
-        return r;
+        DSC_EventWriteWebDownloadManagerGetDocChecksumValidation(NULL, NULL);
+        *getActionStatusCode = ConfigurationChecksumValidationFailure;
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CHECKSUMMISMATCH);
     }
-    if( requestParam.u.config.checkSumAlgorithm) 
-        DSC_free(requestParam.u.config.checkSumAlgorithm);    
+
+
+    
+    DSC_EventWriteLCMPullConfigurationChecksumValidationResult(configurationID, (MI_Uint32)MI_RESULT_OK);
   
     //Create checksumFile
     {
@@ -2479,23 +1797,23 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         fp = File_OpenT(checksumFileName,MI_T("w"));
         if( fp != NULL )
         {
-            fwrite(requestParam.u.config.checkSum, 1, Strlen(requestParam.u.config.checkSum), fp);
+            fwrite(checksumResponse, 1, Strlen(checksumResponse), fp);
             File_Close(fp);
         }
         else
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
-            if( requestParam.u.config.checkSum)
-                DSC_free(requestParam.u.config.checkSum);   
             DSC_free(outputResult);
             return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED, checksumFileName);            
         }
     }
 
-    if( requestParam.u.config.checkSum)
-        DSC_free(requestParam.u.config.checkSum);       
+    CleanupHeaderChunk(&headerChunk);
+    free(dataChunk.data);
+
     *result = outputResult;
     DSC_EventWriteWebDownloadManagerGetDocGetCall(configurationID, *result );
+
     return MI_RESULT_OK;
 }
 
@@ -2503,6 +1821,7 @@ MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
                                   const MI_Char *certificateID,
                                   MI_Char* directoryPath,
                                   MI_Char* fileName,
+                                  _In_z_ struct SSLOptions sslOptions,
                                   MI_Char** result,                               
                                   MI_Uint32* getActionStatusCode,
                                   MI_Boolean bAllowedModuleOverride,
@@ -2537,6 +1856,7 @@ MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
                                   current->moduleVersionClassTuple->moduleVersion,
                                   certificateID,
                                   zipPath,
+                                  sslOptions,
                                   result,
                                   getActionStatusCode,
                                   url,
@@ -2596,6 +1916,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     MI_Value value;
     MI_Uint32 flags;
     MI_Boolean bAllowedModuleOverride;
+    struct SSLOptions sslOptions;
 
     if( metaConfig == NULL )
     {
@@ -2624,9 +1945,19 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         r = GetCimMIError( r, extendedError, ID_LCMHELPER_CREATE_CONFDIR_FAILED);
         return r;
     }
+
+    // Get our supported SSL options if there are any
+    r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_DownloadManagerCustomData, &value, NULL, &flags, NULL);
+    if (r == MI_RESULT_OK && !( (flags & MI_FLAG_NULL) && value.instancea.size == 0))
+    {
+        GetDoNotCheckCertificateOption(&value.instancea, &sslOptions.DoNotCheckCertificate);
+        GetSSLv3Option(&value.instancea, &sslOptions.NoSSLv3);
+        GetCipherList(&value.instancea, &sslOptions.cipherList);
+    }
+
     DSC_EventWriteLCMPullGetConfigAttempt( webPulginName, configurationID);    
     // Issue Get Action Request
-    r = IssueGetConfigurationRequest( configurationID,  certificateID, fileName, result, 
+    r = IssueGetConfigurationRequest( configurationID,  certificateID, fileName, sslOptions, result, 
                     getActionStatusCode, url, port, subUrl, bIsHttps, extendedError);
       
     if( r != MI_RESULT_OK)
@@ -2643,7 +1974,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         bAllowedModuleOverride = MI_TRUE;
     }
 
-    r = Pull_GetModules(configurationID,  certificateID, directoryPath, fileName, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
+    r = Pull_GetModules(configurationID,  certificateID, directoryPath, fileName, sslOptions, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
     if( r != MI_RESULT_OK)
     {
          DSC_free(configurationID);
@@ -2679,6 +2010,9 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     MI_Uint32 port = DEFAULT_SERVERPORT;
     MI_Boolean bIsHttps = MI_FALSE;
     MI_Char *tmpChecksum = NULL;
+    struct SSLOptions sslOptions;
+    MI_Value value;
+    MI_Uint32 flags;
     
     if( metaConfig == NULL)
     {
@@ -2707,9 +2041,19 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
         DSC_free(tmpChecksum);
         return r;
     }    
+
+    // Get our supported SSL options if there are any
+    r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_DownloadManagerCustomData, &value, NULL, &flags, NULL);
+    if (r == MI_RESULT_OK && !( (flags & MI_FLAG_NULL) && value.instancea.size == 0))
+    {
+        GetDoNotCheckCertificateOption(&value.instancea, &sslOptions.DoNotCheckCertificate);
+        GetSSLv3Option(&value.instancea, &sslOptions.NoSSLv3);
+        GetCipherList(&value.instancea, &sslOptions.cipherList);
+    }
+
     DSC_EventWriteLCMPullGetActionAttempt( webPulginName, configurationID, tmpChecksum, complianceStatus);    
     // Issue Get Action Request
-    r = IssueGetActionRequest( configurationID, certificateID, tmpChecksum, complianceStatus, lastGetActionStatusCode, result, 
+    r = IssueGetActionRequest( configurationID, certificateID, tmpChecksum, sslOptions, complianceStatus, lastGetActionStatusCode, result, 
                     getActionStatusCode, url, port, subUrl, bIsHttps, extendedError);
 
     DSC_free(configurationID);
@@ -3002,12 +2346,4 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     return MI_RESULT_OK;
 }
 
-
-void SaveModule()
-{
-}
-
-void IssueRequest()
-{
-}
 

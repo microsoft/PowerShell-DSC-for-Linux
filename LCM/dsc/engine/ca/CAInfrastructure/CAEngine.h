@@ -80,19 +80,6 @@ MI_Result MI_CALL Pull_GetAction(_In_ LCMProviderContext *lcmContext,
                                  _Out_ MI_Uint32* getActionStatusCode,
                                  _Outptr_result_maybenull_ MI_Instance **extendedError);
 
-MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID, 
-                                  const MI_Char *certificateID,
-                                  MI_Char* directoryPath,
-                                  MI_Char* fileName,
-                                  MI_Char** result,                               
-                                  MI_Uint32* getActionStatusCode,
-                                  MI_Boolean bAllowedModuleOverride,
-                                  _In_reads_z_(URL_SIZE) const MI_Char *url,
-                                  _In_ MI_Uint32 port,
-                                  _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
-                                  MI_Boolean bIsHttps,
-                                  MI_Instance **extendedError);
-
 MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContext *lcmContext,
                                                           _In_ MI_Instance *metaConfig,
                                                           _In_opt_z_ MI_Char *partialConfigName,

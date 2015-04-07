@@ -7,8 +7,7 @@ LIBRARY = CAEngine
 SOURCES = \
 	CAEngine.c \
 	CAValidate.c \
-	WebPullClient.c \
-	CACrypto.c
+	WebPullClient.c
 
 INCLUDES = \
 	$(OMI) \

@@ -1,6 +1,14 @@
 #ifndef __WEBPULLCLIENT_H_
 #define __WEBPULLCLIENT_H_
 
+
+struct SSLOptions
+{
+    MI_Boolean DoNotCheckCertificate;
+    MI_Boolean NoSSLv3;
+    char * cipherList;
+};
+
 enum GetActionStatusCodeTypes
 {
     Success = 0,
@@ -116,29 +124,46 @@ MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
                       _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID, 
-                                 _In_z_ const MI_Char *certificateID,
-                                 _In_z_ const MI_Char *checkSum,
-                                 _In_ MI_Boolean complianceStatus,
-                                _In_ MI_Uint32 lastGetActionStatusCode,
-                                _Outptr_result_maybenull_z_  MI_Char** result,
-                                _Out_ MI_Uint32* getActionStatusCode,
-                                _In_reads_z_(URL_SIZE) const MI_Char *url,
-                                _In_ MI_Uint32 port,
-                                _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
-                                MI_Boolean bIsHttps,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError);
+                                  _In_z_ const MI_Char *certificateID,
+                                  _In_z_ const MI_Char *checkSum,
+                                  _In_z_ struct SSLOptions sslOptions,
+                                  _In_ MI_Boolean complianceStatus,
+                                  _In_ MI_Uint32 lastGetActionStatusCode,
+                                  _Outptr_result_maybenull_z_  MI_Char** result,
+                                  _Out_ MI_Uint32* getActionStatusCode,
+                                  _In_reads_z_(URL_SIZE) const MI_Char *url,
+                                  _In_ MI_Uint32 port,
+                                  _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
+                                  MI_Boolean bIsHttps,
+                                  _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 
 MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID, 
-                                _In_z_ const MI_Char *certificateID,
-                                _In_z_ const MI_Char *directoryPath, 
-                                _Outptr_result_maybenull_z_  MI_Char** result,
-                                _Out_ MI_Uint32* getActionStatusCode,
-                                _In_reads_z_(URL_SIZE) const MI_Char *url,
-                                _In_ MI_Uint32 port,
-                                _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
-                                MI_Boolean bIsHttps,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError);
+                                         _In_z_ const MI_Char *certificateID,
+                                         _In_z_ const MI_Char *directoryPath, 
+                                         _In_z_ struct SSLOptions sslOptions,
+                                         _Outptr_result_maybenull_z_  MI_Char** result,
+                                         _Out_ MI_Uint32* getActionStatusCode,
+                                         _In_reads_z_(URL_SIZE) const MI_Char *url,
+                                         _In_ MI_Uint32 port,
+                                         _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
+                                         MI_Boolean bIsHttps,
+                                         _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+
+MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
+                                  const MI_Char *certificateID,
+                                  MI_Char* directoryPath,
+                                  MI_Char* fileName,
+                                  _In_z_ struct SSLOptions sslOptions,
+                                  MI_Char** result,
+                                  MI_Uint32* getActionStatusCode,
+                                  MI_Boolean bAllowedModuleOverride,
+                                  _In_reads_z_(URL_SIZE) const MI_Char *url,
+                                  _In_ MI_Uint32 port,
+                                  _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
+                                  MI_Boolean bIsHttps,
+                                  MI_Instance **extendedError);
 
 
 
