@@ -175,7 +175,7 @@ if [ $OMISERVER_INSTALLED -eq 0 ]; then
     echo "Error: dsc requires the omiserver package to be installed"
 fi
 
-LIBCURL_SO=`ldconfig -p | grep "libcurl.so " | awk -F ">" '{print $2}' | awk -F " " '{print $1}'`
+LIBCURL_SO=`ldconfig -p | grep "libcurl.so" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
    echo "Error: Unable to find libcurl.so in ldconfig.  Please install curl."
    PREREQ_ERROR=1
@@ -253,7 +253,7 @@ ln -s $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration $OMI_REGISTER_D
 cp -R /opt/microsoft/dsc/Scripts $OMI_LIB/Scripts
 
 # create symlink from /opt/omi/lib/libcurl.so.3 to wherever libcurl.so is on the system
-LIBCURL_SO=`ldconfig -p | grep "libcurl.so " | awk -F ">" '{print $2}' | awk -F " " '{print $1}'`
+LIBCURL_SO=`ldconfig -p | grep "libcurl.so" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
    echo "Error: Unable to find libcurl.so in ldconfig.  Please install curl."
    exit 1
@@ -262,6 +262,21 @@ fi
 ln -s $LIBCURL_SO /opt/omi/lib/libcurl.so.3
 
 /opt/microsoft/dsc/Scripts/RegenerateInitFiles.py
+
+pidof systemd 1> /dev/null 2> /dev/null
+if [ $? -eq 0 ]; then
+    if [ -f /opt/omi/var/run/omiserver.pid ]; then
+	systemctl restart omiserver
+    else
+	systemctl start omiserver
+    fi
+else
+    if [ -f /opt/omi/var/run/omiserver.pid ]; then
+	/etc/init.d/omiserver restart
+    else
+	/etc/init.d/omiserver start
+    fi
+fi
 
 %Preuninstall_999
 # TODO: Detect omi install directory?
