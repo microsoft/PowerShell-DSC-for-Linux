@@ -13,7 +13,7 @@ import time
 import imp
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
-l = nxDSCLog.DSCLog
+LG = nxDSCLog.DSCLog
 try:
     import hashlib
     md5const = hashlib.md5
@@ -143,7 +143,7 @@ def ReadFile65k(path):
     F, error = opened_bin_w_error(path)
     if error:
         Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr )
-        l().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
     else:
         d = F.read(65535)
         F.close()
@@ -164,7 +164,7 @@ def ReadFile(path):
     F, error = opened_bin_w_error(path)
     if error:
         Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr )
-        l().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
     else:
         d=F.read()
         F.close()
@@ -184,7 +184,7 @@ def WriteFile(path, contents):
     F, error =  opened_w_error(path, 'w+')
     if error:
         Print("Exception opening file " + path + " Error Code: " + str(error) , file=sys.stderr)
-        l().Log('ERROR', "Exception opening file " + path + " Error Code: " + str(error))
+        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " + str(error))
     else:
         F.write(contents)
         F.close()
@@ -204,10 +204,10 @@ def LStatFile(path):
         d = os.lstat(path)
     except OSError, error:
         Print("Exception lstating file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception lstating file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception lstating file " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception lstating file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception lstating file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception lstating file " + path  + " Error: " + str(error))
     return d
 
 
@@ -221,10 +221,10 @@ def StatFile(path):
         d = os.stat(path)
     except OSError, error:
         Print("Exception stating file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception stating file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception stating file " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception stating file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception stating file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception stating file " + path  + " Error: " + str(error))
     return d
 
 
@@ -234,10 +234,10 @@ def Chown(path, owner, group):
         os.chown(path, owner, group)
     except OSError, error:
         Print("Exception changing ownership of file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception changing ownership of file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception changing ownership of file " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception changing ownership of file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception changing ownership of file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception changing ownership of file " + path  + " Error: " + str(error))
     return error
 
 
@@ -249,10 +249,10 @@ def Chmod(path, mode):
         os.chmod(path, mode)
     except OSError, error:
         Print("Exception  changing mode of file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception changing mode of file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception changing mode of file " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception  changing mode of file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception changing mode of file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception changing mode of file " + path  + " Error: " + str(error))
     return error
 
 
@@ -262,10 +262,10 @@ def LChown(path, owner, group):
         os.lchown(path, owner, group)
     except OSError, error:
         Print("Exception changing ownership of file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception changing ownership of file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception changing ownership of file " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception changing ownership of file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception changing ownership of file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception changing ownership of file " + path  + " Error: " + str(error))
     return error
 
 
@@ -275,10 +275,10 @@ def LChmod(path, mode):
         os.lchmod(path, mode)
     except OSError, error:
         Print("Exception  changing mode of file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception changing mode of file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception changing mode of file " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception  changing mode of file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception changing mode of file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception changing mode of file " + path  + " Error: " + str(error))
     return error
 
 
@@ -289,10 +289,10 @@ def ListDir(path):
         d = os.listdir(path)
     except OSError, error:
         Print("Exception listing dir " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception listing dir " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception listing dir " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception listing dir " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception listing dir  " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception listing dir  " + path  + " Error: " + str(error))
     return d
 
 
@@ -307,20 +307,20 @@ def Symlink(spath, dpath):
             os.unlink(dpath)
         except OSError, error:
             Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-            l().Log('ERROR', "Exception removing " + dpath  + " Error: " + str(error))
+            LG().Log('ERROR', "Exception removing " + dpath  + " Error: " + str(error))
             return error
         except IOError, error:
             Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-            l().Log('ERROR', "Exception removing " + dpath  + " Error: " + str(error))
+            LG().Log('ERROR', "Exception removing " + dpath  + " Error: " + str(error))
             return error
     try:
         os.symlink(spath, dpath)
     except OSError, error:
         Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception creating symlink from " + spath  + ' to ' + dpath + " Error: " + str(error))
+        LG().Log('ERROR', "Exception creating symlink from " + spath  + ' to ' + dpath + " Error: " + str(error))
     except IOError, error:
         Print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception creating symlink from " + spath  + ' to ' + dpath + " Error: " + str(error))
+        LG().Log('ERROR', "Exception creating symlink from " + spath  + ' to ' + dpath + " Error: " + str(error))
     return error
 
 
@@ -330,10 +330,10 @@ def MakeDirs(path):
         os.makedirs(path)
     except OSError, error:
         Print("Exception making dir " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception making dir " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception making dir " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception making dir " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception making dir " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception making dir " + path  + " Error: " + str(error))
     return error
 
 
@@ -343,10 +343,10 @@ def RemoveFile(path):
         os.remove(path)
     except OSError, error:
         Print("Exception removing file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception removing file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception removing file " + path  + " Error: " + str(error))
     except IOError, error:
         Print("Exception removing file " + path  + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception removing file " + path  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception removing file " + path  + " Error: " + str(error))
     return error
 
 
@@ -358,10 +358,10 @@ def CopyFile(spath, dpath):
         shutil.copyfile(spath, dpath)
     except OSError, error:
         Print("Exception copying tree " + spath  + ' to ' + dpath + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception copying tree " + spath  + ' to ' + dpath  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception copying tree " + spath  + ' to ' + dpath  + " Error: " + str(error))
     except IOError, error:
         Print("Exception copying tree " + spath  + ' to ' + dpath + " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception copying tree " + spath  + ' to ' + dpath  + " Error: " + str(error))
+        LG().Log('ERROR', "Exception copying tree " + spath  + ' to ' + dpath  + " Error: " + str(error))
     return error
 
 
@@ -387,12 +387,12 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
         src_file,src_error = opened_bin_w_error(SourcePath, 'rb')
         if src_error:
             Print("Exception opening source file " + SourcePath + " Error : " + str(src_error), file=sys.stderr)
-            l().Log('ERROR', "Exception opening source file " + SourcePath + " Error : " + str(src_error))
+            LG().Log('ERROR', "Exception opening source file " + SourcePath + " Error : " + str(src_error))
             return -1
         dest_file, dest_error = opened_bin_w_error(DestinationPath, 'rb')
         if dest_error:
             Print("Exception opening destination file " + DestinationPath + " Error : " + str(dest_error), file=sys.stderr)
-            l().Log('ERROR', "Exception opening destination file " + DestinationPath + " Error : " + str(dest_error))
+            LG().Log('ERROR', "Exception opening destination file " + DestinationPath + " Error : " + str(dest_error))
             src_file.close()
             return -1
         while src_block != '' and dest_block != '':
@@ -427,12 +427,12 @@ def RemoveTree(path):
     except OSError, error:
         Print("Exception removing folder " + path + " Error Code: "
               +  " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception removing folder " + path + " Error Code: "
+        LG().Log('ERROR', "Exception removing folder " + path + " Error Code: "
               +  " Error: " + str(error))
     except IOError, error:
         Print("Exception removing folder " + path + " Error Code: "
               +  " Error: " + str(error), file=sys.stderr)
-        l().Log('ERROR', "Exception removing folder " + path + " Error Code: "
+        LG().Log('ERROR', "Exception removing folder " + path + " Error Code: "
               +  " Error: " + str(error))
     return error
 
@@ -445,7 +445,7 @@ def RemovePath(path):
         RemoveTree(path)
     else:
         Print("Error: Unknown file type for file: " + path, file=sys.stderr)
-        l().Log('ERROR', "Error: Unknown file type for file: " + path)
+        LG().Log('ERROR', "Error: Unknown file type for file: " + path)
     return error
 
 
@@ -460,7 +460,7 @@ def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
             Specified_Owner_ID = pwd.getpwnam(fc.Owner)[2]
         except KeyError, error:
             Print("Exception obtaining gid from group name " + fc.Group  + " Error: " + str(error), file=sys.stderr)
-            l().Log('ERROR', "Exception obtaining gid from group name " + fc.Group  + " Error: " + str(error))
+            LG().Log('ERROR', "Exception obtaining gid from group name " + fc.Group  + " Error: " + str(error))
             return False
         if Specified_Owner_ID != pwd.getpwuid(stat_info.st_uid)[2]:
             return False
@@ -474,7 +474,7 @@ def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
             Specified_Group_ID = grp.getgrnam(fc.Group)[2]
         except KeyError, error:
             Print("Exception obtaining gid from group name " + fc.Group  + " Error: " + str(error), file=sys.stderr)
-            l().Log('ERROR', "Exception obtaining gid from group name " + fc.Group  + " Error: " + str(error))
+            LG().Log('ERROR', "Exception obtaining gid from group name " + fc.Group  + " Error: " + str(error))
             return False
         if Specified_Group_ID != grp.getgrgid(stat_info.st_gid)[2]:
             return False
@@ -587,7 +587,7 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
         Specified_Owner_ID = pwd.getpwnam(fc.Owner)[2]
         if Specified_Owner_ID != pwd.getpwuid(stat_info.st_uid)[2]:
             Print("Changing owner of " + DestinationPath + " to " + str(Specified_Owner_ID))
-            l().Log('INFO', "Changing owner of " + DestinationPath + " to " + str(Specified_Owner_ID))
+            LG().Log('INFO', "Changing owner of " + DestinationPath + " to " + str(Specified_Owner_ID))
             if LChown(DestinationPath, Specified_Owner_ID, -1) is not None :
                 return False
 
@@ -595,7 +595,7 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
         src_uid = pwd.getpwuid(stat_info_src.st_uid)[2]
         if pwd.getpwuid(stat_info.st_uid)[2] != src_uid:
             Print("Changing owner of " + DestinationPath + " to " + str(src_uid))
-            l().Log('INFO', "Changing owner of " + DestinationPath + " to " + str(src_uid))
+            LG().Log('INFO', "Changing owner of " + DestinationPath + " to " + str(src_uid))
             if LChown(DestinationPath, src_uid, -1) is not None :
                 return False
 
@@ -603,7 +603,7 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
         Specified_Group_ID = grp.getgrnam(fc.Group)[2]
         if Specified_Group_ID != grp.getgrgid(stat_info.st_gid)[2]:
             Print("Changing group of " + DestinationPath + " to " + str(Specified_Group_ID))
-            l().Log('INFO', "Changing group of " + DestinationPath + " to " + str(Specified_Group_ID))
+            LG().Log('INFO', "Changing group of " + DestinationPath + " to " + str(Specified_Group_ID))
             if LChown(DestinationPath, -1, Specified_Group_ID) is not None :
                 return False
 
@@ -611,7 +611,7 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
         src_gid = grp.getgrgid(stat_info_src.st_gid)[2]
         if grp.getgrgid(stat_info.st_gid)[2] != src_gid:
             Print("Changing group of " + DestinationPath + " to " + str(src_gid))
-            l().Log('INFO', "Changing group of " + DestinationPath + " to " + str(src_gid))
+            LG().Log('INFO', "Changing group of " + DestinationPath + " to " + str(src_gid))
             if LChown(DestinationPath, src_gid , -1) is not None :
                 return False
 
@@ -620,14 +620,14 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
         if fc.Mode:
             if str(oct(stat_info.st_mode))[-3:] != fc.Mode:
                 Print("Changing mode of " + DestinationPath + " to " + fc.Mode)
-                l().Log('INFO', "Changing mode of " + DestinationPath + " to " + fc.Mode)
+                LG().Log('INFO', "Changing mode of " + DestinationPath + " to " + fc.Mode)
                 if Chmod(DestinationPath, fc.Mode) is not None :
                     return False
         elif SourcePath:
             src_mode = str(oct(stat_info_src.st_mode))[-3:]
             if str(oct(stat_info.st_mode))[-3:] != src_mode:
                 Print("Changing mode of " + DestinationPath + " to " + src_mode)
-                l().Log('INFO', "Changing mode of " + DestinationPath + " to " + src_mode)
+                LG().Log('INFO', "Changing mode of " + DestinationPath + " to " + src_mode)
                 if Chmod(DestinationPath, src_mode) is not None :
                     return False
     return True
@@ -683,7 +683,7 @@ def SetFile(DestinationPath, SourcePath, fc):
             RemovePath(DestinationPath)
         else:
             Print("Error: " + DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
-            l().Log("ERROR", DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
+            LG().Log("ERROR", DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
             return False
     if SourcePath and len(SourcePath) > 0:
         if '://' in SourcePath and fc.LocalPath == '':
@@ -708,7 +708,7 @@ def SetFile(DestinationPath, SourcePath, fc):
     elif fc.Contents:
         if WriteFile(DestinationPath, fc.Contents) is not None:
             Print("Error: Unable to write file at " + DestinationPath)
-            l().Log("ERROR", "Unable to write file at " + DestinationPath)
+            LG().Log("ERROR", "Unable to write file at " + DestinationPath)
             return False
     else:
         # Create a file with nothing in it
@@ -716,10 +716,10 @@ def SetFile(DestinationPath, SourcePath, fc):
             open(DestinationPath, 'a').close()
         except OSError, error:
             Print("Exception creating file " + DestinationPath  + " Error: " + str(error), file=sys.stderr)
-            l().Log('ERROR', "Exception creating file " + DestinationPath  + " Error: " + str(error))
+            LG().Log('ERROR', "Exception creating file " + DestinationPath  + " Error: " + str(error))
         except IOError, error:
             Print("Exception creating file " + DestinationPath + " Error: " + str(error), file=sys.stderr)
-            l().Log('ERROR', "Exception creating file " + DestinationPath  + " Error: " + str(error))
+            LG().Log('ERROR', "Exception creating file " + DestinationPath  + " Error: " + str(error))
     SetOwnerGroupMode(DestinationPath, SourcePath, fc)
     if len(fc.LocalPath) > 0 :
         RemoveFile(fc.LocalPath)
@@ -732,7 +732,7 @@ def SetDirectory(DestinationPath, SourcePath, fc):
             RemovePath(DestinationPath)
         else:
             Print("Error: Unable to overwrite currently existing non-directory object at " + DestinationPath + " without the Force option being true.")
-            l().Log("ERROR", "Unable to overwrite currently existing non-directory object at " + DestinationPath + " without the Force option being true.")
+            LG().Log("ERROR", "Unable to overwrite currently existing non-directory object at " + DestinationPath + " without the Force option being true.")
             return False
 
     return SetDirectoryRecursive(DestinationPath, SourcePath, fc)
@@ -741,7 +741,7 @@ def SetDirectory(DestinationPath, SourcePath, fc):
 def SetLink(DestinationPath, SourcePath, fc):
     if SourcePath is None or len(SourcePath) < 1 or not os.path.exists(SourcePath) :
         Print("Error: Need a valid source path in order to create a new symbolic link.")
-        l().Log("ERROR", "Need a valid source path in order to create a new symbolic link.")
+        LG().Log("ERROR", "Need a valid source path in order to create a new symbolic link.")
         return False
 
     if os.path.exists(DestinationPath) and not os.path.islink(DestinationPath) :
@@ -749,7 +749,7 @@ def SetLink(DestinationPath, SourcePath, fc):
             RemovePath(DestinationPath)
         else:
             Print("Error: Unable to overwrite currently existing non-link object at " + DestinationPath + " without the Force option being true.")
-            l().Log("ERROR", "Unable to overwrite currently existing non-link object at " + DestinationPath + " without the Force option being true.")
+            LG().Log("ERROR", "Unable to overwrite currently existing non-link object at " + DestinationPath + " without the Force option being true.")
             return False
 
     if os.path.islink(SourcePath):
@@ -801,7 +801,7 @@ def ShowMof(op, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Chec
     mof += '}\n'
     f = open('./test_mofs.log', 'a')
     Print(mof, file=f)
-    l().Log('INFO', mof)
+    LG().Log('INFO', mof)
     f.close()
 
 
@@ -863,7 +863,7 @@ def TestDirectory(DestinationPath, SourcePath, fc):
     for f in Source_subfiles:
         if f not in Destination_subfiles:
             Print("File: " + f + " does not exist in: " + SourcePath)
-            l().Log('ERROR', "File: " + f + " does not exist in: " + SourcePath)
+            LG().Log('ERROR', "File: " + f + " does not exist in: " + SourcePath)
             return False
 
         f_destpath = os.path.join(DestinationPath, f)
@@ -900,7 +900,7 @@ def TestFile(DestinationPath, SourcePath, fc):
             if fc.Links == "follow":
                 if os.path.isdir(os.path.realpath(SourcePath)):
                     Print("Error: Expecting a file, but source link points to directory")
-                    l().Log("ERROR", "Expecting a file, but source link points to directory")
+                    LG().Log("ERROR", "Expecting a file, but source link points to directory")
                     return False
             else:
                 if not os.path.islink(DestinationPath):
@@ -1047,7 +1047,7 @@ def GetRemoteFile(fc):
         resp = urllib2.urlopen(req)
     except urllib2.URLError , e:
         Print(repr(e))
-        l().Log('ERROR', repr(e))
+        LG().Log('ERROR', repr(e))
         return 1
     fc.LocalPath = '/tmp/'+os.path.basename(fc.DestinationPath)+'_remote'
     h = resp.info()
@@ -1076,7 +1076,7 @@ def GetRemoteFile(fc):
             F.close()
         except  Exception, e:
             Print(repr(e))
-            l().Log('ERROR', repr(e))
+            LG().Log('ERROR', repr(e))
             F.close()
             return 1
     return 0
@@ -1115,14 +1115,14 @@ class FileContext:
                     Mode = ConvertLongModeToNumeric(Mode)
                 except Exception, error:
                     Print("Exception in ConvertLongModeToNumeric on " + Mode  + " Error: " + str(error), file=sys.stderr)
-                    l().Log('ERROR', "Exception in ConvertLongModeToNumeric on " + Mode  + " Error: " + str(error))
+                    LG().Log('ERROR', "Exception in ConvertLongModeToNumeric on " + Mode  + " Error: " + str(error))
                     
             elif len(Mode) == 3:
                 # Already in proper format
                 pass
             else:
                 Print("Error: Invalid Mode: " + Mode)
-                l().Log("ERROR", "Invalid Mode: " + Mode)
+                LG().Log("ERROR", "Invalid Mode: " + Mode)
                 Mode = ""
 
         self.Mode = Mode
