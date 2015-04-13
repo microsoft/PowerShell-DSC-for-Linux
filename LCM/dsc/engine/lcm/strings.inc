@@ -399,3 +399,7 @@
                  "Failed to save the configuration in file " Intlstr_tstr(1) ".")  
     INTERNAL_Intlstr_Define0( ID_PULL_CHECKSUMMISMATCH,ID_PULL_CHECKSUMMISMATCH,"Checksum for configuration does not match.")                 
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_DOCINS , ID_MODMAN_VALIDATE_DOCINS ,"There is no document instance inside the metaconfiguration. Please create the configuration with an instance of OMI_ConfigurationDocument and try again.")
+ INTERNAL_Intlstr_Define1( ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF ,
+                 ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "The partial configuration name " Intlstr_tstr(1) " present in the configuration document is invalid. Define a partial configuration inside the metaconfiguration with this partial configuration name in order to use it.")
