@@ -1296,38 +1296,6 @@ static MI_CONST MI_PropertyDecl MSFT_nxPackageResource_ReturnCode_prop =
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxPackageResource_LogPath_Write_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_nxPackageResource_LogPath_Write_qual =
-{
-    MI_T("Write"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxPackageResource_LogPath_Write_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxPackageResource_LogPath_quals[] =
-{
-    &MSFT_nxPackageResource_LogPath_Write_qual,
-};
-
-/* property MSFT_nxPackageResource.LogPath */
-static MI_CONST MI_PropertyDecl MSFT_nxPackageResource_LogPath_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x006C6807, /* code */
-    MI_T("LogPath"), /* name */
-    MSFT_nxPackageResource_LogPath_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxPackageResource_LogPath_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_nxPackageResource, LogPath), /* offset */
-    MI_T("MSFT_nxPackageResource"), /* origin */
-    MI_T("MSFT_nxPackageResource"), /* propagator */
-    NULL,
-};
-
 static MI_CONST MI_Boolean MSFT_nxPackageResource_PackageDescription_Read_qual_value = 1;
 
 static MI_CONST MI_Qualifier MSFT_nxPackageResource_PackageDescription_Read_qual =
@@ -1529,7 +1497,6 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxPackageResource_props[] =
     &MSFT_nxPackageResource_PackageGroup_prop,
     &MSFT_nxPackageResource_Arguments_prop,
     &MSFT_nxPackageResource_ReturnCode_prop,
-    &MSFT_nxPackageResource_LogPath_prop,
     &MSFT_nxPackageResource_PackageDescription_prop,
     &MSFT_nxPackageResource_Publisher_prop,
     &MSFT_nxPackageResource_InstalledOn_prop,
