@@ -1,5 +1,7 @@
 TOP := $(shell cd ..; pwd)
 
+include $(TOP)/build/Makefile.version
+
 OUTPUT_DIR := $(TOP)/output
 STAGING_DIR := $(OUTPUT_DIR)/staging
 INTERMEDIATE_DIR := $(OUTPUT_DIR)/intermediate
@@ -31,7 +33,7 @@ ifeq ($(BUILD_RPM),1)
 		--PFARCH=$(PF_ARCH) \
 		--PFDISTRO=ULINUX \
 		--VERSION=$(CONFIG_VERSION) \
-		--RELEASE=1 \
+		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
 		--OUTPUTFILE=dsc-$(CONFIG_VERSION).ssl_$(SSL_VERSION).$(PF_ARCH) \
 		--DATAFILE_PATH=$(TOP)/installbuilder/datafiles \
 		Base_DSC.data
@@ -52,7 +54,7 @@ ifeq ($(BUILD_DPKG),1)
 		--PFARCH=$(PF_ARCH) \
 		--PFDISTRO=ULINUX \
 		--VERSION=$(CONFIG_VERSION) \
-		--RELEASE=1 \
+		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
 		--OUTPUTFILE=dsc-$(CONFIG_VERSION).ssl_$(SSL_VERSION).$(PF_ARCH) \
 		--DPKG_LOCATION=$(IB_DIR)/tools/bin/dpkg-deb-$(PF_ARCH) \
 		--DATAFILE_PATH=$(TOP)/installbuilder/datafiles \

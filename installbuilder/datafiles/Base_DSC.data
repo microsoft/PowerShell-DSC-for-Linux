@@ -122,6 +122,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxFileLine.py; Providers/Scripts/3.x/Scripts/nxFileLine.py; 755; root; root
 
+/opt/omi/etc/dsc/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; root; root
+
 %Directories
 /opt/microsoft;          755; root; root
 /opt/microsoft/dsc;      755; root; root
@@ -137,6 +139,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts; 755; root; root
+/opt/omi/etc/dsc;        755; root; root; sysdir
+
 
 
 %Links
@@ -231,27 +235,28 @@ mkdir -p $CONFIG_DATADIR/dsc/configuration/registration
 
 # Create links in omi's directories for DSC data
 mkdir -p $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
-cp /opt/microsoft/dsc/etc/*.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
-cp /opt/microsoft/dsc/etc/dsccore.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration/
-ln -s /opt/microsoft/dsc/lib/libdsccore.so $OMI_HOME/lib/libdsccore.so
-ln -s /opt/microsoft/dsc/bin/ConsistencyInvoker $OMI_HOME/bin/ConsistencyInvoker
+cp -f /opt/microsoft/dsc/etc/*.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
+cp -f /opt/microsoft/dsc/etc/dsccore.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration/
+ln -fs /opt/microsoft/dsc/lib/libdsccore.so $OMI_HOME/lib/libdsccore.so
+ln -fs /opt/microsoft/dsc/bin/ConsistencyInvoker $OMI_HOME/bin/ConsistencyInvoker
 
-cp /opt/microsoft/dsc/mof/OMI_BaseResourceUE.mof $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration/baseresource.schema.mof
-cp /opt/microsoft/dsc/mof/MSFT_DSCMetaConfiguration.mof $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration/MSFT_DSCMetaConfiguration.mof
-cp /opt/microsoft/dsc/mof/MSFT_LogResource.registration.mof  $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_LogResource
-cp /opt/microsoft/dsc/mof/MSFT_LogResource.schema.mof  $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_LogResource
-
-
+cp -f /opt/microsoft/dsc/mof/OMI_BaseResourceUE.mof $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration/baseresource.schema.mof
+cp -f /opt/microsoft/dsc/mof/MSFT_DSCMetaConfiguration.mof $CONFIG_SYSCONFDIR/dsc/configuration/baseregistration/MSFT_DSCMetaConfiguration.mof
+cp -f /opt/microsoft/dsc/mof/MSFT_LogResource.registration.mof  $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_LogResource
+cp -f /opt/microsoft/dsc/mof/MSFT_LogResource.schema.mof  $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_LogResource
 
 for prov in ${{PROVIDERS}}; do
-    cp /opt/microsoft/dsc/etc/MSFT_nx${prov}Resource.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
+    cp -f /opt/microsoft/dsc/etc/MSFT_nx${prov}Resource.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
     mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_nx${prov}Resource/ $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_nx${prov}Resource/
-    cp /opt/microsoft/dsc/mof/MSFT_nx${prov}Resource.schema.mof $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_nx${prov}Resource/
-    cp /opt/microsoft/dsc/mof/MSFT_nx${prov}Resource.registration.mof $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_nx${prov}Resource/
-    ln -s /opt/microsoft/dsc/lib/libMSFT_nx${prov}Resource.so $OMI_LIB/libMSFT_nx${prov}Resource.so
+    cp -f /opt/microsoft/dsc/mof/MSFT_nx${prov}Resource.schema.mof $CONFIG_SYSCONFDIR/dsc/configuration/schema/MSFT_nx${prov}Resource/
+    cp -f /opt/microsoft/dsc/mof/MSFT_nx${prov}Resource.registration.mof $CONFIG_SYSCONFDIR/dsc/configuration/registration/MSFT_nx${prov}Resource/
+    ln -fs /opt/microsoft/dsc/lib/libMSFT_nx${prov}Resource.so $OMI_LIB/libMSFT_nx${prov}Resource.so
 done
 
-ln -s $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
+ln -fs $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
+if [ -d  $OMI_LIB/Scripts ]; then
+    rm -rf $OMI_LIB/Scripts
+fi
 cp -R /opt/microsoft/dsc/Scripts $OMI_LIB/Scripts
 
 # create symlink from /opt/omi/lib/libcurl.so.3 to wherever libcurl.so is on the system
@@ -261,7 +266,7 @@ if [ -z "$LIBCURL_SO" ]; then
    exit 1
 fi
 
-ln -s $LIBCURL_SO /opt/omi/lib/libcurl.so.3
+ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.3
 
 /opt/microsoft/dsc/Scripts/RegenerateInitFiles.py
 
@@ -281,17 +286,21 @@ else
 fi
 
 %Preuninstall_999
+# if this is a package removal, not an upgrade, remove the modules
+if [ "$1" = "0" -o "$1" = "remove" ]; then
+    # Remove all DSC specific data
+    for module in `ls /opt/microsoft/dsc/modules`; do
+	/opt/microsoft/dsc/Scripts/RemoveModule.py $module
+    done
+fi
+
+%Postuninstall_999
 # TODO: Detect omi install directory?
 OMI_HOME=/opt/omi
 OMI_REGISTER_DIR=$OMI_HOME/etc/omiregister
 CONFIG_SYSCONFDIR=$OMI_HOME/etc
 CONFIG_DATADIR=$OMI_HOME/share
 OMI_LIB=$OMI_HOME/lib
-
-# Remove all DSC specific data
-for module in `ls /opt/microsoft/dsc/modules`; do
-    /opt/microsoft/dsc/Scripts/RemoveModule.py $module
-done
 
 rm -rf $OMI_ETC_DIR/conf/omiregister/root-Microsoft-DesiredStateConfiguration
 rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration

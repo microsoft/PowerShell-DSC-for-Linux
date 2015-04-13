@@ -1,12 +1,13 @@
 #ifndef __WEBPULLCLIENT_H_
 #define __WEBPULLCLIENT_H_
 
+#define MAX_CIPHER_LIST_LENGTH 4096
 
 struct SSLOptions
 {
     MI_Boolean DoNotCheckCertificate;
     MI_Boolean NoSSLv3;
-    char * cipherList;
+    char cipherList[MAX_CIPHER_LIST_LENGTH + 1];
 };
 
 enum GetActionStatusCodeTypes
