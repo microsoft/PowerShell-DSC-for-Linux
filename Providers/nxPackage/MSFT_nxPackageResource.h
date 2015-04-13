@@ -36,7 +36,6 @@ typedef struct _MSFT_nxPackageResource /* extends OMI_BaseResource */
     MI_ConstBooleanField PackageGroup;
     MI_ConstStringField Arguments;
     MI_ConstUint32Field ReturnCode;
-    MI_ConstStringField LogPath;
     MI_ConstStringField PackageDescription;
     MI_ConstStringField Publisher;
     MI_ConstStringField InstalledOn;
@@ -326,45 +325,13 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_ReturnCode(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_LogPath(
-    _Inout_ MSFT_nxPackageResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        7,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_SetPtr_LogPath(
-    _Inout_ MSFT_nxPackageResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        7,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_LogPath(
-    _Inout_ MSFT_nxPackageResource* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        7);
-}
-
 MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_PackageDescription(
     _Inout_ MSFT_nxPackageResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        8,
+        7,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -376,7 +343,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_SetPtr_PackageDescription(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        8,
+        7,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -387,7 +354,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_PackageDescription(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        8);
+        7);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_Publisher(
@@ -396,7 +363,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_Publisher(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        9,
+        8,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -408,7 +375,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_SetPtr_Publisher(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        9,
+        8,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -419,7 +386,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_Publisher(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        9);
+        8);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_InstalledOn(
@@ -428,7 +395,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_InstalledOn(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        10,
+        9,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -440,7 +407,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_SetPtr_InstalledOn(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        10,
+        9,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -451,7 +418,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_InstalledOn(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        10);
+        9);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_Size(
@@ -476,7 +443,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_Version(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        12,
+        11,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -488,7 +455,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_SetPtr_Version(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        12,
+        11,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -499,7 +466,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Clear_Version(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        12);
+        11);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxPackageResource_Set_Installed(
