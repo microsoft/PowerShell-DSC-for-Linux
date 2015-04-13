@@ -29,6 +29,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <curl/curl.h>
+#include <base/conf.h>
 #endif
 
 #include "WebPullClient.h"
@@ -103,128 +104,91 @@ static void CleanupHeaderChunk(struct HeaderChunk * chunk)
     
 }
 
-
-static void GetSSLv3Option(_In_ MI_InstanceA *customData,
-                           _Inout_ MI_Boolean * NoSSLv3)
+static void GetSSLOptions(struct SSLOptions * sslOptions)
 {
-    MI_Uint32 i;
-    MI_Boolean outBoolean = MI_FALSE;
-    MI_Value value;
-    MI_Uint32 flags;
-    MI_Result result;
+    Conf* conf;
 
-    for (i = 0; i < customData->size; ++i)
-    {
-        result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
-        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(value.string, MI_T("NoSSLv3")) == 0 )
-        {
-            result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
-            if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
-            {
-                if ( Tcscasecmp(value.string, MI_T("true")) == 0 )
-                {
-                    outBoolean = MI_TRUE;
-                }
-                else
-                {
-                    outBoolean = MI_FALSE;
-                }
-            }
-            break;
-        }
-    }
-
-    *NoSSLv3 = outBoolean;
-    return;
-}
-
-static const char * defaultCipherList = "HIGH";
-
-static void GetCipherList(_In_ MI_InstanceA *customData,
-                       _Inout_ char ** cipherList)
-{
-    MI_Uint32 i;
-    MI_Value value;
-    MI_Uint32 flags;
-    MI_Result result;
-    size_t length;
-
-    length = strlen(defaultCipherList);
-    *cipherList = (char*)calloc(length + 1, 1);
-    memcpy(*cipherList, defaultCipherList, length);
-
-    // if not found in customData, use defaultCipherList
-    for (i = 0; i < customData->size; ++i)
-    {
-        result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
-        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(value.string, MI_T("sslcipherlist")) == 0 )
-        {
-            result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
-            if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
-            {
-                free(*cipherList);
-                length = (size_t)Tcslen(value.string);
-                *cipherList = (char*)calloc(length + 1, 1);
-                memcpy(*cipherList, value.string, length);
-            }
-            break;
-        }
-    }
-
-    return;
-}
-
-
-
-static void GetDoNotCheckCertificateOption(_In_ MI_InstanceA *customData,
-                                           _Inout_ MI_Boolean * DoNotCheckCertificate)
-{
-    MI_Uint32 i;
-    MI_Boolean outBoolean = MI_FALSE;
-    MI_Value value;
-    MI_Uint32 flags;
-    MI_Result result;
-
-    for (i = 0; i < customData->size; ++i)
-    {
-        result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
-        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(value.string, MI_T("DoNotCheckCertificate")) == 0 )
-        {
-            result = MI_Instance_GetElement(customData->data[i], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
-            if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
-            {
-                if ( Tcscasecmp(value.string, MI_T("true")) == 0 )
-                {
-                    outBoolean = MI_TRUE;
-                }
-                else
-                {
-                    outBoolean = MI_FALSE;
-                }
-            }
-            break;
-        }
-    }
-
-    *DoNotCheckCertificate = outBoolean;
-    return;
-}
-
-static CURLcode ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *userptr)
-{
-    struct SSLOptions * sslOptions = (struct SSLOptions*)userptr;
-
-    SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
+    sslOptions->DoNotCheckCertificate = MI_FALSE;
+    sslOptions->NoSSLv3 = MI_FALSE;
+    sslOptions->cipherList[0] = '\0';
     
-    if (sslOptions->NoSSLv3 == MI_TRUE)
+    conf = Conf_Open("/opt/omi/etc/dsc/dsc.conf");
+    if (!conf)
     {
-        SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv3);
+        // TODO: Log this
+        return;
     }
-    
-    SSL_CTX_set_cipher_list(ssl_ctx, sslOptions->cipherList);
-    free(sslOptions->cipherList);
 
-    return CURLE_OK;
+    for (;;)
+    {
+        const char* key;
+        const char* value;
+        int r = Conf_Read(conf, &key, &value);
+        if (r == -1)
+        {
+            // TODO: log this
+            printf("%s\n", scs(Conf_Error(conf)));
+            goto cleanup;
+        }
+
+        if (r == 1)
+        {
+            break;
+        }
+
+        if (strcasecmp(key, "DoNotCheckCertificate") == 0)
+        {
+            if (strcasecmp(value, "true") == 0)
+            {
+                sslOptions->DoNotCheckCertificate = MI_TRUE;
+            }
+            else if (strcasecmp(value, "false") == 0)
+            {
+                sslOptions->DoNotCheckCertificate = MI_FALSE;           
+            }
+            else
+            {
+                // TODO: log this
+                continue;
+            }
+        }
+        else if (strcasecmp(key, "NoSSLv3") == 0)
+        {
+            if (strcasecmp(value, "true") == 0)
+            {
+                sslOptions->NoSSLv3 = MI_TRUE;
+            }
+            else if (strcasecmp(value, "false") == 0)
+            {
+                sslOptions->NoSSLv3 = MI_FALSE;         
+            }
+            else
+            {
+                // TODO: log this
+                continue;
+            }
+        }
+        else if (strcasecmp(key, "sslciphersuite") == 0)
+        {
+            size_t valueLength = strlen(value);
+            if (valueLength > MAX_CIPHER_LIST_LENGTH)
+            {
+                // TODO: log that this is too big of a cipher list to use
+                goto cleanup;
+            }
+            memcpy(sslOptions->cipherList, value, valueLength);
+            sslOptions->cipherList[valueLength] = '\0';
+        }
+        else
+        {
+            // TODO: log warning that this key isn't valid
+            continue;
+        }
+    }
+
+cleanup:
+    Conf_Close(conf);
+
 }
 
 static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -772,35 +736,74 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
         {
             customData.size = value.instancea.size;
             customData.data = value.instancea.data;
-        }      
 
-        // Get Server Url.
-        for( xCount =0; xCount < customData.size; xCount++)
-        {
-            MI_Value value;
-            MI_Uint32 flags;
-            r = MI_Instance_GetElement(customData.data[xCount], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
-            if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(ServerUrlParamName, value.string) == 0 )
+            // Get Server Url.
+            for( xCount =0; xCount < customData.size; xCount++)
             {
-                r = MI_Instance_GetElement(customData.data[xCount], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
-                if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) )
+                MI_Value value;
+                MI_Uint32 flags;
+                r = MI_Instance_GetElement(customData.data[xCount], MSFT_KEYVALUEPAIR_CLASS_KEY, &value, NULL, &flags, NULL);
+                if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && Tcscasecmp(ServerUrlParamName, value.string) == 0 )
                 {
-                    // Found ServerUrl in value.string
-                    memcpy(serverURL, value.string, (Tcslen(value.string) + 1) * sizeof(MI_Char));
-
-                    //Check if connection is secure and if unsecure user explicitly asks for it.
-                    if( !ConnectionAllowed(&customData, serverURL) )
+                    r = MI_Instance_GetElement(customData.data[xCount], MSFT_KEYVALUEPAIR_CLASS_VALUE, &value, NULL, &flags, NULL);
+                    if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL) )
                     {
-                        *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
-                        r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, serverURL);
-                        return r;   
-                    }   
-  
-                    break;
+                        // Found ServerUrl in value.string
+                        memcpy(serverURL, value.string, (Tcslen(value.string) + 1) * sizeof(MI_Char));
+                        
+                        //Check if connection is secure and if unsecure user explicitly asks for it.
+                        if( !ConnectionAllowed(&customData, serverURL) )
+                        {
+                            *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
+                            r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, serverURL);
+                            return r;
+                        }   
+                        
+                        break;
+                    }
                 }
             }
-        }
+        }      
+        else
+        {
+            // There's no DownloadManagerCustomData, AND there's no partial configuration.  We should be able to find WebDownloadManager, and only one!
+            r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, &value, NULL, &flags, NULL);
+            if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL) || value.instancea.size == 0)
+            {
+                // Unable to get the config download managers
+                // TODO: log this
+                return MI_RESULT_NO_SUCH_PROPERTY;
+            }
+         
+            if (value.instancea.size > 1)
+            {
+                // Too many download managers defined, please set up partial configuration for this.
+                // TODO: Log this
+                return MI_RESULT_FAILED;
+            }
 
+            // Found the WebDownloadManager with the proper resource ID.
+            MI_Instance_GetElement(value.instancea.data[xCount], MI_T("ServerURL"), &value2, NULL, &flags, NULL);   
+            if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
+            {
+                // TODO: Log this
+                return MI_RESULT_NO_SUCH_PROPERTY;
+            }
+            
+            memcpy(serverURL, value2.string, (Tcslen(value2.string) + 1) * sizeof(MI_Char));
+
+            MI_Instance_GetElement(value.instancea.data[xCount], MI_T("CertificateID"), &value2, NULL, &flags, NULL);   
+            if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+            {
+                memcpy(*certificateID, value2.string, Tcslen(value2.string) * sizeof(MI_Char));  
+            }
+            
+            MI_Instance_GetElement(value.instancea.data[xCount], MI_T("AllowUnsecureConnection"), &value2, NULL, &flags, NULL);   
+            if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+            {
+                allowUnsecureConnection = value2.boolean;
+            }
+        }
     }
 
     if (*serverURL != '\0')
@@ -1182,9 +1185,6 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 {
     MI_Result r = MI_RESULT_OK;
     const char *emptyString = "";
-    const char *header_strings[3] = {0};
-    char contentLengthHeader[DEFAULT_MEMORY_SIZE];
-    int i =0;
     char *bodyContent = NULL;
     const char *checkSumFinalValue = emptyString;
     RequestContainer requestParam = {0};
@@ -1234,11 +1234,10 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         if (sslOptions.DoNotCheckCertificate == MI_TRUE)
         {
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    }
+        }
         else
         {
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-            curl_easy_setopt(curl, CURLOPT_CAPATH, "/etc/pki/tls/certs/ca-bundle.crt");
         }
     }
     else
@@ -1261,8 +1260,27 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
-    curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, ssl_ctx_callback);
-    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, &sslOptions);
+    
+    if (sslOptions.cipherList[0] != '\0')
+    {
+        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, sslOptions.cipherList);
+        if (res != CURLE_OK)
+        {
+            // TODO: log unable to set cipher list
+            fprintf(stderr, "Warning: Unable to set cipher list.");
+        }
+    }
+
+    if (sslOptions.NoSSLv3 == MI_TRUE)
+    {
+        res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+        if (res == CURLE_UNKNOWN_OPTION)
+        {
+            // TODO: log unable to disable SSLv3
+            fprintf(stderr, "Warning: Unable to disable SSLv3 for communication (i.e. Unable to communicate using TLS");
+        }
+    }
+    
 
     res = curl_easy_perform(curl);
 
@@ -1329,7 +1347,6 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
                                 _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
-    RequestContainer requestParam = {0};
     MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
 
     CURL *curl;
@@ -1373,7 +1390,6 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         else
         {
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-            curl_easy_setopt(curl, CURLOPT_CAPATH, "/etc/pki/tls/certs/ca-bundle.crt");
         }
     }    
     else
@@ -1390,9 +1406,27 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
-    curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, ssl_ctx_callback);
-    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, &sslOptions);
 
+    if (sslOptions.cipherList[0] != '\0')
+    {
+        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, sslOptions.cipherList);
+        if (res != CURLE_OK)
+        {
+            // TODO: log unable to set cipher list
+            fprintf(stderr, "Warning: Unable to set cipher list.");
+        }
+    }
+
+    if (sslOptions.NoSSLv3 == MI_TRUE)
+    {
+        res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+        if (res == CURLE_UNKNOWN_OPTION)
+        {
+            // TODO: log unable to disable SSLv3
+            fprintf(stderr, "Warning: Unable to disable SSLv3 for communication (i.e. Unable to communicate using TLS");
+        }
+    }
+    
     res = curl_easy_perform(curl);
 
     if(res != CURLE_OK)
@@ -1642,9 +1676,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
                                   _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
-    RequestContainer requestParam = {0};  
     MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
-
 
     CURL *curl;
     CURLcode res;
@@ -1691,7 +1723,6 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         else
         {
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-            curl_easy_setopt(curl, CURLOPT_CAPATH, "/etc/pki/tls/certs/ca-bundle.crt");
         }
     }
     else
@@ -1704,10 +1735,26 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
-    curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, ssl_ctx_callback);
-    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, &sslOptions);
 
+    if (sslOptions.cipherList[0] != '\0')
+    {
+        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, sslOptions.cipherList);
+        if (res != CURLE_OK)
+        {
+            // TODO: log unable to set cipher list
+            fprintf(stderr, "Warning: Unable to set cipher list.");
+        }
+    }
 
+    if (sslOptions.NoSSLv3 == MI_TRUE)
+    {
+        res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+        if (res == CURLE_UNKNOWN_OPTION)
+        {
+            // TODO: log unable to disable SSLv3
+            fprintf(stderr, "Warning: Unable to disable SSLv3 for communication (i.e. Unable to communicate using TLS");
+        }
+    }
 
     res = curl_easy_perform(curl);
 
@@ -1947,13 +1994,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     }
 
     // Get our supported SSL options if there are any
-    r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_DownloadManagerCustomData, &value, NULL, &flags, NULL);
-    if (r == MI_RESULT_OK && !( (flags & MI_FLAG_NULL) && value.instancea.size == 0))
-    {
-        GetDoNotCheckCertificateOption(&value.instancea, &sslOptions.DoNotCheckCertificate);
-        GetSSLv3Option(&value.instancea, &sslOptions.NoSSLv3);
-        GetCipherList(&value.instancea, &sslOptions.cipherList);
-    }
+    GetSSLOptions(&sslOptions);
 
     DSC_EventWriteLCMPullGetConfigAttempt( webPulginName, configurationID);    
     // Issue Get Action Request
@@ -2011,8 +2052,6 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     MI_Boolean bIsHttps = MI_FALSE;
     MI_Char *tmpChecksum = NULL;
     struct SSLOptions sslOptions;
-    MI_Value value;
-    MI_Uint32 flags;
     
     if( metaConfig == NULL)
     {
@@ -2043,13 +2082,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     }    
 
     // Get our supported SSL options if there are any
-    r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_DownloadManagerCustomData, &value, NULL, &flags, NULL);
-    if (r == MI_RESULT_OK && !( (flags & MI_FLAG_NULL) && value.instancea.size == 0))
-    {
-        GetDoNotCheckCertificateOption(&value.instancea, &sslOptions.DoNotCheckCertificate);
-        GetSSLv3Option(&value.instancea, &sslOptions.NoSSLv3);
-        GetCipherList(&value.instancea, &sslOptions.cipherList);
-    }
+    GetSSLOptions(&sslOptions);
 
     DSC_EventWriteLCMPullGetActionAttempt( webPulginName, configurationID, tmpChecksum, complianceStatus);    
     // Issue Get Action Request
