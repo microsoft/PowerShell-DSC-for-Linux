@@ -1274,7 +1274,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     if (sslOptions.NoSSLv3 == MI_TRUE)
     {
         res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
-        if (res == CURLE_UNKNOWN_OPTION)
+        if (res != CURLE_OK)
         {
             // TODO: log unable to disable SSLv3
             fprintf(stderr, "Warning: Unable to disable SSLv3 for communication (i.e. Unable to communicate using TLS");
@@ -1420,7 +1420,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     if (sslOptions.NoSSLv3 == MI_TRUE)
     {
         res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
-        if (res == CURLE_UNKNOWN_OPTION)
+        if (res != CURLE_OK)
         {
             // TODO: log unable to disable SSLv3
             fprintf(stderr, "Warning: Unable to disable SSLv3 for communication (i.e. Unable to communicate using TLS");
@@ -1749,7 +1749,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     if (sslOptions.NoSSLv3 == MI_TRUE)
     {
         res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
-        if (res == CURLE_UNKNOWN_OPTION)
+        if (res != CURLE_OK)
         {
             // TODO: log unable to disable SSLv3
             fprintf(stderr, "Warning: Unable to disable SSLv3 for communication (i.e. Unable to communicate using TLS");
