@@ -191,15 +191,15 @@ def ReadPasswd(filename):
 
 def PasswordExpired(shadow_entry):
     # No entries for the "last" or "must" fields means Password is Expired
-    if shadow_entry[1] is "" or shadow_entry[3] is "":
+    if shadow_entry[1] == "" or shadow_entry[3] == "":
         return True
 
     # Passwords must be changed if their "last" day is 0
-    if shadow_entry[1] is "0":
+    if shadow_entry[1] == "0":
         return True
 
     # "99999" means "never expire"
-    if shadow_entry[3] is "99999":
+    if shadow_entry[3] == "99999":
         return False
 
     day_0 = datetime.datetime.utcfromtimestamp(0)
@@ -229,7 +229,7 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
     old_passwd_entries = passwd_entries
     usermod_string = ""
     usermodonly_string = ""
-    if Ensure is "absent":
+    if Ensure == "absent":
         exit_code = os.system(userdel_path + " " + UserName)
     else:
         usermod_string = ""
@@ -285,13 +285,13 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
                 return [-1]
             if UserName in shadow_entries:
                 cur_pass = shadow_entries[UserName][0]
-                if cur_pass is "!!":
+                if cur_pass == "!!":
                     Print("Unable to unlock user: " + UserName +
                           ".  Password is not set.", file=sys.stderr)
                     LG().Log('ERROR', "Unable to unlock user: " +
                              UserName + ".  Password is not set.")
                     return [-1]
-                elif cur_pass[0] is '!':
+                elif cur_pass[0] == '!':
                     if len(cur_pass) > 1:
                         usermodonly_string += " -U"
                     else:
@@ -328,14 +328,14 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
     if not Ensure:
         Ensure = "present"
 
-    if Ensure is "absent":
+    if Ensure == "absent":
         if UserName not in passwd_entries:
             return [0]
         else:
             Print(UserName + " in passwd_entries", file=sys.stderr)
             LG().Log('ERROR', UserName + " in passwd_entries")
             return [-1]
-    elif Ensure is "present":
+    elif Ensure == "present":
         if UserName not in passwd_entries:
             Print(UserName + " not in passwd_entries", file=sys.stderr)
             LG().Log('ERROR', UserName + " not in passwd_entries")
@@ -360,7 +360,7 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
 
         extra_fields = passwd_entries[UserName][3].split(",")
 
-        if FullName and extra_fields[0] is not FullName:
+        if FullName and extra_fields[0] != FullName:
             Print("Incorrect full name (" + extra_fields[
                   0] + "), should be: " + FullName + ", for username: " + UserName, file=sys.stderr)
             LG().Log('ERROR', "Incorrect full name (" +
@@ -372,19 +372,19 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
                 Print("There is no description.", file=sys.stderr)
                 LG().Log('ERROR', "There is no description.")
                 return [-1]
-            elif extra_fields[1] is not Description:
+            elif extra_fields[1] != Description:
                 Print(
                     "Incorrect description for username: " + UserName, file=sys.stderr)
                 LG().Log(
                     'ERROR', "Incorrect description for username: " + UserName)
                 return [-1]
 
-        if HomeDirectory and passwd_entries[UserName][4] is not HomeDirectory:
+        if HomeDirectory and passwd_entries[UserName][4] != HomeDirectory:
             Print("Home directories do not match", file=sys.stderr)
             LG().Log('ERROR', "Home directories do not match")
             return [-1]
 
-        if GroupID and passwd_entries[UserName][2] is not GroupID:
+        if GroupID and passwd_entries[UserName][2] != GroupID:
             Print("GroupID does not match", file=sys.stderr)
             LG().Log('ERROR', "GroupID does not match")
             return [-1]
@@ -395,9 +395,9 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
                 Print("Password does not match", file=sys.stderr)
                 LG().Log('ERROR', "Password does not match")
                 return [-1]
-            if read_password[0] is "!":
+            if read_password[0] == "!":
                 read_password = read_password[1:]
-            if read_password is not Password:
+            if read_password != Password:
                 Print("Password does not match", file=sys.stderr)
                 LG().Log('ERROR', "Password does not match")
                 return [-1]
@@ -415,11 +415,11 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
                 'ERROR', "PasswordChangeRequired is False and the password is expired.")
             return [-1]
 
-        if Disabled is True and shadow_entries[UserName][0][0] is not "!":
+        if Disabled is True and shadow_entries[UserName][0][0] != "!":
             Print("Account not disabled", file=sys.stderr)
             LG().Log('ERROR', "Account not disabled")
             return [-1]
-        if Disabled is False and shadow_entries[UserName][0][0] is "!":
+        if Disabled is False and shadow_entries[UserName][0][0] == "!":
             Print("Account disabled", file=sys.stderr)
             LG().Log('ERROR', "Account disabled")
             return [-1]
@@ -444,7 +444,7 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 
     if UserName not in passwd_entries:
         FullName = Description = Password = HomeDirectory = GroupID = ""
-        if Ensure is not "absent":
+        if Ensure != "absent":
             exit_code = -1
         return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
 
@@ -459,7 +459,7 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
     Password = shadow_entries[UserName][0]
     Disabled = False
     if len(Password) > 0:
-        if Password[0] is "!":
+        if Password[0] == "!":
             Disabled = True
             Password = Password[1:]
     if PasswordExpired(shadow_entries[UserName]):

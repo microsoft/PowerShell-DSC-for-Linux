@@ -237,7 +237,7 @@ def CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum):
         LG().Log('ERROR', "Exception opening SourcePath " + SourcePath + " Error Code: " +
                 str(error.errno) + " Error: " + error.message + error.strerror)
         return False
-    if Checksum is "md5":
+    if Checksum == "md5":
         src_error = None
         src_hash = md5const()
         src_block = b'loopme'
@@ -251,16 +251,16 @@ def CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum):
             while src_block:
                 src_block = src_file.read(BLOCK_SIZE)
                 src_hash.update(src_block)
-        if src_hash.hexdigest() is cache_hash:
+        if src_hash.hexdigest() == cache_hash:
             return True
         else:
             return False
-    elif Checksum is "ctime":
+    elif Checksum == "ctime":
         if stat_src.st_ctime > stat_cache_st_ctime:
             return False
         else:
             return True
-    elif Checksum is "mtime":
+    elif Checksum == "mtime":
         if stat_src.st_mtime > stat_cache_st_mtime:
             return False
         else:
@@ -270,7 +270,7 @@ def CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum):
 def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
     # Do nothing.  Set should not get called as previous Test will evaluate to
     # True
-    if Ensure is 'absent':
+    if Ensure == 'absent':
         return False
     # if the sourcepath is not valid file return False
     if not os.path.isfile(SourcePath):
@@ -282,7 +282,7 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
         if MakeDirs(DestinationPath) is not None:
             return False
     if not os.path.isdir(DestinationPath):
-        if Force is 'False':  # Force is False, return False
+        if Force == 'False':  # Force is False, return False
             print(
                 'ERROR: Force must be True if DestinationPath is not a directory.')
             LG().Log(
@@ -297,9 +297,9 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
     # is the sourcepath a valid archive?
     archive_type = 'tar'
     ext = os.path.splitext(SourcePath)
-    if len(ext) > 1 and ext[1].lower() is '.zip':
+    if len(ext) > 1 and ext[1].lower() == '.zip':
         archive_type = 'zip'
-    if archive_type is 'zip':
+    if archive_type == 'zip':
         try:
             arch = zipfile.ZipFile(SourcePath)
             # Exploit check - make sure no names start with '/' or '..'
@@ -369,12 +369,12 @@ def Test(DestinationPath, SourcePath, Ensure, Force, Checksum):
     if not os.path.isdir(DestinationPath):
         return False
     if CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum) is True:
-        if Ensure is 'present':
+        if Ensure == 'present':
             return True
         else:
             return False
     else:
-        if Ensure is 'present':
+        if Ensure == 'present':
             return False
         else:
             return True
@@ -382,7 +382,7 @@ def Test(DestinationPath, SourcePath, Ensure, Force, Checksum):
 
 def Get(DestinationPath, SourcePath, Ensure, Force, Checksum):
     if Test(DestinationPath, SourcePath, Ensure, Force, Checksum) is False:
-        if Ensure is 'present':
+        if Ensure == 'present':
             Ensure = 'absent'
         else:
             Ensure = 'present'

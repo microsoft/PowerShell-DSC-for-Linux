@@ -180,9 +180,9 @@ def Test(Name, Value, Ensure, Path):
     ShowMof('TEST', Name, Value, Ensure, Path)
 
     found, error = FindVar(p)
-    if found and p.Ensure is 'present':
+    if found and p.Ensure == 'present':
         retval = 0
-    if not found and p.Ensure is 'absent':
+    if not found and p.Ensure == 'absent':
         retval = 0
 
     return [retval]
@@ -200,9 +200,9 @@ def Get(Name, Value, Ensure, Path):
         return [retval, Name, Value, Ensure, Path]
     ShowMof('GET', Name, Value, Ensure, Path)
     found, error = FindVar(p)
-    if found and p.Ensure is 'present':
+    if found and p.Ensure == 'present':
         retval = 0
-    if not found and p.Ensure is 'absent':
+    if not found and p.Ensure == 'absent':
         retval = 0
     return [retval, Name, Value, Ensure, Path]
 
@@ -247,7 +247,7 @@ def AddOrDelVar(p):
                 if l.startswith('PATH=$PATH:"' + p.Value):
                     # is is already there - keep it if present requested
                     # otherwise skip
-                    if p.Ensure is 'Present':
+                    if p.Ensure == 'Present':
                         found = True
                         n += l
                     else:
@@ -257,14 +257,14 @@ def AddOrDelVar(p):
             else:
                 if l.startswith(p.Name + '='):
                     found = True
-                    if p.Ensure is 'present':
+                    if p.Ensure == 'present':
                         # set the variable to the new values
                         l = p.Name + '=' + p.Value + '\n'
                         n += l
                 else:
                     n += l
         # not found - present requested so add it.
-        if not found and p.Ensure is 'present':
+        if not found and p.Ensure == 'present':
             if p.Path is True:
                 n += p.Name + p.Value + '"\n'
             else:

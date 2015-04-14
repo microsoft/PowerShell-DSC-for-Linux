@@ -151,7 +151,7 @@ def GetPackageManager():
         code, out = RunGetOutput('which ' + b, False, False)
         if code is 0:
             ret = b
-            if ret is 'apt-get':
+            if ret == 'apt-get':
                 ret = 'apt'
             break
     return ret
@@ -313,11 +313,11 @@ def IsPackageInstalled(p):
         if ReadCacheInfo(p) is False:
             return False, out
     elif len(p.FilePath) > 0 and os.path.exists(p.FilePath) is True:  # FilePath
-        if apt is not None and os.path.splitext(p.FilePath)[-1] is '.deb':
+        if apt is not None and os.path.splitext(p.FilePath)[-1] == '.deb':
             from apt.debfile import DebPackage
             pkg = DebPackage(p.FilePath)
             p.Name = pkg.pkgname
-        elif rpm is not None and os.path.splitext(p.FilePath)[-1] is '.rpm':
+        elif rpm is not None and os.path.splitext(p.FilePath)[-1] == '.rpm':
             F = open(p.FilePath, 'r')
             ts = rpm.TransactionSet()
             ts.setVSFlags(-1)
@@ -393,7 +393,7 @@ def DoEnableDisable(p):
     # if the path is set, use the path and self.PackageSystem
     cmd = ""
     if len(p.FilePath) > 1 and 'present' in p.Ensure:  # don't use the path unless installing
-        if '://' in p.FilePath and p.LocalPath is '':  # its a remote file
+        if '://' in p.FilePath and p.LocalPath == '':  # its a remote file
             ret = 0
             ret = GetRemoteFile(p)
             if ret is not 0:
@@ -401,7 +401,7 @@ def DoEnableDisable(p):
                 raise Exception(
                     'Unable to retrieve remote resource ' + p.FilePath + ' Error is ' + str(ret))
             else:
-                if p.LocalPath is '': 
+                if p.LocalPath == '': 
                     return True,'' # falied the ctime or mtime check
                 p.FilePath = p.LocalPath
 
@@ -441,7 +441,7 @@ def WriteCacheInfo(p):
             return False
     if len(p.LocalPath) < 1:
         return False
-    if apt is not None and os.path.splitext(p.LocalPath)[-1] is '.deb':
+    if apt is not None and os.path.splitext(p.LocalPath)[-1] == '.deb':
         from apt.debfile import DebPackage
         try:
             pkg = DebPackage(p.LocalPath)
@@ -450,7 +450,7 @@ def WriteCacheInfo(p):
             LG().Log('ERROR',  "Exception opening file " + p.LocalPath)
             return False
         p.Name = pkg.pkgname
-    elif rpm is not None and os.path.splitext(p.LocalPath)[-1] is '.rpm':
+    elif rpm is not None and os.path.splitext(p.LocalPath)[-1] == '.rpm':
         F, error = opened_w_error(p.LocalPath, 'r')
         if error:
             Print("Exception opening file " + p.LocalPath, file=sys.stderr)
@@ -515,13 +515,13 @@ def Set(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnC
             'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.message)
         return [-1]
     installed, out = IsPackageInstalled(p)
-    if (installed and Ensure is 'present') or (not installed and Ensure is 'absent'):  # Nothing to do
+    if (installed and Ensure == 'present') or (not installed and Ensure == 'absent'):  # Nothing to do
         return [0]
 
     result, out = DoEnableDisable(p)
     if result is False:
         op = ''
-        if Ensure is 'present':
+        if Ensure == 'present':
             op = 'Install'
         else:
             op = 'Un-install'
@@ -546,7 +546,7 @@ def Test(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, Return
             'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.message)
         return [-1]
     installed, out = IsPackageInstalled(p)
-    if (installed and Ensure is 'present') or (not installed and Ensure is 'absent'):
+    if (installed and Ensure == 'present') or (not installed and Ensure == 'absent'):
         return [0]
     return [-1]
 
