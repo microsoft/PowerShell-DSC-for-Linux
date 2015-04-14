@@ -50,7 +50,7 @@ class DSCLog(object):
         if log_level > self.current_level:
             return
         if type(message) != str:
-            message = message.encode('ascii', 'ignore')
+            message = message.decode('utf-8').encode('ascii', 'ignore')
         t = time.localtime()
         line = "%04u/%02u/%02u %02u:%02u:%02u: %s: %s:\n%s\n" % (t.tm_year,
                         t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,

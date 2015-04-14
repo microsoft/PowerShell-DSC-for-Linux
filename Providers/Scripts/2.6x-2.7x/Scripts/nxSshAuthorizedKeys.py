@@ -132,10 +132,10 @@ def Set(KeyComment, Ensure, UserName, Key):
         LG().Log('ERROR',
                  'ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  ' + e.message)
         return [retval]
-    if p.Ensure is 'present':
+    if p.Ensure == 'present':
         if AddKey(p) is None:
             retval = 0
-    if p.Ensure is 'absent':
+    if p.Ensure == 'absent':
         if DelKey(p) is None:
             retval = 0
     return [retval]
@@ -153,9 +153,9 @@ def Test(KeyComment, Ensure, UserName, Key):
                  'ERROR - Unable to initialize nxSshAuthorizedKeysProvider.  ' + e.message)
         return [retval]
     found, error = FindKey(p)
-    if found and p.Ensure is 'present':
+    if found and p.Ensure == 'present':
         retval = 0
-    if not found and p.Ensure is 'absent':
+    if not found and p.Ensure == 'absent':
         retval = 0
 
     return [retval]
@@ -174,9 +174,9 @@ def Get(KeyComment, Ensure, UserName, Key):
         return [retval, KeyComment, Ensure, UserName, Key]
     found, error = FindKey(p)
     if found:
-        p.Ensure is 'present'
+        p.Ensure == 'present'
     else:
-        p.Ensure is 'absent'
+        p.Ensure == 'absent'
     return [retval, KeyComment, Ensure, UserName, Key]
 
 
@@ -275,15 +275,15 @@ def AddKey(p):
         n = ''
         KC = '#' + p.KeyComment
         for l in F.readlines():
-            if flag is 'found':
+            if flag == 'found':
                 n += p.Key + '\n'
                 flag = 'done'
-            elif KC is l[:len(l) - 1]:
+            elif KC == l[:len(l) - 1]:
                 flag = 'found'
                 n += l
             else:
                 n += l
-        if flag is 'not found':
+        if flag == 'not found':
             n += KC + '\n' + p.Key + '\n'
         F.close()
         with opened_w_error(path, 'wb+') as (F, error):
@@ -314,7 +314,7 @@ def DelKey(p):
             if found is True:
                 found = False  # skip this line
                 continue
-            if KC is l[:len(l) - 1]:
+            if KC == l[:len(l) - 1]:
                 # set this true to skip the next line which is the key
                 found = True
                 continue
@@ -343,12 +343,12 @@ def FindKey(p):
         for l in F.readlines():
             if found is True:
                 # return true of the key is not provided
-                if len(p.Key) is 0 or p.Key is l[:len(l) - 1]:
+                if len(p.Key) is 0 or p.Key == l[:len(l) - 1]:
                     break
                 else:
                     found = False
                     break
-            if KC is l[:len(l) - 1]:
+            if KC == l[:len(l) - 1]:
                 found = True
         F.close()
     return found, error

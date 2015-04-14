@@ -151,7 +151,7 @@ def FindStringInFile(fname, matchs, multiline=False):
 def FindLiteralStringInFile(fname, matchs):
     with (open(fname, 'r')) as F:
         for l in F:
-            if matchs is l.strip('\n'):
+            if matchs == l.strip('\n'):
                 return True
     return False
 
@@ -178,7 +178,7 @@ def ReplaceStringInFile(fname, src, repl):
 def AppendStringToFile(fname, s):
     with (open(fname, 'a')) as F:
         F.write(s)
-        if s[-1] is not '\n':
+        if s[-1] != '\n':
             F.write('\n')
         F.close()
     return True
