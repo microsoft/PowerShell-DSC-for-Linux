@@ -142,7 +142,7 @@ class Params:
             for l in F.readlines():
                 if l.startswith('. /etc/environment'):
                     found = True
-                n += l + '\n'
+                n += l
             if not found:
                 F.seek(0, 0)
                 F.write('. /etc/environment\n' + n)
@@ -246,6 +246,8 @@ def AddOrDelVar(p):
                 if p.Ensure == 'present':
                     found = True
                     n += l
+                else:
+                    found = True
             else:  # not a match
                 n += l
         else:
@@ -257,13 +259,13 @@ def AddOrDelVar(p):
                     n += l
             else:
                 n += l
-        # not found - present requested so add it.
-        if not found and p.Ensure == 'present':
-            if p.Path is True:
-                n += p.Name + p.Value + '"\n'
-            else:
-                n +=  p.Name + '=' + p.Value + '\n'
-
+    # not found - present requested so add it.
+    if not found and p.Ensure == 'present':
+        if p.Path is True:
+            n += p.Name + p.Value + '"\n'
+        else:
+            n +=  p.Name + '=' + p.Value + '\n'
+            
     F.close()
 
     F, error = opened_w_error(p.file_path, 'w')
