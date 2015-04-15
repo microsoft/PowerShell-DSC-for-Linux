@@ -40,6 +40,7 @@ def init_vars(Name, Controller, Enabled, State):
         Controller = ''
     if Enabled is None:
         Enabled = False
+    Enabled = (Enabled == True)
     if State is not None:
         State = State.encode('ascii', 'ignore').lower()
     else:
@@ -618,9 +619,30 @@ def GetInitState(sc):
     # debian style init. These are missing in redhat.
     if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
         check_state_program = '/usr/sbin/service'
-    (process_stdout, process_stderr, retval) = Process(
-        [check_state_program, sc.Name, "status"])
-
+        if os.path.isfile('/usr/sbin/service'):
+            check_state_program = '/usr/sbin/service'
+        else: # invoke the service directly
+            check_state_program = '/etc/init.d/'
+    if check_state_program == '/etc/init.d/':
+        (process_stdout, process_stderr, retval) = Process(
+            [check_state_program + sc.Name, "status"], True)
+        if retval is not 0:
+            Print("Error: " + check_state_program +
+                  sc.Name + " status failed: ", file=sys.stderr)
+            LG().Log('ERROR', "Error: " + check_state_program +
+                     sc.Name + " status failed: ")
+            if IsServiceRunning(sc):
+                return "running"
+            else:
+                return "stopped"
+    else:
+        (process_stdout, process_stderr, retval) = Process(
+            [check_state_program, sc.Name, "status"])
+    if retval is not 0:
+        if IsServiceRunning(sc):
+            return "running"
+        else:
+            return "stopped"
     if DetermineInitState(process_stdout):
         return "running"
     else:
@@ -965,28 +987,69 @@ def ModifyInitService(sc):
     check_enabled_program = initd_chkconfig
     # debian style init. These are missing in redhat.
     if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
-        check_state_program = '/usr/sbin/service'
+        if os.path.isfile('/usr/sbin/service'):
+            check_state_program = '/usr/sbin/service'
+        else: # invoke the service directly
+            check_state_program = '/etc/init.d/'
         check_enabled_program = initd_updaterc
         if sc.Enabled is True:
             (process_stdout, process_stderr, retval) = Process(
                 [check_enabled_program, "-f", sc.Name, "enable"])
             if retval is not 0:
                 Print("Error: " + check_enabled_program + " -f " +
-                      sc.Name + " on failed: " + process_stderr,
+                      sc.Name + " enable failed: " + process_stderr,
                       file=sys.stderr)
                 LG().Log('ERROR', "Error: " + check_enabled_program +
-                         " -f " + sc.Name + " on failed: " + process_stderr)
-                return [-1]
+                         " -f " + sc.Name + " enable failed: " + process_stderr)
+                # try 'defaults'
+                (process_stdout, process_stderr, retval) = Process(
+                [check_enabled_program, "-f", sc.Name, "defaults"])
+                if retval is not 0 :
+                    Print("Error: " + check_enabled_program + " -f " +
+                          sc.Name + " defaults failed: " + process_stderr,
+                          file=sys.stderr)
+                    LG().Log('ERROR', "Error: " + check_enabled_program +
+                             " -f " + sc.Name + " defaults failed: " + process_stderr)
+                    return [-1]
+                if 'already exist' in process_stdout: # we need to remove them first
+                    (process_stdout, process_stderr, retval) = Process(
+                        [check_enabled_program, "-f", sc.Name, "remove"])
+                    if retval is not 0 :
+                        Print("Error: " + check_enabled_program + " -f " +
+                              sc.Name + " remove failed: " + process_stderr,
+                              file=sys.stderr)
+                        LG().Log('ERROR', "Error: " + check_enabled_program +
+                                 " -f " + sc.Name + " remove failed: " + process_stderr)
+                        return [-1]
+                    # it should work now
+                    (process_stdout, process_stderr, retval) = Process(
+                        [check_enabled_program, "-f", sc.Name, "defaults"])
+                    if retval is not 0 :
+                        Print("Error: " + check_enabled_program + " -f " +
+                              sc.Name + " defaults failed: " + process_stderr,
+                              file=sys.stderr)
+                        LG().Log('ERROR', "Error: " + check_enabled_program +
+                                 " -f " + sc.Name + " defaults failed: " + process_stderr)
+                        return [-1]
         elif sc.Enabled is False:
             (process_stdout, process_stderr, retval) = Process(
                 [check_enabled_program, "-f", sc.Name, "disable"])
             if retval is not 0:
                 Print("Error: " + check_enabled_program + " -f " +
-                      sc.Name + " on failed: " + process_stderr,
+                      sc.Name + " disable failed: " + process_stderr,
                       file=sys.stderr)
                 LG().Log('ERROR', "Error: " + check_enabled_program +
-                         " -f " + sc.Name + " on failed: " + process_stderr)
-                return [-1]
+                         " -f " + sc.Name + " disable failed: " + process_stderr)
+                # try remove
+                (process_stdout, process_stderr, retval) = Process(
+                    [check_enabled_program, "-f", sc.Name, "remove"])
+                if retval is not 0:
+                    Print("Error: " + check_enabled_program + " -f " +
+                          sc.Name + " remove failed: " + process_stderr,
+                          file=sys.stderr)
+                    LG().Log('ERROR', "Error: " + check_enabled_program +
+                             " -f " + sc.Name + " remove failed: " + process_stderr)
+                    return [-1]
     else:
         if sc.Enabled is True:
             (process_stdout, process_stderr, retval) = Process(
@@ -996,28 +1059,77 @@ def ModifyInitService(sc):
                       " on failed: " + process_stderr, file=sys.stderr)
                 LG().Log('ERROR', "Error: " + check_enabled_program +
                          " " + sc.Name + " on failed: " + process_stderr)
-                return [-1]
+                # try 'defaults'
+                (process_stdout, process_stderr, retval) = Process(
+                [check_enabled_program, "-f", sc.Name, "defaults"])
+                if retval is not 0 :
+                    Print("Error: " + check_enabled_program + " -f " +
+                          sc.Name + " defaults failed: " + process_stderr,
+                          file=sys.stderr)
+                    LG().Log('ERROR', "Error: " + check_enabled_program +
+                             " -f " + sc.Name + " defaults failed: " + process_stderr)
+                    return [-1]
+                if 'already exist' in process_stdout: # we need to remove them first
+                    (process_stdout, process_stderr, retval) = Process(
+                        [check_enabled_program, "-f", sc.Name, "remove"])
+                    if retval is not 0 :
+                        Print("Error: " + check_enabled_program + " -f " +
+                              sc.Name + " remove failed: " + process_stderr,
+                              file=sys.stderr)
+                        LG().Log('ERROR', "Error: " + check_enabled_program +
+                                 " -f " + sc.Name + " remove failed: " + process_stderr)
+                        return [-1]
+                    # it should work now
+                    (process_stdout, process_stderr, retval) = Process(
+                        [check_enabled_program, "-f", sc.Name, "defaults"])
+                    if retval is not 0 :
+                        Print("Error: " + check_enabled_program + " -f " +
+                              sc.Name + " defaults failed: " + process_stderr,
+                              file=sys.stderr)
+                        LG().Log('ERROR', "Error: " + check_enabled_program +
+                                 " -f " + sc.Name + " defaults failed: " + process_stderr)
+                        return [-1]
+                    
         elif sc.Enabled is False:
             (process_stdout, process_stderr, retval) = Process(
                 [check_enabled_program, sc.Name, "off"])
             if retval is not 0:
                 Print("Error: " + check_enabled_program + " " + sc.Name +
-                      " on failed: " + process_stderr, file=sys.stderr)
+                      " off failed: " + process_stderr, file=sys.stderr)
                 LG().Log('ERROR', "Error: " + check_enabled_program +
-                         " " + sc.Name + " on failed: " + process_stderr)
-                return [-1]
+                         " " + sc.Name + " off failed: " + process_stderr)
+                # try remove
+                (process_stdout, process_stderr, retval) = Process(
+                    [check_enabled_program, "-f", sc.Name, "remove"])
+                if retval is not 0:
+                    Print("Error: " + check_enabled_program + " -f " +
+                          sc.Name + " remove failed: " + process_stderr,
+                          file=sys.stderr)
+                    LG().Log('ERROR', "Error: " + check_enabled_program +
+                             " -f " + sc.Name + " remove failed: " + process_stderr)
+                    return [-1]
 
-    if sc.State == "running":
+    if sc.State == "running":		
         # don't try to read stdout or stderr as 'service start' comand
         # re-directs them, causing a hang in subprocess.communicate()
-        (process_stdout, process_stderr, retval) = Process(
-            [check_state_program, sc.Name, "start"], True)
-        if retval is not 0:
-            Print("Error: " + check_state_program + " " +
-                  sc.Name + " start failed: ", file=sys.stderr)
-            LG().Log('ERROR', "Error: " + check_state_program +
-                     " " + sc.Name + " start failed: ")
-            return [-1]
+        if check_state_program == '/etc/init.d/':
+            (process_stdout, process_stderr, retval) = Process(
+                [check_state_program + sc.Name, "start"], True)
+            if retval is not 0:
+                Print("Error: " + check_state_program +
+                      sc.Name + " start failed: ", file=sys.stderr)
+                LG().Log('ERROR', "Error: " + check_state_program +
+                         sc.Name + " start failed: ")
+                return [-1]
+        else:
+            (process_stdout, process_stderr, retval) = Process(
+                [check_state_program, sc.Name, "start"], True)
+            if retval is not 0:
+                Print("Error: " + check_state_program + " " +
+                      sc.Name + " start failed: ", file=sys.stderr)
+                LG().Log('ERROR', "Error: " + check_state_program +
+                         " " + sc.Name + " start failed: ")
+                return [-1]
         if not IsServiceRunning(sc):
             Print("Error: " + check_state_program + " " +
                   sc.Name + " start failed: ", file=sys.stderr)
@@ -1026,14 +1138,24 @@ def ModifyInitService(sc):
             return [-1]
 
     elif sc.State == "stopped":
-        (process_stdout, process_stderr, retval) = Process(
-            [check_state_program, sc.Name, "stop"])
-        if retval is not 0:
-            Print("Error: " + check_state_program + " " + sc.Name +
-                  " stop failed: " + process_stderr, file=sys.stderr)
-            LG().Log('ERROR', "Error: " + check_state_program +
-                     " " + sc.Name + " stop failed: " + process_stderr)
-            return [-1]
+        if check_state_program == '/etc/init.d/':
+            (process_stdout, process_stderr, retval) = Process(
+                [check_state_program + sc.Name, "stop"], True)
+            if retval is not 0:
+                Print("Error: " + check_state_program +
+                      sc.Name + " stop failed: ", file=sys.stderr)
+                LG().Log('ERROR', "Error: " + check_state_program +
+                         sc.Name + " stop failed: ")
+                return [-1]
+        else:
+            (process_stdout, process_stderr, retval) = Process(
+                [check_state_program, sc.Name, "stop"])
+            if retval is not 0:
+                Print("Error: " + check_state_program + " " + sc.Name +
+                      " stop failed: " + process_stderr, file=sys.stderr)
+                LG().Log('ERROR', "Error: " + check_state_program +
+                         " " + sc.Name + " stop failed: " + process_stderr)
+                return [-1]
         if IsServiceRunning(sc):
             Print("Error: " + check_state_program + " " + sc.Name +
                   " stop failed: " + process_stderr, file=sys.stderr)
