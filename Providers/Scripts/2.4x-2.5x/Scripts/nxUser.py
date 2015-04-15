@@ -48,8 +48,10 @@ def init_vars(UserName, Ensure, FullName, Description, Password, Disabled, Passw
         Password = ''
     if Disabled is None:
         Disabled = False
+    Disabled = ( Disabled == True ) # this arrives as a 0 or 1
     if PasswordChangeRequired is None:
         PasswordChangeRequired = False
+    PasswordChangeRequired = ( PasswordChangeRequired == True ) # this arrives as a 0 or 1
     if HomeDirectory is not None:
         HomeDirectory = HomeDirectory.encode('ascii', 'ignore')
     else:
@@ -401,7 +403,6 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
                 Print("Password does not match", file=sys.stderr)
                 LG().Log('ERROR', "Password does not match")
                 return [-1]
-
         if PasswordChangeRequired is True and not PasswordExpired(shadow_entries[UserName]):
             Print(
                 "PasswordChangeRequired is True and the password is not expired.", file=sys.stderr)
