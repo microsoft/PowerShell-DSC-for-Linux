@@ -403,8 +403,6 @@ def DoEnableDisable(p):
                 raise Exception(
                     'Unable to retrieve remote resource ' + p.FilePath + ' Error is ' + str(ret))
             else:
-                if p.LocalPath == '': 
-                    return True,'' # falied the ctime or mtime check
                 p.FilePath = p.LocalPath
 
         if not os.path.isfile(p.FilePath):
@@ -432,6 +430,8 @@ def DoEnableDisable(p):
     if len(p.LocalPath) > 1:  # create cache entry and remove the tmp file
         WriteCacheInfo(p)
         RemoveFile(p.LocalPath)
+    if p.PackageManager == 'yum'  and 'No Match for argument: ' + p.Name in out: # yum returns 0 on unknown package
+        return False, out
     if code is not int(p.ReturnCode):
         return False, out
     return True, out
@@ -737,8 +737,7 @@ def GetRemoteFile(p):
     if dst_st is not None:
         dst_mtime = time.gmtime(dst_st.st_mtime)
     if lm_mtime is not None and dst_mtime is not None and dst_mtime >= lm_mtime:
-        data = ''
-        p.LocalPath = ''
+        data = '' # skip download, the file is the same
     else:
         data = resp.read()
     if data is not None and len(data) > 0:
