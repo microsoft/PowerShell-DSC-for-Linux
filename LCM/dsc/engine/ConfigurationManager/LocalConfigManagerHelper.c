@@ -2025,6 +2025,7 @@ MI_Result ApplyPendingConfig(
     if (result != MI_RESULT_OK)
     {
         RetryDeleteFile(GetPendingConfigFileName());
+        File_RemoveT(GetConfigChecksumFileName());
         return result;
     }
 

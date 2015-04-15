@@ -1918,8 +1918,20 @@ MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
             }
             else
             {
+                // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
+                Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", "/opt/microsoft/dsc/Scripts/RemoveModule.py", current->moduleName);
+                retval = system(stringBuffer); 
+                if ( retval == 0 || (retval == -1 && errno == ECHILD) )
+                {
+                    r = GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_INSTALLMODULEFAILED, current->moduleName, current->moduleVersionClassTuple->moduleVersion);
+                }
+                else
+                {
+                    r = GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_INSTALLMODULEANDREMOVEMODULEFAILED, current->moduleName, current->moduleVersionClassTuple->moduleVersion);
+                }
+
                 CleanupModuleTable(moduleTable);
-                return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_INSTALLMODULEFAILED, current->moduleName, current->moduleVersionClassTuple->moduleVersion);
+                return r;
             }
         }
 
