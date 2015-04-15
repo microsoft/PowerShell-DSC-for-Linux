@@ -19,7 +19,7 @@ import time
 import imp
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
-l = nxDSCLog.DSCLog
+LG = nxDSCLog.DSCLog
 try:
     import hashlib
     md5const = hashlib.md5
