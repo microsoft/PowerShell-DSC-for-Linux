@@ -403,3 +403,102 @@
                  ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF ,
                  _In_z_ const PAL_Char*, firstString,
                  "The partial configuration name " Intlstr_tstr(1) " present in the configuration document is invalid. Define a partial configuration inside the metaconfiguration with this partial configuration name in order to use it.")
+
+
+INTERNAL_Intlstr_Define0( ID_PULL_DSCCONF_NOTOPENABLE,
+			  ID_PULL_DSCCONF_NOTOPENABLE,
+                 	  "Unable to open file at /opt/omi/etc/dsc/dsc.conf")
+
+INTERNAL_Intlstr_Define1( ID_PULL_DSCCONF_NOTREADABLE,
+			  ID_PULL_DSCCONF_NOTREADABLE,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "Unable to read file at /opt/omi/etc/dsc/dsc.conf. "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define2( ID_PULL_DSCCONF_INVALIDVALUE,
+			  ID_PULL_DSCCONF_INVALIDVALUE,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Key " Intlstr_tstr(1) " in file /opt/omi/etc/dsc/dsc.conf has invalid value "  Intlstr_tstr(2) ".")
+
+INTERNAL_Intlstr_Define0( ID_PULL_SSLCIPHERLISTTOOLONG,
+			  ID_PULL_SSLCIPHERLISTTOOLONG,
+                 	  "sslcipherlist is too long in /opt/omi/etc/dsc/dsc.conf. It must be 4096 characters or less.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_NOCONFIGDOWNLOADMANAGERS,
+			  ID_PULL_NOCONFIGDOWNLOADMANAGERS,
+                 	  "There are no ConfigurationDownloadManagers specified in the MetaConfiguration")
+
+INTERNAL_Intlstr_Define0( ID_PULL_TOOMANYCONFIGDOWNLOADMANAGERS,
+			  ID_PULL_TOOMANYCONFIGDOWNLOADMANAGERS,
+                 	  "There is more than one ConfigurationDownloadManager specified. You must use PartialConfigurations to have more than one ConfigurationDownloadManager.")
+
+INTERNAL_Intlstr_Define1( ID_PULL_NOSERVERURL,
+			  ID_PULL_NOSERVERURL,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "There is no ServerURL specified for the WebDownloadManager with ResourceID: "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CURLFAILEDTOINITIALIZE,
+			  ID_PULL_CURLFAILEDTOINITIALIZE,
+                 	  "cURL failed to initialize.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CURLFAILEDTOSETCIPHERLIST,
+			  ID_PULL_CURLFAILEDTOSETCIPHERLIST,
+                 	  "cURL failed to set the specified cipher list.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CURLFAILEDTOSETNOSSLV3,
+			  ID_PULL_CURLFAILEDTOSETNOSSLV3,
+                 	  "cURL failed to disable SSLv3 communication.")
+
+INTERNAL_Intlstr_Define2( ID_PULL_CURLPERFORMFAILED,
+			  ID_PULL_CURLPERFORMFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "cURL failed to perform on this base url: " Intlstr_tstr(1)  " with this error message: "  Intlstr_tstr(2) ".")
+
+INTERNAL_Intlstr_Define0( ID_PULL_INVALIDRESPONSEFROMSERVER,
+			  ID_PULL_INVALIDRESPONSEFROMSERVER,
+                 	  "Receieved an invalid response from server.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_INVALIDCHECKSUMALGORITHM,
+			  ID_PULL_INVALIDCHECKSUMALGORITHM,
+                 	  "Receieved an invalid checksum algorithm from server.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_NOPARTIALCONFIGS,
+			  ID_PULL_NOPARTIALCONFIGS,
+                 	  "Unable to find PartialConfigurations in the MetaConfiguration.")
+
+INTERNAL_Intlstr_Define1( ID_PULL_NOCONFIGURATIONSOURCE,
+			  ID_PULL_NOCONFIGURATIONSOURCE,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "No ConfigurationSource is specified for the PartialConfiguration: "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODE,
+			  ID_PULL_SERVERHTTPERRORCODE,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) ".")
+
+
+INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODEMODULE,
+			  ID_PULL_SERVERHTTPERRORCODEMODULE,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) " for a module.")
+
+INTERNAL_Intlstr_Define2( ID_PULL_INSTALLMODULEFAILED,
+ 			  ID_PULL_INSTALLMODULEFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Failed to install module: " Intlstr_tstr(1) " with version: "  Intlstr_tstr(2) ".")
+
+INTERNAL_Intlstr_Define1( ID_PULL_INITIALIZEMODULETABLEFAILED,
+			  ID_PULL_INITIALIZEMODULETABLEFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "Failed to initialize the ModuleVersion table: "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define2( ID_PULL_INVALIDMODULEVERSION,
+     			  ID_PULL_INVALIDMODULEVERSION,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Invalid module version: "  Intlstr_tstr(1) " for module: " Intlstr_tstr(2)  ".")
+

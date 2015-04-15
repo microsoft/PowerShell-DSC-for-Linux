@@ -52,6 +52,5 @@ class MSFT_DSCMetaConfiguration
   EmbeddedInstance("OMI_ConfigurationDownloadManager")]
   string  ConfigurationDownloadManagers[];    
 
-  [Read,ValueMap{"Ready","Busy","PendingReboot"}, Values{"Ready","Busy","PendingReboot"}] string LocalConfigurationManagerState;
   [EmbeddedInstance("MSFT_PartialConfiguration")] string PartialConfigurations[];
 };
