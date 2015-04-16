@@ -36,6 +36,7 @@ def init_vars(Name, Value, Ensure, Path):
         Ensure = ''
     if Path is None:
         Path = False
+    Path = ( Path == True )
     return Name, Value, Ensure.lower(), Path
 
 
@@ -107,7 +108,7 @@ class Params:
 
         if Path is not True and Path is not False:
             Print('ERROR: Param Path must be True or False.', file=sys.stderr)
-            LG().Log('ERROR: Param Path must be True or False.')
+            LG().Log('ERROR', 'ERROR: Param Path must be True or False.')
             raise Exception('BadParameter')
         self.Path = Path
 
