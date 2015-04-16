@@ -4964,6 +4964,7 @@ MI_Result LCM_Pull_ExecuteActionPerConfiguration(
         _In_z_ MI_Char *checkSum,
         _In_ MI_Boolean bIsCompliant,
         _In_ MI_Uint32 lastGetActionStatusCode,
+        _Out_ MI_Uint32 * numModulesInstalled,
         _Outptr_result_maybenull_z_  MI_Char** resultStatus,
         _Inout_ MI_Uint32* getActionStatusCode,
         _In_ ModuleManager *moduleManager,
@@ -4978,7 +4979,7 @@ MI_Result LCM_Pull_ExecuteActionPerConfiguration(
                 if (*resultStatus && Tcscasecmp(*resultStatus, PULL_STATUSCODE_GETCONFIG) == 0)
                 {
                         result = LCM_Pull_GetConfiguration(lcmContext, moduleManager, metaConfigInstance, partialConfigName,
-                                &resultExecutionStatus, getActionStatusCode, cimErrorDetails);
+                                                           numModulesInstalled, &resultExecutionStatus, getActionStatusCode, cimErrorDetails);
                         if (result != MI_RESULT_OK)
                         {
                                 DSC_free(*resultStatus);
@@ -5026,6 +5027,8 @@ MI_Result MI_CALL LCM_Pull_Execute(
         MI_Result updateResult = MI_RESULT_OK;
         MI_Instance* updateErrorDetails = NULL;
         MI_Uint32 xCount;
+        MI_Uint32 numModulesInstalled = 0;
+        int retval;
 
     SetLCMStatusBusy(MI_FALSE, lcmContext, MSFT_DSCConfigurationStatus_Type_Initial);
     SetLCMProviderContext( lcmContext, (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE) , NULL);
@@ -5079,7 +5082,9 @@ MI_Result MI_CALL LCM_Pull_Execute(
                         return result;
                 }
                 result = LCM_Pull_ExecuteActionPerConfiguration(lcmContext, metaConfigInstance, partialConfigName,
-                checkSumValue, bComplianceStatus, getActionStatusCode, &resultStatus, &getActionStatusCode, moduleManager, cimErrorDetails);
+                                                                checkSumValue, bComplianceStatus, getActionStatusCode, 
+                                                                &numModulesInstalled, &resultStatus, &getActionStatusCode, 
+                                                                moduleManager, cimErrorDetails);
                 DSC_free(checkSumValue);
                 if (result == MI_RESULT_OK)
                 {
@@ -5101,42 +5106,48 @@ MI_Result MI_CALL LCM_Pull_Execute(
         }
         if (result == MI_RESULT_OK && bGotNewConfiguration)
         {
-                if (!bFullConfiguration)
+            if (!bFullConfiguration)
+            {
+                //If the partial configurations directory contains partial files, combine them and save into pending.mof
+                result = MergePartialConfigurations(lcmContext, moduleManager, GetPendingConfigFileName(), GetPartialConfigBaseDocumentInstanceFileName(), cimErrorDetails);
+                EH_CheckResult(result);
+            }
+            // If everything is good we will apply the configuration here.
+            if (result == MI_RESULT_OK)
+            {
+                if (File_ExistT(GetCurrentConfigFileName()) == 0)
                 {
-                        //If the partial configurations directory contains partial files, combine them and save into pending.mof
-                        result = MergePartialConfigurations(lcmContext, moduleManager, GetPendingConfigFileName(), GetPartialConfigBaseDocumentInstanceFileName(), cimErrorDetails);
-                        EH_CheckResult(result);
+                    if (File_RemoveT(GetCurrentConfigFileName()) != 0)
+                    {
+                        DSC_EventWriteDeleteCurrentConfigFailed();
+                    }
                 }
-                // If everything is good we will apply the configuration here.
+
+                if (numModulesInstalled > 0)
+                {
+                    return GetCimMIError(MI_RESULT_SERVER_IS_SHUTTING_DOWN, cimErrorDetails, ID_PULL_RESTARTINGSERVER);
+                }
+
+                result = ApplyPendingConfig(lcmContext, moduleManager, 0, &resultExecutionStatus, cimErrorDetails);
+                if (result == MI_RESULT_OK && (resultExecutionStatus & DSC_RESTART_SYSTEM_FLAG))
+                {
+                    SetLCMStatusReboot(lcmContext);
+#if defined(_MSC_VER)
+                    result = RegisterRebootTaskIfNeeded((MI_Instance *) metaConfigInstance, moduleManager, cimErrorDetails);
+#endif
+                }
+                
                 if (result == MI_RESULT_OK)
                 {
-                        if (File_ExistT(GetCurrentConfigFileName()) == 0)
-                        {
-                                if (File_RemoveT(GetCurrentConfigFileName()) != 0)
-                                {
-                                        DSC_EventWriteDeleteCurrentConfigFailed();
-                                }
-                        }
-                        result = ApplyPendingConfig(lcmContext, moduleManager, 0, &resultExecutionStatus, cimErrorDetails);
-                        if (result == MI_RESULT_OK && (resultExecutionStatus & DSC_RESTART_SYSTEM_FLAG))
-                        {
-                                SetLCMStatusReboot(lcmContext);
-#if defined(_MSC_VER)
-                                result = RegisterRebootTaskIfNeeded((MI_Instance *) metaConfigInstance, moduleManager, cimErrorDetails);
-#endif
-                        }
-
-                        if (result == MI_RESULT_OK)
-                        {
-                                // update compliance result.
-                                complianceStatus = MI_TRUE;
-                                result = UpdateCurrentStatus(&complianceStatus, NULL, NULL, cimErrorDetails);
-                                if (result == MI_RESULT_OK)
-                                {
-                                        // result = CopyConfigurationChecksum(mofFileName, cimErrorDetails);
-                                }
-                        }
+                    // update compliance result.
+                    complianceStatus = MI_TRUE;
+                    result = UpdateCurrentStatus(&complianceStatus, NULL, NULL, cimErrorDetails);
+                    if (result == MI_RESULT_OK)
+                    {
+                        // result = CopyConfigurationChecksum(mofFileName, cimErrorDetails);
+                    }
                 }
+            }
         }
 
         if (result != MI_RESULT_OK)
@@ -5234,6 +5245,7 @@ MI_Result LCM_Pull_GetConfiguration(
         _In_ ModuleManager *moduleManager,
         _In_ MI_Instance *metaConfigInstance,
         _In_opt_z_ MI_Char *partialConfigName,
+        _Out_ MI_Uint32 * numModulesInstalled,
         _Inout_ MI_Uint32 *resultExecutionStatus,
         _Out_ MI_Uint32 *getActionStatusCode,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
@@ -5243,6 +5255,8 @@ MI_Result LCM_Pull_GetConfiguration(
         MI_Char *targetMofPath = NULL;
         MI_Char *targetMofChecksumPath = NULL;
         MI_Char *resultStatus = NULL;
+        MI_Char * directoryName = NULL;
+        char command[1024];
 
         if (cimErrorDetails == NULL)
         {
@@ -5251,8 +5265,17 @@ MI_Result LCM_Pull_GetConfiguration(
 
         *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
 
-        result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, &mofFileName, &resultStatus, getActionStatusCode, cimErrorDetails);
-        RETURN_RESULT_IF_FAILED(result);
+        result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, &mofFileName, &directoryName, numModulesInstalled, &resultStatus, getActionStatusCode, cimErrorDetails);
+        if (result != MI_RESULT_OK)
+        {
+            if (directoryName != NULL)
+            {
+                snprintf(command, 1024, "rm -rf %s", directoryName);
+                system(command);
+                free(directoryName);
+            }
+            return result;
+        }
 
         if (resultStatus == NULL)
         {
@@ -5304,6 +5327,14 @@ EH_UNWIND:
         {
                 DSCFREE_IF_NOT_NULL(targetMofPath);
                 DSCFREE_IF_NOT_NULL(targetMofChecksumPath);
+        }
+
+        // Delete temp directory if exists
+        if (directoryName != NULL)
+        {
+            snprintf(command, 1024, "rm -rf %s", directoryName);
+            system(command);
+            free(directoryName);
         }
         return result;
 }

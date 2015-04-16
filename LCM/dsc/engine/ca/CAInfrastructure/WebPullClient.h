@@ -1,13 +1,14 @@
 #ifndef __WEBPULLCLIENT_H_
 #define __WEBPULLCLIENT_H_
 
-#define MAX_CIPHER_LIST_LENGTH 4096
+#define MAX_SSLOPTION_STRING_LENGTH 4096
 
 struct SSLOptions
 {
     MI_Boolean DoNotCheckCertificate;
     MI_Boolean NoSSLv3;
-    char cipherList[MAX_CIPHER_LIST_LENGTH + 1];
+    char cipherList[MAX_SSLOPTION_STRING_LENGTH + 1];
+    char CABundle[MAX_SSLOPTION_STRING_LENGTH + 1];
 };
 
 enum GetActionStatusCodeTypes
@@ -152,7 +153,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
                                          _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 
-MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
+MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
+                                  const MI_Char *configurationID,
                                   const MI_Char *certificateID,
                                   MI_Char* directoryPath,
                                   MI_Char* fileName,

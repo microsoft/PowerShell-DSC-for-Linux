@@ -113,6 +113,7 @@ static MI_Result GetSSLOptions(struct SSLOptions * sslOptions,
     sslOptions->DoNotCheckCertificate = MI_FALSE;
     sslOptions->NoSSLv3 = MI_FALSE;
     sslOptions->cipherList[0] = '\0';
+    sslOptions->CABundle[0] = '\0';
     
     conf = Conf_Open("/opt/omi/etc/dsc/dsc.conf");
     if (!conf)
@@ -171,13 +172,24 @@ static MI_Result GetSSLOptions(struct SSLOptions * sslOptions,
         else if (strcasecmp(key, "sslciphersuite") == 0)
         {
             size_t valueLength = strlen(value);
-            if (valueLength > MAX_CIPHER_LIST_LENGTH)
+            if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
             {
                 Conf_Close(conf);
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_SSLCIPHERLISTTOOLONG);
             }
             memcpy(sslOptions->cipherList, value, valueLength);
             sslOptions->cipherList[valueLength] = '\0';
+        }
+        else if (strcasecmp(key, "CURL_CA_BUNDLE") == 0)
+        {
+            size_t valueLength = strlen(value);
+            if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
+            {
+                Conf_Close(conf);
+                return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_CABUNDLETOOLONG);
+            }
+            memcpy(sslOptions->CABundle, value, valueLength);
+            sslOptions->CABundle[valueLength] = '\0';
         }
         else
         {
@@ -1236,6 +1248,14 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         {
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         }
+        if (sslOptions.CABundle[0] != '\0')
+        {
+            res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
+            if (res != CURLE_OK)
+            {
+                return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+            }
+        }
     }
     else
     {
@@ -1385,6 +1405,14 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         else
         {
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        }
+        if (sslOptions.CABundle[0] != '\0')
+        {
+            res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
+            if (res != CURLE_OK)
+            {
+                return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+            }
         }
     }    
     else
@@ -1715,6 +1743,14 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         {
             curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         }
+        if (sslOptions.CABundle[0] != '\0')
+        {
+            res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
+            if (res != CURLE_OK)
+            {
+                return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+            }
+        }
     }
     else
     {
@@ -1853,7 +1889,8 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     return MI_RESULT_OK;
 }
 
-MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID, 
+MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
+                                  const MI_Char *configurationID, 
                                   const MI_Char *certificateID,
                                   MI_Char* directoryPath,
                                   MI_Char* fileName,
@@ -1935,6 +1972,7 @@ MI_Result MI_CALL Pull_GetModules(const MI_Char *configurationID,
             }
         }
 
+        *numModulesInstalled = *numModulesInstalled + 1;
         current = current->next;
     }
 
@@ -1948,6 +1986,8 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
                                                           _In_ MI_Instance *metaConfig,
                                                           _In_opt_z_ MI_Char *partialConfigName,
                                                           _Outptr_result_maybenull_z_  MI_Char** mofFileName,
+                                                          _Outptr_result_maybenull_z_  MI_Char** directoryName,
+                                                          _Out_ MI_Uint32* numModulesInstalled,
                                                           _Outptr_result_maybenull_z_  MI_Char** result,
                                                           _Out_ MI_Uint32* getActionStatusCode,
                                                           _Outptr_result_maybenull_ MI_Instance **extendedError)
@@ -1955,7 +1995,6 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     MI_Result r = MI_RESULT_OK;
     MI_Char *configurationID = NULL;
     MI_Char *certificateID = NULL;
-    MI_Char *directoryPath = NULL;
     MI_Char *fileName = NULL;
     MI_Char url[URL_SIZE] = {0};
     MI_Char subUrl[SUBURL_SIZE] = {0};
@@ -1986,7 +2025,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         r = GetCimMIError( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_INVALIDURLINCUSTOMDATA);
         return r;
     }    
-    r = CreateTmpDirectoryPath(&directoryPath, &fileName);
+    r = CreateTmpDirectoryPath(directoryName, &fileName);
     if( r != MI_RESULT_OK)
     {
         DSC_free(configurationID);
@@ -2000,7 +2039,6 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     {
         DSC_free(configurationID);
         DSC_free(fileName);  
-        free(directoryPath);
         return r;
     }
 
@@ -2013,7 +2051,6 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     {
         DSC_free(configurationID);
         DSC_free(fileName);  
-        free(directoryPath);
         return r;
     }
 
@@ -2023,17 +2060,15 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         bAllowedModuleOverride = MI_TRUE;
     }
 
-    r = Pull_GetModules(configurationID,  certificateID, directoryPath, fileName, sslOptions, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
+    r = Pull_GetModules(numModulesInstalled, configurationID,  certificateID, *directoryName, fileName, sslOptions, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
     if( r != MI_RESULT_OK)
     {
          DSC_free(configurationID);
-         free(directoryPath);
          DSC_free(fileName);
          return r;
     }
 
     DSC_free(configurationID);
-    free(directoryPath);
     *mofFileName = fileName;
     DSC_EventWriteLCMPullGetConfigSuccess(webPulginName);    
     return MI_RESULT_OK;

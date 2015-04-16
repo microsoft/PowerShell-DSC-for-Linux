@@ -60,6 +60,11 @@ MI_Boolean g_hPSInfraModuleHandleInitialized;
 
 #include "LocalConfigurationManager.h"
 
+// TODO: Temporary workaround until we can reload OMI provider registration without restarting omi.
+void ReloadOMI()
+{
+    system("exec setsid /bin/sh -c 'sleep 5; /opt/omi/bin/omiserver -r; sleep 5; /opt/omi/bin/ConsistencyInvoker'&");
+}
 
 void UnloadFromProvider(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
@@ -518,7 +523,8 @@ void Invoke_ApplyConfiguration(
     MI_Uint32 taskMode = TASK_AUTO;
     MI_Value value;
     MI_Uint32 flags = 0;
-        MI_Instance *metaConfigInstance = NULL;
+    MI_Instance *metaConfigInstance = NULL;
+    MI_Boolean restartOMI = MI_FALSE;
 
     if (in->force.exists && in->force.value == MI_TRUE)
     {      
@@ -625,12 +631,16 @@ void Invoke_ApplyConfiguration(
                 miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
                 if (miResult != MI_RESULT_OK)
                 {
-                        SetThreadToken(NULL, m_clientThreadToken);
-                        CloseHandle(m_clientThreadToken);
-                        MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-                        MI_Context_PostCimError(context, cimErrorDetails);
-                        MI_Instance_Delete(cimErrorDetails);
-                        goto ExitWithError;
+                    if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
+                    {
+                        restartOMI = MI_TRUE;
+                    }
+                    SetThreadToken(NULL, m_clientThreadToken);
+                    CloseHandle(m_clientThreadToken);
+                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);
+                    MI_Context_PostCimError(context, cimErrorDetails);
+                    MI_Instance_Delete(cimErrorDetails);
+                    goto ExitWithError;
                 }
     }
     miResult = CallConsistencyEngine(context, TASK_REGULAR, &cimErrorDetails); 
@@ -691,6 +701,10 @@ ExitWithError:
     MI_PostCimError(context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     ResetJobId();
+    if (restartOMI == MI_TRUE)
+    {
+        ReloadOMI();
+    }
 }
 
 void Invoke_SendMetaConfigurationApply(
@@ -1241,6 +1255,7 @@ void Invoke_PerformRequiredConfigurationChecks(
     MSFT_DSCMetaConfiguration *metaConfigInstance = NULL;
     MI_Value value;
     MI_Uint32 flags = 0;
+    MI_Boolean restartOMI = MI_FALSE;
 
     if (!OpenThreadToken(GetCurrentThread(), TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_DUPLICATE, TRUE, &m_clientThreadToken))
     {
@@ -1336,6 +1351,10 @@ void Invoke_PerformRequiredConfigurationChecks(
         miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
+            if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
+            {
+                restartOMI = MI_TRUE;
+            }
             SetThreadToken(NULL, m_clientThreadToken);
             CloseHandle(m_clientThreadToken);
             MI_Instance_Delete((MI_Instance *)metaConfigInstance);
@@ -1399,6 +1418,10 @@ ExitSimple:
     // Debug log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();    
+    if (restartOMI == MI_TRUE)
+    {
+        ReloadOMI();
+    }
 }
 
 void Invoke_StopConfiguration(
@@ -2163,6 +2186,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
     MI_Value value;
     MI_Uint32 flags = 0;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*) param;
+    MI_Boolean restartOMI = MI_FALSE;
 
     if( args == NULL )
     {
@@ -2231,6 +2255,10 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
         miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
+            if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
+            {
+                restartOMI = MI_TRUE;
+            }
             MI_Instance_Delete((MI_Instance *)metaConfigInstance);
             MI_Context_PostCimError(args->context, cimErrorDetails);
             MI_Instance_Delete(cimErrorDetails);
@@ -2276,6 +2304,10 @@ ExitSimple:
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();     
     PAL_Free(args);
+    if (restartOMI == MI_TRUE)
+    {
+        ReloadOMI();
+    }
     return 0;
 }
 
