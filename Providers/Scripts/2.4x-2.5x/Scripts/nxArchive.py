@@ -41,6 +41,7 @@ def init_vars(DestinationPath, SourcePath, Ensure, Force, Checksum):
         Ensure = ''
     if Force is None:
         Force = False
+    Force = ( Force == True )
     if Checksum is None:
         Checksum = ''
     return DestinationPath.encode('ascii', 'ignore'), SourcePath.encode('ascii', 'ignore'), \
