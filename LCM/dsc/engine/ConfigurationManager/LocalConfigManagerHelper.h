@@ -425,6 +425,7 @@ extern "C"
         _In_ ModuleManager *moduleManager,
         _In_ MI_Instance *metaConfigInstance,
         _In_opt_z_ MI_Char *partialConfigName,
+        _Out_ MI_Uint32 * numModulesInstalled,
         _Inout_ MI_Uint32 *resultExecutionStatus,
         _Out_ MI_Uint32 *getActionStatusCode,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);

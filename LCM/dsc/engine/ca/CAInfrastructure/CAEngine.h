@@ -84,6 +84,8 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
                                                           _In_ MI_Instance *metaConfig,
                                                           _In_opt_z_ MI_Char *partialConfigName,
                                                           _Outptr_result_maybenull_z_  MI_Char** mofFileName,
+                                                          _Outptr_result_maybenull_z_  MI_Char** directoryName,
+                                                          _Out_ MI_Uint32 * numModulesInstalled,
                                                           _Outptr_result_maybenull_z_  MI_Char** result,
                                                           _Out_ MI_Uint32* getActionStatusCode,
                                                           _Outptr_result_maybenull_ MI_Instance **extendedError);

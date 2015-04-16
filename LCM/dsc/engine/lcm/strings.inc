@@ -424,6 +424,15 @@ INTERNAL_Intlstr_Define0( ID_PULL_SSLCIPHERLISTTOOLONG,
 			  ID_PULL_SSLCIPHERLISTTOOLONG,
                  	  "sslcipherlist is too long in /opt/omi/etc/dsc/dsc.conf. It must be 4096 characters or less.")
 
+
+INTERNAL_Intlstr_Define0( ID_PULL_CABUNDLETOOLONG,
+			  ID_PULL_CABUNDLETOOLONG,
+                 	  "CURL_CA_BUNDLE is too long in /opt/omi/etc/dsc/dsc.conf. It must be 4096 characters or less.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CABUNDLENOTSUPPORTED,
+			  ID_PULL_CABUNDLENOTSUPPORTED,
+                 	  "The CURL_CA_BUNDLE option is not supported by the version of cURL installed to this system. Please either install a more recent version of libcurl, or disable the CURL_CA_BUNDLE option in /opt/omi/etc/dsc/dsc.conf.")
+
 INTERNAL_Intlstr_Define0( ID_PULL_NOCONFIGDOWNLOADMANAGERS,
 			  ID_PULL_NOCONFIGDOWNLOADMANAGERS,
                  	  "There are no ConfigurationDownloadManagers specified in the MetaConfiguration")
@@ -508,3 +517,7 @@ INTERNAL_Intlstr_Define2( ID_PULL_INVALIDMODULEVERSION,
                           _In_z_ const PAL_Char*, secondString,
                  	  "Invalid module version: "  Intlstr_tstr(1) " for module: " Intlstr_tstr(2)  ".")
 
+
+INTERNAL_Intlstr_Define0( ID_PULL_RESTARTINGSERVER,
+			  ID_PULL_RESTARTINGSERVER,
+                 	  "Due to a required resource module installation, DSC will be restarted. The configuration operation will resume after the restart")
