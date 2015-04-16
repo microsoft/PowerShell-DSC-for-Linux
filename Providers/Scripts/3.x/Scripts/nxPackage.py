@@ -736,14 +736,17 @@ def GetRemoteFile(p):
     if lm_mtime is not None and dst_mtime is not None and dst_mtime >= lm_mtime:
         data = '' # skip download, the file is the same
     else:
-        data = resp.read()
-    if data is not None and len(data) > 0:
-        try:
-            with (open(p.LocalPath, 'wb+')) as F:
-                F.write(data)
+        data=b'keep going'
+        with (open(p.LocalPath, 'wb+')) as F:
+            try:
+                while data:
+                    data = resp.read(1048576)
+                    if data is not None and len(data) > 0:
+                        F.write(data)
+            except Exception as e:
                 F.close()
-        except Exception as e:
-            print(repr(e))
-            LG().Log('ERROR',  repr(e))
-            return 1
+                os.unlink(p.LocalPath)
+                print(repr(e))
+                LG().Log('ERROR', repr(e))
+                return 1
     return 0

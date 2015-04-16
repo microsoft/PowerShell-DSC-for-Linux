@@ -63,6 +63,7 @@ def init_vars(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, R
         FilePath = ''
     if PackageGroup is None:
         PackageGroup = False
+    PackageGroup = ( PackageGroup == True )
     if Arguments is not None:
         Arguments = Arguments.encode('ascii', 'ignore')
     else:
@@ -736,15 +737,18 @@ def GetRemoteFile(p):
     if lm_mtime is not None and dst_mtime is not None and dst_mtime >= lm_mtime:
         data = '' # skip download, the file is the same
     else:
-        data = resp.read()
-    if data is not None and len(data) > 0:
+        data='keep going'
         try:
             F = open(p.LocalPath, 'wb+')
-            F.write(data)
+            while data:
+                data = resp.read(1048576)
+                if data is not None and len(data) > 0:
+                    F.write(data)
             F.close()
-        except Exception, e:
-            F.close()
+        except  Exception, e:
             Print(repr(e))
-            LG().Log('ERROR',  repr(e))
+            LG().Log('ERROR', repr(e))
+            F.close()
+            os.unlink(p.LocalPath)
             return 1
     return 0
