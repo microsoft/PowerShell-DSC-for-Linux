@@ -161,8 +161,8 @@ def ReadFile65k(path):
             print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error. strerror, file=sys.stderr)
             LG().Log('ERROR', "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
         else:
-            d = F.read(65535)
-    return d, error
+            d = F.read(64000) # read slightly under 65k as max message size for OMI is 65k
+    return d.decode('utf-8','ignore').encode('ascii','ignore'), error
 
 
 def ReadFile(path):
@@ -1077,16 +1077,19 @@ def GetRemoteFile(fc):
             data = ''
             fc.LocalPath = ''
             return 0
-    data = resp.read()
-    if data is not None and len(data) > 0:
+    data=b'keep going'
+    with (open(fc.LocalPath, 'wb+')) as F:
         try:
-            with (open(fc.LocalPath, 'wb+')) as F:
-                F.write(data)
-                F.close()
+            while data:
+                data = resp.read(1048576)
+                if data is not None and len(data) > 0:
+                    F.write(data)
         except Exception, e:
-                print(repr(e))
-                LG().Log('ERROR', repr(e))
-                return 1
+            F.close()
+            os.unlink(fc.LocalPath)
+            print(repr(e))
+            LG().Log('ERROR', repr(e))
+            return 1
     return 0
 
 

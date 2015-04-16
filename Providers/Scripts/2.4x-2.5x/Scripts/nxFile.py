@@ -39,12 +39,14 @@ def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents,
         Type = ''
     if Force is None :
         Force = False
+    Force = ( Force == True )
     if Contents is None :
         Contents = ''
     if Checksum is None :
         Checksum = ''
     if Recurse is None :
         Recurse = False
+    Recurse = ( Recurse == True )
     if Links is None :
         Links = 'follow'
     if Owner is None :
@@ -145,9 +147,9 @@ def ReadFile65k(path):
         Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr )
         LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
     else:
-        d = F.read(65535)
+        d = F.read(64000) # read slightly under 65k as max message size for OMI is 65k
         F.close()
-    return d, error
+    return d.decode('utf-8','ignore').encode('ascii','ignore'), error
 
 
 def ReadFile(path):
@@ -1068,17 +1070,20 @@ def GetRemoteFile(fc):
             data = ''
             fc.LocalPath = ''
             return 0
-    data = resp.read()
-    if data is not None and len(data) > 0:
-        try:
-            F = open(fc.LocalPath, 'wb+')
-            F.write(data)
-            F.close()
-        except  Exception, e:
-            Print(repr(e))
-            LG().Log('ERROR', repr(e))
-            F.close()
-            return 1
+    data='keep going'
+    try:
+        F = open(fc.LocalPath, 'wb+')
+        while data:
+            data = resp.read(1048576)
+            if data is not None and len(data) > 0:
+                F.write(data)
+        F.close()
+    except  Exception, e:
+        Print(repr(e))
+        LG().Log('ERROR', repr(e))
+        F.close()
+        os.unlink(fc.LocalPath)
+        return 1
     return 0
 
 
