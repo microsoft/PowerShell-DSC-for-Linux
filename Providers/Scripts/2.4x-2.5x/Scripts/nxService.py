@@ -795,7 +795,8 @@ def ModifySystemdService(sc):
 
     (process_stdout, process_stderr, retval) = Process(
         [systemctl_path, "status", sc.Name + '.service'])
-    if retval is not 0:
+    # retval may be non zero even if service exists for 'status'.
+    if 'No such file or directory' in process_stdout:
         Print("Error: " + systemctl_path + " status " + sc.Name +
               " failed: " + process_stderr, file=sys.stderr)
         LG().Log('ERROR', "Error: " + systemctl_path +
