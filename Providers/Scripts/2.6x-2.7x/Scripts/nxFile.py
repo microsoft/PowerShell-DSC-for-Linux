@@ -144,11 +144,11 @@ def opened_bin_w_error(filename, mode="rb"):
             f.close()
 
 
-def ReadFile65k(path):
+def ReadFile1k(path):
     """
     Safely attempt to read a file,
     ensuring file is always closed at exit.
-    Read only 65k.
+    Read only 1k.
     Return the data and the exception object.
     The data is None if an error occurred.
     The error is None if the data was read.
@@ -161,7 +161,7 @@ def ReadFile65k(path):
             print("Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error. strerror, file=sys.stderr)
             LG().Log('ERROR', "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
         else:
-            d = F.read(64000) # read slightly under 65k as max message size for OMI is 65k
+            d = F.read(1024)
     return d.decode('utf-8','ignore').encode('ascii','ignore'), error
 
 
@@ -1026,9 +1026,9 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
             if os.path.isdir(os.readlink(DestinationPath)):
                 Contents = repr(ListDir(DestinationPath))
             else:
-                Contents, error = ReadFile65k(DestinationPath)
+                Contents, error = ReadFile1k(DestinationPath)
     else :
-        Contents, error = ReadFile65k(DestinationPath)
+        Contents, error = ReadFile1k(DestinationPath)
 
     if Contents is None:
         Contents = ''
