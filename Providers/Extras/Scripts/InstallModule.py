@@ -3,6 +3,7 @@ import sys
 import os
 import subprocess
 import shutil
+import platform
 
 def usage():
     print("Usage:")
@@ -91,8 +92,23 @@ for resource in resourcelist:
     f.write(registration_text(resource))
     f.close()
 
-    # Install lib files
-    retval = subprocess.call(["cp", "-R", modulePath + "/DSCResources/" + resource + "/lib", "/opt/omi"])
+    # Install lib files (lib for x86, lib64 for x64)
+    libdir = "x86"
+    arch = platform.architecture()
+    if len(arch) != 2:
+        print("Error: The python function platform.architecture() failed to return a valid tuple. Cannot detect if this system has x64 or x86 architecture.")
+        sys.exit(1)
+    if (arch[0] == "64bit"):
+        libdir = "x64"
+        
+    libdirPath = modulePath + "/DSCResources/" + resource + "/" + libdir
+    if not os.path.isdir(libdirPath):
+        print("Error: Unable to find directory in module at " + libdirPath + ", unable to install module.")
+        sys.exit(1)
+
+    os.rename(libdirPath, modulePath + "/DSCResources/" + resource + "/lib")
+    retval = subprocess.call(["cp", "-R", modulePath + "/DSCResources/" + resource + "/lib/", "/opt/omi/"])
+    os.rename(modulePath + "/DSCResources/" + resource + "/lib", libdirPath)
     if retval != 0:
         print("Error: Failed to install module " + moduleName + " on resource " + resource)
         sys.exit(1)
