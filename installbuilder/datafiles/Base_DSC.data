@@ -77,6 +77,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/mof/MSFT_nxFileLineResource.schema.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxFileLineResource.registration.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.registration.mof;      755; root; root
 
+/opt/microsoft/dsc/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; root; root
+
 /opt/microsoft/dsc/Scripts/client.py; Providers/Scripts/client.py; 755; root; root
 /opt/microsoft/dsc/Scripts/protocol.py; Providers/Scripts/protocol.py; 755; root; root
 /opt/microsoft/dsc/Scripts/nxDSCLog.py; Providers/Scripts/nxDSCLog.py; 755; root; root
@@ -140,10 +142,13 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/3.x; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts; 755; root; root
 /opt/omi/etc/dsc;        755; root; root; sysdir
-
+/etc/logrotate.d;        755; root; root; sysdir
 
 
 %Links
+/etc/logrotate.d/dsc; /opt/microsoft/dsc/etc/logrotate.conf; 644; root; root
+
+
 
 
 %Dependencies
@@ -313,7 +318,6 @@ rm $OMI_LIB/libdsccore.so
 for prov in ${{PROVIDERS}}; do
     rm $OMI_LIB/libMSFT_nx${prov}Resource.so
 done
-
 
 %Preinstall_0
 ${{SHELL_HEADER}}
