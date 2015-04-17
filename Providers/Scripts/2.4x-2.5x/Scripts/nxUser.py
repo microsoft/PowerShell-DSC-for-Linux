@@ -247,7 +247,7 @@ def Set(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
             usermod_string += "\""
 
         if HomeDirectory:
-            usermod_string += " -m -d \"" + HomeDirectory + "\""
+            usermod_string += " -d \"" + HomeDirectory + "\" -m "
 
         if GroupID:
             usermod_string += " -g " + GroupID
