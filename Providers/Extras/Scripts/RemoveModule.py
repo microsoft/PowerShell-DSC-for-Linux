@@ -3,6 +3,7 @@ import sys
 import os
 import subprocess
 import shutil
+import platform
 
 def usage():
     print("Usage:")
@@ -59,9 +60,25 @@ for resource in resourcelist:
     if os.path.isfile(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof"):
         os.remove(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof")
 
-    # Remove all files in lib/ for each class
-    RemoveMirroredDirectory(modulePath + "/DSCResources/" + resource + "/lib", "/opt/omi/lib")
-    os.rmdir(modulePath + "/DSCResources/" + resource + "/lib")
+    # Remove all files in libdir (lib for x86, lib64 for x64) for each class
+    libdir = "x86"
+    arch = platform.architecture()
+    if len(arch) != 2:
+        print("Error: The python function platform.architecture() failed to return a valid tuple. Cannot detect if this system has x64 or x86 architecture.")
+        sys.exit(1)
+    if (arch[0] == "64bit"):
+        libdir = "x64"
+        
+    libdirPath = modulePath + "/DSCResources/" + resource + "/" + libdir
+    if not os.path.isdir(libdirPath):
+        print("Error: Unable to find directory in module at " + libdirPath + ", unable to remove module.")
+        sys.exit(1)
+
+    RemoveMirroredDirectory(libdirPath, "/opt/omi/lib")
+    if os.path.isdir(modulePath + "/DSCResources/" + resource + "/x86"):
+        shutil.rmtree(modulePath + "/DSCResources/" + resource + "/x86")
+    if os.path.isdir(modulePath + "/DSCResources/" + resource + "/x64"):
+        shutil.rmtree(modulePath + "/DSCResources/" + resource + "/x64")
 
 shutil.rmtree(modulePath)
 
