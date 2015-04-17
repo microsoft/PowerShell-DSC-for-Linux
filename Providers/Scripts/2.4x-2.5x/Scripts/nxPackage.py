@@ -429,7 +429,9 @@ def DoEnableDisable(p):
     if len(p.LocalPath) > 1:  # create cache entry and remove the tmp file
         WriteCacheInfo(p)
         RemoveFile(p.LocalPath)
-    if p.PackageManager == 'yum'  and 'No Match for argument: ' + p.Name in out: # yum returns 0 on unknown package
+    if p.PackageManager == 'yum' and ( 'No Match for argument: ' + p.Name in out or 'Nothing to do' in out ): # yum returns 0 on unknown package
+        return False, out
+    if p.PackageManager == 'zypper' and "package '" + p.Name + "' not found" in out: # zypper returns 0 on unknown package
         return False, out
     if code is not int(p.ReturnCode):
         return False, out
