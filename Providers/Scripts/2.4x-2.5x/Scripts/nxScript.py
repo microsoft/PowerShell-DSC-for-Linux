@@ -113,7 +113,8 @@ def Get_Marshall(GetScript, SetScript, TestScript, User, Group):
     User = protocol.MI_String(User)
     Group = protocol.MI_String(Group)
     Result = protocol.MI_String(Result)
-
+    arg_names.append('Result')
+    
     retd = {}
     ld = locals()
     for k in arg_names:
