@@ -1,4 +1,3 @@
-# omireg /home/johnkord/dev/imp/dsc/Providers/bin/libMSFT_nxGroupResource.so
 LIBRARY=MSFT_nxGroupResource
 HOSTING=@requestor@
 CLASS=MSFT_nxGroupResource:OMI_BaseResource

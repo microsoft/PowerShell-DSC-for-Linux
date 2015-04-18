@@ -3,6 +3,6 @@ class MSFT_nxFileLineResource : OMI_BaseResource
 {
 [key,required] string FilePath;
 [write] string DoesNotContainPattern;
-[write] string ContainsLine;
+[key,write] string ContainsLine;
 };
 

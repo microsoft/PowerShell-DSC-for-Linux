@@ -26,6 +26,8 @@ LG = nxDSCLog.DSCLog
 
 
 def Set_Marshall(FilePath, DoesNotContainPattern, ContainsLine):
+    if ContainsLine == "":
+        ContainsLine = None
     if FilePath is None or len(FilePath) is 0:
         print("Error: 'FilePath' must be specified.\n", file=sys.stderr)
         LG().Log('ERROR', "Error: 'FilePath' must be specified.\n")
@@ -41,6 +43,8 @@ def Set_Marshall(FilePath, DoesNotContainPattern, ContainsLine):
 
 
 def Test_Marshall(FilePath, DoesNotContainPattern, ContainsLine):
+    if ContainsLine == "":
+        ContainsLine = None
     if FilePath is None or len(FilePath) is 0:
         print("Error: 'FilePath' must be specified.\n", file=sys.stderr)
         LG().Log('ERROR', "Error: 'FilePath' must be specified.\n")
@@ -56,6 +60,8 @@ def Test_Marshall(FilePath, DoesNotContainPattern, ContainsLine):
 
 
 def Get_Marshall(FilePath, DoesNotContainPattern, ContainsLine):
+    if ContainsLine == "":
+        ContainsLine = None
     arg_names = list(locals().keys())
     if FilePath is None or len(FilePath) is 0:
         print("Error: 'FilePath' must be specified.\n", file=sys.stderr)
