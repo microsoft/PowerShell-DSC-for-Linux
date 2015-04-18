@@ -495,14 +495,15 @@ MI_Result AddToList(_Inout_ ExecutionOrderContainer *container,
 
 
 MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,  
-                                  _In_ ModuleManager *moduleManager,
-                                  _In_ MI_InstanceA * instanceA,
-                                  _In_ MI_Session *miSession,
-                                  _In_ ExecutionOrderContainer *executionOrder,
-                                  _In_ MI_Uint32 flags,
-                                  _In_ MI_Instance *documentIns,                                  
-                                  _Inout_ MI_Uint32 *resultStatus,
-                                  _Outptr_result_maybenull_ MI_Instance **extendedError)
+                              _In_ ModuleManager *moduleManager,
+                              _In_ MI_InstanceA * instanceA,
+                              _In_ MI_Session *miSession,
+                              _In_ ExecutionOrderContainer *executionOrder,
+                              _In_ MI_Uint32 flags,
+                              _In_ MI_Instance *documentIns,                                  
+                              _Inout_ MI_Uint32 *resultStatus,
+                              _Outptr_result_maybenull_ MI_Instance **previousError,
+                              _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Uint32 xCount = 0;
     MI_Uint32 index = 0;
@@ -518,7 +519,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
     DSC_EventWriteMessageSettingResourcesOrder(executionOrder->executionListSize);
     moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
 
-    if (extendedError == NULL)
+    if (extendedError == NULL || previousError == NULL)
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
@@ -664,23 +665,23 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
                if( intlstr.str)
                    Intlstr_Free(intlstr);
 
-
             //send the error to WriteError stream.
             LCM_WriteError( lcmContext, *extendedError);
 
             // we need to continue moving other resources to their desired state.
             finalr = r;
-            if(extendedError)
+            if(certificateid != NULL)
             {
-                if(certificateid != NULL)
-                {
-                    DSC_free(certificateid);
-                    certificateid = NULL;
-                }
-
-                MI_Instance_Delete(*extendedError);
-                *extendedError = NULL;
+                DSC_free(certificateid);
+                certificateid = NULL;
             }
+            
+            if (*previousError != NULL && previousError != *extendedError)
+            {
+                MI_Instance_Delete(previousError);
+            }
+            *previousError = *extendedError;
+
             continue;
         }
         // Success Case
@@ -904,6 +905,7 @@ MI_Result MI_CALL SendConfigurationApply( _In_ LCMProviderContext *lcmContext,
     ModuleLoaderObject *moduleLoader = NULL;
     MI_Session miSession = MI_SESSION_NULL;
     ExecutionOrderContainer executionContainer = {0};
+    MI_Instance *previousError = NULL;
     DSC_EventWriteMessageParsingConfiguration();
     DSC_EventWriteEngineMethodParameters(__WFUNCTION__,documentIns->classDecl->name,_STRINGEMPTY_,flags,lcmContext->executionMode,documentIns->nameSpace);
     
@@ -946,7 +948,12 @@ MI_Result MI_CALL SendConfigurationApply( _In_ LCMProviderContext *lcmContext,
 
     /*execute the list in sequence.*/
     r = SetResourcesInOrder(lcmContext, moduleManager, instanceA, &miSession, & executionContainer, 
-                            flags, documentIns, resultStatus, extendedError);
+                            flags, documentIns, resultStatus, &previousError, extendedError);
+
+    if(*extendedError && previousError != *extendedError)
+    {
+        MI_Instance_Delete(previousError);
+    }
 
     if( r != MI_RESULT_OK )
     {
@@ -1234,7 +1241,11 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         {
             MI_Instance_Delete(params);            
             MI_OperationOptions_Delete(&sessionOptions);
-            return r;
+            if (*extendedError != NULL)
+            {
+                MI_Instance_Delete(*extendedError);
+            }
+            return GetCimMIError1Param(r, extendedError, ID_APPLYCONFIG_TEST, provContext->resourceId);
         }
 
         //Stop the timer for test
@@ -1311,7 +1322,11 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         if (r != MI_RESULT_OK)
         {
             MI_OperationOptions_Delete(&sessionOptions);
-            return r;
+            if (*extendedError != NULL)
+            {
+                MI_Instance_Delete(*extendedError);
+            }
+            return GetCimMIError1Param(r, extendedError, ID_APPLYCONFIG_SET, provContext->resourceId);
         }
 
         *resultStatus = returnValue;

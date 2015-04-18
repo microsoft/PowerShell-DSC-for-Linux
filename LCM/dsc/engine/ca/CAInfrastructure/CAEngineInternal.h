@@ -73,14 +73,15 @@ MI_Result AddToList(_Inout_ ExecutionOrderContainer *container,
 
 
 MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,  
-                                  _In_ ModuleManager *moduleManager,
-                                  _In_ MI_InstanceA * instanceA,
-                                  _In_ MI_Session *miSession,
-                                  _In_ ExecutionOrderContainer *executionOrder,
-                                  _In_ MI_Uint32 flags,
-                                  _In_ MI_Instance *documentIns,
-                                   _Inout_ MI_Uint32 *resultStatus,
-                                  _Outptr_result_maybenull_ MI_Instance **extendedError);
+                              _In_ ModuleManager *moduleManager,
+                              _In_ MI_InstanceA * instanceA,
+                              _In_ MI_Session *miSession,
+                              _In_ ExecutionOrderContainer *executionOrder,
+                              _In_ MI_Uint32 flags,
+                              _In_ MI_Instance *documentIns,
+                              _Inout_ MI_Uint32 *resultStatus,
+                              _Outptr_result_maybenull_ MI_Instance **previousError,
+                              _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,   
                              _In_ MI_Application *miApp,
