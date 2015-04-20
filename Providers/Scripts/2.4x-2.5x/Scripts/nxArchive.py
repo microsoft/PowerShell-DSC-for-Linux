@@ -107,15 +107,15 @@ def LStatFile(path):
     try:
         d = os.lstat(path)
     except OSError, error:
-        Print("Exception lstating file " + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception lstating file " + path + " Error Code: " + str(error.errno) +
-                " Error: " + error.message + error.strerror)
+        Print("Exception lstating file " + path +
+              " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception lstating file " + path +
+                " Error: " + str(error) )
     except IOError, error:
-        Print("Exception lstating file " + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception lstating file " + path + " Error Code: " + str(error.errno) +
-                " Error: " + error.message + error.strerror)
+        Print("Exception lstating file " + path +
+              " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception lstating file " + path +
+                " Error: " + str(error) )
     return d, error
 
 
@@ -124,15 +124,15 @@ def MakeDirs(path):
     try:
         os.makedirs(path)
     except OSError, error:
-        Print("Exception making dir" + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception making dir" + path + " Error Code: " + str(error.errno) +
-                " Error: " + error.message + error.strerror)
+        Print("Exception making dir" + path +
+              " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception making dir" + path +
+                " Error: " + str(error) )
     except IOError, error:
-        Print("Exception making dir" + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception making dir" + path + " Error Code: " + str(error.errno) +
-                " Error: " + error.message + error.strerror)
+        Print("Exception making dir" + path +
+              " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception making dir" + path +
+                " Error: " + str(error) )
     return error
 
 
@@ -141,15 +141,15 @@ def RemoveFile(path):
     try:
         os.remove(path)
     except OSError, error:
-        Print("Exception removing file" + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception removing file" + path + " Error Code: " + str(error.errno) +
-                " Error: " + error.message + error.strerror)
+        Print("Exception removing file" + path +
+              " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception removing file" + path +
+                " Error: " + str(error) )
     except IOError, error:
-        Print("Exception removing file" + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception removing file" + path + " Error Code: " + str(error.errno) +
-                " Error: " + error.message + error.strerror)
+        Print("Exception removing file" + path +
+              " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception removing file" + path +
+                " Error: " + str(error) )
     return error
 
 
@@ -168,10 +168,10 @@ def ReadCacheInfo(SourcePath, DestinationPath):
     cache_file_path = cache_file_dir+SourcePath.replace('/', '_')+DestinationPath.replace('/', '_')
     F, error = opened_w_error(cache_file_path, 'r')
     if error:
-        Print("Exception opening file " + cache_file_path + " Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + cache_file_path + " Error Code: " +
-                str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + cache_file_path 
+              + " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + cache_file_path 
+                + " Error: " + str(error) )
         return False, 0.0, 0.0, ''
     ln = (F.read()).splitlines()
     F.close()
@@ -190,10 +190,10 @@ def WriteCacheInfo(SourcePath, DestinationPath):
     src_block = 'loopme'
     src_file, src_error = opened_w_error(SourcePath, 'rb')
     if src_error:
-        Print("Exception opening source file " + SourcePath + " Error Code: " + str(src_error.errno) +
-              " Error: " + src_error.message + src_error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening source file " + SourcePath + " Error Code: " + str(src_error.errno) +
-                " Error: " + src_error.message + src_error.strerror)
+        Print("Exception opening source file " + SourcePath  +
+              " Error: " + str(src_error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception opening source file " + SourcePath  +
+                " Error: " + str(src_error) )
         src_file.close()
         return -1
     while src_block:
@@ -204,9 +204,9 @@ def WriteCacheInfo(SourcePath, DestinationPath):
     cache_file_path = cache_file_dir + SourcePath.replace('/', '_') + DestinationPath.replace('/', '_')
     F, error = opened_w_error(cache_file_path, 'w+')
     if error:
-        Print("Exception opening file " + cache_file_path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + cache_file_path + " Error Code: " +
-                str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + cache_file_path + " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + cache_file_path 
+                + " Error: " + str(error) )
         F.close()
         return False
     F.write(
@@ -226,10 +226,10 @@ def CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum):
         return False
     stat_src, error = LStatFile(SourcePath)
     if stat_src is None:
-        Print("Exception opening SourcePath " + SourcePath + " Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening SourcePath " + SourcePath + " Error Code: " +
-                str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening SourcePath " + SourcePath 
+              + " Error: " + str(error) , file=sys.stderr)
+        LG().Log('ERROR', "Exception opening SourcePath " + SourcePath 
+                + " Error: " + str(error) )
         return False
     if Checksum == "md5":
         src_error = None
@@ -237,10 +237,10 @@ def CompareFileWithCacheFile(SourcePath, DestinationPath, Checksum):
         src_block = 'loopme'
         src_file, src_error = opened_w_error(SourcePath, 'rb')
         if src_error:
-            Print("Exception opening source file " + SourcePath + " Error Code: " + str(src_error.errno) +
-                  " Error: " + src_error.message + src_error.strerror, file=sys.stderr)
-            LG().Log('ERROR', "Exception opening source file " + SourcePath + " Error Code: " + str(src_error.errno) +
-                    " Error: " + src_error.message + src_error.strerror)
+            Print("Exception opening source file " + SourcePath +
+                  " Error: " + str(src_error) , file=sys.stderr)
+            LG().Log('ERROR', "Exception opening source file " + SourcePath +
+                    " Error: " + str(src_error) )
             src_file.close()
             return -1
         while src_block:
@@ -308,18 +308,18 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
                 raise Exception('Error: First bad filename is "' + bad + '"')
         except Exception, error:
             Print("Exception opening zipfile" + SourcePath +
-                  " Error: " + error.message, file=sys.stderr)
+                  " Error: " + str(error), file=sys.stderr)
             LG().Log('ERROR', "Exception opening zipfile" + SourcePath +
-                    " Error: " + error.message)
+                    " Error: " + str(error))
             return False
         # extract archive to destinationpath if error return False
         try:
             arch.extractall(DestinationPath)
         except Exception, error:
             Print("Exception extracting zipfile" + SourcePath + " to " +
-                  DestinationPath + " Error: " + error.message, file=sys.stderr)
+                  DestinationPath + " Error: " + str(error), file=sys.stderr)
             LG().Log('ERROR', "Exception extracting zipfile" + SourcePath + " to " +
-                    DestinationPath + " Error: " + error.message)
+                    DestinationPath + " Error: " + str(error))
             return False
     else:  # tarfile
         if not tarfile.is_tarfile(SourcePath):
@@ -333,9 +333,9 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
             if arch is not None:
                 arch.close()
             Print("Exception opening tarfile" + SourcePath +
-                  " Error: " + error.message, file=sys.stderr)
+                  " Error: " + str(error), file=sys.stderr)
             LG().Log('ERROR', "Exception opening tarfile" + SourcePath +
-                    " Error: " + error.message)
+                    " Error: " + str(error))
             return False
         for n in arch.getnames():
             if n.startswith('/') or n.startswith('..'):
@@ -347,9 +347,9 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
         except Exception, error:
             arch.close()
             Print("Exception extracting tarfile" + SourcePath + " to " +
-                  DestinationPath + " Error: " + error.message, file=sys.stderr)
+                  DestinationPath + " Error: " + str(error), file=sys.stderr)
             LG().Log('ERROR', "Exception extracting tarfile" + SourcePath + " to " +
-                    DestinationPath + " Error: " + error.message)
+                    DestinationPath + " Error: " + str(error))
             return False
         arch.close()
     if WriteCacheInfo(SourcePath, DestinationPath) is False:

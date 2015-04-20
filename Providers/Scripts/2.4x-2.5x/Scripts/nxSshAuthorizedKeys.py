@@ -223,10 +223,8 @@ def Log(file_path, message):
     lines = re.sub(re.compile(r'^(.)', re.MULTILINE), t + r'\1', message)
     F, error = opened_w_error(file_path, 'a')
     if error:
-        Print("Exception opening logfile " + file_path + " Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening logfile " + file_path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening logfile " + file_path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening logfile " + file_path + " Error: " + str(error))
     else:
         F.write(lines + "\n")
     F.close()
@@ -242,16 +240,12 @@ def AddKey(p):
             os.chown(
                 d, pwd.getpwnam(p.UserName).pw_uid, pwd.getpwnam(p.UserName).pw_gid)
         except IOError, error:
-            Print("Exception creating directory " + d + " Error Code: " +
-                  str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-            LG().Log('ERROR', "Exception creating directory " + d + " Error Code: " +
-                     str(error.errno) + " Error: " + error.message + error.strerror)
+            Print("Exception creating directory " + d + " Error: " + str(error), file=sys.stderr)
+            LG().Log('ERROR', "Exception creating directory " + d + " Error: " + str(error))
             return error
         except OSError, error:
-            Print("Exception opening directory " + d + " Error Code: " +
-                  str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-            LG().Log('ERROR', "Exception opening directory " + d + " Error Code: " +
-                     str(error.errno) + " Error: " + error.message + error.strerror)
+            Print("Exception opening directory " + d + " Error: " + str(error), file=sys.stderr)
+            LG().Log('ERROR', "Exception opening directory " + d + " Error: " + str(error))
             return error
     if os.path.exists(path) is False:
         os.system('echo > ' + path)
@@ -259,10 +253,8 @@ def AddKey(p):
     error = None
     F, error = opened_w_error(path, 'rb+')
     if error:
-        Print("Exception opening file " + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
 
         return error
     flag = 'not found'
@@ -297,10 +289,8 @@ def DelKey(p):
         return error
     F, error = opened_w_error(path, 'rb+')
     if error:
-        Print("Exception opening file " + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
         return error
     n = ''
     KC = '#' + p.KeyComment
@@ -328,10 +318,8 @@ def FindKey(p):
         return found, error
     F, error = opened_w_error(path, 'rb')
     if error:
-        Print("Exception opening file " + path + " Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
         return found, error
     KC = '#' + p.KeyComment
     for l in F.readlines():

@@ -234,10 +234,8 @@ def AddOrDelVar(p):
         st = os.stat(p.file_path)
     F, error = opened_w_error(p.file_path, 'r')
     if error:
-        Print("Exception opening file " + p.file_path + " Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + p.file_path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + p.file_path + ' Error: ' + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + p.file_path + ' Error: ' + str(error))
         return found, error
     for l in F.readlines():
         if p.Path is True:
@@ -284,10 +282,8 @@ def FindVar(p):
         return found
     F, error = opened_w_error(p.file_path, 'rb')
     if error:
-        Print("Exception opening file " + p.file_path + " Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + p.file_path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + p.file_path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + p.file_path + " Error: " + str(error))
         return found, error
     for l in F.readlines():
         if p.Path is True:

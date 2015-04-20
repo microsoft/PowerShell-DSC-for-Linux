@@ -166,10 +166,8 @@ def opened_w_error(filename, mode="r"):
 def WriteFile(path, contents):
     f, error = opened_w_error(path, 'wb')
     if error:
-        Print("Exception opening file " + path + " Error Code: " + str(error.errno)
-              + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
         return -1
     else:
         f.write(contents.replace("\r", ""))

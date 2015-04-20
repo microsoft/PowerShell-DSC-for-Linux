@@ -308,11 +308,11 @@ def Symlink(spath, dpath):
         try:
             os.unlink(dpath)
         except OSError, error:
-            Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
+            Print("Exception removing " + dpath + " Error: " + str(error), file=sys.stderr)
             LG().Log('ERROR', "Exception removing " + dpath  + " Error: " + str(error))
             return error
         except IOError, error:
-            Print("Exception removing " + dpath + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
+            Print("Exception removing " + dpath + " Error: " + str(error), file=sys.stderr)
             LG().Log('ERROR', "Exception removing " + dpath  + " Error: " + str(error))
             return error
     try:

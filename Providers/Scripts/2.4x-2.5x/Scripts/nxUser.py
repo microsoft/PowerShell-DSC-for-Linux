@@ -174,10 +174,8 @@ chage_path = "/usr/bin/chage"
 def ReadPasswd(filename):
     f, error = opened_w_error(filename, 'rb')
     if error:
-        Print("Exception opening file " + filename + " Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + filename + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception opening file " + filename + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + filename + " Error: " + str(error))
         return None
     else:
         lines = f.read().split("\n")
