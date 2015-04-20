@@ -292,7 +292,7 @@ fi
 
 %Preuninstall_999
 # if this is a package removal, not an upgrade, remove the modules
-if [ "$1" = "0" -o "$1" = "remove" ]; then
+if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     # Remove all DSC specific data
     for module in `ls /opt/microsoft/dsc/modules`; do
 	/opt/microsoft/dsc/Scripts/RemoveModule.py $module
@@ -307,17 +307,20 @@ CONFIG_SYSCONFDIR=$OMI_HOME/etc
 CONFIG_DATADIR=$OMI_HOME/share
 OMI_LIB=$OMI_HOME/lib
 
-rm -rf $OMI_ETC_DIR/conf/omiregister/root-Microsoft-DesiredStateConfiguration
-rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
-rm -rf $CONFIG_SYSCONFDIR/dsc
-rm -rf $CONFIG_DATADIR/dsc
-rm -rf $OMI_LIB/Scripts
-
-rm $OMI_HOME/bin/ConsistencyInvoker
-rm $OMI_LIB/libdsccore.so    
-for prov in ${{PROVIDERS}}; do
-    rm $OMI_LIB/libMSFT_nx${prov}Resource.so
-done
+# if this is a package removal, not an upgrade, remove the modules
+if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
+    rm -rf $OMI_ETC_DIR/conf/omiregister/root-Microsoft-DesiredStateConfiguration
+    rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
+    rm -rf $CONFIG_SYSCONFDIR/dsc
+    rm -rf $CONFIG_DATADIR/dsc
+    rm -rf $OMI_LIB/Scripts
+    
+    rm $OMI_HOME/bin/ConsistencyInvoker
+    rm $OMI_LIB/libdsccore.so    
+    for prov in ${{PROVIDERS}}; do
+        rm $OMI_LIB/libMSFT_nx${prov}Resource.so
+    done
+fi
 
 %Preinstall_0
 ${{SHELL_HEADER}}
