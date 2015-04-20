@@ -2599,78 +2599,22 @@ MI_Result ApplyConfig(
         r = ApplyConfigGroup(lcmContext, moduleManager, flags, documentIns, &resourceInstances, (MI_Instance*) metaConfigInstance, resultStatus, cimErrorDetails);
         EH_CheckResult(r);
     }
-    
-
-/* TODO: remove this.  
-
-    if (documentIns != NULL)
-    {
-        r = ValidateDocumentInstance(documentIns, cimErrorDetails);
-        if (r != MI_RESULT_OK)
-        {
-            DSC_EventWriteMessageDeletingInstance(configFileLocation);
-            MI_Instance_Delete(documentIns);
-            return r;
-        }
-    }
-
-    // Check if at least 1 resource was specified in the instance document
-    if (resourceInstances.size == 0)
-    {
-        MI_Instance_Delete(documentIns);    
-
-        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_LCMHELPER_NORESOURCESPECIFIED);
-    }
-
-    r = SendConfigurationApply(lcmContext, flags, &resourceInstances, moduleManager, documentIns, resultStatus, cimErrorDetails);
-    MI_Instance_Delete(documentIns);    
-    CleanUpInstanceCache(&resourceInstances);
-    if (r != MI_RESULT_OK)
-    {
-        if (cimErrorDetails && *cimErrorDetails)
-            return r;
-
-        return GetCimMIError(r, cimErrorDetails,ID_LCMHELPER_SENDCONFIGAPPLY_ERROR);
-    }
-
-    if (!(flags & LCM_EXECUTE_TESTONLY) && (DSC_RESTART_SYSTEM_FLAG & *resultStatus))
-    {
-        //Log the message here; log different message depends on the value of RebootNodeIfNeeded(winblue:366265)
-        MI_Instance *metaConfigInstance = NULL;
-        MI_Value configModeValue;
-        r = GetMetaConfig((MSFT_DSCMetaConfiguration **)&metaConfigInstance);
-        if (r!= MI_RESULT_OK)
-        {
-            return r;
-        }     
-
-        r = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_RebootNodeIfNeeded, &configModeValue, NULL, NULL, NULL);
-        if (r != MI_RESULT_OK)
-        {
-            MSFT_DSCMetaConfiguration_Delete((MSFT_DSCMetaConfiguration *)metaConfigInstance);
-            return r;
-        }
-        //telling user that reboot is scheduled
-        if (configModeValue.boolean == MI_TRUE)
-        {
-            LCM_BuildMessage(lcmContext, ID_LCM_WRITEMESSAGE_REBOOT, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);       
-        }
-        //telling user that manual reboot is needed
-        else
-        {
-            LCM_BuildMessage(lcmContext, ID_LCM_WRITEMESSAGE_REBOOTMANUALLY, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);       
-        }
-        MSFT_DSCMetaConfiguration_Delete((MSFT_DSCMetaConfiguration *)metaConfigInstance);
-
-    }
-*/
 
 EH_UNWIND:
+
+    if (documentIns)
+    {
+        MI_Instance_Delete(documentIns);
+        documentIns = NULL;
+    }
+
+    CleanUpInstanceCache(&resourceInstances);  
     
     if (metaConfigInstance != NULL)
     {
         MSFT_DSCMetaConfiguration_Delete((MSFT_DSCMetaConfiguration *) metaConfigInstance);
     }
+
     return r;
 }
 

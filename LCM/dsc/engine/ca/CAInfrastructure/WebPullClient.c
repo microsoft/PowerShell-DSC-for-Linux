@@ -197,6 +197,8 @@ static MI_Result GetSSLOptions(struct SSLOptions * sslOptions,
         }
     }
 
+    Conf_Close(conf);
+
     return MI_RESULT_OK;
 
 }
@@ -1231,6 +1233,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     curl = curl_easy_init();
     if (!curl)
     {
+        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
 
@@ -1253,6 +1256,9 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
             res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
             if (res != CURLE_OK)
             {
+                DSC_free(bodyContent);
+                curl_easy_cleanup(curl);
+                curl_global_cleanup();
                 return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
             }
         }
@@ -1284,6 +1290,10 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetDscActionCommandFailure;
+            DSC_free(bodyContent);
+            curl_slist_free_all(list);
+            curl_easy_cleanup(curl);
+            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
     }
@@ -1294,18 +1304,26 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetDscActionCommandFailure;
+            DSC_free(bodyContent);
+            curl_slist_free_all(list);
+            curl_easy_cleanup(curl);
+            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
     
 
     res = curl_easy_perform(curl);
+    DSC_free(bodyContent);
 
     if(res != CURLE_OK)
     {
         *getActionStatusCode = GetDscActionCommandFailure;
         free(headerChunk.data);
         free(dataChunk.data);
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
@@ -1326,7 +1344,6 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     
     free(headerChunk.data);
     free(dataChunk.data);
-    
 
     if( getActionStatus == NULL)
     {
@@ -1389,6 +1406,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     curl = curl_easy_init();
     if (!curl)
     {
+        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
     
@@ -1411,6 +1429,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
             res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
             if (res != CURLE_OK)
             {
+                curl_easy_cleanup(curl);
+                curl_global_cleanup();
                 return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
             }
         }
@@ -1437,6 +1457,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
+            curl_easy_cleanup(curl);
+            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
     }
@@ -1447,6 +1469,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
+            curl_easy_cleanup(curl);
+            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
@@ -1459,6 +1483,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         CleanupHeaderChunk(&headerChunk);
         free(dataChunk.data);
         DSC_free(outputResult);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
@@ -1722,6 +1748,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     curl = curl_easy_init();
     if (!curl)
     {
+        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
 
@@ -1748,6 +1775,8 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
             res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
             if (res != CURLE_OK)
             {
+                curl_easy_cleanup(curl);
+                curl_global_cleanup();
                 return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
             }
         }
@@ -1769,6 +1798,8 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
+            curl_easy_cleanup(curl);
+            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
     }
@@ -1779,6 +1810,8 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
+            curl_easy_cleanup(curl);
+            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
@@ -1791,6 +1824,8 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         CleanupHeaderChunk(&headerChunk);
         free(dataChunk.data);
         DSC_free(outputResult);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
