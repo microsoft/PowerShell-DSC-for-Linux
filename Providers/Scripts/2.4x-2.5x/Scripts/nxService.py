@@ -218,12 +218,8 @@ def ReadFile(path):
     error = None
     F, error = opened_w_error(path, 'rb')
     if error:
-        Print("Exception opening file " + path + " Error Code: " +
-              str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message +
-                 error.strerror)
+        Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
     else:
         d = F.read()
         F.close()
@@ -242,12 +238,8 @@ def WriteFile(path, contents):
     error = None
     F, error = opened_w_error(path, 'wb+')
     if error:
-        Print("Exception opening file " + path + " Error Code: " +
-              str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message +
-                 error.strerror)
+        Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
     else:
         F.write(contents)
     return error

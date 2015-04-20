@@ -476,10 +476,9 @@ def WriteCacheInfo(p):
     cache_file_path = cache_file_dir + '/' + os.path.basename(p.LocalPath)
     F, error = opened_w_error(cache_file_path, 'w+')
     if error:
-        Print("Exception creating cache file " + cache_file_path + " Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
+        Print("Exception creating cache file " + cache_file_path + " Error: " + str(error), file=sys.stderr)
         LG().Log('ERROR',  "Exception creating cache file " + cache_file_path +
-                 " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+                 " Error: " + str(error))
         return False
     F.write(p.Name + '\n')
     F.close()
@@ -492,10 +491,9 @@ def ReadCacheInfo(p):
         return False
     F, error = opened_w_error(cache_file_path, 'r')
     if error:
-        Print("Exception opening cache file " + cache_file_path + " Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
+        Print("Exception opening cache file " + cache_file_path + " Error: " + str(error), file=sys.stderr)
         LG().Log('ERROR',  "Exception creating cache file " + cache_file_path +
-                 " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+                 " Error: " + str(error))
         return False
     t = F.read()
     F.close()
@@ -513,9 +511,9 @@ def Set(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnC
                    FilePath, PackageGroup, Arguments, ReturnCode)
     except Exception, e:
         Print('ERROR - Unable to initialize nxPackageProvider.  ' +
-              e.message, file=sys.stdout)
+              str(e), file=sys.stdout)
         LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.message)
+            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + str(e))
         return [-1]
     installed, out = IsPackageInstalled(p)
     if (installed and Ensure == 'present') or (not installed and Ensure == 'absent'):  # Nothing to do
@@ -544,9 +542,9 @@ def Test(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, Return
                    FilePath, PackageGroup, Arguments, ReturnCode)
     except Exception, e:
         Print('ERROR - Unable to initialize nxPackageProvider.  ' +
-              e.message, file=sys.stdout)
+              str(e), file=sys.stdout)
         LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.message)
+            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + str(e))
         return [-1]
     installed, out = IsPackageInstalled(p)
     if (installed and Ensure == 'present') or (not installed and Ensure == 'absent'):
@@ -564,9 +562,9 @@ def Get(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnC
                    FilePath, PackageGroup, Arguments, ReturnCode)
     except Exception, e:
         Print('ERROR - Unable to initialize nxPackageProvider.  ' +
-              e.message, file=sys.stdout)
+              str(e), file=sys.stdout)
         LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.message)
+            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + str(e))
         return [retval, p.PackageDescription, p.Publisher, p.InstalledOn, p.Size, p.Version, installed]
     installed, out = IsPackageInstalled(p)
     ParseInfo(p, out)
@@ -667,15 +665,11 @@ def RemoveFile(path):
     try:
         os.remove(path)
     except OSError, error:
-        Print("Exception removing file" + path + " Error Code: " + str(error.errno)
-              + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception removing file" + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception removing file" + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception removing file" + path + " Error: " + str(error))
     except IOError, error:
-        Print("Exception removing file" + path + " Error Code: " + str(error.errno)
-              + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception removing file" + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception removing file" + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception removing file" + path + " Error: " + str(error))
     return error
 
 
@@ -688,15 +682,11 @@ def LStatFile(path):
     try:
         d = os.lstat(path)
     except OSError, error:
-        Print("Exception lstating file " + path + " Error Code: " + str(error.errno)
-              + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception lstating file " + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception lstating file " + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception lstating file " + path + " Error: " + str(error))
     except IOError, error:
-        Print("Exception lstating file " + path + " Error Code: " + str(error.errno)
-              + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR', "Exception lstating file " + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception lstating file " + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR', "Exception lstating file " + path + " Error: " + str(error))
     return d
 
 
@@ -705,15 +695,11 @@ def MakeDirs(path):
     try:
         os.makedirs(path)
     except OSError, error:
-        Print("Exception making dir" + path + " Error Code: " + str(error.errno)
-              + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR',  "Exception making dir" + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception making dir" + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR',  "Exception making dir" + path + " Error: " + str(error))
     except IOError, error:
-        Print("Exception making dir" + path + " Error Code: " + str(error.errno)
-              + " Error: " + error.message + error.strerror, file=sys.stderr)
-        LG().Log('ERROR',  "Exception making dir" + path + " Error Code: " +
-                 str(error.errno) + " Error: " + error.message + error.strerror)
+        Print("Exception making dir" + path + " Error: " + str(error), file=sys.stderr)
+        LG().Log('ERROR',  "Exception making dir" + path + " Error: " + str(error))
     return error
 
 
