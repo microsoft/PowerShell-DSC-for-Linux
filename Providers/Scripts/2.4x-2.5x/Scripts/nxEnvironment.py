@@ -30,10 +30,10 @@ def init_vars(Name, Value, Ensure, Path):
         Value = Value.encode('ascii', 'ignore')
     else:
         Value = ''
-    if Ensure is not None:
+    if Ensure is not None and Ensure != '':
         Ensure = Ensure.encode('ascii', 'ignore')
     else:
-        Ensure = ''
+        Ensure = 'present'
     if Path is None:
         Path = False
     Path = ( Path == True )

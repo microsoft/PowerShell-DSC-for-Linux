@@ -32,10 +32,10 @@ def init_vars(UserName, Ensure, FullName, Description, Password, Disabled, Passw
         UserName = UserName.encode('ascii', 'ignore')
     else:
         UserName = ''
-    if Ensure is not None:
+    if Ensure is not None and Ensure != '':
         Ensure = Ensure.encode('ascii', 'ignore').lower()
     else:
-        Ensure = ''
+        Ensure = 'present'
     if FullName is not None:
         FullName = FullName.encode('ascii', 'ignore')
     else:

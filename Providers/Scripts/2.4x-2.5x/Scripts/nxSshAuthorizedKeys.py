@@ -24,10 +24,10 @@ show_mof = False
 
 
 def init_vars(KeyComment, Ensure, UserName, Key):
-    if Ensure is not None:
+    if Ensure is not None and Ensure != '':
         Ensure = Ensure.encode('ascii', 'ignore').lower()
     else:
-        Ensure = ''
+        Ensure = 'present'
     if KeyComment is not None:
         KeyComment = KeyComment.encode('ascii', 'ignore')
     else:

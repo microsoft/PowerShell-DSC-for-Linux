@@ -29,10 +29,10 @@ def init_vars(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Pr
         GroupName = GroupName.encode('ascii', 'ignore')
     else:
         GroupName = ''
-    if Ensure is not None:
+    if Ensure is not None and Ensure != '':
         Ensure = Ensure.encode('ascii', 'ignore').lower()
     else:
-        Ensure = ''
+        Ensure = 'present'
     if Members is None or len(Members) < 1:
         Members = ['']
     if MembersToInclude is None or len(MembersToInclude) < 1:
