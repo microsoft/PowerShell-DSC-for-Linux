@@ -948,6 +948,8 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
     if( r != MI_RESULT_OK)
     {
         CleanUpGetCache(outInstances);
+        DSC_free(outInstances->data);
+        outInstances->size = 0;
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
@@ -961,6 +963,8 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
         if( r != MI_RESULT_OK)
         {
             CleanUpGetCache(outInstances);
+            DSC_free(outInstances->data);
+            outInstances->size = 0;
             MI_Session_Close(&miSession, NULL, NULL);
             return r;
         }        
@@ -969,7 +973,9 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
         r = moduleManager->ft->GetProviderCompatibleInstance(moduleManager, instanceA->data[xCount], &filteredInstance, extendedError);
         if( r != MI_RESULT_OK)
         {
-            CleanUpGetCache(outInstances);           
+            CleanUpGetCache(outInstances);     
+            DSC_free(outInstances->data);
+            outInstances->size = 0;      
             MI_Session_Close(&miSession, NULL, NULL);            
             return r;
         }
@@ -995,7 +1001,9 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
             if( intlstr.str)
                 Intlstr_Free(intlstr);   
 
-            CleanUpGetCache(outInstances);           
+            CleanUpGetCache(outInstances);     
+            DSC_free(outInstances->data);
+            outInstances->size = 0;      
             MI_Session_Close(&miSession, NULL, NULL);            
             return r;
         }
