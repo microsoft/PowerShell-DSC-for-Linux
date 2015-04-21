@@ -49,10 +49,10 @@ show_mof = False
 
 
 def init_vars(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
-    if Ensure is not None:
+    if Ensure is not None and Ensure != '':
         Ensure = Ensure.encode('ascii', 'ignore').lower()
     else:
-        Ensure = ''
+        Ensure = 'present'
     if PackageManager is not None:
         PackageManager = PackageManager.encode('ascii', 'ignore').lower()
     else:

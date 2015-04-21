@@ -39,8 +39,8 @@ def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents,
         DestinationPath = ''
     if SourcePath is None :
         SourcePath = ''
-    if Ensure is None :
-        Ensure = ''
+    if Ensure is None or Ensure == '':
+        Ensure = 'present'
     if Type is None :
         Type = ''
     if Force is None :

@@ -42,8 +42,8 @@ def init_vars(DestinationPath, SourcePath, Ensure, Force, Checksum):
         DestinationPath = ''
     if SourcePath is None:
         SourcePath = ''
-    if Ensure is None:
-        Ensure = ''
+    if Ensure is None or Ensure == '':
+        Ensure = 'present'
     if Force is None:
         Force = False
     if Checksum is None:
