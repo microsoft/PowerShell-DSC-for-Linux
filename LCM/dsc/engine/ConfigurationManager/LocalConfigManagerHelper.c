@@ -724,8 +724,9 @@ MI_Result CallGetConfiguration(
         result = ValidateDocumentInstance(documentIns, cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
+            CleanUpInstanceCache(&getInstances);
             moduleManager->ft->Close(moduleManager, NULL);
-                        SetLCMStatusReady();
+            SetLCMStatusReady();
             MI_Instance_Delete(documentIns);
             return result;
         }
@@ -2465,8 +2466,9 @@ MI_Result ProcessPartialConfigurations(
 
                         if (dependsExist)
                         {
-                DSC_EventWriteLCMApplyingPartial(searchBucket.key);
+                            DSC_EventWriteLCMApplyingPartial(searchBucket.key);
                                 r = ConfigurationProcessor(lcmContext, moduleManager, flags, bucket->documentIns, &partialConfigResourceInstances, (MI_Instance*) metaConfigInstance, resultStatus, cimErrorDetails);
+                                DSC_free(partialConfigResourceInstances.data);
                                 if (r != MI_RESULT_OK)
                                 {
                                         //Get the message and print a warning
@@ -2533,11 +2535,11 @@ MI_Result ProcessPartialConfigurations(
         }
 
 EH_UNWIND:
-
-                if (tempInstance != NULL)
-                {
-                DSC_free(tempInstance);
-                }
+        CleanUpInstanceCache(&partialConfigDocumentIns);
+        if (tempInstance != NULL)
+        {
+            DSC_free(tempInstance);
+        }
 
         if (hashInited)
         {
@@ -3388,11 +3390,16 @@ MI_Result GetMofChecksum(
     /* Read checksum file if exists.*/
     if (File_ExistT(checkSumFile) == 0)
     {
-        r = ReadFileContent(checkSumFile, &tmpchecksumBuffer, &checksumBufferSize, cimErrorDetails);
+        r = ReadFileContent(checkSumFile, &tmpchecksumBuffer, &checksumBufferSize, cimErrorDetails);    
         checksumBuffer = (MI_Uint8*)DSC_malloc(checksumBufferSize + 1, NitsHere());
         memcpy(checksumBuffer, tmpchecksumBuffer, checksumBufferSize);
         checksumBuffer[checksumBufferSize] = '\0';
         DSC_free(tmpchecksumBuffer);
+        if( configName != NULL)
+        {
+            DSC_free(checkSumFile);
+            DSC_free(configurationFile);
+        }
     }
     else
     {
@@ -3409,6 +3416,11 @@ MI_Result GetMofChecksum(
             memcpy(checksumBuffer, tmpchecksumBuffer, checksumBufferSize);
             checksumBuffer[checksumBufferSize] = '\0';
             DSC_free(tmpchecksumBuffer);
+            if( configName != NULL)
+            {
+                DSC_free(checkSumFile);
+                DSC_free(configurationFile);
+            }
         }
         //use empty string if current.mof is not there
         else
