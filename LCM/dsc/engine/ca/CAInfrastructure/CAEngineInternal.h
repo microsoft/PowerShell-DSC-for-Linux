@@ -42,6 +42,33 @@
 #define LOGRESOURCE_MESSAGEPROPERTYNAME MI_T("Message")
 #define STOP_CONFIGURATIONT_TIMEOUT 60000
 
+/*
+  This is a data structure for a single linked list that contains a front pointer and a back pointer, and we'll be using it to keep track of all resources that have failed to apply, and at the end we construct a string based on entries in this data structure and free the memory allocated by it.
+
+  Example output in the CIM_Error instance that is returned is:
+
+    Failed to apply the configuration.  These resources produced errors: [nxSshAuthorizedKeys]rootKey, [nxFile]MyFile1. Detailed error information can be found in the log file.
+*/
+
+typedef struct _ResourceError ResourceError;
+typedef struct _ResourceErrorList ResourceErrorList;
+
+struct _ResourceError
+{
+    ResourceError * next;
+    char * resourceID;
+};
+
+struct _ResourceErrorList
+{
+    ResourceError * first;
+    ResourceError * last;
+};
+
+MI_Result InitResourceErrorList(ResourceErrorList * resourceErrorList);
+MI_Result AddToResourceErrorList(ResourceErrorList * resourceErrorList, const char * resourceID);
+char *    BuildStringResourceErrorList(ResourceErrorList * resourceErrorList);
+MI_Result CleanupResourceErrorList(ResourceErrorList * resourceErrorList);
 
 MI_Result DependentResourceProcessed (_In_ MI_Uint32 resourceIndex,
                                     _In_ ExecutionOrderContainer *container,
@@ -80,7 +107,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
                               _In_ MI_Uint32 flags,
                               _In_ MI_Instance *documentIns,
                               _Inout_ MI_Uint32 *resultStatus,
-                              _Outptr_result_maybenull_ MI_Instance **previousError,
+                              _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                               _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,   
@@ -91,6 +118,7 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
                              _In_ MI_Uint32 flags,
                              _Inout_ MI_Uint32 *resultStatus,
                              _Inout_ MI_Boolean *canceled,
+                             _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                              _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,  
@@ -109,6 +137,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
                              _In_ MI_Uint32 flags,
                              _Inout_ MI_Uint32 *resultStatus,
                              _Inout_ MI_Boolean* canceled,
+                             _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                              _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result Exec_PSProvider(_In_ ProviderCallbackContext *provContext, 
