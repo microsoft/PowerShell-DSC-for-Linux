@@ -42,6 +42,121 @@
 
 volatile MI_Operation *g_CurrentWmiv2Operation = NULL;
 
+MI_Result InitResourceErrorList(ResourceErrorList * resourceErrorList)
+{
+    if (resourceErrorList == NULL)
+    {
+        return MI_RESULT_FAILED;
+    }
+    resourceErrorList->first = NULL;
+    resourceErrorList->last = NULL;
+    return MI_RESULT_OK;
+}
+
+MI_Result AddToResourceErrorList(ResourceErrorList * resourceErrorList, const char * resourceID)
+{
+    ResourceError * current;
+    size_t length = 0;
+    if (resourceID == NULL || resourceErrorList == NULL)
+    {
+        return MI_RESULT_FAILED;
+    }
+
+    length = strlen(resourceID);
+
+    if (resourceErrorList->first == NULL)
+    {
+        resourceErrorList->first = (ResourceError*)calloc(1, sizeof(ResourceError));
+        current = resourceErrorList->first;
+        resourceErrorList->last = current;
+    }
+    else
+    {
+        current = (ResourceError*)calloc(1, sizeof(ResourceError));
+        resourceErrorList->last->next = current;
+        resourceErrorList->last = current;
+    }
+
+    current->next = NULL;
+    current->resourceID = (char *)calloc(length + 1, sizeof(char));
+    strncpy(current->resourceID, resourceID, length);
+    return MI_RESULT_OK;
+}
+
+char * BuildStringResourceErrorList(ResourceErrorList * resourceErrorList)
+{
+    char * outstring;
+    const char * separator = ", ";
+    const size_t separator_length = strlen(separator);
+    size_t current_length;
+    size_t added_length;
+    ResourceError* current;
+
+    if (resourceErrorList == NULL)
+    {
+        return NULL;
+    }
+
+    outstring = (char *) calloc(1, sizeof(char));
+    current_length = 0;
+    current = resourceErrorList->first;
+
+    while (current != NULL)
+    {
+        if (current->resourceID == NULL)
+        {
+            current = current->next;
+        }
+        
+        added_length = strlen(current->resourceID);
+        if (current->next != NULL)
+        {
+            outstring = (char *) realloc(outstring, current_length + added_length + separator_length + 1);
+            strncpy(outstring + current_length, current->resourceID, added_length);
+            strncpy(outstring + current_length + added_length, separator, separator_length);
+            current_length += added_length + separator_length;
+        }
+        else
+        {
+            outstring = (char *) realloc(outstring, current_length + added_length + 1);
+            strncpy(outstring + current_length, current->resourceID, added_length);
+            current_length += added_length;
+        }
+
+        outstring[current_length] = '\0';
+            
+        current = current->next;
+    }
+
+    return outstring;
+
+}
+
+MI_Result CleanupResourceErrorList(ResourceErrorList * resourceErrorList)
+{
+    ResourceError * current;
+    ResourceError * next;
+    if (resourceErrorList == NULL)
+    {
+        return MI_RESULT_FAILED;
+    }
+
+    current = resourceErrorList->first;
+    
+    while (current != NULL)
+    {
+        next = current->next;
+        if (current->resourceID)
+        {
+            free(current->resourceID);
+        }
+        free(current);
+        current = next;
+    }
+
+    return MI_RESULT_OK;
+}
+
 MI_Result GetDocumentEncryptionSetting( _In_ MI_Instance *documentIns, 
                                         _Inout_ MI_Boolean *bEncryptionEnabled,
                                         _Outptr_result_maybenull_z_ MI_Char **certificateid,
@@ -502,7 +617,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
                               _In_ MI_Uint32 flags,
                               _In_ MI_Instance *documentIns,                                  
                               _Inout_ MI_Uint32 *resultStatus,
-                              _Outptr_result_maybenull_ MI_Instance **previousError,
+                              _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                               _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Uint32 xCount = 0;
@@ -519,7 +634,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
     DSC_EventWriteMessageSettingResourcesOrder(executionOrder->executionListSize);
     moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
 
-    if (extendedError == NULL || previousError == NULL)
+    if (extendedError == NULL)
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
@@ -622,7 +737,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
 
         /* Move the resource to desired state.*/
         canceled = MI_FALSE;
-        r = MoveToDesiredState(&providerContext, moduleLoader->application, miSession, filteredInstance, regInstance, flags, resultStatus, &canceled, extendedError);
+        r = MoveToDesiredState(&providerContext, moduleLoader->application, miSession, filteredInstance, regInstance, flags, resultStatus, &canceled, resourceErrorList, extendedError);
         MI_Instance_Delete(filteredInstance);
         filteredInstance = NULL;
         
@@ -670,17 +785,17 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
 
             // we need to continue moving other resources to their desired state.
             finalr = r;
-            if(certificateid != NULL)
+            if (extendedError)
             {
-                DSC_free(certificateid);
-                certificateid = NULL;
+                if(certificateid != NULL)
+                {
+                    DSC_free(certificateid);
+                    certificateid = NULL;
+                }
+
+                MI_Instance_Delete(*extendedError);
+                *extendedError = NULL;
             }
-            
-            if (*previousError != NULL && previousError != *extendedError)
-            {
-                MI_Instance_Delete(previousError);
-            }
-            *previousError = *extendedError;
 
             continue;
         }
@@ -905,7 +1020,8 @@ MI_Result MI_CALL SendConfigurationApply( _In_ LCMProviderContext *lcmContext,
     ModuleLoaderObject *moduleLoader = NULL;
     MI_Session miSession = MI_SESSION_NULL;
     ExecutionOrderContainer executionContainer = {0};
-    MI_Instance *previousError = NULL;
+    ResourceErrorList resourceErrorList;
+    char * resourceErrorString;
     DSC_EventWriteMessageParsingConfiguration();
     DSC_EventWriteEngineMethodParameters(__WFUNCTION__,documentIns->classDecl->name,_STRINGEMPTY_,flags,lcmContext->executionMode,documentIns->nameSpace);
     
@@ -945,16 +1061,26 @@ MI_Result MI_CALL SendConfigurationApply( _In_ LCMProviderContext *lcmContext,
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
-
+    InitResourceErrorList(&resourceErrorList);
     /*execute the list in sequence.*/
     r = SetResourcesInOrder(lcmContext, moduleManager, instanceA, &miSession, & executionContainer, 
-                            flags, documentIns, resultStatus, &previousError, extendedError);
+                            flags, documentIns, resultStatus, &resourceErrorList, extendedError);
 
-    if(*extendedError && previousError != *extendedError)
+    if (resourceErrorList.first != NULL)
     {
-        MI_Instance_Delete(previousError);
+        resourceErrorString = BuildStringResourceErrorList(&resourceErrorList);
+        if (resourceErrorString != NULL)
+        {
+            if(*extendedError != NULL)
+            {
+                MI_Instance_Delete(*extendedError);
+            }
+            r = GetCimMIError1Param(r, extendedError, ID_APPLYCONFIG_RESOURCEERRORLIST, resourceErrorString);
+            free(resourceErrorString);
+        }
     }
 
+    CleanupResourceErrorList(&resourceErrorList);
     if( r != MI_RESULT_OK )
     {
         FreeExecutionOrderContainer(&executionContainer);            
@@ -1006,6 +1132,7 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
                              _In_ MI_Uint32 flags,
                              _Inout_ MI_Uint32 *resultStatus,
                              _Inout_ MI_Boolean *canceled,
+                             _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                              _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     DSC_EventWriteMessageMoveResourceToDesired(provContext->resourceId,instance->classDecl->name);
@@ -1019,7 +1146,7 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
             SQMLogResourceCountData(instance->classDecl->name,1);
         }
 
-        return Exec_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, canceled, extendedError);
+        return Exec_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, canceled, resourceErrorList, extendedError);
     }
     
 #if defined(_MSC_VER)
@@ -1048,6 +1175,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
                              _In_ MI_Uint32 flags,
                              _Inout_ MI_Uint32 *resultStatus,
                              _Inout_ MI_Boolean* canceled,
+                             _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                              _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;  
@@ -1241,11 +1369,8 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         {
             MI_Instance_Delete(params);            
             MI_OperationOptions_Delete(&sessionOptions);
-            if (*extendedError != NULL)
-            {
-                MI_Instance_Delete(*extendedError);
-            }
-            return GetCimMIError1Param(r, extendedError, ID_APPLYCONFIG_TEST, provContext->resourceId);
+            AddToResourceErrorList(resourceErrorList, provContext->resourceId);
+            return r;
         }
 
         //Stop the timer for test
@@ -1322,11 +1447,8 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         if (r != MI_RESULT_OK)
         {
             MI_OperationOptions_Delete(&sessionOptions);
-            if (*extendedError != NULL)
-            {
-                MI_Instance_Delete(*extendedError);
-            }
-            return GetCimMIError1Param(r, extendedError, ID_APPLYCONFIG_SET, provContext->resourceId);
+            AddToResourceErrorList(resourceErrorList, provContext->resourceId);
+            return r;
         }
 
         *resultStatus = returnValue;

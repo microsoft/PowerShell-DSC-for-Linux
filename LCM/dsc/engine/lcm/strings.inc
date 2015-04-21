@@ -523,13 +523,8 @@ INTERNAL_Intlstr_Define0( ID_PULL_RESTARTINGSERVER,
                  	  "Due to a required resource module installation, DSC will be restarted. The configuration operation will resume after the restart")
 
 
-INTERNAL_Intlstr_Define1( ID_APPLYCONFIG_SET,
-			  ID_APPLYCONFIG_SET,
+INTERNAL_Intlstr_Define1( ID_APPLYCONFIG_RESOURCEERRORLIST,
+			  ID_APPLYCONFIG_RESOURCEERRORLIST,
       			  _In_z_ const PAL_Char*, firstString,
-                 	  "Failed to apply the configuration on resource: "  Intlstr_tstr(1) ". This only reports the last error, there may be more. Detailed error information can be found in the log file.")
+                 	  "Failed to apply the configuration.  These resources produced errors: "  Intlstr_tstr(1) ". Detailed error information can be found in the log file.")
 
-
-INTERNAL_Intlstr_Define1( ID_APPLYCONFIG_TEST,
-			  ID_APPLYCONFIG_TEST,
-      			  _In_z_ const PAL_Char*, firstString,
-                 	  "When trying to invoke the Test method for resource: "  Intlstr_tstr(1) ", the invocation returned with an unexpected error.")
