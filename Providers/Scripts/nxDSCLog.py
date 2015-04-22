@@ -4,8 +4,13 @@
 # ============================================================================
 
 import os
+import sys
 import time
 import inspect
+
+
+def Print(s, file=sys.stderr):
+    file.write(s + '\n')
 
 
 def opened_w_error(filename, mode="r"):
@@ -14,8 +19,8 @@ def opened_w_error(filename, mode="r"):
     """
     try:
         f = open(filename, mode)
-    except IOError, err:
-        return None, err
+    except:
+        return None, Exception('IOError')
     return f, None
 
 # YYYY/MM/DD HH:MM:SS: LEVEL: FILE(LINE): \n message \n
@@ -34,7 +39,8 @@ class DSCLog(object):
 
     def Log(self, log_level, message):
         last_frame = inspect.currentframe().f_back
-        place = last_frame.f_globals['__file__'] + '('+str(last_frame.f_lineno)+')'
+        place = last_frame.f_globals['__file__'] + \
+            '('+str(last_frame.f_lineno)+')'
         if message is None or len(message) is 0:
             return
         if log_level is None:
@@ -49,26 +55,24 @@ class DSCLog(object):
             return
         if log_level > self.current_level:
             return
-        if type(message) != str:
+        if type(message) != str: # this should only happen if the type is unicode.
             message = message.decode('utf-8').encode('ascii', 'ignore')
         t = time.localtime()
         line = "%04u/%02u/%02u %02u:%02u:%02u: %s: %s:\n%s\n" % (t.tm_year,
-                        t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,
-                        self.levels[log_level][1], place, message)
+            t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,
+            self.levels[log_level][1], place, message)
         try:
             F, error = opened_w_error(self.file_path, 'a')
             if error:
-                print "Exception opening logfile " + self.file_path + \
-                      " Error Code: " + str(error.errno) + " Error: " + \
-                      error.message + error.strerror
+                Print("Exception opening logfile " + self.file_path +
+                      " Error: " + str(error), file=sys.stderr)
             else:
                 F.write(line)
                 F.close()
         except:
             F.close()
-            print "Exception opening logfile " + self.file_path + \
-                  " Error Code: " + str(error.errno) + " Error: " + \
-                  error.message + error.strerror
+            Print("Exception opening logfile " + self.file_path +
+                  " Error: " + str(error), file=sys.stderr)
 
     def GetCurrentLogLevel(self):
         return 5

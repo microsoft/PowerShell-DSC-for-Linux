@@ -25,13 +25,9 @@ show_mof = False
 
 
 def init_vars(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
-    if GroupName is not None:
-        GroupName = GroupName.encode('ascii', 'ignore')
-    else:
+    if GroupName is None:
         GroupName = ''
-    if Ensure is not None and Ensure != '':
-        Ensure = Ensure.encode('ascii', 'ignore').lower()
-    else:
+    if Ensure is None or Ensure == '':
         Ensure = 'present'
     if Members is None or len(Members) < 1:
         Members = ['']
@@ -39,11 +35,9 @@ def init_vars(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Pr
         MembersToInclude = ['']
     if MembersToExclude is None or len(MembersToExclude) < 1:
         MembersToExclude = ['']
-    if PreferredGroupID is not None:
-        PreferredGroupID = PreferredGroupID.encode('ascii', 'ignore')
-    else:
+    if PreferredGroupID is None:
         PreferredGroupID = ''
-    return GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID
+    return GroupName, Ensure.lower(), Members, MembersToInclude, MembersToExclude, PreferredGroupID
 
 
 def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):

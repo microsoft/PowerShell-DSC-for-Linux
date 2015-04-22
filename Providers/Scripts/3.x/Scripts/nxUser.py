@@ -28,25 +28,15 @@ show_mof = False
 
 
 def init_vars(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-    if UserName is not None:
-        UserName = UserName.encode('ascii', 'ignore')
-    else:
+    if UserName is None:
         UserName = ''
-    if Ensure is not None and Ensure != '':
-        Ensure = Ensure.encode('ascii', 'ignore').lower()
-    else:
+    if Ensure is None or Ensure == '':
         Ensure = 'present'
-    if FullName is not None:
-        FullName = FullName.encode('ascii', 'ignore')
-    else:
+    if FullName is None:
         FullName = ''
-    if Description is not None:
-        Description = Description.encode('ascii', 'ignore')
-    else:
+    if Description is None:
         Description = ''
-    if Password is not None:
-        Password = Password.encode('ascii', 'ignore')
-    else:
+    if Password is None:
         Password = ''
     if Disabled is None:
         Disabled = False
@@ -54,16 +44,12 @@ def init_vars(UserName, Ensure, FullName, Description, Password, Disabled, Passw
     if PasswordChangeRequired is None:
         PasswordChangeRequired = False
     PasswordChangeRequired = ( PasswordChangeRequired == True ) # this arrives as a 0 or 1
-    if HomeDirectory is not None:
-        HomeDirectory = HomeDirectory.encode('ascii', 'ignore')
-    else:
+    if HomeDirectory is None:
         HomeDirectory = ''
-    if GroupID is not None:
-        GroupID = GroupID.encode('ascii', 'ignore')
-    else:
+    if GroupID is None:
         GroupID = ''
 
-    return UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID
+    return UserName, Ensure.lower(), FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID
 
 
 def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
@@ -179,7 +165,7 @@ chage_path = "/usr/bin/chage"
 
 
 def ReadPasswd(filename):
-    with opened_w_error(filename, 'rb') as (f, error):
+    with opened_w_error(filename, 'r') as (f, error):
         if error:
             Print("Exception opening file " + filename + " Error Code: " +
                   str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)

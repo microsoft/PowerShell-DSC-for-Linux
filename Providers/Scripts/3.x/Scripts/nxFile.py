@@ -58,10 +58,10 @@ def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents,
     if Mode is None :
         Mode = ''
 
-    return DestinationPath.encode('ascii', 'ignore'), SourcePath.encode('ascii', 'ignore'), \
-        Ensure.encode('ascii', 'ignore').lower(), Type.encode('ascii', 'ignore').lower(), Force,\
-        Contents, Checksum.encode('ascii', 'ignore').lower(), Recurse, \
-        Links.encode('ascii', 'ignore').lower(), Owner, Group, Mode
+    return DestinationPath, SourcePath, \
+        Ensure.lower(), Type.lower(), Force,\
+        Contents, Checksum.lower(), Recurse, \
+        Links.lower(), Owner, Group, Mode
 
 
 def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
@@ -90,7 +90,7 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     Ensure = protocol.MI_String(Ensure)
     Type = protocol.MI_String(Type)
     Force = protocol.MI_Boolean(Force)
-    Contents = protocol.MI_String(Contents.decode('ascii', 'ignore'))
+    Contents = protocol.MI_String(Contents)
     Checksum = protocol.MI_String(Checksum)
     Recurse = protocol.MI_Boolean(Recurse)
     Links = protocol.MI_String(Links)
