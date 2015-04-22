@@ -24,17 +24,11 @@ show_mof = False
 
 
 def init_vars(Name, Value, Ensure, Path):
-    if Name is not None:
-        Name = Name.encode('ascii', 'ignore')
-    else:
+    if Name is None:
         Name = ''
-    if Value is not None:
-        Value = Value.encode('ascii', 'ignore')
-    else:
+    if Value is None:
         Value = ''
-    if Ensure is not None and Ensure != '':
-        Ensure = Ensure.encode('ascii', 'ignore')
-    else:
+    if Ensure is None or Ensure == '':
         Ensure = 'present'
     if Path is None:
         Path = False

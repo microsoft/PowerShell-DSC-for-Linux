@@ -29,22 +29,16 @@ show_mof = False
 
 
 def init_vars(Name, Controller, Enabled, State):
-    if Name is not None:
-        Name = Name.encode('ascii', 'ignore')
-    else:
+    if Name is None:
         Name = ''
-    if Controller is not None:
-        Controller = Controller.encode('ascii', 'ignore').lower()
-    else:
+    if Controller is None:
         Controller = ''
     if Enabled is None:
         Enabled = False
     Enabled = (Enabled == True)
-    if State is not None:
-        State = State.encode('ascii', 'ignore').lower()
-    else:
+    if State is None:
         State = ''
-    return Name, Controller, Enabled, State
+    return Name, Controller.lower(), Enabled, State.lower()
 
 
 def Set_Marshall(Name, Controller, Enabled, State):
@@ -171,6 +165,7 @@ def RunGetOutput(cmd, no_output, chk_err=True):
     try:
         output = subprocess.check_output(
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)
+        output = output.decode('ascii','ignore')
     except subprocess.CalledProcessError as e:
         if chk_err:
             Print('CalledProcessError.  Error Code is ' +

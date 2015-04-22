@@ -31,25 +31,15 @@ show_mof = False
 
 
 def Set_Marshall(GetScript, SetScript, TestScript, User, Group):
-    if GetScript is not None:
-        GetScript = GetScript.encode('ascii', 'ignore')
-    else:
+    if GetScript is None:
         GetScript = ''
-    if SetScript is not None:
-        SetScript = SetScript.encode('ascii', 'ignore')
-    else:
+    if SetScript is None:
         SetScript = ''
-    if TestScript is not None:
-        TestScript = TestScript.encode('ascii', 'ignore')
-    else:
+    if TestScript is None:
         TestScript = ''
-    if User is not None:
-        User = User.encode('ascii', 'ignore')
-    else:
+    if User is None:
         User = ''
-    if Group is not None:
-        Group = Group.encode('ascii', 'ignore')
-    else:
+    if Group is None:
         Group = ''
 
     retval = Set(GetScript, SetScript, TestScript, User, Group)
@@ -57,25 +47,15 @@ def Set_Marshall(GetScript, SetScript, TestScript, User, Group):
 
 
 def Test_Marshall(GetScript, SetScript, TestScript, User, Group):
-    if GetScript is not None:
-        GetScript = GetScript.encode('ascii', 'ignore')
-    else:
+    if GetScript is None:
         GetScript = ''
-    if SetScript is not None:
-        SetScript = SetScript.encode('ascii', 'ignore')
-    else:
+    if SetScript is None:
         SetScript = ''
-    if TestScript is not None:
-        TestScript = TestScript.encode('ascii', 'ignore')
-    else:
+    if TestScript is None:
         TestScript = ''
-    if User is not None:
-        User = User.encode('ascii', 'ignore')
-    else:
+    if User is None:
         User = ''
-    if Group is not None:
-        Group = Group.encode('ascii', 'ignore')
-    else:
+    if Group is None:
         Group = ''
 
     retval = Test(GetScript, SetScript, TestScript, User, Group)
@@ -84,25 +64,15 @@ def Test_Marshall(GetScript, SetScript, TestScript, User, Group):
 
 def Get_Marshall(GetScript, SetScript, TestScript, User, Group):
     arg_names = list(locals().keys())
-    if GetScript is not None:
-        GetScript = GetScript.encode('ascii', 'ignore')
-    else:
+    if GetScript is None:
         GetScript = ''
-    if SetScript is not None:
-        SetScript = SetScript.encode('ascii', 'ignore')
-    else:
+    if SetScript is None:
         SetScript = ''
-    if TestScript is not None:
-        TestScript = TestScript.encode('ascii', 'ignore')
-    else:
+    if TestScript is None:
         TestScript = ''
-    if User is not None:
-        User = User.encode('ascii', 'ignore')
-    else:
+    if User is None:
         User = ''
-    if Group is not None:
-        Group = Group.encode('ascii', 'ignore')
-    else:
+    if Group is None:
         Group = ''
 
     retval = 0
@@ -171,7 +141,7 @@ def opened_w_error(filename, mode="r"):
 
 
 def WriteFile(path, contents):
-    with opened_w_error(path, 'wb') as (f, error):
+    with opened_w_error(path, 'w') as (f, error):
         if error:
             Print("Exception opening file " + path + " Error Code: " + str(error.errno)
                   + " Error: " + error.message + error.strerror, file=sys.stderr)
@@ -256,12 +226,12 @@ def Set(GetScript, SetScript, TestScript, User, Group):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, preexec_fn=PreExec(uid, gid, User))
     exit_code = proc.wait()
-    Print("stdout: " + proc.stdout.read().encode('ascii', 'ignore'))
+    Print("stdout: " + proc.stdout.read().decode('ascii', 'ignore'))
     LG().Log('INFO', "stdout: " +
-             proc.stdout.read().encode('ascii', 'ignore'))
-    Print("stderr: " + proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stdout.read().decode('ascii', 'ignore'))
+    Print("stderr: " + proc.stderr.read().decode('ascii', 'ignore'))
     LG().Log('INFO', "stderr: " +
-             proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stderr.read().decode('ascii', 'ignore'))
 
     os.remove(path)
     return [exit_code]
@@ -296,12 +266,12 @@ def Test(GetScript, SetScript, TestScript, User, Group):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, preexec_fn=PreExec(uid, gid, User))
     exit_code = proc.wait()
-    Print("stdout: " + proc.stdout.read().encode('ascii', 'ignore'))
+    Print("stdout: " + proc.stdout.read().decode('ascii', 'ignore'))
     LG().Log('INFO', "stdout: " +
-             proc.stdout.read().encode('ascii', 'ignore'))
-    Print("stderr: " + proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stdout.read().decode('ascii', 'ignore'))
+    Print("stderr: " + proc.stderr.read().decode('ascii', 'ignore'))
     LG().Log('INFO', "stderr: " +
-             proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stderr.read().decode('ascii', 'ignore'))
 
     os.remove(path)
     return [exit_code]
@@ -337,12 +307,12 @@ def Get(GetScript, SetScript, TestScript, User, Group):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, preexec_fn=PreExec(uid, gid, User))
     exit_code = proc.wait()
-    Result = proc.stdout.read().encode('ascii', 'ignore')
+    Result = proc.stdout.read().decode('ascii', 'ignore')
     Print("stdout: " + Result)
     LG().Log('INFO', "stdout: " + Result)
-    Print("stderr: " + proc.stderr.read().encode('ascii', 'ignore'))
+    Print("stderr: " + proc.stderr.read().decode('ascii', 'ignore'))
     LG().Log('INFO', "stderr: " +
-             proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stderr.read().decode('ascii', 'ignore'))
 
     os.remove(path)
     return [exit_code, GetScript, SetScript, TestScript, User, Group, Result]

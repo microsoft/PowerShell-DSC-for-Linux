@@ -26,23 +26,15 @@ show_mof = False
 
 
 def init_vars(KeyComment, Ensure, UserName, Key):
-    if Ensure is not None and Ensure != '':
-        Ensure = Ensure.encode('ascii', 'ignore').lower()
-    else:
+    if Ensure is None or Ensure == '':
         Ensure = 'present'
-    if KeyComment is not None:
-        KeyComment = KeyComment.encode('ascii', 'ignore')
-    else:
+    if KeyComment is None:
         KeyComment = ''
-    if UserName is not None:
-        UserName = UserName.encode('ascii', 'ignore')
-    else:
+    if UserName is None:
         UserName = ''
-    if Key is not None:
-        Key = Key
-    else:
+    if Key is None:
         Key = ''
-    return KeyComment, Ensure, UserName, Key
+    return KeyComment, Ensure.lower(), UserName, Key
 
 
 def Set_Marshall(KeyComment, Ensure, UserName, Key):

@@ -47,31 +47,21 @@ show_mof = False
 
 
 def init_vars(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
-    if Ensure is not None and Ensure != '':
-        Ensure = Ensure.encode('ascii', 'ignore').lower()
-    else:
+    if Ensure is None or Ensure == '':
         Ensure = 'present'
-    if PackageManager is not None:
-        PackageManager = PackageManager.encode('ascii', 'ignore').lower()
-    else:
+    if PackageManager is None:
         PackageManager = ''
-    if Name is not None:
-        Name = Name.encode('ascii', 'ignore')
-    else:
+    if Name is None:
         Name = ''
-    if FilePath is not None:
-        FilePath = FilePath.encode('ascii', 'ignore')
-    else:
+    if FilePath is None:
         FilePath = ''
     if PackageGroup is None:
         PackageGroup = False
-    if Arguments is not None:
-        Arguments = Arguments.encode('ascii', 'ignore')
-    else:
+    if Arguments is None:
         Arguments = ''
     if ReturnCode is None:
         ReturnCode = 0
-    return Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode
+    return Ensure.lower(), PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode
 
 
 def Set_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
@@ -635,16 +625,16 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             print(
                 'CalledProcessError.  Command string was ' + e.cmd, file=sys.stdout)
             print('CalledProcessError.  Command result was ' +
-                  (e.output[:-1]).encode('ascii', 'ignore'), file=sys.stdout)
+                  (e.output[:-1]).decode('ascii', 'ignore'), file=sys.stdout)
         if no_output:
             return e.returncode, None
         else:
-            return e.returncode, e.output.encode('ascii', 'ignore')
+            return e.returncode, e.output.decode('ascii', 'ignore')
 
     if no_output:
         return 0, None
     else:
-        return 0, output.encode('ascii', 'ignore')
+        return 0, output.decode('ascii', 'ignore')
 
 
 def GetTimeFromString(s):
