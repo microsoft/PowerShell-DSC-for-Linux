@@ -4087,12 +4087,8 @@ MI_Result GetPartialConfigurationName(_In_ MI_Instance *partialConfiguration,
         }
         if (!(flags & MI_FLAG_NULL))
         {
-                // ResourceID is in format [[[[]]]]ActualId, so find last occurance of ]. Name can't contain special characters.
-                *name = wcsrchr(value.string, L']');
-                if (*name == NULL)
-                        *name = value.string;
-                else
-                        *name += 1; //advance to next character
+            // ResourceID is in format [[[[]]]]ActualId, so find last occurance of ]. Name can't contain special characters.
+            *name = value.string;
         }
         return MI_RESULT_OK;
 }
