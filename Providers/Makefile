@@ -85,8 +85,8 @@ all:
 
 # reg target
 ################################################################################
-OMI_BIN_PATH:=$(BINDIR)
-OMI_LIB_PATH:=$(LIBDIR)
+OMI_BIN_PATH:=$(CONFIG_BINDIR)
+OMI_LIB_PATH:=$(CONFIG_LIBDIR)
 OMI_CONFIG_PATH:=$(CONFIG_SYSCONFDIR)/dsc/configuration
 OMI_REG_PATH:=$(BIN_PATH)/omi
 OMI_REG:=$(OMI_BIN_PATH)/omireg -n root/Microsoft/DesiredStateConfiguration \
@@ -97,7 +97,6 @@ REGISTER:=Resource.registration.mof
 # $(call REGISTER_PROVIDER,provider-name)
 define REGISTER-PROVIDER
 	echo ...registering: $1;
-	export LD_LIBRARY_PATH=$(BOOST_LIB_ROOT):$$LD_LIBRARY_PATH; \
 	$(MKDIR) $(OMI_CONFIG_PATH)/{registration,schema}/MSFT_$1Resource; \
 	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(SCHEMA) \
 	    $(OMI_CONFIG_PATH)/schema/MSFT_$1Resource/MSFT_$1$(SCHEMA); \
