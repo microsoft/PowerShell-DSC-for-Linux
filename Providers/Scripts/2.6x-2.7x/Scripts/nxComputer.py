@@ -1,261 +1,420 @@
-#from _future_ import print_function
-#from _future_ import with_statement
-#from contextlib import contextmanager
+# !/usr/bin/env python
+# ==================================
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# See license.txt for license information.
+# ==================================
+
+from __future__ import print_function
+from __future__ import with_statement
+from contextlib import contextmanager
 
 import os
 import sys
-import codecs
-import socket
-import fileinput
-import re
+import time
 import subprocess
-def Set_Marshall(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-	Name = Name.decode("utf-8")
-        DNSDomainName = DNSDomainName.decode("utf-8")
-        TimeZoneName = TimeZoneName.decode("utf-8")
-        AlternateTimeZoneName = AlternateTimeZoneName.decode("utf-8")
+import re
+import imp
+protocol = imp.load_source('protocol', '../protocol.py')
+nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
+LG = nxDSCLog.DSCLog
+try:
+    import hashlib
+    md5const = hashlib.md5
+except ImportError:
+    import md5
+    md5const = md5.md5
 
-	retval = Set(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
-	return retval
+# [ClassVersion("1.0.0"), FriendlyName("nxComputer")]
+# class MSFT_nxComputerResource : OMI_BaseResource
+# {
+#     [key] string Name;
+#     [Write] string DNSDomainName;
+#     [Write] string TimeZoneName;
+#     [Write] string AlternateTimeZoneName;
+# };
+
+
+def init_vars(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
+    if Name is None:
+        Name = ''
+    if DNSDomainName is None:
+        DNSDomainName = ''
+    if TimeZoneName is None:
+        TimeZoneName = ''
+    if AlternateTimeZoneName is None:
+        AlternateTimeZoneName = ''
+    return Name.encode('ascii', 'ignore'), DNSDomainName.encode('ascii', 'ignore'), \
+        TimeZoneName.encode('ascii', 'ignore'), AlternateTimeZoneName.encode('ascii', 'ignore')
+
+
+def Set_Marshall(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
+    (Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName) = init_vars(
+        Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
+    retval = Set(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
+    if retval is False:
+        retval = [-1]
+    else:
+        retval = [0]
+    return retval
+
 
 def Test_Marshall(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-	Name = Name.decode("utf-8")
-        DNSDomainName = DNSDomainName.decode("utf-8")
-        TimeZoneName = TimeZoneName.decode("utf-8")
-        AlternateTimeZoneName = AlternateTimeZoneName.decode("utf-8")
-	
-	retval= Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
-	return retval
+    (Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName) = init_vars(
+        Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
+    retval = Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
+    if retval is False:
+        retval = [-1]
+    else:
+        retval = [0]
+    return retval
+
 
 def Get_Marshall(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-	Name = Name.decode("utf-8")
-        DNSDomainName = DNSDomainName.decode("utf-8")
-        TimeZoneName = TimeZoneName.decode("utf-8")
-        AlternateTimeZoneName = AlternateTimeZoneName.decode("utf-8")
-        
-	retval = 0
-	(retval, Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName) = Get(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
-
-	Name = Name.encode("utf-8")
-        DNSDomainName = DNSDomainName.encode("utf-8")
-        TimeZoneName = TimeZoneName.encode("utf-8")
-        AlternateTimeZoneName = AlternateTimeZoneName.encode("utf-8")
-	return [retval, Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName]
+    arg_names = list(locals().keys())
+    (Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName) = init_vars(
+        Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
+    retval = 0
+    (Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName) = Get(
+        Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
+    Name = protocol.MI_String(Name)
+    DNSDomainName = protocol.MI_String(DNSDomainName)
+    TimeZoneName = protocol.MI_String(TimeZoneName)
+    AlternateTimeZoneName = protocol.MI_String(AlternateTimeZoneName)
+    retd = {}
+    ld = locals()
+    for k in arg_names:
+        retd[k] = ld[k]
+    return retval, retd
 
 ############################################################
-### Begin user defined DSC functions
+# Begin user defined DSC functions
 ############################################################
-global UNITTEST
 
-#global Name
-#global DNSDomainName
-#global TimeZoneName
-#global AlternateTimeZoneName 
-#Name = "John's Computer"
-#DNSDomainName = "jokes.com"
-#TimeZoneName = "America/Los_Angeles"
-#AlternateTimeZoneName = "Canada/Eastern"
 
-UNITTEST = False 
+def RunGetOutput(cmd, no_output, chk_err=True):
+    """
+    Wrapper for subprocess.check_output.
+    Execute 'cmd'.  Returns return code and STDOUT, trapping expected exceptions.
+    Reports exceptions to Error if chk_err parameter is True
+    """
+    def check_output(no_output, *popenargs, **kwargs):
+        r"""Backport from subprocess module from python 2.7"""
+        if 'stdout' in kwargs:
+            raise ValueError(
+                'stdout argument not allowed, it will be overridden.')
+        if no_output:
+            out_file = None
+        else:
+            out_file = subprocess.PIPE
+        process = subprocess.Popen(stdout=out_file, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise subprocess.CalledProcessError(retcode, cmd, output=output)
+        return output
 
-def FilePaths(filePath):
-    if os.path.islink("/etc/localtime"):
-       os.unlink("/etc/localtime")
-       os.symlink(filePath,"/etc/localtime")
-    elif os.path.isfile("/etc/localtime"):
-       os.remove("/etc/localtime")
-       os.symlink(filePath, "/etc/localtime")
-    elif os.path.islink("/etc/timezone"):
-       os.unlink("/etc/timezone")
-       os.symlink(filePath,"/etc/timezone")
-    elif os.path.isfile("/etc/timezone"):
-       os.remove("/etc/timezone")
-       os.symlink(filePath, "/etc/timezone")
+    # Exception classes used by this module.
+    class CalledProcessError(Exception):
+
+        def __init__(self, returncode, cmd, output=None):
+            self.returncode = returncode
+            self.cmd = cmd
+            self.output = output
+
+        def __str__(self):
+            return "Command '%s' returned non-zero exit status %d" % (self.cmd, self.returncode)
+
+    subprocess.check_output = check_output
+    subprocess.CalledProcessError = CalledProcessError
+    try:
+        output = subprocess.check_output(
+            no_output, cmd, stderr=subprocess.STDOUT, shell=True)
+    except subprocess.CalledProcessError, e:
+        if chk_err:
+            print('CalledProcessError.  Error Code is ' +
+                  str(e.returncode), file=sys.stdout)
+            LG().Log('ERROR', 'CalledProcessError.  Error Code is ' +
+                  str(e.returncode), file=sys.stdout)
+            print(
+                'CalledProcessError.  Command string was ' + e.cmd, file=sys.stdout)
+            LG().Log('ERROR', 
+                'CalledProcessError.  Command string was ' + e.cmd, file=sys.stdout)
+            print('CalledProcessError.  Command result was ' +
+                  (e.output[:-1]).decode('utf-8').encode('ascii', 'ignore'), file=sys.stdout)
+            LG().Log('ERROR', 'CalledProcessError.  Command result was ' +
+                  (e.output[:-1]).decode('utf-8').encode('ascii', 'ignore'))
+        if no_output:
+            return e.returncode, None
+        else:
+            return e.returncode, e.output.decode('utf-8').encode('ascii', 'ignore')
+
+    if no_output:
+        return 0, None
     else:
-       os.symlink(filePath, "/etc/localtime")
-    
-def parseFile(fileName, num, propertyName, propertyDef):
-    text = ""
-    count = 0
-    writeIn = propertyName + "= " + propertyDef + "\n"
-    testFile = open(fileName, "r")
-    for line in testFile:
-       trimmedName = line.strip()
-       if trimmedName[0:num] == propertyName:
-          count = 1 
-          text = text + writeIn
-       else:
-          text = text +  line + "\n"
-    if count == 0:
-       text = text + writeIn     
-    testFile.close()
-    testFile = open(fileName, "w")
-    testFile.write(text)
-    testFile.close()
-       
-       
-def parseFileSmall(fileName, num, propertyName):
-    testFile = open(fileName, "r")
-    for line in testFile:
-       trimmedName = line.strip()
-       smallName = trimmedName[0:num]
-       if smallName == propertyName:
-          return trimmedName
-   
+        return 0, output.decode('utf-8').encode('ascii', 'ignore')
+
+
+@contextmanager
+def opened_w_error(filename, mode="rb"):
+    """
+    This context ensures the file is closed.
+    """
+    try:
+        f = open(filename, mode)
+    except IOError, err:
+        yield None, err
+    else:
+        try:
+            yield f, None
+        finally:
+            f.close()
+
+
 def Set(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-    DNSText = " "
-    NameText = " "
-    works = 0  
-    if os.path.isfile(getNamePath2()):                   # Setting Name
-       nameFile = open(getNamePath2(), "w")
-       nameFile.write(Name)
-    elif os.path.isfile(getNamePath()):
-       nameFile = open(getNamePath(), 'w')
-       nameFile.write(Name)
-    else:
-       works = -1
-    if os.path.isfile(getDNSDomainNamePath()):
-       parseFile(getDNSDomainNamePath(), 6, "domain", DNSDomainName)
-    else:
-       domainFile = open("/etc/resolv.conf", "w")
-       domainText = "domain= " + DNSDomainName
-       domainFile.write(domainText)
-       domainFile.close()
-    fullPath = "/usr/share/zoneinfo/" + TimeZoneName    #set TimeZoneName or AlternateTimeZoneName
-    altFullPath = "/usr/share/zoneinfo/" + AlternateTimeZoneName
-    if os.path.isfile(fullPath):
-       FilePaths(fullPath)
-    else:
-       FilePaths(altFullPath)
-    return [works]
+    if len(Name) > 0 and SetHostname(Name, DNSDomainName) is False:
+        return False
+    if len(TimeZoneName) > 0 and SetTimezone(TimeZoneName) is False:
+        if len(TimeZoneName) > 0 and SetTimezone(AlternateTimeZoneName) is False:
+            return False
+    return True
+
+
+def Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
+    if GetHostname() != Name + DNSDomainName:
+        return False
+    if TestTimezone(TimeZoneName) is False:
+        if TestTimezone(AlternateTimeZoneName) is False:
+            return False
+    return True
+
 
 def Get(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-   works = 0
-   if os.path.isfile(getNamePath2()):
-      nameFile = open(getNamePath2(), "r")           
-      for line in nameFile:
-         nameLine = line
-   elif os.path.isfile(getNamePath()):
-      nameFile = open(getNamePath(), "r")
-      for line in nameFile:
-         nameLine = line
-   else:
-      works = -1
-      nameLine = ""
-   DNSName = ""
-   if os.path.isfile(getDNSDomainNamePath()):
-      dnsName = parseFileSmall(getDNSDomainNamePath(), 6,"domain")
-      if dnsName == None:
-         works = -1
-      else:
-         print "I MADE IT"
-         DNSName = dnsName.split("domain=", 1)
-	 DNSName = DNSName[1].strip()
-      
-   if os.path.islink(getTimeZonePath()):                              
-      timeZonePath = os.readlink(getTimeZonePath())
-      timeZone = timeZonePath.split('/',4)
-      
-      timeZone2 = timeZone[4]
-   elif os.path.islink(getTimeZonePath2()):
-      timeZonePath = os.readlink(getTimeZonePath2())
-      timeZone = timeZonePath.split('/', 4)
-      timeZone2 = timeZone[4]                                                                                                                                                                                                                                             
-   else:
-      works = -1
-   if works == 0:
-      return [0, nameLine, DNSName , timeZone2, ""]
-   else:
-      return [-1, nameLine, DNSName, timeZone2, ""]
-def Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-    works = 0
-    if os.path.isfile(getNamePath2()):
-       nameFile = open(getNamePath2(), "r")
-       for line in nameFile:
-          nameStrip = line.strip()
-          if nameStrip == Name:
-	     print "\nName: " +nameStrip+ " = "+ Name
-             break
-       if nameStrip != Name:
-          works = -1
-    elif os.path.isfile(getNamePath()):
-       nameFile = open(getNamePath(), "r")
-       for line in nameFile:
-          nameStrip = line.strip()
-          if nameStrip == Name:
-             break
-       if nameStrip != Name:
-          works = -1
-
-    if os.path.isfile(getDNSDomainNamePath()):
-       dnsName = parseFileSmall(getDNSDomainNamePath(), 6,"domain")
-       if dnsName != None:
-         DNSName = dnsName.split("domain=",1)
-	 DNSName = DNSName[1].strip()
-	 if DNSName != DNSDomainName:
-	    works = -1
-	 
-    localfile = getTimeZonePath()
-    timezone = getTimeZonePath2()
-    if os.path.islink(localfile):
-       timeZonePath = os.readlink(localfile)         #fix when get is fixed
-       timeZone = timeZonePath.split('/',4)
-       timeZone2 = timeZone[4]
-    elif os.path.islink(timezone):
-       timeZonePath = os.readlink(timezone)
-       timeZone = timeZonePath.split('/',4)
-       timeZone2 = timeZone[4]
+    fqdn = GetHostname()
+    if '.' in fqdn:
+        Name = fqdn.split('.')[0]
+        DNSDomainName = fqdn.replace(Name + '.', '')
     else:
-        works = -1
-    return [works]
-       
-def getNamePath():
-    if UNITTEST == True:
-        return nameString
-    else:
-        return "/etc/hostname"
-    
-def getNamePath2():
-    if UNITTEST == True:
-        return nameString
-    else:
-        return "/etc/HOSTNAME"
-    
-def getDNSDomainNamePath():
-    if UNITTEST == True:
-        return DNSDomainNameString
-    else:
-        return "/etc/resolv.conf"
-#def getDNSDomainNamePath2():
-#    if UNITTEST == True;
-#       return DNSDomainNameString
-#    else:
-#        return "/etc/resolvconf"
-    
-def getTimeZonePath():
-    if UNITTEST == True:
-        return TimeZoneString
-    else:
-        return "/etc/localtime"
-def getTimeZonePath2():
-    if UNITTEST == True:
-        return TimeZoneString
-    else:
-        return "/etc/timezone"
-
-#Testing Name paths 
-nameString = "sysconfig.txt"    #redhat,sles, cent os, oracle 
-#UnitTest1()
-nameString = "sysconfig2.txt"             # debian and ubuntu
-#UnitTest2()
-DNSDomainNameString = "resolv.txt"
-#UnitTest3()
-TimeZoneString = "localtime.txt"
-#UnitTest4()
-TimeZoneString = "localtime2.txt"
-#UnitTest5()
+        Name = fqdn
+        DNSDomainName = ''
+    zones = GetCurrentTimezones()
+    if len(zones) > 1:
+        AlternateTimeZoneName = zones[1][0]
+    if len(zones) > 0:
+        AlternateTimeZoneName = zones[0][0]
+    return Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName
 
 
-#print Set(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
-#print Get(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
-#print Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName)
+def BuildTZList():
+    tzlist = list()
+    for top, dirs, files in os.walk('/usr/share/zoneinfo'):
+        for f in files:
+            h = md5const()
+            n = top + '/' + f
+            with opened_w_error(n, 'r') as (F, error):
+                if error:
+                    print("Exception opening file " + n + " Error Code: " + str(error.errno) +
+                          " Error: " + error.message + error.strerror, file=sys.stderr)
+                    LG().Log('ERROR', "Exception opening file " + n + " Error Code: " + str(error.errno) +
+                          " Error: " + error.message + error.strerror)
+                    return tzlist
+                t = F.read()
+            h.update(t)
+            tzlist.append((n[20:], h.hexdigest()))
+    return tzlist
+
+# Example TZ 'AEST-10:55:01AEDT-11:55:10,M10.5.0/11:55:01,M3.5.0/11:55:10'
+
+timezone_regex = r"""
+(?P<std_name>.*?ST)                                  # std name is required
+(?P<std_hours>[-,+]?[0-1][0-9]|[-,+]?[2][0-4])       # std offset hours is required 
+(?P<std_minutes>:[0-5][0-9])?                        # std offset minutes is optional 
+(?P<std_seconds>:[0-5][0-9])?                        # std offset seconds is optional 
+(?P<dst_name>.*?DT)?                                 # dst name is optional
+(?P<dst_hours>[-,+]?[0-1][0-9]|[-,+]?[2][0-4])?      # dst offset hours is optional
+(?P<dst_minutes>:[0-5][0-9])?                        # dst offset minutes is optional
+(?P<dst_seconds>:[0-5][0-9])?                        # dst offset seconds is optional
+
+(?P<dst_start_day_of_jullian_year>,J[1-2][0-9][0-9]|
+,J[3][0-5][0-9]|,J[3][6][0-5]|,J[1-9][0-9]|,J[0-9])? # dst offset start_day_of_year is optional
+(?P<dst_start_day_of_year>,[1-2][0-9][0-9]|
+,[3][0-5][0-9]|,[3][6][0-5]|,[1-9][0-9]|,[0-9])?     # dst offset start_day_of_year is optional
+(?P<dst_start_month>,M[1][0-2]|M[1-9])?              # dst offset start_month is optional
+(?P<dst_start_week>[.][1-5])?                        # dst offset start_week is optional
+(?P<dst_start_day>[.][0-6])?                         # dst offset start_day is optional
+(?P<dst_start_hours>[/][0-1][0-9]|[/][2][0-4])?      # dst offset hours is optional
+(?P<dst_start_minutes>:[0-5][0-9])?                  # dst offset minutes is optional
+(?P<dst_start_seconds>:[0-5][0-9])?                  # dst offset seconds is optional
+
+(?P<dst_end_day_of_jullian_year>,J[1-2][0-9][0-9]|
+,J[3][0-5][0-9]|,J[3][6][0-5]|,J[1-9][0-9]|,J[0-9])? # dst offset end_day_of_year is optional
+(?P<dst_end_day_of_year>,[1-2][0-9][0-9]|
+,[3][0-5][0-9]|,[3][6][0-5]|,[1-9][0-9]|,[0-9])?     # dst offset end_day_of_year is optional
+(?P<dst_end_month>,M[1][0-2]|,M[1-9])?               # dst offset end_month is optional
+(?P<dst_end_week>[.][1-5])?                          # dst offset end_week is optional
+(?P<dst_end_day>[.][0-6])?                           # dst offset end_day is optional
+(?P<dst_end_hours>[/][0-1][0-9]|[/][2][0-4])?        # dst offset hours is optional
+(?P<dst_end_minutes>:[0-5][0-9])?                    # dst offset minutes is optional
+(?P<dst_end_seconds>:[0-5][0-9])?                    # dst offset seconds is optional
+"""
+# Use re to filter out invalid syntax and number ranges.
+# Keep the delimiters.
+
+
+def ValidateTimeZoneString(TimeZone):
+    safe_tz = ''
+    tzstring = TimeZone.strip()
+    m = re.search(timezone_regex, tzstring, re.VERBOSE)
+    if m is None:
+        print('Unable to validate TimeZone', file=sys.stderr)
+        LG().Log('ERROR', 'Unable to validate TimeZone')
+        return safe_tz
+    if m.group('std_name') is None or m.group('std_hours') is None:
+        return safe_tz
+    # return only what matched
+    for g in m.groups():
+        if g is not None:
+            safe_tz += g
+    return safe_tz
+
+
+def ExtractSimpleNameFromTimeZoneString(TimeZone):
+    simple_tz = ''
+    tzstring = TimeZone.strip()
+    m = re.search(timezone_regex, tzstring, re.VERBOSE)
+    if m is None:
+        print('Unable to parse TimeZone', file=sys.stderr)
+        LG().Log('ERROR', 'Unable to parse TimeZone')
+        return simple_tz
+    if m.group('std_name') is None or m.group('std_hours') is None:
+        return simple_tz
+    simple_tz += m.group('std_name')
+    simple_tz += m.group('std_hours')
+    if m.group('dst_name') is not None:
+        simple_tz += m.group('dst_name')
+    return simple_tz
+
+
+def ValidateTimezone(TimeZone):
+    # Is it a region file path?
+    l = BuildTZList()
+    for n, h in l:
+        if TimeZone == n:
+            return TimeZone,TimeZone
+    # Is it a TZ string?
+    safe_tz = ValidateTimeZoneString(TimeZone)
+    tzfile = ExtractSimpleNameFromTimeZoneString(TimeZone)
+    return safe_tz, tzfile
+
+
+def SetTimezone(TimeZone):
+    zone, tzfile_name = ValidateTimezone(TimeZone)
+    if len(zone) < 1:
+        return False
+    os.environ['TZ'] = zone
+    time.tzset()
+    SetLocaltimeTZFile(tzfile_name)
+    print('Time is now ' + time.strftime('%X %x %Z') +
+        ' time zone is ' + repr(time.tzname), file=sys.stderr)
+    LG().Log('INFO', 'Time is now ' + time.strftime('%X %x %Z') +
+        ' time zone is ' + repr(time.tzname))
+
+
+def SetLocaltimeTZFile(tzfile):
+    l = BuildTZList()
+    for n, h in l:
+        if tzfile == n:
+            code=os.system('cp /usr/share/zoneinfo/' + n + ' /etc/localtime')
+            if code:
+                print('Error: cp /usr/share/zoneinfo/' + n + ' /etc/localtime Failed', file=sys.stderr)
+            return
+    print('Error: No match for ' + tzfile + ' under /usr/share/zoneinfo.', file=sys.stderr)
+    return
+                      
+def SetHostname(Name, DNSDomainName):
+    fqdn = Name + '.' + DNSDomainName
+    with opened_w_error('/etc/hosts', 'r') as (F, error):
+        if error:
+            print("Exception opening file /etc/hosts Error Code: " + str(error.errno) +
+                  " Error: " + error.message + error.strerror, file=sys.stderr)
+            LG().Log('ERROR', "Exception opening file /etc/hosts Error Code: " + str(error.errno) +
+                  " Error: " + error.message + error.strerror)
+            return False
+        found_v4 = False
+        found_v6 = False
+        n = ''
+        for l in F:
+            if l.startswith('127.0.0.1') and not found_v4:
+                found_v4 = True
+                n += l + '127.0.0.1     ' + fqdn + '     ' + Name + '\n'
+            elif l.startswith('127.0.0.1') and found_v4:
+                continue
+            if l.startswith('::1') and not found_v6:
+                found_v6 = True
+                n += l + '::1     ' + fqdn + '     ' + Name + '\n'
+            elif l.startswith('::1') and found_v6:
+                continue
+            else:
+                n += l
+    if not found_v4:
+        n = '127.0.0.1     ' + fqdn + '    ' + Name + '\n' + n
+    if not found_v6:
+        n += '::1     ' + fqdn + '    ' + Name + '\n'
+    with opened_w_error('/etc/hosts', 'w') as (F, error):
+        if error:
+            print("Exception opening file /etc/hosts Error Code: " + str(error.errno) +
+                  " Error: " + error.message + error.strerror, file=sys.stderr)
+            LG().Log('ERROR', "Exception opening file /etc/hosts Error Code: " + str(error.errno) +
+                  " Error: " + error.message + error.strerror)
+            return False
+        F.write(n)
+    with opened_w_error('/etc/hostname', 'w') as (F, error):
+        if error:
+            print("Exception opening file /etc/hostname Error Code: " + str(error.errno) +
+                  " Error: " + error.message + error.strerror, file=sys.stderr)
+            LG().Log('ERROR', "Exception opening file /etc/hostname Error Code: " + str(error.errno) +
+                  " Error: " + error.message + error.strerror)
+            return False
+        F.write(Name + '\n')
+    os.system('hostname ' + Name)
+    return True
+
+
+def GetHostname():
+    out = ''
+    code, out = RunGetOutput('hostname --fqdn', False, False)
+    return out
+
+
+def GetCurrentTimezones():
+    zones = list()
+    hash = md5const()
+    with opened_w_error('/etc/localtime', 'r') as (F, error):
+        if error:
+            print("Exception opening file /etc/localtime Error Code: " +
+                  str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
+            LG().Log('ERROR', "Exception opening file /etc/localtime Error Code: " +
+                  str(error.errno) + " Error: " + error.message + error.strerror)
+            return zones
+        t = F.read()
+    hash.update(t)
+    md = hash.hexdigest()
+    l = BuildTZList()
+    for n, h in l:
+        if md == h:
+            zones.append((n, h))
+    return zones
+
+
+def TestTimezone(TimeZone):
+    zones = GetCurrentTimezones()
+    for n, h in zones:
+        if TimeZone == n:
+            return True
+    tz, tzfile = ValidateTimeZoneString(TimeZone)
+    for n, h in zones:
+        if tzfile == n:
+            return True
+    return False
