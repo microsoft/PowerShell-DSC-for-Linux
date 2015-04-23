@@ -987,13 +987,11 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         raise Exception('ERROR: Remote paths are only valid for Type = "file".')
     if not DestinationPath:
         Ensure = "absent"
-        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ""
         ModifiedDate = 0
         return [-1, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
     if not os.path.exists(DestinationPath):
         Ensure = "absent"
-        SourcePath = Type = Contents = Checksum = Links = Owner = Group = Mode = ''
         ModifiedDate = 0
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
