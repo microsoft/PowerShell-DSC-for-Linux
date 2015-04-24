@@ -660,11 +660,13 @@ def RemoveFile(path):
               str(error.errno) + " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception removing file" + path +
                  " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception removing file" + path + " Error Code: " +
               str(error.errno) + " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception removing file" + path +
                  " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -698,11 +700,13 @@ def MakeDirs(path):
               str(error.errno) + " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR',  "Exception making dir" + path +
                  " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception making dir" + path + " Error Code: " +
               str(error.errno) + " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR',  "Exception making dir" + path +
                  " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
