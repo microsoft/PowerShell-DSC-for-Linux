@@ -8,7 +8,7 @@ namespace DSC
     
     class nxServiceTest : ProviderTestBase
     {
-        private const string service_tool = "/sbin/service";
+        private const string service_tool = "service";
         private const string chkconfig_tool = "/sbin/chkconfig";
         private const string invoke_tool = "/usr/sbin/invoke-rc.d";
         private const string update_tool = "/usr/sbin/update-rc.d";
@@ -54,6 +54,16 @@ namespace DSC
             string orgState = String.Empty;
             string orgEnableState = String.Empty;
 
+            string sysinfo = String.Empty;
+            if ( controller.ToLower().Equals("init"))
+            {            
+                sshHelper.Execute("cat /proc/version", out sysinfo);
+                if (sysinfo.ToLower().Contains("ubuntu"))
+                {
+                    throw new VarUnsupported("init controller is ignored on Ubuntu!");
+                }
+            }
+            
             // Check if the controller is supported on the Linux.
             CheckControllerExist(controller);
 
@@ -103,6 +113,7 @@ namespace DSC
         /// <param name="ctx">Testing Context.</param>
         protected override void VerifyLinuxState(IContext ctx)
         {
+            
             string verification = ctx.Records.GetValue("verification");
 
             if (String.IsNullOrEmpty(verification))
@@ -418,9 +429,12 @@ namespace DSC
         {
             try
             {
-                sshHelper.Execute("/bin/systemctl status " + name);
-
-                return "Running";
+                string rlt = String.Empty;
+                sshHelper.Execute("/bin/systemctl status " + name, out rlt);
+                if (rlt.ToLower().Contains("running"))
+                    return "Running";
+                else
+                    return "Stopped";
             }
             catch (InvalidOperationException)
             {
@@ -530,6 +544,30 @@ namespace DSC
 
         private string InitGetStatus(string name)
         {
+            string retval = "";
+            try
+            {
+                sshHelper.Execute(String.Format(service_tool_check_status_command, name), out retval);
+            }
+            catch (InvalidOperationException)
+            {
+                sshHelper.Execute(String.Format(invoke_tool_check_status_command, name), out retval);
+            }
+             
+            if (retval.Contains("running") && !retval.Contains("failed"))
+            {
+                return "Running";
+            }
+            else if (retval.Trim().Equals("Running"))
+            {
+                return "Running";
+            }
+            else
+            {
+                return "Stopped";
+            }
+            
+            /*
             string check_status_command = "";
             try
             {
@@ -564,6 +602,7 @@ namespace DSC
             {
                 return "Stopped";
             }
+              */
 
         }
 
@@ -588,7 +627,7 @@ namespace DSC
                     string retval = "";
                     sshHelper.Execute("/sbin/chkconfig --list " + name + " | awk '{print $4$5$6$7}' | tr -d '\n'", out retval);
 
-                    if (retval.Contains("2:on3:on4:on5:on"))
+                    if (retval.Contains("2:on3:on4:on5:on") || retval.Contains("2:on3:on4:off5:on"))
                     {
                         return "true";
                     }

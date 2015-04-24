@@ -25,7 +25,7 @@ namespace DSC
             finalizeCmd = ctx.Records.GetValue("finalCmd");
 
             base.Setup(ctx);
-
+          
             ctx.Alw("nxEnvironmentTest Setup End.");
         }
 

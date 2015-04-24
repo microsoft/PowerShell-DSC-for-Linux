@@ -8,48 +8,128 @@
 using System;
 using System.Text;
 using Infra.Frmwrk;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DSC
 {
     class nxPackageTest : ProviderTestBase
     {
-        private const string yum_install_cmmd = "yum install {0}";
-        private const string rpm_install_cmmd = "rpm -ivh {0}"+".rpm";
+        private const string yum_install_cmmd = "yum install -y {0}";
+        private const string rpm_install_cmmd = "rpm -ivh {0}";
         private const string rpm_check_cmmd = "rpm -qa | grep '{0}*'";
         private const string rpm_remove_cmmd = "package=`rpm -qa |grep '{0}*'`;rpm -e $package";
 
-        private const string apt_install_cmmd = "apt-get install {0}";
-        private const string dpkg_install_cmmd = "dpkg -i {0}"+".deb";
+        private const string apt_install_cmmd = "apt-get install {0} --allow-unauthenticated";
+        private const string dpkg_install_cmmd = "dpkg -i {0}";
         private const string dpkg_groupinstall_cmmd = "dpkg -R {0}";
-        private const string dpkg_check_cmmd = "dpkg -l | grep '{0}*'";
-        private const string dpkg_remove_cmmd = "package=`dpkg -l |grep '{0}*'`;dpkg -P $package";
+        private const string dpkg_check_cmmd = "dpkg -l {0}";
+        private const string dpkg_remove_cmmd = "dpkg --purge {0}";
 
         private string localSrcPath = "";
         private bool IsPackageMngr;
-
+        private string suffix = String.Empty;
+        private string manager = String.Empty;
         public override void Setup(IContext ctx)
         {
             ctx.Alw("nxPackageTest Setup Begin.");
 
-            mofHelper = new PackageMofHelper();
+            propString = ctx.Records.GetValue("propString");
+            mofPath = ctx.Records.GetValue("mofPath");
+            configMofScriptPath = ctx.Records.GetValue("configMofScriptPath");
+            psScripts = ctx.Records.GetValues("psScript");
+            psErrorMsg = ctx.Records.GetValue("psErrorMsg");
+            verificationCmd = ctx.Records.GetValue("verificationCmd");
+            expectedValue = ctx.Records.GetValue("expectedValue");
+            successfulyMsg = ctx.Records.GetValue("successfulMsg");
+            failedMsg = ctx.Records.GetValue("failedMsg");
 
-            string initialInstallState = ctx.Records.GetValue("initialInstallState");
-            localSrcPath = ctx.Records.GetValue("localSrcPath");
-            string packageName = ctx.Records.GetValue("name");
-            string manager = ctx.Records.GetValue("manager");
-            string keyword = ctx.Records.GetValue("keyword");
+            string nxHostName = ctx.Records.GetValue("nxHostName");
+            string nxUsername = ctx.Records.GetValue("nxUsername");
+            string nxpassword = ctx.Records.GetValue("nxpassword");
+            int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
             
+            string expectedInstallState = ctx.Records.GetValue("expectedInstallState");
+            // Open SSH.
+            sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
+
+            if (ctx.Records.GetValue("propString").Contains("FilePath:"))
+            {
+                string sysinfo = String.Empty;
+
+                sshHelper.Execute("cat /proc/version", out sysinfo);
+                if (sysinfo.ToLower().Contains("debian") || sysinfo.ToLower().Contains("ubuntu"))
+                {
+                    manager = "apt";
+                }
+                else if (sysinfo.ToLower().Contains("suse"))
+                {
+                    manager = "zypper";
+                }
+                else
+                    manager = "yum"; 
+            }
+            else
+            {
+                manager = ctx.Records.GetValue("manager");
+            }
+
+            
+            if ("apt" == manager)
+            {
+                suffix = "deb";
+            }  
+            else if ("zypper" == manager || "yum" == manager )
+            {
+                suffix = "rpm";
+            }
+            else
+            {
+                ctx.Alw("The package manager is invalid");
+            }
+
             string orgInstallState = String.Empty;
             if (ctx.Records.GetValue("propString").Contains("Path:"))
                 IsPackageMngr = true;
             else
                 IsPackageMngr = false;
 
-            initializeCmd = GetInitializeCmd(packageName, keyword, manager, initialInstallState, out orgInstallState);
-            finalizeCmd = GetFinalizeCmd(packageName, keyword, manager, orgInstallState);
+            string packageName = ctx.Records.GetValue("name");
+            string initialInstallState = ctx.Records.GetValue("initialInstallState");
+            localSrcPath = ctx.Records.GetValue("localSrcPath");
+            if (!String.IsNullOrWhiteSpace(localSrcPath))
+            {
+                localSrcPath = localSrcPath + "." + suffix;
+                string[] items = localSrcPath.Split('/');
+                string name = items[items.Length - 1];
+                try 
+                {
+                    sshHelper.Execute("rm /tmp/" + name);
+                }
+                catch { }
+                    
+                if (!localSrcPath.Contains("//"))
+                {
+                    try
+                    {
+                        PosixCopy psxCopy = new PosixCopy(nxHostName, nxUsername, nxpassword);
+                        psxCopy.CopyTo("..\\Package\\" + name, "/tmp/" + name);
+                    }
+                    catch
+                    {
+                        ctx.Alw("Copy package: failed!");
+                    }
+                }    
+                
+            }
+           
+            initializeCmd = GetInitializeCmd(packageName, manager, initialInstallState, out orgInstallState);
+            finalizeCmd = GetFinalizeCmd(packageName, manager, expectedInstallState, orgInstallState);
 
             // Initialize Service State.
             ctx.Alw(String.Format("Initilize Linux state : '{0}'", initializeCmd));
+            ctx.Alw(String.Format("Finalize Linux state : '{0}'", finalizeCmd));
             try
             {
                 sshHelper.Execute(initializeCmd);
@@ -59,7 +139,30 @@ namespace DSC
                 ctx.Alw(ex.Message);
             }
 
-            base.Setup(ctx);
+            // Prepare a configuration MOF file.
+            mofHelper = new PackageMofHelper();
+            propMap = ConvertStringToPropMap(propString);
+            if (propMap.ContainsKey("FilePath"))
+            {
+                propMap["FilePath"] = propMap["FilePath"] + "." + suffix;
+            }
+            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath);
+            ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
+                configMofScriptPath));
+
+            // Add the config to the logs
+            StreamReader sr = new StreamReader(configMofScriptPath);
+            string line = null;
+            StringBuilder configFile = new StringBuilder();
+            line = sr.ReadLine();
+            while (line != null)
+            {
+                line = line.Replace("{", "{{").Replace("}", "}}");
+                configFile.Append(line);
+                line = sr.ReadLine();
+            }
+            ctx.Alw(String.Format(configFile.ToString()));
+
             ctx.Alw("nxPackageTest Setup End.");
         }
 
@@ -72,30 +175,27 @@ namespace DSC
                     sshHelper.Execute(String.Format(rpm_check_cmmd, key), out package);
                     break;
                 case "apt":
-                    sshHelper.Execute(String.Format(dpkg_check_cmmd + "|awk -F ' ' '{print $2}'", key), out package);
+                    sshHelper.Execute(String.Format(dpkg_check_cmmd, key) + "|awk -F ' ' '{print $2}'|tr -d '\n'", out package);
                     break;
-                case "zipper":
-                    throw new ArgumentException("The package manager is 'zipper'!");
+                case "zypper":
+                    sshHelper.Execute(String.Format(dpkg_check_cmmd, key) + "|awk -F ' ' '{print $2}'|tr -d '\n'", out package);
+                    break;
                 default:
                     throw new ArgumentException("The package manager is invalid!");
             }
-            
+
         }
 
-        private string GetInitializeCmd(string packageName, string package, string manager, string initialInstallState, out string orgInstallState)
+        private string GetInitializeCmd(string packageName, string manager, string initialInstallState, out string orgInstallState)
         {
-            string state = GetState(package, manager);
-            if ("true" == state)
-                orgInstallState = "installed";
-            else
-                orgInstallState = "uninstalled";
-
-            return GetCmd(packageName, package, manager, initialInstallState);
+            string state = GetState(packageName, manager).ToLower();
+            orgInstallState = state;
+            return GetCmd(packageName, manager, state, initialInstallState);
         }
 
-        private string GetFinalizeCmd(string packageName, string package, string manager, string finalInstallState)
+        private string GetFinalizeCmd(string packageName, string manager, string expectedInstallState, string finalInstallState)
         {
-            return GetCmd(packageName, package, manager, finalInstallState);
+            return GetCmd(packageName, manager, expectedInstallState, finalInstallState);
         }
 
         private string GetState(string package, string manager)
@@ -104,206 +204,237 @@ namespace DSC
             switch (manager.ToLower())
             {
                 case "yum":
-                    sshHelper.Execute(String.Format(rpm_check_cmmd + "|wc -l | tr -d '\n'", package), out state);
-                    break;
+                    try
+                    {
+                        sshHelper.Execute("rpm -qa|grep " + package + "| wc -l | tr -d '\n'", out state);
+                        if ( "0" == state)
+                        {
+                            return "False";
+                        }
+                        else
+                        {
+                            return "True";
+                        }
+                    }
+                    catch
+                    {
+                        return "False";
+                    }
                 case "apt":
-                    sshHelper.Execute(String.Format(dpkg_check_cmmd + "|wc -l | tr -d '\n'", package), out state);
-                    break;
-                case "zipper":
-                    throw new ArgumentException("The package manager is 'zipper'!");
+                    try
+                    {
+                        sshHelper.Execute("dpkg-query -W -f='${Status}' " + package + "| tr -d '\n'", out state);
+                        if (state.Contains("deinstall") || state.Contains("not-installed") )
+                        {
+                            return "False";
+                        }
+                        else
+                        {
+                            return "True";
+                        }
+                    }
+                    catch
+                    {
+                        return "False";
+                    }
+                   
+                case "zypper":
+                    try
+                    {
+                         sshHelper.Execute("rpm -qa|grep " + package + "| wc -l | tr -d '\n'", out state);
+                        if ( "0" == state)
+                        {
+                            return "False";
+                        }
+                        else
+                        {
+                            return "True";
+                    }
+                     }
+                    catch
+                    {
+                        return "False";
+                    }
                 default:
                     throw new ArgumentException("The package manager is invalid!");
             }
-            if ("0" == state)
-                return "false";
-            else
-                return "true";
         }
 
-        protected override void VerifyLinuxState(IContext ctx)
+        public override void Verify(IContext ctx)
         {
-            string verification = ctx.Records.GetValue("verification");
-
-            if (String.IsNullOrEmpty(verification))
+            ctx.Alw("Verify Begin.");
+            
+            if (String.IsNullOrWhiteSpace(psErrorMsg))
             {
-                return;
-            }
-
-            var verificationMap = ConvertStringToPropMap(verification);
-
-            string keyword = ctx.Records.GetValue("keyword");
-            string manager = verificationMap["PackageManager"];
-            string name = string.Empty;
-            GetPackage(keyword, manager, out name);
-            //string actualDescription = string.Empty;
-            //string actualPublisher = string.Empty;
-            //string actualInstallOn = string.Empty;
-            //string actualSize = string.Empty;
-            //string actualVersion = string.Empty;
-
-            // Check package description if needed.
-            if (verificationMap.ContainsKey("PackageDescription"))
-            {
-                string actualDescription = string.Empty;
-                checkInfo(name, manager, "Description", out actualDescription);
-
-                if (!verificationMap["PackageDescription"].Equals(
-                    actualDescription, StringComparison.InvariantCultureIgnoreCase))
+                // Verify if the PowerShell cmdlets were executed without error.
+                if (String.IsNullOrWhiteSpace(psHelper.ErrorMsg))
                 {
-                    throw new VarFail(String.Format(
-                        "'{0}' Service Enabled State : expect - '{1}', actual - '{2}'",
-                        name, verificationMap["PackageDescription"], actualDescription));
+                    ctx.Alw("PowerShell return 0.");
                 }
-            }
-
-            // Check package publisher if needed.
-            if (verificationMap.ContainsKey("Publisher"))
-            {
-                string actualPublisher = string.Empty;
-                checkInfo(name, manager, "Publisher", out actualPublisher);
-
-                if (!verificationMap["Publisher"].Equals(
-                    actualPublisher, StringComparison.InvariantCultureIgnoreCase))
+                else
                 {
-                    throw new VarFail(String.Format(
-                        "'{0}' Service Enabled State : expect - '{1}', actual - '{2}'",
-                        name, verificationMap["Publisher"], actualPublisher));
+                    throw new VarFail(psHelper.ErrorMsg);
                 }
-            }
 
-            // Check installation date if needed.
-            if (verificationMap.ContainsKey("InstalledOn"))
-            {
-                string actualInstallOn = string.Empty;
-                checkInfo(name, manager, "InstalledOn", out actualInstallOn);
-
-                if (!verificationMap["InstalledOn"].Equals(
-                    actualInstallOn, StringComparison.InvariantCultureIgnoreCase))
+                Dictionary<string, string> linuxMap = new Dictionary<string, string>();
+                string name = ctx.Records.GetValue("Name");
+                string verification = ctx.Records.GetValue("verification");
+                Dictionary<string, string> verificationMap = new Dictionary<string, string>();
+                if (!String.IsNullOrEmpty(verification))
                 {
-                    throw new VarFail(String.Format(
-                        "'{0}' Service Enabled State : expect - '{1}', actual - '{2}'",
-                        name, verificationMap["InstalledOn"], actualInstallOn));
+                    verificationMap = ConvertStringToPropMap(verification);
+
+                    if (verificationMap.ContainsKey("FilePath"))
+                    {
+                        verificationMap["FilePath"] = verificationMap["FilePath"] + "." + suffix;
+                    }
                 }
-            }
-
-            // Check package size if needed.
-            if (verificationMap.ContainsKey("Size"))
-            {
-                string actualSize = string.Empty;
-                checkInfo(name, manager, "Size", out actualSize);
-
-                if (!verificationMap["Size"].Equals(
-                    actualSize, StringComparison.InvariantCultureIgnoreCase))
+                else
                 {
-                    throw new VarFail(String.Format(
-                        "'{0}' Service Enabled State : expect - '{1}', actual - '{2}'",
-                        name, verificationMap["Size"], actualSize));
+                    ctx.Alw("No specified property need to be verified in varmap");
                 }
-            }
 
-            // Check package version if needed.
-            if (verificationMap.ContainsKey("Verison"))
-            {
-                string actualVerison = string.Empty;
-                checkInfo(name, manager, "Verison", out actualVerison);
-
-                if (!verificationMap["Verison"].Equals(
-                    actualVerison, StringComparison.InvariantCultureIgnoreCase))
+                //Return from Get-DscConfiguration
+                Dictionary<string, string> list = psHelper.LastPowerShellReturnValues[0];
+                list.Remove("CimClass");
+                list.Remove("CimInstanceProperties");
+                list.Remove("CimSystemProperties");
+                list.Remove("PSShowComputerName");
+                list.Remove("PSComputerName");
+                string rltGetDSC = "The result of Get-DscConfiguration:\n\n************************************************";
+                foreach (string key in list.Keys)
                 {
-                    throw new VarFail(String.Format(
-                        "'{0}' Service Enabled State : expect - '{1}', actual - '{2}'",
-                        name, verificationMap["Verison"], actualVerison));
+                    rltGetDSC = rltGetDSC + String.Format("\n{0,-20}:{1}", key, list[key]);
                 }
-            }
+                ctx.Alw(rltGetDSC + "\n************************************************\n");
+                //Get property value from Linux
+                linuxMap = GetLinuxValue(name, propMap);
 
-            // Check whether package is installed or not if needed.
-            if (verificationMap.ContainsKey("Installed"))
-            {
-                string actualInstalled = string.Empty;
-                actualInstalled = GetState(name, manager);
-
-                if (!verificationMap["Installed"].ToLower().Equals(
-                    actualInstalled, StringComparison.InvariantCultureIgnoreCase))
+                ///////////////////////
+                foreach (string key in list.Keys)
                 {
-                    throw new VarFail(String.Format(
-                        "'{0}' Service Enabled State : expect - '{1}', actual - '{2}'",
-                        name, verificationMap["Installed"].ToLower(), actualInstalled));
-                }
-            }
+                    if (!linuxMap.ContainsKey(key))
+                    { continue; }
+                    string actualDescription = linuxMap[key];
 
-        }
+                    // Check property value with Get-DscConfiguration
+                    if (!String.IsNullOrEmpty(actualDescription))
+                    {
+                        try
+                        {
+                            psHelper.CheckOutput(key, actualDescription);
+                            ctx.Alw(String.Format("Check Get-DscConfiguration: {0} is pass", key));
+                        }
+                        catch (VarFail ex)
+                        {
+                            throw new VarFail(ex.Message);
+                        }
 
-        private void checkInfo(string package, string manager, string property, out string info)
-        {
-            info = string.Empty;
-            if ("yum" == manager.ToLower())
-            {
-                switch (property.ToLower())
-                {
-                    case "Description":
-                        sshHelper.Execute(String.Format("rpm -qi {0} | awk 'n==1{print} $0~/Description/{n=1}'|grep -v '^$' |grep -v 'You have new mail in*'", package), out info);
-                        break;
-                    case "Version":
-                        sshHelper.Execute(String.Format("rpm -qi {0}|grep '^Version' |sed 's/:/ /g' | sed 's/[ ][ ]*/\n/g'| sed -n '/{1}/{n;p}'", package), out info);
-                        break;
-                    case "Publisher":
-                        sshHelper.Execute(String.Format("rpm -qi {0}|grep '^Vendor' |sed 's/:/ /g' | sed 's/[ ][ ]*/\n/g'| sed -n '/{1}/{n;p}'", package), out info);
-                        break;
-                    case "Size":
-                        sshHelper.Execute(String.Format("rpm -qi {0}|grep '^Size' |sed 's/:/ /g' | sed 's/[ ][ ]*/\n/g'| sed -n '/{1}/{n;p}'", package), out info);
-                        break;
-                    case "InstalledOn":
-                        sshHelper.Execute(String.Format("rpm -qi {0} |grep '^Install' | awk -F 'Build Host' '{print $1}'| awk -F 'Install Date: ' '{print $2}'", package), out info);
-                        break;
-                    default:
-                        throw new ArgumentException("The package manager is invalid!");
-                }
-            }
-            else if ("apt" == manager.ToLower())
-            {
-                switch (property.ToLower())
-                {
-                    case "Description":
-                        sshHelper.Execute(String.Format("dpkg -p {0} | awk 'n==1{print} $0~/Description/{n=1}'|grep -v '^$' |grep -v 'You have new mail in*'", package), out info);
-                        break;
-                    case "Version":
-                        sshHelper.Execute(String.Format("dpkg -p {0}|grep '^Version' |cut -d ':' -f 2| sed 's/^[ ]*//g'", package), out info);
-                        break;
-                    case "Publisher":
-                        sshHelper.Execute(String.Format("dpkg -p {0}| grep '^Maintainer' |cut -d ':' -f 2| sed 's/^[ ]*//g'", package), out info);
-                        break;
-                    case "Size":
-                        sshHelper.Execute(String.Format("dpkg -p {0}| grep '^Size' |cut -d ':' -f 2| sed 's/^[ ]*//g'", package), out info);
-                        break;
-                    case "InstalledOn":
-                        break;
-                    default:
-                        throw new ArgumentException("The package manager is invalid!");
+                        // Check property value specified in varmap
+                        if (verificationMap.ContainsKey(key))
+                        {
+                            if (!verificationMap[key].Equals(actualDescription, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                throw new VarFail(String.Format(
+                                        "'{0}' Service Enabled State : expect - '{1}', actual - '{2}'",
+                                        key, verificationMap[key], actualDescription));
+                            }
+                         }   
+                    }
                 }
             }
             else
             {
-
+                psHelper.CheckErrorMessage(psErrorMsg);
+                ctx.Alw(String.Format("PowerShell return error message '{0}' as expected!", psErrorMsg));
             }
+
+            ctx.Alw("Verify End.");
         }
 
-        private string GetCmd(string packageName, string package, string manager, string initialInstallState)
+        private Dictionary<string, string> GetLinuxValue(string package, Dictionary<string, string> map)
+        {
+            string[] dpkgQuery = new string[6];
+            string info = string.Empty;
+            switch (manager.ToLower())
+            {
+                case "apt":
+                    try
+                    {
+                        sshHelper.Execute("dpkg-query -W -f='PackageDescription:::${Description}|Publisher:::${Maintainer}|InstalledOn:::'Unknown'|Size:::${Installed-Size}|Version:::${Version}|Status:::${Status}' " + package, out info);
+                        if (!info.Contains("not-installed") && !info.Contains("deinstall"))
+                        {
+                            //sshHelper.Execute("dpkg-query -W -f='PackageDescription:::${Description}|Publisher:::${Maintainer}|InstalledOn:::'Unknown'|Size:::${Installed-Size}|Version:::${Version}' " + package, out info);
+                            dpkgQuery = (info + "|Installed:::True").Split('|');
+                        }
+                        else
+                        {
+                            dpkgQuery = (info + "|Installed:::False").Split('|');
+                            //dpkgQuery = new string[] { "PackageDescription:::''", "Publisher:::''", "InstalledOn:::Unknown", "Size:::0", "Version:::''", "Installed:::False" };
+                        }
+                    }
+                    catch
+                    {
+                        dpkgQuery = new string[] { "PackageDescription:::", "Publisher:::", "InstalledOn:::", "Size:::0", "Version:::", "Installed:::False" };
+                    }
+                    break;
+                case "yum":
+                    sshHelper.Execute("rpm -qa|grep " + package + " | wc -l | tr -d '\n' " , out info);
+                    if ("1" == info )
+                    {
+                        sshHelper.Execute("rpm -q --queryformat 'PackageDescription:::%{SUMMARY}|Publisher:::%{PACKAGER}|InstalledOn:::%{INSTALLTIME}|Size:::%{SIZE}|Version:::%{VERSION}' " + package, out info);
+                        dpkgQuery = (info + "|Installed:::True").Split('|');
+                    }
+                    else
+                    {
+                        dpkgQuery = new string[] { "PackageDescription:::", "Publisher:::", "InstalledOn:::", "Size:::0", "Version:::", "Installed:::False" };
+                    }
+                    break;
+                case "zypper":
+                    sshHelper.Execute("rpm -qa|grep " + package + " | wc -l | tr -d '\n' " , out info);
+                    if ("1" == info )
+                    {
+                        sshHelper.Execute("rpm -q --queryformat 'PackageDescription:::%{SUMMARY}|Publisher:::%{PACKAGER}|InstalledOn:::%{INSTALLTIME}|Size:::%{SIZE}|Version:::%{VERSION}' " + package, out info);
+                        dpkgQuery = (info + "|Installed:::True").Split('|');
+                    }
+                    else
+                    {
+                        dpkgQuery = new string[] { "PackageDescription:::", "Publisher:::", "InstalledOn:::", "Size:::0", "Version:::", "Installed:::False" };
+                    }
+                    break;
+                default:
+                    break;
+            }
+            foreach (string property in dpkgQuery)
+            {
+                string[] propDic = Regex.Split(property,":::");
+                map[propDic[0]] = propDic[1];
+            }
+            if (String.IsNullOrEmpty(map["Size"]))
+            {
+                map["Size"] = "0";
+            }
+            map["PackageDescription"] = map["PackageDescription"].Replace("\n", "&#10;");
+            return map;
+        }        
+           
+        private string GetCmd(string packageName, string manager, string state, string initialInstallState)
         {
             StringBuilder command = new StringBuilder();
-            string state = GetState(package, manager);
+            state = state.ToLower();
             switch (manager.ToLower())
             {
                 case "yum":
                     if ("true" == initialInstallState.ToLower() && "false" == state)
                     {
                         if (IsPackageMngr)
-                            command.Append(String.Format(yum_install_cmmd, packageName));
+                            command.Append(String.Format(rpm_install_cmmd, localSrcPath));
                         else
-                            command.Append(String.Format(rpm_install_cmmd, localSrcPath + packageName));
+                            command.Append(String.Format(yum_install_cmmd, packageName));
                     }
                     else if ("false" == initialInstallState.ToLower() && "true" == state)
                     {
-                        command.Append(String.Format(rpm_remove_cmmd, package));
+                        command.Append(String.Format(rpm_remove_cmmd, packageName));
                     }
                     else { }
                     break;
@@ -311,24 +442,34 @@ namespace DSC
                     if ("true" == initialInstallState.ToLower() && "false" == state)
                     {
                         if (IsPackageMngr)
-                            command.Append(String.Format(apt_install_cmmd, packageName));
+                            command.Append(String.Format(dpkg_install_cmmd, localSrcPath));
                         else
-                            command.Append(String.Format(dpkg_install_cmmd, localSrcPath + packageName));
+                            command.Append(String.Format(apt_install_cmmd, packageName));
                     }
                     else if ("false" == initialInstallState.ToLower() && "true" == state)
                     {
-                        command.Append(String.Format(dpkg_remove_cmmd, package));
+                        command.Append(String.Format(dpkg_remove_cmmd, packageName));
                     }
                     else { }
                     break;
-                case "zipper":
-                    throw new ArgumentException("The package manager is 'zipper'!");
+                case "zypper":
+                    if ("true" == initialInstallState.ToLower() && "false" == state)
+                    {
+                        if (IsPackageMngr)
+                            command.Append(String.Format(rpm_install_cmmd, localSrcPath));
+                        else
+                            command.Append(String.Format("zypper --non-interactive install", packageName));
+                    }
+                    else if ("false" == initialInstallState.ToLower() && "true" == state)
+                    {
+                        command.Append(String.Format(rpm_remove_cmmd, packageName));
+                    }
+                    else { }
+                    break;
                 default:
                     throw new ArgumentException("The package manager is invalid!");
             }
-
             return command.ToString();
         }
-
     }
 }

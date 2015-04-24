@@ -30,7 +30,7 @@ namespace DSC
 
             foreach (string property in propString.Keys)
             {
-                if (!String.IsNullOrWhiteSpace(property))
+                if (!String.IsNullOrWhiteSpace(property) && !property.ToString().Equals("Password"))
                 {
                     if (!booleanProp.Contains(property))
                     {
@@ -64,12 +64,22 @@ namespace DSC
                         keyProp,
                         username));
 
+                    string password = "$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0";
+                    if (propString.ContainsKey("Password"))
+                    {
+                        password = propString["Password"].Replace("$", "`$");
+                        propString.Remove("Password");
+                    }
+                    dependedProp.Append(String.Format("{0} = \"{1}\"\n",
+                        "Password",
+                        password));
                     dependedProp.Append("Ensure = \"Present\"");
                 }
 
                 content = content.Replace("#DependdeResourceType", dependedType);
                 content = content.Replace("#DependedResourceName", dependedName);
                 content = content.Replace("#DependedProperties", dependedProp.ToString());
+                
             }
 
             return content;

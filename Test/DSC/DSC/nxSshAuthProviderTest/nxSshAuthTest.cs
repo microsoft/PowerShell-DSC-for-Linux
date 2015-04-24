@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using Infra.Frmwrk;
 
-namespace DSC.nxSshAuthProviderTest
+namespace DSC
 {
     class nxSshAuthTest : ProviderTestBase
     {
@@ -20,7 +20,7 @@ namespace DSC.nxSshAuthProviderTest
         {
             ctx.Alw("nxSshAuthTest Setup Begin.");
 
-            mofHelper = new ScriptMofHelper();
+            mofHelper = new SshAuthMofHelper();
 
             initializeCmd = ctx.Records.GetValue("initialCmd");
             finalizeCmd = ctx.Records.GetValue("finalCmd");

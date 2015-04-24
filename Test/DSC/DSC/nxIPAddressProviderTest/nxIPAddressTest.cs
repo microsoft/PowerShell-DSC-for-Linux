@@ -21,7 +21,7 @@ namespace DSC
         {
             ctx.Alw("nxIPAddressTest Setup Begin.");
 
-            mofHelper = new EnvironmentMofHelper();
+            mofHelper = new IPAddressMofHelper();
 
             string initalSet = ctx.Records.GetValue("initialSet");
             interfaceName = ctx.Records.GetValue("interfaceName");
@@ -48,15 +48,17 @@ namespace DSC
                 finalizeCmd = GetFinalizeCmd(isDU);
 
                 // Initialize Service State.
-                ctx.Alw(String.Format("Initilize Linux state : '{0}'", initializeCmd));
+                //ctx.Alw(String.Format("Initilize Linux state : '{0}'", initializeCmd));
                 
-                sshHelper.Execute(initializeCmd);
+                //sshHelper.Execute(initializeCmd);
                 
             }
             catch (Exception ex)
             {
                 ctx.Alw(ex.Message);
             }
+
+            base.Setup(ctx);
 
             ctx.Alw("nxIPAddressTest Setup End.");
         }
@@ -94,7 +96,7 @@ namespace DSC
             string addrFamily = "inet";
             if (verificationMap.ContainsKey("AddressFamily"))
             {
-                if (verificationMap["AddressFamily"].ToLower() == "ipv6") ;
+                if (verificationMap["AddressFamily"].ToLower().Equals("ipv6"))
                 {
                     addrFamily = "inet6";
                 }
@@ -108,7 +110,7 @@ namespace DSC
                     tmpAddr, StringComparison.InvariantCultureIgnoreCase))
                 {
                     throw new VarFail(String.Format(
-                        "'{0}' Service State : expect - '{1}', actual - '{2}'",
+                        "'{0}' State : expect - '{1}', actual - '{2}'",
                         "IPAddress", verificationMap["IPAddress"], tmpAddr));
                 }
             }
@@ -127,8 +129,8 @@ namespace DSC
                     tmpDefaultGW, StringComparison.InvariantCultureIgnoreCase))
                 {
                     throw new VarFail(String.Format(
-                        "'{0}' Service State : expect - '{1}', actual - '{2}'",
-                        "IPAddress", verificationMap["DefaultGateway"], tmpDefaultGW));
+                        "'{0}' State : expect - '{1}', actual - '{2}'",
+                        "DefaultGateway", verificationMap["DefaultGateway"], tmpDefaultGW));
                 }
             }
 
@@ -140,8 +142,8 @@ namespace DSC
                     tmpPrefixLen, StringComparison.InvariantCultureIgnoreCase))
                 {
                     throw new VarFail(String.Format(
-                        "'{0}' Service State : expect - '{1}', actual - '{2}'",
-                        "IPAddress", verificationMap["PrefixLength"], tmpPrefixLen));
+                        "'{0}' State : expect - '{1}', actual - '{2}'",
+                        "PrefixLength", verificationMap["PrefixLength"], tmpPrefixLen));
                 }
             }
            
@@ -152,7 +154,7 @@ namespace DSC
 
         private string GetConfigVal(string cmmd, string item, int step)
         {
-            string reval = string.Empty;
+            string reval = string.Empty; 
             sshHelper.Execute(String.Format("{0}| grep 'inet addr' | awk -F'[ :]+' '{for (i=1;i<=NF;i){if({1} == $i) print $(i+{2})}}",cmmd, item, step), out reval);
             return reval.ToLower();
         }
@@ -163,6 +165,7 @@ namespace DSC
             StringBuilder config = new StringBuilder();
             Dictionary<string, string>initialDict = ConvertStringToPropMap(initial);
             string interf = string.Empty;
+            string addrFamily = "IPv4";
             if(!initialDict.ContainsKey("InterfaceName"))
             {
                 interf = interfaceName;
@@ -171,6 +174,7 @@ namespace DSC
             {
                 interf = initialDict["InterfaceName"];
             }
+            
             
             //set up the initial test environment if specified
             if(isDU)
@@ -182,6 +186,10 @@ namespace DSC
                 else
                 {
                     throw new ArgumentException("Please specify IPAddress value for the initial test environment establishment! ");
+                }
+                if (initialDict.ContainsKey("AddressFamily"))
+                {
+                    //TBD
                 }
                 if (initialDict.ContainsKey("BootProtocol"))
                 {
@@ -202,11 +210,8 @@ namespace DSC
                 {
                     config.AppendLine(String.Format("netmask {0}", initialDict["PrefixLength"]));
                 }
-                if (initialDict.ContainsKey("AddressFamily"))
-                {
-                    //TBD
-                }
-                string path = "/etc/sysconfig/network-scripts/ifcfg-" + interfaceName;
+
+                string path = "/etc/network/interfaces";
                 command.Append(String.Format("mv {0} {0}-old; echo {1} > {0}; /etc/init.d/network restart", path, config.ToString()));
             }
             else
@@ -219,12 +224,26 @@ namespace DSC
                 {
                     throw new ArgumentException("Please specify IPAddress value for the initial test environment establishment! ");
                 }
+                if (initialDict.ContainsKey("AddressFamily"))
+                {
+                    if (initialDict["AddressFamily"].ToLower().Equals("ipv6"))
+                    {
+                        addrFamily = "IPv6";
+                    }
+                }
                 if (initialDict.ContainsKey("BootProtocol"))
                 {
                     string bootProto = "static";
-                    if (initialDict["BootProtocol"] == "Automatic")
+                    if (initialDict["BootProtocol"].ToLower().Equals("automatic"))
                     {
-                        bootProto = "dhcp";
+                        if (addrFamily.Equals("IPv4"))
+                        {
+                            bootProto = "dhcp";
+                        }
+                        else 
+                        {
+                            bootProto = "dhcp\n" + "IPV6INIT=\"yes\"\nIPV6_AUTOCONF=\"yes\"";
+                        }
                     }
                     config.AppendLine(String.Format("BOOTPROTO={0}", bootProto));
                 }
@@ -240,8 +259,8 @@ namespace DSC
                 {
                     //TBD
                 }
-                string path = "/etc/network/interfaces";
-                command.Append(String.Format("mv {0} {0}-old; echo {1} > {0}; /etc/init.d/networking restart", path, config.ToString()));
+                string path = "/etc/sysconfig/network-scripts/ifcfg-" + interfaceName;
+                command.Append(String.Format("if [ -f {0} ]; then mv {0} {0}-old; fi; echo -e \"{1}\" > {0}; ", path, config.ToString())); //TBD:etc/init.d/networking restart
             }
             return command.ToString();
         }
@@ -257,7 +276,7 @@ namespace DSC
             {
                 path = "/etc/sysconfig/network-scripts/ifcfg-" + interfaceName;
             }
-            return String.Format("rm -f {0}; mv {0}-old {0}", path);
+            return String.Format("rm -f {0}; if [ -f {0}-old ]; then mv {0}-old {0}; fi;", path);
         }
 
         #endregion

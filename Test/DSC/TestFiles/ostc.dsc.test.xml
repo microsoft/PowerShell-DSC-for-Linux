@@ -15,8 +15,17 @@
     <rec key="testServiceName">atd</rec>
     <rec key="invalidServiceName">invalidService</rec>
 
-    <rec key="testManagerName">apt</rec>
-
+    <!--
+                            testManagerName    packageFromSource    packageFromPath
+    Debian/Ubuntu             apt                 nano              testpackage3
+    SLES, Centos 5x8          zypper              nano              testpackage3-1.0-1
+    Centos, Oracle, Rhel      yum                 nano              testpackage3-1.0-1.noarch
+    -->
+    <rec key="testManagerName">PACKAGE_MANAGER</rec>
+    <rec key="packageFromPath">PACKAGE_NAME</rec>
+    <rec key="packageFilePath">/tmp/testpackage3_1.0</rec>
+    <rec key="packageFromSource">nano</rec>
+    
     <!-- DSC Info. -->
     <rec key="dscHome">/opt</rec>
     <rec key="omiHome">%dscHome%/omi</rec>
@@ -24,6 +33,7 @@
     <rec key="dscLog">/tmp/dsc_out.log</rec>
     <rec key="loadErrorMsg">Loading the instance document from the pending location did not succeed</rec>
     <rec key="funcErrorMsg">The SendConfigurationApply function did not succeed</rec>
+    <rec key="configErrorMsg">Failed to apply the configuration.</rec>
     <rec key="PermisssionErrorMsg">Access to a CIM resource is not available to the client</rec>
 
     <!-- Script Info. -->
@@ -77,7 +87,7 @@
         <rec key="propString">DestinationPath:%path%;Ensure:Present;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk '$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The destination file '%name%' is created under %parentPath% successfully.</rec>
         <rec key="failedMsg">The destination file '%path%' is not created under %parentPath%.</rec>
@@ -97,7 +107,7 @@
         <rec key="propString">DestinationPath:%path%;Ensure:Absent;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | awk '$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">The destination file '%name%' is deleted successfully.</rec>
         <rec key="failedMsg">The destination file '%path%' is not deleted.</rec>
@@ -117,7 +127,7 @@
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:Directory;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^d' | awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}'| wc -l | tr -d '\n'</rec>
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^d' | awk '$NF=="%name%"{print $NF}'| wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The destination folder '%name%' is created successfully.</rec>
         <rec key="failedMsg">The destination folder '%path%' is not created.</rec>
@@ -137,7 +147,7 @@
         <rec key="propString">DestinationPath:%path%;Ensure:Absent;Type:Directory;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | awk '$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">The destination folder '%name%' is removed successfully.</rec>
         <rec key="failedMsg">The destination folder '%path%' is not removed.</rec>
@@ -177,7 +187,7 @@
         <rec key="propString">DestinationPath:%path%;Ensure:Absent;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | awk '$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">The destination file '%path%' is removed successfully.</rec>
         <rec key="failedMsg">The destination folder '%path%' is not removed.</rec>
@@ -276,7 +286,7 @@
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Mode:abcabacas</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as invalid Mode.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -317,7 +327,7 @@
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Group:abcdc</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as invalid group.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -356,7 +366,7 @@
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Owner:abas</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as invalid Owner.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -403,7 +413,7 @@
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">t=`ls -l %parentPath% | grep '^d' | grep -i ' %name%$' | wc -l | tr -d '\n'`;s=`ls %path% | wc -l | tr -d '\n'`;echo $t$s  | tr -d '\n'</rec>
-        <rec key="expectedValue">10</rec>
+        <rec key="expectedValue">11</rec>
         <rec key="successfulMsg">The destination folder '%path%' is copied from '%s_path%' successfully.</rec>
         <rec key="failedMsg">Copied failed.</rec>
       </var>
@@ -489,13 +499,14 @@
         <rec key="name">test</rec>
         <rec key="owner">temp_test</rec>
         <rec key="path">%parentPath%/%name%</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">rm -rf %path%;</rec>
         <rec key="finalCmd">rm -rf %path%;userdel -f -r %owner%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">DestinationPath:%path%;Ensure:Present;Owner:%owner%;DependsOn:[nxUser]user</rec>
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Owner:%owner%;DependsOn:[nxUser]user;Password:%password%</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | awk 'NF==9&amp;&amp;$NF=="%name%"{printf $NF$3}'</rec>
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | awk '$NF=="%name%"{printf $NF$3}'</rec>
         <rec key="expectedValue">%name%%owner%</rec>
         <rec key="successfulMsg">The file is created by depended new user.</rec>
         <rec key="failedMsg">The file is not created.</rec>
@@ -579,7 +590,7 @@
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <!--rec key="successfulMsg">PowerShell error as the same name folder existing.</rec-->
         <!--rec key="failedMsg">PowerShell should error out but it succeeds!</rec-->
@@ -598,7 +609,7 @@
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:Directory;Force:false</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <!--rec key="successfulMsg">PowerShell error as the same name file existing.</rec-->
         <!--rec key="failedMsg">PowerShell should error out but it succeeds!</rec-->
@@ -649,7 +660,7 @@
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat %path%/%s_file% | tr -d '\n'</rec>
-        <rec key="expectedValue">%content%</rec>
+        <rec key="expectedValue">%s_content%</rec>
         <rec key="successfulMsg">The destination path didn't update as its ctime is newer.</rec>
         <rec key="failedMsg">The ctime of destination is newer but it was updated.</rec>
       </var>
@@ -700,7 +711,7 @@
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat %path%/%s_file%  | tr -d '\n'</rec>
-        <rec key="expectedValue">%content%</rec>
+        <rec key="expectedValue">%s_content%</rec>
         <rec key="successfulMsg">The destination is not updated as its mtime is newer.</rec>
         <rec key="failedMsg">The mtime of destination is newer but it was updated.</rec>
       </var>
@@ -852,7 +863,7 @@
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:Link;SourcePath:%s_path%;Force:false</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
       </var>
 
@@ -870,7 +881,7 @@
         <!-- MOF Info. -->
         <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:Link</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">ls -l %parentPath% | grep '^l' | grep -i '%name% -> %s_path%$' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">0</rec>
@@ -891,7 +902,7 @@
         <rec key="psScript">%dscSender-nonRoot%</rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk '$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">0</rec>
       </var>
       
@@ -919,7 +930,7 @@
         </rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk 'NF==9&amp;&amp;$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk '$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
       </var>
       
@@ -932,10 +943,11 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | wc -l | tr -d '\n'</rec>
@@ -965,10 +977,11 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user_661689</rec>
         <rec key="fullName">%username%_full</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username%; cat /etc/passwd|grep -i "^%username%"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | grep -i "%fullName%"| wc -l | tr -d '\n'</rec>
@@ -982,10 +995,11 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user_661690</rec>
         <rec key="fullName">Test Hot</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username% -c %username%_full; cat /etc/passwd|grep -i "^%username%"|grep -i "%username%_full"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | grep -i "Test Hot"| wc -l | tr -d '\n'</rec>
@@ -1000,10 +1014,11 @@
         <rec key="username">test_user_661691</rec>
         <rec key="fullName">Test Hot</rec>
         <rec key="description">GoodUser</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username% -c "Test Hot"; cat /etc/passwd|grep -i "^%username%"|grep -i "Test Hot"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%' | grep -i "%fullName%,%description%"| wc -l | tr -d '\n'</rec>
@@ -1018,10 +1033,11 @@
         <rec key="username">test_user_661692</rec>
         <rec key="fullName">Tester Cool</rec>
         <rec key="description">GoodUser!</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -rf %username%;groupdel %username%;useradd -m %username% -c "Tester Cool,this is the description for this user"; cat /etc/passwd|grep -i "^%username%"|grep -i "Tester Cool,this is the description for this user"; if [ $? -ne 0 ];then exit 1;fi;</rec>
         <rec key="finalCmd">userdel -rf %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;FullName:%fullName%;Description:%description%;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | grep -i "%fullName%,%description%"| wc -l | tr -d '\n'</rec>
@@ -1074,10 +1090,11 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/shadow | grep -i '^%username%:' | tr ':' ' ' | awk '{print $3}' | tr -d '\n'</rec>
@@ -1091,10 +1108,11 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:false</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:false;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">expire=`cat /etc/shadow | grep -i '^%username%:' | tr ':' ' ' | awk '{print $3}' | tr -d '\n'`;expr $expire - 7 | awk '{if ($0 > 0){print &quot;true&quot;} else {print &quot;false&quot;} }' | tr -d '\n'</rec>
@@ -1108,10 +1126,11 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="home">/home/testhome</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;HomeDirectory:%home%</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;HomeDirectory:%home%;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | tr ':' ' ' | awk '{print $5}' | tr -d '\n'</rec>
@@ -1125,10 +1144,11 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="home">/home/testhome</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;useradd %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;HomeDirectory:%home%</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;HomeDirectory:%home%;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | tr ':' ' ' | awk '{print $5}' | tr -d '\n'</rec>
@@ -1143,10 +1163,11 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="groupID">0</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;GroupID:%groupID%</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;GroupID:%groupID%;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | tr ':' ' ' | awk '{print $4}' | tr -d '\n'</rec>
@@ -1161,10 +1182,11 @@
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
         <rec key="groupID">0</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;useradd %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;GroupID:%groupID%</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;GroupID:%groupID%;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | tr ':' ' ' | awk '{print $4}' | tr -d '\n'</rec>
@@ -1173,19 +1195,21 @@
       </var>
 
       <var set="2" lvl="2" vid="666927"
-           dsc="[nxUser] Verify PasswordChangeRequired property can be updated for existing user"
+           dsc="[nxUser] Verify PasswordChangeRequired property won't be updated for existing user"
            cls="DSC.nxUserTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="username">test_user</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;useradd %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true</rec>
+        <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat /etc/shadow | grep -i '^%username%:' | tr ':' ' ' | awk '{print $3}' | tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
+        <rec key="expectedValue">16547</rec>
+        <rec key="expectedPasswordChangeRequired">false</rec>
         <rec key="successfulMsg">The user '%username%' is updated successfully, its password must be changed in next login</rec>
       </var>
 
@@ -1302,9 +1326,9 @@
         <rec key="groupname">test_group_automation</rec>
         <rec key="initialState">absent</rec>
         <!-- MOF Info. -->
-        <rec key="propString">GroupName:%groupname%;Ensure:present;Members:;MembersToInclude:;MembersToExclude:</rec>
+        <rec key="propString">GroupName:%groupname%;Ensure:present;Members:root;MembersToInclude:root;MembersToExclude:scxuser</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as invalid MOF have both Members property and MembersToInclude/MembersToExlude property.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -1318,7 +1342,7 @@
         <!-- MOF Info. -->
         <rec key="propString">GroupName:%groupname%;Ensure:present;Members:xxxxx</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as invliad members are listed.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -1408,19 +1432,9 @@
         <rec key="s_path">%parentPath%/%s_name%</rec>
         <rec key="t_name">set_file</rec>
         <rec key="t_path">%parentPath%/%t_name%</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          touch %t_path%
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          touch %s_path%
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;touch %t_path%&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;touch %s_path%&#10;</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <!-- MOF Info. -->
@@ -1443,20 +1457,9 @@
         <rec key="s_path">%parentPath%/%s_name%</rec>
         <rec key="t_name">test_file</rec>
         <rec key="t_path">%parentPath%/%t_name%</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          echo test > %t_path%
-          exit 0
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          touch %s_path%
-          exit 0
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;echo test > %t_path%&#10;exit 0</rec>
+        <rec key="setScript">#!/bin/sh&#10;touch %s_path%&#10;exit 0</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <!-- MOF Info. -->
@@ -1479,26 +1482,15 @@
         <rec key="s_path">%parentPath%/%s_name%</rec>
         <rec key="g_name">get_file</rec>
         <rec key="g_path">%parentPath%/%g_name%</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          echo Testing quotes...
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          echo set> %s_path%
-          exit 1
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;echo Testing quotes...&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;echo set> %s_path%&#10;exit 1</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">The SendConfigurationApply function did not succeed</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
@@ -1516,21 +1508,9 @@
         <rec key="s_path">%parentPath%/%s_name%</rec>
         <rec key="g_name">get_file</rec>
         <rec key="g_path">%parentPath%/%g_name%</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          echo Testing quotes...
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          echo set> %s_path%
-          exit 0
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          echo get >%g_path%
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;echo Testing quotes...&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;echo set> %s_path%&#10;exit 0</rec>
+        <rec key="getScript">#!/bin/sh&#10;echo get >%g_path%&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
         <!-- MOF Info. -->
@@ -1553,21 +1533,9 @@
         <rec key="s_path">%parentPath%/%s_name%</rec>
         <rec key="g_name">get_file</rec>
         <rec key="g_path">%parentPath%/%g_name%</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          echo `"Testing quotes...`"
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          echo `"set 09`"> %s_path%
-          exit 0
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          echo ``hostname`` >%g_path%
-          exit 1
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;echo Testing quotes...&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;echo set 09> %s_path%&#10;exit 0</rec>
+        <rec key="getScript">#!/bin/sh&#10;echo ``hostname`` >%g_path%&#10;exit 1</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
         <!-- MOF Info. -->
@@ -1592,19 +1560,9 @@
         <rec key="t_name">test_file</rec>
         <rec key="t_path">%parentPath%/%t_name%</rec>
         <rec key="user">scxuser</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          touch %t_path%
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          touch %s_path%
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;touch %t_path%&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;touch %s_path%</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <!-- MOF Info. -->
@@ -1627,25 +1585,15 @@
         <rec key="t_name">test_file</rec>
         <rec key="t_path">%parentPath%/%t_name%</rec>
         <rec key="user">invalidUser</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          touch %t_path%
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          touch %s_path%
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;touch %t_path%&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;touch %s_path%</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%;User:%user%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">s=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;t=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;echo $t$s | tr -d '\n'</rec>
         <rec key="expectedValue">00</rec>
@@ -1663,19 +1611,9 @@
         <rec key="t_name">set_file</rec>
         <rec key="t_path">%parentPath%/%t_name%</rec>
         <rec key="group">scxuser</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          touch %t_path%
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          touch %s_path%
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;touch %t_path%&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;touch %s_path%</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <!-- MOF Info. -->
@@ -1698,25 +1636,15 @@
         <rec key="t_name">set_file</rec>
         <rec key="t_path">%parentPath%/%t_name%</rec>
         <rec key="group">invalidgroup</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          touch %t_path%
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          touch %s_path%
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;touch %t_path%&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;touch %s_path%</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <!-- MOF Info. -->
         <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%;Group:%group%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">s=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;t=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;echo $t$s | tr -d '\n'</rec>
         <rec key="expectedValue">00</rec>
@@ -1730,21 +1658,9 @@
         <rec key="parentPath">/tmp</rec>
         <rec key="s_name">set_file</rec>
         <rec key="s_path">%parentPath%/%s_name%</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          echo "test"
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          echo "set"
-          touch %s_path%
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          echo "get"
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;echo test&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;echo set&#10;touch %s_path%</rec>
+        <rec key="getScript">#!/bin/sh&#10;echo get&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;</rec>
         <rec key="finalCmd">rm -rf %s_path%;</rec>
         <!-- MOF Info. -->
@@ -1766,19 +1682,9 @@
         <rec key="s_path">%parentPath%/%s_name%</rec>
         <rec key="t_name">set_file</rec>
         <rec key="t_path">%parentPath%/%t_name%</rec>
-        <rec key="testScript">
-          #!/bin/sh
-          touch %t_path%
-          exit 1
-        </rec>
-        <rec key="setScript">
-          #!/bin/sh
-          touch %s_path%
-        </rec>
-        <rec key="getScript">
-          #!/bin/sh
-          exit 0
-        </rec>
+        <rec key="testScript">#!/bin/sh&#10;touch %t_path%&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;touch %s_path%</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
         <rec key="finalCmd">ls /tmp</rec>
         <!-- MOF Info. -->
@@ -1876,50 +1782,6 @@
         <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
       </var>
 
-      <var set="5" lvl="2" vid="814855"
-     dsc="[nxService] Verify if error out while non-root user runs DSC operation to start a service"
-     cls="DSC.nxServiceTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="serviceName">%testServiceName%</rec>
-        <rec key="controller">init</rec>
-        <rec key="initialState">Stopped</rec>
-        <rec key="expectedState">Running</rec>
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
-        <rec key="psScript">%dscSender-nonRoot%</rec>
-        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verification">%propString%</rec>
-        <rec key="expectedValue">%initialState%</rec>
-      </var>
-
-      <var set="5" lvl="2" vid="814856"
-     dsc="[nxService] Verify if error out while non-root user runs DSC operation to get service information"
-     cls="DSC.nxServiceTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="serviceName">%testServiceName%</rec>
-        <rec key="controller">init</rec>
-        <rec key="initialState">Stopped</rec>
-        <rec key="expectedState">Running</rec>
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
-        <rec key="psScript">
-          %dscSender%
-          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
-          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
-          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
-          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
-          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
-          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
-          Get-DscConfiguration -CimSession $demo1;
-        </rec>
-        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verification">%propString%</rec>
-        <rec key="expectedValue">"expectedState"</rec>
-      </var>
 
       <!-- Upstart Controller. -->
       <var set="5" lvl="1" vid="661815"
@@ -1993,7 +1855,7 @@
         <rec key="expectedValue">%expectedState%</rec>
         <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
       </var>
-
+      
       <!-- Systemd Controller. -->
       <var set="5" lvl="1" vid="661820"
            dsc="[nxService] Verify the specific service is started successfully by ‘systemd’ service controller"
@@ -2080,7 +1942,7 @@
         <!-- MOF Info. -->
         <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
         <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
@@ -2098,7 +1960,7 @@
         <!-- MOF Info. -->
         <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
         <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
@@ -2116,10 +1978,63 @@
         <!-- MOF Info. -->
         <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
         <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
+      </var>
+    
+      <var set="5" lvl="2" vid="814855"
+     dsc="[nxService] Verify if error out while non-root user runs DSC operation to start a service"
+     cls="DSC.nxServiceTest" permutation="rows">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <recm key="controller">
+          <val>init</val>
+          <val>upstart</val>
+          <val>systemd</val>
+        </recm>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%initialState%</rec>
+      </var>
+
+      <var set="5" lvl="2" vid="814856"
+     dsc="[nxService] Verify if error out while non-root user runs DSC operation to get service information"
+     cls="DSC.nxServiceTest" permutation="rows">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="serviceName">%testServiceName%</rec>
+        <recm key="controller">
+          <val>init</val>
+          <val>upstart</val>
+          <val>systemd</val>
+        </recm>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">"expectedState"</rec>
       </var>
     </section>
 
@@ -2141,8 +2056,8 @@
         <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">env| grep "%varName%=%varValue%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%varName%=\"%varValue%\""| wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">11</rec>
+        <rec key="verificationCmd">cat %etcEnv%| grep "%varName%=%varValue%"| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The environment variable is created successfully.</rec>
         <rec key="failedMsg">The environment variable is not created.</rec>
       </var>
@@ -2164,8 +2079,8 @@
         <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%;Path:true</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">source %dscProfile%;env| grep "PATH=\S*:%varValue%"| wc -l |tr -d '\n';cat %dscProfile%| grep "PATH=\$PATH:\"%varValue%\""| wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">11</rec>
+        <rec key="verificationCmd">source %dscProfile%;cat %dscProfile%| grep "PATH=\$PATH:\"%varValue%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The environment variable is created successfully if Path is true.</rec>
         <rec key="failedMsg">The environment variable is not created.</rec>
       </var>
@@ -2178,7 +2093,7 @@
         <rec key="varName">testEnvVar</rec>
         <rec key="varValue">envVarValue</rec>
         <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
-        <rec key="etcEnv">/etc/enviroment</rec>
+        <rec key="etcEnv">/etc/environment</rec>
         <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%dscProfile%" ]; then sed -i '/%varValue%/'d %dscProfile%; source %dscProfile%; fi;</rec>
         <rec key="initialCmd">%cleanVar%</rec>
         <rec key="finalCmd">%cleanVar%</rec>
@@ -2186,8 +2101,8 @@
         <rec key="propString">Name:%varName%;Ensure:Present;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">env| grep "%varName%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%testEnvVar" |wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">11</rec>
+        <rec key="verificationCmd">cat %etcEnv%| grep "%varName%=" |wc -l |tr -d '\n';cat %etcEnv%| grep "%envVarValue%" |wc -l |tr -d '\n';</rec>
+        <rec key="expectedValue">10</rec>
         <rec key="successfulMsg">The environment variable without value is created successfully.</rec>
         <rec key="failedMsg">The environment variable without value is not created.</rec>
       </var>
@@ -2202,14 +2117,14 @@
         <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
         <rec key="etcEnv">/etc/environment</rec>
         <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%dscProfile%" ]; then sed -i '/%varValue%/'d %dscProfile%; source %dscProfile%; fi</rec>
-        <rec key="initialCmd">%cleanVar%; echo "%varName%=\"%varValue%\"" >> %etcEnv%; source %etcEnv%</rec>
+        <rec key="initialCmd">%cleanVar%; echo "%varName%=%varValue%" >> %etcEnv%; source %etcEnv%</rec>
         <rec key="finalCmd">%cleanVar%</rec>
         <!-- MOF Info. -->
         <rec key="propString">Name:%varName%;Ensure:absent;Value:%varValue%</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">env| grep "%varName%"| wc -l |tr -d '\n';cat %etcEnv%| grep "^%varName%" |wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">00</rec>
+        <rec key="verificationCmd">cat %etcEnv%| grep "%varName%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">The environment variable is not removed if the Ensure is 'absent' and the variable is not originally added by DSC.</rec>
         <rec key="failedMsg">The environment variable is removed successfully.</rec>
       </var>
@@ -2220,38 +2135,38 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="varName">testEnvVar</rec>
-        <rec key="varValue">envVarValue</rec>
+        <rec key="varValue">/tmp/testPath</rec>
         <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
         <rec key="pathTmp">/tmp/path.tmp</rec>
-        <rec key="initialCmd">echo PATH=\$PATH:\"%pathTmp%\" >> %dscProfile%</rec>
+        <rec key="initialCmd">echo "PATH=\$PATH:\"%varValue%\"" >> %dscProfile%</rec>
         <rec key="finalCmd">sed -i '/%pathTmp%/'d %etcEnv%;rm -f %pathTmp%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">Name:%varName%;Ensure:Absent;Path:True</rec>
+        <rec key="propString">Name:%varName%;Value:%varValue%;Ensure:Absent;Path:True</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">source %dscProfile%;env| grep "PATH=\S*:%pathTmp%"| wc -l |tr -d '\n';cat %dscProfile%| grep "PATH=\$PATH:\"%pathTmp%\""| wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">00</rec>
+        <rec key="verificationCmd">source %dscProfile%;cat %dscProfile%| grep "PATH=\$PATH:\"%varValue%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">The PATH environment variable is not changed or removed.</rec>
         <rec key="failedMsg">The PATH environment variable is removed successfully.</rec>
       </var>
 
       <var set="6" lvl="3" vid="661732"
-           dsc="[nxEnvironment] Verify if Path environment variable which never changed by DSC is not removed when the Ensure is absent"
+           dsc="[nxEnvironment] Verify if Path environment variable which isn't originally added by DSC is not removed when the Ensure is absent"
            cls="DSC.nxEnvironmentTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="varName">testEnvVar</rec>
         <rec key="varValue">envVarValue</rec>
         <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
-        <rec key="pathTmp">/tmp/path.tmp</rec>
-        <rec key="initialCmd">echo $PATH > %pathTmp%</rec>
-        <rec key="finalCmd">rm -f %pathTmp%</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="initialCmd">echo "%varName%=%varValue%" > %etcEnv%</rec>
+        <rec key="finalCmd">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi; if [ -f "%dscProfile%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
         <!-- MOF Info. -->
-        <rec key="propString">Name:%varName%;Ensure:Absent;Path:True</rec>
+        <rec key="propString">Name:%varName%;Value:%varValue%;Ensure:Absent;Path:True</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">old=`cat %pathTmp%`;new=`echo $PATH`; if [ $old = $new ]; then echo 0; fi;</rec>
-        <rec key="expectedValue">0</rec>
+        <rec key="verificationCmd">cat %etcEnv% | grep "%varName%=%varValue%" |wc -l |tr -d '\n';</rec>
+        <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The PATH environment variable is not changed or removed.</rec>
       </var>
 
@@ -2266,14 +2181,14 @@
         <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
         <rec key="etcEnv">/etc/environment</rec>
         <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi</rec>
-        <rec key="initialCmd">%cleanVar%; echo "%varName%=\"%orgValue%\"" >> %etcEnv%; source %etcEnv%</rec>
+        <rec key="initialCmd">%cleanVar%; echo "%varName%=%orgValue%" >> %etcEnv%; source %etcEnv%</rec>
         <rec key="finalCmd">%cleanVar%</rec>
         <!-- MOF Info. -->
         <rec key="propString">Name:%varName%;Ensure:Present;Value:%newValue%</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">env| grep "%varName%=%newValue%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%varName%=\"%newValue%\""| wc -l |tr -d '\n';</rec>
-        <rec key="expectedValue">11</rec>
+        <rec key="verificationCmd">cat %etcEnv%| grep "%varName%=%newValue%"| wc -l |tr -d '\n';</rec>
+        <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The environment variable is updated successfully.</rec>
         <rec key="failedMsg">The environment variable is not updated.</rec>
       </var>
@@ -2284,19 +2199,18 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="varName">testEnvVar</rec>
-        <rec key="orgValue">envVarValue</rec>
-        <rec key="newValue">envVarValue_new</rec>
+        <rec key="varValue">envVarValue</rec>
         <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
         <rec key="etcEnv">/etc/environment</rec>
         <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi;if [ -f "%dscProfile%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi</rec>
-        <rec key="initialCmd">rm -f %dscProfile%;set %varName%=%orgValue%;unset %varName%;</rec>
+        <rec key="initialCmd">echo "%varName%=" > %etcEnv%</rec>
         <rec key="finalCmd">%cleanVar%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">Name:%varName%;Ensure:Present;Value:%newValue%</rec>
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">checkEnv=`cat %dscProfile%| grep "%testEnvVar%" | wc -l |tr -d '\n'`; env| grep "%testEnvVar%=%varValue%" &amp;&amp; cat %etcEnv%| grep "%testEnvVar%=%varValue%";echo $?$checkEnv</rec>
-        <rec key="expectedValue">00</rec>
+        <rec key="verificationCmd">cat %etcEnv%| grep "%varName%=%varValue%"| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The environment variable is updated successfully.</rec>
         <rec key="failedMsg">The environment variable is not updated.</rec>
       </var>
@@ -2318,8 +2232,8 @@
         <rec key="psScript">%dscSender-nonRoot%</rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">env| grep "%varName%=%varValue%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%varName%=\"%varValue%\""| wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">00</rec>
+        <rec key="verificationCmd">cat %etcEnv%| grep "%varName%=\"%varValue%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
       </var>
 
       <var set="6" lvl="2" vid="814832"
@@ -2348,21 +2262,19 @@
         </rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">env| grep "%varName%=%varValue%"| wc -l |tr -d '\n';cat %etcEnv%| grep "%varName%=\"%varValue%\""| wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">11</rec>
+        <rec key="verificationCmd">cat %etcEnv%| grep "%varName%=\"%varValue%\""| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
       </var>
-      
+
     </section>
 
     <section sid="7" dsc="nxPackage Provider">
-
       <var set="7" lvl="1" vid="665043"
            dsc="[nxPackage] Verify if specific package is installed successfully by PackageManager"
            cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">testPackage-1-1.0_all</rec>
-        <rec key="keyword">testPackage</rec>
+        <rec key="Name">%packageFromSource%</rec>
         <rec key="manager">%testManagerName%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
@@ -2375,13 +2287,12 @@
       </var>
 
       <var set="7" lvl="1" vid="665044"
-           dsc="[nxPackage] Verify if specific package is installed via Path property"
-           cls="DSC.nxPackageTest">
+     dsc="[nxPackage] Verify if specific package is installed via Path property"
+     cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">apache*</rec>
-        <rec key="keyword">apache</rec>
-        <rec key="localSrcPath">/tmp</rec>
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">%packageFilePath%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
         <!-- MOF Info. -->
@@ -2397,8 +2308,7 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">testPackage-1-1.0_all</rec>
-        <rec key="keyword">testPackage</rec>
+        <rec key="Name">%packageFromSource%</rec>
         <rec key="manager">%testManagerName%</rec>
         <rec key="initialInstallState">True</rec>
         <rec key="expectedInstallState">False</rec>
@@ -2415,9 +2325,8 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">testPackage-1-1.0_all</rec>
-        <rec key="keyword">testPackage</rec>
-        <rec key="localSrcPath">/tmp</rec>
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">%packageFilePath%</rec>
         <rec key="initialInstallState">True</rec>
         <rec key="expectedInstallState">False</rec>
         <!-- MOF Info. -->
@@ -2433,8 +2342,8 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">testPackage-1-1.0_all</rec>
-        <rec key="keyword">testPackage</rec>
+        <rec key="Name">%packageFromSource%</rec>
+        <rec key="manager">%testManagerName%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
         <!-- MOF Info. -->
@@ -2450,10 +2359,9 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">testPackage-1-1.0_all</rec>
-        <rec key="keyword">testPackage</rec>
+        <rec key="Name">%packageFromPath%</rec>
         <rec key="manager">%testManagerName%</rec>
-        <rec key="localSrcPath">/tmp</rec>
+        <rec key="localSrcPath">%packageFilePath%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
         <!-- MOF Info. -->
@@ -2469,9 +2377,8 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">testPackage-1-1.0_all</rec>
-        <rec key="keyword">testPackage</rec>
-        <rec key="localSrcPath">/tmp</rec>
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">%packageFilePath%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
         <!-- MOF Info. -->
@@ -2487,37 +2394,35 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">testPackage-1-1.0_all</rec>
-        <rec key="keyword">testPackage</rec>
-        <rec key="localSrcPath">/tmp</rec>
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">%packageFilePath%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">False</rec>
         <!-- MOF Info. -->
-        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;ReturnCode:1</rec>
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;ReturnCode:99</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as mismatched return code.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
       </var>
 
       <var set="7" lvl="3" vid="665051"
-     dsc="[nxPackage] Verify if  error out if both Path and PackageGroup are provided"
+     dsc="[nxPackage] Verify if  PackageGroup is invalid if both Path and PackageGroup are provided"
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">testPackage-1-1.0_all</rec>
-        <rec key="keyword">testPackage</rec>
-        <rec key="localSrcPath">/tmp</rec>
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">%packageFilePath%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">False</rec>
         <!-- MOF Info. -->
         <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;PackageGroup:true</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%;</rec>
         <rec key="successfulMsg">PowerShell error as both Path and PackageGroup are provided.</rec>
-        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
       </var>
 
       <var set="7" lvl="3" vid="665052"
@@ -2533,7 +2438,7 @@
         <!-- MOF Info. -->
         <rec key="propString">Name:%Name%;Ensure:Present;PackageManager:%manager%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as invalid package name.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -2546,13 +2451,13 @@
         <!-- Linux Initial State. -->
         <rec key="Name">ErrorTestPackage</rec>
         <rec key="keyword">%Name%</rec>
-        <rec key="localSrcPath">/sthwrong</rec>
+        <rec key="localSrcPath">/sthwrong/testpackage3_1.0</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">False</rec>
         <!-- MOF Info. -->
         <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as invalid path.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -2563,15 +2468,15 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">sthwrong</rec>
+        <rec key="Name">testpackage1</rec>
         <rec key="keyword">%Name%</rec>
-        <rec key="localSrcPath">/tmp</rec>
+        <rec key="localSrcPath">/tmp/testpackage1</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">False</rec>
         <!-- MOF Info. -->
         <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as inexistent package under path.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -2582,15 +2487,14 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">test</rec>
-        <rec key="keyword">%Name%</rec>
-        <rec key="localSrcPath">/tmp</rec>
+        <rec key="Name">unsupport</rec>
+        <rec key="localSrcPath">/tmp/unsupport</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">False</rec>
         <!-- MOF Info. -->
-        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;PackageGroup:true</rec>
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="successfulMsg">PowerShell error as unsupported package.</rec>
         <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
@@ -2601,8 +2505,7 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">yash</rec>
-        <rec key="keyword">testPackage</rec>
+        <rec key="Name">%packageFromSource%</rec>
         <rec key="manager">%testManagerName%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
@@ -2619,8 +2522,7 @@
      cls="DSC.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="Name">yash</rec>
-        <rec key="keyword">testPackage</rec>
+        <rec key="Name">%packageFromSource%</rec>
         <rec key="manager">%testManagerName%</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
@@ -2639,10 +2541,132 @@
         <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
       </var>
     
+      <var set="7" lvl="2" vid="845801"
+     dsc="[nxPackage] Verify if specific package is installed via a remote HTTP path"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">http://dsc64-apache-01.scx.com/testpackage3_1.0</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is installed as expected.</rec>
+      </var>
+      
+      <var set="7" lvl="2" vid="845802"
+     dsc="[nxPackage] Verify if specific package is installed via a remote HTTPs path"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">https://dsc64-apache-01.scx.com/testpackage3_1.0</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is installed as expected.</rec>
+      </var>
+      
+      <var set="7" lvl="2" vid="845804"
+     dsc="[nxPackage] Verify if specific package is installed via a remote FTP path"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">ftp://dsc64-apache-01.scx.com/pub/testpackage3_1.0</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is installed as expected.</rec>
+      </var>
+    
+      <var set="7" lvl="3" vid="845807"
+     dsc="[nxPackage] Verify if error out if the package source doesn't exist in the remote HTTP path"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">http://dsc64-apache-01.scx.com/testpackage4</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%initialInstallState%</rec>
+        <rec key="successfulMsg">The specific package is not installed as expected.</rec>
+      </var>
+      
+      <var set="7" lvl="3" vid="845808"
+     dsc="[nxPackage] Verify if error out if the package source doesn't exist in the remote HTTPs path"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">https://dsc64-apache-01.scx.com/testpackage4</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%initialInstallState%</rec>
+        <rec key="successfulMsg">The specific package is not installed as expected.</rec>
+      </var>
+      
+      <var set="7" lvl="3" vid="845809"
+     dsc="[nxPackage] Verify if error out if the package source doesn't exist in the remote FTP path"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">ftp://dsc64-apache-01.scx.com/pub/testpackage4</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%initialInstallState%</rec>
+        <rec key="successfulMsg">The specific package is not installed as expected.</rec>
+      </var>
+      
+      <var set="7" lvl="3" vid="845825"
+     dsc="[nxPackage] Verify if error out if the remote path for source package is unreachable"
+     cls="DSC.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="Name">%packageFromPath%</rec>
+        <rec key="localSrcPath">http://dsc64-apache-10.scx.com/testpackage3_1.0</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;FilePath:%localSrcPath%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%initialInstallState%</rec>
+        <rec key="successfulMsg">The specific package is not installed as expected.</rec>
+      </var>
+    
     </section>
 
     <section sid="8" dsc="nxSshAuthorizedKeys Provider">
-
       <var set="8" lvl="1" vid="664653"
            dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key for specific user is stored into ~/.ssh/authorizied_keys."
            cls="DSC.nxSshAuthTest">
@@ -2687,7 +2711,7 @@
         <rec key="successfulMsg">Authorized_keys file is created when it does not exist.</rec>
         <rec key="failedMsg">Authorized_keys file didn't create when it does not exist.</rec>
       </var>
-      
+
       <var set="8" lvl="2" vid="664655"
            dsc="[nxSshAuthorizedKeys] Verify if authorized_keys file is created with specific authorized key if .ssh directory does not exist."
            cls="DSC.nxSshAuthTest">
@@ -2709,10 +2733,10 @@
         <rec key="successfulMsg">Authorized_keys file is created when .ssh directory does not exist.</rec>
         <rec key="failedMsg">Authorized_keys file didn't create when .ssh directory does not exist.</rec>
       </var>
-      
+
       <!--Not sure if the key should be updated.-->
       <var set="8" lvl="2" vid="664656"
-           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is updated if the KeyComment does exist."
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is updated if the KeyComment exist."
            cls="DSC.nxSshAuthTest">
         <snipref id="Variables" />
         <!--Linux Initial State.-->
@@ -2729,11 +2753,55 @@
         <!--Verify Linux State.-->
         <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
         <rec key="expectedValue">1</rec>
-        <rec key="successfulMsg">Authorized_keys file is updated when the KeyComment does exist.</rec>
-        <rec key="failedMsg">Authorized_keys file didn't update when the KeyComment does exist.</rec>
+        <rec key="successfulMsg">Authorized_keys file isn't updated when the KeyComment does exist.</rec>
+        <rec key="failedMsg">Authorized_keys file is updated when the KeyComment does exist.</rec>
       </var>
 
-      <!--Bug-->
+      <var set="8" lvl="2" vid="839476"
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key didn't updated if the KeyComment not exist."
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!--Linux Initial State.-->
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;echo %key% > %keyFile%</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!--MOF Info.-->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %keyComment% |wc -l |tr -d '\n';cat %keyFile% |grep -i %key% |wc -l |tr -d '\n';</rec>
+        <rec key="expectedValue">12</rec>
+        <rec key="successfulMsg">Authorized_keys file isn't updated when the KeyComment does exist.</rec>
+        <rec key="failedMsg">Authorized_keys file is updated when the KeyComment does exist.</rec>
+      </var>
+
+      <var set="8" lvl="2" vid="839477"
+           dsc="[nxSshAuthorizedKeys] Verify if add multiple Keys to the ssh authorized key successfully."
+           cls="DSC.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!--Linux Initial State.-->
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;echo "#oldKeyComment" > %keyFile%;echo "TestoldKey" >> %keyFile%;</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!--MOF Info.-->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n';cat %keyFile% |grep -i %keyComment% |wc -l |tr -d '\n';cat %keyFile% |grep -i "#oldKeyComment" |wc -l |tr -d '\n';cat %keyFile% |grep -i "TestoldKey" |wc -l |tr -d '\n';</rec>
+        <rec key="expectedValue">1111</rec>
+        <rec key="successfulMsg">Authorized_keys file isn't updated when the KeyComment does exist.</rec>
+        <rec key="failedMsg">Authorized_keys file is updated when the KeyComment does exist.</rec>
+      </var>
+
+
       <var set="8" lvl="2" vid="664658"
            dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is delete if the Ensure is set to absent."
            cls="DSC.nxSshAuthTest">
@@ -2744,7 +2812,7 @@
         <rec key="userName">root</rec>
         <rec key="key">TestKey</rec>
         <rec key="keyFile">/root/.ssh/authorized_keys</rec>
-        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;</rec>
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;echo "#%keyComment%" > %keyFile%;echo "%key%" >> %keyFile%;</rec>
         <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
         <!-- MOF Info. -->
         <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
@@ -2761,20 +2829,19 @@
      cls="DSC.nxSshAuthTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="keyComment">KeyCommentsTest</rec>
-        <rec key="ensure">Present</rec>
-        <rec key="userName">root</rec>
-        <rec key="key">TestKey</rec>
-        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
-
-        <rec key="initialCmd">cp %keyFile% /tmp/key_bak</rec>
-        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">testUser</rec>
+        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <rec key="initialCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <rec key="finalCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
         <rec key="psScript">%dscSender-nonRoot%</rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
         <rec key="expectedValue">0</rec>
       </var>
 
@@ -2783,33 +2850,24 @@
      cls="DSC.nxSshAuthTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="keyComment">KeyCommentsTest</rec>
-        <rec key="ensure">Present</rec>
-        <rec key="userName">root</rec>
-        <rec key="key">TestKey</rec>
-        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
-
-        <rec key="initialCmd">cp %keyFile% /tmp/key_bak</rec>
-        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <rec key="keyComment">testKeyComments</rec>
+        <rec key="username">testUser</rec>
+        <rec key="hostname">scxcmt-gql-cent5x64-01</rec>
+        <rec key="sshKeyPath"> ~/.ssh/authorized_keys</rec>
+        <rec key="key">ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAygdrpslUAJEPe/WWWsw9U6X3NdhktBN0I5N/2Cm4a09e8t83KfliXlFaZAmizDGDosZUz6zDPhWmmLQo99m6+aWVGGbkjlSCkSYX+M2hXYzjlpWp8gQwE0aHzOg/OyNKtxaXNuf/7UqJGGfsUcZu1JzS4O6YbTJ7dQlKRWGawy0nrSbPqcoD7qqUTgFKFhqO6hpJK7fhQSAskpMCog5/dN7/mjyx9hx1Onfh2FXEKVUxlJeiLZ0IghlFRV+iDb4oG4/B0V1nqiHxHx+VwCgPpVJO8fWWh9ihC/tUJiheig65Wn1vcdtOozlXxXCffUibYBa7mcxzcxiEQMHr0Ft06w==</rec>
+        <rec key="initialCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
+        <rec key="finalCmd">sed -i '/%username%/d' %sshKeyPath%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
-        <rec key="psScript">
-          %dscSender%
-          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
-          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
-          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
-          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
-          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
-          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
-          Get-DscConfiguration -CimSession $demo1;
-        </rec>
+        <rec key="propString">KeyComment:%keyComment%;Ensure:Present;UserName:%username%;Key:%key%</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="verificationCmd"> cat %sshKeyPath% | grep -i '%key% %keyComment% '| wc -l | tr -d "\n"</rec>
         <rec key="expectedValue">1</rec>
       </var>
-    </section>
 
+    </section>
+    
     <section sid="9" dsc="nxFileLine Provider">
 
       <var set="9" lvl="1" vid="814821"
@@ -2820,11 +2878,10 @@
         <rec key="filePath">/tmp/test</rec>
         <rec key="doesNotContainPattern">comments</rec>
         <rec key="keepLine">This line will be retained.</rec>
-
         <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %doesNotContainPattern% > %filePath%;echo %doesNotContainPattern% >> %filePath%;echo %keepLine% >> %filePath%;</rec>
         <rec key="finalCmd">rm /tmp/test</rec>
         <!-- MOF Info. -->
-        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%</rec>
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%;ContainsLine:</rec>
         <rec key="psScript">%dscSender%</rec>
         <!--Verify Linux State.-->
         <rec key="verificationCmd">cat %filePath% |grep -i %doesNotContainPattern% |wc -l |tr -d '\n'</rec>
@@ -2882,14 +2939,14 @@
         <rec key="containsLine">ContainsLineTest</rec>
         <rec key="doesNotContainPattern">DoesNotContainPatternTest</rec>
 
-        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %doesNotContainPattern% > %filePath%;echo %doesNotContainPattern% > %filePath%;echo "Keep Line" >> %filePath%;</rec>
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %doesNotContainPattern% > %filePath%;echo %doesNotContainPattern% >> %filePath%;echo "Keep Line" >> %filePath%;</rec>
         <rec key="finalCmd">rm /tmp/test</rec>
         <!-- MOF Info. -->
         <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;DoesNotContainPattern:%doesNotContainPattern%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!--Verify Linux State.-->
-        <rec key="verificationCmd">cat %filePath% |grep %containsLine% | wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">2</rec>
+        <rec key="verificationCmd">cat %filePath% |grep %doesNotContainPattern% | wc -l |tr -d '\n';cat %filePath% |grep %containsLine% | wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">01</rec>
         <rec key="successfulMsg">Lines match DoesNotContainPattern are removed when they do not match ContainsLine.</rec>
         <rec key="failedMsg">Lines match DoesNotContainPattern are not removed when they do not match ContainsLine.</rec>
       </var>
@@ -2947,7 +3004,7 @@
         <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo "DoesNotContainPatternTest" > %filePath%;echo "Line1" >> %filePath%;</rec>
         <rec key="finalCmd">rm /tmp/test</rec>
         <!-- MOF Info. -->
-        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%;</rec>
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%;ContainsLine:</rec>
         <rec key="psScript">%dscSender%</rec>
         <!--Verify Linux State.-->
         <rec key="verificationCmd">cat %filePath% |grep -i "DoesNotContainPatternTest" |wc -l | tr -d '\n'</rec>
@@ -3041,7 +3098,7 @@
         <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo "Line1" > %filePath%;</rec>
         <rec key="finalCmd">rm /tmp/test</rec>
         <!-- MOF Info. -->
-        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%;</rec>
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%;ContainsLine:</rec>
         <rec key="psScript">%dscSender%</rec>
         <!--Verify Linux State.-->
         <rec key="verificationCmd">cat %filePath% | tr -d '\n'</rec>
@@ -3050,7 +3107,6 @@
         <rec key="failedMsg">The file is modified even no lines match the value of DoesNotContainPattern.</rec>
       </var>
 
-      <!--Todo-->
       <var set="9" lvl="3" vid="814845"
            dsc="[nxFileLine] Verify if error out when the FilePath doesn't exist."
            cls="DSC.nxFileLineTest">
@@ -3064,7 +3120,7 @@
         <!-- MOF Info. -->
         <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         <!--Verify Linux State.-->
         <rec key="verificationCmd"></rec>
@@ -3072,7 +3128,701 @@
         <rec key="successfulMsg">Send error out when the FilePath doesn't exist.</rec>
         <rec key="failedMsg">No error out when the FilePath doesn't exist.</rec>
       </var>
+
+    </section>
+
+    <section sid="10" dsc="nxIPAddress Provider">
+
+      <var set="10" lvl="1" vid="690538"
+           dsc="[nxIPAddress] Verify if IPv4 address is removed if the address exists before and Ensure property is 'Absent'"
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Absent</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">IPv4 address is removed when Ensure property is 'Absent'.</rec>
+        <rec key="failedMsg">IPv4 address isn't removed when Ensure property is 'Absent'.</rec>
+      </var>
+
+      <var set="10" lvl="1" vid="690540"
+        dsc="[nxIPAddress] Verify if IPv6 address removed if the address exists before and Ensure property is 'Absent'"
+        cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Absent</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv6</rec>
+        <rec key="initialSet">IPAddress:11.10.10.10;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">IPv6 address is removed when Ensure property is 'Absent'.</rec>
+        <rec key="failedMsg">IPv6 address isn't removed when Ensure property is 'Absent'.</rec>
+      </var>
+
+      <var set="10" lvl="1" vid="690325"
+        dsc="[nxIPAddress] Verify if IPv4 address is set on a network interface if the address doesn't exist before and Ensure property is 'Present'"
+        cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">IPv4 address is set on a network interface when the address doesn't exist before and Ensure property is 'Present'</rec>
+        <rec key="failedMsg">IPv4 address isn't set on a network interface when Ensure property is 'Present'</rec>
+      </var>
+
+      <var set="10" lvl="1" vid="690345"
+        dsc="[nxIPAddress] Verify if IPv6 address is set on a network interface if the address doesn't exist before and Ensure property is 'Present'"
+        cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv6</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">IPv6 address is set on a network interface when the address doesn't exist before and Ensure property is 'Present'</rec>
+        <rec key="failedMsg">IPv6 address isn't set on a network interface when Ensure property is 'Present'</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="690374"
+        dsc="[nxIPAddress] Verify if the protocol to obtain an IP is dhcp for IPv4 while BootProtocol property is Automatic."
+        cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="bootProtocol">Automatic</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/sysconfig/network-scripts/ifcfg-eth1 |grep -i 'BOOTPROTO=DHCP' |wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">the protocol to obtain an IP is dhcp for IPv4 while BootProtocol property is Automatic.</rec>
+        <rec key="failedMsg">the protocol didn't to obtain an IP is dhcp for IPv4 while BootProtocol property is Automatic.</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="690519"
+        dsc="[nxIPAddress] Verify if the protocol to obtain an IP is autoconf for IPv6 while BootProtocol property is Automatic."
+        cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="bootProtocol">Automatic</rec>
+        <rec key="addressFamily">IPv6</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/sysconfig/network-scripts/ifcfg-eth1 |grep -i 'BOOTPROTO=Autoconf' |wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">the protocol to obtain an IP is Autoconf for IPv6 while BootProtocol property is Automatic.</rec>
+        <rec key="failedMsg">the protocol didn't to obtain an IP is Autoconf for IPv6 while BootProtocol property is Automatic.</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="690536"
+           dsc="[nxIPAddress] Verify if the Defaultgateway for IPv4 is changed while DefaultGateway property is specified."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="gateway">11.10.10.1</rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;DefaultGateway:%gateway%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">netstat -r |grep -i eth1 |awk '{print $2}'| tr -d '\r\n'</rec>
+        <rec key="expectedValue">%gateway%</rec>
+        <rec key="successfulMsg">The Defaultgateway for IPv4 is changed while DefaultGateway property is specified.</rec>
+        <rec key="failedMsg">The Defaultgateway for IPv4 isn't changed while DefaultGateway property is specified.</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="690537"
+           dsc="[nxIPAddress] Verify if the Defaultgateway for IPv6 is changed while DefaultGateway property is specified."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv6</rec>
+        <rec key="gateway">fe80::215:5dff:fec0:4</rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;DefaultGateway:%gateway%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">netstat -r |grep -i eth1 |awk '{print $2}'| tr -d '\r\n'</rec>
+        <rec key="expectedValue">%gateway%</rec>
+        <rec key="successfulMsg">The Defaultgateway for IPv6 is changed while DefaultGateway property is specified.</rec>
+        <rec key="failedMsg">The Defaultgateway for IPv6 isn't changed while DefaultGateway property is specified.</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="690563"
+           dsc="[nxIPAddress] Verify if the subnet mask is specified while PrefixLength property is set."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="prefixLength">25</rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;PrefixLength:%prefixLength%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">The subnet mask is specified while PrefixLength property is set.</rec>
+        <rec key="failedMsg">The subnet mask isn't specified while PrefixLength property is set.</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="690564"
+           dsc="[nxIPAddress] Verify if the default setting for Ensure is Present."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The default setting for Ensure is Present.</rec>
+        <rec key="failedMsg">The default setting for Ensure is Absent.</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="690565"
+           dsc="[nxIPAddress] Verify if the default setting for BootProtocol is Automatic."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/sysconfig/network-scripts/ifcfg-eth1 |grep -i 'BOOTPROTO=DHCP' |wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The default setting for Ensure is Present.</rec>
+        <rec key="failedMsg">The default setting for Ensure is Absent.</rec>
+      </var>
+
+      <var set="10" lvl="2" vid="690566"
+           dsc="[nxIPAddress] Verify if the default setting for AddressFamily is IPv4."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The default setting for AddressFamily is IPv4.</rec>
+        <rec key="failedMsg">The default setting for AddressFamily isn't IPv4.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690569"
+           dsc="[nxIPAddress] Verify if error out if the provided IP address is not a right IPv4 format."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.300</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out if the provided IP address is not a right IPv4 format.</rec>
+        <rec key="failedMsg">No error out if the provided IP address is not a right IPv4 format.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690570"
+           dsc="[nxIPAddress] Verify if error out if the provided IP address is not a right IPv6 format."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a:001</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv6</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out if the provided IP address is not a right IPv6 format.</rec>
+        <rec key="failedMsg">No error out if the provided IP address is not a right IPv6 format.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690571"
+           dsc="[nxIPAddress] Verify if error out while the specified InterfaceName doesn't exist."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out while the specified InterfaceName doesn't exist.</rec>
+        <rec key="failedMsg">No error out while the specified InterfaceName doesn't exist.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690573"
+           dsc="[nxIPAddress] Verify if error out while the BootProtocol property is invalid."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="bootProtocol">invalid</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out while the BootProtocol property is invalid.</rec>
+        <rec key="failedMsg">No error out while the BootProtocol property is invalid.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690574"
+           dsc="[nxIPAddress] Verify if a new IP address is added on network interface while IPAddress is provided and BootProtocol is specified as 'Automatic'."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="bootProtocol">Automatic</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet">IPAddress:12.10.10.10;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Send error out while the specified InterfaceName doesn't exist.</rec>
+        <rec key="failedMsg">No error out while the specified InterfaceName doesn't exist.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690902"
+           dsc="[nxIPAddress] Verify if error out if the provided gateway is not a right IPv4 format."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="gateway">11.10.10.300</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;DefaultGateway:%gateway%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out if the provided gateway is not a right IPv4 format.</rec>
+        <rec key="failedMsg">No error out if the provided gateway is not a right IPv4 format.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690903"
+           dsc="[nxIPAddress] Verify if error out if the provided gateway is not a right IPv6 format."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="addressFamily">IPv6</rec>
+        <rec key="gateway">fe80::215:5dff:fec0:4e1a:001</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;DefaultGateway:%gateway%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out if the provided gateway is not a right IPv6 format.</rec>
+        <rec key="failedMsg">No error out if the provided gateway is not a right IPv6 format.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690905"
+           dsc="[nxIPAddress] Verify if error out if the Ensure property is not Present/Absent."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">invalid</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out if the Ensure property is not Present/Absent.</rec>
+        <rec key="failedMsg">No error out if the Ensure property is not Present/Absent.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690919"
+           dsc="[nxIPAddress] Verify if error out while the PrefixLength value is greater than 32."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="prefixLength">50</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;PrefixLength:%prefixLength%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out while the PrefixLength value is greater than 32.</rec>
+        <rec key="failedMsg">No error out while the PrefixLength value is greater than 32.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690924"
+           dsc="[nxIPAddress] Verify if error out while the AddressFamily value is not IPv4/IPv6."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="addressFamily">invalid</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg"></rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out while the AddressFamily value is not IPv4/IPv6.</rec>
+        <rec key="failedMsg">No error out while the AddressFamily value is not IPv4/IPv6.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690925"
+           dsc="[nxIPAddress] Verify if no error out if the IP address doesn't exist before and Ensure property is Absent."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Absent</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls /etc/sysconfig/network-scripts |grep -i %interfaceName% | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">no change while the IP address doesn't exist before and Ensure property is Absent.</rec>
+        <rec key="failedMsg">Have a change while the IP address doesn't exist before and Ensure property is Absent.</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="690930"
+           dsc="[nxIPAddress] Verify if the information on a network interface is updated accordlingly while the address exists before and Ensure property is Present."
+           cls="DSC.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet">IPAddress:12.10.10.10;InterfaceName:%interfaceName%;AddressFamily:%addressFamily%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">IPAddress is updated accordlingly while the address exists before and Ensure property is Present.</rec>
+        <rec key="failedMsg">IPAddress isn't updated accordlingly while the address exists before and Ensure property is Present.</rec>
+      </var>
+
+    </section>
+
+    <section sid="11" dsc="nxDNSServerAddress Provider">
+
+      <var set="11" lvl="1" vid="690318"
+           dsc="[nxDNSServerAddress] Verify if DNS Server Address is added while providing a IPv4 address which does not exist in DNS."
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">128.9.0.107</rec>
+        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep %address%|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">IPV4 address is added as a DNS Server Address successfully.</rec>
+      </var>
+
+      <var set="11" lvl="1" vid="690319"
+           dsc="[nxDNSServerAddress] Verify if DNS Server Address is added while providing a IPv6 address which does not exist in DNS."
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">2001:da8:8000:1:202:120:2:101</rec>
+        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep %address%|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">IPV6 address is added as a DNS Server Address successfully.</rec>
+      </var>
       
+      <var set="11" lvl="2" vid="690320"
+           dsc="[nxDNSServerAddress] Verify if multiple DNS Server Addresses are added."
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">128.9.0.107</rec>
+        <rec key="address1">128.9.0.12</rec>
+        <rec key="address2">2001:da8:8000:1:202:120:2:101</rec>
+        <rec key="initialCmd">sed -i '/%address%\|%address1%\|%address2%/d' /etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%,%address1%,%address2%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%\|%address1%\|%address2%"|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">3</rec>
+        <rec key="successfulMsg">Multiple DNS Server Addresses are added successfully.</rec>
+      </var>
+      
+      <var set="11" lvl="3" vid="690321"
+           dsc="[nxDNSServerAddress] Verify if error out if more than three DNS Server Addresses are provided."
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">128.9.0.107</rec>
+        <rec key="address1">128.9.0.12</rec>
+        <rec key="address2">2001:da8:8000:1:202:120:2:101</rec>
+        <rec key="address3">2001:da8:8000:1:202:120:2:103</rec>
+        <rec key="initialCmd">sed -i '/%address%\|%address1%\|%address2%|%address3%/d' /etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%,%address1%,%address2%,%address3%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%\|%address1%\|%address2%|%address3%"|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Error out if more than three DNS Server Addresses are provided</rec>
+      </var>
+      
+      <var set="11" lvl="3" vid="690322"
+           dsc="[nxDNSServerAddress] Verify if error out if the provided address is not a right IPv4 format."
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">10.320.2.6</rec>
+        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Error out if the provided address is not a right IPv4 format</rec>
+      </var>
+      
+      <var set="11" lvl="3" vid="690323"
+           dsc="[nxDNSServerAddress] Verify if error out if the provided address is not a right IPv6 format."
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">2001::8000::202:120</rec>
+        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Error out if the provided address is not a right IPv6 format</rec>
+      </var>
+      
+      <var set="11" lvl="2" vid="690324"
+           dsc="[nxDNSServerAddress] Verify if no error out if the provided address exists in DNS."
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">128.9.0.107</rec>
+        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf; echo "nameserver %address%" >> etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%funcErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Error out if the provided address exists in DNS</rec>
+      </var>
+      
+      <var set="11" lvl="2" vid="814840"
+           dsc="[nxDNSServerAddress] Verify if error out while non-root user runs DSC operation to add a DNS address"
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">128.9.0.107</rec>
+        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Error out if the provided address exists in DNS</rec>
+      </var>
+      
+      <var set="11" lvl="2" vid="814842"
+           dsc="[nxDNSServerAddress] Verify if error out while non-root user runs DSC operation to get current DNS information"
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">128.9.0.107</rec>
+        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Error out if the provided address exists in DNS</rec>
+      </var>
     </section>
   </section>
 </varmap>

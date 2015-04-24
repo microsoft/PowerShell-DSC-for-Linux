@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Text;
 using Infra.Frmwrk;
+using System.IO;
 
 namespace DSC
 {
@@ -10,13 +12,12 @@ namespace DSC
         {
             ctx.Alw("nxExecTest Setup Begin.");
 
-            mofHelper = new EnvironmentMofHelper();
+            mofHelper = new ExecMofHelper();
 
             initializeCmd = ctx.Records.GetValue("initialCmd");
             finalizeCmd = ctx.Records.GetValue("finalCmd");
 
             base.Setup(ctx);
-
             ctx.Alw("nxExecTest Setup End.");
         }
 

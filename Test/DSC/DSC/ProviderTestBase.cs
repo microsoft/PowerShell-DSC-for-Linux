@@ -74,6 +74,7 @@ namespace DSC
             }
 
             // Prepare a configuration MOF file.
+            
             propMap = ConvertStringToPropMap(propString);
             mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath);
             ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
@@ -110,10 +111,10 @@ namespace DSC
             ctx.Alw("Verify Begin.");
 
             #region Check PowerShell Result
-
             if (String.IsNullOrWhiteSpace(psErrorMsg))
             {
                 // Verify if the PowerShell cmdlets were executed without error.
+                
                 if (String.IsNullOrWhiteSpace(psHelper.ErrorMsg))
                 {
                     ctx.Alw("PowerShell return 0.");
@@ -122,9 +123,9 @@ namespace DSC
                 {
                     throw new VarFail(psHelper.ErrorMsg);
                 }
-
                 // Check the result of GetConfiguration.
                 ctx.Alw("The result of Get-DscConfiguration:");
+              
                 var returnedProperties = mofHelper.ReturnedPropertiesOfGetDscConfiguration(propMap);
                 foreach (var key in returnedProperties.Keys)
                 {
@@ -138,22 +139,15 @@ namespace DSC
                         throw new VarFail(ex.Message);
                     }
                 }
+                // Verify Linux machine state.
+                VerifyLinuxState(ctx);
             }
             else
             {
                 psHelper.CheckErrorMessage(psErrorMsg);
                 ctx.Alw(String.Format("PowerShell return error message '{0}' as expected!", psErrorMsg));
             }
-
             #endregion
-
-            #region Check Linux State
-
-            // Verify Linux machine state.
-            VerifyLinuxState(ctx);
-
-            #endregion
-
             ctx.Alw("Verify End.");
         }
 
@@ -190,11 +184,22 @@ namespace DSC
         protected Dictionary<string, string> ConvertStringToPropMap(string propString)
         {
             string[] properties = propString.Split(';');
-
+            
             return (from property in properties
                     where !String.IsNullOrWhiteSpace(property)
                     select property.Split(':'))
-                    .ToDictionary(propertyMap => propertyMap[0], propertyMap => propertyMap[1]);
+                    .ToDictionary(propertyMap => propertyMap[0], propertyMap => PickStringList(propertyMap,1));
+        }
+
+        protected string PickStringList(string[] list, int index)
+        {
+            string indexString = String.Empty;
+            int len = list.Length;
+            for (int i = index; i < len; i++)
+            {
+                indexString = indexString + list[i] + ":";
+            }
+            return indexString.TrimEnd(':');
         }
 
         protected virtual void VerifyLinuxState(IContext ctx)

@@ -57,8 +57,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IFileCopyHelper.cs" />
     <Compile Include="nxComputerProviderTest\ComputerMofHelper.cs" />
     <Compile Include="nxComputerProviderTest\nxComputerTest.cs" />
+    <Compile Include="nxDNSAddrProviderTest\DNSAddressMofHelper.cs" />
+    <Compile Include="nxDNSAddrProviderTest\DNSAddressTest.cs" />
     <Compile Include="nxEnvironmentProviderTest\EnvironmentMofHelper.cs" />
     <Compile Include="nxEnvironmentProviderTest\nxEnvironmentTest.cs" />
     <Compile Include="nxExecProviderTest\ExecMofHelper.cs" />
@@ -79,6 +82,7 @@
     <Compile Include="nxServiceProviderTest\ServiceMofHelper.cs" />
     <Compile Include="nxSshAuthProviderTest\nxSshAuthTest.cs" />
     <Compile Include="nxSshAuthProviderTest\SshAuthMofHelper.cs" />
+    <Compile Include="PosixCopy.cs" />
     <Compile Include="ProviderTestBase.cs" />
     <Compile Include="CommonHelper.cs" />
     <Compile Include="nxFileProviderTest\FileMofHelper.cs" />
@@ -108,6 +112,7 @@
     <PostBuildEvent>cd $(SolutionDir)..\
 xcopy /E /Y /I ".\Dependency\MCF\*" "$(TargetDir)MCF"
 xcopy /E /Y /I ".\Dependency\SshcomLib\x64\*" "$(TargetDir)x64"
+xcopy /E /Y /I ".\Dependency\Package\*" "$(TargetDir)Package"
 xcopy /E /Y /I ".\Dependency\SshcomLib\Interop.sshcomLib.dll" "$(TargetDir)"
 xcopy /E /Y /I ".\DSC\TestFiles\*" "$(TargetDir)TestFiles"</PostBuildEvent>
   </PropertyGroup>
