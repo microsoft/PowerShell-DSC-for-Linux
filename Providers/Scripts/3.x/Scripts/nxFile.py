@@ -243,9 +243,11 @@ def Chown(path, owner, group):
     except OSError as error:
         print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception changing ownership of file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception changing ownership of file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -258,9 +260,11 @@ def Chmod(path, mode):
     except OSError as error:
         print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception  changing mode of file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception  changing mode of file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -271,9 +275,11 @@ def LChown(path, owner, group):
     except OSError as error:
         print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception changing ownership of file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception changing ownership of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception changing ownership of file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -284,9 +290,11 @@ def LChmod(path, mode):
     except OSError as error:
         print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception  changing mode of file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception  changing mode of file " + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception  changing mode of file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -326,9 +334,11 @@ def Symlink(spath, dpath):
     except OSError as error:
         print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception creating symlink from " + spath + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception creating symlink from " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception creating symlink from " + spath + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -339,9 +349,11 @@ def MakeDirs(path):
     except OSError as error:
         print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception making dir" + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception making dir" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception making dir" + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -352,9 +364,11 @@ def RemoveFile(path):
     except OSError as error:
         print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception removing file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception removing file" + path  + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception removing file " + path + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -367,9 +381,11 @@ def CopyFile(spath, dpath):
     except OSError as error:
         print("Exception copying tree " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception copying tree " + spath + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception copying tree " + spath  + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception copying tree " + spath + ' to ' + dpath + " Error Code: " + str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -436,11 +452,13 @@ def RemoveTree(path):
               + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception removing folder " + path + " Error Code: " +
               str(error.errno) + " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception removing folder " + path + " Error Code: "
               + str(error.errno) + " Error: " +error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception removing folder " + path + " Error Code: " +
               str(error.errno) + " Error: " + error.strerror)
+        return error
     return error
 
 

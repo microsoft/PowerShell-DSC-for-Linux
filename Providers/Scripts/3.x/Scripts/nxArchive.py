@@ -109,11 +109,13 @@ def LStatFile(path):
               " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception lstating file " + path + " Error Code: " + str(error.errno) +
                 " Error: " + error.strerror)
+        return d, error
     except IOError as error:
         print("Exception lstating file " + path + " Error Code: " + str(error.errno) +
               " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception lstating file " + path + " Error Code: " + str(error.errno) +
                 " Error: " + error.strerror)
+        return d, error
     return d, error
 
 
@@ -126,11 +128,13 @@ def MakeDirs(path):
               " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception making dir" + path + " Error Code: " + str(error.errno) +
                 " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception making dir" + path + " Error Code: " + str(error.errno) +
               " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception making dir" + path + " Error Code: " + str(error.errno) +
                 " Error: " + error.strerror)
+        return error
     return error
 
 
@@ -143,11 +147,13 @@ def RemoveFile(path):
               " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception removing file" + path + " Error Code: " + str(error.errno) +
                 " Error: " + error.strerror)
+        return error
     except IOError as error:
         print("Exception removing file" + path + " Error Code: " + str(error.errno) +
               " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception removing file" + path + " Error Code: " + str(error.errno) +
                 " Error: " + error.strerror)
+        return error
     return error
 
 
