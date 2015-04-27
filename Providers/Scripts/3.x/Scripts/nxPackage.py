@@ -61,7 +61,7 @@ def init_vars(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, R
         Arguments = ''
     if ReturnCode is None:
         ReturnCode = 0
-    return Ensure.lower(), PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode
+    return Ensure.lower(), PackageManager.lower(), Name, FilePath, PackageGroup, Arguments, ReturnCode
 
 
 def Set_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
@@ -501,9 +501,9 @@ def Set(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnC
                    FilePath, PackageGroup, Arguments, ReturnCode)
     except Exception as e:
         print('ERROR - Unable to initialize nxPackageProvider.  ' +
-              e.strerror, file=sys.stdout)
+              str(e), file=sys.stdout)
         LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.strerror)
+            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + str(e))
         return [-1]
     installed, out = IsPackageInstalled(p)
     if (installed and Ensure == 'present') or (not installed and Ensure == 'absent'):  # Nothing to do
@@ -532,9 +532,9 @@ def Test(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, Return
                    FilePath, PackageGroup, Arguments, ReturnCode)
     except Exception as e:
         print('ERROR - Unable to initialize nxPackageProvider.  ' +
-              e.strerror, file=sys.stdout)
+              str(e), file=sys.stdout)
         LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.strerror)
+            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + str(e))
         return [-1]
     installed, out = IsPackageInstalled(p)
     if (installed and Ensure == 'present') or (not installed and Ensure == 'absent'):
@@ -552,9 +552,9 @@ def Get(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnC
                    FilePath, PackageGroup, Arguments, ReturnCode)
     except Exception as e:
         print('ERROR - Unable to initialize nxPackageProvider.  ' +
-              e.strerror, file=sys.stdout)
+              str(e), file=sys.stdout)
         LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.strerror)
+            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + str(e))
         return [retval, p.PackageDescription, p.Publisher, p.InstalledOn, p.Size, p.Version, installed]
     installed, out = IsPackageInstalled(p)
     ParseInfo(p, out)
@@ -714,7 +714,7 @@ def GetRemoteFile(p):
     req = urllib.request.Request(p.FilePath)
     try:
         resp = urllib.request.urlopen(req)
-    except urllib.request.error.URLError as e:
+    except urllib.request.URLError as e:
         print(repr(e))
         LG().Log('ERROR',  repr(e))
         return 1
