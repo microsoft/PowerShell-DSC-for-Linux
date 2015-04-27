@@ -162,6 +162,7 @@ def RunGetOutput(cmd, no_output, chk_err=True):
 
     subprocess.check_output = check_output
     subprocess.CalledProcessError = CalledProcessError
+    output=b''
     try:
         output = subprocess.check_output(
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)
@@ -179,14 +180,14 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             LG().Log(
                 'ERROR', 'CalledProcessError.  Command string was ' + e.cmd)
             Print('CalledProcessError.  Command result was ' +
-                  (e.output[:-1]), file=sys.stderr)
+                  (e.output[:-1]).decode('ascii','ignore'), file=sys.stderr)
             LG().Log(
                 'ERROR', 'CalledProcessError.  Command result was '
-                + (e.output[:-1]))
+                + (e.output[:-1]).decode('ascii','ignore'))
         if no_output:
             return e.returncode, None
         else:
-            return e.returncode, e.output
+            return e.returncode, e.output.decode('ascii','ignore')
 
     if no_output:
         return 0, None
