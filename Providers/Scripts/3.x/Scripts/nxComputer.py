@@ -126,6 +126,7 @@ def RunGetOutput(cmd, no_output, chk_err=True):
 
     subprocess.check_output = check_output
     subprocess.CalledProcessError = CalledProcessError
+    output=b''
     try:
         output = subprocess.check_output(
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)

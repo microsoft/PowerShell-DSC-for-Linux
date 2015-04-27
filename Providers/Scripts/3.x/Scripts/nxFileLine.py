@@ -123,6 +123,9 @@ def Get(FilePath, ContainsLine):
             ContainsLine = ''
         print("Get returned " + ContainsLine, file=sys.stderr)
         LG().Log('INFO', "Get returned " + ContainsLine)
+    if ContainsLine is None:
+        ContainsLine=''
+
     return 0, FilePath, ContainsLine
 
 
