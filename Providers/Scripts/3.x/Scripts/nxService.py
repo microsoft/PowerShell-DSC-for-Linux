@@ -166,7 +166,8 @@ def RunGetOutput(cmd, no_output, chk_err=True):
     try:
         output = subprocess.check_output(
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)
-        output = output.decode('ascii','ignore')
+        if output is None:
+            output=b''
     except subprocess.CalledProcessError as e:
         if chk_err:
             Print('CalledProcessError.  Error Code is ' +
@@ -192,7 +193,7 @@ def RunGetOutput(cmd, no_output, chk_err=True):
     if no_output:
         return 0, None
     else:
-        return 0, output
+        return 0, output.decode('ascii','ignore')
 
 
 systemctl_path = "/usr/bin/systemctl"

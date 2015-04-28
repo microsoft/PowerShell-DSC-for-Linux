@@ -130,6 +130,8 @@ def RunGetOutput(cmd, no_output, chk_err=True):
     try:
         output = subprocess.check_output(
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)
+        if output is None:
+            output=b''
     except subprocess.CalledProcessError as e:
         if chk_err:
             print('CalledProcessError.  Error Code is ' +
