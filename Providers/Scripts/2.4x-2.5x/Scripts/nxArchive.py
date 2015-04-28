@@ -42,8 +42,8 @@ def init_vars(DestinationPath, SourcePath, Ensure, Force, Checksum):
     if Force is None:
         Force = False
     Force = ( Force == True )
-    if Checksum is None:
-        Checksum = ''
+    if Checksum is None or Checksum == '':
+        Checksum = 'md5'
     return DestinationPath.encode('ascii', 'ignore'), SourcePath.encode('ascii', 'ignore'), \
         Ensure.encode('ascii', 'ignore').lower(), Force, Checksum.encode(
             'ascii', 'ignore').lower()
@@ -278,7 +278,7 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
         if MakeDirs(DestinationPath) is not None:
             return False
     if not os.path.isdir(DestinationPath):
-        if Force == 'False':  # Force is False, return False
+        if Force == False:  # Force is False, return False
             Print(
                 'ERROR: Force must be True if DestinationPath is not a directory.')
             LG().Log(
@@ -378,8 +378,7 @@ def Test(DestinationPath, SourcePath, Ensure, Force, Checksum):
 
 def Get(DestinationPath, SourcePath, Ensure, Force, Checksum):
     if Test(DestinationPath, SourcePath, Ensure, Force, Checksum) is False:
-        if Ensure == 'present':
-            Ensure = 'absent'
-        else:
-            Ensure = 'present'
+        Ensure = 'absent'
+    else:
+        Ensure = 'present'
     return DestinationPath, SourcePath, Ensure, Force, Checksum
