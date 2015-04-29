@@ -1092,13 +1092,15 @@ def GetRemoteFile(fc):
             fc.LocalPath = ''
             return 0
     data=b'keep going'
+    hasWritten = False
     with (open(fc.LocalPath, 'wb+')) as F:
         try:
             while data:
                 data = resp.read(1048576)
                 if data is not None and len(data) > 0:
+                    hasWritten = True
                     F.write(data)
-            if len(data) == 0:
+            if hasWritten == False:
                 LG().Log('ERROR', "Data at URL: " + fc.SourcePath + " was empty. Please ensure this file exists at this remote location.")
                 F.close()
                 os.unlink(fc.LocalPath)
