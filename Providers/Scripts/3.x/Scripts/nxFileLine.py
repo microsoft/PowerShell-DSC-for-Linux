@@ -78,6 +78,8 @@ def Get_Marshall(FilePath, DoesNotContainPattern, ContainsLine):
     retd = {}
     ld = locals()
     for k in arg_names:
+        if ld[k].value == None:
+            ld[k].value = ""
         retd[k] = ld[k]
     return retval, retd
 
