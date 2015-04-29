@@ -275,7 +275,7 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
     # Do nothing.  Set should not get called as previous Test will evaluate to
     # True
     if Ensure == 'absent':
-        return False
+        return True
     # if the sourcepath is not valid file return False
     if not os.path.isfile(SourcePath):
         print('ERROR: SourcePath<' + SourcePath + '> is not a valid file')

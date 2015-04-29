@@ -267,7 +267,7 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
     # Do nothing.  Set should not get called as previous Test will evaluate to
     # True
     if Ensure == 'absent':
-        return False
+        return True
     # if the sourcepath is not valid file return False
     if not os.path.isfile(SourcePath):
         Print('ERROR: SourcePath<' + SourcePath + '> is not a valid file')
@@ -342,15 +342,15 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
                 arch.close()
                 raise Exception(
                     'Error: corrupted filename "' + n + '" in tarfile!')
-        try:
-            arch.extractall(DestinationPath)
-        except Exception, error:
-            arch.close()
-            Print("Exception extracting tarfile" + SourcePath + " to " +
-                  DestinationPath + " Error: " + str(error), file=sys.stderr)
-            LG().Log('ERROR', "Exception extracting tarfile" + SourcePath + " to " +
-                    DestinationPath + " Error: " + str(error))
-            return False
+            try:
+                arch.extract(n,DestinationPath)
+            except Exception, error:
+                arch.close()
+                Print("Exception extracting tarfile" + SourcePath + " to " +
+                      DestinationPath + " Error: " + str(error), file=sys.stderr)
+                LG().Log('ERROR', "Exception extracting tarfile" + SourcePath + " to " +
+                         DestinationPath + " Error: " + str(error))
+                return False
         arch.close()
     if WriteCacheInfo(SourcePath, DestinationPath) is False:
         return False
