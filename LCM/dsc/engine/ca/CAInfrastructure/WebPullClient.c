@@ -2370,6 +2370,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = MI_Deserializer_DeserializeInstanceArray(&deserializer, 0, &options, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miInstanceArray, extendedError);
     if (r != MI_RESULT_OK)
     {
+        DSC_free(miApp);
         return r;
     }
 
@@ -2379,7 +2380,6 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
         pbuffer = NULL;
     }
 
-    
     for (i = 0; i < miInstanceArray->size; ++i)
     {
         // compare classname with BASE_DOCUMENT_CLASSNAME.  Skip if same
@@ -2457,6 +2457,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
                 MI_Deserializer_Close(&deserializer);
                 MI_OperationOptions_Delete(&options);
                 CleanUpDeserializerInstanceCache(miInstanceArray);
+                DSC_free(miApp);
                 return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDMODULEVERSION, moduleVersion.string, moduleName.string);
             }
         }
@@ -2468,6 +2469,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     MI_OperationOptions_Delete(&options);
 
     CleanUpDeserializerInstanceCache(miInstanceArray);
+    DSC_free(miApp);
 
     return MI_RESULT_OK;
 }
