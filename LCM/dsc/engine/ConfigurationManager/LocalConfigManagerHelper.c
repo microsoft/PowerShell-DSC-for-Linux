@@ -930,6 +930,7 @@ MI_Result CallConsistencyEngine(
         result = MergePartialConfigurations(&lcmContext, moduleManager, GetPendingConfigFileName(), GetPartialConfigBaseDocumentInstanceFileName(), cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
+            MSFT_DSCMetaConfiguration_Delete((MSFT_DSCMetaConfiguration *)metaConfigInstance);
             moduleManager->ft->Close(moduleManager, NULL);
             SetLCMStatusReady(lcmContext, result);
             return result;
@@ -2477,7 +2478,11 @@ MI_Result ProcessPartialConfigurations(
                                         {
                                                 DSC_WriteWarning2Param((MI_Context*) lcmContext->context, ID_LCMHELPER_APPLYPARTIALCONFIG_FAILED_WITHERROR, searchBucket.key, value.string);
                                         }
-                                        *cimErrorDetails = NULL;//Clear error details
+                                        if (*cimErrorDetails != NULL)
+                                        {
+                                            MI_Instance_Delete(*cimErrorDetails);
+                                            *cimErrorDetails = NULL;//Clear error details
+                                        }
                                         flagPartialConfigFailedToApply = MI_TRUE;
                                         r = MI_RESULT_OK;
                                 }
