@@ -3214,12 +3214,6 @@ static int _FinalizeClassProperties(
         /* Set MI_PropertyDecl.propagator */
         pd->propagator = Batch_Tcsdup(state->batch, cd->name);
 
-        /* Set NULL flag to property */
-        if (!(pd->flags & MI_FLAG_NULL) && !pd->value)
-        {
-            pd->flags |= MI_FLAG_NULL;
-        }
-
         /* See if the property is already in the list */
 
         pos = _FindPropertyDecl(&propertySet, pd->name);

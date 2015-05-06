@@ -27,6 +27,10 @@
 
 #include <stdio.h>
 #include <pal/palcommon.h>
+#include <pal/file.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 
 typedef struct _Internal_DirEnt 
 {
@@ -56,6 +60,10 @@ int UCS2ToAscii( _In_z_ const wchar_t *input,
                   _Outptr_result_z_ char **output);
 
 
+int AsciiToUCS2(_In_z_ char *input, 
+            _Outptr_result_z_ wchar_t **output);
+
+
 int File_CopyT(_In_z_ const PAL_Char* src, _In_z_ const PAL_Char* dest);
 
 
@@ -71,6 +79,15 @@ int Directory_Exist(
 int Directory_ExistW(
         _In_z_ const wchar_t *path);
 
+int TempnamW(
+        _Outptr_result_maybenull_z_ wchar_t **output );
+
+int Tempnam(
+        _Outptr_result_maybenull_z_ char **output );
+
+
+int MkdirW(_In_z_ const wchar_t *path, int mode);
+
 Internal_Dir* Internal_Dir_Open(_In_z_ const TChar* path, NitsCallSite cs);
 
 Internal_DirEnt* Internal_Dir_Read(_In_ Internal_Dir* dir,  _In_opt_z_ TChar *fileEndsWith);
@@ -82,6 +99,11 @@ int Directory_Remove( _In_z_ TChar *path);
 TChar * Generate_UUID(NitsCallSite cs);
 
 int GetComputerHostName(_Inout_updates_z_(length) TChar *buffer, unsigned int length);
+
+void PAL_SHA256Transform(_In_ void * pInputValue,
+    _In_ unsigned int valueLength,
+    _Out_ unsigned char hashedValue[SHA256TRANSFORM_DIGEST_LEN]);
+
 
 
 PAL_INLINE FILE* File_OpenT(
@@ -139,6 +161,30 @@ PAL_INLINE int Directory_ExistT(
     return Directory_Exist(path);
 #endif
 }
+
+PAL_INLINE int MkdirT(
+    _In_z_ const TChar* path,
+    int mode
+    )
+{
+#if defined(CONFIG_ENABLE_WCHAR)
+    return MkdirW(path, mode);
+#else
+    return mkdir(path, mode);
+#endif
+}
+
+PAL_INLINE int TempnamT(
+     _Outptr_result_maybenull_z_ TChar **output 
+    )
+{
+#if defined(CONFIG_ENABLE_WCHAR)
+    return TempnamW(output);
+#else
+    return Tempnam(output);
+#endif
+}
+
 
 // Intlstr.h
 

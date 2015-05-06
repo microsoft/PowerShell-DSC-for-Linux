@@ -416,6 +416,81 @@ void DSCFilePutLog(
 #define DSC_EventWriteLCMPullModuleSkippedAsModuleIsAvailable(ModuleName, ModuleVersion, ModulePath) \
     ExpandEvent(LCMPullModuleSkippedAsModuleIsAvailable( g_ConfigurationDetails.jobGuidString, ModuleName, ModuleVersion, ModulePath))
 
+#define DSC_EventWriteWebDownloadManagerDoActionServerUrl(ConfigurationId, ServerUrl) \
+    ExpandEvent(WebDownloadManagerDoActionServerUrl( g_ConfigurationDetails.jobGuidString, ConfigurationId, ServerUrl))
+
+#define DSC_EventWriteWebDownloadManagerDoActionGetUrl(ConfigurationId, RelativeUrl) \
+    ExpandEvent(WebDownloadManagerDoActionGetUrl( g_ConfigurationDetails.jobGuidString, ConfigurationId, RelativeUrl))
+
+#define DSC_EventWriteWebDownloadManagerDoActionGetCall(ConfigurationId, OutputResult) \
+    ExpandEvent(WebDownloadManagerDoActionGetCall( g_ConfigurationDetails.jobGuidString, ConfigurationId, OutputResult))
+
+#define DSC_EventWriteWebDownloadManagerGetDocGetUrl(ConfigurationId, RelativeUrl) \
+    ExpandEvent(WebDownloadManagerGetDocGetUrl( g_ConfigurationDetails.jobGuidString, ConfigurationId, RelativeUrl))
+
+#define DSC_EventWriteWebDownloadManagerGetDocGetCall(ConfigurationId, OutputResult) \
+    ExpandEvent(WebDownloadManagerGetDocGetCall( g_ConfigurationDetails.jobGuidString, ConfigurationId, OutputResult))
+
+#define DSC_EventWriteWebDownloadManagerDoActionCertId(ConfigurationId, CertificateId) \
+    ExpandEvent(WebDownloadManagerDoActionCertId(g_ConfigurationDetails.jobGuidString, ConfigurationId, CertificateId))
+
+#define DSC_EventWriteWebDownloadManagerDoActionHttpClient(ConfigurationId, errorString) \
+    ExpandEvent(WebDownloadManagerDoActionHttpClient(g_ConfigurationDetails.jobGuidString, ConfigurationId, errorString))
+
+#define DSC_EventWriteWebDownloadManagerGetDocHttpClient(ConfigurationId, OutputResult) \
+    ExpandEvent(WebDownloadManagerGetDocHttpClient( g_ConfigurationDetails.jobGuidString, ConfigurationId, OutputResult))
+
+#define DSC_EventWriteWebDownloadManagerGetDocChecksumValidation(ConfigurationId, OutputResult) \
+    ExpandEvent(WebDownloadManagerGetDocChecksumValidation( g_ConfigurationDetails.jobGuidString, ConfigurationId, OutputResult))
+
+#define DSC_EventWriteWebDownloadManagerGetDocFileSave(ConfigurationId, FilePath) \
+    ExpandEvent(WebDownloadManagerGetDocFileSave( g_ConfigurationDetails.jobGuidString, ConfigurationId, FilePath))
+
+//*********************PARTIAL CONFIGURATION EVENTS ********************//
+#define DSC_EventWriteLCMPullingPartial(partialConfigName) \
+    ExpandEvent(LCMPullingPartial(g_ConfigurationDetails.jobGuidString, partialConfigName))
+
+#define DSC_EventWriteLCMApplyingPartial(PartialConfigName) \
+    ExpandEvent(LCMApplyingPartial(g_ConfigurationDetails.jobGuidString, PartialConfigName))
+
+#define DSC_EventWriteLCMIdentifiedModePartial() \
+    ExpandEvent(LCMIdentifiedModePartial(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMAboutToMergePartial() \
+    ExpandEvent(LCMAboutToMergePartial(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMMergingPartialConfiguration(PartialConfigurationName) \
+    ExpandEvent(LCMMergingPartialConfiguration(g_ConfigurationDetails.jobGuidString, PartialConfigurationName))
+
+#define DSC_EventWriteLCMValidatingPartialConfiguration(PartialConfigurationName) \
+    ExpandEvent(LCMValidatingPartialConfiguration(g_ConfigurationDetails.jobGuidString, PartialConfigurationName))
+        
+#define DSC_EventWriteLCMValidatingMergedPartial() \
+    ExpandEvent(LCMValidatingMergedPartial(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMValidatingMetaConfPartial() \
+    ExpandEvent(LCMValidatingMetaConfPartial(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMValidatingPartialConfigName(partialConfigName) \
+    ExpandEvent(LCMValidatingPartialConfigName(g_ConfigurationDetails.jobGuidString, partialConfigName))
+
+#define DSC_EventWriteLCMValidatingPartialConfigMetaConfDownloadMgr() \
+    ExpandEvent(LCMValidatingPartialConfigMetaConfDownloadMgr(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMValidatingPartialConfigMetaConfExclusiveResources() \
+    ExpandEvent(LCMValidatingPartialConfigMetaConfExclusiveResources(g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteLCMValidatingPartialExclusiveResourceStringDefintion(exclusiveResourceString) \
+    ExpandEvent(LCMValidatingPartialExclusiveResourceStringDefintion(g_ConfigurationDetails.jobGuidString, exclusiveResourceString))
+
+#define DSC_EventWritePartialConfigurationNotAvailable(PartialConfigurationName) \
+    ExpandEvent(PartialConfigurationNotAvailable( g_ConfigurationDetails.jobGuidString, PartialConfigurationName))
+
+
+#define DSC_EventWriteCUMethodWarning(WarningMessage) \
+        ExpandEvent(CUMethodWarning( g_ConfigurationDetails.jobGuidString, WarningMessage))
+
+
 
 #ifdef __cplusplus
 

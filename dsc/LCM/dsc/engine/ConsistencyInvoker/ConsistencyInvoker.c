@@ -32,7 +32,7 @@
 #if defined(_MSC_VER)
 #define DSCENGINE_NAMESPACE MI_T("root\\microsoft\\windows\\desiredstateconfiguration")
 #else
-#define DSCENGINE_NAMESPACE MI_T("/dsc")
+#define DSCENGINE_NAMESPACE MI_T("root/Microsoft/Windows/DesiredStateConfiguration")
 #endif
 
 int main(int argc, char *argv[])
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     if( argc >= 2 )
     {
         // the argument is the value of the parameter passed to function PerformRequiredConfigurationChecks
-        argValue = atoi(argv[1]);
+        argValue = strtoul(argv[1], NULL, 10);
         if( argValue == 0 || !(argValue == TASK_REGULAR || argValue== TASK_REBOOT || argValue == TASK_BOOTSTRAP))
             argValue = TASK_REGULAR;
     }

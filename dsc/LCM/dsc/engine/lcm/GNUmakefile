@@ -21,6 +21,7 @@ INCLUDES = \
 
 DEFINES = MI_CONST= HOOK_BUILD
 
-LIBRARIES =  ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure mi base pal omi_error  micodec mofparser
+LIBRARIES =  ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure mi pal omi_error  micodec mofparser base pal curl
 
 include $(OMI)/mak/rules.mak
+

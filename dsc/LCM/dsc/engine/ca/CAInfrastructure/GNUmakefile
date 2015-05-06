@@ -7,7 +7,7 @@ LIBRARY = CAEngine
 SOURCES = \
 	CAEngine.c \
 	CAValidate.c \
-	CACrypto.c
+	WebPullClient.c
 
 INCLUDES = \
 	$(OMI) \
@@ -20,6 +20,6 @@ INCLUDES = \
 	$(TOP)/codec/common \
 	$(OMI)/nits/base
 
-DEFINES = MI_CONST= HOOK_BUILD
+DEFINES = MI_CONST= HOOK_BUILD DSC_PACKAGE_BUILD
 
 include $(OMI)/mak/rules.mak

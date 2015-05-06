@@ -1,156 +1,207 @@
 # -*- mode: Makefile; -*- 
-#--------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-#--------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+#-------------------------------------------------------------------------------
 # 2014-01-17
-#--------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-# Please define the variables below for your system!
+# define some aliases
+MKDIR:=mkdir -p -m 755
+RM:=rm -f
+SED:=sed
+COPY:=cp
+MKDEP:=-MD
 
-OMI_DIR := $(shell cd ../omi-1.0.8; pwd)
-BASE_DIR := $(shell pwd)
-TARGET_DIR := $(BASE_DIR)/target
+# define some source paths
+TOP?=$(shell cd ..; pwd)
+OMI_PATH?=$(TOP)/omi-1.0.8
+PROVIDER_PATH?=$(TOP)/Providers
 
-include $(BASE_DIR)/config.mak
+# define the root output path
+BIN_PATH:=$(PROVIDER_PATH)/bin
 
-PAL_OUTPUT_DIR := $(PAL_DIR)/target/$(BUILD_CONFIGURATION)
+# included makefiles for additional definitions
+include $(OMI_PATH)/output/config.mak
+include ./config.mak
 
-ifndef ENABLE_DEBUG
-$(error "ENABLE_DEBUG is not set.  Please re-run configure")
-endif
+# additional include paths
+INCLUDE_PATH+=$(INCDIR)
+INCLUDE_PATH+=$(SRCDIR)
+INCLUDE_PATH+=$(SRCDIR)/base
+INCLUDE_PATH+=$(SRCDIR)/common
+INCLUDE_PATH+=$(PROVIDER_PATH)
+CPPFLAGS+=$(addprefix -I,$(INCLUDE_PATH))
 
-SHARED_FLAGS := -shared
-INCLUDE_FLAGS := -I$(OMI_DIR)/output/include -I$(BASE_DIR)/PythonHelper
-LINK_LIBRARIES := -L$(OMI_DIR)/output/lib -lmicxx -lrt
-PYTHON_CFLAGS = $(shell python-config --cflags)
-BUILD_SHARED_LIBRARY := g++ $(SHARED_FLAGS) $(INCLUDE_FLAGS) $(LINK_LIBRARIES) $(PYTHON_CFLAGS) -fPIC 
-BUILD_OBJECT_FILE := g++ -c $(INCLUDE_FLAGS) $(PYTHON_CFLAGS) -fPIC 
+# add the OMI lib path to the library path
+LDFLAGS+=-L$(LIBDIR)
 
+# add some libraries
+LDFLAGS+=-lmicxx
+LDFLAGS+=-lrt
 
+# extra compile flags
+CXXFLAGS+=-fPIC
+CXXFLAGS+=-DNDEBUG
+CXXFLAGS+=-Wall
+CXXFLAGS+=-ggdb
+CXXFLAGS+=-O2
 
-PROVIDER_LIST := nxFile \
-		 nxScript \
-		 nxUser \
-		 nxGroup \
-		 nxService
+# common source files
+COMMON_SOURCES:=debug_tags.cpp
+COMMON_SOURCES+=PythonProvider.cpp
 
-PROVIDER_LIST_OMI := $(addsuffix Resource,$(addprefix MSFT_,$(PROVIDER_LIST)))
-PROVIDER_LIBRARIES := $(addsuffix Resource.so,$(addprefix libMSFT_,$(PROVIDER_LIST)))
-PROVIDER_LIBRARIES_PATHS := $(addprefix $(TARGET_DIR)/,$(PROVIDER_LIBRARIES))
+COMMON_OBJS:=$(COMMON_SOURCES:.cpp=.o)
 
-all: $(PROVIDER_LIBRARIES_PATHS)
+# these are the names of the files that are auto-generated for each provider
+GENERATED_SOURCES:=module.c
+GENERATED_SOURCES+=schema.c
+GENERATED_OBJS:=$(GENERATED_SOURCES:.c=.o)
 
-$(TARGET_DIR): $(TARGET_DIR)/objs
+# list of providers
+PROVIDERS:=nxFile
+PROVIDERS+=nxScript
+PROVIDERS+=nxUser
+PROVIDERS+=nxGroup
+PROVIDERS+=nxService
+PROVIDERS+=nxPackage
+PROVIDERS+=nxEnvironment
+PROVIDERS+=nxSshAuthorizedKeys
+#PROVIDERS+=nxIPAddress
+##PROVIDERS+=nxComputer
+##PROVIDERS+=nxFirewall
+#PROVIDERS+=nxDNSServerAddress
+PROVIDERS+=nxFileLine
+PROVIDERS+=nxArchive
 
-$(TARGET_DIR)/objs:
-	mkdir -p $(TARGET_DIR)/objs
-
-# PythonHelper static library
-PYTHONHELPER_SRC := PythonHelper.cpp 
-PYTHONHELPER_SRC_PATHS := $(addprefix $(BASE_DIR)/PythonHelper/,$(PYTHONHELPER_SRC))
-
-PYTHONHELPER_OBJS := $(patsubst %.cpp,%.o,$(PYTHONHELPER_SRC))
-PYTHONHELPER_OBJS_PATHS := $(addprefix $(TARGET_DIR)/objs/,$(PYTHONHELPER_OBJS))
-
-$(TARGET_DIR)/objs/%.o: $(BASE_DIR)/PythonHelper/%.cpp
-	$(BUILD_OBJECT_FILE) $^ -o $@
-
-$(TARGET_DIR)/libpythonhelper.a: $(PYTHONHELPER_OBJS_PATHS)
-	ar rcs $@ $^
-
-# General Provider stuff
-$(PROVIDER_LIBRARIES_PATHS): $(TARGET_DIR)/libpythonhelper.a
-
-# nxFile
-NXFILE_SRC :=   MSFT_nxFileResource.cpp \
-	        MSFT_nxFileResource.h \
-		module.c \
-		schema.c
-
-NXFILE_SRC_PATHS := $(addprefix $(BASE_DIR)/nxFile/,$(NXFILE_SRC))
-
-$(NXFILE_SRC_PATHS): $(TARGET_DIR)
-
-$(TARGET_DIR)/libMSFT_nxFileResource.so: $(NXFILE_SRC_PATHS)
-	$(BUILD_SHARED_LIBRARY) $^ -o $@
-
-# nxScript
-NXSCRIPT_SRC := MSFT_nxScriptResource.cpp \
-	        MSFT_nxScriptResource.h \
-		module.c \
-		schema.c
-
-NXSCRIPT_SRC_PATHS := $(addprefix $(BASE_DIR)/nxScript/,$(NXSCRIPT_SRC))
-
-$(NXSCRIPT_SRC_PATHS): $(TARGET_DIR)
-
-$(TARGET_DIR)/libMSFT_nxScriptResource.so: $(NXSCRIPT_SRC_PATHS)
-	$(BUILD_SHARED_LIBRARY) $^ -o $@
-
-# nxUser
-NXUSER_SRC := MSFT_nxUserResource.cpp \
-	        MSFT_nxUserResource.h \
-		module.c \
-		schema.c
-
-NXUSER_SRC_PATHS := $(addprefix $(BASE_DIR)/nxUser/,$(NXUSER_SRC))
-
-$(NXUSER_SRC_PATHS): $(TARGET_DIR)
-
-$(TARGET_DIR)/libMSFT_nxUserResource.so: $(NXUSER_SRC_PATHS)
-	$(BUILD_SHARED_LIBRARY) $^ -o $@
-
-# nxGroup
-NXGROUP_SRC := MSFT_nxGroupResource.cpp \
-	        MSFT_nxGroupResource.h \
-		module.c \
-		schema.c
-
-NXGROUP_SRC_PATHS := $(addprefix $(BASE_DIR)/nxGroup/,$(NXGROUP_SRC))
-
-$(NXGROUP_SRC_PATHS): $(TARGET_DIR)
-
-$(TARGET_DIR)/libMSFT_nxGroupResource.so: $(NXGROUP_SRC_PATHS)
-	$(BUILD_SHARED_LIBRARY) $^ -o $@
-
-# nxService
-NXSERVICE_SRC := MSFT_nxServiceResource.cpp \
-	        MSFT_nxServiceResource.h \
-		module.c \
-		schema.c
-
-NXSERVICE_SRC_PATHS := $(addprefix $(BASE_DIR)/nxService/,$(NXSERVICE_SRC))
-
-$(NXSERVICE_SRC_PATHS): $(TARGET_DIR)
-
-$(TARGET_DIR)/libMSFT_nxServiceResource.so: $(NXSERVICE_SRC_PATHS)
-	$(BUILD_SHARED_LIBRARY) $^ -o $@
+# this is used to enable the printing of xml style tags for help in debugging
+PRINT_BOOKENDS?=0
+CPPFLAGS+=-DPRINT_BOOKENDS=$(PRINT_BOOKENDS)
 
 
-# nxEnvironment
-$(TARGET_DIR)/libMSFT_nxEnvironmentResource.so: $(NXENVIRONMENT_SRC_PATHS)
-	$(BUILD_SHARED_LIBRARY) $^ -o $@
+# the main target
+################################################################################
+all:
 
 
-clean :
-	-rm -r $(TARGET_DIR)
+# reg target
+################################################################################
+OMI_BIN_PATH:=$(CONFIG_BINDIR)
+OMI_LIB_PATH:=$(CONFIG_LIBDIR)
+OMI_CONFIG_PATH:=$(CONFIG_SYSCONFDIR)/dsc/configuration
+OMI_REG_PATH:=$(BIN_PATH)/omi
+OMI_REG:=$(OMI_BIN_PATH)/omireg -n root/Microsoft/DesiredStateConfiguration \
+	-o @requestor@
+SCHEMA:=Resource.schema.mof
+REGISTER:=Resource.registration.mof
 
+# $(call REGISTER_PROVIDER,provider-name)
+define REGISTER-PROVIDER
+	echo ...registering: $1;
+	$(MKDIR) $(OMI_CONFIG_PATH)/registration/MSFT_$1Resource; \
+	$(MKDIR) $(OMI_CONFIG_PATH)/schema/MSFT_$1Resource; \
+	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(SCHEMA) \
+	    $(OMI_CONFIG_PATH)/schema/MSFT_$1Resource/MSFT_$1$(SCHEMA); \
+	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(REGISTER) \
+	    $(OMI_CONFIG_PATH)/registration/MSFT_$1Resource/MSFT_$1$(REGISTER); \
+	$(OMI_REG) $(BIN_PATH)/libMSFT_$1Resource.so;
+endef
 
-include $(OMI_DIR)/output/config.mak
-OMI_BINDIR := $(CONFIG_BINDIR)
-OMI_LIBDIR := $(CONFIG_LIBDIR)
-OMIGEN := $(OMI_BINDIR)/omigen
-OMIREG := $(OMI_BINDIR)/omireg
-DSC_SCHEMA_DIR := $(CONFIG_SYSCONFDIR)/dsc/configuration/schema
-DSC_REGISTRATION_DIR := $(CONFIG_SYSCONFDIR)/dsc/configuration/registration
-
+.PHONY: reg
 reg :
-	cp -R $(BASE_DIR)/Scripts $(OMI_LIBDIR)
-	for prov in $(PROVIDER_LIST); do \
-		export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); $(OMIREG) -n "root/Microsoft/DesiredStateConfiguration" -o @requestor@ $(TARGET_DIR)/libMSFT_$${prov}Resource.so; \
-		mkdir -p  $(DSC_SCHEMA_DIR)/MSFT_$${prov}Resource; \
-		mkdir -p  $(DSC_REGISTRATION_DIR)/MSFT_$${prov}Resource; \
-		cp $(BASE_DIR)/$${prov}/MSFT_$${prov}Resource.schema.mof $(DSC_SCHEMA_DIR)/MSFT_$${prov}Resource/MSFT_$${prov}Resource.schema.mof; \
-		cp $(BASE_DIR)/$${prov}/MSFT_$${prov}Resource.registration.mof $(DSC_REGISTRATION_DIR)/MSFT_$${prov}Resource/MSFT_$${prov}Resource.registration.mof; \
-	done
+	echo ...copying scripts
+	$(MKDIR) -p $(OMI_LIB_PATH)/Scripts
+	$(MKDIR) -p $(CONFIG_DATADIR)/dsc/modules
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/*.py $(OMI_LIB_PATH)/Scripts
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/2.4x-2.5x $(OMI_LIB_PATH)/Scripts
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/2.6x-2.7x $(OMI_LIB_PATH)/Scripts
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/3.x $(OMI_LIB_PATH)/Scripts
+	$(COPY) -R $(TOP)/intermediate/Scripts/*.py $(OMI_LIB_PATH)/Scripts
+	chmod a+x $(OMI_LIB_PATH)/Scripts/*.py
+	@$(foreach provider,$(PROVIDERS),$(call REGISTER-PROVIDER,$(provider)))
 
+
+# compile rule
+################################################################################
+# this macro defines rules for compiling source files using extra flags,
+# generating files with lists of dependencies, and alternate placement for those
+# files
+# $(call COMPILE-WITH-DEPEND,dest-path-prefix)
+define COMPILE-WITH-DEPEND
+	@echo ...compiling: $$(@F)
+	$(COMPILE.cpp) $($2) $(MKDEP) $$< -o $$@
+	@-$(COPY) $1$$*.d $1$$*.P;
+	@$(SED) -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$$$//' -e '/^$$$$/ d' \
+	    -e 's/$$$$/ :/' < $1$$*.d >> $1$$*.P;
+	@$(RM) $1$$*.d
+endef
+
+
+# compile rule
+$(BIN_PATH)/%.o : %.cpp
+	@echo ...compiling: $(@F)
+	$(COMPILE.cpp) $(MKDEP) $< -o $@
+	@-$(COPY) $(BIN_PATH)/$*.d $(BIN_PATH)/$*.P;
+	@$(SED) -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e '/^$$/ d' \
+	    -e 's/$$/ :/' < $(BIN_PATH)/$*.d >> $(BIN_PATH)/$*.P
+	@$(RM) $(BIN_PATH)/$*.d
+
+
+# add bin path dependencies to the object files
+$(addprefix $(BIN_PATH)/,$(COMMON_OBJS)) : | $(BIN_PATH)
+
+
+# per provider specific rules
+################################################################################
+# $(call PER-PROVIDER_RULES,provider)
+define PER-PROVIDER-RULES
+
+# compile rule
+$(BIN_PATH)/$1_%.o : $(PROVIDER_PATH)/$1/%.c
+	$(call COMPILE-WITH-DEPEND,$(BIN_PATH)/$1_)
+
+$(BIN_PATH)/%.o : $(PROVIDER_PATH)/$1/%.cpp
+	$(call COMPILE-WITH-DEPEND,$(BIN_PATH)/)
+
+# add bin path dependencies to the object files
+$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) : | $(BIN_PATH)
+
+# add this shared object to the "all" target
+all: $(BIN_PATH)/libMSFT_$1Resource.so
+
+$(BIN_PATH)/libMSFT_$1Resource.so : \
+	$(addprefix $(BIN_PATH)/,$(COMMON_OBJS)) \
+	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
+	$(BIN_PATH)/MSFT_$1Resource.o
+	@echo ...linking: $(BIN_PATH)/libMSFT_$1Resource.so
+	$(CXX) -shared -o $$@ $$^ $(LIBDIR)/libpal.a
+
+endef
+
+# instantiate per provider rules
+$(foreach provider,$(PROVIDERS),\
+    $(eval $(call PER-PROVIDER-RULES,$(provider))))
+
+
+# miscellaneous rules
+################################################################################
+
+# a rule to make root bin directory
+$(BIN_PATH) :
+	$(MKDIR) $(BIN_PATH)
+
+# rules for output when running the clean target
+.phony : clean-text
+clean-text :
+	@echo ...deleting: library, object, and dependency files!
+
+# rules doing the cleanup in the root bin directory
+.phony : clean-action
+clean-action :
+	@$(RM) $(BIN_PATH)/*.o $(BIN_PATH)/*.d $(BIN_PATH)/*.P $(BIN_PATH)/*.so
+	@$(RM) -r $(OMI_REG_PATH)
+
+# master clean target
+clean : clean-text clean-action
+
+# include shared dependency files
+-include $(BIN_PATH)/*.P
