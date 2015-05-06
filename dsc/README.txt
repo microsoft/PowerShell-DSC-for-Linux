@@ -57,11 +57,11 @@ Prerequisites
 
 
 1. Install the Linux Resource Provider MOF module:
-   A. Extract the nx.zip file into %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\ such that the directory tree looks like:
-      %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\nx\nx.psd1
-      %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\nx\Readme.txt
-      %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\nx\DSCResources
-      %SystemRoot%\system32\WindowsPowerShell\v1.0\Modules\nx\DSCResources\MSFT_nxFileResource
+   A. Extract the nx.zip file into %programfiles%\WindowsPowerShell\Modules\ such that the directory tree looks like:
+      %programfiles%\WindowsPowerShell\Modules\nx\nx.psd1
+      %programfiles%\WindowsPowerShell\Modules\nx\Readme.txt
+      %programfiles%\WindowsPowerShell\Modules\nx\DSCResources
+      %programfiles%\WindowsPowerShell\Modules\nx\DSCResources\MSFT_nxFileResource
       ...
 
    B. In order to compile a Configuration MOF that uses the DSC for Linux resources, use "Import-DscResource -Module nx" inside a DSC Configuration block.
