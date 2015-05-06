@@ -58,6 +58,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IFileCopyHelper.cs" />
+    <Compile Include="nxArchiveProviderTest\ArchiveMofHelper.cs" />
+    <Compile Include="nxArchiveProviderTest\nxArchiveTest.cs" />
     <Compile Include="nxComputerProviderTest\ComputerMofHelper.cs" />
     <Compile Include="nxComputerProviderTest\nxComputerTest.cs" />
     <Compile Include="nxDNSAddrProviderTest\DNSAddressMofHelper.cs" />

@@ -7,7 +7,8 @@
   <!-- Variables. -->
   <snippet id="Variables">
     <!-- Linux Info. -->
-    <rec key="nxHostName">DSC_HOST</rec>
+    <!--<rec key="nxHostName">DSC_HOST</rec>-->
+    <rec key="nxHostName">dsc64-cent6-15</rec>
     <rec key="nxUsername">root</rec>
     <rec key="nxPassword">OpsMgr2007R2</rec>
     <rec key="nxPort">22</rec>
@@ -25,6 +26,7 @@
     <rec key="packageFromPath">PACKAGE_NAME</rec>
     <rec key="packageFilePath">/tmp/testpackage3_1.0</rec>
     <rec key="packageFromSource">nano</rec>
+    <rec key="remoteTarFilePath">http://dsc64-apache-01.scx.com/source.tar</rec>
     
     <!-- DSC Info. -->
     <rec key="dscHome">/opt</rec>
@@ -3823,6 +3825,444 @@
         <rec key="expectedValue">0</rec>
         <rec key="successfulMsg">Error out if the provided address exists in DNS</rec>
       </var>
+    </section>
+
+    <section sid="12" dsc="nxArchive Provider">
+
+      <var set="12" lvl="1" vid="865889"
+           dsc="[nxArchive] Verify if unpack a source file which is .tar file to destination path successfully."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Unpack a source file which is .tar file to destination path successfully</rec>
+        <rec key="failedMsg">Fail to unpack a source file which is .tar file to destination path.</rec>
+      </var>
+
+      <var set="12" lvl="1" vid="865890"
+           dsc="[nxArchive] Verify if unpack a source file which is .zip file to destination path successfully."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.zip</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;zip %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Unpack a source file which is .zip file to destination path successfully</rec>
+        <rec key="failedMsg">Fail to unpack a source file which is .zip file to destination path.</rec>
+      </var>
+
+      <var set="12" lvl="1" vid="865891"
+           dsc="[nxArchive] Verify if unpack a source file which is .tar.gz file to destination path successfully."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar.gz</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -zcvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Unpack a source file which is .tar.gz file to destination path successfully</rec>
+        <rec key="failedMsg">Fail to unpack a source file which is .tar.gz file to destination path.</rec>
+      </var>
+
+      <var set="12" lvl="1" vid="865907"
+           dsc="[nxArchive] Verify if the source file is unpacked while destination is a file and Force is set to true."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %destinationPath%;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Force:True;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The source file is unpacked successfully while destination is a file and Force is set to true.</rec>
+        <rec key="failedMsg">Fail to unpack a source file while destination is a file and Force is set to true.</rec>
+      </var>
+
+      <var set="12" lvl="1" vid="878420"
+           dsc="[nxArchive] Verify if unpack source file successfully when set 'Ensure' to 'Present'"
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Unpack source file successfully when set 'Ensure' to 'Present'.</rec>
+        <rec key="failedMsg">Fail to unpack source file when set 'Ensure' to 'Present'.</rec>
+      </var>
+
+      <var set="12" lvl="1" vid="878451"
+           dsc="[nxArchive] Verify if the source file is unpacked to destination path when set 'DependsOn'"
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;DependsOn:[nxFile]File;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The source file is unpacked to destination path when set 'DependsOn' successfully</rec>
+        <rec key="failedMsg">Fail to unpack the source file is unpacked to destination path when set 'DependsOn'.</rec>
+      </var>
+
+      <var set="12" lvl="2" vid="878470"
+           dsc="[nxArchive] Verify if the source file is unpacked normally when destination path is already exist."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;mkdir -p %destinationPath%;touch "%destinationPath%/test1.txt";touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n';ls -l "%destinationPath%/test1.txt"|wc -l |tr -d '\n';</rec>
+        <rec key="expectedValue">11</rec>
+        <rec key="successfulMsg">The source file is unpacked normally when destination path is already exist.</rec>
+        <rec key="failedMsg">Fail to unpack the source file when destination path is already exist.</rec>
+      </var>
+
+      <var set="12" lvl="2" vid="878421"
+           dsc="[nxArchive] Verify if didn't unpack the source file to destination path when set 'Ensure' to 'Absent'"
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Ensure:Absent;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% 2>/dev/null|grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Didn't unpack the source file to destination path when set 'Ensure' to 'Absent'.</rec>
+        <rec key="failedMsg">Unpack the source file to destination path even set 'Ensure' to 'Absent'.</rec>
+      </var>
+
+      <var set="12" lvl="2" vid="865906"
+           dsc="[nxArchive] Verify if error out while destination is a file and Force is set to false."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %destinationPath%;echo "testfile" > %destinationPath%;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Force:false;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out while destination is a file and Force is set to false.</rec>
+        <rec key="failedMsg">Didn't send error out while destination is a file and Force is set to false.</rec>
+      </var>
+
+      <var set="12" lvl="2" vid="865892"
+           dsc="[nxArchive] Verify if destination file is updated if Checksum is 'ctime' and the source is newer than destination file."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+        <rec key="newContent">ctime was changed.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;mkdir -p %destinationPath%;cp %filePath% %destinationPath%/;echo %newContent%> %filePath%;chmod a+x %filePath%; cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Checksum:ctime;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat "%destinationPath%/%fileName%"|grep -i "%newContent%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Destination file is updated if Checksum is 'ctime' and the source is newer than destination file.</rec>
+        <rec key="failedMsg">Destination file is not updated if Checksum is 'ctime' and the source is newer than destination file.</rec>
+      </var>
+
+      <var set="12" lvl="2" vid="865897"
+           dsc="[nxArchive] Verify if destination file is updated if Checksum is 'mtime' and the source is newer than destination file."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+        <rec key="newContent">ctime was changed.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;mkdir -p %destinationPath%;cp %filePath% %destinationPath%/;echo %newContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Checksum:mtime;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat "%destinationPath%/%fileName%"|grep -i "%newContent%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Destination file is updated if Checksum is 'mtime' and the source is newer than destination file.</rec>
+        <rec key="failedMsg">Destination file is not updated if Checksum is 'mtime' and the source is newer than destination file.</rec>
+      </var>
+
+      <var set="12" lvl="2" vid="865899"
+           dsc="[nxArchive] Verify if destination file is updated if Checksum is 'md5' and the source is other than destination file"
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+        <rec key="newContent">ctime was changed.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;mkdir -p %destinationPath%;cp %filePath% %destinationPath%/;echo %newContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Checksum:md5;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat "%destinationPath%/%fileName%"|grep -i "%newContent%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Destination file is updated if Checksum is 'md5' and the source is newer than destination file.</rec>
+        <rec key="failedMsg">Destination file is not updated if Checksum is 'md5' and the source is newer than destination file.</rec>
+      </var>
+
+      <var set="12" lvl="3" vid="865901"
+           dsc="[nxArchive] Verify if destination file isn't updated if Checksum is 'md5' and the source is the same as destination file."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+        <rec key="newContent">ctime was changed.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;mkdir -p %destinationPath%;cp %filePath% %destinationPath%/;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Checksum:md5;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat "%destinationPath%/%fileName%"|grep -i "%fileContent%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Destination file isn't updated if Checksum is 'md5' and the source is the same as destination file.</rec>
+        <rec key="failedMsg">Destination file is updated even Checksum is 'md5' and the source is the same as destination file.</rec>
+      </var>
+
+      <var set="12" lvl="3" vid="865902"
+           dsc="[nxArchive] Verify if error out when SourcePath doesn't exist."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+        <rec key="newContent">ctime was changed.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out when SourcePath doesn't exist.</rec>
+        <rec key="failedMsg">Didn't error out when SourcePath doesn't exist.</rec>
+      </var>
+
+      <var set="12" lvl="3" vid="865896"
+           dsc="[nxArchive] Verify if destination file isn't updated if Checksum is 'ctime' and the source is older than destination file"
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+        <rec key="newContent">ctime was changed</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo "%fileContent%" > %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;mkdir -p %destinationPath%;cp %filePath% %destinationPath%/;sleep 65;echo "%newContent%" > "%destinationPath%/%fileName%";chmod a+x "%destinationPath%/%fileName%";</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Checksum:ctime;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat "%destinationPath%/%fileName%"|grep -i "%newContent%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Destination file isn't updated if Checksum is 'ctime' and the source is older than destination file.</rec>
+        <rec key="failedMsg">Destination file updated if Checksum is 'ctime' and the source is older than destination file.</rec>
+      </var>
+
+      <var set="12" lvl="3" vid="865898"
+           dsc="[nxArchive] Verify if destination file isn't updated if Checksum is 'mtime' and the source is older than destination file"
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+        <rec key="newContent">ctime was changed</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent% > %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;sleep 65;echo %newContent% > %filePath%;mkdir -p %destinationPath%;cp %filePath% %destinationPath%/;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Checksum:mtime;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat "%destinationPath%/%fileName%"|grep -i "%newContent%" |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Destination file isn't updated if Checksum is 'mtime' and the source is older than destination file</rec>
+        <rec key="failedMsg">Destination file updated if Checksum is 'mtime' and the source is older than destination file.</rec>
+      </var>
+
+      <var set="12" lvl="2" vid="865904"
+           dsc="[nxArchive] Verify if error out while non-root user runs DSC operation to unpack a source file."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;</rec>
+        <rec key="psScript">%dscSender-nonRoot%</rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Send error out while non-root user runs DSC operation to unpack a source file.</rec>
+        <rec key="failedMsg">Didn't error out while non-root user runs DSC operation to unpack a source file.</rec>
+      </var>
+
+      <var set="12" lvl="2" vid="865905"
+           dsc="[nxArchive] Verify if error out while non-root user runs DSC operation to get dsc configuration."
+           cls="DSC.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;</rec>
+        <rec key="psScript">
+          %dscSender%
+          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
+          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+          Get-DscConfiguration -CimSession $demo1;
+        </rec>
+        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Send error out while non-root user runs DSC operation to get dsc configuration.</rec>
+        <rec key="failedMsg">Didn't error out while non-root user runs DSC operation to get dsc configuration.</rec>
+      </var>
+
     </section>
   </section>
 </varmap>
