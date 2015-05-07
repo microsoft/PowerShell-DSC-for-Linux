@@ -1,127 +1,50 @@
-/*============================================================================
- * Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
- *============================================================================
- */
 /* @migen@ */
-#include "PythonHelper.hpp"
-#include <MI.h>
 #include "MSFT_nxScriptResource.h"
 
+
+#include "debug_tags.hpp"
+#include "MI.h"
+#include "PythonProvider.hpp"
+
+
 #include <cstdlib>
-#include <string>
-#include <vector>
-#include <fstream>
-
-#include <stdlib.h>
-#include <stdarg.h>
-#include <ctime>
-#include <iostream>
 
 
-struct _MSFT_nxScriptResource_Self
+typedef struct _MSFT_nxScriptResource_Self : public scx::PythonProvider
 {
-public:
-    PyObjPtr pModule;
-    PyObjPtr pSetFn;
-    PyObjPtr pTestFn;
-    PyObjPtr pGetFn;
-
-    static int create (_MSFT_nxScriptResource_Self** const ppInstance);
-
-private:
-    /*ctor*/ _MSFT_nxScriptResource_Self (
-        PyObjPtr const& _pModule,
-        PyObjPtr const& _pSetFn,
-        PyObjPtr const& _pTestFn,
-        PyObjPtr const& _pGetFn)
-      : pModule (_pModule)
-      , pSetFn (_pSetFn)
-      , pTestFn (_pTestFn)
-      , pGetFn (_pGetFn)
+    /*ctor*/ _MSFT_nxScriptResource_Self ()
+        : scx::PythonProvider ("nxScript")
     {
         // empty
     }
+} MSFT_nxScriptResource_Self;
 
-};
-
-typedef _MSFT_nxScriptResource_Self MSFT_nxScriptResource_Self;
-
-
-
-/*static*/
-int
-_MSFT_nxScriptResource_Self::create (
-    _MSFT_nxScriptResource_Self** const ppInstance)
-{
-    int rval = EXIT_SUCCESS;
-    PyObjPtr pModule;
-    PyObjPtr pSetFn;
-    PyObjPtr pTestFn;
-    PyObjPtr pGetFn;
-    if (ppInstance &&
-        !*ppInstance)
-    {
-        if (EXIT_SUCCESS == (rval = initPython ("do'h", GetScriptPath().c_str())))
-        {
-            pModule = loadModule ("nxScript");
-            if (pModule)
-            {
-                pSetFn = loadFunctionFromModule (pModule, "Set_Marshall");
-                pTestFn = loadFunctionFromModule (pModule, "Test_Marshall");
-                pGetFn = loadFunctionFromModule (pModule, "Get_Marshall");
-                if (pSetFn && pTestFn && pGetFn)
-                {
-                    *ppInstance = new _MSFT_nxScriptResource_Self (
-                        pModule, pSetFn, pTestFn, pGetFn);
-                }
-                else
-                {
-                    rval = EXIT_FAILURE;
-                }
-            }
-            else
-            {
-                rval = EXIT_FAILURE;
-            }
-        }
-        else
-        {
-            rval = EXIT_FAILURE;
-        }
-    }
-    else
-    {
-        rval = EXIT_FAILURE;
-    }
-    return rval;
-}
-
-static const MI_Char* PassString(const MI_ConstStringField& field)
-{
-    if (field.exists == MI_TRUE)
-    {
-        return field.value;
-    }
-    else
-    {
-        return (const MI_Char*)"";
-    }
-}
 
 void MI_CALL MSFT_nxScriptResource_Load(
     _Outptr_result_maybenull_ MSFT_nxScriptResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
+    SCX_BOOKEND_EX ("Load", " name=\"nxScript\"");
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
-    if (EXIT_SUCCESS != MSFT_nxScriptResource_Self::create (self))
+    if (0 != self)
+    {
+        if (0 == *self)
+        {
+            *self = new MSFT_nxScriptResource_Self;
+            if (EXIT_SUCCESS != (*self)->init ())
+            {
+                delete *self;
+                *self = 0;
+                res = MI_RESULT_FAILED;
+            }
+        }
+    }
+    else
     {
         res = MI_RESULT_FAILED;
-    
     }
-
-
     MI_Context_PostResult(context, res);
 }
 
@@ -129,11 +52,11 @@ void MI_CALL MSFT_nxScriptResource_Unload(
     _In_opt_ MSFT_nxScriptResource_Self* self,
     _In_ MI_Context* context)
 {
+    SCX_BOOKEND_EX ("Unload", " name=\"nxScript\"");
     if (self)
     {
         delete self;
     }
-
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
@@ -220,44 +143,6 @@ void MI_CALL MSFT_nxScriptResource_DeleteInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-int SetElement(
-    MI_Instance* newInstance, 
-    char const * field,
-    std::string& newFieldVal,
-    MI_Type type)
-{
-    MI_Value value;
-    MI_Result r;
-
-    if (type == MI_STRING)
-    {
-        value.string = (MI_Char*)newFieldVal.c_str();
-        r = MI_Instance_SetElement(newInstance, field, &value, MI_STRING, 0);
-        if ( r != MI_RESULT_OK )
-        {
-            return -1;
-        }
-    }
-    else if (type == MI_DATETIME)
-    {
-        time_t time_in_seconds = atol(newFieldVal.c_str());
-        struct tm* time_in_tm = localtime(&time_in_seconds);
-        value.datetime.u.timestamp.year = time_in_tm->tm_year+1900;
-        value.datetime.u.timestamp.month = time_in_tm->tm_mon+1;
-        value.datetime.u.timestamp.day = time_in_tm->tm_mday;
-        value.datetime.u.timestamp.hour = time_in_tm->tm_hour;
-        value.datetime.u.timestamp.minute = time_in_tm->tm_min;
-        value.datetime.u.timestamp.second = time_in_tm->tm_sec;
-        value.datetime.u.timestamp.utc = -8*60;
-        r = MI_Instance_SetElement(newInstance, field, &value, MI_DATETIME, 0);
-        if ( r != MI_RESULT_OK )
-        {
-            return -1;
-        }
-    }
-    return 0;
-}
-
 void MI_CALL MSFT_nxScriptResource_Invoke_GetTargetResource(
     _In_opt_ MSFT_nxScriptResource_Self* self,
     _In_ MI_Context* context,
@@ -267,78 +152,38 @@ void MI_CALL MSFT_nxScriptResource_Invoke_GetTargetResource(
     _In_ const MSFT_nxScriptResource* instanceName,
     _In_opt_ const MSFT_nxScriptResource_GetTargetResource* in)
 {
-    std::cerr << "Get" << std::endl;
-
-    MI_Result r = MI_RESULT_OK;
-    MI_Boolean res = MI_TRUE;
-    MSFT_nxScriptResource_GetTargetResource out;
-    MI_Instance *newInstance;
-    MI_Value value;
-
-    r = MSFT_nxScriptResource_GetTargetResource_Construct(&out, context);
-    r = MSFT_nxScriptResource_GetTargetResource_Set_MIReturn(&out, 0);
-
-    const MSFT_nxScriptResource * script = in->InputResource.value;
-    r = MI_Instance_Clone(&script->__instance, &newInstance);
-
-
-    std::vector<std::string> ret_strings;
-    long exit_code = callPythonFunction(
-        ret_strings,
-        self->pGetFn,
-        5,
-        PassString(script->GetScript),
-        PassString(script->SetScript),
-        PassString(script->TestScript),
-        PassString(script->User),
-        PassString(script->Group));
-    
-    // Expecting 5+1 parameters in return
-    if (ret_strings.size() == (5+1) && exit_code == 0)
+    SCX_BOOKEND_EX ("Get", " name=\"nxScript\"");
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-        res = MI_TRUE;
+        MI_Instance* retInstance;
+        MI_Instance_Clone (&in->InputResource.value->__instance, &retInstance);
+        result = self->get (in->InputResource.value->__instance, context,
+                            retInstance);
+        if (MI_RESULT_OK == result)
+        {
+            SCX_BOOKEND_PRINT ("packing succeeded!");
+            MSFT_nxScriptResource_GetTargetResource out;
+            MSFT_nxScriptResource_GetTargetResource_Construct (&out, context);
+            MSFT_nxScriptResource_GetTargetResource_Set_MIReturn (&out, 0);
+            MI_Value value;
+            value.instance = retInstance;
+            MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
+                                    MI_INSTANCE, 0);
+            result = MSFT_nxScriptResource_GetTargetResource_Post (&out, context);
+            if (MI_RESULT_OK != result)
+            {
+                SCX_BOOKEND_PRINT ("post Failed");
+            }
+            MSFT_nxScriptResource_GetTargetResource_Destruct (&out);
+        }
+        else
+        {
+            SCX_BOOKEND_PRINT ("get FAILED");
+        }
+        MI_Instance_Delete (retInstance);
     }
-    else
-    {
-        MI_Context_PostResult(context, MI_RESULT_FAILED);
-        return;
-    }
-
-    if (SetElement(newInstance, "GetScript", ret_strings[0], MI_STRING)  != 0 ||
-        SetElement(newInstance, "SetScript", ret_strings[1], MI_STRING)  != 0 ||
-        SetElement(newInstance, "TestScript", ret_strings[2], MI_STRING) != 0 ||
-        SetElement(newInstance, "User", ret_strings[3], MI_STRING)       != 0 ||
-        SetElement(newInstance, "Group", ret_strings[4], MI_STRING)      != 0 ||
-        SetElement(newInstance, "Result", ret_strings[5], MI_STRING)     != 0)
-    {
-        MI_Context_PostResult(context, MI_RESULT_FAILED);
-        return;
-    }
-
-    value.instance = newInstance;
-    r = MI_Instance_SetElement(&out.__instance, "OutputResource", &value, MI_INSTANCE, 0);
-    if ( r != MI_RESULT_OK )
-    {
-        MI_Context_PostResult(context, r);
-        return;
-    }
-
-    MI_Instance_Delete(newInstance);
-    r = MSFT_nxScriptResource_GetTargetResource_Post(&out, context);
-    if ( r != MI_RESULT_OK )
-    {
-        MI_Context_PostResult(context, r);
-        return;
-    }
-
-    r = MSFT_nxScriptResource_GetTargetResource_Destruct(&out);
-    if ( r != MI_RESULT_OK )
-    {
-        MI_Context_PostResult(context, r);
-        return;
-    }
-
-    MI_Context_PostResult(context, MI_RESULT_OK);
+    MI_Context_PostResult (context, result);
 }
 
 void MI_CALL MSFT_nxScriptResource_Invoke_TestTargetResource(
@@ -350,45 +195,23 @@ void MI_CALL MSFT_nxScriptResource_Invoke_TestTargetResource(
     _In_ const MSFT_nxScriptResource* instanceName,
     _In_opt_ const MSFT_nxScriptResource_TestTargetResource* in)
 {
-    std::cerr << "Test" << std::endl;
-
-    if (!self)
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-        MI_Context_PostResult(context, MI_RESULT_OK);
-        return;
+        MI_Boolean testResult = MI_FALSE;
+        result = self->test (in->InputResource.value->__instance, &testResult);
+        if (MI_RESULT_OK == result)
+        {
+            MSFT_nxScriptResource_TestTargetResource out;
+            MSFT_nxScriptResource_TestTargetResource_Construct (&out, context);
+            MSFT_nxScriptResource_TestTargetResource_Set_Result (
+                &out, testResult);
+            MSFT_nxScriptResource_TestTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxScriptResource_TestTargetResource_Post (&out, context);
+            MSFT_nxScriptResource_TestTargetResource_Destruct (&out);
+        }
     }
-
-    MI_Result r = MI_RESULT_OK;
-    MI_Boolean res = MI_TRUE;
-    MSFT_nxScriptResource_TestTargetResource out;
-    const MSFT_nxScriptResource * script = in->InputResource.value;
-
-    std::vector<std::string> ret_strings;
-    long exit_code = callPythonFunction(
-        ret_strings,
-        self->pTestFn,
-        5,
-        PassString(script->GetScript),
-        PassString(script->SetScript),
-        PassString(script->TestScript),
-        PassString(script->User),
-        PassString(script->Group));
-    
-    if (ret_strings.size() == 0 && exit_code == 0)
-    {
-        res = MI_TRUE;
-    }
-    else
-    {
-        res = MI_FALSE;
-    }
-
-    r = MSFT_nxScriptResource_TestTargetResource_Construct(&out, context);
-    r = MSFT_nxScriptResource_TestTargetResource_Set_Result(&out, res);
-    r = MSFT_nxScriptResource_TestTargetResource_Set_MIReturn(&out, 0);
-    r = MSFT_nxScriptResource_TestTargetResource_Post(&out, context);
-    r = MSFT_nxScriptResource_TestTargetResource_Destruct(&out);
-    MI_Context_PostResult(context, MI_RESULT_OK);
+    MI_Context_PostResult (context, result);
 }
 
 void MI_CALL MSFT_nxScriptResource_Invoke_SetTargetResource(
@@ -400,42 +223,21 @@ void MI_CALL MSFT_nxScriptResource_Invoke_SetTargetResource(
     _In_ const MSFT_nxScriptResource* instanceName,
     _In_opt_ const MSFT_nxScriptResource_SetTargetResource* in)
 {
-    std::cerr << "Set" << std::endl;
-
-    if (!self)
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
     {
-        MI_Context_PostResult(context, MI_RESULT_OK);
-        return;
+        MI_Result setResult = MI_RESULT_FAILED;
+        result = self->set (in->InputResource.value->__instance, &setResult);
+        if (MI_RESULT_OK == result)
+        {
+            result = setResult;
+            MSFT_nxScriptResource_SetTargetResource out;
+            MSFT_nxScriptResource_SetTargetResource_Construct (&out, context);
+            MSFT_nxScriptResource_SetTargetResource_Set_MIReturn (
+                &out, setResult);
+            MSFT_nxScriptResource_SetTargetResource_Post (&out, context);
+            MSFT_nxScriptResource_SetTargetResource_Destruct (&out);
+        }
     }
-
-    MI_Result r = MI_RESULT_OK;
-    MSFT_nxScriptResource_SetTargetResource out;
-    const MSFT_nxScriptResource * script = in->InputResource.value;
-    MI_Result res = MI_RESULT_OK;
-
-    std::vector<std::string> ret_strings;
-    long exit_code = callPythonFunction(
-        ret_strings,
-        self->pSetFn,
-        5,
-        PassString(script->GetScript),
-        PassString(script->SetScript),
-        PassString(script->TestScript),
-        PassString(script->User),
-        PassString(script->Group));
-
-    if (ret_strings.size() == 0 && exit_code == 0)
-    {
-        res = MI_RESULT_OK;
-    }
-    else
-    {
-        res = MI_RESULT_FAILED;
-    }
-
-    r = MSFT_nxScriptResource_SetTargetResource_Construct(&out, context);
-    r = MSFT_nxScriptResource_SetTargetResource_Set_MIReturn(&out, res);
-    r = MSFT_nxScriptResource_SetTargetResource_Post(&out, context);
-    r = MSFT_nxScriptResource_SetTargetResource_Destruct(&out);
-    MI_Context_PostResult(context, res);
+    MI_Context_PostResult (context, result);
 }

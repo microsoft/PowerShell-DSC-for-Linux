@@ -107,6 +107,38 @@ MI_Result ValidateKeyValuePairClass(_In_ MI_Class *configDocumentClass,
 MI_Result ValidateDocumentInstance(_In_ MI_Instance *docInstance,
                                     _Outptr_result_maybenull_ MI_Instance **extendedError );
 
+//Validation function for all those classes that inherit directly or indirectly from the metaconfigurationresource base class
+MI_Result ValidateClassPropertiesForMetaConfResourceChildren(_In_ MI_Class *configDocumentClass,
+                                                             _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+/*Function to check if the configurationsource exists as a defined download manatger*/
+MI_Result ValidatePartialMeta_ConfigDownloadMgr(_In_ MI_Instance* partialInstance,
+                                                _In_ MI_Instance* metaConfInstance,
+                                                _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+MI_Result ValidatePartialMeta_ExclusiveResources(_In_ MI_Instance* partialInstance,
+                                                 _Inout_ MI_StringA* arrayOutput,
+                                                 _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+MI_Result ValidatePartialConfigMetaConfDefinition(_In_ MI_Instance* metaConfigInstance,
+                                                  _Outptr_result_maybenull_ MI_Instance** cimErrorDetails);
+
+MI_Result ValidateResourceObeysExclusiveResourcesRule(_In_z_ MI_Char* exclusiveResourceString,
+                                                      _In_ MI_Instance* resourceInstance,
+                                                      _Inout_ MI_Boolean * obeysExclusiveResources,
+                                                      _Outptr_result_maybenull_ MI_Instance** cimErrorDetails);
+
+MI_Result ValidateConfigurationDownloadManagerProperties(_In_ MI_Class *configDocumentClass, 
+                                                         _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+MI_Result ValidateMetaConfResourceProperties(_In_ MI_Class *configDocumentClass, 
+                                             _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+MI_Result ValidateWebDownloadManagerProperties(_In_ MI_Class *configDocumentClass, 
+                                             _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+
+
 typedef struct _InfraSchemaValidator
 {
     const MI_Char *wszClassName;

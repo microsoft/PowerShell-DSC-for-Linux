@@ -60,6 +60,11 @@ MI_Boolean g_hPSInfraModuleHandleInitialized;
 
 #include "LocalConfigurationManager.h"
 
+// TODO: Temporary workaround until we can reload OMI provider registration without restarting omi.
+void ReloadOMI()
+{
+    system(OMI_RELOAD_COMMAND);
+}
 
 void UnloadFromProvider(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
@@ -518,7 +523,8 @@ void Invoke_ApplyConfiguration(
     MI_Uint32 taskMode = TASK_AUTO;
     MI_Value value;
     MI_Uint32 flags = 0;
-	MI_Instance *metaConfigInstance = NULL;
+    MI_Instance *metaConfigInstance = NULL;
+    MI_Boolean restartOMI = MI_FALSE;
 
     if (in->force.exists && in->force.value == MI_TRUE)
     {      
@@ -598,40 +604,44 @@ void Invoke_ApplyConfiguration(
         value.string = METADATA_REFRESHMODE_PUSH;
     }
 
-	// if pending configuration exists
-	if (File_ExistT(GetPendingConfigFileName()) != -1)
-	{
-		if (taskMode == TASK_AUTO)
-		{
-			GetCimMIError(MI_RESULT_ALREADY_EXISTS, &cimErrorDetails, ID_LCMHELPER_OLDCONFPENDING_ERROR);
-			goto ExitWithError;
-		}
-	}
-	else
-	{
-		// no current configuration exists
-		if (File_ExistT(GetCurrentConfigFileName()) == -1)
-		{
-			if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PUSH) == 0)
-			{
-				GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
-				goto ExitWithError;
-			}
-		}
-	}
+        // if pending configuration exists
+        if (File_ExistT(GetPendingConfigFileName()) != -1)
+        {
+                if (taskMode == TASK_AUTO)
+                {
+                        GetCimMIError(MI_RESULT_ALREADY_EXISTS, &cimErrorDetails, ID_LCMHELPER_OLDCONFPENDING_ERROR);
+                        goto ExitWithError;
+                }
+        }
+        else
+        {
+                // no current configuration exists
+                if (File_ExistT(GetCurrentConfigFileName()) == -1)
+                {
+                        if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PUSH) == 0)
+                        {
+                                GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
+                                goto ExitWithError;
+                        }
+                }
+        }
 
     if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PULL) == 0)
     {
-		miResult = DoPullServerRefresh(context, &cimErrorDetails);
-		if (miResult != MI_RESULT_OK)
-		{
-			SetThreadToken(NULL, m_clientThreadToken);
-			CloseHandle(m_clientThreadToken);
-			MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-			MI_Context_PostCimError(context, cimErrorDetails);
-			MI_Instance_Delete(cimErrorDetails);
-			goto ExitWithError;
-		}
+                miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
+                if (miResult != MI_RESULT_OK)
+                {
+                    if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
+                    {
+                        restartOMI = MI_TRUE;
+                    }
+                    SetThreadToken(NULL, m_clientThreadToken);
+                    CloseHandle(m_clientThreadToken);
+                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);
+                    MI_Context_PostCimError(context, cimErrorDetails);
+                    MI_Instance_Delete(cimErrorDetails);
+                    goto ExitWithError;
+                }
     }
     miResult = CallConsistencyEngine(context, TASK_REGULAR, &cimErrorDetails); 
     if (miResult != MI_RESULT_OK)
@@ -691,6 +701,10 @@ ExitWithError:
     MI_PostCimError(context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     ResetJobId();
+    if (restartOMI == MI_TRUE)
+    {
+        ReloadOMI();
+    }
 }
 
 void Invoke_SendMetaConfigurationApply(
@@ -813,7 +827,7 @@ void Invoke_GetMetaConfiguration(
     _In_opt_ const MSFT_DSCLocalConfigurationManager_GetMetaConfiguration* in)
 {
     MI_Result miResult;
-	MSFT_DSCMetaConfiguration * metaConfigInstance;
+        MSFT_DSCMetaConfiguration * metaConfigInstance;
     MI_Instance *cimErrorDetails = NULL;
     HANDLE m_clientThreadToken;
     MSFT_DSCLocalConfigurationManager_GetMetaConfiguration outputObject;       
@@ -929,17 +943,17 @@ void Invoke_GetMetaConfiguration(
     }
 
     CloseHandle(m_clientThreadToken);
-	if (MetaMofCorrupted == MI_TRUE)
-	{
-		Intlstr pTempStr = Intlstr_Null;
-		GetResourceString(ID_LCMHELPER_METAMOFCORRUPTED, &pTempStr);
-		MI_Context_WriteWarning(context, pTempStr.str);
-		if (pTempStr.str)
-		{
-			Intlstr_Free(pTempStr);
-		}
-		MetaMofCorrupted = MI_FALSE;
-	}
+        if (MetaMofCorrupted == MI_TRUE)
+        {
+                Intlstr pTempStr = Intlstr_Null;
+                GetResourceString(ID_LCMHELPER_METAMOFCORRUPTED, &pTempStr);
+                MI_Context_WriteWarning(context, pTempStr.str);
+                if (pTempStr.str)
+                {
+                        Intlstr_Free(pTempStr);
+                }
+                MetaMofCorrupted = MI_FALSE;
+        }
     EndLcmOperation();
     MI_Context_PostResult(context, MI_RESULT_OK);
 
@@ -1239,9 +1253,9 @@ void Invoke_PerformRequiredConfigurationChecks(
     HANDLE m_clientThreadToken;
     MI_Instance *cimErrorDetails = NULL;
     MSFT_DSCMetaConfiguration *metaConfigInstance = NULL;
-    MI_Boolean bRunConsistencyCheck = MI_FALSE;
     MI_Value value;
     MI_Uint32 flags = 0;
+    MI_Boolean restartOMI = MI_FALSE;
 
     if (!OpenThreadToken(GetCurrentThread(), TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_DUPLICATE, TRUE, &m_clientThreadToken))
     {
@@ -1334,20 +1348,13 @@ void Invoke_PerformRequiredConfigurationChecks(
 
     if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PULL) == 0)
     {
-        miResult = DoPullServerRefresh(context, &cimErrorDetails);
+        miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
-            SetThreadToken(NULL, m_clientThreadToken);
-            CloseHandle(m_clientThreadToken);
-            MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-            MI_Context_PostCimError(context, cimErrorDetails);
-            MI_Instance_Delete(cimErrorDetails);
-            goto ExitSimple;
-        }
-
-        miResult = TimeToRunConsistencyCheck(&bRunConsistencyCheck, &cimErrorDetails);
-        if (miResult != MI_RESULT_OK)
-        {
+            if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
+            {
+                restartOMI = MI_TRUE;
+            }
             SetThreadToken(NULL, m_clientThreadToken);
             CloseHandle(m_clientThreadToken);
             MI_Instance_Delete((MI_Instance *)metaConfigInstance);
@@ -1357,18 +1364,15 @@ void Invoke_PerformRequiredConfigurationChecks(
         }
     }    
 
-    if (bRunConsistencyCheck == MI_TRUE || Tcscasecmp(value.string , METADATA_REFRESHMODE_PUSH) == 0)
+    miResult = RunConsistencyEngine(context, in->Flags.value, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
     {
-        miResult = RunConsistencyEngine(context, in->Flags.value, &cimErrorDetails);
-        if (miResult != MI_RESULT_OK)
-        {
-            SetThreadToken(NULL, m_clientThreadToken);
-            CloseHandle(m_clientThreadToken);
-            MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-            MI_Context_PostCimError(context, cimErrorDetails);
-            MI_Instance_Delete(cimErrorDetails);
-            goto ExitSimple;
-        }
+        SetThreadToken(NULL, m_clientThreadToken);
+        CloseHandle(m_clientThreadToken);
+        MI_Instance_Delete((MI_Instance *)metaConfigInstance);
+        MI_Context_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        goto ExitSimple;
     }
 
     miResult = MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_Construct(&outputObject, context);
@@ -1414,6 +1418,10 @@ ExitSimple:
     // Debug log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();    
+    if (restartOMI == MI_TRUE)
+    {
+        ReloadOMI();
+    }
 }
 
 void Invoke_StopConfiguration(
@@ -2175,10 +2183,10 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
     MI_Result miResult = MI_RESULT_OK;
     MI_Instance *cimErrorDetails = NULL;
     MSFT_DSCMetaConfiguration *metaConfigInstance = NULL;
-    MI_Boolean bRunConsistencyCheck = MI_FALSE;
     MI_Value value;
     MI_Uint32 flags = 0;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*) param;
+    MI_Boolean restartOMI = MI_FALSE;
 
     if( args == NULL )
     {
@@ -2244,18 +2252,13 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
 
     if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PULL) == 0)
     {
-        miResult = DoPullServerRefresh(args->context, &cimErrorDetails);
+        miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
-            MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-            MI_Context_PostCimError(args->context, cimErrorDetails);
-            MI_Instance_Delete(cimErrorDetails);
-            goto ExitSimple;
-        }
-
-        miResult = TimeToRunConsistencyCheck(&bRunConsistencyCheck, &cimErrorDetails);
-        if (miResult != MI_RESULT_OK)
-        {
+            if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
+            {
+                restartOMI = MI_TRUE;
+            }
             MI_Instance_Delete((MI_Instance *)metaConfigInstance);
             MI_Context_PostCimError(args->context, cimErrorDetails);
             MI_Instance_Delete(cimErrorDetails);
@@ -2263,16 +2266,13 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
         }
     }    
 
-    if (bRunConsistencyCheck == MI_TRUE || Tcscasecmp(value.string , METADATA_REFRESHMODE_PUSH) == 0)
+    miResult = RunConsistencyEngine(args->context, args->flag, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
     {
-        miResult = RunConsistencyEngine(args->context, args->flag, &cimErrorDetails);
-        if (miResult != MI_RESULT_OK)
-        {
-            MI_Instance_Delete((MI_Instance *)metaConfigInstance);
-            MI_Context_PostCimError(args->context, cimErrorDetails);
-            MI_Instance_Delete(cimErrorDetails);
-            goto ExitSimple;
-        }
+        MI_Instance_Delete((MI_Instance *)metaConfigInstance);
+        MI_Context_PostCimError(args->context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        goto ExitSimple;
     }
 
     miResult = MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_Construct(&outputObject, args->context);
@@ -2304,6 +2304,10 @@ ExitSimple:
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();     
     PAL_Free(args);
+    if (restartOMI == MI_TRUE)
+    {
+        ReloadOMI();
+    }
     return 0;
 }
 

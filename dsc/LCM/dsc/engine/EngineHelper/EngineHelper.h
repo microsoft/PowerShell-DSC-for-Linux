@@ -63,6 +63,22 @@ void GetResourceString4Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
                _In_z_ const MI_Char * param2, _In_z_ const MI_Char * param3,  _In_z_ const MI_Char * param4, _Inout_ Intlstr *resStr);
 
 
+//Function to write a warning with message iD that requires 1 parameter of type string
+void DSC_WriteWarning1Param(_In_ MI_Context* context,
+    _In_ MI_Uint32 messageID,
+    _In_z_ MI_Char* param1);
+
+
+void DSC_WriteWarning2Param(_In_ MI_Context* context,
+    _In_ MI_Uint32 messageID,
+    _In_z_ MI_Char* param1,
+    _In_z_ MI_Char* param2);
+
+//Function to write a warning from the message trapped in an error.
+void DSC_WriteWarningFromError1Param(_In_ MI_Context* context,
+    _In_ MI_Instance ** cimErrorDetails,
+    _In_ MI_Uint32 messageID,
+    _In_z_ MI_Char* param1);
 
 
 

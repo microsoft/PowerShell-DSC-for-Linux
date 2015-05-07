@@ -6,10 +6,11 @@ LIBRARY = ConfigurationManager
 
 SOURCES = \
 	BeginEndLcmOperation.c \
+	hashmap.c \
 	LocalConfigManagerHelper.c \
 	LocalConfigurationManager.c \
         MSFT_DSCLocalConfigurationManager.c \
-		OMI_LocalConfigManagerHelper.c \
+	OMI_LocalConfigManagerHelper.c \
         omi_schema.c 
 
 INCLUDES = \

@@ -42,6 +42,121 @@
 
 volatile MI_Operation *g_CurrentWmiv2Operation = NULL;
 
+MI_Result InitResourceErrorList(ResourceErrorList * resourceErrorList)
+{
+    if (resourceErrorList == NULL)
+    {
+        return MI_RESULT_FAILED;
+    }
+    resourceErrorList->first = NULL;
+    resourceErrorList->last = NULL;
+    return MI_RESULT_OK;
+}
+
+MI_Result AddToResourceErrorList(ResourceErrorList * resourceErrorList, const char * resourceID)
+{
+    ResourceError * current;
+    size_t length = 0;
+    if (resourceID == NULL || resourceErrorList == NULL)
+    {
+        return MI_RESULT_FAILED;
+    }
+
+    length = strlen(resourceID);
+
+    if (resourceErrorList->first == NULL)
+    {
+        resourceErrorList->first = (ResourceError*)calloc(1, sizeof(ResourceError));
+        current = resourceErrorList->first;
+        resourceErrorList->last = current;
+    }
+    else
+    {
+        current = (ResourceError*)calloc(1, sizeof(ResourceError));
+        resourceErrorList->last->next = current;
+        resourceErrorList->last = current;
+    }
+
+    current->next = NULL;
+    current->resourceID = (char *)calloc(length + 1, sizeof(char));
+    strncpy(current->resourceID, resourceID, length);
+    return MI_RESULT_OK;
+}
+
+char * BuildStringResourceErrorList(ResourceErrorList * resourceErrorList)
+{
+    char * outstring;
+    const char * separator = ", ";
+    const size_t separator_length = strlen(separator);
+    size_t current_length;
+    size_t added_length;
+    ResourceError* current;
+
+    if (resourceErrorList == NULL)
+    {
+        return NULL;
+    }
+
+    outstring = (char *) calloc(1, sizeof(char));
+    current_length = 0;
+    current = resourceErrorList->first;
+
+    while (current != NULL)
+    {
+        if (current->resourceID == NULL)
+        {
+            current = current->next;
+        }
+        
+        added_length = strlen(current->resourceID);
+        if (current->next != NULL)
+        {
+            outstring = (char *) realloc(outstring, current_length + added_length + separator_length + 1);
+            strncpy(outstring + current_length, current->resourceID, added_length);
+            strncpy(outstring + current_length + added_length, separator, separator_length);
+            current_length += added_length + separator_length;
+        }
+        else
+        {
+            outstring = (char *) realloc(outstring, current_length + added_length + 1);
+            strncpy(outstring + current_length, current->resourceID, added_length);
+            current_length += added_length;
+        }
+
+        outstring[current_length] = '\0';
+            
+        current = current->next;
+    }
+
+    return outstring;
+
+}
+
+MI_Result CleanupResourceErrorList(ResourceErrorList * resourceErrorList)
+{
+    ResourceError * current;
+    ResourceError * next;
+    if (resourceErrorList == NULL)
+    {
+        return MI_RESULT_FAILED;
+    }
+
+    current = resourceErrorList->first;
+    
+    while (current != NULL)
+    {
+        next = current->next;
+        if (current->resourceID)
+        {
+            free(current->resourceID);
+        }
+        free(current);
+        current = next;
+    }
+
+    return MI_RESULT_OK;
+}
+
 MI_Result GetDocumentEncryptionSetting( _In_ MI_Instance *documentIns, 
                                         _Inout_ MI_Boolean *bEncryptionEnabled,
                                         _Outptr_result_maybenull_z_ MI_Char **certificateid,
@@ -96,76 +211,6 @@ MI_Result GetDocumentEncryptionSetting( _In_ MI_Instance *documentIns,
 
     // Lack of a value in the document or an invalid setting doesn't stop processing.
     return MI_RESULT_OK;
-}
-
-MI_Result DecryptPasswords( _In_z_ MI_Char *certificateid,
-                            _In_ MI_Instance* instance,
-                            _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r = MI_RESULT_OK;
-    MI_Uint32 yCount = 0;
-
-    if (instance == NULL || certificateid == NULL || extendedError == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
-    }
-
-    *extendedError = NULL;     
-
-    for (yCount = 0 ; yCount < instance->classDecl->numProperties; yCount++)            
-    {
-        const MI_PropertyDecl * miProp = instance->classDecl->properties[yCount];
-        if( miProp->className != NULL && Tcscasecmp(miProp->className, MSFT_BASECREDENTIAL_CLASSNAME) == 0)
-        {
-            MI_Value credentialInstance;
-            MI_Type type;
-            MI_Uint32 flags;
-            r = MI_Instance_GetElement(instance,  miProp->name, &credentialInstance, &type, &flags, NULL);
-            if (r != MI_RESULT_OK)
-            {                        
-                return GetCimMIError(r, extendedError, ID_MODMAN_GETELEMENT_FAILED);
-            }   
-            if( (type == MI_INSTANCE ) && !( flags & MI_FLAG_NULL) && credentialInstance.instance != NULL)
-            {
-                const MI_Char *password = NULL;
-                        
-                MI_Value value;
-                MI_Value result;
-
-                r = MI_Instance_GetElement(credentialInstance.instance,  MSFT_Credential_Password, &value, NULL, &flags, NULL);
-                if (r != MI_RESULT_OK)
-                {
-                    return GetCimMIError(r, extendedError, ID_MODMAN_GETELEMENT_FAILED);
-                }
-                if( !(flags & MI_FLAG_NULL))
-                {
-                    password = value.string;
-                    r = Decrypt(certificateid, password, &result.string, extendedError);
-                    if (r != MI_RESULT_OK)
-                    {
-                        return r;
-                    }
-
-                    r = MI_Instance_SetElement(credentialInstance.instance,  MSFT_Credential_Password, &result, MI_STRING, 0);
-                    if (r != MI_RESULT_OK)
-                    {
-                        DSC_free(result.string);
-                        return GetCimMIError(r, extendedError, ID_CA_CRYPTO_DECRYPTION_FAILED);
-                    }
-
-                    r = MI_Instance_SetElement(instance,  miProp->name, &credentialInstance, MI_INSTANCE, 0);
-                    if (r != MI_RESULT_OK)
-                    {                        
-                        return GetCimMIError(r, extendedError, ID_MODMAN_GETELEMENT_FAILED);
-                    }   
-
-                    DSC_free(result.string);
-                }
-            }
-        }
-    }
-
-    return r;
 }
 
 MI_Result InitCAHandler(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
@@ -457,7 +502,7 @@ MI_Result DependentResourceFailed( _In_ MI_Uint32 index,
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
-    *extendedError = NULL;	// Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.	
+    *extendedError = NULL;      // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.       
     *bDependentFailed = MI_FALSE;
     if( index >= instanceA->size || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -541,7 +586,7 @@ MI_Result AddToList(_Inout_ ExecutionOrderContainer *container,
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
-    *extendedError = NULL;	// Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.	
+    *extendedError = NULL;      // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.       
         
     for( xCount = 0; xCount < container->executionListSize; xCount++)
     {
@@ -565,14 +610,15 @@ MI_Result AddToList(_Inout_ ExecutionOrderContainer *container,
 
 
 MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,  
-                                  _In_ ModuleManager *moduleManager,
-                                  _In_ MI_InstanceA * instanceA,
-                                  _In_ MI_Session *miSession,
-                                  _In_ ExecutionOrderContainer *executionOrder,
-                                  _In_ MI_Uint32 flags,
-                                  _In_ MI_Instance *documentIns,                                  
-                                  _Inout_ MI_Uint32 *resultStatus,
-                                  _Outptr_result_maybenull_ MI_Instance **extendedError)
+                              _In_ ModuleManager *moduleManager,
+                              _In_ MI_InstanceA * instanceA,
+                              _In_ MI_Session *miSession,
+                              _In_ ExecutionOrderContainer *executionOrder,
+                              _In_ MI_Uint32 flags,
+                              _In_ MI_Instance *documentIns,                                  
+                              _Inout_ MI_Uint32 *resultStatus,
+                              _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
+                              _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Uint32 xCount = 0;
     MI_Uint32 index = 0;
@@ -596,9 +642,9 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
  
     providerContext.lcmProviderContext = lcmContext;
-
+    
     r = GetDocumentEncryptionSetting(documentIns, &bEncryptionEnabled, &certificateid, extendedError);
-    if( r != MI_RESULT_OK )
+    if (r != MI_RESULT_OK)
     {
         return r;
     }
@@ -677,22 +723,6 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
             return r;
         }        
 
-        if (bEncryptionEnabled == MI_TRUE && certificateid != NULL)
-        {
-            /*Decrypt passwords if necessary */
-            r = DecryptPasswords(certificateid, instanceA->data[index], extendedError);
-            if (r != MI_RESULT_OK)
-            {                        
-                if(certificateid != NULL)
-                {
-                    DSC_free(certificateid);
-                    certificateid = NULL;
-                }
-                MI_Instance_Delete(filteredInstance);
-                return r;
-            }
-        }
-
         /*Get provider compatible instance*/
         r = moduleManager->ft->GetProviderCompatibleInstance(moduleManager, instanceA->data[index], &filteredInstance, extendedError);
         if (r != MI_RESULT_OK)
@@ -707,7 +737,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
 
         /* Move the resource to desired state.*/
         canceled = MI_FALSE;
-        r = MoveToDesiredState(&providerContext, moduleLoader->application, miSession, filteredInstance, regInstance, flags, resultStatus, &canceled, extendedError);
+        r = MoveToDesiredState(&providerContext, moduleLoader->application, miSession, filteredInstance, regInstance, flags, resultStatus, &canceled, resourceErrorList, extendedError);
         MI_Instance_Delete(filteredInstance);
         filteredInstance = NULL;
         
@@ -750,13 +780,12 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
                if( intlstr.str)
                    Intlstr_Free(intlstr);
 
-
             //send the error to WriteError stream.
             LCM_WriteError( lcmContext, *extendedError);
 
             // we need to continue moving other resources to their desired state.
             finalr = r;
-            if(extendedError)
+            if (extendedError)
             {
                 if(certificateid != NULL)
                 {
@@ -767,6 +796,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
                 MI_Instance_Delete(*extendedError);
                 *extendedError = NULL;
             }
+
             continue;
         }
         // Success Case
@@ -918,6 +948,8 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
     if( r != MI_RESULT_OK)
     {
         CleanUpGetCache(outInstances);
+        DSC_free(outInstances->data);
+        outInstances->size = 0;
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
@@ -931,31 +963,19 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
         if( r != MI_RESULT_OK)
         {
             CleanUpGetCache(outInstances);
+            DSC_free(outInstances->data);
+            outInstances->size = 0;
             MI_Session_Close(&miSession, NULL, NULL);
             return r;
         }        
-
-        if (bEncryptionEnabled == MI_TRUE && certificateid != NULL)
-        {
-            /*Decrypt passwords if necessary */
-            r = DecryptPasswords(certificateid, instanceA->data[index], extendedError);
-            if (r != MI_RESULT_OK)
-            {                        
-                if(certificateid != NULL)
-                {
-                    DSC_free(certificateid);
-                    certificateid = NULL;
-                }
-                MI_Instance_Delete(filteredInstance);
-                return r;
-            }
-        }
 
         /*Get provider compatible instance*/
         r = moduleManager->ft->GetProviderCompatibleInstance(moduleManager, instanceA->data[xCount], &filteredInstance, extendedError);
         if( r != MI_RESULT_OK)
         {
-            CleanUpGetCache(outInstances);           
+            CleanUpGetCache(outInstances);     
+            DSC_free(outInstances->data);
+            outInstances->size = 0;      
             MI_Session_Close(&miSession, NULL, NULL);            
             return r;
         }
@@ -981,7 +1001,9 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
             if( intlstr.str)
                 Intlstr_Free(intlstr);   
 
-            CleanUpGetCache(outInstances);           
+            CleanUpGetCache(outInstances);     
+            DSC_free(outInstances->data);
+            outInstances->size = 0;      
             MI_Session_Close(&miSession, NULL, NULL);            
             return r;
         }
@@ -1006,6 +1028,8 @@ MI_Result MI_CALL SendConfigurationApply( _In_ LCMProviderContext *lcmContext,
     ModuleLoaderObject *moduleLoader = NULL;
     MI_Session miSession = MI_SESSION_NULL;
     ExecutionOrderContainer executionContainer = {0};
+    ResourceErrorList resourceErrorList;
+    char * resourceErrorString;
     DSC_EventWriteMessageParsingConfiguration();
     DSC_EventWriteEngineMethodParameters(__WFUNCTION__,documentIns->classDecl->name,_STRINGEMPTY_,flags,lcmContext->executionMode,documentIns->nameSpace);
     
@@ -1045,11 +1069,26 @@ MI_Result MI_CALL SendConfigurationApply( _In_ LCMProviderContext *lcmContext,
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
-
+    InitResourceErrorList(&resourceErrorList);
     /*execute the list in sequence.*/
     r = SetResourcesInOrder(lcmContext, moduleManager, instanceA, &miSession, & executionContainer, 
-                            flags, documentIns, resultStatus, extendedError);
+                            flags, documentIns, resultStatus, &resourceErrorList, extendedError);
 
+    if (resourceErrorList.first != NULL)
+    {
+        resourceErrorString = BuildStringResourceErrorList(&resourceErrorList);
+        if (resourceErrorString != NULL)
+        {
+            if(*extendedError != NULL)
+            {
+                MI_Instance_Delete(*extendedError);
+            }
+            r = GetCimMIError1Param(r, extendedError, ID_APPLYCONFIG_RESOURCEERRORLIST, resourceErrorString);
+            free(resourceErrorString);
+        }
+    }
+
+    CleanupResourceErrorList(&resourceErrorList);
     if( r != MI_RESULT_OK )
     {
         FreeExecutionOrderContainer(&executionContainer);            
@@ -1101,6 +1140,7 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
                              _In_ MI_Uint32 flags,
                              _Inout_ MI_Uint32 *resultStatus,
                              _Inout_ MI_Boolean *canceled,
+                             _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                              _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     DSC_EventWriteMessageMoveResourceToDesired(provContext->resourceId,instance->classDecl->name);
@@ -1114,7 +1154,7 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
             SQMLogResourceCountData(instance->classDecl->name,1);
         }
 
-        return Exec_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, canceled, extendedError);
+        return Exec_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, canceled, resourceErrorList, extendedError);
     }
     
 #if defined(_MSC_VER)
@@ -1143,6 +1183,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
                              _In_ MI_Uint32 flags,
                              _Inout_ MI_Uint32 *resultStatus,
                              _Inout_ MI_Boolean* canceled,
+                             _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                              _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;  
@@ -1336,6 +1377,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         {
             MI_Instance_Delete(params);            
             MI_OperationOptions_Delete(&sessionOptions);
+            AddToResourceErrorList(resourceErrorList, provContext->resourceId);
             return r;
         }
 
@@ -1413,6 +1455,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         if (r != MI_RESULT_OK)
         {
             MI_OperationOptions_Delete(&sessionOptions);
+            AddToResourceErrorList(resourceErrorList, provContext->resourceId);
             return r;
         }
 

@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxScriptResource
+HOSTING=@requestor@
+CLASS=MSFT_nxScriptResource:OMI_BaseResource

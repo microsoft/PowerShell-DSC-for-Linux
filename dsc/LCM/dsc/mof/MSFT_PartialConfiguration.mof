@@ -1,0 +1,17 @@
+[Description(
+	"This represents a Partial Configuration class."),
+	ClassVersion("1.0.0")]
+class MSFT_PartialConfiguration : OMI_MetaConfigurationResource 
+{
+	[Description ("Description of the partial configuration" )  , Write] 
+	String Description ; 
+
+	[Description ("Defines the resources that are exclusive to this particular partial configuration" )  , Write] 
+	String ExclusiveResources[]; 
+ 
+	[Description ("The configuration repository source that this partial configuration will use" )  , Write] 
+	String ConfigurationSource; 
+
+	[Description ("A dependency variable indicating which partial configuration must be applied prior to this" )  , Write] 
+	String DependsOn[];        
+};

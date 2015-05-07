@@ -108,7 +108,7 @@
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_TRUE , ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_TRUE ,"Completed processing test operation. The operation returned True.")
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FALSE , ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FALSE ,"Completed processing test operation. The operation returned False.")
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FAIL , ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FAIL ,"Completed processing test operation. The operation failed.")
-	INTERNAL_Intlstr_Define0( ID_LCMHELPER_METAMOFCORRUPTED , ID_LCMHELPER_METAMOFCORRUPTED ,"Falling back to system defaults because the meta configuration mof has either been corrupted or an invalid mof property has been set.")
+    INTERNAL_Intlstr_Define0( ID_LCMHELPER_METAMOFCORRUPTED , ID_LCMHELPER_METAMOFCORRUPTED ,"Falling back to system defaults because the meta configuration mof has either been corrupted or an invalid mof property has been set.")
     INTERNAL_Intlstr_Define1(ID_LCMHELPER_OVERWROTE_USER_SPECIFIED_REFRESH_FREQUENCY ,
                      ID_LCMHELPER_OVERWROTE_USER_SPECIFIED_REFRESH_FREQUENCY ,
                      _In_z_ const PAL_Char*, firstString,
@@ -343,4 +343,188 @@
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_REBOOT_PENDINGEXIST, ID_LCM_WRITEMESSAGE_REBOOT_PENDINGEXIST, "A pending configuration exists after reboot. DSC will process a set request on the pending configuration.")
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_REBOOT_CURRENTEXIST, ID_LCM_WRITEMESSAGE_REBOOT_CURRENTEXIST, "Checking consistency for current configuration after reboot.")
     INTERNAL_Intlstr_Define0( ID_LCM_WRITEMESSAGE_ENDPROCESSREBOOT, ID_LCM_WRITEMESSAGE_ENDPROCESSREBOOT, "Reboot processing completed.")
+    INTERNAL_Intlstr_Define0( ID_PULL_CONFIGURATIONIDNOTSPECIFIED,ID_PULL_CONFIGURATIONIDNOTSPECIFIED,"The configuration ID is not in a valid format. Please supply the value in Guid format or specify 'UseSystemUUID' to automatically detect and use the target node's UUID.")
+    INTERNAL_Intlstr_Define1( ID_PULL_INVALIDCONFIGURATIONIDFORMAT ,
+                 ID_PULL_INVALIDCONFIGURATIONIDFORMAT ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "The configuration ID  " Intlstr_tstr(1) " is not in a valid format. Please use a configuration with name in a Guid format.")
+    INTERNAL_Intlstr_Define0( ID_PULL_INVALIDURLINCUSTOMDATA,ID_PULL_INVALIDURLINCUSTOMDATA, "Invalid URL specified in Local Configuration Manager settings.")
+    INTERNAL_Intlstr_Define1( ID_PULL_GETACTIONFAILED ,
+                 ID_PULL_GETACTIONFAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "A generic exception occured during while trying to get the action by Download Manager " Intlstr_tstr(1) ".")    
+    INTERNAL_Intlstr_Define2( ID_PULL_GETACTIONUNEXPECTEDRESULT ,
+                 ID_PULL_GETACTIONUNEXPECTEDRESULT ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "Unexpected result " Intlstr_tstr(1) " while trying to get the action from server "  Intlstr_tstr(2) ".")
+    INTERNAL_Intlstr_Define1( ID_PULL_UNSECURECONNECTIONNOTALLOWED ,
+                 ID_PULL_UNSECURECONNECTIONNOTALLOWED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Cannot download configuration from " Intlstr_tstr(1) ". Downloading over HTTP is not allowed. To ensure security while downloading configurations use an HTTPS address for the ServerUrl in the DownloadMangerCustomData of the LocalConfigurationManager resource for this device. If you understand the security implications of using HTTP and want to allow its use on this device, set AllowUnsecureConnection property to true in the DownloadMangerCustomData of the LocalConfigurationManager resource for this device.")                    
+    INTERNAL_Intlstr_Define1( ID_PULLGETCONFIGURATIONFAILED ,
+                 ID_PULLGETCONFIGURATIONFAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "A generic exception occured during while trying to get the configuration by Download Manager " Intlstr_tstr(1) ".")       
+    INTERNAL_Intlstr_Define1( ID_PULLGETCONFIGURATION_NULLCHECKSUMALGORITHM ,
+                 ID_PULLGETCONFIGURATION_NULLCHECKSUMALGORITHM ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Server " Intlstr_tstr(1) " returned an empty checksum algorithm.")   
+    INTERNAL_Intlstr_Define1( ID_PULLGETCONFIGURATION_NULLCHECKSUM ,
+                 ID_PULLGETCONFIGURATION_NULLCHECKSUM ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Server " Intlstr_tstr(1) " returned an empty checksum.")         
+    INTERNAL_Intlstr_Define2( ID_PULLGETCONFIGURATION_INVALIDCHECKSUMALGORITHM ,
+                 ID_PULLGETCONFIGURATION_INVALIDCHECKSUMALGORITHM ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "Server " Intlstr_tstr(1) " returned an unsupported "  Intlstr_tstr(2) " checksum algorithm.")       
+    INTERNAL_Intlstr_Define1( ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED ,
+                 ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Failed to save the configuration checksum in file " Intlstr_tstr(1) ".")     
+    INTERNAL_Intlstr_Define2( ID_PULLGETCONFIGURATION_BADRESPONSE ,
+                 ID_PULLGETCONFIGURATION_BADRESPONSE ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "The attempt to get the configuration from server " Intlstr_tstr(1) " returned unexpected response code "  Intlstr_tstr(2) ".")                 
+    INTERNAL_Intlstr_Define2( ID_PULLGETACTION_BADRESPONSE ,
+                 ID_PULLGETACTION_BADRESPONSE ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "The attempt to get the action from server " Intlstr_tstr(1) " returned unexpected response code "  Intlstr_tstr(2) ".")  
+    INTERNAL_Intlstr_Define1( ID_PULL_CONFIGURATIONSAVEFAILED ,
+                 ID_PULL_CONFIGURATIONSAVEFAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "Failed to save the configuration in file " Intlstr_tstr(1) ".")  
+    INTERNAL_Intlstr_Define0( ID_PULL_CHECKSUMMISMATCH,ID_PULL_CHECKSUMMISMATCH,"Checksum for configuration does not match.")                 
+    INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_DOCINS , ID_MODMAN_VALIDATE_DOCINS ,"There is no document instance inside the metaconfiguration. Please create the configuration with an instance of OMI_ConfigurationDocument and try again.")
+ INTERNAL_Intlstr_Define1( ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF ,
+                 ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF ,
+                 _In_z_ const PAL_Char*, firstString,
+                 "The partial configuration name " Intlstr_tstr(1) " present in the configuration document is invalid. Define a partial configuration inside the metaconfiguration with this partial configuration name in order to use it.")
+
+
+INTERNAL_Intlstr_Define0( ID_PULL_DSCCONF_NOTOPENABLE,
+			  ID_PULL_DSCCONF_NOTOPENABLE,
+                 	  "Unable to open file at " CONFIG_SYSCONFDIR "/dsc/dsc.conf")
+
+INTERNAL_Intlstr_Define1( ID_PULL_DSCCONF_NOTREADABLE,
+			  ID_PULL_DSCCONF_NOTREADABLE,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "Unable to read file at " CONFIG_SYSCONFDIR "/dsc/dsc.conf. "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define2( ID_PULL_DSCCONF_INVALIDVALUE,
+			  ID_PULL_DSCCONF_INVALIDVALUE,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Key " Intlstr_tstr(1) " in file " CONFIG_SYSCONFDIR "/dsc/dsc.conf has invalid value "  Intlstr_tstr(2) ".")
+
+INTERNAL_Intlstr_Define0( ID_PULL_SSLCIPHERLISTTOOLONG,
+			  ID_PULL_SSLCIPHERLISTTOOLONG,
+                 	  "sslcipherlist is too long in " CONFIG_SYSCONFDIR "/dsc/dsc.conf. It must be 4096 characters or less.")
+
+
+INTERNAL_Intlstr_Define0( ID_PULL_CABUNDLETOOLONG,
+			  ID_PULL_CABUNDLETOOLONG,
+                 	  "CURL_CA_BUNDLE is too long in " CONFIG_SYSCONFDIR "/dsc/dsc.conf. It must be 4096 characters or less.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CABUNDLENOTSUPPORTED,
+			  ID_PULL_CABUNDLENOTSUPPORTED,
+                 	  "The CURL_CA_BUNDLE option is not supported by the version of cURL installed to this system. Please either install a more recent version of libcurl, or disable the CURL_CA_BUNDLE option in " CONFIG_SYSCONFDIR "/dsc/dsc.conf.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_NOCONFIGDOWNLOADMANAGERS,
+			  ID_PULL_NOCONFIGDOWNLOADMANAGERS,
+                 	  "There are no ConfigurationDownloadManagers specified in the MetaConfiguration")
+
+INTERNAL_Intlstr_Define0( ID_PULL_TOOMANYCONFIGDOWNLOADMANAGERS,
+			  ID_PULL_TOOMANYCONFIGDOWNLOADMANAGERS,
+                 	  "There is more than one ConfigurationDownloadManager specified. You must use PartialConfigurations to have more than one ConfigurationDownloadManager.")
+
+INTERNAL_Intlstr_Define1( ID_PULL_NOSERVERURL,
+			  ID_PULL_NOSERVERURL,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "There is no ServerURL specified for the WebDownloadManager with ResourceID: "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CURLFAILEDTOINITIALIZE,
+			  ID_PULL_CURLFAILEDTOINITIALIZE,
+                 	  "cURL failed to initialize.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CURLFAILEDTOSETCIPHERLIST,
+			  ID_PULL_CURLFAILEDTOSETCIPHERLIST,
+                 	  "cURL failed to set the specified cipher list.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CURLFAILEDTOSETNOSSLV3,
+			  ID_PULL_CURLFAILEDTOSETNOSSLV3,
+                 	  "cURL failed to disable SSLv3 communication.")
+
+INTERNAL_Intlstr_Define2( ID_PULL_CURLPERFORMFAILED,
+			  ID_PULL_CURLPERFORMFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "cURL failed to perform on this base url: " Intlstr_tstr(1)  " with this error message: "  Intlstr_tstr(2) ".")
+
+INTERNAL_Intlstr_Define0( ID_PULL_INVALIDRESPONSEFROMSERVER,
+			  ID_PULL_INVALIDRESPONSEFROMSERVER,
+                 	  "Receieved an invalid response from server.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_INVALIDCHECKSUMALGORITHM,
+			  ID_PULL_INVALIDCHECKSUMALGORITHM,
+                 	  "Receieved an invalid checksum algorithm from server.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_NOPARTIALCONFIGS,
+			  ID_PULL_NOPARTIALCONFIGS,
+                 	  "Unable to find PartialConfigurations in the MetaConfiguration.")
+
+INTERNAL_Intlstr_Define1( ID_PULL_NOCONFIGURATIONSOURCE,
+			  ID_PULL_NOCONFIGURATIONSOURCE,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "No ConfigurationSource is specified for the PartialConfiguration: "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODE,
+			  ID_PULL_SERVERHTTPERRORCODE,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) ".")
+
+
+INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODEMODULE,
+			  ID_PULL_SERVERHTTPERRORCODEMODULE,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) " for a module.")
+
+INTERNAL_Intlstr_Define2( ID_PULL_INSTALLMODULEFAILED,
+ 			  ID_PULL_INSTALLMODULEFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Failed to install module: " Intlstr_tstr(1) " with version: "  Intlstr_tstr(2) ". Removed module.")
+
+INTERNAL_Intlstr_Define2( ID_PULL_INSTALLMODULEANDREMOVEMODULEFAILED,
+ 			  ID_PULL_INSTALLMODULEANDREMOVEMODULEFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Failed to install module: " Intlstr_tstr(1) " with version: "  Intlstr_tstr(2) ". Also failed to remove module.  DSC may need to be reinstalled.")
+
+INTERNAL_Intlstr_Define1( ID_PULL_INITIALIZEMODULETABLEFAILED,
+			  ID_PULL_INITIALIZEMODULETABLEFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "Failed to initialize the ModuleVersion table: "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define2( ID_PULL_INVALIDMODULEVERSION,
+     			  ID_PULL_INVALIDMODULEVERSION,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Invalid module version: "  Intlstr_tstr(1) " for module: " Intlstr_tstr(2)  ".")
+
+
+INTERNAL_Intlstr_Define0( ID_PULL_RESTARTINGSERVER,
+			  ID_PULL_RESTARTINGSERVER,
+                 	  "Due to a required resource module installation, DSC will be restarted. The configuration operation will resume after the restart")
+
+
+INTERNAL_Intlstr_Define1( ID_APPLYCONFIG_RESOURCEERRORLIST,
+			  ID_APPLYCONFIG_RESOURCEERRORLIST,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "Failed to apply the configuration.  These resources produced errors: "  Intlstr_tstr(1) ". Detailed error information can be found in the log file.")
 

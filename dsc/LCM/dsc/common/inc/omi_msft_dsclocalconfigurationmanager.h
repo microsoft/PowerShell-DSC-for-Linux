@@ -699,6 +699,7 @@ typedef struct _MSFT_DSCLocalConfigurationManager_ApplyConfiguration
 {
     MI_Instance __instance;
     /*OUT*/ MI_ConstUint32Field MIReturn;
+    /*IN*/ MI_ConstBooleanField force;
 }
 MSFT_DSCLocalConfigurationManager_ApplyConfiguration;
 
@@ -752,6 +753,22 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_ApplyConfiguration
     _Inout_ MSFT_DSCLocalConfigurationManager_ApplyConfiguration* self)
 {
     memset((void*)&self->MIReturn, 0, sizeof(self->MIReturn));
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_ApplyConfiguration_Set_force(
+    _Inout_ MSFT_DSCLocalConfigurationManager_ApplyConfiguration* self,
+    _In_ MI_Boolean x)
+{
+    ((MI_BooleanField*)&self->force)->value = x;
+    ((MI_BooleanField*)&self->force)->exists = 1;
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_ApplyConfiguration_Clear_force(
+    _Inout_ MSFT_DSCLocalConfigurationManager_ApplyConfiguration* self)
+{
+    memset((void*)&self->force, 0, sizeof(self->force));
     return MI_RESULT_OK;
 }
 

@@ -165,6 +165,29 @@ int UCS2ToAscii( _In_z_ const wchar_t *input,
 }
 
 
+int AsciiToUCS2(_In_z_ char *input, _Outptr_result_z_ wchar_t **output)
+{
+    size_t inputLen;
+    size_t xCount = 0;
+    char *incInput = (char*) input;
+    char *incOutput;
+    inputLen = Strlen(input);
+    *output = (wchar_t*) malloc( (inputLen+1) *2 );
+    if( *output == NULL )
+    {
+        return -1;
+    }
+    memset(*output, 0, (inputLen+1) *2);
+    incOutput = (char*)*output;
+    for( xCount = 0; xCount < inputLen; xCount++)
+    {
+        incOutput[xCount*2] = *incInput;
+        incInput++;
+    }
+    return 0;
+
+}
+
 int File_CopyT(_In_z_ const PAL_Char* src, _In_z_ const PAL_Char* dest)
 {
     FILE* is = NULL;
@@ -256,6 +279,55 @@ int Directory_ExistW(
     return result;
 #endif        
 
+}
+
+int MkdirW(_In_z_ const wchar_t *path, int mode)
+{
+#if defined(_MSC_VER)
+    PAL_UNUSED(mode);
+    return _wmkdir(path);
+#else
+    char *dirPath;
+    int result;
+
+    if( !UCS2ToAscii( path, &dirPath) )
+        return -1;
+
+    result = mkdir(dirPath, mode);
+    free(dirPath);
+    return result;
+#endif    
+}
+
+int TempnamW(  _Outptr_result_maybenull_z_ wchar_t **output )
+{
+    *output = NULL;
+#if defined(_MSC_VER)
+    *output = _wtempnam(NULL,NULL);
+#else    
+    char *Path = tempnam(NULL,NULL);
+    if(Path == NULL )
+        return -1;
+    
+    AsciiToUCS2( Path, output) ;
+    free(Path);
+#endif
+    if( *output == NULL)
+        return -1;
+    return 0;
+}
+
+int Tempnam(  _Outptr_result_maybenull_z_ char **output )
+{
+    *output = NULL;    
+#if defined(_MSC_VER)
+    *output = _tempnam(NULL,NULL);
+#else
+    *output = tempnam(NULL,NULL);
+#endif
+    if( *output == NULL)
+        return -1;
+    return 0;
 }
 
 int File_Exist( 
@@ -489,4 +561,36 @@ int GetComputerHostName(_Inout_updates_z_(length) TChar *buffer, unsigned int le
 #endif
 }
 
+void PAL_SHA256Transform(_In_ void * pInputValue,
+    _In_ unsigned int valueLength,
+    _Out_ unsigned char hashedValue[SHA256TRANSFORM_DIGEST_LEN])
+{
+    SHA256_CTX Ctx;    
+#if defined(_MSC_VER)
+
+    SHA256Init(&Ctx);
+
+    SHA256Update
+        (
+        &Ctx,
+        (unsigned char *)pInputValue,
+        valueLength
+        );
+
+    SHA256Final(&Ctx, hashedValue);    
+#else
+
+    SHA256_Init(&Ctx);
+
+    SHA256_Update
+        (
+        &Ctx,
+        (unsigned char *)pInputValue,
+        valueLength
+        );
+
+    SHA256_Final(hashedValue, &Ctx);
+
+#endif
+}
 
