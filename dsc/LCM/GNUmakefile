@@ -36,4 +36,3 @@ deploydsc:
 	cp $(BINDIR)/ConsistencyInvoker $(CONFIG_BINDIR)/
 	$(CONFIG_BINDIR)/omireg -n "root/Microsoft/DesiredStateConfiguration" $(LIBDIR)/libdsccore.so
 	ln -fs $(CONFIG_SYSCONFDIR)/omiregister/root-Microsoft-DesiredStateConfiguration $(CONFIG_SYSCONFDIR)/omiregister/root-Microsoft-Windows-DesiredStateConfiguration
-	cp  $(BINDIR)/consistencyinvoker $(CONFIG_BINDIR)/ConsistencyInvoker
