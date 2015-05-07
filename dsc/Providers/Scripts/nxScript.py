@@ -10,6 +10,7 @@ import os
 import stat
 import time
 import tempfile
+import re
 
 def Set_Marshall(GetScript, SetScript, TestScript, User, Group):
     GetScript = GetScript.decode("utf-8")
@@ -56,6 +57,7 @@ def Get_Marshall(GetScript, SetScript, TestScript, User, Group):
 ############################################################
 def WriteFile(path, contents):
     try:
+        contents = re.sub('^\s+', '', contents)
         f = open(path, "w")
         f.write(contents.replace("\r",""))
         return 0

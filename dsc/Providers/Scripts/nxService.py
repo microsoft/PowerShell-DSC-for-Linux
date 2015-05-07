@@ -57,6 +57,7 @@ upstart_start_path = "/sbin/start"
 upstart_stop_path = "/sbin/stop"
 upstart_status_path = "/sbin/status"
 initd_service = "/sbin/service"
+initd_service_partial = "/etc/init.d/"
 initd_chkconfig = "/sbin/chkconfig"
 initd_invokerc = "/usr/sbin/invoke-rc.d"
 initd_updaterc = "/usr/sbin/update-rc.d"
@@ -82,10 +83,12 @@ def ReadFile(filename):
         return []
 
 def Process(params):
-    process = subprocess.Popen(params, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    enEnv = os.environ.copy()
+    enEnv["LANG"] = "en_US.UTF8" 
+    process = subprocess.Popen(params, env=enEnv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (process_stdout, process_stderr) = process.communicate()
 
-    return (process_stdout, process_stderr, process.returncode)
+    return (process_stdout.decode("utf-8"), process_stderr.decode("utf-8"), process.returncode)
 
 
 def StartService(sc):
@@ -315,13 +318,13 @@ def TestUpstart(sc):
     return [0]
 
 def GetInitState(sc):
-    check_state_program = initd_service
+    check_state_program = initd_service_partial + sc.Name
     check_enabled_program = initd_chkconfig
     if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
         check_state_program = initd_invokerc
         check_enabled_program = initd_updaterc
 
-    (process_stdout, process_stderr, retval) = Process([check_state_program, sc.Name, "status"])
+    (process_stdout, process_stderr, retval) = Process([check_state_program, "status"])
     
     if DetermineInitState(process_stdout):
         return "running"
@@ -393,8 +396,8 @@ def InitExists():
 def ServiceExistsInSystemd(sc):
     (process_stdout, process_stderr, retval) = Process([systemctl_path, "status", sc.Name])
     
-    if sc.Name + ".service" in process_stdout:
-        if "Loaded: not-found" in process_stdout:
+    if sc.Name + ".service" in process_stdout.decode('utf-8'):
+        if "Loaded: not-found" in process_stdout.decode('utf-8'):
             return False
         else:
             return True
