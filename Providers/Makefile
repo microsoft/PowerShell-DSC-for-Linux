@@ -97,7 +97,8 @@ REGISTER:=Resource.registration.mof
 # $(call REGISTER_PROVIDER,provider-name)
 define REGISTER-PROVIDER
 	echo ...registering: $1;
-	$(MKDIR) $(OMI_CONFIG_PATH)/{registration,schema}/MSFT_$1Resource; \
+	$(MKDIR) $(OMI_CONFIG_PATH)/registration/MSFT_$1Resource; \
+	$(MKDIR) $(OMI_CONFIG_PATH)/schema/MSFT_$1Resource; \
 	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(SCHEMA) \
 	    $(OMI_CONFIG_PATH)/schema/MSFT_$1Resource/MSFT_$1$(SCHEMA); \
 	$(COPY) $(PROVIDER_PATH)/$1/MSFT_$1$(REGISTER) \
@@ -108,7 +109,14 @@ endef
 .PHONY: reg
 reg :
 	echo ...copying scripts
-	$(COPY) -R $(PROVIDER_PATH)/Scripts $(OMI_LIB_PATH)
+	$(MKDIR) -p $(OMI_LIB_PATH)/Scripts
+	$(MKDIR) -p $(CONFIG_DATADIR)/dsc/modules
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/*.py $(OMI_LIB_PATH)/Scripts
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/2.4x-2.5x $(OMI_LIB_PATH)/Scripts
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/2.6x-2.7x $(OMI_LIB_PATH)/Scripts
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/3.x $(OMI_LIB_PATH)/Scripts
+	$(COPY) -R $(TOP)/intermediate/Scripts/*.py $(OMI_LIB_PATH)/Scripts
+	chmod a+x $(OMI_LIB_PATH)/Scripts/*.py
 	@$(foreach provider,$(PROVIDERS),$(call REGISTER-PROVIDER,$(provider)))
 
 

@@ -3,7 +3,8 @@ import fileinput
 import sys
 import subprocess
 
-omicli_path = "/opt/omi/bin/omicli"
+omi_bindir = "<CONFIG_BINDIR>"
+omicli_path = omi_bindir + "/omicli"
 
 parameters = []
 parameters.append(omicli_path)

@@ -63,7 +63,7 @@ MI_Boolean g_hPSInfraModuleHandleInitialized;
 // TODO: Temporary workaround until we can reload OMI provider registration without restarting omi.
 void ReloadOMI()
 {
-    system("exec setsid /bin/sh -c 'sleep 5; /opt/omi/bin/omiserver -r; sleep 5; /opt/omi/bin/ConsistencyInvoker'&");
+    system(OMI_RELOAD_COMMAND);
 }
 
 void UnloadFromProvider(

@@ -485,8 +485,19 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define CONSISTENCY_TASKSCHEDULE_NAME_BASE MI_T("\\Microsoft\\Windows\\Desired State Configuration\\")
 #define CONSISTENCY_TASKSCHEDULE_NAME CONSISTENCY_TASKSCHEDULE_NAME_BASE MI_T("Consistency")
 #else
-// note this task name should not contain space
+
+#if defined(DSC_PACKAGE_BUILD)
+#define DSC_PATH MI_T("/opt/microsoft/dsc")
+#else
+#define DSC_PATH CONFIG_DATADIR PATH_SEPARATOR MI_T("dsc")
+#endif
+
+#define OMI_LIB_SCRIPTS CONFIG_LIBDIR PATH_SEPARATOR MI_T("Scripts")
+#define DSC_MODULES_PATH DSC_PATH PATH_SEPARATOR MI_T("modules")
 #define OMI_CONSISTENCY_TASKSCHEDULE_NAME CONFIG_BINDIR PATH_SEPARATOR MI_T("ConsistencyInvoker")
+#define OMI_CONF_FILE_PATH CONFIG_SYSCONFDIR PATH_SEPARATOR MI_T("dsc") PATH_SEPARATOR MI_T("dsc.conf")
+#define OMI_SERVER_PATH CONFIG_BINDIR PATH_SEPARATOR MI_T("omiserver")
+#define OMI_RELOAD_COMMAND MI_T("exec setsid /bin/sh -c 'sleep 5; ") OMI_SERVER_PATH MI_T(" -r; sleep 5; ") OMI_CONSISTENCY_TASKSCHEDULE_NAME MI_T("'&")
 #endif
 #define TASK_PARAMETER_SC_DAILY MI_T("DAILY")
 #define TASK_PARAMETER_DU_DAILY MI_T("24:00")

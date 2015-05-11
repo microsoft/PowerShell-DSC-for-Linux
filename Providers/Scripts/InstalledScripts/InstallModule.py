@@ -49,15 +49,20 @@ if "." not in moduleVersion:
     print("Error: Version does not contain a dot and is thus improperly formed.")
     sys.exit(1)
 
-retval = subprocess.call(["unzip","-o","-d", "/opt/microsoft/dsc/modules", filepath])
+omi_bindir = "<CONFIG_BINDIR>"
+omi_libdir = "<CONFIG_LIBDIR>"
+omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
+dsc_path = "<DSC_PATH>"
+baseModulePath = dsc_path + "/modules"
+modulePath = baseModulePath + "/" + moduleName
+
+retval = subprocess.call(["unzip","-o","-d", baseModulePath, filepath])
 if retval != 0:
     print("Error: Failed to unzip " + filepath)
     sys.exit(1)
 
-modulePath = "/opt/microsoft/dsc/modules/" + moduleName
-
 if not os.path.isdir(modulePath):
-    print("Error: After extracting module, unable to find module directory in /opt/microsoft/dsc/modules")
+    print("Error: After extracting module, unable to find module directory in " + baseModulePath)
     sys.exit(1)
 
 if not os.path.isdir(modulePath + "/DSCResources"):
@@ -77,18 +82,18 @@ for resource in resourcelist:
         continue
     
     # Install schema/registration files
-    if not os.path.isdir("/opt/omi/etc/dsc/configuration/registration/" + resource):
-        os.mkdir("/opt/omi/etc/dsc/configuration/registration/" + resource)
-    if not os.path.isdir("/opt/omi/etc/dsc/configuration/schema/" + resource):
-        os.mkdir("/opt/omi/etc/dsc/configuration/schema/" + resource)
+    if not os.path.isdir(omi_sysconfdir + "/dsc/configuration/registration/" + resource):
+        os.mkdir(omi_sysconfdir + "/dsc/configuration/registration/" + resource)
+    if not os.path.isdir(omi_sysconfdir + "/dsc/configuration/schema/" + resource):
+        os.mkdir(omi_sysconfdir + "/dsc/configuration/schema/" + resource)
 
     if not os.path.isfile(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof"):
         print("Error: Unable to find schema mof for resource " + resource)
         sys.exit(1)
 
-    shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof", "/opt/omi/etc/dsc/configuration/schema/" + resource + "/")
-    shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".reg", "/opt/omi/etc/omiregister/root-Microsoft-DesiredStateConfiguration/")
-    f = open("/opt/omi/etc/dsc/configuration/registration/" + resource + "/" + resource + ".registration.mof", "w")
+    shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof", omi_sysconfdir + "/dsc/configuration/schema/" + resource + "/")
+    shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".reg", omi_sysconfdir + "/omiregister/root-Microsoft-DesiredStateConfiguration/")
+    f = open(omi_sysconfdir + "/dsc/configuration/registration/" + resource + "/" + resource + ".registration.mof", "w")
     f.write(registration_text(resource))
     f.close()
 
@@ -107,13 +112,13 @@ for resource in resourcelist:
         sys.exit(1)
 
     os.rename(libdirPath, modulePath + "/DSCResources/" + resource + "/lib")
-    retval = subprocess.call(["cp", "-R", modulePath + "/DSCResources/" + resource + "/lib/", "/opt/omi/"])
+    retval = subprocess.call(["cp", "-R", modulePath + "/DSCResources/" + resource + "/lib/", omi_libdir + "/.."])
     os.rename(modulePath + "/DSCResources/" + resource + "/lib", libdirPath)
     if retval != 0:
         print("Error: Failed to install module " + moduleName + " on resource " + resource)
         sys.exit(1)
 
-retval = subprocess.call(["/opt/microsoft/dsc/Scripts/RegenerateInitFiles.py"])
+retval = subprocess.call([omi_libdir + "/Scripts/RegenerateInitFiles.py"])
 if retval != 0:
     print("Error: failed to regenerate init files.")
     sys.exit(1)
