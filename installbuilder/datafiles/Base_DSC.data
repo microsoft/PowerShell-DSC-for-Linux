@@ -83,13 +83,13 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/protocol.py; Providers/Scripts/protocol.py; 755; root; root
 /opt/microsoft/dsc/Scripts/nxDSCLog.py; Providers/Scripts/nxDSCLog.py; 755; root; root
 /opt/microsoft/dsc/Scripts/zipfile2.6.py; Providers/Scripts/zipfile2.6.py; 755; root; root
-/opt/microsoft/dsc/Scripts/SendConfigurationApply.py; Providers/Extras/Scripts/SendConfigurationApply.py; 755; root; root
-/opt/microsoft/dsc/Scripts/GetConfiguration.py; Providers/Extras/Scripts/GetConfiguration.py; 755; root; root
-/opt/microsoft/dsc/Scripts/SendMetaConfigurationApply.py; Providers/Extras/Scripts/SendMetaConfigurationApply.py; 755; root; root
-/opt/microsoft/dsc/Scripts/GetMetaConfiguration.py; Providers/Extras/Scripts/GetMetaConfiguration.py; 755; root; root
-/opt/microsoft/dsc/Scripts/InstallModule.py; Providers/Extras/Scripts/InstallModule.py; 755; root; root
-/opt/microsoft/dsc/Scripts/RemoveModule.py; Providers/Extras/Scripts/RemoveModule.py; 755; root; root
-/opt/microsoft/dsc/Scripts/RegenerateInitFiles.py; Providers/Extras/Scripts/RegenerateInitFiles.py; 755; root; root
+/opt/microsoft/dsc/Scripts/SendConfigurationApply.py; intermediate/Scripts/SendConfigurationApply.py; 755; root; root
+/opt/microsoft/dsc/Scripts/GetConfiguration.py; intermediate/Scripts/GetConfiguration.py; 755; root; root
+/opt/microsoft/dsc/Scripts/SendMetaConfigurationApply.py; intermediate/Scripts/SendMetaConfigurationApply.py; 755; root; root
+/opt/microsoft/dsc/Scripts/GetMetaConfiguration.py; intermediate/Scripts/GetMetaConfiguration.py; 755; root; root
+/opt/microsoft/dsc/Scripts/InstallModule.py; intermediate/Scripts/InstallModule.py; 755; root; root
+/opt/microsoft/dsc/Scripts/RemoveModule.py; intermediate/Scripts/RemoveModule.py; 755; root; root
+/opt/microsoft/dsc/Scripts/RegenerateInitFiles.py; intermediate/Scripts/RegenerateInitFiles.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFile.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFile.py; 755; root; root

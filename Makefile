@@ -1,4 +1,5 @@
 include config.mak
+-include omi-1.0.8/output/config.mak
 UNAME_P := $(shell uname -p)
 ifeq ($(UNAME_P),x86_64)
  PF_ARCH := x64
@@ -6,12 +7,19 @@ else
  PF_ARCH := x86
 endif
 
+all:
+	mkdir -p intermediate/Scripts
 ifeq ($(BUILD_LOCAL),1)
-all:
 	make local
-
 else
-all:
+	for f in Providers/Scripts/InstalledScripts/*.py; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@/opt/omi/bin@" | \
+	  sed "s@<CONFIG_LIBDIR>@/opt/omi/lib@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@/opt/omi/etc@" | \
+	  sed "s@<DSC_PATH>@/opt/microsoft/dsc@" > intermediate/Scripts/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/`basename $$f`; \
+	done
  ifeq ($(BUILD_SSL_098),1)
 	make kit098 
  endif
@@ -105,6 +113,14 @@ nxNetworking:
 distclean: clean
 
 clean:
+ifeq ($(BUILD_LOCAL),1)
+	make -C Providers clean
+	make -C omi-1.0.8 distclean
+	rm -rf omi-1.0.8/output
+	rm -rf output
+	rm -rf release
+	rm -rf intermediate
+else
 	make -C Providers clean
 	make configureomi098
 	make -C omi-1.0.8 distclean
@@ -113,6 +129,8 @@ clean:
 	rm -rf omi-1.0.8/output
 	rm -rf output
 	rm -rf release
+	rm -rf intermediate
+endif
 
 
 # To build DSC without making kits (i.e. the old style), run 'make local'
@@ -128,4 +146,12 @@ lcmreg:
 	make -C LCM deploydsc
 
 providersreg:
+	for f in Providers/Scripts/InstalledScripts/*.py; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$(CONFIG_BINDIR)@" | \
+	  sed "s@<CONFIG_LIBDIR>@$(CONFIG_LIBDIR)@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$(CONFIG_SYSCONFDIR)@" | \
+	  sed "s@<DSC_PATH>@$(CONFIG_DATADIR)/dsc@" > intermediate/Scripts/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/`basename $$f`; \
+	done 
 	make -C Providers reg

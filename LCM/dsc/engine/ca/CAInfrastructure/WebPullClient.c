@@ -115,7 +115,7 @@ static MI_Result GetSSLOptions(struct SSLOptions * sslOptions,
     sslOptions->cipherList[0] = '\0';
     sslOptions->CABundle[0] = '\0';
     
-    conf = Conf_Open("/opt/omi/etc/dsc/dsc.conf");
+    conf = Conf_Open(OMI_CONF_FILE_PATH);
     if (!conf)
     {
         return GetCimMIError(MI_RESULT_NOT_FOUND, extendedError, ID_PULL_DSCCONF_NOTOPENABLE);
@@ -562,7 +562,7 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
     MI_Uint32 flags;
     MI_Uint32 xCount;
     MI_Char* configurationSource = NULL;
-    MI_Boolean allowUnsecureConnection;
+    MI_Boolean allowUnsecureConnection = MI_FALSE;
     MI_InstanceA customData;
     *credential = NULL;
     *extendedError = NULL;
@@ -1979,7 +1979,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             return r;
         }
 
-        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", "/opt/microsoft/dsc/Scripts/InstallModule.py", zipPath);
+        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", OMI_LIB_SCRIPTS "/InstallModule.py", zipPath);
         retval = system(stringBuffer);
         
         if (retval != 0)
@@ -1991,7 +1991,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             else
             {
                 // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
-                Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", "/opt/microsoft/dsc/Scripts/RemoveModule.py", current->moduleName);
+                Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", OMI_LIB_SCRIPTS "/RemoveModule.py", current->moduleName);
                 retval = system(stringBuffer); 
                 if ( retval == 0 || (retval == -1 && errno == ECHILD) )
                 {
@@ -2239,7 +2239,7 @@ static int IsModuleInstalled(MI_Char* moduleName, MI_Char* moduleVersion)
         return 1;
     }
 
-    Snprintf(buffer, MAX_URL_LENGTH, "/opt/microsoft/dsc/modules/%s/VERSION", moduleName);
+    Snprintf(buffer, MAX_URL_LENGTH, DSC_MODULES_PATH "/%s/VERSION", moduleName);
     
     fp = File_OpenT(buffer, MI_T("r"));
     if( fp == NULL )
@@ -2358,7 +2358,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
         return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INITIALIZEMODULETABLEFAILED, "Creating New Deserializer Failed");
     }
 
-    r = ReadFileContent(mofFileLocation, &pbuffer, &contentSize, &extendedError);
+    r = ReadFileContent(mofFileLocation, &pbuffer, &contentSize, extendedError);
     if(r != MI_RESULT_OK)
     {
         DSC_free(miApp);

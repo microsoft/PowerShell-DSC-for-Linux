@@ -407,31 +407,31 @@
 
 INTERNAL_Intlstr_Define0( ID_PULL_DSCCONF_NOTOPENABLE,
 			  ID_PULL_DSCCONF_NOTOPENABLE,
-                 	  "Unable to open file at /opt/omi/etc/dsc/dsc.conf")
+                 	  "Unable to open file at " CONFIG_SYSCONFDIR "/dsc/dsc.conf")
 
 INTERNAL_Intlstr_Define1( ID_PULL_DSCCONF_NOTREADABLE,
 			  ID_PULL_DSCCONF_NOTREADABLE,
       			  _In_z_ const PAL_Char*, firstString,
-                 	  "Unable to read file at /opt/omi/etc/dsc/dsc.conf. "  Intlstr_tstr(1) ".")
+                 	  "Unable to read file at " CONFIG_SYSCONFDIR "/dsc/dsc.conf. "  Intlstr_tstr(1) ".")
 
 INTERNAL_Intlstr_Define2( ID_PULL_DSCCONF_INVALIDVALUE,
 			  ID_PULL_DSCCONF_INVALIDVALUE,
       			  _In_z_ const PAL_Char*, firstString,
                           _In_z_ const PAL_Char*, secondString,
-                 	  "Key " Intlstr_tstr(1) " in file /opt/omi/etc/dsc/dsc.conf has invalid value "  Intlstr_tstr(2) ".")
+                 	  "Key " Intlstr_tstr(1) " in file " CONFIG_SYSCONFDIR "/dsc/dsc.conf has invalid value "  Intlstr_tstr(2) ".")
 
 INTERNAL_Intlstr_Define0( ID_PULL_SSLCIPHERLISTTOOLONG,
 			  ID_PULL_SSLCIPHERLISTTOOLONG,
-                 	  "sslcipherlist is too long in /opt/omi/etc/dsc/dsc.conf. It must be 4096 characters or less.")
+                 	  "sslcipherlist is too long in " CONFIG_SYSCONFDIR "/dsc/dsc.conf. It must be 4096 characters or less.")
 
 
 INTERNAL_Intlstr_Define0( ID_PULL_CABUNDLETOOLONG,
 			  ID_PULL_CABUNDLETOOLONG,
-                 	  "CURL_CA_BUNDLE is too long in /opt/omi/etc/dsc/dsc.conf. It must be 4096 characters or less.")
+                 	  "CURL_CA_BUNDLE is too long in " CONFIG_SYSCONFDIR "/dsc/dsc.conf. It must be 4096 characters or less.")
 
 INTERNAL_Intlstr_Define0( ID_PULL_CABUNDLENOTSUPPORTED,
 			  ID_PULL_CABUNDLENOTSUPPORTED,
-                 	  "The CURL_CA_BUNDLE option is not supported by the version of cURL installed to this system. Please either install a more recent version of libcurl, or disable the CURL_CA_BUNDLE option in /opt/omi/etc/dsc/dsc.conf.")
+                 	  "The CURL_CA_BUNDLE option is not supported by the version of cURL installed to this system. Please either install a more recent version of libcurl, or disable the CURL_CA_BUNDLE option in " CONFIG_SYSCONFDIR "/dsc/dsc.conf.")
 
 INTERNAL_Intlstr_Define0( ID_PULL_NOCONFIGDOWNLOADMANAGERS,
 			  ID_PULL_NOCONFIGDOWNLOADMANAGERS,

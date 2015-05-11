@@ -37,7 +37,12 @@ if len(sys.argv) != 2:
     usage()
 
 moduleName = sys.argv[1]
-modulePath = "/opt/microsoft/dsc/modules/" + moduleName
+omi_bindir = "<CONFIG_BINDIR>"
+omi_libdir = "<CONFIG_LIBDIR>"
+omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
+dsc_path = "<DSC_PATH>"
+baseModulePath = dsc_path + "/modules"
+modulePath = baseModulePath + "/" + moduleName
 
 if not os.path.isdir(modulePath):
     print("Error: unable to find installed module " + moduleName + " at " + modulePath)
@@ -50,8 +55,8 @@ resourcelist = os.listdir(modulePath + "/DSCResources")
 for resource in resourcelist:
     print("Removing resource " + resource)
     # Remove schema/registration for each class
-    schemadir = "/opt/omi/etc/dsc/configuration/schema"
-    regdir = "/opt/omi/etc/dsc/configuration/registration"
+    schemadir = omi_sysconfdir + "/dsc/configuration/schema"
+    regdir = omi_sysconfdir + "/dsc/configuration/registration"
     if os.path.isdir(schemadir + "/" + resource):
         shutil.rmtree(schemadir + "/" + resource)
     if os.path.isdir(regdir + "/" + resource):
@@ -74,7 +79,7 @@ for resource in resourcelist:
         print("Error: Unable to find directory in module at " + libdirPath + ", unable to remove module.")
         sys.exit(1)
 
-    RemoveMirroredDirectory(libdirPath, "/opt/omi/lib")
+    RemoveMirroredDirectory(libdirPath, omi_libdir)
     if os.path.isdir(modulePath + "/DSCResources/" + resource + "/x86"):
         shutil.rmtree(modulePath + "/DSCResources/" + resource + "/x86")
     if os.path.isdir(modulePath + "/DSCResources/" + resource + "/x64"):
@@ -82,7 +87,7 @@ for resource in resourcelist:
 
 shutil.rmtree(modulePath)
 
-retval = subprocess.call(["/opt/microsoft/dsc/Scripts/RegenerateInitFiles.py"])
+retval = subprocess.call([omi_libdir+ "/Scripts/RegenerateInitFiles.py"])
 if retval != 0:
     print("Error: failed to regenerate init files.")
 sys.exit(0)
