@@ -21,52 +21,12 @@ namespace DSC
         {
             ctx.Alw("nxComputerTest Setup Begin.");
 
-            mofHelper = new EnvironmentMofHelper();
+            mofHelper = new ComputerMofHelper();
 
-            string hostName = ctx.Records.GetValue("computerName");
-            string timeZone = ctx.Records.GetValue("timeZone");
-            string initalHostName = ctx.Records.GetValue("initalHostName");
-            if (String.IsNullOrWhiteSpace(initalHostName))
-            {
-                initalHostName = "initalHostName";
-            }
-            string initalTimeZone = ctx.Records.GetValue("initalTimeZone");
-            if (String.IsNullOrWhiteSpace(initalTimeZone))
-            {
-                initalTimeZone = "America/Los_Angeles";
-            }
+            initializeCmd = ctx.Records.GetValue("initialCmd");
+            finalizeCmd = ctx.Records.GetValue("finalCmd");
 
-            string nxHostName = ctx.Records.GetValue("nxHostName");
-            string nxUsername = ctx.Records.GetValue("nxUsername");
-            string nxpassword = ctx.Records.GetValue("nxpassword");
-            int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
-
-            // Open SSH.
-            sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
-            try
-            {
-                // Store the orignal hostname.
-                sshHelper.Execute("hostname", out orgHostName);
-            }
-            catch (Exception ex)
-            {
-                ctx.Alw(ex.Message);
-            }
-
-            initializeCmd = GetInitializeCmd(initalHostName, initalTimeZone, orgTimeZone);
-            finalizeCmd = GetFinalizeCmd(orgHostName, orgTimeZone);
-
-            // Initialize Service State.
-            ctx.Alw(String.Format("Initilize Linux state : '{0}'", initializeCmd));
-            try
-            {
-                sshHelper.Execute(initializeCmd);
-            }
-            catch (Exception ex)
-            {
-                ctx.Alw(ex.Message);
-            }
-
+            base.Setup(ctx);
             ctx.Alw("nxComputerTest Setup End.");
         }
 

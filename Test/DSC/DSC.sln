@@ -8,6 +8,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{B8CB00A2-23FB-4ACF-8752-BAAA55BF3162}"
 	ProjectSection(SolutionItems) = preProject
 		TestFiles\ostc.dsc.test.xml = TestFiles\ostc.dsc.test.xml
+		TestFiles\OSTC64-DEB6-01.xml = TestFiles\OSTC64-DEB6-01.xml
+		TestFiles\OSTC64-RHEL6-98.xml = TestFiles\OSTC64-RHEL6-98.xml
+		TestFiles\OSTC64-RHEL7-01.xml = TestFiles\OSTC64-RHEL7-01.xml
+		TestFiles\OSTC64-UBUN10-01.xml = TestFiles\OSTC64-UBUN10-01.xml
+		TestFiles\OSTC86-CENT6-01.xml = TestFiles\OSTC86-CENT6-01.xml
+		TestFiles\OSTC86-ORA6-01.xml = TestFiles\OSTC86-ORA6-01.xml
 	EndProjectSection
 EndProject
 Global
