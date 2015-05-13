@@ -301,7 +301,11 @@ class AbstractDistro(object):
     def restart_network(self):
         os.system('service network restart')
         return [0]
-    
+
+    def interface_down(self,Interface):
+        os.system('ifconfig ' + Interface + ' down')
+        return [0]
+
     def UpdateValuesInFile(self,fname,src_dict,re_dict):
         updated=''
         if os.path.exists(fname) != True:
@@ -373,6 +377,7 @@ class AbstractDistro(object):
                     retval=[0]
             else:
                 retval=self.UpdateValuesInFile(self.gateway_file,self.gateway_dict,gateway_re_dict)
+            self.interface_down(InterfaceName)
         else:
             retval=self.UpdateValuesInFile(self.gateway_file,self.gateway_dict,gateway_re_dict)
             retval=self.UpdateValuesInFile(self.ifcfg_file,self.ifcfg_dict,ifcfg_re_dict)
@@ -406,12 +411,12 @@ class AbstractDistro(object):
     
     def Get(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
         # calling Test here will fill the dicts with values
-        if self.Test(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily) != [0]:
-            if Ensure=='Absent' :
-                Ensure='Present'
-            else:
-                Ensure='Absent'
-            IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily = self.src_dicts_to_params(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+        if self.Test(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily) == [0]:
+            Ensure='Present'
+            IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength, \
+            AddressFamily = self.src_dicts_to_params(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+        else:
+            Ensure='Absent'
         if PrefixLength=='':
             PrefixLength=0
         return 0,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily
