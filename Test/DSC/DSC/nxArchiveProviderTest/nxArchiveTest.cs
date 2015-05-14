@@ -1,5 +1,7 @@
 ﻿using System;
 using Infra.Frmwrk;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DSC
 {
@@ -18,6 +20,20 @@ namespace DSC
 
             base.Setup(ctx);
 
+            if (!propMap.ContainsKey("Force")) 
+            {
+                propMap["Force"] = "False";
+            }
+
+            if (!propMap.ContainsKey("Ensure")) 
+            {
+                propMap["Ensure"] = "present";
+            }
+
+            if (!propMap.ContainsKey("Checksum")) 
+            {
+                propMap["Checksum"] = "md5";
+            }
             ctx.Alw("nxArchiveTest Setup End.");
         }
 

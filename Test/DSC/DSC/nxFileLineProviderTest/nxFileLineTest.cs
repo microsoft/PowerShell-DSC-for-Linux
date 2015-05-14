@@ -18,6 +18,11 @@ namespace DSC
 
             base.Setup(ctx);
 
+            if (!propMap.ContainsKey("DoesNotContainPattern"))
+            {
+                propMap["Path"] = "";
+            }
+
             ctx.Alw("nxFileLineTest Setup End.");
         }
 

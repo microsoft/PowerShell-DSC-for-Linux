@@ -25,7 +25,17 @@ namespace DSC
             finalizeCmd = ctx.Records.GetValue("finalCmd");
 
             base.Setup(ctx);
-          
+
+            if (!propMap.ContainsKey("Path"))
+            {
+                propMap["Path"] = "False";
+            }
+
+            if (!propMap.ContainsKey("Ensure"))
+            {
+                propMap["Ensure"] = "present";
+            }
+
             ctx.Alw("nxEnvironmentTest Setup End.");
         }
 

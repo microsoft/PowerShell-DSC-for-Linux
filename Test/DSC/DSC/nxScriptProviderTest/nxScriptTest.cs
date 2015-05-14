@@ -15,6 +15,16 @@
 
             base.Setup(ctx);
 
+            if (!propMap.ContainsKey("User"))
+            {
+                propMap["User"] = "";
+            }
+
+            if (!propMap.ContainsKey("Group"))
+            {
+                propMap["Group"] = "";
+            }
+
             ctx.Alw("nxScriptTest Setup End."); 
         }
     }

@@ -36,6 +36,16 @@ namespace DSC
             finalizeCmd = GetFinalizeCmd(groupName);
             base.Setup(ctx);
 
+            if (!propMap.ContainsKey("Members"))
+            {
+                propMap["Members"] = "";
+            }
+
+            if (!propMap.ContainsKey("Ensure"))
+            {
+                propMap["Ensure"] = "present";
+            }
+
             ctx.Alw("nxGroupTest Setup End.");
         }
 

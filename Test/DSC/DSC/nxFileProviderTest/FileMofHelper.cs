@@ -64,7 +64,7 @@ namespace DSC
                         keyProp,
                         username));
 
-                    string password = "$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0";
+                    string password = propString.ContainsKey("Password") ? propString["Password"] : "$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0";
                     if (propString.ContainsKey("Password"))
                     {
                         password = propString["Password"].Replace("$", "`$");

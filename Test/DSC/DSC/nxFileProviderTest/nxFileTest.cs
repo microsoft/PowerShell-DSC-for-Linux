@@ -29,6 +29,61 @@ namespace DSC
 
             base.Setup(ctx);
 
+            if (!propMap.ContainsKey("SourcePath"))
+            {
+                propMap["SourcePath"] = "";
+            }
+
+            if (!propMap.ContainsKey("Contents"))
+            {
+                propMap["Contents"] = "";
+            }
+
+            if (!propMap.ContainsKey("Checksum"))
+            {
+                propMap["Checksum"] = "";
+            }
+
+            if (!propMap.ContainsKey("Ensure"))
+            {
+                propMap["Ensure"] = "present";
+            }
+
+            if (!propMap.ContainsKey("Type"))
+            {
+                propMap["Type"] = "File";
+            } 
+
+            if (!propMap.ContainsKey("Recurse"))
+            {
+                propMap["Recurse"] = "False";
+            }
+
+            if (!propMap.ContainsKey("Force"))
+            {
+                propMap["Force"] = "False";
+            }
+
+            if (!propMap.ContainsKey("Links"))
+            {
+                propMap["Links"] = "follow";
+            }
+
+            if (!propMap.ContainsKey("Group"))
+            {
+                propMap["Group"] = "root";
+            }
+
+            if (!propMap.ContainsKey("Mode"))
+            {
+                propMap["Mode"] = "644";
+            }
+
+            if (!propMap.ContainsKey("Owner"))
+            {
+                propMap["Owner"] = "root";
+            }
+
             ctx.Alw("nxFileTest Setup End.");
         }
 

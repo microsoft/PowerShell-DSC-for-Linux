@@ -7,7 +7,8 @@
   <!-- Variables. -->
   <snippet id="Variables">
     <!-- Linux Info. -->
-    <rec key="nxHostName">DSC_HOST</rec>
+    <!--<rec key="nxHostName">DSC_HOST</rec>-->
+    <rec key="nxHostName">dsc86-ora6-04</rec>
     <rec key="nxUsername">root</rec>
     <rec key="nxPassword">OpsMgr2007R2</rec>
     <rec key="nxPort">22</rec>
@@ -26,6 +27,8 @@
     <rec key="packageFromPath">PACKAGE_NAME</rec>
     <rec key="packageFilePath">/tmp/testpackage3_1.0</rec>
     <rec key="packageFromSource">nano</rec>
+    
+    <rec key="remoteTarFilePath">http://dsc64-apache-01.scx.com/source.tar</rec>
     
     <!-- DSC Info. -->
     <rec key="dscHome">/opt</rec>
@@ -3373,8 +3376,7 @@
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">IPv4 address is removed when Ensure property is 'Absent'.</rec>
         <rec key="failedMsg">IPv4 address isn't removed when Ensure property is 'Absent'.</rec>
       </var>
@@ -3383,20 +3385,19 @@
         dsc="[nxIPAddress] Verify if IPv6 address removed if the address exists before and Ensure property is 'Absent'"
         cls="DSC.nxIPAddressTest">
         <snipref id="Variables" />
-        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a</rec>
+        <rec key="ipAddress">2001:4898:d8:f205:15:5dff:fe22:724</rec>
         <rec key="interfaceName">eth1</rec>
         <rec key="ensure">Absent</rec>
         <rec key="bootProtocol">Static</rec>
         <rec key="addressFamily">IPv6</rec>
-        <rec key="initialSet">IPAddress:11.10.10.10;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">IPv6 address is removed when Ensure property is 'Absent'.</rec>
         <rec key="failedMsg">IPv6 address isn't removed when Ensure property is 'Absent'.</rec>
       </var>
@@ -3410,15 +3411,14 @@
         <rec key="ensure">Present</rec>
         <rec key="bootProtocol">Static</rec>
         <rec key="addressFamily">IPv4</rec>
-        <rec key="initialSet"></rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:absent;AddressFamily:%addressFamily%;</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">IPv4 address is set on a network interface when the address doesn't exist before and Ensure property is 'Present'</rec>
         <rec key="failedMsg">IPv4 address isn't set on a network interface when Ensure property is 'Present'</rec>
       </var>
@@ -3427,20 +3427,19 @@
         dsc="[nxIPAddress] Verify if IPv6 address is set on a network interface if the address doesn't exist before and Ensure property is 'Present'"
         cls="DSC.nxIPAddressTest">
         <snipref id="Variables" />
-        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a</rec>
+        <rec key="ipAddress">2001:4898:d8:f205:15:5dff:fe22:724</rec>
         <rec key="interfaceName">eth1</rec>
         <rec key="ensure">Present</rec>
         <rec key="bootProtocol">Static</rec>
         <rec key="addressFamily">IPv6</rec>
-        <rec key="initialSet"></rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:absent;AddressFamily:%addressFamily%;</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">IPv6 address is set on a network interface when the address doesn't exist before and Ensure property is 'Present'</rec>
         <rec key="failedMsg">IPv6 address isn't set on a network interface when Ensure property is 'Present'</rec>
       </var>
@@ -3461,8 +3460,7 @@
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/sysconfig/network-scripts/ifcfg-eth1 |grep -i 'BOOTPROTO=DHCP' |wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">the protocol to obtain an IP is dhcp for IPv4 while BootProtocol property is Automatic.</rec>
         <rec key="failedMsg">the protocol didn't to obtain an IP is dhcp for IPv4 while BootProtocol property is Automatic.</rec>
       </var>
@@ -3483,13 +3481,13 @@
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/sysconfig/network-scripts/ifcfg-eth1 |grep -i 'BOOTPROTO=Autoconf' |wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">the protocol to obtain an IP is Autoconf for IPv6 while BootProtocol property is Automatic.</rec>
         <rec key="failedMsg">the protocol didn't to obtain an IP is Autoconf for IPv6 while BootProtocol property is Automatic.</rec>
       </var>
 
-      <var set="10" lvl="2" vid="690536"
+      <!--Disable two gateway cases, it will make linux client lost.-->
+      <!--<var set="10" lvl="2" vid="690536"
            dsc="[nxIPAddress] Verify if the Defaultgateway for IPv4 is changed while DefaultGateway property is specified."
            cls="DSC.nxIPAddressTest">
         <snipref id="Variables" />
@@ -3501,11 +3499,11 @@
         <rec key="gateway">11.10.10.1</rec>
         <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
 
-        <!-- MOF Info. -->
+        --><!-- MOF Info. --><!--
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;DefaultGateway:%gateway%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
-        <!-- Verify Linux State. -->
+        --><!-- Verify Linux State. --><!--
         <rec key="verificationCmd">netstat -r |grep -i eth1 |awk '{print $2}'| tr -d '\r\n'</rec>
         <rec key="expectedValue">%gateway%</rec>
         <rec key="successfulMsg">The Defaultgateway for IPv4 is changed while DefaultGateway property is specified.</rec>
@@ -3524,16 +3522,16 @@
         <rec key="gateway">fe80::215:5dff:fec0:4</rec>
         <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
 
-        <!-- MOF Info. -->
+        --><!-- MOF Info. --><!--
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;DefaultGateway:%gateway%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
-        <!-- Verify Linux State. -->
+        --><!-- Verify Linux State. --><!--
         <rec key="verificationCmd">netstat -r |grep -i eth1 |awk '{print $2}'| tr -d '\r\n'</rec>
         <rec key="expectedValue">%gateway%</rec>
         <rec key="successfulMsg">The Defaultgateway for IPv6 is changed while DefaultGateway property is specified.</rec>
         <rec key="failedMsg">The Defaultgateway for IPv6 isn't changed while DefaultGateway property is specified.</rec>
-      </var>
+      </var>-->
 
       <var set="10" lvl="2" vid="690563"
            dsc="[nxIPAddress] Verify if the subnet mask is specified while PrefixLength property is set."
@@ -3543,15 +3541,16 @@
         <rec key="interfaceName">eth1</rec>
         <rec key="bootProtocol">Static</rec>
         <rec key="addressFamily">IPv4</rec>
-        <rec key="prefixLength">25</rec>
-        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="prefixLength">32</rec>
+        <rec key="mask">255.255.255.255</rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;Ensure:absent;PrefixLength:%mask%;</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;PrefixLength:%prefixLength%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd"></rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;PrefixLength:%mask%;</rec>
         <rec key="expectedValue"></rec>
         <rec key="successfulMsg">The subnet mask is specified while PrefixLength property is set.</rec>
         <rec key="failedMsg">The subnet mask isn't specified while PrefixLength property is set.</rec>
@@ -3565,15 +3564,14 @@
         <rec key="interfaceName">eth1</rec>
         <rec key="bootProtocol">Static</rec>
         <rec key="addressFamily">IPv4</rec>
-        <rec key="initialSet"></rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:absent;</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">The default setting for Ensure is Present.</rec>
         <rec key="failedMsg">The default setting for Ensure is Absent.</rec>
       </var>
@@ -3592,8 +3590,7 @@
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/sysconfig/network-scripts/ifcfg-eth1 |grep -i 'BOOTPROTO=DHCP' |wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">The default setting for Ensure is Present.</rec>
         <rec key="failedMsg">The default setting for Ensure is Absent.</rec>
       </var>
@@ -3604,15 +3601,14 @@
         <snipref id="Variables" />
         <rec key="ipAddress">11.10.10.10</rec>
         <rec key="interfaceName">eth1</rec>
-        <rec key="initialSet"></rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:absent;</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;</rec>
         <rec key="successfulMsg">The default setting for AddressFamily is IPv4.</rec>
         <rec key="failedMsg">The default setting for AddressFamily isn't IPv4.</rec>
       </var>
@@ -3630,7 +3626,7 @@
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         <!-- Verify Linux State. -->
         <rec key="verificationCmd"></rec>
@@ -3652,7 +3648,7 @@
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         <!-- Verify Linux State. -->
         <rec key="verificationCmd"></rec>
@@ -3666,7 +3662,7 @@
            cls="DSC.nxIPAddressTest">
         <snipref id="Variables" />
         <rec key="ipAddress">11.10.10.10</rec>
-        <rec key="interfaceName">eth1</rec>
+        <rec key="interfaceName">invalid</rec>
         <rec key="bootProtocol">Static</rec>
         <rec key="addressFamily">IPv4</rec>
         <rec key="initialSet"></rec>
@@ -3674,7 +3670,7 @@
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         <!-- Verify Linux State. -->
         <rec key="verificationCmd"></rec>
@@ -3696,7 +3692,7 @@
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         <!-- Verify Linux State. -->
         <rec key="verificationCmd"></rec>
@@ -3713,15 +3709,14 @@
         <rec key="interfaceName">eth1</rec>
         <rec key="bootProtocol">Automatic</rec>
         <rec key="addressFamily">IPv4</rec>
-        <rec key="initialSet">IPAddress:12.10.10.10;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="initialSet"></rec>
 
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
         <rec key="successfulMsg">Send error out while the specified InterfaceName doesn't exist.</rec>
         <rec key="failedMsg">No error out while the specified InterfaceName doesn't exist.</rec>
       </var>
@@ -3738,7 +3733,7 @@
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;DefaultGateway:%gateway%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         <!-- Verify Linux State. -->
         <rec key="verificationCmd"></rec>
@@ -3751,7 +3746,7 @@
            dsc="[nxIPAddress] Verify if error out if the provided gateway is not a right IPv6 format."
            cls="DSC.nxIPAddressTest">
         <snipref id="Variables" />
-        <rec key="ipAddress">fe80::215:5dff:fec0:4e1a</rec>
+        <rec key="ipAddress">2001:4898:d8:f205:15:5dff:fe22:723</rec>
         <rec key="interfaceName">eth1</rec>
         <rec key="addressFamily">IPv6</rec>
         <rec key="gateway">fe80::215:5dff:fec0:4e1a:001</rec>
@@ -3760,7 +3755,7 @@
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;DefaultGateway:%gateway%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         <!-- Verify Linux State. -->
         <rec key="verificationCmd"></rec>
@@ -3769,7 +3764,8 @@
         <rec key="failedMsg">No error out if the provided gateway is not a right IPv6 format.</rec>
       </var>
 
-      <var set="10" lvl="3" vid="690905"
+      <!--If Ensure is not present/absent, it will send error while create mof file, so disabled it.-->
+      <!--<var set="10" lvl="3" vid="690905"
            dsc="[nxIPAddress] Verify if error out if the Ensure property is not Present/Absent."
            cls="DSC.nxIPAddressTest">
         <snipref id="Variables" />
@@ -3778,17 +3774,17 @@
         <rec key="ensure">invalid</rec>
         <rec key="initialSet"></rec>
 
-        <!-- MOF Info. -->
+        --><!-- MOF Info. --><!--
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
-        <!-- Verify Linux State. -->
+        --><!-- Verify Linux State. --><!--
         <rec key="verificationCmd"></rec>
         <rec key="expectedValue"></rec>
         <rec key="successfulMsg">Send error out if the Ensure property is not Present/Absent.</rec>
         <rec key="failedMsg">No error out if the Ensure property is not Present/Absent.</rec>
-      </var>
+      </var>-->
 
       <var set="10" lvl="3" vid="690919"
            dsc="[nxIPAddress] Verify if error out while the PrefixLength value is greater than 32."
@@ -3802,7 +3798,7 @@
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;PrefixLength:%prefixLength%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         <!-- Verify Linux State. -->
         <rec key="verificationCmd"></rec>
@@ -3811,7 +3807,8 @@
         <rec key="failedMsg">No error out while the PrefixLength value is greater than 32.</rec>
       </var>
 
-      <var set="10" lvl="3" vid="690924"
+      <!--Disable the case, while set AddressFamily is not IPv4/IPv6, will fail to create mof file.-->
+      <!--<var set="10" lvl="3" vid="690924"
            dsc="[nxIPAddress] Verify if error out while the AddressFamily value is not IPv4/IPv6."
            cls="DSC.nxIPAddressTest">
         <snipref id="Variables" />
@@ -3820,17 +3817,17 @@
         <rec key="addressFamily">invalid</rec>
         <rec key="initialSet"></rec>
 
-        <!-- MOF Info. -->
+        --><!-- MOF Info. --><!--
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <rec key="psErrorMsg"></rec>
 
-        <!-- Verify Linux State. -->
+        --><!-- Verify Linux State. --><!--
         <rec key="verificationCmd"></rec>
         <rec key="expectedValue"></rec>
         <rec key="successfulMsg">Send error out while the AddressFamily value is not IPv4/IPv6.</rec>
         <rec key="failedMsg">No error out while the AddressFamily value is not IPv4/IPv6.</rec>
-      </var>
+      </var>-->
 
       <var set="10" lvl="3" vid="690925"
            dsc="[nxIPAddress] Verify if no error out if the IP address doesn't exist before and Ensure property is Absent."
@@ -3839,15 +3836,14 @@
         <rec key="ipAddress">11.10.10.10</rec>
         <rec key="interfaceName">eth1</rec>
         <rec key="ensure">Absent</rec>
-        <rec key="initialSet"></rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ls /etc/sysconfig/network-scripts |grep -i %interfaceName% | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;</rec>
         <rec key="successfulMsg">no change while the IP address doesn't exist before and Ensure property is Absent.</rec>
         <rec key="failedMsg">Have a change while the IP address doesn't exist before and Ensure property is Absent.</rec>
       </var>
@@ -3860,15 +3856,14 @@
         <rec key="interfaceName">eth1</rec>
         <rec key="ensure">Present</rec>
         <rec key="addressFamily">IPv4</rec>
-        <rec key="initialSet">IPAddress:12.10.10.10;InterfaceName:%interfaceName%;AddressFamily:%addressFamily%;</rec>
+        <rec key="initialSet">IPAddress:11.10.10.11;InterfaceName:%interfaceName%;Ensure:present;</rec>
 
         <!-- MOF Info. -->
-        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;AddressFamily:%addressFamily%;</rec>
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;</rec>
         <rec key="psScript">%dscSender%</rec>
 
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">ifconfig | grep -i %ipAddress%$ | wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;Ensure:%ensure%;</rec>
         <rec key="successfulMsg">IPAddress is updated accordlingly while the address exists before and Ensure property is Present.</rec>
         <rec key="failedMsg">IPAddress isn't updated accordlingly while the address exists before and Ensure property is Present.</rec>
       </var>

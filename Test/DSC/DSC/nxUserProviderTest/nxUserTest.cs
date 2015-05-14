@@ -34,6 +34,36 @@ namespace DSC
 
             base.Setup(ctx);
 
+            if (!propMap.ContainsKey("FullName"))
+            {
+                propMap["FullName"] = "";
+            }
+
+            if (!propMap.ContainsKey("Description"))
+            {
+                propMap["Description"] = "";
+            }
+
+            if (!propMap.ContainsKey("Password"))
+            {
+                propMap["Password"] = "";
+            }
+
+            if (!propMap.ContainsKey("Ensure"))
+            {
+                propMap["Ensure"] = "present";
+            }
+
+            if (!propMap.ContainsKey("Disabled"))
+            {
+                propMap["Disabled"] = "False";
+            }
+
+            if (!propMap.ContainsKey("PasswordChangeRequired"))
+            {
+                propMap["PasswordChangeRequired"] = "False";
+            }
+         
             ctx.Alw("nxUserTest Setup End."); 
         }
 

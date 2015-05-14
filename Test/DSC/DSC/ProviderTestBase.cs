@@ -125,22 +125,72 @@ namespace DSC
                 }
                 // Check the result of GetConfiguration.
                 ctx.Alw("The result of Get-DscConfiguration:");
-              
-                var returnedProperties = mofHelper.ReturnedPropertiesOfGetDscConfiguration(propMap);
-                foreach (var key in returnedProperties.Keys)
+
+                Dictionary<string, string> linuxMap = new Dictionary<string, string>();
+                
+
+                //Return from Get-DscConfiguration
+                Dictionary<string, string> list = psHelper.LastPowerShellReturnValues[0];
+                list.Remove("CimClass");
+                list.Remove("CimInstanceProperties");
+                list.Remove("CimSystemProperties");
+                list.Remove("PSShowComputerName");
+                list.Remove("PSComputerName");
+                string rltGetDSC = "The result of Get-DscConfiguration:\n\n************************************************";
+                foreach (string key in list.Keys)
                 {
-                    try
+                    rltGetDSC = rltGetDSC + String.Format("\n{0,-20}:{1}", key, list[key]);
+                }
+                ctx.Alw(rltGetDSC + "\n************************************************\n");
+                //Get property value from Linux
+                linuxMap = GetLinuxValue();
+                
+
+                foreach (string key in list.Keys)
+                {
+
+                    if (linuxMap.ContainsKey(key))                  
                     {
-                        psHelper.CheckOutput(key, returnedProperties[key]);
-                        ctx.Alw(String.Format("\t{0} : {1}", key, returnedProperties[key]));
+                        string actualDescription = linuxMap[key];
+
+                        // Check Linux property value with Get-DscConfiguration
+                        if (!String.IsNullOrEmpty(actualDescription))
+                        {
+                            try
+                            {
+                                psHelper.CheckOutput(key, actualDescription);
+                                ctx.Alw(String.Format("Check Get-DscConfiguration: {0} is pass", key));
+                            }
+                            catch (VarFail ex)
+                            {
+                                throw new VarFail(ex.Message);
+                            }
+                        }
                     }
-                    catch (VarFail ex)
+
+                    if (propMap.ContainsKey(key))
                     {
-                        throw new VarFail(ex.Message);
+                        string mapProperty = propMap[key];
+
+                        // Check varmap property value with Get-DscConfiguration
+                        if (!String.IsNullOrEmpty(mapProperty))
+                        {
+                            try
+                            {
+                                psHelper.CheckOutput(key, mapProperty);
+                                ctx.Alw(String.Format("Check Get-DscConfiguration: {0} is pass", key));
+                            }
+                            catch (VarFail ex)
+                            {
+                                throw new VarFail(ex.Message);
+                            }
+                        }
                     }
                 }
+
                 // Verify Linux machine state.
                 VerifyLinuxState(ctx);
+                
             }
             else
             {
@@ -220,5 +270,11 @@ namespace DSC
                 }
             } 
         }
+
+        private Dictionary<string, string> GetLinuxValue()
+        {
+            Dictionary<string, string> linuxValueMap = new Dictionary<string, string>();
+            return linuxValueMap;
+        }        
     }
 }
