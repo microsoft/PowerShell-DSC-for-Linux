@@ -7,8 +7,7 @@
   <!-- Variables. -->
   <snippet id="Variables">
     <!-- Linux Info. -->
-    <!--<rec key="nxHostName">DSC_HOST</rec>-->
-    <rec key="nxHostName">dsc86-ora6-04</rec>
+    <rec key="nxHostName">DSC_HOST</rec>
     <rec key="nxUsername">root</rec>
     <rec key="nxPassword">OpsMgr2007R2</rec>
     <rec key="nxPort">22</rec>
@@ -3820,7 +3819,7 @@
         --><!-- MOF Info. --><!--
         <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;AddressFamily:%addressFamily%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg"></rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
 
         --><!-- Verify Linux State. --><!--
         <rec key="verificationCmd"></rec>
@@ -3878,14 +3877,12 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="address">128.9.0.107</rec>
-        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
         <!-- MOF Info. -->
         <rec key="propString">Address:%address%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep %address%|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">Address:%address%;</rec>
         <rec key="successfulMsg">IPV4 address is added as a DNS Server Address successfully.</rec>
       </var>
 
@@ -3895,33 +3892,29 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="address">2001:da8:8000:1:202:120:2:101</rec>
-        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
         <!-- MOF Info. -->
-        <rec key="propString">Address:%address%;</rec>
+        <rec key="propString">Address:%address%;AddressFamily:IPv6</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep %address%|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">Address:%address%;</rec>
         <rec key="successfulMsg">IPV6 address is added as a DNS Server Address successfully.</rec>
       </var>
       
       <var set="11" lvl="2" vid="690320"
-           dsc="[nxDNSServerAddress] Verify if multiple DNS Server Addresses are added."
+           dsc="[nxDNSServerAddress] Verify if multiple IPV4 DNS Server Addresses are added."
            cls="DSC.DNSAddressTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="address">128.9.0.107</rec>
         <rec key="address1">128.9.0.12</rec>
-        <rec key="address2">2001:da8:8000:1:202:120:2:101</rec>
-        <rec key="initialCmd">sed -i '/%address%\|%address1%\|%address2%/d' /etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <rec key="address2">128.9.0.165</rec>
+        <!--rec key="initialCmd">sed -i '/%address%\|%address1%\|%address2%/d' /etc/resolv.conf</rec-->
         <!-- MOF Info. -->
         <rec key="propString">Address:%address%,%address1%,%address2%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%\|%address1%\|%address2%"|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">3</rec>
+        <rec key="verification">Address:%address%,%address1%,%address2%;</rec>
         <rec key="successfulMsg">Multiple DNS Server Addresses are added successfully.</rec>
       </var>
       
@@ -3932,18 +3925,13 @@
         <!-- Linux Initial State. -->
         <rec key="address">128.9.0.107</rec>
         <rec key="address1">128.9.0.12</rec>
-        <rec key="address2">2001:da8:8000:1:202:120:2:101</rec>
-        <rec key="address3">2001:da8:8000:1:202:120:2:103</rec>
-        <rec key="initialCmd">sed -i '/%address%\|%address1%\|%address2%|%address3%/d' /etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <rec key="address2">128.9.0.165</rec>
+        <rec key="address3">128.9.0.170</rec>
+        <!--rec key="initialCmd">sed -i '/%address%\|%address1%\|%address2%|%address3%/d' /etc/resolv.conf</rec-->
         <!-- MOF Info. -->
         <rec key="propString">Address:%address%,%address1%,%address2%,%address3%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%\|%address1%\|%address2%|%address3%"|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
-        <rec key="successfulMsg">Error out if more than three DNS Server Addresses are provided</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
       </var>
       
       <var set="11" lvl="3" vid="690322"
@@ -3952,16 +3940,11 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="address">10.320.2.6</rec>
-        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
         <!-- MOF Info. -->
         <rec key="propString">Address:%address%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
-        <rec key="successfulMsg">Error out if the provided address is not a right IPv4 format</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
       </var>
       
       <var set="11" lvl="3" vid="690323"
@@ -3970,16 +3953,11 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="address">2001::8000::202:120</rec>
-        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
         <!-- MOF Info. -->
-        <rec key="propString">Address:%address%;</rec>
+        <rec key="propString">Address:%address%;AddressFamily:IPv6</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
-        <rec key="successfulMsg">Error out if the provided address is not a right IPv6 format</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
       </var>
       
       <var set="11" lvl="2" vid="690324"
@@ -3988,16 +3966,13 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="address">128.9.0.107</rec>
-        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf; echo "nameserver %address%" >> etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <rec key="initialCmd">if [ -f /etc/resolv.conf ]; then echo -e "domain scx.com\nsearch scx\nnameserver  %address%" >/etc/resolv.conf;fi;if [ -f /etc/sysconfig/network/config ]; then sed -i 's/NETCONFIG_DNS_STATIC_SEARCHLIST=.*/NETCONFIG_DNS_STATIC_SEARCHLIST=\"%address% \"/' /etc/sysconfig/network/config;fi;if [ -f /etc/network/interfaces ]; then sed -i 's/dns-nameservers.*/dns-nameservers  %address%/' /etc/network/interfaces;fi;</rec>
         <!-- MOF Info. -->
         <rec key="propString">Address:%address%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%funcErrorMsg%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
-        <rec key="successfulMsg">Error out if the provided address exists in DNS</rec>
+        <rec key="verification">Address:%address%;</rec>
+        <rec key="successfulMsg">Multiple DNS Server Addresses are added successfully.</rec>
       </var>
       
       <var set="11" lvl="2" vid="814840"
@@ -4006,16 +3981,11 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="address">128.9.0.107</rec>
-        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
         <!-- MOF Info. -->
         <rec key="propString">Address:%address%;</rec>
         <rec key="psScript">%dscSender-nonRoot%</rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
-        <rec key="successfulMsg">Error out if the provided address exists in DNS</rec>
       </var>
       
       <var set="11" lvl="2" vid="814842"
@@ -4024,8 +3994,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="address">128.9.0.107</rec>
-        <rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec>
-        <rec key="finalCmd"></rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
         <!-- MOF Info. -->
         <rec key="propString">Address:%address%;</rec>
         <rec key="psScript">%dscSender%
@@ -4037,11 +4006,49 @@
           $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
           Get-DscConfiguration -CimSession $demo1;</rec>
         <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verificationCmd">cat /etc/resolv.conf |grep "%address%"|wc -l| tr -d '\n'</rec>
-        <rec key="expectedValue">0</rec>
-        <rec key="successfulMsg">Error out if the provided address exists in DNS</rec>
       </var>
+    
+      <var set="11" lvl="2" vid="886810"
+           dsc="[nxDNSServerAddress] Verify if multiple IPv6 DNS Server Addresses are added."
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">2001:da8:8000:1:202:120:2:101,2001:da8:8000:1:202:120:2:124,2001:da8:8000:1:202:120:2:190</rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;AddressFamily:IPv6</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">Address:%address%;</rec>
+        <rec key="successfulMsg">Mutiple IPv6 DNS Server address are added .</rec>
+      </var>
+
+      <var set="11" lvl="3" vid="886812"
+           dsc="[nxDNSServerAddress] Verify if error out while Address is IPv4 format and AddressFamily is set to IPv6"
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">128.9.0.107</rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;AddressFamily:IPv6</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+      </var>
+    
+      <var set="11" lvl="3" vid="886813"
+           dsc="[nxDNSServerAddress] Verify if error out while Address is IPv6 format and AddressFamily is set to IPv4"
+           cls="DSC.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="address">2001:da8:8000:1:202:120:2:101</rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;AddressFamily:IPv4</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+      </var>
+
     </section>
 
     <section sid="12" dsc="nxArchive Provider">
@@ -4170,9 +4177,8 @@
         <rec key="destinationPath">/tmp/nxArchive</rec>
         <rec key="filePath">/tmp/test.txt</rec>
         <rec key="fileName">test.txt</rec>
-
-        <rec key="initialCmd">rm -rf /tmp/*;</rec>
-        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <rec key="initialCmd">rm -rf /tmp/*;echo "just for archive test" > test.txt;tar -cvf source.tar test.txt;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;rm source.tar;rm test.txt</rec>
         <!-- MOF Info. -->
         <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;DependsOn:[nxFile]File;</rec>
         <rec key="psScript">%dscSender%</rec>
@@ -4483,893 +4489,31 @@
     </section>
 
     <section sid="13" dsc="nxFirewall Provider">
-      
-      <var set="13" lvl="1" vid="690941"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if the firewall rule is set while Protocol is 'tcp' and Ensure is 'Present'"
+      <var set="13" lvl="1" vid="001"
+           dsc="[nxFirewall] Verify the rule is set successfully which accepts tcp packets from 10.231.248.249 on dport 8080"
            cls="DSC.nxFirewallTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
+        <rec key="name">Accept tcp packets from 10.231.248.249 on dport 8080</rec>
         <rec key="protocol">tcp</rec>
+        <rec key="addrFamily">4</rec>
+        <rec key="state1">New</rec>
         <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
+        <rec key="dPort">8080</rec>
+        <rec key="sHost">10.231.248.249</rec>
+        <rec key="Direction">INPUT</rec>
+        <rec key="initialSet">iptables -A INPUT -i lo -j ACCEPT;</rec>
         <!-- MOF Info. -->
-        
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;</rec>
+        <!--"iptables -A INPUT -s scxomt-deb6-01 -p tcp - -dport 8080 -j ACCEPT"-->
+        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;AddressFamily:IPv%addrFamily%;State:%state1%;Direction:%direction%;SourcePort:%sPort%;DestinationHost:%dHost%</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verification">%propString%</rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">The firewall rule is set while Protocol is 'tcp' and Ensure is 'Present'</rec>
-        <rec key="failedMsg">The firewall rule doesn't set while Protocol is 'tcp' and Ensure is 'Present'</rec>
+        <rec key="successfulMsg">The DefaultGateway is set as required</rec>
+        <rec key="failedMsg">The DefaultGateway is not set as required</rec>
       </var>
-
-      <var set="13" lvl="2" vid="690942"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if the firewall rule is set while Protocol is 'udp' and Ensure is 'Present'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_udp</rec>
-        <rec key="protocol">udp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verification">%propString%</rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">The firewall rule is set while Protocol is 'udp' and Ensure is 'Present'</rec>
-        <rec key="failedMsg">The firewall rule doesn't set while Protocol is 'udp' and Ensure is 'Present'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="690943"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if the firewall rule is set while Protocol is 'icmp' and Ensure is 'Present'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_icmp</rec>
-        <rec key="protocol">icmp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verification">%propString%</rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">The firewall rule is set while Protocol is 'icmp' and Ensure is 'Present'</rec>
-        <rec key="failedMsg">The firewall rule doesn't set while Protocol is 'icmp' and Ensure is 'Present'</rec>
-      </var>
-
-      <var set="13" lvl="1" vid="690944"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if the firewall rule is removed while this rule exists before and Ensure is 'Absent'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet"></rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Absent;Direction:%direction%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <!-- Verify Linux State. -->
-        <rec key="verification">%propString%</rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">The firewall rule is removed while this rule exists before and Ensure is 'Absent'</rec>
-        <rec key="failedMsg">The firewall rule isn't removed while this rule exists before and Ensure is 'Absent'</rec>
-      </var>
-      
-      <var set="13" lvl="3" vid="691283"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while Protocol is not 'tcp/udp/icmp'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">invalidProtocol</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <!-- MOF Info. -->
-        
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-        
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out while Protocol is not 'tcp/udp/icmp'</rec>
-        <rec key="failedMsg">No error out while Protocol is not 'tcp/udp/icmp'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691284"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while this rule fit the given specifications and Ensure is 'Absent'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Absent;Direction:%direction%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out while this rule fit the given specifications and Ensure is 'Absent'</rec>
-        <rec key="failedMsg">No error out while this rule fit the given specifications and Ensure is 'Absent'</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691285"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while Ensure is not 'PresentAbsent'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Invalid;Direction:%direction%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out while Ensure is not 'PresentAbsent'</rec>
-        <rec key="failedMsg">No error out while Ensure is not 'PresentAbsent'</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691286"
-           dsc="[nxFirewall] Verify if error out while AddressFamily is not 'IPv4/IPv6'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">invalid</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out while AddressFamily is not 'IPv4/IPv6'</rec>
-        <rec key="failedMsg">No error out while AddressFamily is not 'IPv4/IPv6'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691288"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if Access property is set as specified while the provided value is 'Allow'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Access property is set as specified while the provided value is 'Allow'</rec>
-        <rec key="failedMsg">Access property isn't set as specified while the provided value is 'Allow'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691289"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if Access property is set as specified while the provided value is 'Block'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Block</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Access property is set as specified while the provided value is 'Block'</rec>
-        <rec key="failedMsg">Access property isn't set as specified while the provided value is 'Block'</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691290"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while Access is not 'Allow/Block'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Invalid</rec>
-        
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out while Access is not 'Allow/Block'</rec>
-        <rec key="failedMsg">No error out while Access is not 'Allow/Block'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691292"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if State property is set as specified while the provided value is 'NEW'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state">NEW</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State:%state%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">State property is set as specified while the provided value is 'NEW'</rec>
-        <rec key="failedMsg">State property isn't set as specified while the provided value is 'NEW'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691293"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if State property is set as specified while the provided value is 'RELATED'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state">RELATED</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State:%state%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">State property is set as specified while the provided value is 'RELATED'</rec>
-        <rec key="failedMsg">State property isn't set as specified while the provided value is 'RELATED'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691294"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if State property is set as specified while the provided value is 'ESTABLISHED'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state">ESTABLISHED</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State:%state%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">State property is set as specified while the provided value is 'ESTABLISHED'</rec>
-        <rec key="failedMsg">State property isn't set as specified while the provided value is 'ESTABLISHED'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691295"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if State, State2 and State3 properties are set as specified"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state">NEW</rec>
-        <rec key="state2">RELATED</rec>
-        <rec key="state3">ESTABLISHED</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State:%state%;State2:%state2%;State3:%state3%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">State, State2 and State3 properties are set as specified</rec>
-        <rec key="failedMsg">State, State2 and State3 properties are not set as specified</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691296"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if State2 property is set as specified while State property is not provided."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state2">RELATED</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State2:%state2%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">State2 property is set as specified while State property is not provided.</rec>
-        <rec key="failedMsg">State2 property is not set as specified while State property is not provided.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691297"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out if not NEW/RELATED/ESTABLISHED in State property."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state">Invalid</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State:%state%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out if not NEW/RELATED/ESTABLISHED in State property.</rec>
-        <rec key="failedMsg">No error out if not NEW/RELATED/ESTABLISHED in State property.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691298"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out if not NEW/RELATED/ESTABLISHED in State2 property."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state2">Invalid</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State2:%state2%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out if not NEW/RELATED/ESTABLISHED in State property.</rec>
-        <rec key="failedMsg">No error out if not NEW/RELATED/ESTABLISHED in State property.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691299"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out if not NEW/RELATED/ESTABLISHED in State3 property."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state3">Invalid</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State3:%state3%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out if not NEW/RELATED/ESTABLISHED in State3 property.</rec>
-        <rec key="failedMsg">No error out if not NEW/RELATED/ESTABLISHED in State3 property.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691300"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if State3 property is set as specified while State and State2 properties are not provided."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <rec key="addressFamily">IPv4</rec>
-        <rec key="state3">NEW</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;AddressFamily:%addressFamily%;State3:%state3%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">State3 property is set as specified while State and State2 properties are not provided.</rec>
-        <rec key="failedMsg">State3 property isn't set as specified while State and State2 properties are not provided.</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691302"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if Direction property is set as specified while the provided value is 'INPUT'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Direction property is set as specified while the provided value is 'INPUT'</rec>
-        <rec key="failedMsg">Direction property isn't set as specified while the provided value is 'INPUT'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691304"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if Direction property is set as specified while the provided value is 'OUTPUT'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">OUTPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Direction property is set as specified while the provided value is 'OUTPUT'</rec>
-        <rec key="failedMsg">Direction property isn't set as specified while the provided value is 'OUTPUT'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691305"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if Direction property is set as specified while the provided value is 'FORWARD'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">FORWARD</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Direction property is set as specified while the provided value is 'FORWARD'</rec>
-        <rec key="failedMsg">Direction property isn't set as specified while the provided value is 'FORWARD'</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691306"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while Direction property is not 'INPUT/OUTPUT/FORWARD'"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">Invalid</rec>
-        <rec key="initialSet">iptables -F</rec>
-        <rec key="access">Allow</rec>
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">Send error out while Direction property is not 'INPUT/OUTPUT/FORWARD'</rec>
-        <rec key="failedMsg">No error out while Direction property is not 'INPUT/OUTPUT/FORWARD'</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691354"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if SourceHost property is set as specified."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="sourceHost">10.225.29.124</rec>
-        <rec key="initialSet">iptables -F</rec>
-        
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;SourceHost:%sourceHost%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">SourceHost property is set as specified.</rec>
-        <rec key="failedMsg">SourceHost property isn't set as specified.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691364"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while the SourceHost property is not a right address."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="sourceHost">10.225.29.900</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;SourceHost:%sourceHost%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while the SourceHost property is not a right address.</rec>
-        <rec key="failedMsg">No error out while the SourceHost property is not a right address.</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691371"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if SourcePort property is set as specified."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="sourcePort">8080</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;SourcePort:%sourcePort%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">SourcePort property is set as specified.</rec>
-        <rec key="failedMsg">SourcePort property isn't set as specified.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691381"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while the SourcePort value is invalid."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="sourcePort">-1</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;SourcePort:%sourcePort%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while the SourcePort value is invalid.</rec>
-        <rec key="failedMsg">No error out while the SourcePort value is invalid.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691382"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while the SourcePort value is out of range."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="sourcePort">65536</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;SourcePort:%sourcePort%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while the SourcePort value is out of range.</rec>
-        <rec key="failedMsg">No error out while the SourcePort value is out of range.</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691386"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if DestinationHost property is set as specified."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="destinationHost">10.225.29.124</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;DestinationHost:%destinationHost%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">DestinationHost property is set as specified.</rec>
-        <rec key="failedMsg">DestinationHost property isn't set as specified.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691387"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while the DestinationHost property is not a right address."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="destinationHost">10.225.29.900</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;DestinationHost:%destinationHost%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while the DestinationHost property is not a right address.</rec>
-        <rec key="failedMsg">No error out while the DestinationHost property is not a right address.</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="691388"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if DestinationPort property is set as specified."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="destinationPort">8080</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;DestinationPort:%destinationPort%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">DestinationPort property is set as specified.</rec>
-        <rec key="failedMsg">DestinationPort property isn't set as specified.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691393"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while the DestinationPort value is invalid."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="destinationPort">-1</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;DestinationPort:%destinationPort%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">DestinationPort property is set as specified.</rec>
-        <rec key="failedMsg">DestinationPort property isn't set as specified.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691394"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while the DestinationPort value is out of range."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="destinationPort">65536</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;Access:%access%;DestinationPort:%destinationPort%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while the DestinationPort value is out of range.</rec>
-        <rec key="failedMsg">No error out while the DestinationPort value is out of range.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691398"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while the SourcePort is provided and the Protocol don't exist."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="sourcePort">8080</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Ensure:Present;Direction:%direction%;Access:%access%;SourcePort:%sourcePort%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while the SourcePort is provided and the Protocol don't exist.</rec>
-        <rec key="failedMsg">No error out while the SourcePort is provided and the Protocol don't exist.</rec>
-      </var>
-
-      <var set="13" lvl="3" vid="691399"
-           dsc="[nxFirewall] [IPv4/IPv6] Verify if error out while the DestinationPort is provided and the Protocol don't exist."
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="access">Allow</rec>
-        <rec key="destinationPort">8080</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Ensure:Present;Direction:%direction%;Access:%access%;DestinationPort:%destinationPort%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <rec key="psErrorMsg">%configErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while the DestinationPort is provided and the Protocol don't exist.</rec>
-        <rec key="failedMsg">No error out while the DestinationPort is provided and the Protocol don't exist.</rec>
-      </var>
-
-      <var set="13" lvl="2" vid="814844"
-           dsc="[nxFirewall] Verify if error out while non-root user runs DSC operation to add a firewall rule"
-           cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-       
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;</rec>
-        <rec key="psScript">%dscSender-nonRoot%</rec>
-        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
-        
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while non-root user runs DSC operation to add a firewall rule</rec>
-        <rec key="failedMsg">No error out while non-root user runs DSC operation to add a firewall rule</rec>
-      </var>
-
-      <var set="1" lvl="2" vid="814846"
-     dsc="[nxFirewall] Verify if error out while non-root user runs DSC operation to get firewall information"
-     cls="DSC.nxFirewallTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="name">Rule1_tcp</rec>
-        <rec key="protocol">tcp</rec>
-        <rec key="direction">INPUT</rec>
-        <rec key="initialSet">iptables -F</rec>
-
-        <!-- MOF Info. -->
-        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:Present;Direction:%direction%;</rec>
-        <rec key="psScript">
-          %dscSender%
-          [void] (%configMofScriptPath%);    ########### Generate Mof ###########
-          [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
-          $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
-          $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
-          $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
-          $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
-          Get-DscConfiguration -CimSession $demo1;
-        </rec>
-        <rec key="psErrorMsg">%PermisssionErrorMsg%</rec>
-
-        <!-- Verify Linux State. -->
-        <rec key="verification"></rec>
-        <rec key="verificationCmd"></rec>
-        <rec key="successfulMsg">error out while non-root user runs DSC operation to get firewall information</rec>
-        <rec key="failedMsg">No error out while non-root user runs DSC operation to get firewall information</rec>
-      </var>
-      
     </section>
-
+    
     <section sid="14" dsc="nxComputer Provider">
 
       <var set="14" lvl="1" vid="691061"
@@ -5377,7 +4521,7 @@
            cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="initialCmd"></rec>
         <rec key="finalCmd">hostname %nxHostName%</rec>
         
@@ -5396,7 +4540,7 @@
            cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="dnsDomainName">test.com</rec>
         
         <rec key="initialCmd"></rec>
@@ -5417,10 +4561,10 @@
             cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">%nxHostName%</rec>
         <rec key="timeZoneName">UTC</rec>
-        <rec key="initialCmd">mv /etc/localtime /etc/localtime-old;</rec>     
-        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;</rec>
+        <rec key="initialCmd">mv /etc/localtime /etc/localtime-old;ln -s /usr/share/zoneinfo/UCT /etc/localtime;</rec>     
+        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">Name:%name%;TimeZoneName:%timeZoneName%;</rec>
@@ -5437,11 +4581,11 @@
             cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="timeZoneName">Invalid</rec>
         <rec key="alternateTimeZoneName">UTC</rec>
         <rec key="initialCmd">mv /etc/localtime /etc/localtime-old;</rec>
-        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;</rec>
+        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;hostname %nxHostName%</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">Name:%name%;TimeZoneName:%timeZoneName%;AlternateTimeZoneName:%alternateTimeZoneName%;</rec>
@@ -5458,16 +4602,16 @@
             cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="timeZoneName">UTC</rec>
         <rec key="initialCmd">mv /etc/localtime /etc/localtime-old;ln -s /usr/share/zoneinfo/UTC /etc/localtime;</rec>
-        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;</rec>
+        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;hostname %nxHostName%</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">Name:%name%;TimeZoneName:%timeZoneName%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">date |awk '{print $5}'</rec>
+        <rec key="verificationCmd">date |awk '{print $5}' | tr -d '\n'</rec>
         <rec key="expectedValue">%timeZoneName%</rec>
         <rec key="successfulMsg">time zone name is unchanged if the current time zone matches the TimeZoneName.</rec>
         <rec key="failedMsg">time zone name is changed if the current time zone matches the TimeZoneName.</rec>
@@ -5478,17 +4622,17 @@
             cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="timeZoneName">invalid</rec>
         <rec key="alternateTimeZoneName">UTC</rec>
         <rec key="initialCmd">mv /etc/localtime /etc/localtime-old;ln -s /usr/share/zoneinfo/UTC /etc/localtime;</rec>
-        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;</rec>
+        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;hostname %nxHostName%</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">Name:%name%;TimeZoneName:%timeZoneName%;AlternateTimeZoneName:%alternateTimeZoneName%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">date |awk '{print $5}'</rec>
+        <rec key="verificationCmd">date |awk '{print $5}' | tr -d '\n'</rec>
         <rec key="expectedValue">%alternateTimeZoneName%</rec>
         <rec key="successfulMsg">time zone name is unchanged while TimeZoneName is invalid and the current time zone matches the AlternateTimeZoneName.</rec>
         <rec key="failedMsg">time zone name is changed while TimeZoneName is invalid and the current time zone matches the AlternateTimeZoneName.</rec>
@@ -5499,16 +4643,16 @@
             cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="alternateTimeZoneName">UTC</rec>
-        <rec key="initialCmd">mv /etc/localtime /etc/localtime-old;</rec>
-        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;</rec>
+        <rec key="initialCmd">mv /etc/localtime /etc/localtime-old;ln -s /usr/share/zoneinfo/UTC /etc/localtime;</rec>
+        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;hostname %nxHostName%</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">Name:%name%;AlternateTimeZoneName:%alternateTimeZoneName%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">date |awk '{print $5}'</rec>
+        <rec key="verificationCmd">date |awk '{print $5}' | tr -d '\n'</rec>
         <rec key="expectedValue">%alternateTimeZoneName%</rec>
         <rec key="successfulMsg">time zone name is changed as specified in AlternateTimeZoneName property whille TimeZoneName is not provided.</rec>
         <rec key="failedMsg">time zone name is unchanged as specified in AlternateTimeZoneName property whille TimeZoneName is not provided.</rec>
@@ -5519,11 +4663,11 @@
             cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="timeZoneName">Invalid1</rec>
         <rec key="alternateTimeZoneName">Invalid2</rec>
         <rec key="initialCmd">mv /etc/localtime /etc/localtime-old;</rec>
-        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;</rec>
+        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;hostname %nxHostName%</rec>
 
         <!-- MOF Info. -->
         <rec key="propString">Name:%name%;TimeZoneName:%timeZoneName%;AlternateTimeZoneName:%alternateTimeZoneName%;</rec>
@@ -5550,7 +4694,7 @@
         <rec key="propString">Name:%name%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">hostname</rec>
+        <rec key="verificationCmd">hostname | tr -d '\n'</rec>
         <rec key="expectedValue">%name%</rec>
         <rec key="successfulMsg">computer name is unchanged if current computer name matches the Name property.</rec>
         <rec key="failedMsg">computer name is changed if current computer name matches the Name property.</rec>
@@ -5561,7 +4705,7 @@
             cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="dnsDomainName">scx.com</rec>
         <rec key="initialCmd"></rec>
         <rec key="finalCmd"></rec>
@@ -5581,7 +4725,7 @@
            cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="initialCmd"></rec>
 
         <!-- MOF Info. -->
@@ -5601,7 +4745,7 @@
            cls="DSC.nxComputerTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="name">New_ComputerName</rec>
+        <rec key="name">New-ComputerName</rec>
         <rec key="initialCmd"></rec>
 
         <!-- MOF Info. -->
@@ -5626,6 +4770,5 @@
       </var>
       
     </section>
-    
   </section>
 </varmap>

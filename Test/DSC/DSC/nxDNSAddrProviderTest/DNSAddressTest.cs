@@ -6,21 +6,24 @@
 // <description>Inherit from BaseProviderTest, override Setup(IContext ctx). </description>
 //-----------------------------------------------------------------------
 using System;
-using System.Text;
 using Infra.Frmwrk;
 using System.IO;
+using System.Collections.Generic;
 
 namespace DSC
 {
     class DNSAddressTest : ProviderTestBase
     {
+        private const string debDNSCheck = "cat /etc/network/interfaces | grep -e \"dns-nameservers\\s*{0}\" | wc -l |tr -d '\n'";
+        private const string suseDNSCheck = "cat /etc/sysconfig/network/config | grep -e \"NETCONFIG_DNS_STATIC_SEARCHLIST=\\\"{0}\\\"\" | wc -l | tr -d '\n'";
+        private const string redDNSCheck = "cat /etc/resolv.conf | grep -e \"nameserver  {0}\" | wc -l | tr -d '\\n'";
+        private string sysinfo;
+        
         public override void Setup(IContext ctx)
         {
             ctx.Alw("nxDNSAddrTest Setup Begin.");
 
-            mofHelper = new FileMofHelper();
-
-            string dnsBKPath = "/tmp/resolv_bk.conf";
+            mofHelper = new DNSAddressMofHelper();
 
             propString = ctx.Records.GetValue("propString");
             mofPath = ctx.Records.GetValue("mofPath");
@@ -39,62 +42,89 @@ namespace DSC
 
             // Open SSH.
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
-
-            initializeCmd = GetInitializeCmd(dnsBKPath);
-            finalizeCmd = GetFinalizeCmd(dnsBKPath);
-
-            // Initialize Service State.
-            ctx.Alw(String.Format("Initilize Linux state: '{0}'", initializeCmd));
             try
             {
-                sshHelper.Execute(initializeCmd);
+                string tmpInfo = String.Empty;
+                sshHelper.Execute("cat /proc/version", out tmpInfo);
+                if (tmpInfo.ToLower().Contains("debian") || tmpInfo.ToLower().Contains("ubuntu"))
+                {
+                    sysinfo = "debian"; //debian & ubuntu
+                    initializeCmd = "cp /etc/network/interfaces /tmp/interfaces_bk";
+                    finalizeCmd = "cp /tmp/interfaces_bk /etc/network/interfaces";
+                }
+                else if (tmpInfo.ToLower().Contains("suse"))
+                {
+                    sysinfo = "suse";
+                    initializeCmd = "cp /etc/sysconfig/network/config /tmp/config_bk";
+                    finalizeCmd = "cp /tmp/config_bk /etc/sysconfig/network/config";
+                }
+                else
+                {
+                    sysinfo = "redhat"; //redhat & centos
+                    initializeCmd = "cp /etc/resolv.conf /tmp/resolv.conf_bk";
+                    finalizeCmd = "cp /tmp/resolv.conf_bk /etc/resolv.conf";
+                }
             }
             catch (Exception ex)
-            {
+            {  
                 ctx.Alw(ex.Message);
             }
-
-            // Prepare a configuration MOF file.
-
-            propMap = ConvertStringToPropMap(propString);
-            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath);
-            ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
-                configMofScriptPath));
-
-            // Add the config to the logs
-            StreamReader sr = new StreamReader(configMofScriptPath);
-            string line = null;
-            StringBuilder configFile = new StringBuilder();
-            line = sr.ReadLine();
-            while (line != null)
-            {
-                line = line.Replace("{", "{{").Replace("}", "}}");
-                configFile.Append(line);
-                line = sr.ReadLine();
-            }
-            ctx.Alw(String.Format(configFile.ToString()));
-
+            initializeCmd = initializeCmd + ";sleep 1;" + ctx.Records.GetValue("initialCmd");
+            base.Setup(ctx);
             ctx.Alw("nxDNSAddrTest Setup End.");
         }
-   
-        // Check Linux service's state and enabled state.
+
+
         protected override void VerifyLinuxState(IContext ctx)
         {
-            string addrs = ctx.Records.GetValue("verification");
+            string verification = ctx.Records.GetValue("verification");
+            Dictionary<string, string> verificationMap = new Dictionary<string, string>();
+            if (!String.IsNullOrEmpty(verification))
+            {
+                verificationMap = ConvertStringToPropMap(verification);
+            }
+            else
+            {
+                ctx.Alw("No specified property need to be verified in varmap");
+            }
             try
             {
-                if (!string.IsNullOrEmpty(addrs))
+                if(verificationMap.ContainsKey("Address"))
                 {
-                    string[] addrArray = addrs.Split(',');
-                    string retval = string.Empty;
-                    foreach (string addr in addrArray)
+                    string[] ipList = verificationMap["Address"].ToString().Split(',');
+                    string ipString = String.Empty;
+                    string result = String.Empty;
+                    foreach (string item in ipList)
                     {
-                        retval = "-1";
-                        sshHelper.Execute(String.Format("cat /etc/resolv.conf | grep 'nameserver {0}'|echo $?",addr), out retval);
-                        if (!retval.Equals("0"))
-                        {
-                            throw new VarFail(String.Format("DNS Service Address : expect - {0}", addr));
-                        }
+                        ipString = ipString + item + " ";
+                    }
+                    switch (sysinfo)
+                    {
+                        case "debian":
+                            sshHelper.Execute(String.Format(debDNSCheck, ipString), out result);
+                            if (result.Equals("0"))
+                            {
+                                throw new Exception("The DNSServer is not updated successfully");
+                            }
+                            break;
+                        case "suse":
+                            sshHelper.Execute(String.Format(suseDNSCheck, ipString), out result);
+                            if (result.Equals("0"))
+                            {
+                                throw new Exception("The DNSServer is not updated successfully");
+                            }
+                            break;
+                        default:
+                            foreach (string item in ipList)
+                            {
+                                string cmd = String.Format(redDNSCheck, item);
+                                sshHelper.Execute(cmd, out result);
+                                if (result.Equals("0"))
+                                {
+                                    throw new Exception("The DNSServer is not updated successfully");
+                                }
+                            }
+                            break;
                     }
                 }
             }
@@ -103,26 +133,5 @@ namespace DSC
                 ctx.Alw(ex.Message);
             }
         }
-
-        #region Private Methods
-
-        private string GetInitializeCmd(string dnsPath)
-        {
-            StringBuilder command = new StringBuilder();
-
-            // keep a backup for the original DNS setting
-            command.Append(String.Format("cp /etc/resolv.conf {0}", dnsPath));
-            return command.ToString();
-        }
-        private string GetFinalizeCmd(string dnsPath)
-        {
-            StringBuilder command = new StringBuilder();
-
-            //restore the original firewall rules
-            command.Append(String.Format("mv {0} /etc/resolv.conf", dnsPath));
-            return command.ToString();
-        }
-
-        #endregion
     }
 }

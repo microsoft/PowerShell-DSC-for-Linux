@@ -8,7 +8,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace DSC
@@ -18,29 +17,38 @@ namespace DSC
         public DNSAddressMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
-                    Replace("$ResourceType", "nxDNSAddr").
+                    Replace("$ResourceType", "nxDNSServerAddress").
                     Replace("$ResourceName", "DNSServerAddress");
         }
+
+
 
         protected override string ConvertStringToMofProperty(Dictionary<string, string> propString)
         {
             StringBuilder text = new StringBuilder();
 
-            List<String> booleanProp = new List<String> { "Enabled" };
-
             foreach (string property in propString.Keys)
             {
                 if (!String.IsNullOrWhiteSpace(property))
                 {
-                    if (!booleanProp.Contains(property))
+                    string propertyValue = propString[property];
+                    if (propertyValue.Contains(","))
                     {
-                        text.Append(String.Format("{0} = \"{1}\"\n",
-                            property,
-                            propString[property].Replace("$", "`$")));
+                        string[] propertyValueArray = propertyValue.Split(',');
+                        text.Append(property + "= @(\"" + propertyValueArray[0] + "\"");
+                        // text.Append(String.Format("{0} = {\"{1}\"",
+                        //property,
+                        //propertyValueArray[0]));
+                        for (int i = 1; i < propertyValueArray.Length; i++)
+                        {
+                            text.Append(String.Format(",\"{0}\"",
+                             propertyValueArray[i]));
+                        }
+                        text.Append(")\n");
                     }
                     else
                     {
-                        text.Append(String.Format("{0} = ${1}\n",
+                        text.Append(String.Format("{0} = \"{1}\"\n",
                             property,
                             propString[property]));
                     }
