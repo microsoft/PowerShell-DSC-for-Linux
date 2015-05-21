@@ -49,6 +49,12 @@ namespace DSC
             set;
         }
 
+        public int TestConfigurationReturnValue
+        {
+            get;
+            set;
+        }
+
         #endregion
 
         #region Construct Methods
@@ -87,6 +93,23 @@ namespace DSC
             try
             {
                 Collection<PSObject> objs = powershell.Invoke();
+
+                if (objs.Count != 0)
+                {
+                    switch (objs[0].GetHashCode())
+                    {
+                        //The objs[0].GetHashCode()'s value is 1 when the testConfiguration return true.
+                        //So i set the TestConfigurationReturnValue 1 on behalf of the testConfiguration return true
+                        case 1:
+                            TestConfigurationReturnValue = 1;
+                            break;
+                        case 2:
+                            TestConfigurationReturnValue = 0;
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
                 var errors = powershell.Streams.Error;
 

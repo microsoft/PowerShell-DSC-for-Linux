@@ -6,9 +6,7 @@
 // <description>A base class about provider test.</description>
 //-----------------------------------------------------------------------
 
-using System.Configuration;
 using System.IO;
-using System.Management.Automation;
 using System.Text;
 
 namespace DSC
@@ -17,7 +15,7 @@ namespace DSC
     using System.Collections.Generic;
     using System.Linq;
     using Infra.Frmwrk;
-    
+
     public class ProviderTestBase : ISetup, IRun, IVerify, ICleanup
     {
         protected MofHelper mofHelper;
@@ -44,6 +42,9 @@ namespace DSC
 
         public virtual void Setup(IContext ctx)
         {
+            //the TestConfigurationReturnValude defalut val
+            psHelper.TestConfigurationReturnValue = -1;
+
             propString = ctx.Records.GetValue("propString");
             mofPath = ctx.Records.GetValue("mofPath");
             configMofScriptPath = ctx.Records.GetValue("configMofScriptPath");
@@ -81,9 +82,11 @@ namespace DSC
                 configMofScriptPath));
 
             // Add the config to the logs
-            StreamReader sr = new StreamReader(configMofScriptPath);
-            string line = null;
+            StreamReader sr = new StreamReader(configMofScriptPath);        
             StringBuilder configFile = new StringBuilder();
+
+            //The temp variable line is to read a line from the temp variable sr.It's recycle variable.
+            string line = null;
             line = sr.ReadLine();
             while (line != null)
             {
@@ -123,6 +126,40 @@ namespace DSC
                 {
                     throw new VarFail(psHelper.ErrorMsg);
                 }
+
+                //get the Test-DscConfiguration's returnvalue
+                if (psHelper.TestConfigurationReturnValue != -1)
+                {
+                    
+                    
+                    string expectedInstallState = ctx.Records.GetValue("expectedInstallState").ToLower();
+                    ctx.Alw("The expectedInstallState:" + expectedInstallState + "\n" +"the TestConfigurationReturnValue:" + Convert.ToString(psHelper.TestConfigurationReturnValue) + "\n");
+
+                    if (psHelper.TestConfigurationReturnValue == 0)
+                    {
+                        if (expectedInstallState != "false")
+                        {
+                            throw new VarFail(string.Format(
+                    "The expectedInstallState: '{0}' \n" +
+                            "the TestConfigurationReturnValue:'{1}'\n",
+                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                        }
+                    }
+                    else if (psHelper.TestConfigurationReturnValue == 1)
+                    {
+                        if (expectedInstallState != "true")
+                        {
+                            throw new VarFail(string.Format(
+                    "The expectedInstallState: '{0}' \n" +
+                            "the TestConfigurationReturnValue:'{1}'\n",
+                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                        }
+                    }
+                    ctx.Alw("Verify End.");
+
+                    return;
+                }
+
                 // Check the result of GetConfiguration.
                 ctx.Alw("The result of Get-DscConfiguration:");
 

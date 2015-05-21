@@ -122,6 +122,37 @@ namespace DSC
                     ctx.Alw("No specified property need to be verified in varmap");
                 }
 
+                //get the Test-DscConfiguration's returnvalue
+                if (psHelper.TestConfigurationReturnValue != -1)
+                {
+                    string expectedInstallState = ctx.Records.GetValue("expectedInstallState").ToLower();
+                    ctx.Alw("The expectedInstallState:" + expectedInstallState + "\n" +"the testConfigurationReturnValude:" + Convert.ToString(psHelper.TestConfigurationReturnValue) + "\n");
+
+                    if (psHelper.TestConfigurationReturnValue == 0)
+                    {
+                        if (expectedInstallState != "false")
+                        {
+                            throw new VarFail(string.Format(
+                    "The expectedInstallState: '{0}' \n" +
+                            "the testConfigurationReturnValude:'{1}'\n",
+                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                        }
+                    }
+                    else if (psHelper.TestConfigurationReturnValue == 1)
+                    {
+                        if (expectedInstallState != "true")
+                        {
+                            throw new VarFail(string.Format(
+                    "The expectedInstallState: '{0}' \n" +
+                            "the testConfigurationReturnValude:'{1}'\n",
+                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                        }
+                    }
+                    ctx.Alw("Verify End.");
+
+                    return;
+                }
+
                 //Return from Get-DscConfiguration
                 Dictionary<string, string> list = psHelper.LastPowerShellReturnValues[0];
                 list.Remove("CimClass");
