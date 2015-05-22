@@ -30,7 +30,7 @@ class MSFT_nxIPAddress : OMI_BaseResource
 };
 """
 
-def ValidateAddresses(IPAddress,AddressFamily):
+def ValidateAddresses(IPAddress,AddressFamily,PrefixLength):
     if 'IPv4' in AddressFamily:
         ptype=socket.AF_INET
     elif 'IPv6' in AddressFamily:
@@ -40,13 +40,25 @@ def ValidateAddresses(IPAddress,AddressFamily):
     try:
         socket.inet_pton(ptype,IPAddress)
     except:
+        print('Error: IPAddress "'+IPAddress+'" is invalid.',file=sys.stderr)
         return False
+    if type(PrefixLength) == int or type(PrefixLength) == long :
+        if 'IPv4' in AddressFamily and ( PrefixLength < 0 or PrefixLength > 32) :
+            print('Error: PrefixLength "'+ str(PrefixLength) +'" is invalid.  Values are 0-32.',file=sys.stderr)
+            return False
+        if 'IPv6' in AddressFamily and ( PrefixLength < 0 or PrefixLength > 128) :
+            print('Error: PrefixLength "'+ str(PrefixLength) +'" is invalid.  Values are 0-128.',file=sys.stderr)
+            return False
     return True
 
 def bitNetmaskConversion(PrefixLength):
-    N = int(PrefixLength)
+    if PrefixLength == '':
+        return ''
+    if type(PrefixLength) != long and type(PrefixLength) != int :
+        N = int(PrefixLength)
+    else :
+        N = PrefixLength
     M =  N / 8    #number of 255 sections (full octets)
-#    part = N % 8    #number of 1's in odd octet
     MASK = 255
    
     netmaskIP = ""
@@ -68,7 +80,8 @@ def bitNetmaskConversion(PrefixLength):
     return netmaskIP
 
 def netmaskBitConversion(netmask):
-    print( netmask, "netmask")
+    if netmask==None or netmask=='' :
+        return 0
     arrTmp = netmask.strip("'")
     arr = arrTmp.split(".")
     
@@ -84,77 +97,57 @@ def netmaskBitConversion(netmask):
                 j+=1
     return sumT
 
-def Set_Marshall(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+def init_vars(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
     if PrefixLength == None:
         PrefixLength=''
     if BootProtocol == None:
         BootProtocol=''
+    else :
+        BootProtocol=BootProtocol[0].upper()+BootProtocol[1:].lower()
     if Ensure == None or len(Ensure)<1:
         Ensure='Present'
+    else :
+        Ensure=Ensure[0].upper()+Ensure[1:].lower()
     if AddressFamily == None or len(AddressFamily)<1:
         AddressFamily='IPv4'
+    else :
+        AddressFamily=AddressFamily[0].upper()+AddressFamily[1].upper()+AddressFamily[2].lower()+AddressFamily[3:]
     if IPAddress == None:
         IPAddress=''
     if len(IPAddress)>0:
-        if ValidateAddresses(IPAddress,AddressFamily) == False:
-            return [-1]
+        if ValidateAddresses(IPAddress,AddressFamily,PrefixLength) == False:
+            return False,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily
     elif BootProtocol != 'Automatic' and Ensure == 'Present':
         print('ERROR: BootProtocol != Automatic.  IPAdress is required.',file=sys.stdout)
-        return [-1]
+        return False,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily
     if DefaultGateway == None:
         DefaultGateway=''
-    if len(DefaultGateway) > 0 and ValidateAddresses(DefaultGateway,AddressFamily) == False:
+    if len(DefaultGateway) > 0 and ValidateAddresses(DefaultGateway,AddressFamily,'') == False:
+        return False,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily
+    return True,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily
+
+def Set_Marshall(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+    ret,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily = \
+    init_vars(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+    if ret is False :
         return [-1]
     MyDistro=GetMyDistro()
     retval = MyDistro.Set(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
     return retval
 
 def Test_Marshall(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
-    if PrefixLength == None:
-        PrefixLength=''
-    if BootProtocol == None:
-        BootProtocol=''
-    if Ensure == None or len(Ensure)<1:
-        Ensure='Present'
-    if AddressFamily == None or len(AddressFamily)<1:
-        AddressFamily='IPv4'
-    if IPAddress == None:
-        IPAddress=''
-    if len(IPAddress)>0:
-        if ValidateAddresses(IPAddress,AddressFamily) == False:
-            return [-1]
-    elif BootProtocol != 'Automatic' and Ensure == 'Present':
-        print('ERROR: BootProtocol != Automatic.  IPAdress is required.',file=sys.stdout)
-        return [-1]
-    if DefaultGateway == None:
-        DefaultGateway=''
-    if len(DefaultGateway) > 0 and ValidateAddresses(DefaultGateway,AddressFamily) == False:
+    ret,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily = \
+    init_vars(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+    if ret is False :
         return [-1]
     MyDistro=GetMyDistro()
-    retval = MyDistro.Test(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
-    return retval
+    return MyDistro.Test(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
 
 def Get_Marshall(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
     arg_names=list(locals().keys())
-    if PrefixLength == None:
-        PrefixLength=''
-    if BootProtocol == None:
-        BootProtocol=''
-    if Ensure == None or len(Ensure)<1:
-        Ensure='Absent'
-    if AddressFamily == None or len(AddressFamily)<1:
-        AddressFamily='IPv4'
-    if IPAddress == None:
-        IPAddress=''
-    if len(IPAddress)>0:
-        if ValidateAddresses(IPAddress,AddressFamily) == False:
-            return [-1,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily]
-    elif BootProtocol != 'Automatic' and Ensure == 'Present':
-        print('ERROR: BootProtocol != Automatic.  IPAdress is required.',file=sys.stdout)
-        return [-1,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily]
-    if DefaultGateway == None:
-        DefaultGateway=''
-    if len(DefaultGateway) > 0 and ValidateAddresses(DefaultGateway,AddressFamily) == False:
+    ret,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily = \
+    init_vars(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+    if ret is False :
         return [-1,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily]
     retval = 0
     MyDistro=GetMyDistro()
@@ -165,7 +158,7 @@ def Get_Marshall(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,Pref
     InterfaceName = protocol.MI_String(InterfaceName.encode("utf-8"))
     BootProtocol = protocol.MI_String(BootProtocol.encode("utf-8"))
     DefaultGateway = protocol.MI_String(DefaultGateway.encode("utf-8"))
-    if type(PrefixLength) == int:
+    if type(PrefixLength) == int or type(PrefixLength) == long :
         PrefixLength=protocol.MI_Uint32(PrefixLength)
     else:
         PrefixLength=protocol.MI_Uint32(int(PrefixLength))
@@ -261,7 +254,6 @@ class AbstractDistro(object):
         else:
             self.ifcfg_v6_dict['BOOTPROTO=']='dhcp'
         self.ifcfg_v6_dict['DHCPCLASS=']=''
-        self.ifcfg_v6_dict['IPV6ADDR=']=IPAddress
         if BootProtocol.lower() == 'static':
             self.ifcfg_v6_dict['IPV6_INIT=']='yes'
             self.ifcfg_v6_dict['IPV6_AUTOCONF=']='no'
@@ -269,9 +261,9 @@ class AbstractDistro(object):
             self.ifcfg_v6_dict['IPV6_INIT=']='yes'
             self.ifcfg_v6_dict['IPV6_AUTOCONF=']='no'
         if PrefixLength != 0 and PrefixLength != '':
-            self.ifcfg_v6_dict['NETMASK=']=bitNetmaskConversion(PrefixLength)
+            self.ifcfg_v6_dict['IPV6ADDR=']=IPAddress+'/'+str(PrefixLength)
         else:
-            self.ifcfg_v6_dict['NETMASK=']=''
+            self.ifcfg_v6_dict['IPV6ADDR=']=IPAddress
         self.gateway_dict['GATEWAY=']=DefaultGateway
         if AddressFamily == 'IPv4':
             self.ifcfg_dict=self.ifcfg_v4_dict
@@ -281,32 +273,33 @@ class AbstractDistro(object):
             self.addr_key='IPV6ADDR='
 
     def src_dicts_to_params(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
-        if len(self.ifcfg_dict['NETMASK=']) > 0:
-            PrefixLength=netmaskBitConversion(self.ifcfg_dict['NETMASK='])
-        else:
-            PrefixLength=''
-        if ':' in self.ifcfg_dict[self.addr_key]:
-            AddressFamily='IPv6'
-        else:
-            AddressFamily='IPv4'
-        if self.ifcfg_dict['BOOTPROTO='] == 'dhcp':
-            bootproto='Automatic'
-        else:
-            bootproto='Static'
+        if AddressFamily=='IPv4':
+            if 'NETMASK=' in self.ifcfg_dict.keys() and len(self.ifcfg_dict['NETMASK=']) > 0 :
+                PrefixLength=netmaskBitConversion(self.ifcfg_dict['NETMASK='])
+        elif PrefixLength != '' and PrefixLength > 0 and '/' in self.ifcfg_dict[self.addr_key] :
+            PrefixLength=int(self.ifcfg_dict[self.addr_key].split('/')[1])
+            self.ifcfg_dict[self.addr_key]=self.ifcfg_dict[self.addr_key].split('/')[0]
+        bootproto=''
+        if BootProtocol != None and len(BootProtocol) > 0 :
+            if self.ifcfg_dict['BOOTPROTO='] == 'dhcp':
+                bootproto='Automatic'
+            else:
+                bootproto='Static'
         gateway=''
         if len(self.gateway_dict['GATEWAY=']) >0:
             gateway=self.gateway_dict['GATEWAY=']
         return self.ifcfg_dict[self.addr_key],self.ifcfg_dict['DEVICE='],bootproto,gateway,Ensure,PrefixLength,AddressFamily
     
-    def restart_network(self):
-        os.system('service network restart')
+    def restart_network(self,Interface):
+        os.system('ifconfig ' + Interface + ' down')
+        os.system('ifconfig ' + Interface + ' up')
         return [0]
 
     def interface_down(self,Interface):
         os.system('ifconfig ' + Interface + ' down')
         return [0]
 
-    def UpdateValuesInFile(self,fname,src_dict,re_dict):
+    def UpdateValuesInFile(self,fname,src_dict,re_dict,Ensure):
         updated=''
         if os.path.exists(fname) != True:
             # if this file is not here - we will create it
@@ -370,18 +363,18 @@ class AbstractDistro(object):
                     os.remove(self.ifcfg_file)
                     retval=[0]
             else:
-                retval=self.UpdateValuesInFile(self.ifcfg_file,self.ifcfg_dict,ifcfg_re_dict)
+                retval=self.UpdateValuesInFile(self.ifcfg_file,self.ifcfg_dict,ifcfg_re_dict,Ensure)
             if len(self.gateway_prefix)>0:
                 if os.path.exists(self.gateway_file):
                     os.remove(self.gateway_file)
                     retval=[0]
             else:
-                retval=self.UpdateValuesInFile(self.gateway_file,self.gateway_dict,gateway_re_dict)
+                retval=self.UpdateValuesInFile(self.gateway_file,self.gateway_dict,gateway_re_dict,Ensure)
             self.interface_down(InterfaceName)
         else:
-            retval=self.UpdateValuesInFile(self.gateway_file,self.gateway_dict,gateway_re_dict)
-            retval=self.UpdateValuesInFile(self.ifcfg_file,self.ifcfg_dict,ifcfg_re_dict)
-        retval=self.restart_network()
+            retval=self.UpdateValuesInFile(self.gateway_file,self.gateway_dict,gateway_re_dict,Ensure)
+            retval=self.UpdateValuesInFile(self.ifcfg_file,self.ifcfg_dict,ifcfg_re_dict,Ensure)
+            retval=self.restart_network(InterfaceName)
         return retval
     
     def Test(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
@@ -404,6 +397,13 @@ class AbstractDistro(object):
                 test_ifcfg[k]=''
         test_ifcfg_re_dict=self.init_re_dict(self.ifcfg_dict)
         self.GetValuesFromFile(self.ifcfg_file,test_ifcfg,test_ifcfg_re_dict)
+        if Ensure == 'Absent':
+            if 'iface ' in test_ifcfg.keys() and test_ifcfg['iface ']!=None and len(test_ifcfg['iface '])>0:
+                return [-1]
+            elif len(self.ifcfg_prefix)>0 and os.path.exists(self.ifcfg_file) :
+                return [-1]
+            else:
+                return [0]
         for k in self.ifcfg_dict:
             if self.ifcfg_dict[k] != test_ifcfg[k]:
                 return [-1]
@@ -411,12 +411,9 @@ class AbstractDistro(object):
     
     def Get(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
         # calling Test here will fill the dicts with values
-        if self.Test(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily) == [0]:
-            Ensure='Present'
-            IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength, \
-            AddressFamily = self.src_dicts_to_params(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
-        else:
-            Ensure='Absent'
+        self.Test(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
+        IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily = \
+        self.src_dicts_to_params(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily)
         if PrefixLength=='':
             PrefixLength=0
         return 0,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily
@@ -435,7 +432,7 @@ class SuSEDistro(AbstractDistro):
             self.gateway_v6_dict['default ']=''
         else:
             self.gateway_v4_dict['default ']=DefaultGateway+' '+bitNetmaskConversion(PrefixLength)+' '+InterfaceName
-            self.gateway_v6_dict['default ']=DefaultGateway+'/'+str(PrefixLength)+' - - '+InterfaceName
+            self.gateway_v6_dict['default ']=DefaultGateway+'/'+str(PrefixLength)+' '+InterfaceName
         self.ifcfg_v4_dict=dict()
         if BootProtocol.lower() != 'static':
             self.ifcfg_v4_dict['BOOTPROTO=']='dhcp'
@@ -443,15 +440,17 @@ class SuSEDistro(AbstractDistro):
             self.ifcfg_v4_dict['BOOTPROTO=']='static'
         self.ifcfg_v4_dict['STARTMODE=']='auto'
         self.ifcfg_v4_dict['IPADDR=']=IPAddress
-        self.ifcfg_v4_dict['PREFIXLEN=']=str(PrefixLength)
+        self.ifcfg_v4_dict['NETMASK=']=bitNetmaskConversion(PrefixLength)
         self.ifcfg_v6_dict=dict()
         if BootProtocol.lower() != 'static':
             self.ifcfg_v6_dict['BOOTPROTO=']='autoip' 
         else:
             self.ifcfg_v6_dict['BOOTPROTO=']='static'
         self.ifcfg_v6_dict['STARTMODE=']='auto'
-        self.ifcfg_v6_dict['IPADDR=']=IPAddress
-        self.ifcfg_v6_dict['PREFIXLEN=']=str(PrefixLength)
+        if PrefixLength != 0 and PrefixLength != '':
+            self.ifcfg_v6_dict['IPADDR=']=IPAddress+'/'+str(PrefixLength)
+        else:
+            self.ifcfg_v6_dict['IPADDR=']=IPAddress
         if AddressFamily == 'IPv4':
             self.ifcfg_dict=self.ifcfg_v4_dict
             self.addr_key='IPADDR='
@@ -462,25 +461,26 @@ class SuSEDistro(AbstractDistro):
             self.gateway_dict=self.gateway_v6_dict
 
     def src_dicts_to_params(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
-        if len(self.ifcfg_dict['PREFIXLEN=']) > 0:
-            PrefixLength=netmaskBitConversion(self.ifcfg_dict['PREFIXLEN='])
-        else:
-            PrefixLength=''
-        if ':' in self.ifcfg_dict['IPADDR=']:
-            AddressFamily='IPv6'
-        else:
-            AddressFamily='IPv4'
-        if self.ifcfg_v4_dict['BOOTPROTO='] != 'static':
-            bootproto='Automatic'
-        else:
-            bootproto='Static'
+        if AddressFamily=='IPv4':
+            if 'NETMASK=' in self.ifcfg_dict.keys() and len(self.ifcfg_dict['NETMASK=']) > 0 :
+                PrefixLength=netmaskBitConversion(self.ifcfg_dict['NETMASK='])
+        elif PrefixLength != '' and PrefixLength > 0 and '/' in self.ifcfg_dict[self.addr_key] :
+            PrefixLength=int(self.ifcfg_dict[self.addr_key].split('/')[1])
+            self.ifcfg_dict[self.addr_key]=self.ifcfg_dict[self.addr_key].split('/')[0]
+        bootproto=''
+        if BootProtocol != '' and 'BOOTPROTO=' in self.ifcfg_v4_dict.keys() and len(self.ifcfg_v4_dict['BOOTPROTO=']) >0 :
+            if self.ifcfg_v4_dict['BOOTPROTO='] != 'static':
+                bootproto='Automatic'
+            else:
+                bootproto='Static'
         gateway=''
         if len(self.gateway_dict['default ']) >0:
             gateway=self.gateway_dict['default '].split(' ')[1]
         return self.ifcfg_dict['IPADDR='],self.ifcfg_file.split('-')[-1],bootproto,gateway,Ensure,PrefixLength,AddressFamily
     
-    def restart_network(self):
-        os.system('/sbin/rcnetwork restart')
+    def restart_network(self,Interface):
+        os.system('ifconfig ' + Interface + ' down')
+        os.system('ifconfig ' + Interface + ' up')
         return [0]
 
 class debianDistro(AbstractDistro):
@@ -499,6 +499,8 @@ class debianDistro(AbstractDistro):
             re_dict['iface ']=re.compile(r'\s*iface '+src_dict['iface '])
         if 'inet ' in re_dict:
             re_dict['inet ']=re.compile(r'\s*iface '+src_dict['iface '] + ' inet .*')
+        if 'inet6 ' in re_dict:
+            re_dict['inet6 ']=re.compile(r'\s*iface '+src_dict['iface '] + ' inet6 .*')
         return re_dict
 
     def init_src_dicts(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
@@ -525,16 +527,11 @@ class debianDistro(AbstractDistro):
         else:
             self.ifcfg_v6_dict['inet6 ']='' 
         self.ifcfg_v6_dict['iface ']=InterfaceName
-        addr=IPAddress
-        if PrefixLength != '' and IPAddress !='' :
-            addr+='/'+str(PrefixLength)
-        self.ifcfg_v6_dict['address ']=addr
         if PrefixLength !=0 and PrefixLength != '':
-            self.ifcfg_v6_dict['netmask ']=bitNetmaskConversion(PrefixLength)
+            self.ifcfg_v6_dict['address ']=IPAddress+'/'+ str(PrefixLength)
         else:
-            self.ifcfg_v6_dict['netmask ']=''
+            self.ifcfg_v6_dict['address ']=IPAddress
         self.ifcfg_v6_dict['gateway ']=DefaultGateway
-
         if AddressFamily == "IPv4":
             self.ifcfg_dict=self.ifcfg_v4_dict
             self.inet='inet '
@@ -550,36 +547,38 @@ class debianDistro(AbstractDistro):
             self.ifcfg_dict[auto]=''
             
     def src_dicts_to_params(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
-        if len(self.ifcfg_dict['netmask ']) > 0:
-            PrefixLength=netmaskBitConversion(self.ifcfg_dict['netmask '])
-        else:
-            PrefixLength=''
-        if ':' in self.ifcfg_dict['address ']:
-            AddressFamily='IPv6'
-            if self.ifcfg_dict['autoconf '] == '1' :
-                inet = 'Automatic'
+        inet=''
+        if BootProtocol != None and len(BootProtocol) > 0 :
+            if AddressFamily=='IPv6':
+                if self.ifcfg_dict['autoconf '] == '1' :
+                    inet = 'Automatic'
+                else:
+                    inet = 'Static'
             else:
-                inet = 'Static'
-        else:
-            AddressFamily='IPv4'
-            if self.ifcfg_dict[self.inet] == 'dhcp':
-                inet = 'Automatic'
-            else:
-                inet = 'Static'
+                if self.ifcfg_dict[self.inet] == 'dhcp':
+                    inet = 'Automatic'
+                else:
+                    inet = 'Static'
+        if AddressFamily=='IPv4':
+            if 'netmask' in self.ifcfg_dict.keys() and len(self.ifcfg_dict['netmask']) > 0 :
+                PrefixLength=netmaskBitConversion(self.ifcfg_dict['netmask'])
+        elif PrefixLength != '' and PrefixLength > 0 and '/' in self.ifcfg_dict['address '] :
+            PrefixLength=int(self.ifcfg_dict['address '].split('/')[1])
+            self.ifcfg_dict['address ']=self.ifcfg_dict['address '].split('/')[0]
         gateway=''
         if len(self.ifcfg_dict['gateway ']) >0:
             gateway=self.ifcfg_dict['gateway ']
         return self.ifcfg_dict['address '],self.ifcfg_dict['iface '],inet,gateway,Ensure,PrefixLength,AddressFamily
 
-    def restart_network(self):
-        os.system('ifdown --exclude=lo -a ; ifup --exclude=lo -a')
+    def restart_network(self,Interface):
+        os.system('ifdown --exclude=lo ' + Interface +'; ifup --exclude=lo '+ Interface)
         return [0]
 
-    def UpdateValuesInFile(self,fname,src_dict,re_dict):
+    def UpdateValuesInFile(self,fname,src_dict,re_dict,Ensure):
         if len(src_dict) == 0:
             return [0]
         removing=False
-        if 'inet ' in src_dict.keys() and len(src_dict[self.inet])==0: # we are trying to remove
+        if self.inet in src_dict.keys() and Ensure=='Absent': # we are trying to remove
             removing=True
         if removing == False and os.path.exists(fname) != True:
             # if this file is not here - we will create it
@@ -610,7 +609,8 @@ class debianDistro(AbstractDistro):
         else:  #matched      
             if removing:
                 tail=''
-                txt=re.sub(r.group(0),tail,txt,flags=re.S|re.M)
+                rpl=re.compile(r.group(0),flags=re.S|re.M)
+                txt=rpl.sub(tail,txt)
                 if txt[-2:] == '\n\n':
                     txt=txt[:-1]
             else : # replace tags - preserve unknown tags
@@ -649,7 +649,8 @@ class debianDistro(AbstractDistro):
                 if updated[-1] != '\n':
                     tail='\n'
                 updated+=tail
-                txt=re.sub(r.group(0),updated,txt,flags=re.S|re.M)
+                rpl=re.compile(r.group(0),flags=re.S|re.M)
+                txt=rpl.sub(updated,txt)
                 if txt[-2:] == '\n\n':
                     txt=txt[:-1]
         ReplaceFileContentsAtomic(fname,txt)
