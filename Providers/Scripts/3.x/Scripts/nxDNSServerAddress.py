@@ -189,7 +189,7 @@ def GetMyDistro(dist_class_name=''):
     else:
         Distro=dist_class_name
     
-    if not globals().has_key(dist_class_name):
+    if not dist_class_name in globals().keys():
         print(Distro+' is not a supported distribution.')
         return None
     return globals()[dist_class_name]() # the distro class inside this module.
