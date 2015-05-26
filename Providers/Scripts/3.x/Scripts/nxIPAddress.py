@@ -177,7 +177,7 @@ def ReplaceFileContentsAtomic(filepath, contents):
         contents=contents.encode('latin-1')
     try:
         os.write(handle, contents)
-    except IOError, e:
+    except IOError as e:
         print('ReplaceFileContentsAtomic','Writing to file ' + filepath + ' Exception is ' + str(e),file=sys.stderr)
         return None
     finally:
@@ -185,15 +185,15 @@ def ReplaceFileContentsAtomic(filepath, contents):
     try:
         os.rename(temp, filepath)
         return None
-    except IOError, e:
+    except IOError as e:
         print('ReplaceFileContentsAtomic','Renaming ' + temp+ ' to ' + filepath + ' Exception is ' +str(e),file=sys.stderr)
     try:
         os.remove(filepath)
-    except IOError, e:
+    except IOError as e:
         print('ReplaceFileContentsAtomic','Removing '+ filepath + ' Exception is ' +str(e),file=sys.stderr)
     try:
         os.rename(temp,filepath)
-    except IOError, e:
+    except IOError as e:
         print('ReplaceFileContentsAtomic','Removing '+ filepath + ' Exception is ' +str(e),file=sys.stderr)
         return 1
     return 0
