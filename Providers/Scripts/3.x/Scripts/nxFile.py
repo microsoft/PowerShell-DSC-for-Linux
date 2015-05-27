@@ -40,7 +40,7 @@ def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents,
     if Ensure is None or Ensure == '':
         Ensure = 'present'
     if Type is None :
-        Type = ''
+        Type = 'file'
     if Force is None :
         Force = False
     if Contents is None :
@@ -1012,11 +1012,6 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         Ensure = "absent"
         ModifiedDate = 0
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
-
-    Contents = ""
-    Checksum = ""
-    Force = False
-    Recurse = False
 
     stat_info = os.lstat(DestinationPath)
 
