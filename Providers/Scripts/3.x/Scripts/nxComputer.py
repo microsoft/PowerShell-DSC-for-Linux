@@ -192,18 +192,22 @@ def Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
 
 
 def Get(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-    fqdn = GetHostname()
+    fqdn = GetHostname().strip('\n')
     if '.' in fqdn:
         Name = fqdn.split('.')[0]
         DNSDomainName = fqdn.replace(Name + '.', '')
     else:
         Name = fqdn
         DNSDomainName = ''
+    
     zones = GetCurrentTimezones()
-    if len(zones) > 1:
-        AlternateTimeZoneName = zones[1][0]
-    if len(zones) > 0:
-        AlternateTimeZoneName = zones[0][0]
+    if not TestTimezone(TimeZoneName):
+        TimeZoneName = zones[0][0]
+    if len(AlternateTimeZoneName) > 0 and not TestTimezone(AlternateTimeZoneName):
+        if len(zones) >1:
+            AlternateTimeZoneName = zones[1][0]
+        else :
+            AlternateTimeZoneName = zones[0][0]
     return Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName
 
 
@@ -413,8 +417,9 @@ def TestTimezone(TimeZone):
     for n, h in zones:
         if TimeZone == n:
             return True
-    tz, tzfile = ValidateTimeZoneString(TimeZone)
+    tz = ValidateTimeZoneString(TimeZone)
+    tz = ExtractSimpleNameFromTimeZoneString(tz)
     for n, h in zones:
-        if tzfile == n:
+        if tz == n:
             return True
     return False
