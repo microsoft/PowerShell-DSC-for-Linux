@@ -58,7 +58,7 @@ def bitNetmaskConversion(PrefixLength):
         N = int(PrefixLength)
     else :
         N = PrefixLength
-    M =  N / 8    #number of 255 sections (full octets)
+    M =  int(N / 8)    #number of 255 sections (full octets)
     MASK = 255
    
     netmaskIP = ""
@@ -100,8 +100,8 @@ def netmaskBitConversion(netmask):
 def init_vars(IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
     if PrefixLength == None:
         PrefixLength=''
-    if BootProtocol == None:
-        BootProtocol=''
+    if BootProtocol == None or len(BootProtocol)<1:
+        BootProtocol='Automatic'
     else :
         BootProtocol=BootProtocol[0].upper()+BootProtocol[1:].lower()
     if Ensure == None or len(Ensure)<1:
@@ -254,10 +254,10 @@ class AbstractDistro(object):
             self.ifcfg_v6_dict['BOOTPROTO=']='dhcp'
         self.ifcfg_v6_dict['DHCPCLASS=']=''
         if BootProtocol.lower() == 'static':
-            self.ifcfg_v6_dict['IPV6_INIT=']='yes'
+            self.ifcfg_v6_dict['IPV6INIT=']='yes'
             self.ifcfg_v6_dict['IPV6_AUTOCONF=']='no'
         else :
-            self.ifcfg_v6_dict['IPV6_INIT=']='yes'
+            self.ifcfg_v6_dict['IPV6INIT=']='yes'
             self.ifcfg_v6_dict['IPV6_AUTOCONF=']='no'
         if PrefixLength != 0 and PrefixLength != '':
             self.ifcfg_v6_dict['IPV6ADDR=']=IPAddress+'/'+str(PrefixLength)
@@ -290,8 +290,8 @@ class AbstractDistro(object):
         return self.ifcfg_dict[self.addr_key],self.ifcfg_dict['DEVICE='],bootproto,gateway,Ensure,PrefixLength,AddressFamily
     
     def restart_network(self,Interface):
-        os.system('ifconfig ' + Interface + ' down')
-        os.system('ifconfig ' + Interface + ' up')
+        os.system('ifdown ' + Interface)
+        os.system('ifup ' + Interface)
         return [0]
 
     def interface_down(self,Interface):
@@ -326,10 +326,10 @@ class AbstractDistro(object):
                                 re_dict[k]=None
                 if len(l)>2:
                     updated+=l
-                for k in re_dict:
-                    if re_dict[k] != None and len(src_dict[k]) > 0 :
-                        l=k+src_dict[k]+'\n'
-                        updated+=l
+            for k in re_dict:
+                if re_dict[k] != None and len(src_dict[k]) > 0 :
+                    l=k+src_dict[k]+'\n'
+                    updated+=l
                 
         except:
             raise
@@ -430,7 +430,7 @@ class SuSEDistro(AbstractDistro):
     def init_src_dicts(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
         self.gateway_v4_dict=dict()
         self.gateway_v6_dict=dict()
-        if BootProtocol.lower() != 'static':
+        if BootProtocol.lower() != 'static' or len(DefaultGateway) == 0:
             self.gateway_v4_dict['default ']=''
             self.gateway_v6_dict['default ']=''
         else:
@@ -482,8 +482,8 @@ class SuSEDistro(AbstractDistro):
         return self.ifcfg_dict['IPADDR='],self.ifcfg_file.split('-')[-1],bootproto,gateway,Ensure,PrefixLength,AddressFamily
     
     def restart_network(self,Interface):
-        os.system('ifconfig ' + Interface + ' down')
-        os.system('ifconfig ' + Interface + ' up')
+        os.system('ifdown ' + Interface)
+        os.system('ifup ' + Interface)
         return [0]
 
 class debianDistro(AbstractDistro):
