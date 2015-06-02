@@ -46,7 +46,7 @@ DO_VERBOSE_TRACE = False
 
 def trace(text):
     if DO_TRACE:
-        sys.stdout.write(text + '\n')
+        sys.stdout.write(repr(text) + '\n')
 
 
 def verbose_trace(text):
@@ -837,10 +837,7 @@ class MI_String(MI_Value):
     def __init__(self, val):
         MI_Value.__init__(self, MI_STRING)
         if val is not None:
-            if type(val) is not str:
-                self.value = str(val)
-            else:
-                self.value = val
+            self.value = val
 
     def write(self, fd):
         verbose_trace('<MI_String.write>')
@@ -1483,7 +1480,7 @@ class MI_StringA(MI_Value):
         self.value = []
         if vals is not None:
             for val in vals:
-                self.value.append(str(val))
+                self.value.append(val)
 
     def write(self, fd):
         verbose_trace('<MI_StringA.write>')
