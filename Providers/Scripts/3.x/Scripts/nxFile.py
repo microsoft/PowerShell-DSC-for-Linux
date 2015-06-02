@@ -160,7 +160,7 @@ def ReadFile1k(path):
             LG().Log('ERROR', "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
         else:
             d = F.read(1024)
-    return d.decode('ascii','ignore'), error
+    return d, error
 
 
 def ReadFile(path):

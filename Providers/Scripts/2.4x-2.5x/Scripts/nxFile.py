@@ -88,7 +88,7 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     Ensure = protocol.MI_String(Ensure)
     Type = protocol.MI_String(Type)
     Force = protocol.MI_Boolean(Force)
-    Contents = protocol.MI_String(Contents.decode('ascii', 'ignore'))
+    Contents = protocol.MI_String(Contents)
     Checksum = protocol.MI_String(Checksum)
     Recurse = protocol.MI_Boolean(Recurse)
     Links = protocol.MI_String(Links)
@@ -149,7 +149,7 @@ def ReadFile1k(path):
     else:
         d = F.read(1024)
         F.close()
-    return d.decode('utf-8','ignore').encode('ascii','ignore'), error
+    return d, error
 
 
 def ReadFile(path):
