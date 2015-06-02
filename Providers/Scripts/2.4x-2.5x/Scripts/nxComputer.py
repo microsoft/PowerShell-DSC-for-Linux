@@ -192,14 +192,10 @@ def Get(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
         Name = fqdn
         DNSDomainName = ''
     
-    zones = GetCurrentTimezones()
     if not TestTimezone(TimeZoneName):
-        TimeZoneName = zones[0][0]
+        TimeZoneName = ''
     if len(AlternateTimeZoneName) > 0 and not TestTimezone(AlternateTimeZoneName):
-        if len(zones) >1:
-            AlternateTimeZoneName = zones[1][0]
-        else :
-            AlternateTimeZoneName = zones[0][0]
+        AlternateTimeZoneName = ''
     return Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName
 
 
