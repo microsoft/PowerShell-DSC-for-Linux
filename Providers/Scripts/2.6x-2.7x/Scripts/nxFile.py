@@ -921,7 +921,7 @@ def TestFile(DestinationPath, SourcePath, fc):
 
     elif fc.Contents:
         dest_file, error = ReadFile(DestinationPath)
-        if fc.Contents != dest_file:
+        if fc.Contents.encode('utf8') != dest_file:
             return False
 
     return True
