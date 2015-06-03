@@ -9,6 +9,8 @@ import sys
 import tempfile
 import re
 import imp
+import codecs
+
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
@@ -142,11 +144,11 @@ def FindStringInFile(fname, matchs, multiline=False):
     try:
         ms = re.compile(matchs)
         if multiline:
-            with (open(fname, 'r')) as F:
+            with (codecs.open(fname, 'r', 'utf8')) as F:
                 l = F.read()
                 m = re.findall(ms, l)
         else:
-            with (open(fname, 'r')) as F:
+            with (codecs.open(fname, 'r', 'utf8')) as F:
                 for l in F:
                     m = re.search(ms, l)
                     if m:
@@ -157,7 +159,7 @@ def FindStringInFile(fname, matchs, multiline=False):
 
 
 def FindLiteralStringInFile(fname, matchs):
-    with (open(fname, 'r')) as F:
+    with (codecs.open(fname, 'r', 'utf8')) as F:
         for l in F:
             if matchs == l.strip('\n'):
                 return True
@@ -172,7 +174,7 @@ def ReplaceStringInFile(fname, src, repl):
     try:
         sr = re.compile(src)
         if FindStringInFile(fname, src):
-            for l in (open(fname, 'r')):
+            for l in (codecs.open(fname, 'r', 'utf8')):
                 n = re.sub(sr, repl, l)
                 if len(n) > 2:
                     updated += n
@@ -184,7 +186,7 @@ def ReplaceStringInFile(fname, src, repl):
 
 
 def AppendStringToFile(fname, s):
-    with (open(fname, 'a')) as F:
+    with (codecs.open(fname, 'a', 'utf8')) as F:
         F.write(s)
         if s[-1] != '\n':
             F.write('\n')

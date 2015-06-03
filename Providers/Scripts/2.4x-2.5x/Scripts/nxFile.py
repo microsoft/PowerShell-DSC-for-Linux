@@ -194,7 +194,7 @@ def WriteFile(path, contents):
 
 
 def Print(s, file=sys.stderr):
-    file.write(s + '\n')
+    file.write(s.encode('utf8') + '\n')
     
 def LStatFile(path):
     """
@@ -914,7 +914,7 @@ def TestFile(DestinationPath, SourcePath, fc):
 
     elif fc.Contents:
         dest_file, error = ReadFile(DestinationPath)
-        if fc.Contents != dest_file:
+        if fc.Contents.encode('utf8') != dest_file:
             return False
 
     return True
