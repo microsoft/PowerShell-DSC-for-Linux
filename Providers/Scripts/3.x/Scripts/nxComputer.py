@@ -183,7 +183,7 @@ def Set(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
 
 
 def Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-    if GetHostname() != Name + DNSDomainName:
+    if GetHostname() != Name + '.' + DNSDomainName:
         return False
     if TestTimezone(TimeZoneName) is False:
         if TestTimezone(AlternateTimeZoneName) is False:
@@ -192,7 +192,7 @@ def Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
 
 
 def Get(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-    fqdn = GetHostname().strip('\n')
+    fqdn = GetHostname()
     if '.' in fqdn:
         Name = fqdn.split('.')[0]
         DNSDomainName = fqdn.replace(Name + '.', '')
@@ -385,7 +385,7 @@ def SetHostname(Name, DNSDomainName):
 def GetHostname():
     out = ''
     code, out = RunGetOutput('hostname --fqdn', False, False)
-    return out
+    return out.strip('\n')
 
 
 def GetCurrentTimezones():
