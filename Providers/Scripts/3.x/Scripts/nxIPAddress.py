@@ -271,6 +271,7 @@ class AbstractDistro(object):
         else :
             self.ifcfg_dict=self.ifcfg_v6_dict
             self.addr_key='IPV6ADDR='
+            self.gateway_dict['NETWORKING_IPV6=']='yes'
 
     def src_dicts_to_params(self,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
         if AddressFamily=='IPv4':
@@ -389,6 +390,8 @@ class AbstractDistro(object):
         test_gateway_re_dict=self.init_re_dict(self.gateway_dict)
         self.GetValuesFromFile(self.gateway_file,test_gateway,test_gateway_re_dict)
         for k in self.gateway_dict:
+            if k == 'default ' and len(self.gateway_dict[k]) >0:  # SuSE
+                self.gateway_dict[k]=self.gateway_dict[k].split(' ')[0]
             if self.gateway_dict[k] != test_gateway[k]:
                 return [-1]
         test_ifcfg=dict(self.ifcfg_dict)
@@ -432,7 +435,7 @@ class SuSEDistro(AbstractDistro):
             self.gateway_v6_dict['default ']=''
         else:
             self.gateway_v4_dict['default ']=DefaultGateway+' '+bitNetmaskConversion(PrefixLength)+' '+InterfaceName
-            self.gateway_v6_dict['default ']=DefaultGateway+'/'+str(PrefixLength)+' '+InterfaceName
+            self.gateway_v6_dict['default ']=DefaultGateway+' '+InterfaceName
         self.ifcfg_v4_dict=dict()
         if BootProtocol.lower() != 'static':
             self.ifcfg_v4_dict['BOOTPROTO=']='dhcp'
@@ -474,8 +477,10 @@ class SuSEDistro(AbstractDistro):
             else:
                 bootproto='Static'
         gateway=''
+        # The gateway line here for SuSE is 'default <addr> <interface>'.
+        # Remove the <interface> so it can match <addr>.  
         if len(self.gateway_dict['default ']) >0:
-            gateway=self.gateway_dict['default '].split(' ')[1]
+            gateway=self.gateway_dict['default '].split(' ')[0]
         return self.ifcfg_dict['IPADDR='],self.ifcfg_file.split('-')[-1],bootproto,gateway,Ensure,PrefixLength,AddressFamily
     
     def restart_network(self,Interface):
