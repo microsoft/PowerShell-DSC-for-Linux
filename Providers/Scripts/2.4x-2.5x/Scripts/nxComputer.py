@@ -208,9 +208,9 @@ def BuildTZList():
             F, error = opened_w_error(n, 'r')
             if error:
                 Print("Exception opening file " + n + " Error Code: " + str(error.errno) +
-                      " Error: " + error.message + error.strerror, file=sys.stderr)
+                      " Error: " + error.strerror, file=sys.stderr)
                 LG().Log('ERROR', "Exception opening file " + n + " Error Code: " + str(error.errno) +
-                      " Error: " + error.message + error.strerror)
+                      " Error: " + error.strerror)
                 return tzlist
             t = F.read()
             F.close()
@@ -331,9 +331,9 @@ def SetHostname(Name, DNSDomainName):
     F, error = opened_w_error('/etc/hosts', 'r')
     if error:
         Print("Exception opening file /etc/hosts Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
+              " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception opening file /etc/hosts Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror)
+              " Error: " + error.strerror)
         return False
     found_v4 = False
     found_v6 = False
@@ -359,18 +359,18 @@ def SetHostname(Name, DNSDomainName):
     F, error = opened_w_error('/etc/hosts', 'w')
     if error:
         Print("Exception opening file /etc/hosts Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
+              " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception opening file /etc/hosts Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror)
+              " Error: " + error.strerror)
         return False
     F.write(n)
     F.close()
     F, error = opened_w_error('/etc/hostname', 'w')
     if error:
         Print("Exception opening file /etc/hostname Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror, file=sys.stderr)
+              " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception opening file /etc/hostname Error Code: " + str(error.errno) +
-              " Error: " + error.message + error.strerror)
+              " Error: " + error.strerror)
         return False
     F.write(Name + '\n')
     F.close()
@@ -390,9 +390,9 @@ def GetCurrentTimezones():
     F, error = opened_w_error('/etc/localtime', 'r')
     if error:
         Print("Exception opening file /etc/localtime Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror, file=sys.stderr)
+              str(error.errno) + " Error: " + error.strerror, file=sys.stderr)
         LG().Log('ERROR', "Exception opening file /etc/localtime Error Code: " +
-              str(error.errno) + " Error: " + error.message + error.strerror)
+              str(error.errno) + " Error: " + error.strerror)
         return zones
     t = F.read()
     F.close()
