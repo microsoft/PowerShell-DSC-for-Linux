@@ -352,6 +352,7 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
                          DestinationPath + " Error: " + str(error))
                 return False
         arch.close()
+        os.system('touch '+DestinationPath) # existing dirs won't get an updated time, so update it.
     if WriteCacheInfo(SourcePath, DestinationPath) is False:
         return False
     return True
