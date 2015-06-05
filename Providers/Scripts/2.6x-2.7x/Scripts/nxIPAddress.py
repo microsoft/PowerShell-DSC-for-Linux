@@ -259,7 +259,7 @@ class AbstractDistro(object):
             self.ifcfg_v6_dict['IPV6_AUTOCONF=']='no'
         else :
             self.ifcfg_v6_dict['IPV6INIT=']='yes'
-            self.ifcfg_v6_dict['IPV6_AUTOCONF=']='no'
+            self.ifcfg_v6_dict['IPV6_AUTOCONF=']='yes'
         if PrefixLength != 0 and PrefixLength != '':
             self.ifcfg_v6_dict['IPV6ADDR=']=IPAddress+'/'+str(PrefixLength)
         else:
