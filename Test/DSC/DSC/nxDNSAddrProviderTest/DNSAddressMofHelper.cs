@@ -36,9 +36,7 @@ namespace DSC
                     {
                         string[] propertyValueArray = propertyValue.Split(',');
                         text.Append(property + "= @(\"" + propertyValueArray[0] + "\"");
-                        // text.Append(String.Format("{0} = {\"{1}\"",
-                        //property,
-                        //propertyValueArray[0]));
+
                         for (int i = 1; i < propertyValueArray.Length; i++)
                         {
                             text.Append(String.Format(",\"{0}\"",

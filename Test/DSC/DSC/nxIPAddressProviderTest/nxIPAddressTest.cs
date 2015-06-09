@@ -16,10 +16,11 @@ namespace DSC
     class nxIPAddressTest : ProviderTestBase
     {
         private string interfaceName;
-        private string ifcfg_bak;
+        private string configFile_bak;
+        private string configFilePath;
+        private string restartNetworkCmd;
         private bool isDU;
         private bool isSuse;
-        private SshHelper sshHelper;
         public override void Setup(IContext ctx)
         {
             ctx.Alw("nxIPAddressTest Setup Begin.");
@@ -39,8 +40,9 @@ namespace DSC
             string sysinfo = string.Empty;
             isDU = false;
             isSuse = false;
-            ifcfg_bak = "/tmp/eth1_bak";
-
+            configFile_bak = "/tmp/configFile_bak";
+            configFilePath = "/etc/sysconfig/network-scripts/ifcfg-" + interfaceName;
+            restartNetworkCmd = "service network restart";
             try
             {
                 // Store the orignal hostname.
@@ -48,18 +50,17 @@ namespace DSC
                 if (sysinfo.Contains("Ubuntu") || sysinfo.Contains("Debian"))
                 {
                     isDU = true;
+                    configFilePath = "/etc/network/interfaces";
+                    restartNetworkCmd = "service networking restart";
                 }
                 if (sysinfo.Contains("SUSE"))
                 {
                     isSuse = true;
+                    configFilePath = "/etc/sysconfig/network/ifcfg-" + interfaceName;
                 }
+
                 initializeCmd = GetInitializeCmd(initalSet, isDU, isSuse);
-                finalizeCmd = GetFinalizeCmd(isDU,isSuse);
-
-                // Initialize Service State.
-                //ctx.Alw(String.Format("Initilize Linux state : '{0}'", initializeCmd));
-
-                //sshHelper.Execute(initializeCmd);
+                finalizeCmd = GetFinalizeCmd(isDU, isSuse);
 
             }
             catch (Exception ex)
@@ -68,6 +69,32 @@ namespace DSC
             }
 
             base.Setup(ctx);
+
+            //set the default value of property.
+            if (!propMap.ContainsKey("BootProtocol"))
+            {
+                propMap["BootProtocol"] = "Automatic";
+            }
+
+            if (!propMap.ContainsKey("Ensure"))
+            {
+                propMap["Ensure"] = "present";
+            }
+
+            if (!propMap.ContainsKey("DefaultGateway"))
+            {
+                propMap["DefaultGateway"] = "";
+            }
+
+            if (!propMap.ContainsKey("PrefixLength"))
+            {
+                propMap["PrefixLength"] = "0";
+            }
+
+            if (!propMap.ContainsKey("AddressFamily"))
+            {
+                propMap["AddressFamily"] = "IPv4";
+            }
 
             ctx.Alw("nxIPAddressTest Setup End.");
         }
@@ -83,136 +110,166 @@ namespace DSC
             }
 
             var verificationMap = ConvertStringToPropMap(verification);
-            string interf = string.Empty;
-            string configVal = string.Empty;
-            string ensureVal = string.Empty;
-            string result = string.Empty;
+
             string addr = verificationMap["IPAddress"];
-            string expectedAddr = verificationMap["IPAddress"];
 
-            if (verificationMap.ContainsKey("Ensure"))
-            {
-                ensureVal = verificationMap["Ensure"];
-            }
+            string result = string.Empty;
 
-            if (!verificationMap.ContainsKey("InterfaceName"))
-            {
-                interf = interfaceName;
-            }
-            else
-            {
-                interf = verificationMap["InterfaceName"];
-            }
+            string interf = !verificationMap.ContainsKey("InterfaceName") ? interfaceName : verificationMap["InterfaceName"];
 
-            try
-            {
-                sshHelper.Execute("ifconfig " + interf, out configVal);
-            }
-            catch
-            { }
+            string ensureVal = !verificationMap.ContainsKey("Ensure") ? "present" : verificationMap["Ensure"];
 
-            // Get AddressFamily type, the default is "IPV4"
-            string addrFamily = "inet *addr";
-            if (verificationMap.ContainsKey("AddressFamily"))
-            {
-                if (verificationMap["AddressFamily"].ToLower().Equals("ipv6"))
-                {
-                    addrFamily = "inet6 *addr";
-                }
-            }
+            string addrFamily = !verificationMap.ContainsKey("AddressFamily") ? "ipv4" : verificationMap["AddressFamily"];
 
-            string bootPro = "Static";
-            if (verificationMap.ContainsKey("BootProtocol"))
+            string bootPro = !verificationMap.ContainsKey("BootProtocol") ? "automatic" : verificationMap["BootProtocol"];
+
+            string addrTag = !addrFamily.ToLower().Equals("ipv6") ? "inet *addr" : "inet6 *addr";
+
+            // When Ensure set to 'Absent'
+            if (ensureVal.ToLower().Equals("absent"))
             {
-                bootPro = verificationMap["BootProtocol"];
-            }
-            // Check IPAddress and AddressFamily.
-            if (verificationMap.ContainsKey("IPAddress"))
-            {
-                if (ensureVal.ToLower().Equals("absent"))
+                if (isDU)
                 {
                     try
                     {
-                        sshHelper.Execute(string.Format("ifconfig {0} |grep -i '{1}'", interfaceName, addr), out result);
+                        sshHelper.Execute(string.Format("cat {0} |grep -i 'address {1}' 2>/dev/null", configFilePath, addr), out result);
                     }
-                    catch (Exception ex1)
+                    catch (Exception)
                     {
-                        throw new VarFail(String.Format("Fail to get ip address. "));
-                    }                  
-                 
-                    if (!string.IsNullOrEmpty(result))
+                        if (!String.IsNullOrEmpty(result))
+                        {
+                            throw new VarFail(String.Format("Fail to remove IPAddress {0}", verificationMap["IPAddress"]));
+                        }
+                    }
+                }
+                else
+                {
+                    try
                     {
-                        throw new VarFail(String.Format("Fail to remove IPAddress {0}", verificationMap["IPAddress"]));
+                        sshHelper.Execute(string.Format("ifconfig {0} |grep -i '{1}'| grep -i '{2}' 2>/dev/null", interfaceName, addrTag, addr), out result);
+                    }
+                    catch (Exception)
+                    {
+                        if (!String.IsNullOrEmpty(result))
+                        {
+                            throw new VarFail(String.Format("Fail to remove IPAddress {0}", verificationMap["IPAddress"]));
+                        }
 
+                    }
+                }
+            }
+
+            //when Ensure set to 'Present'.
+            if (ensureVal.ToLower() == "present")
+            {
+                ////when 'BOOTPROTO' set to Static
+                if (bootPro.ToLower().Equals("static"))
+                {
+                    try
+                    {
+                        // Check 'IPAddress'
+                        sshHelper.Execute(string.Format("ifconfig {0} |grep -i '{1}'|grep -i '{2}'", interfaceName, addrTag, addr), out result);
+                    }
+                    catch (Exception)
+                    {
+                        throw new VarFail(String.Format("Fail to set IPAddress {0}", verificationMap["IPAddress"]));
                     }
 
                 }
                 else
                 {
-                    if (bootPro.ToLower().Equals("static"))
+                    //when 'BOOTPROTO' set to Automatic
+                    if (isDU)
                     {
-                        //sshHelper.Execute(string.Format("ifconfig {0} |grep -i {1}", interfaceName, addr), out result);
-                        sshHelper.Execute(string.Format("ifconfig {0} |grep -i '{1}'", interfaceName, addr), out result);
-
-                        //Ensure is set to 'present'
-                        if (string.IsNullOrEmpty(result))
+                        if (addrFamily.ToLower() == "ipv4")
                         {
-                            throw new VarFail(String.Format("Fail to set IPAddress {0}", verificationMap["IPAddress"]));
+                            try
+                            {
+                                sshHelper.Execute(string.Format("cat {0} |grep -i 'iface {1} inet dhcp'", configFilePath, interf), out result);
+                            }
+                            catch (Exception)
+                            {
+                                throw new VarFail(String.Format("Fail to set automatic ipv4 address to 'iface {0} inet dhcp'", interf));
+                            }
                         }
+                        else
+                        {
+                            // e.g. 'iface eth1 inet6 static'
+                            try
+                            {
+                                sshHelper.Execute(string.Format("cat {0} |grep -i 'iface {1} inet6 static'", configFilePath, interf), out result);
+                            }
+                            catch (Exception)
+                            {
+                                throw new VarFail(String.Format("Fail to set automatic ipv6 address to 'iface {0} inet6 static'", interf));
+                            }
 
+                            //Check 'autoconf=1'
+                            try
+                            {
+                                sshHelper.Execute(string.Format("cat {0} |grep -i 'autoconf 1'", configFilePath), out result);
+                            }
+                            catch (Exception)
+                            {
+                                throw new VarFail(String.Format("Fail to set autoconf to '1'"));
+                            }
+                        }
                     }
                     else
                     {
-                        sshHelper.Execute(string.Format("ifconfig {0} |grep -i '{1}'", interfaceName, addrFamily), out result);
-                        if (string.IsNullOrEmpty(result))
-                        {
-                            throw new VarFail(String.Format("Fail to set IPAddress while BootProtocol set to automatic "));
+                        //Check on cent/oracle/sles/rhel
 
+                        if (addrFamily.ToLower() == "ipv6")
+                        {
+                            try
+                            {
+                                sshHelper.Execute(string.Format("cat {0} |grep -i 'IPV6_AUTOCONF=yes'", configFilePath), out result);
+                            }
+                            catch (Exception)
+                            {
+                                throw new VarFail(String.Format("Fail to set IPV6_AUTOCONF to 'yes'"));
+                            }
+                        }
+
+                        //Check 'BOOTPROTO=dhcp'
+                        try
+                        {
+                            sshHelper.Execute(string.Format("cat {0} |grep -i 'BOOTPROTO=dhcp'", configFilePath), out result);
+                        }
+                        catch (Exception)
+                        {
+                            throw new VarFail(String.Format("Fail to set BOOTPROTO to 'dhcp'"));
                         }
 
                     }
-                }
 
-                //if (!verificationMap["IPAddress"].Equals(
-                //    tmpAddr, StringComparison.InvariantCultureIgnoreCase))
-                //{
-                //    throw new VarFail(String.Format(
-                //        "'{0}' State : expect - '{1}', actual - '{2}'",
-                //        "IPAddress", verificationMap["IPAddress"], tmpAddr));
-                //}
-
-
-
-                // Check DefaultGateway
-                if (verificationMap.ContainsKey("DefaultGateway"))
-                {
-                    string tmpDefaultGW = GetConfigVal("ip route", "default", 2);
-                    if (!verificationMap["DefaultGateway"].Equals(
-                        tmpDefaultGW, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        throw new VarFail(String.Format(
-                            "'{0}' State : expect - '{1}', actual - '{2}'",
-                            "DefaultGateway", verificationMap["DefaultGateway"], tmpDefaultGW));
-                    }
                 }
 
                 // Check Mask 
                 if (verificationMap.ContainsKey("PrefixLength"))
                 {
-                    string tmpPrefixLen = GetConfigVal("ifconfig " + interfaceName, "Mask", 1);
-                    if (!verificationMap["PrefixLength"].Equals(
-                        tmpPrefixLen, StringComparison.InvariantCultureIgnoreCase))
+                    string verifyMaskCmd = string.Format("ifconfig {0} |grep -i '{1}'|grep -i 'mask:{2}'", interfaceName, addrTag, verificationMap["PrefixLength"]);
+
+                    if (addrFamily.ToLower() == "ipv6")
                     {
-                        throw new VarFail(String.Format(
-                            "'{0}' State : expect - '{1}', actual - '{2}'",
-                            "PrefixLength", verificationMap["PrefixLength"], tmpPrefixLen));
+                        verifyMaskCmd = string.Format("ifconfig {0} |grep -i '{1}'|grep -i '/{2}'", interfaceName, addrTag, verificationMap["PrefixLength"]);
+                    }
+
+                    if (bootPro.ToLower().Equals("static"))
+                    {
+                        try
+                        {
+                            sshHelper.Execute(string.Format("{0}", verifyMaskCmd), out result);
+                        }
+                        catch (Exception)
+                        {
+                            throw new VarFail(String.Format("Fail to set net mask {0}", verificationMap["PrefixLength"]));
+                        }
                     }
                 }
             }
-
         }
         
-
         #region Private Methods
 
         private string GetConfigVal(string cmmd, string item, int step)
@@ -227,163 +284,101 @@ namespace DSC
             StringBuilder command = new StringBuilder();
             StringBuilder config = new StringBuilder();
             Dictionary<string, string> initialDict = ConvertStringToPropMap(initial);
-            string interf = string.Empty;
-            string ensureValue = "present";
-            string addrFamily = "IPv4";
-            if (!initialDict.ContainsKey("InterfaceName"))
+
+            string interf = !initialDict.ContainsKey("InterfaceName") ? interfaceName : initialDict["InterfaceName"]; 
+            string ensureValue = !initialDict.ContainsKey("Ensure") ? "present" : initialDict["Ensure"]; 
+            string addrFamily = !initialDict.ContainsKey("AddressFamily") ? "ipv4" : initialDict["AddressFamily"]; 
+            string bootProto = !initialDict.ContainsKey("BootProtocol") ? "automatic" : initialDict["BootProtocol"]; 
+            string autocConf = "autoconf 1";
+
+            if (bootProto.ToLower() == "static")
             {
-                interf = interfaceName;
-            }
-            else
-            {
-                interf = initialDict["InterfaceName"];
+                autocConf = "autoconf 0";
             }
 
-
-            //set up the initial test environment if specified
             if (isDU)
             {
-                string bootProto = "static";
-                string path = "/etc/network/interfaces";
-
-                config.AppendLine(String.Format("auto {0}", interf));
-
-                if (initialDict.ContainsKey("AddressFamily"))
+                if (ensureValue.ToLower() == "present")
                 {
-                    addrFamily = initialDict["AddressFamily"];
+                    config.AppendLine(String.Format("auto {0}", interf));
+
+                    if (initialDict.ContainsKey("IPAddress"))
+                    {
+                        config.AppendLine(String.Format("address {0}", initialDict["IPAddress"]));
+                    }
+
                     if (addrFamily.ToLower().Equals("ipv6"))
                     {
-                        addrFamily = "IPv6";
-                    }
-                }
-                if (initialDict.ContainsKey("IPAddress"))
-                {
-                    config.AppendLine(String.Format("address {0}", initialDict["IPAddress"]));
-                }
-                else
-                {
-                    throw new ArgumentException("Please specify IPAddress value for the initial test environment establishment! ");
-                }
-
-                if (initialDict.ContainsKey("BootProtocol"))
-                {
-
-                    //should consider about "bootp"?
-                    if (initialDict["BootProtocol"] == "Automatic")
-                    {
-                        bootProto = "dhcp";
-                    }
-
-                    if (addrFamily.Equals("IPv6"))
-                    {
-                        config.AppendLine(String.Format("iface {0} inet6 {1}", interf, bootProto));
+                        //no dhcp for ipv6, static is correct.
+                        bootProto = "static";
+                        config.AppendLine(String.Format("iface {0} inet6 {1}\n{2}", interf, bootProto, autocConf));
                     }
                     else
                     {
-                        config.AppendLine(String.Format("iface {0} inet {1}", interf, bootProto));
+                        //ipv4
+                        if (bootProto.ToLower() == "automatic")
+                        {
+                            bootProto = "dhcp";
+                        }
+                        config.AppendLine(String.Format("iface {0} inet {1}\n{2}", interf, bootProto, autocConf));
                     }
-                }
-                if (initialDict.ContainsKey("DefaultGateway"))
-                {
-                    config.AppendLine(String.Format("gateway {0}", initialDict["DefaultGateway"]));
-                }
-                if (initialDict.ContainsKey("PrefixLength"))
-                {
-                    config.AppendLine(String.Format("netmask {0}", initialDict["PrefixLength"]));
-                }
 
-                
-                command.Append(String.Format("mv {0} {2}; echo {1} > {0}; /etc/init.d/networking restart", path, config.ToString(), ifcfg_bak));
+                    if (initialDict.ContainsKey("PrefixLength"))
+                    {
+                        config.AppendLine(String.Format("netmask {0}", initialDict["PrefixLength"]));
+                    }
+
+                    command.Append(String.Format("mv {0} {2}; echo {1} > {0}; {3};", configFilePath, config.ToString(), configFile_bak, restartNetworkCmd));
+                }
             }
             else
             {
-                string path = "/etc/sysconfig/network-scripts/ifcfg-" + interfaceName;
-                if (isSuse)
-                {
-                     path = "/etc/sysconfig/network/ifcfg-" + interfaceName;
-                }
-
+                // On Sles/Rhel/CentOs/Oracle
                 config.AppendLine(String.Format("DEVICE={0}", interfaceName));
 
-                if (initialDict.ContainsKey("Ensure"))
-                {
-                    ensureValue = initialDict["Ensure"];
-                }
-                
                 if (ensureValue.ToLower().Equals("absent"))
                 {
-                    command.AppendLine(string.Format("if [ -f {0} ]; then mv {0} {2}; fi;echo -e \"{1}\" > {0};/etc/init.d/network restart;", path, config.ToString(), ifcfg_bak));
+                    command.AppendLine(string.Format("if [ -f {0} ]; then mv {0} {2}; fi;echo -e \"{1}\" > {0};{3};", configFilePath, config.ToString(), configFile_bak, restartNetworkCmd));
                 }
                 else
                 {
-                    if (initialDict.ContainsKey("AddressFamily"))
-                    {
-                        if (initialDict["AddressFamily"].ToLower().Equals("ipv6"))
-                        {
-                            addrFamily = "IPv6";
-                        }
-                    }
+
                     if (initialDict.ContainsKey("IPAddress"))
                     {
-                        if (addrFamily.Equals("IPv6"))
+
+                        config.AppendLine(addrFamily.ToLower().Equals("ipv6")
+                            ? String.Format("IPV6ADDR={0}\\nONBOOT=yes", initialDict["IPAddress"])
+                            : String.Format("IPADDR={0}\\nONBOOT=yes", initialDict["IPAddress"]));
+
+                    }
+
+                    //set 'BOOTPROTO'
+                    if (addrFamily.ToLower().Equals("ipv6"))
+                    {
+                        if (bootProto.ToLower().Equals("automatic"))
                         {
-                            config.AppendLine(String.Format("IPV6ADDR={0}", initialDict["IPAddress"]));
+                            bootProto = "dhcp\n" + "IPV6INIT=\"yes\"\nIPV6_AUTOCONF=\"yes\"";
                         }
                         else
                         {
-                            config.AppendLine(String.Format("IPADDR={0}", initialDict["IPAddress"]));
+                            bootProto = "None\n" + "IPV6INIT=\"yes\"\nIPV6_AUTOCONF=\"no\"";
                         }
-                        
+
                     }
                     else
                     {
-                        throw new ArgumentException("Please specify IPAddress value for the initial test environment establishment! ");
+                        //IPv4
+                        bootProto = bootProto.ToLower().Equals("automatic") ? "dhcp" : "None";
+
                     }
+                    config.AppendLine(String.Format("BOOTPROTO={0}", bootProto));
 
-                    if (initialDict.ContainsKey("BootProtocol"))
-                    { 
-
-                        string bootProto = "Static";
-                        if (addrFamily.Equals("IPv6"))
-                        {
-                            if (initialDict["BootProtocol"].ToLower().Equals("automatic"))
-                            {
-                                bootProto = "dhcp\n" + "IPV6INIT=\"yes\"\nIPV6_AUTOCONF=\"no\"";
-                            }
-                            else
-                            {
-                                bootProto = "None\n" + "IPV6INIT=\"yes\"\nIPV6_AUTOCONF=\"no\"";
-                            }
-                        }
-                        else
-                        {
-                            if (initialDict["BootProtocol"].ToLower().Equals("automatic"))
-                            {
-                                bootProto = "dhcp";
-                            }
-                            else
-                            {
-                                bootProto = "None";
-                            }
-
-                        }
-
-                        config.AppendLine(String.Format("BOOTPROTO={0}", bootProto));
-                    }
-
-                    if (initialDict.ContainsKey("DefaultGateway"))
-                    {
-                        //config.AppendLine(String.Format("GATEWAY={0}", initialDict["DefaultGateway"]));
-                    }
                     if (initialDict.ContainsKey("PrefixLength"))
                     {
                         config.AppendLine(String.Format("NETMASK={0}", initialDict["PrefixLength"]));
                     }
-                   
 
-                    //command.Append(String.Format("if [ -f {0} ]; then mv {0} {0}-old; fi; echo -e \"{1}\" > {0}; ", path, config.ToString())); //TBD:etc/init.d/networking restart
-
-                    command.Append(String.Format("if [ -f {0} ]; then mv {0} {2}; fi; echo -e \"{1}\" > {0}; ", path, config.ToString(), ifcfg_bak));
+                    command.Append(String.Format("if [ -f {0} ]; then mv {0} {2}; fi; echo -e \"{1}\" > {0};{3};", configFilePath, config.ToString(), configFile_bak, restartNetworkCmd));
                 }
             }
             return command.ToString();
@@ -391,35 +386,12 @@ namespace DSC
 
         private string GetFinalizeCmd(bool isDU, bool isSuse)
         {
-            string path = "/etc/sysconfig/network-scripts/ifcfg-" + interfaceName;
-            if (isDU)
-            {
-                path = "/etc/network/interfaces";
-            }
-            if (isSuse)
-            {
-                path = "/etc/sysconfig/network/ifcfg-" + interfaceName;
-            }
-
-            return String.Format("if [ -f {1} ]; then mv {1} {0}; fi;", path, ifcfg_bak);
+            return String.Format("if [ -f {1} ]; then mv {1} {0}; {2}; fi;", configFilePath, configFile_bak, restartNetworkCmd);
         }
 
-        private string Getifcfg_filepath(string sysinfo)
-        {
-            string filePath = "/etc/sysconfig/network/ifcfg";
-            if (sysinfo.Contains("Ubuntu") || sysinfo.Contains("Debian"))
-            {
-                filePath = "/etc/network/interfaces";
-            }
 
-            if (sysinfo.Contains("SUSE"))
-            {
-                filePath = "/etc/sysconfig/network/ifcfg-";
-            }
-
-            return filePath;
         #endregion
 
-        }
+
     }
 }

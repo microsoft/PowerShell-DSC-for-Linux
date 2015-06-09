@@ -140,9 +140,9 @@ namespace DSC
                         if (expectedInstallState != "false")
                         {
                             throw new VarFail(string.Format(
-                    "The expectedInstallState: '{0}' \n" +
-                            "the TestConfigurationReturnValue:'{1}'\n",
-                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                                "The expectedInstallState: '{0}' \n" +
+                                "the TestConfigurationReturnValue:'{1}'\n",
+                                expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
                         }
                     }
                     else if (psHelper.TestConfigurationReturnValue == 1)
@@ -150,9 +150,9 @@ namespace DSC
                         if (expectedInstallState != "true")
                         {
                             throw new VarFail(string.Format(
-                    "The expectedInstallState: '{0}' \n" +
-                            "the TestConfigurationReturnValue:'{1}'\n",
-                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                                "The expectedInstallState: '{0}' \n" +
+                                "the TestConfigurationReturnValue:'{1}'\n",
+                                expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
                         }
                     }
                     ctx.Alw("Verify End.");
@@ -181,8 +181,8 @@ namespace DSC
                 ctx.Alw(rltGetDSC + "\n************************************************\n");
                 //Get property value from Linux
                 linuxMap = GetLinuxValue();
-                
 
+                Dictionary<string, string> varMap = mofHelper.ReturnedPropertiesOfGetDscConfiguration(propMap);
                 foreach (string key in list.Keys)
                 {
 
@@ -207,7 +207,7 @@ namespace DSC
 
                     if (propMap.ContainsKey(key))
                     {
-                        string mapProperty = propMap[key];
+                        string mapProperty = varMap[key];
 
                         // Check varmap property value with Get-DscConfiguration
                         if (!String.IsNullOrEmpty(mapProperty))

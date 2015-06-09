@@ -14,8 +14,6 @@ namespace DSC
 {
     class nxComputerTest : ProviderTestBase
     {
-        private string orgHostName;
-        private const string orgTimeZone = "/etc/localtime-old";
 
         public override void Setup(IContext ctx)
         {
@@ -27,21 +25,6 @@ namespace DSC
             finalizeCmd = ctx.Records.GetValue("finalCmd");
 
             base.Setup(ctx);
-
-            if (!propMap.ContainsKey("DNSDomainName"))
-            {
-                propMap["DNSDomainName"] = "";
-            }
-
-            if (!propMap.ContainsKey("TimeZoneName"))
-            {
-                propMap["TimeZoneName"] = "";
-            }
-
-            if (!propMap.ContainsKey("AlternateTimeZoneName"))
-            {
-                propMap["AlternateTimeZoneName"] = "";
-            }
             ctx.Alw("nxComputerTest Setup End.");
         }
 
