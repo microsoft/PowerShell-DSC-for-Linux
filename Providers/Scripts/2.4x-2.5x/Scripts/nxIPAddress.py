@@ -527,8 +527,10 @@ class debianDistro(AbstractDistro):
         self.ifcfg_v4_dict['address ']=IPAddress
         if PrefixLength !=0 and PrefixLength != '':
             self.ifcfg_v4_dict['netmask ']=bitNetmaskConversion(PrefixLength)
+            self.ifcfg_v6_dict['netmask ']=str(PrefixLength)
         else:
             self.ifcfg_v4_dict['netmask ']=''
+            self.ifcfg_v6_dict['netmask ']=''
         self.ifcfg_v4_dict['gateway ']=DefaultGateway
         if len(BootProtocol) > 0:
             self.ifcfg_v6_dict['inet6 ']='static'  # static is used for autoconf as well
@@ -536,7 +538,7 @@ class debianDistro(AbstractDistro):
             self.ifcfg_v6_dict['inet6 ']='' 
         self.ifcfg_v6_dict['iface ']=InterfaceName
         if PrefixLength !=0 and PrefixLength != '':
-            self.ifcfg_v6_dict['address ']=IPAddress+'/'+ str(PrefixLength)
+            self.ifcfg_v6_dict['address ']=IPAddress
         else:
             self.ifcfg_v6_dict['address ']=IPAddress
         self.ifcfg_v6_dict['gateway ']=DefaultGateway
