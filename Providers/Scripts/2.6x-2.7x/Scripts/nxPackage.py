@@ -347,7 +347,7 @@ def IsPackageInstalled(p):
                 'ERROR', 'ERROR.  PackageGroup is not valid for ' + p.PackageManager)
             return False, out
     else:
-        cmd = p.cmds[p.PackageManager]['stat'] + p.Name
+        cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager]['stat'] + p.Name
     code, out = RunGetOutput(cmd, False)
     if p.PackageGroup is True:  # implemented for YUM only.
         if 'Installed' in out:
@@ -423,7 +423,7 @@ def DoEnableDisable(p):
                 'ERROR', 'Error: Group mode not implemented for ' + p.PackageManager)
             return False, 'Error: Group mode not implemented for ' + p.PackageManager
     else:
-        cmd = p.cmds[p.PackageManager][p.Ensure] + ' ' + p.Name
+        cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager][p.Ensure] + ' ' + p.Name
     cmd = cmd.replace('%', p.Arguments)
     cmd = cmd.replace('^', p.CommandArguments)
     code, out = RunGetOutput(cmd, False)
