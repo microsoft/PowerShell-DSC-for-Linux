@@ -166,19 +166,35 @@ def Print(s, file=sys.stderr):
 
 
 def Set(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-    if len(Name) > 0 and SetHostname(Name, DNSDomainName) is False:
-        return False
+    if len(Name) > 0 :
+        if len(DNSDomainName) > 0 :
+            if GetHostname() != Name + '.' + DNSDomainName and SetHostname(Name, DNSDomainName) is False:
+                return False
+        else :
+            if '.' in GetHostname() and GetHostname().split('.')[0] != Name and SetHostname(Name, DNSDomainName) is False:
+                return False
+            else :
+                if GetHostname() != Name and SetHostname(Name, DNSDomainName) is False:
+                    return False
     if len(TimeZoneName) > 0 and SetTimezone(TimeZoneName) is False:
-        if len(TimeZoneName) > 0 and SetTimezone(AlternateTimeZoneName) is False:
+        if len(AlternateTimeZoneName) > 0 and SetTimezone(AlternateTimeZoneName) is False:
             return False
     return True
 
 
 def Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
-    if GetHostname() != Name + '.' + DNSDomainName:
-        return False
-    if TestTimezone(TimeZoneName) is False:
-        if TestTimezone(AlternateTimeZoneName) is False:
+    if len(Name) > 0 :
+        if len(DNSDomainName) > 0 :
+            if GetHostname() != Name + '.' + DNSDomainName:
+                return False
+        else :
+            if '.' in GetHostname() and GetHostname().split('.')[0] != Name:
+                return False
+            else :
+                if GetHostname() != Name:
+                    return False
+    if len(TimeZoneName) > 0 and TestTimezone(TimeZoneName) is False:
+        if len(AlternateTimeZoneName) > 0 and TestTimezone(AlternateTimeZoneName) is False:
             return False
     return True
 
@@ -211,7 +227,7 @@ def BuildTZList():
                       " Error: " + error.strerror, file=sys.stderr)
                 LG().Log('ERROR', "Exception opening file " + n + " Error Code: " + str(error.errno) +
                       " Error: " + error.strerror)
-                return tzlist
+                continue
             t = F.read()
             F.close()
             h.update(t)
@@ -335,27 +351,27 @@ def SetHostname(Name, DNSDomainName):
         LG().Log('ERROR', "Exception opening file /etc/hosts Error Code: " + str(error.errno) +
               " Error: " + error.strerror)
         return False
-    found_v4 = False
-    found_v6 = False
-    n = ''
-    for l in F:
-        if l.startswith('127.0.0.1') and not found_v4:
-            found_v4 = True
-            n += l + '127.0.0.1     ' + fqdn + '     ' + Name + '\n'
-        elif l.startswith('127.0.0.1') and found_v4:
-            continue
-        if l.startswith('::1') and not found_v6:
-            found_v6 = True
-            n += l + '::1     ' + fqdn + '     ' + Name + '\n'
-        elif l.startswith('::1') and found_v6:
-            continue
-        else:
-            n += l
+    text=F.read()
     F.close()
-    if not found_v4:
-        n = '127.0.0.1     ' + fqdn + '    ' + Name + '\n' + n
-    if not found_v6:
-        n += '::1     ' + fqdn + '    ' + Name + '\n'
+    # we must ensure that our line is the first in the list or 'hostname --fqdn' may fail
+    # remove ::1 and 127.0.0.1
+    srch=r'(^(/s)?((.*?:)|(.*?\.)).*?\n)'
+    srch=re.compile(r'(^(/s)?((::1)|(127\.0\.0\.1)).*?\n)',re.M|re.S)
+    text=srch.sub('',text)
+    # if other entries are here - put our line in front of the first of that type
+    # otherwise put the ipv4 at the top and ipv6 at the bottom.
+    srch=re.compile(r'(^([0-9]+.*?\.).*?\n)',re.M)
+    if len(srch.findall(text)) > 0:
+        sub=r'127.0.0.1     ' + fqdn + '    ' + Name + r'\n\1'
+        text=srch.sub(sub,text,1)
+    else :
+        text='127.0.0.1     ' + fqdn + '    ' + Name + '\n' + text
+    srch=re.compile(r'(^([0-9,a-f,:]+.*?:).*?\n)',re.M)
+    if len(srch.findall(text)) > 0:
+        sub=r'::1     ' + fqdn + '    ' + Name + r'\n\1'
+        text=srch.sub(sub,text,1)
+    else:
+        text+='::1     ' + fqdn + '    ' + Name + '\n'
     F, error = opened_w_error('/etc/hosts', 'w')
     if error:
         Print("Exception opening file /etc/hosts Error Code: " + str(error.errno) +
@@ -363,7 +379,7 @@ def SetHostname(Name, DNSDomainName):
         LG().Log('ERROR', "Exception opening file /etc/hosts Error Code: " + str(error.errno) +
               " Error: " + error.strerror)
         return False
-    F.write(n)
+    F.write(text)
     F.close()
     F, error = opened_w_error('/etc/hostname', 'w')
     if error:
