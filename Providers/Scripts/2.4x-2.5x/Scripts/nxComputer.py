@@ -176,9 +176,13 @@ def Set(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
             else :
                 if GetHostname() != Name and SetHostname(Name, DNSDomainName) is False:
                     return False
-    if len(TimeZoneName) > 0 and SetTimezone(TimeZoneName) is False:
-        if len(AlternateTimeZoneName) > 0 and SetTimezone(AlternateTimeZoneName) is False:
+    if len(TimeZoneName) > 0:
+        if SetTimezone(TimeZoneName) is True:
+            return True
+        elif len(AlternateTimeZoneName) is 0:
             return False
+    if len(AlternateTimeZoneName) > 0 and SetTimezone(AlternateTimeZoneName) is False:
+        return False
     return True
 
 
@@ -193,9 +197,13 @@ def Test(Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
             else :
                 if GetHostname() != Name:
                     return False
-    if len(TimeZoneName) > 0 and TestTimezone(TimeZoneName) is False:
-        if len(AlternateTimeZoneName) > 0 and TestTimezone(AlternateTimeZoneName) is False:
+    if len(TimeZoneName) > 0:
+        if TestTimezone(TimeZoneName) is True:
+            return True
+        elif len(AlternateTimeZoneName) is 0:
             return False
+    if len(AlternateTimeZoneName) > 0 and TestTimezone(AlternateTimeZoneName) is False:
+        return False
     return True
 
 
@@ -329,7 +337,7 @@ def SetTimezone(TimeZone):
         ' time zone is ' + repr(time.tzname), file=sys.stderr)
     LG().Log('INFO', 'Time is now ' + time.strftime('%X %x %Z') +
         ' time zone is ' + repr(time.tzname))
-
+    return True
 
 def SetLocaltimeTZFile(tzfile):
     l = BuildTZList()
