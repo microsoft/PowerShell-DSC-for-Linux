@@ -567,43 +567,7 @@ namespace DSC
                 return "Stopped";
             }
             
-            /*
-            string check_status_command = "";
-            try
-            {
-                sshHelper.Execute("ls /sbin/service");
-                sshHelper.Execute("ls /sbin/chkconfig");
-                check_status_command = service_tool_check_status_command;
-            }
-            catch(InvalidOperationException)
-            {
-                check_status_command = invoke_tool_check_status_command;
-            }
-
-            try
-            {
-                string retval = "";
-                sshHelper.Execute(String.Format(check_status_command, name), out retval);
-
-                if (retval.Contains("is running"))
-                {
-                    return "Running";
-                }
-                else if (retval.Trim().Equals("Running"))
-                {
-                    return "Running";
-                }
-                else
-                {
-                    return "Stopped";
-                }
-            }
-            catch(InvalidOperationException)
-            {
-                return "Stopped";
-            }
-              */
-
+            
         }
 
         private string InitGetEnabledState(string name)

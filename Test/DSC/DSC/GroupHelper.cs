@@ -55,7 +55,7 @@ namespace DSC
                 ctx.Alw(String.Format("Kill old omiserver process '{0}'", pid));
             }
 
-           sshHelper.Execute(String.Format("{0};{1}", exportDSCPathCommand, startOMIcommand));
+            sshHelper.Execute(String.Format("{0};{1}", exportDSCPathCommand, startOMIcommand));
             ctx.Alw(String.Format("Export DSC_PATH : '{0}'", exportDSCPathCommand));
             ctx.Alw(String.Format("Start DSC omiserver : '{0}'", startOMIcommand));
 

@@ -308,7 +308,7 @@ namespace DSC
             } 
         }
 
-        private Dictionary<string, string> GetLinuxValue()
+        protected virtual Dictionary<string, string> GetLinuxValue()
         {
             Dictionary<string, string> linuxValueMap = new Dictionary<string, string>();
             return linuxValueMap;

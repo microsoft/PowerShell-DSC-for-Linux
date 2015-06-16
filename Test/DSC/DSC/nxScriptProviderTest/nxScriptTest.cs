@@ -25,6 +25,11 @@
                 propMap["Group"] = "";
             }
 
+            if (!propMap.ContainsKey("Result"))
+            {
+                propMap["Result"] = "";
+            }
+
             ctx.Alw("nxScriptTest Setup End."); 
         }
     }

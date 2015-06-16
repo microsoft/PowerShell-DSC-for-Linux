@@ -7,8 +7,7 @@
   <!-- Variables. -->
   <snippet id="Variables">
     <!-- Linux Info. -->
-    <!--<rec key="nxHostName">DSC_HOST</rec>-->
-    <rec key="nxHostName">dsc86-deb5-04</rec>
+    <rec key="nxHostName">DSC_HOST</rec>
     <rec key="nxUsername">root</rec>
     <rec key="nxPassword">OpsMgr2007R2</rec>
     <rec key="nxPort">22</rec>
@@ -1546,7 +1545,7 @@
    cls="DSC.nxUserTest" permutation="rows">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="userName">scxUser</rec>
+        <rec key="userName">test_user</rec>
         <rec key="homeDir">/home/%userName%</rec>
         <rec key="passwd">12310</rec>
         <rec key="description">Monitoring user</rec>
@@ -1567,7 +1566,7 @@
    cls="DSC.nxUserTest" permutation="rows">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
-        <rec key="userName">scxUser</rec>
+        <rec key="userName">test_user</rec>
         <rec key="homeDir">/home/%userName%</rec>
         <rec key="passwd">12310</rec>
         <rec key="description">Monitoring user</rec>
@@ -1747,8 +1746,8 @@
       </var>
 
       <var set="3" lvl="2" vid="884191"
-   dsc="[nxGroup] Verify if  return proper value after run 'Test-DscConfiguration' when the group is not exit."
-   cls="DSC.nxGroupTest" permutation="rows">
+         dsc="[nxGroup] Verify if  return proper value after run 'Test-DscConfiguration' when the group is not exit."
+         cls="DSC.nxGroupTest" permutation="rows">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="groupName">testuser</rec>
@@ -1766,8 +1765,8 @@
       </var>
 
       <var set="3" lvl="2" vid="884193"
-   dsc="[nxGroup] Verify if  return proper value after run 'Test-DscConfiguration' when the group is exit."
-   cls="DSC.nxGroupTest" permutation="rows">
+         dsc="[nxGroup] Verify if  return proper value after run 'Test-DscConfiguration' when the group is exit."
+         cls="DSC.nxGroupTest" permutation="rows">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="groupName">testuser</rec>
@@ -2402,8 +2401,8 @@
       </var>
     
       <var set="5" lvl="2" vid="814855"
-     dsc="[nxService] Verify if error out while non-root user runs DSC operation to start a service"
-     cls="DSC.nxServiceTest" permutation="rows">
+         dsc="[nxService] Verify if error out while non-root user runs DSC operation to start a service"
+         cls="DSC.nxServiceTest" permutation="rows">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="serviceName">%testServiceName%</rec>
@@ -2424,8 +2423,8 @@
       </var>
 
       <var set="5" lvl="2" vid="814856"
-     dsc="[nxService] Verify if error out while non-root user runs DSC operation to get service information"
-     cls="DSC.nxServiceTest" permutation="rows">
+           dsc="[nxService] Verify if error out while non-root user runs DSC operation to get service information"
+           cls="DSC.nxServiceTest" permutation="rows">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="serviceName">%testServiceName%</rec>
@@ -2455,8 +2454,8 @@
       </var>
 
       <var set="5" lvl="2" vid="884763"
-   dsc="[nxService]Verify if  return proper value after run 'Test-DscConfiguration' when the service is stopped."
-   cls="DSC.nxServiceTest" permutation="rows">
+          dsc="[nxService]Verify if  return proper value after run 'Test-DscConfiguration' when the service is stopped."
+          cls="DSC.nxServiceTest" permutation="rows">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="serviceName">%testServiceName%</rec>
@@ -2474,13 +2473,13 @@
       </var>
 
       <var set="5" lvl="2" vid="884764"
-   dsc="[nxService]Verify if  return proper value after run 'Test-DscConfiguration' when the service is running."
-   cls="DSC.nxServiceTest" permutation="rows">
+          dsc="[nxService]Verify if  return proper value after run 'Test-DscConfiguration' when the service is running."
+          cls="DSC.nxServiceTest" permutation="rows">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="serviceName">%testServiceName%</rec>
         <rec key="controller">init</rec>
-        <rec key="initialState">Running</rec>
+        <rec key="initialState">Stopped</rec>
         <rec key="expectedState">Running</rec>
         <rec key="expectedInstallState">True</rec>
         <!-- MOF Info. -->

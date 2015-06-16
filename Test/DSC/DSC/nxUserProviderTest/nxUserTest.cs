@@ -69,29 +69,30 @@ namespace DSC
 
         #region Private Methods
 
-        private string GetInitializeCmd(string username, string initState)
+        private string GetInitializeCmd(string userName, string initState)
         {
             StringBuilder command = new StringBuilder();
 
-            command.Append(String.Format("userdel -f -r {0};", username));
+            command.Append(String.Format("userdel -f -r {0};", userName));
 
             if (initState.ToLower().Equals("present"))
             {
-                command.Append(String.Format("useradd {0};", username));
+                command.Append(String.Format("useradd {0};", userName));
             }
 
             return command.ToString();
         }
 
-        private string GetFinalizeCmd(string username)
+        private string GetFinalizeCmd(string userName)
         {
             StringBuilder command = new StringBuilder();
 
-            command.Append(String.Format("userdel -f -r {0};", username));
+            command.Append(String.Format("userdel -f -r {0};", userName));
 
             return command.ToString();
         }
 
+        
         public override void Verify(IContext ctx)
         {
             ctx.Alw("Verify Begin.");
@@ -126,16 +127,16 @@ namespace DSC
                 if (psHelper.TestConfigurationReturnValue != -1)
                 {
                     string expectedInstallState = ctx.Records.GetValue("expectedInstallState").ToLower();
-                    ctx.Alw("The expectedInstallState:" + expectedInstallState + "\n" +"the testConfigurationReturnValude:" + Convert.ToString(psHelper.TestConfigurationReturnValue) + "\n");
+                    ctx.Alw("The expectedInstallState:" + expectedInstallState + "\n" + "the testConfigurationReturnValude:" + Convert.ToString(psHelper.TestConfigurationReturnValue) + "\n");
 
                     if (psHelper.TestConfigurationReturnValue == 0)
                     {
                         if (expectedInstallState != "false")
                         {
                             throw new VarFail(string.Format(
-                    "The expectedInstallState: '{0}' \n" +
-                            "the testConfigurationReturnValude:'{1}'\n",
-                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                                "The expectedInstallState: '{0}' \n" +
+                                "the testConfigurationReturnValude:'{1}'\n",
+                                expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
                         }
                     }
                     else if (psHelper.TestConfigurationReturnValue == 1)
@@ -143,9 +144,9 @@ namespace DSC
                         if (expectedInstallState != "true")
                         {
                             throw new VarFail(string.Format(
-                    "The expectedInstallState: '{0}' \n" +
-                            "the testConfigurationReturnValude:'{1}'\n",
-                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                                "The expectedInstallState: '{0}' \n" +
+                                "the testConfigurationReturnValude:'{1}'\n",
+                                expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
                         }
                     }
                     ctx.Alw("Verify End.");
@@ -172,23 +173,46 @@ namespace DSC
                 //linuxMap = GetLinuxValue(name, propMap);
 
                 ///////////////////////
+                Dictionary<string, string> linuxMap = GetLinuxValue(); 
+
                 foreach (string key in list.Keys)
                 {
-                    if (!verificationMap.ContainsKey(key))
-                    { continue; }
-                    string actualDescription = verificationMap[key];
 
-                    // Check property value with Get-DscConfiguration
-                    if (!String.IsNullOrEmpty(actualDescription))
+                    if (linuxMap.ContainsKey(key))
                     {
-                        try
+                        string actualDescription = linuxMap[key];
+
+                        // Check Linux property value with Get-DscConfiguration
+                        if (!String.IsNullOrEmpty(actualDescription))
                         {
-                            psHelper.CheckOutput(key, actualDescription);
-                            ctx.Alw(String.Format("Check Get-DscConfiguration: {0} is pass", key));
+                            try
+                            {
+                                psHelper.CheckOutput(key, actualDescription);
+                                ctx.Alw(String.Format("Check Get-DscConfiguration: {0} is pass", key));
+                            }
+                            catch (VarFail ex)
+                            {
+                                throw new VarFail(ex.Message);
+                            }
                         }
-                        catch (VarFail ex)
+                    }
+
+                    if (verificationMap.ContainsKey(key))
+                    {
+                        string mapProperty = verificationMap[key];
+
+                        // Check property value with Get-DscConfiguration
+                        if (!String.IsNullOrEmpty(mapProperty))
                         {
-                            throw new VarFail(ex.Message);
+                            try
+                            {
+                                psHelper.CheckOutput(key, mapProperty);
+                                ctx.Alw(String.Format("Check Get-DscConfiguration: {0} is pass", key));
+                            }
+                            catch (VarFail ex)
+                            {
+                                throw new VarFail(ex.Message);
+                            }
                         }
                     }
                 }
@@ -201,6 +225,59 @@ namespace DSC
 
             ctx.Alw("Verify End.");
         }
+
+        protected override Dictionary<string, string> GetLinuxValue()
+        {
+            Dictionary<string, string> linuxValueMap = new Dictionary<string, string>();
+            string userName = propMap["UserName"];
+            string homeDir = propMap.ContainsKey("HomeDirectory") ? propMap["HomeDirectory"] : string.Empty;
+            string ensureVal = propMap.ContainsKey("Ensure") ? propMap["Ensure"] : "present";
+            string groupID = string.Empty;
+            string cmd = string.Empty;
+            string verifyLog = string.Empty;
+
+            if (ensureVal.ToLower() == "present")
+            {
+                try
+                {
+                    cmd = "cat /etc/passwd |grep -i {0}: |awk '{print $1}'|cut -d ':' -f4 |tr -d '\n'";
+                    string getGroupCmd = cmd.Replace("{0}", userName);
+
+                    sshHelper.Execute(getGroupCmd, out groupID);
+                }
+                catch (Exception)
+                {
+                    throw new VarFail(String.Format("Fail to get GroupID of user: {0}", userName));
+                }
+
+                if (string.IsNullOrEmpty(homeDir))
+                {
+                    try
+                    {
+                        cmd = "ls {0}";
+                        string verifyHomeDirCmd = cmd.Replace("{0}", homeDir);
+
+                        sshHelper.Execute(verifyHomeDirCmd, out verifyLog);
+                    }
+                    catch (Exception)
+                    {
+                        throw new VarFail(String.Format("No home directory: {0}", homeDir));
+                    }
+                }
+
+                linuxValueMap["HomeDirectory"] = homeDir;
+                linuxValueMap["GroupID"] = groupID;
+            }
+            else
+            {
+                //if Ensure is 'absent', the value is null.
+                linuxValueMap["HomeDirectory"] = "";
+                linuxValueMap["GroupID"] = "";
+            }
+
+            return linuxValueMap;
+        } 
+
         #endregion 
     }
 }
