@@ -60,6 +60,7 @@ def Test_Marshall(Name, Controller, Enabled, State):
 
 def Get_Marshall(Name, Controller, Enabled, State):
     arg_names = list(locals().keys())
+    arg_names.append('Path')
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
     retval = 0
