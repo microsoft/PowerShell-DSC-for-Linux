@@ -163,8 +163,8 @@ namespace DSC
                 // Check the result of GetConfiguration.
                 ctx.Alw("The result of Get-DscConfiguration:");
 
-                Dictionary<string, string> linuxMap = new Dictionary<string, string>();
-                
+                //Get the value of properties from Linux.
+                Dictionary<string, string> linuxMap = GetLinuxValue();            
 
                 //Return from Get-DscConfiguration
                 Dictionary<string, string> list = psHelper.LastPowerShellReturnValues[0];
@@ -178,9 +178,7 @@ namespace DSC
                 {
                     rltGetDSC = rltGetDSC + String.Format("\n{0,-20}:{1}", key, list[key]);
                 }
-                ctx.Alw(rltGetDSC + "\n************************************************\n");
-                //Get property value from Linux
-                linuxMap = GetLinuxValue();
+                ctx.Alw(rltGetDSC + "\n************************************************\n");          
 
                 Dictionary<string, string> varMap = mofHelper.ReturnedPropertiesOfGetDscConfiguration(propMap);
                 foreach (string key in list.Keys)

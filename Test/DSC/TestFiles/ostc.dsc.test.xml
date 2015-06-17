@@ -4769,16 +4769,15 @@
         <rec key="filePath">/tmp/test.txt</rec>
         <rec key="fileName">test.txt</rec>
         <rec key="fileContent">This is a test file.</rec>
-        <rec key="newContent">ctime was changed</rec>
 
-        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo "%fileContent%" > %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;mkdir -p %destinationPath%;cp %filePath% %destinationPath%/;sleep 65;echo "%newContent%" > "%destinationPath%/%fileName%";chmod a+x "%destinationPath%/%fileName%";</rec>
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo "%fileContent%" > %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
         <rec key="finalCmd">rm -rf /tmp/*;</rec>
         <!-- MOF Info. -->
         <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Checksum:ctime;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!--Verify Linux State.-->
-        <rec key="verificationCmd">cat "%destinationPath%/%fileName%"|grep -i "%newContent%" |wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">ctime</rec>
+        <rec key="expectedValue"></rec>
         <rec key="successfulMsg">Destination file isn't updated if Checksum is 'ctime' and the source is older than destination file.</rec>
         <rec key="failedMsg">Destination file updated if Checksum is 'ctime' and the source is older than destination file.</rec>
       </var>
@@ -4793,16 +4792,15 @@
         <rec key="filePath">/tmp/test.txt</rec>
         <rec key="fileName">test.txt</rec>
         <rec key="fileContent">This is a test file.</rec>
-        <rec key="newContent">ctime was changed</rec>
 
-        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent% > %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;sleep 65;echo %newContent% > %filePath%;mkdir -p %destinationPath%;cp %filePath% %destinationPath%/;</rec>
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent% > %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
         <rec key="finalCmd">rm -rf /tmp/*;</rec>
         <!-- MOF Info. -->
         <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Checksum:mtime;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!--Verify Linux State.-->
-        <rec key="verificationCmd">cat "%destinationPath%/%fileName%"|grep -i "%newContent%" |wc -l |tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
+        <rec key="verification">mtime</rec>
+        <rec key="expectedValue"></rec>
         <rec key="successfulMsg">Destination file isn't updated if Checksum is 'mtime' and the source is older than destination file</rec>
         <rec key="failedMsg">Destination file updated if Checksum is 'mtime' and the source is older than destination file.</rec>
       </var>
