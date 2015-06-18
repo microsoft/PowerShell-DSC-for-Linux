@@ -1018,6 +1018,88 @@ static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_Name_prop =
     NULL,
 };
 
+static MI_CONST MI_Boolean MSFT_nxFirewallResource_FirewallType_Write_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_FirewallType_Write_qual =
+{
+    MI_T("Write"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxFirewallResource_FirewallType_Write_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxFirewallResource_FirewallType_ValueMap_qual_data_value[] =
+{
+    MI_T("Iptables"),
+    MI_T("Ip6tables"),
+    MI_T("yast"),
+    MI_T("ufw"),
+    MI_T("susefirewall2"),
+    MI_T("firewalld"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_FirewallType_ValueMap_qual_value =
+{
+    MSFT_nxFirewallResource_FirewallType_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxFirewallResource_FirewallType_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_FirewallType_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxFirewallResource_FirewallType_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxFirewallResource_FirewallType_Values_qual_data_value[] =
+{
+    MI_T("2"),
+    MI_T("3"),
+    MI_T("4"),
+    MI_T("5"),
+    MI_T("6"),
+    MI_T("7"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_FirewallType_Values_qual_value =
+{
+    MSFT_nxFirewallResource_FirewallType_Values_qual_data_value,
+    MI_COUNT(MSFT_nxFirewallResource_FirewallType_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_FirewallType_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_nxFirewallResource_FirewallType_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_FirewallType_quals[] =
+{
+    &MSFT_nxFirewallResource_FirewallType_Write_qual,
+    &MSFT_nxFirewallResource_FirewallType_ValueMap_qual,
+    &MSFT_nxFirewallResource_FirewallType_Values_qual,
+};
+
+/* property MSFT_nxFirewallResource.FirewallType */
+static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_FirewallType_prop =
+{
+    MI_FLAG_PROPERTY, /* flags */
+    0x0066650C, /* code */
+    MI_T("FirewallType"), /* name */
+    MSFT_nxFirewallResource_FirewallType_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFirewallResource_FirewallType_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxFirewallResource, FirewallType), /* offset */
+    MI_T("MSFT_nxFirewallResource"), /* origin */
+    MI_T("MSFT_nxFirewallResource"), /* propagator */
+    NULL,
+};
+
 static MI_CONST MI_Boolean MSFT_nxFirewallResource_Protocol_Write_qual_value = 1;
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Protocol_Write_qual =
@@ -1049,10 +1131,32 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Protocol_ValueMap_qual =
     &MSFT_nxFirewallResource_Protocol_ValueMap_qual_value
 };
 
+static MI_CONST MI_Char* MSFT_nxFirewallResource_Protocol_Values_qual_data_value[] =
+{
+    MI_T("8"),
+    MI_T("9"),
+    MI_T("10"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_Protocol_Values_qual_value =
+{
+    MSFT_nxFirewallResource_Protocol_Values_qual_data_value,
+    MI_COUNT(MSFT_nxFirewallResource_Protocol_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Protocol_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_nxFirewallResource_Protocol_Values_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_Protocol_quals[] =
 {
     &MSFT_nxFirewallResource_Protocol_Write_qual,
     &MSFT_nxFirewallResource_Protocol_ValueMap_qual,
+    &MSFT_nxFirewallResource_Protocol_Values_qual,
 };
 
 /* property MSFT_nxFirewallResource.Protocol */
@@ -1104,8 +1208,8 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Ensure_ValueMap_qual =
 
 static MI_CONST MI_Char* MSFT_nxFirewallResource_Ensure_Values_qual_data_value[] =
 {
-    MI_T("2"),
-    MI_T("3"),
+    MI_T("11"),
+    MI_T("12"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_Ensure_Values_qual_value =
@@ -1178,8 +1282,8 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_AddressFamily_ValueMap_qual
 
 static MI_CONST MI_Char* MSFT_nxFirewallResource_AddressFamily_Values_qual_data_value[] =
 {
-    MI_T("4"),
-    MI_T("5"),
+    MI_T("13"),
+    MI_T("14"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_AddressFamily_Values_qual_value =
@@ -1220,14 +1324,14 @@ static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_AddressFamily_prop =
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxFirewallResource_Access_Required_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxFirewallResource_Access_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Access_Required_qual =
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Access_Write_qual =
 {
-    MI_T("Required"),
+    MI_T("Write"),
     MI_BOOLEAN,
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxFirewallResource_Access_Required_qual_value
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxFirewallResource_Access_Write_qual_value
 };
 
 static MI_CONST MI_Char* MSFT_nxFirewallResource_Access_ValueMap_qual_data_value[] =
@@ -1252,8 +1356,8 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Access_ValueMap_qual =
 
 static MI_CONST MI_Char* MSFT_nxFirewallResource_Access_Values_qual_data_value[] =
 {
-    MI_T("6"),
-    MI_T("7"),
+    MI_T("15"),
+    MI_T("16"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_Access_Values_qual_value =
@@ -1272,7 +1376,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Access_Values_qual =
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_Access_quals[] =
 {
-    &MSFT_nxFirewallResource_Access_Required_qual,
+    &MSFT_nxFirewallResource_Access_Write_qual,
     &MSFT_nxFirewallResource_Access_ValueMap_qual,
     &MSFT_nxFirewallResource_Access_Values_qual,
 };
@@ -1280,7 +1384,7 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_Access_quals[] =
 /* property MSFT_nxFirewallResource.Access */
 static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_Access_prop =
 {
-    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED|MI_FLAG_READONLY, /* flags */
+    MI_FLAG_PROPERTY, /* flags */
     0x00617306, /* code */
     MI_T("Access"), /* name */
     MSFT_nxFirewallResource_Access_quals, /* qualifiers */
@@ -1306,9 +1410,9 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_State_Write_qual =
 
 static MI_CONST MI_Char* MSFT_nxFirewallResource_State_ValueMap_qual_data_value[] =
 {
-    MI_T("NEW"),
-    MI_T("RELATED"),
     MI_T("ESTABLISHED"),
+    MI_T("RELATED"),
+    MI_T("NEW"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_State_ValueMap_qual_value =
@@ -1325,10 +1429,32 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_State_ValueMap_qual =
     &MSFT_nxFirewallResource_State_ValueMap_qual_value
 };
 
+static MI_CONST MI_Char* MSFT_nxFirewallResource_State_Values_qual_data_value[] =
+{
+    MI_T("17"),
+    MI_T("18"),
+    MI_T("19"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_State_Values_qual_value =
+{
+    MSFT_nxFirewallResource_State_Values_qual_data_value,
+    MI_COUNT(MSFT_nxFirewallResource_State_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_State_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_nxFirewallResource_State_Values_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_State_quals[] =
 {
     &MSFT_nxFirewallResource_State_Write_qual,
     &MSFT_nxFirewallResource_State_ValueMap_qual,
+    &MSFT_nxFirewallResource_State_Values_qual,
 };
 
 /* property MSFT_nxFirewallResource.State */
@@ -1339,118 +1465,10 @@ static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_State_prop =
     MI_T("State"), /* name */
     MSFT_nxFirewallResource_State_quals, /* qualifiers */
     MI_COUNT(MSFT_nxFirewallResource_State_quals), /* numQualifiers */
-    MI_STRING, /* type */
+    MI_STRINGA, /* type */
     NULL, /* className */
     0, /* subscript */
     offsetof(MSFT_nxFirewallResource, State), /* offset */
-    MI_T("MSFT_nxFirewallResource"), /* origin */
-    MI_T("MSFT_nxFirewallResource"), /* propagator */
-    NULL,
-};
-
-static MI_CONST MI_Boolean MSFT_nxFirewallResource_State2_Write_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_nxFirewallResource_State2_Write_qual =
-{
-    MI_T("Write"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxFirewallResource_State2_Write_qual_value
-};
-
-static MI_CONST MI_Char* MSFT_nxFirewallResource_State2_ValueMap_qual_data_value[] =
-{
-    MI_T("NEW"),
-    MI_T("RELATED"),
-    MI_T("ESTABLISHED"),
-};
-
-static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_State2_ValueMap_qual_value =
-{
-    MSFT_nxFirewallResource_State2_ValueMap_qual_data_value,
-    MI_COUNT(MSFT_nxFirewallResource_State2_ValueMap_qual_data_value),
-};
-
-static MI_CONST MI_Qualifier MSFT_nxFirewallResource_State2_ValueMap_qual =
-{
-    MI_T("ValueMap"),
-    MI_STRINGA,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxFirewallResource_State2_ValueMap_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_State2_quals[] =
-{
-    &MSFT_nxFirewallResource_State2_Write_qual,
-    &MSFT_nxFirewallResource_State2_ValueMap_qual,
-};
-
-/* property MSFT_nxFirewallResource.State2 */
-static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_State2_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00733206, /* code */
-    MI_T("State2"), /* name */
-    MSFT_nxFirewallResource_State2_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxFirewallResource_State2_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_nxFirewallResource, State2), /* offset */
-    MI_T("MSFT_nxFirewallResource"), /* origin */
-    MI_T("MSFT_nxFirewallResource"), /* propagator */
-    NULL,
-};
-
-static MI_CONST MI_Boolean MSFT_nxFirewallResource_State3_Write_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_nxFirewallResource_State3_Write_qual =
-{
-    MI_T("Write"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxFirewallResource_State3_Write_qual_value
-};
-
-static MI_CONST MI_Char* MSFT_nxFirewallResource_State3_ValueMap_qual_data_value[] =
-{
-    MI_T("NEW"),
-    MI_T("RELATED"),
-    MI_T("ESTABLISHED"),
-};
-
-static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_State3_ValueMap_qual_value =
-{
-    MSFT_nxFirewallResource_State3_ValueMap_qual_data_value,
-    MI_COUNT(MSFT_nxFirewallResource_State3_ValueMap_qual_data_value),
-};
-
-static MI_CONST MI_Qualifier MSFT_nxFirewallResource_State3_ValueMap_qual =
-{
-    MI_T("ValueMap"),
-    MI_STRINGA,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxFirewallResource_State3_ValueMap_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_State3_quals[] =
-{
-    &MSFT_nxFirewallResource_State3_Write_qual,
-    &MSFT_nxFirewallResource_State3_ValueMap_qual,
-};
-
-/* property MSFT_nxFirewallResource.State3 */
-static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_State3_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00733306, /* code */
-    MI_T("State3"), /* name */
-    MSFT_nxFirewallResource_State3_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxFirewallResource_State3_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_nxFirewallResource, State3), /* offset */
     MI_T("MSFT_nxFirewallResource"), /* origin */
     MI_T("MSFT_nxFirewallResource"), /* propagator */
     NULL,
@@ -1489,9 +1507,9 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Direction_ValueMap_qual =
 
 static MI_CONST MI_Char* MSFT_nxFirewallResource_Direction_Values_qual_data_value[] =
 {
-    MI_T("8"),
-    MI_T("9"),
-    MI_T("10"),
+    MI_T("20"),
+    MI_T("21"),
+    MI_T("22"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_Direction_Values_qual_value =
@@ -1660,21 +1678,99 @@ static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_DestinationPort_prop =
     NULL,
 };
 
+static MI_CONST MI_Boolean MSFT_nxFirewallResource_Position_Write_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Position_Write_qual =
+{
+    MI_T("Write"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxFirewallResource_Position_Write_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxFirewallResource_Position_ValueMap_qual_data_value[] =
+{
+    MI_T("top"),
+    MI_T("after-top"),
+    MI_T("before-end"),
+    MI_T("end"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_Position_ValueMap_qual_value =
+{
+    MSFT_nxFirewallResource_Position_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_nxFirewallResource_Position_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Position_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxFirewallResource_Position_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxFirewallResource_Position_Values_qual_data_value[] =
+{
+    MI_T("23"),
+    MI_T("24"),
+    MI_T("25"),
+    MI_T("26"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxFirewallResource_Position_Values_qual_value =
+{
+    MSFT_nxFirewallResource_Position_Values_qual_data_value,
+    MI_COUNT(MSFT_nxFirewallResource_Position_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_Position_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_nxFirewallResource_Position_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_Position_quals[] =
+{
+    &MSFT_nxFirewallResource_Position_Write_qual,
+    &MSFT_nxFirewallResource_Position_ValueMap_qual,
+    &MSFT_nxFirewallResource_Position_Values_qual,
+};
+
+/* property MSFT_nxFirewallResource.Position */
+static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_Position_prop =
+{
+    MI_FLAG_PROPERTY, /* flags */
+    0x00706E08, /* code */
+    MI_T("Position"), /* name */
+    MSFT_nxFirewallResource_Position_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFirewallResource_Position_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxFirewallResource, Position), /* offset */
+    MI_T("MSFT_nxFirewallResource"), /* origin */
+    MI_T("MSFT_nxFirewallResource"), /* propagator */
+    NULL,
+};
+
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxFirewallResource_props[] =
 {
     &MSFT_nxFirewallResource_Name_prop,
+    &MSFT_nxFirewallResource_FirewallType_prop,
     &MSFT_nxFirewallResource_Protocol_prop,
     &MSFT_nxFirewallResource_Ensure_prop,
     &MSFT_nxFirewallResource_AddressFamily_prop,
     &MSFT_nxFirewallResource_Access_prop,
     &MSFT_nxFirewallResource_State_prop,
-    &MSFT_nxFirewallResource_State2_prop,
-    &MSFT_nxFirewallResource_State3_prop,
     &MSFT_nxFirewallResource_Direction_prop,
     &MSFT_nxFirewallResource_SourceHost_prop,
     &MSFT_nxFirewallResource_SourcePort_prop,
     &MSFT_nxFirewallResource_DestinationHost_prop,
     &MSFT_nxFirewallResource_DestinationPort_prop,
+    &MSFT_nxFirewallResource_Position_prop,
 };
 
 static MI_CONST MI_Boolean MSFT_nxFirewallResource_GetTargetResource_Static_qual_value = 1;
@@ -1687,7 +1783,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_Static_qu
     &MSFT_nxFirewallResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_Description_qual_value = MI_T("27");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_Description_qual =
 {
@@ -1723,7 +1819,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_InputReso
     &MSFT_nxFirewallResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_InputResource_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_InputResource_Description_qual_value = MI_T("28");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_InputResource_Description_qual =
 {
@@ -1764,7 +1860,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_Flags_In_
     &MSFT_nxFirewallResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_Flags_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_Flags_Description_qual_value = MI_T("29");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_Flags_Description_qual =
 {
@@ -1814,7 +1910,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_OutputRes
     &MSFT_nxFirewallResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("14");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("30");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_OutputResource_Description_qual =
 {
@@ -1855,7 +1951,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_MIReturn_
     &MSFT_nxFirewallResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("27");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_GetTargetResource_MIReturn_Description_qual =
 {
@@ -1921,7 +2017,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_Static_q
     &MSFT_nxFirewallResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_Description_qual_value = MI_T("15");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_Description_qual_value = MI_T("31");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_Description_qual =
 {
@@ -1957,7 +2053,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_InputRes
     &MSFT_nxFirewallResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_InputResource_Description_qual_value = MI_T("16");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_InputResource_Description_qual_value = MI_T("32");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_InputResource_Description_qual =
 {
@@ -1998,7 +2094,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_Flags_In
     &MSFT_nxFirewallResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_Flags_Description_qual_value = MI_T("17");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_Flags_Description_qual_value = MI_T("33");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_Flags_Description_qual =
 {
@@ -2038,7 +2134,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_Result_O
     &MSFT_nxFirewallResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_Result_Description_qual_value = MI_T("18");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_Result_Description_qual_value = MI_T("34");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_Result_Description_qual =
 {
@@ -2078,7 +2174,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_Provider
     &MSFT_nxFirewallResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("19");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("35");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_ProviderContext_Description_qual =
 {
@@ -2118,7 +2214,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_MIReturn
     &MSFT_nxFirewallResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("15");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("31");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_TestTargetResource_MIReturn_Description_qual =
 {
@@ -2185,7 +2281,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_Static_qu
     &MSFT_nxFirewallResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_Description_qual_value = MI_T("20");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_Description_qual_value = MI_T("36");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_Description_qual =
 {
@@ -2221,7 +2317,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_InputReso
     &MSFT_nxFirewallResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_InputResource_Description_qual_value = MI_T("16");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_InputResource_Description_qual_value = MI_T("32");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_InputResource_Description_qual =
 {
@@ -2262,7 +2358,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_ProviderC
     &MSFT_nxFirewallResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("21");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("37");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_ProviderContext_Description_qual =
 {
@@ -2302,7 +2398,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_Flags_In_
     &MSFT_nxFirewallResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_Flags_Description_qual_value = MI_T("17");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_Flags_Description_qual_value = MI_T("33");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_Flags_Description_qual =
 {
@@ -2342,7 +2438,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_MIReturn_
     &MSFT_nxFirewallResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("20");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("36");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_SetTargetResource_MIReturn_Description_qual =
 {
@@ -2443,7 +2539,7 @@ static MI_CONST MI_Qualifier MSFT_nxFirewallResource_ClassVersion_qual =
     &MSFT_nxFirewallResource_ClassVersion_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFirewallResource_FriendlyName_qual_value = MI_T("nxFirewallResource");
+static MI_CONST MI_Char* MSFT_nxFirewallResource_FriendlyName_qual_value = MI_T("nxFirewall");
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_FriendlyName_qual =
 {
