@@ -10,7 +10,7 @@ endif
 all:
 	mkdir -p intermediate/Scripts
 ifeq ($(BUILD_LOCAL),1)
-	make local
+	$(MAKE) local
 else
 	for f in Providers/Scripts/InstalledScripts/*.py; do \
 	  cat $$f | \
@@ -21,13 +21,13 @@ else
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
  ifeq ($(BUILD_SSL_098),1)
-	make kit098 
+	$(MAKE) kit098
  endif
  ifeq ($(BUILD_SSL_100),1)
-	make kit100 
+	$(MAKE) kit100
  endif
-	make nxNetworking
-	make nxComputerManagement
+	$(MAKE) nxNetworking
+	$(MAKE) nxComputerManagement
 	mkdir -p release; \
 	rm -rf release/*.{rpm,deb}; \
 	mv omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
@@ -38,24 +38,24 @@ kit098: omi098 dsc098
 kit100: omi100 dsc100
 
 dsc098: lcm098 providers
-	make -C installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 dsc100: lcm100 providers
-	make -C installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 omi098:
-	make configureomi098
+	$(MAKE) configureomi098
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_0.9.8 omi-1.0.8/output
-	make -C omi-1.0.8
-	make -C omi-1.0.8/installbuilder-generic SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C omi-1.0.8
+	$(MAKE) -C omi-1.0.8/installbuilder-generic SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 omi100:
-	make configureomi100
+	$(MAKE) configureomi100
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_1.0.0 omi-1.0.8/output
-	make -C omi-1.0.8
-	make -C omi-1.0.8/installbuilder-generic SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C omi-1.0.8
+	$(MAKE) -C omi-1.0.8/installbuilder-generic SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 configureomi098:
 	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_0.9.8 --opensslcflags=$(openssl098_cflags) --openssllibs=$(openssl098_libs) --openssllibdir=$(openssl098_libdir))
@@ -64,13 +64,13 @@ configureomi100:
 	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_1.0.0 --opensslcflags=$(openssl100_cflags) --openssllibs=$(openssl100_libs) --openssllibdir=$(openssl100_libdir))
 
 lcm098:
-	make -C LCM
+	$(MAKE) -C LCM
 
 lcm100:
-	make -C LCM
+	$(MAKE) -C LCM
 
 providers:
-	make -C Providers
+	$(MAKE) -C Providers
 
 nxComputerManagement:
 	rm -rf output/staging; \
@@ -114,18 +114,18 @@ distclean: clean
 
 clean:
 ifeq ($(BUILD_LOCAL),1)
-	make -C Providers clean
-	make -C omi-1.0.8 distclean
+	$(MAKE) -C Providers clean
+	$(MAKE) -C omi-1.0.8 distclean
 	rm -rf omi-1.0.8/output
 	rm -rf output
 	rm -rf release
 	rm -rf intermediate
 else
-	make -C Providers clean
-	make configureomi098
-	make -C omi-1.0.8 distclean
-	make configureomi100
-	make -C omi-1.0.8 distclean
+	$(MAKE) -C Providers clean
+	$(MAKE) configureomi098
+	$(MAKE) -C omi-1.0.8 distclean
+	$(MAKE) configureomi100
+	$(MAKE) -C omi-1.0.8 distclean
 	rm -rf omi-1.0.8/output
 	rm -rf output
 	rm -rf release
@@ -137,13 +137,13 @@ endif
 local: lcm providers
 
 lcm:
-	make -C omi-1.0.8
-	make -C LCM
+	$(MAKE) -C omi-1.0.8
+	$(MAKE) -C LCM
 
 reg: lcmreg providersreg
 
 lcmreg:
-	make -C LCM deploydsc
+	$(MAKE) -C LCM deploydsc
 
 providersreg:
 	for f in Providers/Scripts/InstalledScripts/*.py; do \
@@ -154,4 +154,4 @@ providersreg:
 	  sed "s@<DSC_PATH>@$(CONFIG_DATADIR)/dsc@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done 
-	make -C Providers reg
+	$(MAKE) -C Providers reg
