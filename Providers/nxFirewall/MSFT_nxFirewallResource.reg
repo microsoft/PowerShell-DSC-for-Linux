@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxFirewallResource
+HOSTING=@requestor@
+CLASS=MSFT_nxFirewallResource:OMI_BaseResource
