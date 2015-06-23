@@ -42,22 +42,9 @@ LG = nxDSCLog.DSCLog
 #   [Write] string DestinationPort;
 # };
 
-# Name = "scxfirewallrule";
-# Protocol = "tcp";	    # {tcp, udp}
-# Ensure = "Absent";  	    #{Present, Absent}
-# AddressFamily = "IPv4";   #{IPv4, IPv6}
-# Access = "Allow";	    # {Allow, Block}   ACCEPT or DROP
-# State = "NEW, RELATED";   #{ESTABLISHED, RELATED, NEW}
-# Direction = "INPUT";	    #{INPUT, OUTPUT, FORWARD}
-# SourceHost = "all";
-# SourcePort = "22";
-# DestinationHost = "all";
-# DestinationPort = "ssh";
-
-
 def init_vars(Name, FirewallType, Protocol, Ensure, AddressFamily,
-              Access, State, Direction, Position, SourceHost, SourcePort,
-              DestinationHost, DestinationPort):
+    Access, State, Direction, Position, SourceHost, SourcePort,
+    DestinationHost, DestinationPort):
 
     if Name is None or Name == '':
         print('Error: "Name" must be specified.', file=sys.stderr)
@@ -72,144 +59,89 @@ def init_vars(Name, FirewallType, Protocol, Ensure, AddressFamily,
     FirewallType = FirewallType.encode('ascii', 'ignore').lower()
 
     if Protocol is None or Protocol == '':
-        print('Error: "Protocol" must be specified.', file=sys.stderr)
-        LG().Log('ERROR', 'Error: "Protocol" must be specified.')
-        raise Exception('Protocol must be specified.')
+        Protocol = 'tcp'
     Protocol = Protocol.encode('ascii', 'ignore')
 
     if Ensure is None or Ensure == '':
-        print('Error: "Ensure" must be specified.', file=sys.stderr)
-        LG().Log('ERROR', 'Error: "Ensure" must be specified.')
-        raise Exception('Ensure must be specified.')
+        Ensure = 'present'
     Ensure = Ensure.encode('ascii', 'ignore').lower()
 
     if AddressFamily is None or AddressFamily == '':
-        print('Error: "AddressFamily" must be specified.', file=sys.stderr)
-        LG().Log('ERROR', 'Error: "AddressFamily" must be specified.')
-        raise Exception('AddressFamily must be specified.')
+        AddressFamily = 'ipv4'
     AddressFamily = AddressFamily.encode('ascii', 'ignore').lower()
 
-    if Ensure == 'present':
-        if Access is None or Access == '':
+    if Access is None or Access == '':
+        print(
+            'Error: "Access" must be specified.', \
+            file=sys.stderr)
+        LG().Log(
+            'ERROR', 'Error: "Access" must be specified.')
+        raise Exception('Access must be specified.')
+    Access = Access.encode('ascii', 'ignore')
+
+    if State is None:
+        State = ''
+        
+    if Position is None or Position == '':
+        Position = 'top'
+    Position = Position.encode('ascii', 'ignore')
+
+    if SourceHost is None:
+        SourceHost = ''
+    else :
+        SourceHost = SourceHost.encode('ascii', 'ignore')
+        if ValidateAddress(SourceHost, AddressFamily) is False:
             print(
-                'Error: "Access" must be specified if Ensure is "Present".', \
-                file=sys.stderr)
-            LG().Log(
-                'ERROR', 'Error: "Access" must be specified if Ensure is "Present".')
-            raise Exception('Access must be specified if Ensure is "Present".')
-        Access = Access.encode('ascii', 'ignore')
-
-        if State is None or len(State) == 0:
+            'Error: Invalid address for "SourceHost".', file=sys.stderr)
+            LG().Log('ERROR', 'Error: Invalid address for "SourceHost".')
+            raise Exception('Error: Invalid address for "SourceHost".')
+        if AddressFamily == 'ipv6': # ip6tables only looks upto the first ':'
+            if '/' in SourceHost:
+                pfx=SourceHost.split('/')[1]
+            SourceHost = SourceHost.split(':')[0]+'::/'+pfx
+    if SourcePort is None:
+       SourcePort = '' 
+    else :
+        SourcePort = SourcePort.encode('ascii', 'ignore')
+        if ValidatePort(SourcePort) is False:
             print(
-                'Error: "State" must be specified if Ensure is "Present".', \
-                file=sys.stderr)
-            LG().Log(
-                'ERROR', 'Error: "State" must be specified if Ensure is "Present".')
-            raise Exception('State must be specified if Ensure is "Present".')
+            'Error: Invalid address for "SourcePort".', file=sys.stderr)
+            LG().Log('ERROR', 'Error: Invalid address for "SourcePort".')
+            raise Exception('Error: Invalid address for "SourcePort".')
 
-        if Position is None or Position == '':
+    if DestinationHost is None:
+        DestinationHost = ''
+    else :
+        DestinationHost = DestinationHost.encode('ascii', 'ignore')
+        if ValidateAddress(DestinationHost, AddressFamily) is False:
             print(
-                'Error: "Position" must be specified if Ensure is "Present".', \
-                file=sys.stderr)
-            LG().Log(
-                'ERROR', 'Error: "Position" must be specified if Ensure is "Present".')
-            raise Exception(
-                'Position must be specified if Ensure is "Present".')
-        Position = Position.encode('ascii', 'ignore')
-
-        if Direction is None or Direction == '':
+            'Error: Invalid address for "DestinationHost".', file=sys.stderr)
+            LG().Log('ERROR', 'Error: Invalid address for "DestinationHost".')
+            raise Exception('Error: Invalid address for "DestinationHost".')
+        if AddressFamily == 'ipv6': # ip6tables only looks upto the first ':'
+            if '/' in DestinationHost:
+                pfx=DestinationHost.split('/')[1]
+            DestinationHost = DestinationHost.split(':')[0]+'::/'+pfx
+    
+    if DestinationPort is None:
+       DestinationPort = '' 
+    else :
+        DestinationPort = DestinationPort.encode('ascii', 'ignore')
+        if ValidatePort(DestinationPort) is False:
             print(
-                'Error: "Direction" must be specified if Ensure is "Present".', \
-                file=sys.stderr)
-            LG().Log(
-                'ERROR', 'Error: "Direction" must be specified if Ensure is "Present".')
-            raise Exception(
-                'Direction must be specified if Ensure is "Present".')
-        Direction = Direction.encode('ascii', 'ignore')
-
-        if Direction == 'input':
-            if SourceHost is None or SourceHost == '':
-                print(
-                    'Error: "SourceHost" must be specified if Ensure is "Present".', \
-                    file=sys.stderr)
-                LG().Log(
-                    'ERROR', 'Error: "SourceHost" must be specified if Ensure is "Present".')
-                raise Exception(
-                    'Direction must be specified if Ensure is "Present".')
-            SourceHost = SourceHost.encode('ascii', 'ignore')
-
-            if ValidateAddress(SourceHost, AddressFamily) is False:
-                print(
-                    'Error: Invalid address for "SourceHost".', file=sys.stderr)
-                LG().Log('ERROR', 'Error: Invalid address for "SourceHost".')
-                raise Exception('Error: Invalid address for "SourceHost".')
-
-            if SourcePort is None or SourcePort == '':
-                print(
-                    'Error: "SourcePort" must be specified if Ensure is "Present".', \
-                    file=sys.stderr)
-                LG().Log(
-                    'ERROR', 'Error: "SourcePort" must be specified if Ensure is "Present".')
-                raise Exception(
-                    'Direction must be specified if Ensure is "Present".')
-            SourcePort = SourcePort.encode('ascii', 'ignore')
-
-            if ValidatePort(SourcePort) is False:
-                print(
-                    'Error: Invalid address for "SourcePort".', file=sys.stderr)
-                LG().Log('ERROR', 'Error: Invalid address for "SourcePort".')
-                raise Exception('Error: Invalid address for "SourcePort".')
-
-        if Direction == 'output':
-            if DestinationHost is None or DestinationHost == '':
-                print(
-                    'Error: "DestinationHost" must be specified if Ensure is "Present".', \
-                    file=sys.stderr)
-                LG().Log(
-                    'ERROR', 'Error: "DestinationHost" must be specified if Ensure is "Present".')
-                raise Exception(
-                    'Error: "DestinationHost" must be specified if Ensure is "Present".')
-            DestinationHost = DestinationHost.encode('ascii', 'ignore')
-
-            if ValidateAddress(DestinationHost, AddressFamily) is False:
-                print(
-                    'Error: Invalid address for "DestinationHost".', file=sys.stderr)
-                LG().Log(
-                    'ERROR', 'Error: Invalid address for "DestinationHost".')
-                raise Exception(
-                    'Error: Invalid address for "DestinationHost".')
-
-            if DestinationPort is None or DestinationPort == '':
-                print(
-                    'Error: "DestinationPort" must be specified if Ensure is "Present".', \
-                    file=sys.stderr)
-                LG().Log(
-                    'ERROR', 'Error: "DestinationPort" must be specified if Ensure is "Present".')
-                raise Exception(
-                    'Error: "DestinationPort" must be specified if Ensure is "Present".')
-            DestinationPort = DestinationPort.encode('ascii', 'ignore')
-
-            if ValidatePort(DestinationPort) is False:
-                print(
-                    'Error: Invalid address for "DestinationPort".', file=sys.stderr)
-                LG().Log(
-                    'ERROR', 'Error: Invalid address for "DestinationPort".')
-                raise Exception(
-                    'Error: Invalid address for "DestinationPort".')
-
-        if (((DestinationPort is None or DestinationPort == '')
-             and (DestinationPort is None or DestinationHost == ''))
-                and ((SourcePort is None or SourcePort == '')
-                     and (SourcePort is None or SourceHost == ''))):
-            print(
-                'Error: "DestinationHost/Port or SourcesHost/Port " \
-                must be specified if Direction is "forward".', file=sys.stderr)
-            LG().Log('ERROR',
-                     'Error: "DestinationHost/Port or SourcesHost/Port " \
-                     must be specified if Direction is "forward".')
-            raise Exception(
-                'Error: "DestinationHost/Port or SourcesHost/Port " must \
-                be specified if Direction is "forward".')
+            'Error: Invalid address for "DestinationPort".', file=sys.stderr)
+            LG().Log('ERROR', 'Error: Invalid address for "DestinationPort".')
+            raise Exception('Error: Invalid address for "DestinationPort".')
+    
+    if Direction is None or Direction == '':
+        print(
+            'Error: "Direction" must be specified.', \
+            file=sys.stderr)
+        LG().Log(
+            'ERROR', 'Error: "Direction" must be specified.')
+        raise Exception(
+            'Direction must be specified.')
+    Direction = Direction.encode('ascii', 'ignore')
 
     return Name, FirewallType, Protocol, Ensure, AddressFamily, \
     Access, State, Direction, Position, SourceHost, SourcePort, \
@@ -368,7 +300,9 @@ def RunGetOutput(cmd, no_output, chk_err=True):
         return 0, output.decode('utf-8').encode('ascii', 'ignore')
 
 
-def ValidateAddress(IPAddress, AddressFamily, Port):
+def ValidateAddress(IPAddress, AddressFamily):
+    if ':' not in IPAddress and IPAddress[1].isalpha() == True: # dont try to validate a hostname
+        return True
     if '/' in IPAddress:
         IPAddress=IPAddress.split('/')[0]
     if 'ipv4' in AddressFamily:
@@ -379,7 +313,6 @@ def ValidateAddress(IPAddress, AddressFamily, Port):
         return False
     try:
         socket.inet_pton(ptype, IPAddress)
-        socket.getaddrinfo(None, Port, 0, 0, socket.IPPROTO_TCP)
     except:
         return False
     return True
@@ -427,14 +360,14 @@ def RuleExists(rule):
 
 def GetRuleCountInChain(rule):
     rule.cmds[rule.FirewallType]['chain']()
-    cmd = 'echo `'+rule.iptbls+' -L ' + rule.Direction + ' | wc -l` " - 2" | bc'
+    cmd = rule.iptbls+' -L ' + rule.Direction
     code, out = RunGetOutput(cmd,False)
     if code != 0:
         return 0
     if out is not None and len(out) > 0:
         Val = None
         try:
-            Val = int(out)
+            Val = out.splitlines()-2
         except:
             print('ERROR: Rule count is not numeric in Check rule exists: ' +
                   cmd + ' result code is: ' + str(code))
@@ -541,7 +474,10 @@ class RuleBag(object):
             self.Access = 'ACCEPT'
         else:
             self.Access = 'DROP'
-        self.State=reduce(lambda x, y: x.encode('ascii','ignore') + ',' + y.encode('ascii','ignore') , State)
+        if len(State)>0:
+            self.State=reduce(lambda x, y: x.encode('ascii','ignore') + ',' + y.encode('ascii','ignore') , State)
+        else:
+            self.State=''
         self.Direction = Direction
         self.Position = Position
         self.SourceHost = SourceHost
@@ -566,10 +502,14 @@ class RuleBag(object):
         self.cmds['iptables']['post'] = self.iptables_post
         self.cmds['iptables']['chain'] = self.iptables_chain_translate
 
-        # firewalld
+        # firewalld firewall-cmd [--permanent] --direct --add-rule { ipv4 | ipv6 | eb } <table> <chain> <priority> <args>
         self.cmds['firewalld'] = {}
-        self.cmds['firewalld']['present'] = self.cmds['iptables']['present']
-        self.cmds['firewalld']['absent'] = self.cmds['iptables']['absent']
+        self.cmds['firewalld']['present'] = {}
+        self.cmds['firewalld']['present']['ind'] = 'firewall-cmd --direct --add-rule ' + ' {AddressFamily} filter {Direction} {Index} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
+        self.cmds['firewalld']['present']['end'] = 'firewall-cmd --direct --add-rule ' + ' {AddressFamily} filter {Direction} {Index} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
+        self.cmds['firewalld']['absent'] = {}
+        self.cmds['firewalld']['absent']['ind'] = 'firewall-cmd --direct --remove-rule ' + ' {AddressFamily} filter {Direction} {Index} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
+        self.cmds['firewalld']['absent']['end'] = 'firewall-cmd --direct --remove-rule ' + ' {AddressFamily} filter {Direction} {Index} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
         self.cmds['firewalld']['check'] = self.iptbls + ' -C {Direction} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
         self.cmds['firewalld']['post'] = self.firewalld_post
         self.cmds['firewalld']['chain'] = self.firewalld_chain_translate
@@ -603,12 +543,13 @@ class RuleBag(object):
             if m == None:
                 continue
             found=True
-            for k in m.groupdict().keys():
+            groupd=dict(m.groupdict())
+            for k in groupd.keys():
                 if k in mykeys:
                     if k[-4:] == 'Host':
                         if self.__dict__[k] != None and '/' in self.__dict__[k]:
-                            m.groupdict()[k]+= '/' + m.group(k[0:1]+'pfx')
-                    if m.groupdict()[k] != self.__dict__[k]:
+                            groupd[k]+= '/' + m.group(k[0:1]+'pfx')
+                    if groupd[k] != self.__dict__[k]:
                         found=False
                         break
             if found == True:
@@ -641,11 +582,11 @@ class RuleBag(object):
             p = 'ind'
         rule = self.fmt(self.cmds[self.FirewallType]['present'][p])
         cmd = rule.replace(
-            self.FirewallType, self.FirewallType + ' --permanent ')
+            'firewall-cmd', 'firewall-cmd --permanent ')
         code, out = RunGetOutput(cmd,False)
-        print('Set permanent rule ' + rule.Ensure +
+        print('Set permanent rule ' + self.Ensure +
               ': ' + cmd + ' result code is: ' + str(code))
-        LG().Log('INFO', 'Set permanent rule ' + rule.Ensure +
+        LG().Log('INFO', 'Set permanent rule ' + self.Ensure +
                  ': ' + cmd + ' result code is: ' + str(code))
         return
 
@@ -656,7 +597,10 @@ class RuleBag(object):
             p = 'user'
         else:
             p = 'after'
-        self.Direction = 'ufw-' + p + '-' + self.OrigDirection.lower()
+        ufw = 'ufw-'
+        if self.AddressFamily == 'ipv6':
+            ufw = 'ufw6-'
+        self.Direction = ufw + p + '-' + self.OrigDirection.lower()
 
     def ufw_post(self):
         self.update_ufw_rules()
@@ -702,15 +646,16 @@ class RuleBag(object):
         pos['before-end'] = 'fw_custom_before_masq'
         pos['end'] = 'fw_custom_before_denyall'
         pos['anchor'] = 'true\n'
-        search_str = r'^(' + pos[self.Position] +  ')(.*)(#DSC-keep this line!!!\n.*?true\n}\n)(.*?true\n}\n)'
+        search_str = r'^.*(fw_custom_before_antispoofing)(.*?[{].*?)(\n[ ]+true\n}\n)'
         rule = self.fmt(self.cmds[self.FirewallType]['present']['end'])
-        rplace_str = r'\1' + rule + '\n\n#DSC-keep this line!!!\n\3'
+        rplace_str = r'\1\2' + rule + r'\n\3'
         text = ''
         with open(rules_file, 'r') as F:
             text = F.read()
         text=text.replace(rule+'\n','') # remove rule
-        srch = re.compile(search_str, re.M| re.S)
-        text = srch.sub(rplace_str, text)
+        if self.Ensure == 'present':
+            srch = re.compile(search_str, re.M| re.S)
+            text = srch.sub(rplace_str, text)
         with open(rules_file, 'w') as F:
             F.write(text)
 
