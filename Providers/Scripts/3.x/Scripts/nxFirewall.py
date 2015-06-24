@@ -76,7 +76,7 @@ def init_vars(Name, FirewallType, Protocol, Ensure, AddressFamily,
         LG().Log(
             'ERROR', 'Error: "Access" must be specified.')
         raise Exception('Access must be specified.')
-    Access = Access
+    Access = Access.lower()
 
     if State is None:
         State = ''
@@ -329,6 +329,10 @@ def IsFirewallRunning(rule):
         code, out = RunGetOutput('iptables -L',False)
         if code == 0:
             return True
+    if rule.FirewallType == 'ip6tables':
+        code, out = RunGetOutput('ip6tables -L',False)
+        if code == 0:
+            return True
     elif rule.FirewallType == 'firewalld':
         code, out = RunGetOutput('ps -ef | grep -v grep | grep firewalld',False)
         if code == 0:
@@ -471,7 +475,7 @@ class RuleBag(object):
         self.iptbls='iptables'
         if self.AddressFamily == 'ipv6' :
             self.iptbls = 'ip6tables'
-        if 'Allow' == Access :
+        if 'allow' == Access :
             self.Access = 'ACCEPT'
         else:
             self.Access = 'DROP'
@@ -503,6 +507,9 @@ class RuleBag(object):
         self.cmds['iptables']['post'] = self.iptables_post
         self.cmds['iptables']['chain'] = self.iptables_chain_translate
 
+        # ip6tables
+        self.cmds['ip6tables'] = self.cmds['iptables']
+        
         # firewalld firewall-cmd [--permanent] --direct --add-rule { ipv4 | ipv6 | eb } <table> <chain> <priority> <args>
         self.cmds['firewalld'] = {}
         self.cmds['firewalld']['present'] = {}
@@ -547,6 +554,8 @@ class RuleBag(object):
             groupd=dict(m.groupdict())
             for k in groupd.keys():
                 if k in mykeys:
+                    if groupd[k] == None :
+                        groupd[k] = ''
                     if k[-4:] == 'Host':
                         if self.__dict__[k] != None and '/' in self.__dict__[k]:
                             groupd[k]+= '/' + m.group(k[0:1]+'pfx')
