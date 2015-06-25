@@ -490,6 +490,8 @@ class RuleBag(object):
         self.DestinationPort = DestinationPort
         self.Index = 0
         self.InterfaceName = 'eth1'
+        if self.Direction == 'output':
+            self.InterfaceName = ''
         self.OrigDirection = Direction
         self.cmds = {}
 
