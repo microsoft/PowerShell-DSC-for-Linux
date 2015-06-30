@@ -96,7 +96,9 @@ def init_vars(Name, FirewallType, Protocol, Ensure, AddressFamily,
         if AddressFamily == 'ipv6': # ip6tables only looks upto the first ':'
             if '/' in SourceHost:
                 pfx=SourceHost.split('/')[1]
-            SourceHost = SourceHost.split(':')[0]+'::/'+pfx
+                SourceHost = SourceHost.split(':')[0]+'::/'+pfx
+            else:
+                SourceHost = SourceHost.split(':')[0]+'::'
     if SourcePort is None:
        SourcePort = '' 
     else :
@@ -119,8 +121,9 @@ def init_vars(Name, FirewallType, Protocol, Ensure, AddressFamily,
         if AddressFamily == 'ipv6': # ip6tables only looks upto the first ':'
             if '/' in DestinationHost:
                 pfx=DestinationHost.split('/')[1]
-            DestinationHost = DestinationHost.split(':')[0]+'::/'+pfx
-    
+                DestinationHost = DestinationHost.split(':')[0]+'::/'+pfx
+            else:
+                DestinationHost = DestinationHost.split(':')[0]+'::'
     if DestinationPort is None:
        DestinationPort = '' 
     else :
@@ -441,8 +444,6 @@ def Get(rule):
         Ensure = 'Present'
     else:
         Ensure = 'Absent'
-    if rule.FirewallType == 'ip6tables':
-        rule.FirewallType = 'iptables'
     return rule.Name, rule.FirewallType, rule.Protocol, Ensure, \
     rule.AddressFamily, rule.Access, rule.OrigDirection, \
     rule.Position, rule.SourceHost, rule.SourcePort, \
@@ -490,7 +491,7 @@ class RuleBag(object):
         self.DestinationPort = DestinationPort
         self.Index = 0
         self.InterfaceName = 'eth1'
-        if self.Direction == 'output':
+        if self.Direction.lower() == 'output':
             self.InterfaceName = ''
         self.OrigDirection = Direction
         self.cmds = {}
@@ -499,7 +500,7 @@ class RuleBag(object):
         # iptables
         self.cmds['iptables'] = {}
         self.cmds['iptables']['present'] = {}
-        self.cmds['iptables']['present']['end'] = self.iptbls + ' -A {Direction} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
+        self.cmds['iptables']['present']['end'] = self.iptbls + ' -A {Direction} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
         self.cmds['iptables']['present']['ind'] = self.iptbls + ' -I {Direction} {Index} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
         self.cmds['iptables']['absent'] = {}
         self.cmds['iptables']['absent']['end'] = self.iptbls + ' -D {Direction} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
