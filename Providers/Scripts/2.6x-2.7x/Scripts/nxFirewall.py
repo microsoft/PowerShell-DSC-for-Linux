@@ -304,7 +304,9 @@ def RunGetOutput(cmd, no_output, chk_err=True):
 
 
 def ValidateAddress(IPAddress, AddressFamily):
-    if ':' not in IPAddress and IPAddress[1].isalpha() == True: # dont try to validate a hostname
+    if IPAddress == None or len(IPAddress) == 0: # allow empty or None.
+        return True
+    if ':' not in IPAddress and IPAddress[1].isalpha() == True: # dont try to validate a hostname.
         return True
     if '/' in IPAddress:
         IPAddress=IPAddress.split('/')[0]
@@ -374,7 +376,7 @@ def GetRuleCountInChain(rule):
     if out is not None and len(out) > 0:
         Val = None
         try:
-            Val = out.splitlines()-2
+            Val = len(out.splitlines())-2
         except:
             print('ERROR: Rule count is not numeric in Check rule exists: ' +
                   cmd + ' result code is: ' + str(code))
