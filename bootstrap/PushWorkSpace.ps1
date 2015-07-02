@@ -66,7 +66,7 @@ if (Test-Path $WorkspaceArchive -pathtype leaf) {
 }
 
 
-$PackWorkspaceCmd = "${BuildDir}\Sources\DSC\build\Tools\7zip\7z.exe -r -ttar a ${WorkspaceArchive} ${BuildDir}\Sources\* -xr!Target\*"
+$PackWorkspaceCmd = "${BuildDir}\src\DSC\build\Tools\7zip\7z.exe -r -ttar a ${WorkspaceArchive} ${BuildDir}\src\* -xr!Target\*"
 WriteToLog $PackWorkspaceCmd
 $ans = Invoke-Expression $PackWorkspaceCmd
 WriteToLog "$ans"
@@ -89,7 +89,7 @@ WriteToLog "Pushing workspace unpack script"
 
 $UnpackScriptName = "UnpackWorkspace.bsh"
 $QualifiedUnpackScriptName = "${WorkSpaceName}.${UnpackScriptName}"
-$PushUnpackCmd = "$TransferExec -q -C -l $BuildUser -pw $BuildUserPW ${BuildDir}\Sources\DSC\bootstrap\${UnpackScriptName} $BuildHost`:${QualifiedUnpackScriptName}"
+$PushUnpackCmd = "$TransferExec -q -C -l $BuildUser -pw $BuildUserPW ${BuildDir}\src\DSC\bootstrap\${UnpackScriptName} $BuildHost`:${QualifiedUnpackScriptName}"
 WriteToLog $PushUnpackCmd
 $ans = Invoke-Expression $PushUnpackCmd
 WriteToLog "$ans"

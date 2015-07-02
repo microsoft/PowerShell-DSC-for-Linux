@@ -34,10 +34,10 @@ echo ${ScriptName} : ConfigToBuild=${ConfigToBuild}
 # Need to Implement: 
 #  <Target Name="CoreTest">
 #    <Message Text="Building TestApp on solarisSPARC" />
-#    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\sources\bootstrap" 
+#    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\src\bootstrap" 
 #          Command="buildscript.bat $(UnixBuildServer) $(TestAppMakeFilePath) all" />
 #    <Message Text="Running Tests on solarisSPARC" />
-#    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\sources\bootstrap" 
+#    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\src\bootstrap" 
 #          Command="buildscript.bat $(UnixBuildServer) $(MakeFilePath) testrun %22BUILD_TYPE=Debug%22" IgnoreExitCode="true" />
 #  </Target>
 

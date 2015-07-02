@@ -223,7 +223,7 @@
     <!-- Copy currentlabel.txt (From the source) to drop folder so we can easily see what was built 
     THis might point out discrepancies in what we thought we were getting and what we really get. -->
     <Copy
-       SourceFiles="$(MSBuildProjectDirectory)\..\sources\build\currentlabel.txt"
+       SourceFiles="$(MSBuildProjectDirectory)\..\src\build\currentlabel.txt"
        DestinationFolder="$(DropLocation)\$(BuildNumber)"
      />
   </Target>

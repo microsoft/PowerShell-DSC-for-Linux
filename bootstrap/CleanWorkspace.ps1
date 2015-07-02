@@ -56,7 +56,7 @@ trap {
 WriteToLog "Pushing workspaceClean.sh"
 
 $QualifiedWorkspaceCleanupScriptName = "${WorkSpaceName}.workspace_clean.sh"
-$PushWorkspaceCleanUpCmd = "$TransferExec -q -C -l $BuildUser -pw $BuildUserPW ${BuildDir}\Sources\tools\build\workspace_clean.sh $BuildHost`:${QualifiedWorkspaceCleanupScriptName}"
+$PushWorkspaceCleanUpCmd = "$TransferExec -q -C -l $BuildUser -pw $BuildUserPW ${BuildDir}\src\tools\build\workspace_clean.sh $BuildHost`:${QualifiedWorkspaceCleanupScriptName}"
 WriteToLog $PushWorkspaceCleanUpCmd
 $ans = Invoke-Expression "echo Y | $PushWorkspaceCleanUpCmd"
 WriteToLog "$ans"
