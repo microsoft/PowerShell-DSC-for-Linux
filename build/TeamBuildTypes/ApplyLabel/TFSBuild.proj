@@ -144,13 +144,13 @@
   <Target Name="AfterGet">
 
     <PropertyGroup>
-      <SourceDir>$(MSBuildProjectDirectory)\..\sources\DSC</SourceDir>
+      <SourceDir>$(MSBuildProjectDirectory)\..\src\DSC</SourceDir>
     </PropertyGroup>
 
     <Message Text="Updating currentlabel.txt, makefile.version, makefile.versionumber and then Applying label" />
 
     <Exec WorkingDirectory="$(SourceDir)\build"
-          Command="&quot;c:\program files (x86)\Microsoft Visual Studio 10.0\common7\IDE\tf.exe&quot; checkout /type:&quot;ascii&quot; &quot;currentlabel.txt&quot; &quot;Makefile.versionnumber&quot; &quot;Makefile.version&quot;" />
+          Command="&quot;c:\program files (x86)\TFSClient\tf.exe&quot; checkout /type:&quot;ascii&quot; &quot;currentlabel.txt&quot; &quot;Makefile.versionnumber&quot; &quot;Makefile.version&quot;" />
 
     <!-- Read and update the version number. -->
     <Version
@@ -214,20 +214,20 @@
     </PropertyGroup>
 
     <Exec WorkingDirectory="$(SourceDir)\build"
-          Command="&quot;c:\program files (x86)\Microsoft Visual Studio 10.0\common7\IDE\tf.exe&quot; checkin /override:&quot;Build System Checkin&quot; /noprompt /notes:&quot;Code Reviewer&quot;=&quot;Build System Checkin&quot; /comment:&quot;$(CheckinComment)&quot; &quot;currentlabel.txt&quot; &quot;Makefile.versionnumber&quot; &quot;Makefile.version&quot;" />
+          Command="&quot;c:\program files (x86)\TFSClient\tf.exe&quot; checkin /override:&quot;Build System Checkin&quot; /noprompt /notes:&quot;Code Reviewer&quot;=&quot;Build System Checkin&quot; /comment:&quot;$(CheckinComment)&quot; &quot;currentlabel.txt&quot; &quot;Makefile.versionnumber&quot; &quot;Makefile.version&quot;" />
 
     <!-- Apply the label -->
     <Exec WorkingDirectory="$(SourceDir)"
-          Command="&quot;c:\program files (x86)\Microsoft Visual Studio 10.0\common7\IDE\tf.exe&quot; label $(TheLabel) /recursive ." />
+          Command="&quot;c:\program files (x86)\TFSClient\tf.exe&quot; label $(TheLabel) /recursive ." />
 
     <Exec WorkingDirectory="$(SourceDir)\..\pal"
-          Command="&quot;c:\program files (x86)\Microsoft Visual Studio 10.0\common7\IDE\tf.exe&quot; label $(TheLabel) /recursive ." />
+          Command="&quot;c:\program files (x86)\TFSClient\tf.exe&quot; label $(TheLabel) /recursive ." />
 
     <Exec WorkingDirectory="$(SourceDir)\..\omi"
-          Command="&quot;c:\program files (x86)\Microsoft Visual Studio 10.0\common7\IDE\tf.exe&quot; label $(TheLabel) /recursive ." />
+          Command="&quot;c:\program files (x86)\TFSClient\tf.exe&quot; label $(TheLabel) /recursive ." />
 
     <Exec WorkingDirectory="$(SourceDir)\..\tools"
-          Command="&quot;c:\program files (x86)\Microsoft Visual Studio 10.0\common7\IDE\tf.exe&quot; label $(TheLabel) /recursive ." />
+          Command="&quot;c:\program files (x86)\TFSClient\tf.exe&quot; label $(TheLabel) /recursive ." />
 
     <!-- Copy currentlabel.txt to \\scx-drop-01\Builds\InfraTest\BuildFromLabel so subsequent builds can pick it up. -->
     <Copy
@@ -237,7 +237,7 @@
 
     <!-- Update Currentlabel.txt and Makefile.version in source to not have the build version so that tip builds don't show a inappropriate version -->
     <Exec WorkingDirectory="$(SourceDir)\build"
-          Command="&quot;c:\program files (x86)\Microsoft Visual Studio 10.0\common7\IDE\tf.exe&quot; checkout /type:&quot;ascii&quot; &quot;currentlabel.txt&quot;  &quot;Makefile.version&quot;" />
+          Command="&quot;c:\program files (x86)\TFSClient\tf.exe&quot; checkout /type:&quot;ascii&quot; &quot;currentlabel.txt&quot;  &quot;Makefile.version&quot;" />
 
     <PropertyGroup>
       <TipLabel>$(BranchLabelPrefix)_DEVBUILD</TipLabel>
@@ -256,7 +256,7 @@
     </PropertyGroup>
 
     <Exec WorkingDirectory="$(SourceDir)\build"
-          Command="&quot;c:\program files (x86)\Microsoft Visual Studio 10.0\common7\IDE\tf.exe&quot; checkin /override:&quot;Build System Checkin&quot; /noprompt /notes:&quot;Code Reviewer&quot;=&quot;Build System Checkin&quot; /comment:&quot;$(CheckinComment)&quot; &quot;currentlabel.txt&quot; &quot;Makefile.version&quot;" />
+          Command="&quot;c:\program files (x86)\TFSClient\tf.exe&quot; checkin /override:&quot;Build System Checkin&quot; /noprompt /notes:&quot;Code Reviewer&quot;=&quot;Build System Checkin&quot; /comment:&quot;$(CheckinComment)&quot; &quot;currentlabel.txt&quot; &quot;Makefile.version&quot;" />
 
   </Target>
 

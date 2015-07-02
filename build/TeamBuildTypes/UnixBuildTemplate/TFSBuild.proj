@@ -69,7 +69,7 @@
     <ErrorWarningLogText>The errors/warnings log file is at:</ErrorWarningLogText>
     <SkipPostBuild>true</SkipPostBuild>
 
-    <WorkspaceFolder>$(BuildDirectory)\Sources\DSC</WorkspaceFolder>
+    <WorkspaceFolder>$(BuildDirectory)\src\DSC</WorkspaceFolder>
 
     <BinariesRoot>$(SolutionRoot)\DSC\Target</BinariesRoot>
 
@@ -269,7 +269,7 @@
   <Target Name="AfterDropBuild">
     <Message Text="AfterDropBuild: Cleaning up workspaces on unix host." />
 
-    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\sources\DSC\bootstrap"
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\src\DSC\bootstrap"
           Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\RunRemoteBashScript.ps1 $(UnixBuildServer) ./$(UnixWorkSpaceName).UnpackWorkspace.bsh $(UnixWorkspaceName) CleanupMode' />
   </Target>
 
