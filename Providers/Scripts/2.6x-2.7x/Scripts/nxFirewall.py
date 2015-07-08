@@ -548,7 +548,7 @@ class RuleBag(object):
     def iptables_check(self):
         self.iptables_chain_translate()
         r=re.compile(iptables_regex,re.VERBOSE)
-        code,out = RunGetOutput(self.iptbls + ' -S ' + self.Direction, False)
+        code,out = RunGetOutput(self.iptbls + '-save ', False)
         mykeys=self.__dict__.keys()
         for line in out.splitlines():
             m=r.search(line)
