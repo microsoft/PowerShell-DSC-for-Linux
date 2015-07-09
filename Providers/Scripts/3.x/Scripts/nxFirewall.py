@@ -454,8 +454,10 @@ def Get(rule):
 
 iptables_regex=r"""
 ^-A[ ]+(?P<Direction>.*?)[ ]+
-((?:-s[ ]+)(?P<SourceHost>.*?)(?:/)(?P<Spfx>.*?)(?:[ ]+))?
-((?:-d[ ]+)(?P<DestinationHost>.*?)(?:/)(?P<Dpfx>.*?)(?:[ ]+))?
+((?:-s[ ]+)(?P<SourceHost>.*?)
+(((?:/)(?P<Spfx>.*?)(?:[ ]+))|(?:[ ]+)))?
+((?:-d[ ]+)(?P<DestinationHost>.*?)
+(((?:/)(?P<Dpfx>.*?)(?:[ ]+))|(?:[ ]+)))?
 ((?:-i[ ]+)(?P<InterfaceName>.*?)(?:[ ]+))?
 ((?:-p[ ]+)(?P<proto>.*?)(?:[ ]+))?
 ((?:-m[ ]+)(?P<matchport>.*?)(?:[ ]+))?
@@ -635,7 +637,7 @@ class RuleBag(object):
         search_str = \
         r'^(.filter)(.*)((:.*?\n\n)|(:.*?\n#.*?\n\n))'
         rule = self.fmt(self.cmds[self.FirewallType]['present'][p])
-        rule=re.sub(r'iptables.*? ','',rule)
+        rule=re.sub(self.iptbls+r'.*? ','',rule)
         rplace_str = r'\1\2\3' + rule + '\n\n'
         text = ''
         with open(rules_file[self.Position], 'r') as F:
