@@ -20,6 +20,7 @@ LG = nxDSCLog.DSCLog
 # class MSFT_nxFirewallResource:OMI_BaseResource
 # {
 #   [Key] string Name;
+#   [Write] string InterfaceName;
 #   [Write] string FirewallType; # Iptables, Ip6tables, yast, \
 #   ufw, susefirewall2
 #   [Write ValueMap{"tcp", "udp", "icmp"}] string Protocol;
@@ -41,7 +42,7 @@ LG = nxDSCLog.DSCLog
 #   [Write] string DestinationPort;
 # };
 
-def init_vars(Name, FirewallType, Protocol, Ensure, AddressFamily,
+def init_vars(Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
     Access, State, Direction, Position, SourceHost, SourcePort,
     DestinationHost, DestinationPort):
 
@@ -50,6 +51,11 @@ def init_vars(Name, FirewallType, Protocol, Ensure, AddressFamily,
         LG().Log('ERROR', 'Error: "Name" must be specified.')
         raise Exception('Name must be specified.')
     Name = Name
+    
+    if InterfaceName is None or InterfaceName == '':
+        InterfaceName = 'eth0'
+    else:
+        InterfaceName = InterfaceName
 
     if FirewallType is None or FirewallType == '':
         print('Error: "FirewallType" must be specified.', file=sys.stderr)
@@ -145,35 +151,35 @@ def init_vars(Name, FirewallType, Protocol, Ensure, AddressFamily,
             'Direction must be specified.')
     Direction = Direction
 
-    return Name, FirewallType, Protocol, Ensure, AddressFamily, \
+    return Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily, \
     Access, State, Direction, Position, SourceHost, SourcePort, \
     DestinationHost, DestinationPort
 
 
-def Set_Marshall(Name, FirewallType, Protocol, Ensure, AddressFamily,
+def Set_Marshall(Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
                  Access, State,  Direction, Position, SourceHost, SourcePort,
                  DestinationHost, DestinationPort):
-    (Name, FirewallType, Protocol, Ensure, AddressFamily,
+    (Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
      Access, State,  Direction, Position, SourceHost, SourcePort,
-     DestinationHost, DestinationPort) = init_vars(Name, FirewallType, Protocol, Ensure,
+     DestinationHost, DestinationPort) = init_vars(Name, InterfaceName, FirewallType, Protocol, Ensure,
     AddressFamily, Access, State, Direction, Position, SourceHost, SourcePort,
     DestinationHost, DestinationPort)
-    Rule = RuleBag(Name, FirewallType, Protocol, Ensure, AddressFamily,
+    Rule = RuleBag(Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
                    Access, State, Direction, Position, SourceHost, SourcePort,
                    DestinationHost, DestinationPort)
     retval = Set(Rule)
     return retval
 
 
-def Test_Marshall(Name, FirewallType, Protocol, Ensure,
+def Test_Marshall(Name, InterfaceName, FirewallType, Protocol, Ensure,
     AddressFamily, Access, State,  Direction, Position, SourceHost,
                   SourcePort, DestinationHost, DestinationPort):
-    (Name, FirewallType, Protocol, Ensure, AddressFamily, Access,
+    (Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily, Access,
      State,  Direction, Position, SourceHost, SourcePort, DestinationHost,
-     DestinationPort) = init_vars(Name, FirewallType, Protocol, Ensure,
+     DestinationPort) = init_vars(Name, InterfaceName, FirewallType, Protocol, Ensure,
     AddressFamily, Access, State, Direction, Position, SourceHost,
                                   SourcePort, DestinationHost, DestinationPort)
-    Rule = RuleBag(Name, FirewallType, Protocol, Ensure, AddressFamily,
+    Rule = RuleBag(Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
                    Access, State, Direction, Position, SourceHost, SourcePort,
                    DestinationHost, DestinationPort)
     
@@ -189,23 +195,24 @@ def Test_Marshall(Name, FirewallType, Protocol, Ensure,
             return [0]
 
 
-def Get_Marshall(Name, FirewallType, Protocol, Ensure, AddressFamily,
+def Get_Marshall(Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
     Access, State,  Direction, Position, SourceHost, SourcePort,
                  DestinationHost, DestinationPort):
     arg_names = list(locals().keys())
-    (Name, FirewallType, Protocol, Ensure, AddressFamily, Access, State,
+    (Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily, Access, State,
      Direction, Position, SourceHost, SourcePort, DestinationHost,
-     DestinationPort) = init_vars(Name, FirewallType, Protocol, Ensure,
+     DestinationPort) = init_vars(Name, InterfaceName, FirewallType, Protocol, Ensure,
     AddressFamily, Access, State, Direction, Position, SourceHost,
     SourcePort, DestinationHost, DestinationPort)
-    Rule = RuleBag(Name, FirewallType, Protocol, Ensure,
+    Rule = RuleBag(Name, InterfaceName, FirewallType, Protocol, Ensure,
     AddressFamily, Access, State, Direction, Position, SourceHost, SourcePort,
     DestinationHost, DestinationPort)
 
-    (Name, FirewallType, Protocol, Ensure, AddressFamily,
+    (Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
     Access, Direction, Position, SourceHost, SourcePort,
     DestinationHost, DestinationPort) = Get(Rule)
     Name = protocol.MI_String(Name)
+    InterfaceName = protocol.MI_String(InterfaceName)
     FirewallType = protocol.MI_String(FirewallType)
     Protocol = protocol.MI_String(Protocol)
     Ensure = protocol.MI_String(Ensure)
@@ -447,7 +454,7 @@ def Get(rule):
         Ensure = 'Present'
     else:
         Ensure = 'Absent'
-    return rule.Name, rule.FirewallType, rule.Protocol, Ensure, \
+    return rule.Name, rule.OrigInterfaceName, rule.FirewallType, rule.Protocol, Ensure, \
     rule.AddressFamily, rule.Access, rule.OrigDirection, \
     rule.Position, rule.SourceHost, rule.SourcePort, \
     rule.DestinationHost, rule.DestinationPort
@@ -469,7 +476,7 @@ iptables_regex=r"""
 """
 
 class RuleBag(object):
-    def __init__(self, Name, FirewallType, Protocol, Ensure, AddressFamily,
+    def __init__(self, Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
                  Access, State, Direction, Position, SourceHost, SourcePort,
                  DestinationHost, DestinationPort):
         self.Name = Name
@@ -495,7 +502,8 @@ class RuleBag(object):
         self.DestinationHost = DestinationHost
         self.DestinationPort = DestinationPort
         self.Index = 0
-        self.InterfaceName = 'eth1'
+        self.InterfaceName = InterfaceName
+        self.OrigInterfaceName = InterfaceName
         if self.Direction.lower() == 'output':
             self.InterfaceName = ''
         self.OrigDirection = Direction
