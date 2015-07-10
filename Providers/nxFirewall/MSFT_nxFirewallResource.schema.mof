@@ -1,10 +1,11 @@
 
 
 
-[ClassVersion("1.0.0"), FriendlyName("nxFirewallResource")]
+[ClassVersion("1.0.0"), FriendlyName("nxFirewall")]
 class MSFT_nxFirewallResource:OMI_BaseResource
 {
        [Key] string Name;
+       [Write] string InterfaceName;
        [Write, ValueMap{"Iptables", "Ip6tables", "yast", "ufw", "susefirewall2", "firewalld"}, Values{"Iptables", "Ip6tables", "yast", "ufw", "susefirewall2", "firewalld"}] string FirewallType; 
        [Write, ValueMap{"tcp", "udp", "icmp"}, Values{"tcp", "udp", "icmp"}] string Protocol;
        [Write, ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;

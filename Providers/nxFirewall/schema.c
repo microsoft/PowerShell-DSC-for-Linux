@@ -1018,6 +1018,38 @@ static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_Name_prop =
     NULL,
 };
 
+static MI_CONST MI_Boolean MSFT_nxFirewallResource_InterfaceName_Write_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxFirewallResource_InterfaceName_Write_qual =
+{
+    MI_T("Write"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxFirewallResource_InterfaceName_Write_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFirewallResource_InterfaceName_quals[] =
+{
+    &MSFT_nxFirewallResource_InterfaceName_Write_qual,
+};
+
+/* property MSFT_nxFirewallResource.InterfaceName */
+static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_InterfaceName_prop =
+{
+    MI_FLAG_PROPERTY, /* flags */
+    0x0069650D, /* code */
+    MI_T("InterfaceName"), /* name */
+    MSFT_nxFirewallResource_InterfaceName_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxFirewallResource_InterfaceName_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxFirewallResource, InterfaceName), /* offset */
+    MI_T("MSFT_nxFirewallResource"), /* origin */
+    MI_T("MSFT_nxFirewallResource"), /* propagator */
+    NULL,
+};
+
 static MI_CONST MI_Boolean MSFT_nxFirewallResource_FirewallType_Write_qual_value = 1;
 
 static MI_CONST MI_Qualifier MSFT_nxFirewallResource_FirewallType_Write_qual =
@@ -1759,6 +1791,7 @@ static MI_CONST MI_PropertyDecl MSFT_nxFirewallResource_Position_prop =
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxFirewallResource_props[] =
 {
     &MSFT_nxFirewallResource_Name_prop,
+    &MSFT_nxFirewallResource_InterfaceName_prop,
     &MSFT_nxFirewallResource_FirewallType_prop,
     &MSFT_nxFirewallResource_Protocol_prop,
     &MSFT_nxFirewallResource_Ensure_prop,

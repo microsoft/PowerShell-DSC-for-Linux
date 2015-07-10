@@ -30,6 +30,7 @@ typedef struct _MSFT_nxFirewallResource /* extends OMI_BaseResource */
     /* OMI_BaseResource properties */
     /* MSFT_nxFirewallResource properties */
     /*KEY*/ MI_ConstStringField Name;
+    MI_ConstStringField InterfaceName;
     MI_ConstStringField FirewallType;
     MI_ConstStringField Protocol;
     MI_ConstStringField Ensure;
@@ -165,13 +166,45 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_Name(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_FirewallType(
+MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_InterfaceName(
     _Inout_ MSFT_nxFirewallResource* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
         1,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_InterfaceName(
+    _Inout_ MSFT_nxFirewallResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_InterfaceName(
+    _Inout_ MSFT_nxFirewallResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        1);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_FirewallType(
+    _Inout_ MSFT_nxFirewallResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        2,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -183,7 +216,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_FirewallType(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        1,
+        2,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -194,7 +227,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_FirewallType(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        1);
+        2);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Protocol(
@@ -203,7 +236,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Protocol(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        2,
+        3,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -215,7 +248,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_Protocol(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        2,
+        3,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -226,7 +259,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_Protocol(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        2);
+        3);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Ensure(
@@ -235,7 +268,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Ensure(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        3,
+        4,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -247,7 +280,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_Ensure(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        3,
+        4,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -258,7 +291,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_Ensure(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        3);
+        4);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_AddressFamily(
@@ -267,7 +300,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_AddressFamily(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        4,
+        5,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -279,7 +312,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_AddressFamily(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        4,
+        5,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -290,7 +323,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_AddressFamily(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        4);
+        5);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Access(
@@ -299,7 +332,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Access(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        5,
+        6,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -311,7 +344,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_Access(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        5,
+        6,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -322,7 +355,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_Access(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        5);
+        6);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_State(
@@ -335,7 +368,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_State(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        6,
+        7,
         (MI_Value*)&arr,
         MI_STRINGA,
         0);
@@ -351,7 +384,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_State(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        6,
+        7,
         (MI_Value*)&arr,
         MI_STRINGA,
         MI_FLAG_BORROW);
@@ -362,7 +395,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_State(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        6);
+        7);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Direction(
@@ -371,7 +404,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Direction(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        7,
+        8,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -383,7 +416,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_Direction(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        7,
+        8,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -394,7 +427,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_Direction(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        7);
+        8);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_SourceHost(
@@ -403,7 +436,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_SourceHost(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        8,
+        9,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -415,7 +448,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_SourceHost(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        8,
+        9,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -426,7 +459,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_SourceHost(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        8);
+        9);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_SourcePort(
@@ -435,7 +468,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_SourcePort(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        9,
+        10,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -447,7 +480,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_SourcePort(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        9,
+        10,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -458,7 +491,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_SourcePort(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        9);
+        10);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_DestinationHost(
@@ -467,7 +500,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_DestinationHost(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        10,
+        11,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -479,7 +512,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_DestinationHost(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        10,
+        11,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -490,7 +523,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_DestinationHost(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        10);
+        11);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_DestinationPort(
@@ -499,7 +532,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_DestinationPort(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        11,
+        12,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -511,7 +544,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_DestinationPort(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        11,
+        12,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -522,7 +555,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_DestinationPort(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        11);
+        12);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Position(
@@ -531,7 +564,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Set_Position(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        12,
+        13,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -543,7 +576,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_SetPtr_Position(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        12,
+        13,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -554,7 +587,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxFirewallResource_Clear_Position(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        12);
+        13);
 }
 
 /*
