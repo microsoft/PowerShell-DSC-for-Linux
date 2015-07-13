@@ -551,12 +551,12 @@ class RuleBag(object):
         self.cmds['ufw'] = {}
         self.cmds['ufw']['present'] = self.cmds['iptables']['present']
         self.cmds['ufw']['absent'] = self.cmds['iptables']['absent']
-        self.cmds['ufw']['check'] = self.iptbls + ' -C {Direction} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
+        self.cmds['ufw']['check'] = self.iptables_check
         self.cmds['ufw']['post'] = self.ufw_post
         self.cmds['ufw']['chain'] = self.ufw_chain_translate
 
     def iptables_check(self):
-        self.iptables_chain_translate()
+        self.cmds[self.FirewallType]['chain']()
         r=re.compile(iptables_regex,re.VERBOSE)
         code,out = RunGetOutput(self.iptbls + '-save ', False)
         mykeys=self.__dict__.keys()
