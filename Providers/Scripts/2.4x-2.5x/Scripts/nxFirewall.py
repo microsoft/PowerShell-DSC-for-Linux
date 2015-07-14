@@ -532,7 +532,7 @@ class RuleBag(object):
         self.cmds['firewalld']['absent'] = {}
         self.cmds['firewalld']['absent']['ind'] = 'firewall-cmd --direct --remove-rule ' + ' {AddressFamily} filter {Direction} {Index} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
         self.cmds['firewalld']['absent']['end'] = 'firewall-cmd --direct --remove-rule ' + ' {AddressFamily} filter {Direction} {Index} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
-        self.cmds['firewalld']['check'] = self.iptbls + ' -C {Direction} -i {InterfaceName} -p {Protocol} -s {SourceHost} --sport {SourcePort} -d {DestinationHost} --dport {DestinationPort} -m state --state {State} -j {Access}'
+        self.cmds['firewalld']['check'] = self.iptables_check
         self.cmds['firewalld']['post'] = self.firewalld_post
         self.cmds['firewalld']['chain'] = self.firewalld_chain_translate
 
@@ -573,6 +573,8 @@ class RuleBag(object):
                     if k[-4:] == 'Host':
                         if self.__dict__[k] != None and '/' in self.__dict__[k]:
                             groupd[k]+= '/' + m.group(k[0:1]+'pfx')
+                        if groupd[k] == '::':
+                            groupd[k] = '' 
                     if groupd[k] != self.__dict__[k]:
                         found=False
                         break
