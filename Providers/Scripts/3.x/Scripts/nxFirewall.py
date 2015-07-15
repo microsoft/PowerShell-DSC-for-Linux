@@ -142,13 +142,7 @@ def init_vars(Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily
             raise Exception('Error: Invalid address for "DestinationPort".')
     
     if Direction is None or Direction == '':
-        print(
-            'Error: "Direction" must be specified.', \
-            file=sys.stderr)
-        LG().Log(
-            'ERROR', 'Error: "Direction" must be specified.')
-        raise Exception(
-            'Direction must be specified.')
+        Direction = 'input'
     Direction = Direction
 
     return Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily, \

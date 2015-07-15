@@ -141,13 +141,7 @@ def init_vars(Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily
             raise Exception('Error: Invalid address for "DestinationPort".')
     
     if Direction is None or Direction == '':
-        Print(
-            'Error: "Direction" must be specified.', \
-            file=sys.stderr)
-        LG().Log(
-            'ERROR', 'Error: "Direction" must be specified.')
-        raise Exception(
-            'Direction must be specified.')
+        Direction = 'input'
     Direction = Direction.encode('ascii', 'ignore')
 
     return Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily, \
@@ -678,14 +672,14 @@ class RuleBag(object):
         rule = self.fmt(self.cmds[self.FirewallType]['present']['end'])
         rplace_str = r'\1\2' + rule + r'\n\3'
         text = ''
-        F=open(rules_file[self.Position], 'r')
+        F=open(rules_file, 'r')
         text = F.read()
         F.close()
         text=text.replace(rule+'\n','') # remove rule
         if self.Ensure == 'present':
             srch = re.compile(search_str, re.M| re.S)
             text = srch.sub(rplace_str, text)
-        F= open(rules_file[self.Position], 'w')
+        F= open(rules_file, 'w')
         F.write(text)
         F.close()
         
