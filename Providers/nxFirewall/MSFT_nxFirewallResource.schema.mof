@@ -6,11 +6,11 @@ class MSFT_nxFirewallResource:OMI_BaseResource
 {
        [Key] string Name;
        [Write] string InterfaceName;
-       [Write, ValueMap{"Iptables", "Ip6tables", "yast", "ufw", "susefirewall2", "firewalld"}, Values{"Iptables", "Ip6tables", "yast", "ufw", "susefirewall2", "firewalld"}] string FirewallType; 
+       [Write, required, ValueMap{"Iptables", "Ip6tables", "yast", "ufw", "susefirewall2", "firewalld"}, Values{"Iptables", "Ip6tables", "yast", "ufw", "susefirewall2", "firewalld"}] string FirewallType; 
        [Write, ValueMap{"tcp", "udp", "icmp"}, Values{"tcp", "udp", "icmp"}] string Protocol;
        [Write, ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
        [Write, ValueMap{"IPv4", "IPv6"},Values{"IPv4", "IPv6"}] string AddressFamily;
-       [Write, ValueMap{"Allow", "Block"},Values{"Allow", "Block"}] string Access;
+       [Write, required, ValueMap{"Allow", "Block"},Values{"Allow", "Block"}] string Access;
        [Write, ValueMap{"ESTABLISHED", "RELATED", "NEW"},Values{"ESTABLISHED", "RELATED", "NEW"}] string State[];
        [Write, ValueMap{"INPUT", "OUTPUT", "FORWARD"},Values{"INPUT", "OUTPUT", "FORWARD"}] string Direction;
        [Write] string SourceHost;
@@ -19,4 +19,5 @@ class MSFT_nxFirewallResource:OMI_BaseResource
        [Write] string DestinationPort;
        [Write, ValueMap{"top", "after-top", "before-end", "end"},Values{"top", "after-top", "before-end", "end"}] string Position;
 };
+
 
