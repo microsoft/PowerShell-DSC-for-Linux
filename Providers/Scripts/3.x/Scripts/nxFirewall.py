@@ -601,7 +601,7 @@ class RuleBag(object):
         p = self.Position
         if p != 'end':
             p = 'ind'
-        rule = self.fmt(self.cmds[self.FirewallType]['present'][p])
+        rule = self.fmt(self.cmds[self.FirewallType][self.Ensure][p])
         cmd = rule.replace(
             'firewall-cmd', 'firewall-cmd --permanent ')
         code, out = RunGetOutput(cmd,False)
@@ -632,8 +632,8 @@ class RuleBag(object):
         if self.iptbls == 'ip6tables':
             p='6'
         rules_file['top'] = '/etc/ufw/before'+p+'.rules'
-        rules_file['after-top'] = '/etc/ufw/user'+p+'.rules'
-        rules_file['before-end'] = '/etc/ufw/user'+p+'.rules'
+        rules_file['after-top'] = '/lib/ufw/user'+p+'.rules'
+        rules_file['before-end'] = '/lib/ufw/user'+p+'.rules'
         rules_file['end'] = '/etc/ufw/after'+p+'.rules'
         p='end'
         if self.Position != 'end':
