@@ -37,12 +37,11 @@ namespace DSC
                 propMap["Checksum"] = "md5";
             }
 
-            string verification = ctx.Records.GetValue("verification");
-            if (verification.ToLower().Equals("ctime"))
+            if (verificationCmd.ToLower().Equals("ctime"))
             {
                 getTimeCmd = getCtimeCmd.Replace("{0}", propMap["DestinationPath"]);
             }
-            else if (verification.ToLower().Equals("mtime"))
+            else if (verificationCmd.ToLower().Equals("mtime"))
             {
                 getTimeCmd = getMtimeCmd.Replace("{0}", propMap["DestinationPath"]);
             }
@@ -58,54 +57,63 @@ namespace DSC
             ctx.Alw(String.Format("Run PowerShell : '{0}'", psScripts));
             psHelper.Run(psScripts);
 
-            try 
+            if (verificationCmd.ToLower().Equals("ctime") || verificationCmd.ToLower().Equals("mtime"))
             {
-                sshHelper.Execute(getTimeCmd, out time);
-                
-            }
-            catch(Exception)
-            {
-                throw new VarFail(String.Format("Fail to get ctime or mtime of {0}", propMap["DestinationPath"]));
-            }
+                try
+                {
+                    sshHelper.Execute(getTimeCmd, out time);
 
-            //Run the second time to verify if the destination path will be updated when the source has no change.
-            psHelper.Run(psScripts);
+                }
+                catch (Exception)
+                {
+                    throw new VarFail(String.Format("Fail to get ctime or mtime of {0}", propMap["DestinationPath"]));
+                }
+
+                //Run the second time to verify if the destination path will be updated when the source has no change.
+                psHelper.Run(psScripts);
+            }
             ctx.Alw("Run End.");
         }
 
         protected override void VerifyLinuxState(IContext ctx)
         {
-            try
-            {
-                string newTime = string.Empty;
-                
-                //get the new ctime or mtime.
-                sshHelper.Execute(getTimeCmd, out newTime);
-
-                //the old time and new time should be same.
-                if (!newTime.Equals(time))
-                {
-                    throw new VarFail(failedMsg);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new VarFail(failedMsg, ex);
-            }
-
+            
             if (!string.IsNullOrWhiteSpace(verificationCmd))
             {
-                try
+                if (verificationCmd.ToLower().Equals("ctime") || verificationCmd.ToLower().Equals("mtime"))
                 {
-                    ctx.Alw(String.Format("Run verification command : '{0}', expect it return '{1}'",
-                        verificationCmd, expectedValue));
-                    sshHelper.VerifyExecution(verificationCmd, expectedValue);
+                    try
+                    {
+                        string newTime = string.Empty;
 
-                    ctx.Alw(successfulyMsg);
+                        //get the new ctime or mtime.
+                        sshHelper.Execute(getTimeCmd, out newTime);
+
+                        //the old time and new time should be same.
+                        if (!newTime.Equals(time))
+                        {
+                            throw new VarFail(failedMsg);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new VarFail(failedMsg, ex);
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    throw new VarFail(failedMsg, ex);
+                    try
+                    {
+                        ctx.Alw(String.Format("Run verification command : '{0}', expect it return '{1}'",
+                            verificationCmd, expectedValue));
+                        sshHelper.VerifyExecution(verificationCmd, expectedValue);
+
+                        ctx.Alw(successfulyMsg);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new VarFail(failedMsg, ex);
+                    }
                 }
             }
         }

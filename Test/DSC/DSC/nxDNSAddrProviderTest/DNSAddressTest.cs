@@ -71,6 +71,17 @@ namespace DSC
             }
             initializeCmd = initializeCmd + ";sleep 1;" + ctx.Records.GetValue("initialCmd");
             base.Setup(ctx);
+
+            if (!propMap.ContainsKey("Ensure"))
+            {
+                propMap["Ensure"] = "present";
+            }
+
+            if (!propMap.ContainsKey("AddressFamily"))
+            {
+                propMap["AddressFamily"] = "IPv4";
+            }
+
             ctx.Alw("nxDNSAddrTest Setup End.");
         }
 

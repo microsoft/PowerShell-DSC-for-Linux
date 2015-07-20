@@ -8,13 +8,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace DSC
 {
     class FirewallMofHelper : MofHelper
     {
+        
         public FirewallMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
@@ -26,30 +26,49 @@ namespace DSC
         {
             StringBuilder text = new StringBuilder();
 
-            List<String> booleanProp = new List<String> { "Enabled" };
+            List<String> booleanProp = new List<String> { "SourceHost", "DestinationHost" };
 
             foreach (string property in propString.Keys)
             {
                 if (!String.IsNullOrWhiteSpace(property))
                 {
-                    if (!booleanProp.Contains(property))
+                    if (booleanProp.Contains(property))
                     {
-                        text.Append(String.Format("{0} = \"{1}\"\n",
-                            property,
-                            propString[property].Replace("$", "`$")));
+                        string addrFamily = propString.ContainsKey("AddressFamily") ? propString["AddressFamily"] : "IPv4";
+                        text.Append(addrFamily.ToLower().Equals("ipv6")
+                            ? String.Format("{0} = \"{1}::\"\n", property, propString[property])
+                            : String.Format("{0} = \"{1}\"\n", property, propString[property]));
                     }
-                    else
+                    else 
                     {
-                        text.Append(String.Format("{0} = ${1}\n",
-                            property,
-                            propString[property]));
+                        text.Append(String.Format("{0} = \"{1}\"\n", property, propString[property]));
+                    }                 
+                }
+            }
+            return this.MofGenerator.Replace("$Properties", text.ToString());
+        }
+
+        
+        public override Dictionary<string, string> ReturnedPropertiesOfGetDscConfiguration(Dictionary<string, string> propKeyValuePairs)
+        {
+            List<string> forbiddenProp = new List<string> { "SourceHost", "DestinationHost" };
+
+            foreach (var prop in forbiddenProp)
+            {
+                string addrFamily = propKeyValuePairs.ContainsKey("AddressFamily") ? propKeyValuePairs["AddressFamily"] : "IPv4";
+                
+                if (propKeyValuePairs.ContainsKey(prop))
+                {
+                    if (addrFamily.ToLower().Equals("ipv6"))
+                    {
+                        propKeyValuePairs[prop] = propKeyValuePairs[prop] + "::";
                     }
                 }
             }
 
-            return this.MofGenerator.Replace("$Properties", text.ToString());
+            return propKeyValuePairs;
         }
+        
     }
 }
-
 
