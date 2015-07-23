@@ -1,0 +1,15 @@
+
+
+
+[ClassVersion("1.0.0"), FriendlyName("nxIPAddress")] 
+class MSFT_nxIPAddressResource : OMI_BaseResource
+{
+  [Key] string IPAddress;
+  [Key] string InterfaceName;
+  [Write, ValueMap{"Automatic", "Static"},Values{"Automatic", "Static"}] string BootProtocol;
+  [Write] string DefaultGateway;
+  [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] string Ensure;
+  [Write] uint32 PrefixLength;
+  [Write, ValueMap{"IPv4", "IPv6"},Values{"IPv4", "IPv6"}] string AddressFamily;
+
+};
