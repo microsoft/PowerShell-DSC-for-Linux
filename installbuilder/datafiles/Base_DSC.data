@@ -11,7 +11,7 @@ PROVIDES: 'dscpackage'
 DESCRIPTION: 'Windows Powershell Desired State Configuration for Linux'
 COPYRIGHT_FILE: 'Copyright Microsoft'
 SHLIB_EXT: 'so'
-PROVIDERS: 'File Script User Group Service Package Environment SshAuthorizedKeys Archive FileLine Firewall'
+PROVIDERS: 'File Script User Group Service Package Environment SshAuthorizedKeys Archive FileLine'
 
 DEV_OMI_DIR: 'omi-1.0.8'
 DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateConfiguration'
@@ -77,11 +77,6 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/mof/MSFT_nxFileLineResource.schema.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxFileLineResource.registration.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.registration.mof;      755; root; root
 
-/opt/microsoft/dsc/lib/libMSFT_nxFirewallResource.so;   Providers/bin/libMSFT_nxFirewallResource.so;       755; root; root
-/opt/microsoft/dsc/etc/MSFT_nxFirewallResource.reg;  Providers/nxFirewall/MSFT_nxFirewallResource.reg;      755; root; root
-/opt/microsoft/dsc/mof/MSFT_nxFirewallResource.schema.mof;  Providers/nxFirewall/MSFT_nxFirewallResource.schema.mof;      755; root; root
-/opt/microsoft/dsc/mof/MSFT_nxFirewallResource.registration.mof;  Providers/nxFirewall/MSFT_nxFirewallResource.registration.mof;      755; root; root
-
 /opt/microsoft/dsc/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; root; root
 
 /opt/microsoft/dsc/Scripts/client.py; Providers/Scripts/client.py; 755; root; root
@@ -106,7 +101,6 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; Providers/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFileLine.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFileLine.py; 755; root; root
-/opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFirewall.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFirewall.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxScript.py; Providers/Scripts/2.6x-2.7x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFile.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFile.py; 755; root; root
@@ -118,7 +112,6 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; Providers/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; 755; root; root
-/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFirewall.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFirewall.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxScript.py; Providers/Scripts/3.x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxFile.py; Providers/Scripts/3.x/Scripts/nxFile.py; 755; root; root
@@ -130,7 +123,6 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxEnvironment.py; Providers/Scripts/3.x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxFileLine.py; Providers/Scripts/3.x/Scripts/nxFileLine.py; 755; root; root
-/opt/microsoft/dsc/Scripts/3.x/Scripts/nxFirewall.py; Providers/Scripts/3.x/Scripts/nxFirewall.py; 755; root; root
 
 /opt/omi/etc/dsc/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; root; root
 
