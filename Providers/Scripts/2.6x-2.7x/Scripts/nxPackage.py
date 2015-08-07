@@ -638,7 +638,7 @@ def RunGetOutput(cmd, no_output, chk_err=True):
                 output, unused_err = process.communicate()
                 process.poll()                
                 self.status[same_state]=output
-                LG().Log('INFO', '\n'+cmd+' is '+output+'\n')
+                LG().Log('INFO', '\n'+cmd+' is '+output.decode('utf8','ignore').encode('ascii', 'ignore')+'\n')
                 if same_state < 1:
                     running=True
                 else:
