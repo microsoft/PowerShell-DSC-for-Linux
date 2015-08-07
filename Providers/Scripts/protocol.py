@@ -145,6 +145,9 @@ class MI_Value:
     def __init__(self, type):
         self.type = type
 
+    def __repr__(self):
+        return repr(self.value)
+
     def write(self, fd):
         verbose_trace('  <MI_Value::write>')
         val = self.type
