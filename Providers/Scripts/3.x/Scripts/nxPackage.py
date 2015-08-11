@@ -588,7 +588,7 @@ def RunGetOutput(cmd, no_output, chk_err=True):
     class KillInactiveSubprocesses(object):
         """
         Sleep for 1 second to allow subprocess to start.
-        Check the strace of the subprocess and its children for 2 seconds.
+        Check the strace of the subprocess and its children for 4 seconds.
         Sleep for 1 again.  If the tree has not performed new activity
         in 3 consecutive samples, kill the processes created by the subprocess call.
         Thread is joined after subprocess returns.
@@ -608,6 +608,8 @@ def RunGetOutput(cmd, no_output, chk_err=True):
         def monitor(self):
             time.sleep(1)
             same_state=0
+            last_status=''
+            curr_status=''
             while not self.shutdown:
                 if not os.path.exists(self.pid_path):
                     return
@@ -616,25 +618,20 @@ def RunGetOutput(cmd, no_output, chk_err=True):
                 if children == None or len(children) == 0 :
                     return
                 running = False
-                cmd='timeout 2s strace'
+                cmd='timeout 4s strace'
                 for c in children:
                     cmd+=' -p '+c
                     pargs=[cmd]
                     kwargs={'stderr':subprocess.STDOUT,'shell':True}
                 process = subprocess.Popen(stdout=subprocess.PIPE, *pargs, **kwargs)
                 output, unused_err = process.communicate()
-                process.poll()                
-                self.status[same_state]=output
+                process.poll()
+                last_status=curr_status
+                curr_status=output
                 LG().Log('INFO', '\n'+cmd+' is '+output.decode('ascii', 'ignore')+'\n')
-                if same_state < 1:
+                if last_status != curr_status:
                     running=True
-                else:
-                    s=same_state
-                    while s > 0:
-                        if self.status[s] != self.status[s-1]:
-                            running=True
-                            break
-                        s-=1
+                    same_state = -1
                 if not running and same_state > 1:
                     self.kill_subtree(children)
                     self.shutdown = True
@@ -725,17 +722,30 @@ def RunGetOutput(cmd, no_output, chk_err=True):
         def __str__(self):
             return "Command '%s' returned non-zero exit status %d" % (self.cmd, self.returncode)
 
+    def noop():
+        pass
+
     subprocess.check_output = check_output
     subprocess.CalledProcessError = CalledProcessError
     output=b''
-    kin=KillInactiveSubprocesses()
+    fn=noop
+    kin=None
+    if os.path.exists('/usr/bin/timeout') and os.path.exists('/usr/bin/strace'):
+        kin=KillInactiveSubprocesses()
+        fn=kin.start
+    else :
+        print(
+            'timeout or strace not found.  Inactiviy monitor disabled.', file=sys.stdout)
+        LG().Log(
+            'ERROR', 'timeout or strace not found.  Inactiviy monitor disabled.')
+
     try:
         output = subprocess.check_output(
-            no_output, cmd, stderr=subprocess.STDOUT, shell=True, preexec_fn=kin.start())
+            no_output, cmd, stderr=subprocess.STDOUT, shell=True, preexec_fn=fn())
         if output is None:
             output=b''
     except subprocess.CalledProcessError as e:
-        if kin.t:
+        if kin and kin.t:
             kin.t.join()
         if chk_err:
             print('CalledProcessError.  Error Code is ' +
@@ -748,7 +758,8 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             return e.returncode, None
         else:
             return e.returncode, e.output.decode('ascii', 'ignore')
-
+    if kin and kin.t:
+        kin.t.join()
     if no_output:
         return 0, None
     else:
