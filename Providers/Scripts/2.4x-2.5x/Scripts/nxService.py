@@ -1153,7 +1153,7 @@ def ModifyInitService(sc):
 def IsServiceRunning(sc):
     time.sleep(1)
     cmd = 'ps -ef | grep -v grep | grep -E ".*( ' + \
-        sc.Name + '|/' + sc.Name + ')(.?)$"'
+        sc.Name + '|/' + sc.Name + ')(.?)( |$)"'
     code, out = RunGetOutput(cmd, False, False)
     if code is not 0:
         return False
