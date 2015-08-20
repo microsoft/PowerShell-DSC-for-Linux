@@ -233,7 +233,7 @@ class Params:
         self.cmds['yum'] = {}
         self.cmds['zypper'] = {}
         self.cmds['dpkg']['present'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -i '
-        self.cmds['dpkg']['absent'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -P '
+        self.cmds['dpkg']['absent'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -r '
         self.cmds['dpkg'][
             'stat'] = "dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}\n' "
         self.cmds['dpkg']['stat_group'] = None
@@ -245,7 +245,7 @@ class Params:
         self.cmds['apt'][
             'present'] = 'DEBIAN_FRONTEND=noninteractive apt-get % install ^ --allow-unauthenticated --yes '
         self.cmds['apt'][
-            'absent'] = 'DEBIAN_FRONTEND=noninteractive apt-get % purge ^ --allow-unauthenticated --yes '
+            'absent'] = 'DEBIAN_FRONTEND=noninteractive apt-get % remove ^ --allow-unauthenticated --yes '
         self.cmds['apt']['stat'] = self.cmds['dpkg']['stat']
         self.cmds['apt']['stat_group'] = None
         self.cmds['yum']['present'] = 'yum -y % install ^ '
@@ -256,7 +256,7 @@ class Params:
             'stat_group'] = 'yum grouplist '  # the group mode is implemented when using YUM only.
         self.cmds['yum']['stat'] = self.cmds['rpm']['stat']
         self.cmds['zypper']['present'] = 'zypper --non-interactive % install ^'
-        self.cmds['zypper']['absent'] = 'zypper --non-interactive  % remove ^'
+        self.cmds['zypper']['absent'] = self.cmds['rpm']['absent']
         self.cmds['zypper']['stat'] = self.cmds['rpm']['stat']
         self.cmds['zypper']['stat_group'] = None
         if self.PackageGroup is True:
