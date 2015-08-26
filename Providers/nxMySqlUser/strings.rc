@@ -1,0 +1,31 @@
+/* @migen@ */
+/*
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+** IF YOU NEED TO ADD RESOURCES, CREATE A SECOND .RC FILE, AND USE #INCLUDE TO MERGE THIS FILE
+** INTO THE .RC FILE YOU CREATED.
+**
+**==============================================================================
+*/
+STRINGTABLE
+{
+    1, "Base schema for all native configuration providers."
+    2, "Name of MySQL user to create or remove."
+    3, "Credential for MySql user."
+    4, "Credential for MySql root."
+    5, "Ensure mysql user is present or absent."
+    6, "Present"
+    7, "Absent"
+    8, "Get resource states based on input configuration file."
+    9, "Configuration document that is to be applied."
+    10, "Flags passed to the providers. Reserved for future use."
+    11, "The current state of the specified configuration resources."
+    12, "Test resource states based on input configuration file."
+    13, "Configuration document that to be applied."
+    14, "Flags passed to the providers. reserved for future use."
+    15, "True if identical. False otherwise."
+    16, "Context information that the provider can use to optimize the set, This is optional."
+    17, "Set resource states based on input configuration file."
+    18, "Context information that the provider can use to optimize the set from TestTargetResource, This is optional."
+}

@@ -1,0 +1,40 @@
+/* @migen@ */
+/*
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+** IF YOU NEED TO ADD RESOURCES, CREATE A SECOND .RC FILE, AND USE #INCLUDE TO MERGE THIS FILE
+** INTO THE .RC FILE YOU CREATED.
+**
+**==============================================================================
+*/
+STRINGTABLE
+{
+    1, "Base schema for all native configuration providers."
+    2, "Name of MySQL user."
+    3, "MySql database name to grant permissions."
+    4, "Credential for MySql root."
+    5, "MySql user permission type."
+    6, "ALL PRIVILEGES"
+    7, "CREATE"
+    8, "DROP"
+    9, "DELETE"
+    10, "INSERT"
+    11, "SELECT"
+    12, "UPDATE"
+    13, "EXECUTE"
+    14, "Ensure given grant to mySql database present or absent."
+    15, "Present"
+    16, "Absent"
+    17, "Get resource states based on input configuration file."
+    18, "Configuration document that is to be applied."
+    19, "Flags passed to the providers. Reserved for future use."
+    20, "The current state of the specified configuration resources."
+    21, "Test resource states based on input configuration file."
+    22, "Configuration document that to be applied."
+    23, "Flags passed to the providers. reserved for future use."
+    24, "True if identical. False otherwise."
+    25, "Context information that the provider can use to optimize the set, This is optional."
+    26, "Set resource states based on input configuration file."
+    27, "Context information that the provider can use to optimize the set from TestTargetResource, This is optional."
+}
