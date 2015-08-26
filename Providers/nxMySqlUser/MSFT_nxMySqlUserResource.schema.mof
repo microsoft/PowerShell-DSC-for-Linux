@@ -1,0 +1,10 @@
+
+[ClassVersion("1.0.0"),FriendlyName("nxMySqlUser")] 
+class MSFT_nxMySqlUserResource : OMI_BaseResource
+{ 
+  [Key, Description("Name of MySQL user to create or remove.")] String Name;
+  [Write, Description("Credential for MySql user.")] String Credential;
+  [Write, Description("MySql connection credential used to create a user.")] String ConnectionCredential;
+  [Write, Description("Ensure mysql user is present or absent."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+
+};
