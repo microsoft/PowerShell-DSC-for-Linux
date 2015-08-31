@@ -60,12 +60,18 @@ def init_vars(Name, Credential,  ConnectionCredential, Ensure):
         Ensure = 'Present'
     if ConnectionCredential is None or len(ConnectionCredential) is 0:
         ConnectionCredential=''
+        print("WARNING: No ConnectionCredential specified.\n", file=sys.stderr)
+        LG().Log('WARNING', "WARNING: No ConnectionCredential specified.\n")
     if Credential is None or len(Credential) is 0:
         Credential=''
+        print("WARNING: No User Credential specified.\n", file=sys.stderr)
+        LG().Log('WARNING', "WARNING: No User Credential specified.\n")
     if Name is None or len(Name) is 0:
         print("Error: 'Name' must be specified.\n", file=sys.stderr)
         LG().Log('ERROR', "Error: 'Name' must be specified.\n")
         raise Exception("Error: 'Name' must be specified")
+    Name=Name.strip("`")
+    Name=Name.strip("'")
     return Name, Credential,  ConnectionCredential, Ensure
 
 def Set(Name, Credential,  ConnectionCredential, Ensure):
@@ -92,11 +98,19 @@ def Get(Name, Credential,  ConnectionCredential, Ensure):
 
 
 def IsUserPresent(Name, ConnectionCredential):
-    cmd='mysql -u root -e "use mysql; select user from user where user=' + "'" + Name+"';"+'"'
+    Host='%'
+    if '@' in Name:
+        myName=Name.split('@')[0]
+        Host=Name.split('@')[1]
+    else:
+        myName=Name
+    cmd='mysql -u root -e "use mysql; select user from user where user=' \
+    + "'" + myName + "'" + " and host='" + Host +  "';" + '"'
     os.environ['MYSQL_PWD'] = ConnectionCredential
     code, out=RunGetOutput(cmd,False)
     os.environ['MYSQL_PWD'] = ''
-    if '\n'+Name+'\n' in out:
+    print(repr(out))
+    if '\n'+myName+'\n' in out:
         return True
     return False
 
@@ -115,6 +129,7 @@ def AddRemoveUser(Name, Credential,  ConnectionCredential, Ensure):
     if len(cmd) > 0 :
         cmd='mysql -u root -e "' + cmd + ' FLUSH PRIVILEGES;"'
         os.environ['MYSQL_PWD'] = ConnectionCredential
+        print(cmd)
         code, out=RunGetOutput(cmd,False)
         os.environ['MYSQL_PWD'] = ''
     return code == 0
@@ -122,7 +137,8 @@ def AddRemoveUser(Name, Credential,  ConnectionCredential, Ensure):
 def RunGetOutput(cmd, no_output, chk_err=True):
     """
     Wrapper for subprocess.check_output.
-    Execute 'cmd'.  Returns return code and STDOUT, trapping expected exceptions.
+    Execute 'cmd'.  Returns return code and STDOUT,
+    trapping expected exceptions.
     Reports exceptions to Error if chk_err parameter is True
     """
     def check_output(no_output, *popenargs, **kwargs):
@@ -153,7 +169,8 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             self.output = output
 
         def __str__(self):
-            return "Command '%s' returned non-zero exit status %d" % (self.cmd, self.returncode)
+            return "Command '%s' returned non-zero exit status %d" \
+                   % (self.cmd, self.returncode)
 
     subprocess.check_output = check_output
     subprocess.CalledProcessError = CalledProcessError

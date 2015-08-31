@@ -4,9 +4,6 @@
 # See license.txt for license information.
 # ===================================
 
-from __future__ import print_function
-from __future__ import with_statement
-
 import os
 import sys
 import subprocess
@@ -16,41 +13,37 @@ protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
-# mysqladmin -u root password 'new-password'
-# mysqladmin -h localhost -u root -ppassword create bedrock
-# mysql -e "use mysql; show databases; quit"
-
-# [ClassVersion("1.0.0"),FriendlyName("nxMySqlDatabase")] 
-# class MSFT_nxMySqlDatabaseResource : OMI_BaseResource
-# {
-#     [Key, Description("Name of the database.")] String Name;
-#     [Write, Description("Should the database be present or absent."), \
-#     ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-#     [Write, Description("The root credential that is used to install MySql server.")] \
-#     String ConnectionCredential;
+# [ClassVersion("1.0.0"),FriendlyName("nxMySqlUser")] 
+# class MSFT_nxMySqlUserResource : OMI_BaseResource
+# { 
+#   [Key, Description("Name of MySQL user to create or remove.")] String Name;
+#   [Write, Description("Credential for MySql user."), EmbeddedInstance("MSFT_Credential")] String Credential;
+#   [Write, Description("MySql connection credential used to create a user."), EmbeddedInstance("MSFT_Credential")] String ConnectionCredential;
+#   [Write, Description("Ensure mysql user is present or absent."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 # };
 
-def Set_Marshall(Name, ConnectionCredential, Ensure): 
-    (Name, ConnectionCredential, Ensure) = init_vars(Name, ConnectionCredential, Ensure)
-    retval = Set(Name, ConnectionCredential, Ensure)
+def Set_Marshall(Name, Credential, ConnectionCredential, Ensure): 
+    (Name, Credential,  ConnectionCredential, Ensure) = init_vars(Name, Credential,  ConnectionCredential, Ensure)
+    retval = Set(Name, Credential,  ConnectionCredential, Ensure)
     return retval
 
 
-def Test_Marshall(Name, ConnectionCredential, Ensure):
-    (Name, ConnectionCredential, Ensure) = init_vars(Name, ConnectionCredential, Ensure)
-    if Test(Name, ConnectionCredential, Ensure):
+def Test_Marshall(Name, Credential,  ConnectionCredential, Ensure):
+    (Name, Credential,  ConnectionCredential, Ensure) = init_vars(Name, Credential,  ConnectionCredential, Ensure)
+    if Test(Name, Credential,  ConnectionCredential, Ensure):
         retval=[0]
     else :
         retval=[-1]
     return retval
 
 
-def Get_Marshall(Name, ConnectionCredential, Ensure):
+def Get_Marshall(Name, Credential,  ConnectionCredential, Ensure):
     arg_names = list(locals().keys())
+    (Name, Credential,  ConnectionCredential, Ensure) = init_vars(Name, Credential,  ConnectionCredential, Ensure)
     retval = 0
-    (Name, ConnectionCredential, Ensure) = init_vars(Name, ConnectionCredential, Ensure)
-    (Name, ConnectionCredential, Ensure) = Get(Name, ConnectionCredential, Ensure)
+    (Name, Credential,  ConnectionCredential, Ensure) = Get(Name, Credential,  ConnectionCredential, Ensure)
     Name = protocol.MI_String(Name)
+    Credential = protocol.MI_String(Credential)
     ConnectionCredential = protocol.MI_String(ConnectionCredential)
     Ensure = protocol.MI_String(Ensure)
     retd = {}
@@ -59,66 +52,81 @@ def Get_Marshall(Name, ConnectionCredential, Ensure):
         retd[k] = ld[k]
     return retval, retd
 
-def init_vars(Name, ConnectionCredential, Ensure):
+def init_vars(Name, Credential,  ConnectionCredential, Ensure):
     if Ensure is None or len(Ensure) is 0:
         Ensure = 'Present'
     if ConnectionCredential is None or len(ConnectionCredential) is 0:
         ConnectionCredential=''
         print("WARNING: No ConnectionCredential specified.\n", file=sys.stderr)
         LG().Log('WARNING', "WARNING: No ConnectionCredential specified.\n")
+    if Credential is None or len(Credential) is 0:
+        Credential=''
+        print("WARNING: No User Credential specified.\n", file=sys.stderr)
+        LG().Log('WARNING', "WARNING: No User Credential specified.\n")
     if Name is None or len(Name) is 0:
         print("Error: 'Name' must be specified.\n", file=sys.stderr)
         LG().Log('ERROR', "Error: 'Name' must be specified.\n")
         raise Exception("Error: 'Name' must be specified")
-    return Name, ConnectionCredential, Ensure
+    Name=Name.strip("`")
+    Name=Name.strip("'")
+    return Name, Credential,  ConnectionCredential, Ensure
 
-def Set(Name, ConnectionCredential, Ensure):
+def Set(Name, Credential,  ConnectionCredential, Ensure):
     retval = [0]
-    if AddRemoveDatabase(Name, ConnectionCredential, Ensure) == False:
+    if AddRemoveUser(Name, Credential,  ConnectionCredential, Ensure) == False:
         retval = [-1]
     return retval
 
 
-def Test(Name, ConnectionCredential, Ensure):
-    found = IsDatabasePresent(Name, ConnectionCredential)
+def Test(Name, Credential,  ConnectionCredential, Ensure):
+    found = IsUserPresent(Name, ConnectionCredential)
     if (found and Ensure == 'Present') or ( not found and Ensure == 'Absent'):
         return True
     return False
 
 
-def Get(Name, ConnectionCredential, Ensure):
-    found = IsDatabasePresent(Name, ConnectionCredential)
+def Get(Name, Credential,  ConnectionCredential, Ensure):
+    found = IsUserPresent(Name, ConnectionCredential)
     if found:
         Ensure = 'Present'
     else :
         Ensure = 'Absent'
-    return Name, ConnectionCredential, Ensure
+    return Name, Credential,  ConnectionCredential, Ensure
 
 
-def IsDatabasePresent(Name, ConnectionCredential):
-    cmd='mysql -u root -e "SHOW DATABASES WHERE \`Database\` = ' + "'" + Name+"';"+'"'
+def IsUserPresent(Name, ConnectionCredential):
+    Host='%'
+    if '@' in Name:
+        myName=Name.split('@')[0]
+        Host=Name.split('@')[1]
+    else:
+        myName=Name
+    cmd='mysql -u root -e "use mysql; select user from user where user=' \
+    + "'" + myName + "'" + " and host='" + Host +  "';" + '"'
     os.environ['MYSQL_PWD'] = ConnectionCredential
     code, out=RunGetOutput(cmd,False)
     os.environ['MYSQL_PWD'] = ''
-    if '\n'+Name+'\n' in out:
+    print(repr(out))
+    if '\n'+myName+'\n' in out:
         return True
     return False
 
-def AddRemoveDatabase(Name, ConnectionCredential, Ensure):
+def AddRemoveUser(Name, Credential,  ConnectionCredential, Ensure):
     cmd=''
     out=''
     code=0
-    present=IsDatabasePresent(Name, ConnectionCredential)
+    present=IsUserPresent(Name, ConnectionCredential)
     if Ensure == 'Present':
         if present:
-            return True
+            cmd="SET PASSWORD FOR " + Name + " = PASSWORD('"+ Credential + "');"
         else :
-            cmd="CREATE DATABASE " + Name +  ";"
+            cmd="CREATE USER " + Name + " IDENTIFIED BY '" + Credential + "';"
     elif present:
-        cmd = "DROP DATABASE " + Name + ";"
+        cmd = "DROP USER " + Name + ";"
     if len(cmd) > 0 :
-        cmd='mysql -u root -e "' + cmd + '"'
+        cmd='mysql -u root -e "' + cmd + ' FLUSH PRIVILEGES;"'
         os.environ['MYSQL_PWD'] = ConnectionCredential
+        print(cmd)
         code, out=RunGetOutput(cmd,False)
         os.environ['MYSQL_PWD'] = ''
     return code == 0
@@ -163,28 +171,35 @@ def RunGetOutput(cmd, no_output, chk_err=True):
 
     subprocess.check_output = check_output
     subprocess.CalledProcessError = CalledProcessError
+    output=b''
     try:
         output = subprocess.check_output(
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)
-    except subprocess.CalledProcessError, e:
+        if output is None:
+            output=b''
+    except subprocess.CalledProcessError as e:
         if chk_err:
             print('CalledProcessError.  Error Code is ' +
                   str(e.returncode), file=sys.stdout)
-            LG().Log('ERROR', 'CalledProcessError.  Error Code is ' + str(e.returncode))
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Error Code is '
+                + str(e.returncode))
             print(
-                'CalledProcessError.  Command string was ' + e.cmd, file=sys.stdout)
-            LG().Log('ERROR', 
-                'CalledProcessError.  Command string was ' + e.cmd)
+                'CalledProcessError.  Command string was '
+                + e.cmd, file=sys.stdout)
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Command string was ' + e.cmd)
             print('CalledProcessError.  Command result was ' +
-                  (e.output[:-1]).decode('utf-8').encode('ascii', 'ignore'), file=sys.stdout)
-            LG().Log('ERROR', 'CalledProcessError.  Command result was ' +
-                  (e.output[:-1]).decode('utf-8').encode('ascii', 'ignore'))
+                  (e.output[:-1]).decode('ascii','ignore'), file=sys.stdout)
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Command result was '
+                + (e.output[:-1]).decode('ascii','ignore'))
         if no_output:
             return e.returncode, None
         else:
-            return e.returncode, e.output.decode('utf-8').encode('ascii', 'ignore')
+            return e.returncode, e.output.decode('ascii','ignore')
 
     if no_output:
         return 0, None
     else:
-        return 0, output.decode('utf-8').encode('ascii', 'ignore')
+        return 0, output.decode('ascii','ignore')

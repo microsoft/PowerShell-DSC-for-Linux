@@ -4,9 +4,6 @@
 # See license.txt for license information.
 # ===================================
 
-from __future__ import print_function
-from __future__ import with_statement
-
 import os
 import sys
 import subprocess
@@ -32,14 +29,14 @@ def init_vars(UserName, DatabaseName, ConnectionCredential, PermissionType, Ensu
     if Ensure is None or len(Ensure) is 0:
         Ensure = 'Present'
     if UserName is None or len(UserName) is 0:
-        print("Error: 'UserName' must be specified.\n", file=sys.stderr)
+        Print("Error: 'UserName' must be specified.\n", file=sys.stderr)
         LG().Log('ERROR', "Error: 'UserName' must be specified.\n")
         raise Exception("'UserName' must be specified")
     if DatabaseName is None or len(DatabaseName) is 0:
         DatabaseName='*'
     if ConnectionCredential is None or len(ConnectionCredential) is 0:
         ConnectionCredential=''
-        print("WARNING: No ConnectionCredential specified.\n", file=sys.stderr)
+        Print("WARNING: No ConnectionCredential specified.\n", file=sys.stderr)
         LG().Log('WARNING', "WARNING: No ConnectionCredential specified.\n")
     if PermissionType is None or len(PermissionType) is 0:
         PermissionType = 'ALL PRIVILEGES'
@@ -141,6 +138,11 @@ def AddRemovePermission(UserName, DatabaseName,  ConnectionCredential, Permissio
         os.environ['MYSQL_PWD'] = ''
     return code == 0
 
+
+def Print(s, file=sys.stdout):
+    file.write(s + '\n')
+
+
 def RunGetOutput(cmd, no_output, chk_err=True):
     """
     Wrapper for subprocess.check_output.
@@ -186,14 +188,14 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError, e:
         if chk_err:
-            print('CalledProcessError.  Error Code is ' +
+            Print('CalledProcessError.  Error Code is ' +
                   str(e.returncode), file=sys.stdout)
             LG().Log('ERROR', 'CalledProcessError.  Error Code is ' + str(e.returncode))
-            print(
+            Print(
                 'CalledProcessError.  Command string was ' + e.cmd, file=sys.stdout)
             LG().Log('ERROR', 
                 'CalledProcessError.  Command string was ' + e.cmd)
-            print('CalledProcessError.  Command result was ' +
+            Print('CalledProcessError.  Command result was ' +
                   (e.output[:-1]).decode('utf-8').encode('ascii', 'ignore'), file=sys.stdout)
             LG().Log('ERROR', 'CalledProcessError.  Command result was ' +
                   (e.output[:-1]).decode('utf-8').encode('ascii', 'ignore'))
