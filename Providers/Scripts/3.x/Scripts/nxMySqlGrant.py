@@ -4,9 +4,6 @@
 # See license.txt for license information.
 # ===================================
 
-from __future__ import print_function
-from __future__ import with_statement
-
 import os
 import sys
 import subprocess
@@ -181,28 +178,35 @@ def RunGetOutput(cmd, no_output, chk_err=True):
 
     subprocess.check_output = check_output
     subprocess.CalledProcessError = CalledProcessError
+    output=b''
     try:
         output = subprocess.check_output(
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)
-    except subprocess.CalledProcessError, e:
+        if output is None:
+            output=b''
+    except subprocess.CalledProcessError as e:
         if chk_err:
             print('CalledProcessError.  Error Code is ' +
                   str(e.returncode), file=sys.stdout)
-            LG().Log('ERROR', 'CalledProcessError.  Error Code is ' + str(e.returncode))
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Error Code is '
+                + str(e.returncode))
             print(
-                'CalledProcessError.  Command string was ' + e.cmd, file=sys.stdout)
-            LG().Log('ERROR', 
-                'CalledProcessError.  Command string was ' + e.cmd)
+                'CalledProcessError.  Command string was '
+                + e.cmd, file=sys.stdout)
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Command string was ' + e.cmd)
             print('CalledProcessError.  Command result was ' +
-                  (e.output[:-1]).decode('utf-8').encode('ascii', 'ignore'), file=sys.stdout)
-            LG().Log('ERROR', 'CalledProcessError.  Command result was ' +
-                  (e.output[:-1]).decode('utf-8').encode('ascii', 'ignore'))
+                  (e.output[:-1]).decode('ascii','ignore'), file=sys.stdout)
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Command result was '
+                + (e.output[:-1]).decode('ascii','ignore'))
         if no_output:
             return e.returncode, None
         else:
-            return e.returncode, e.output.decode('utf-8').encode('ascii', 'ignore')
+            return e.returncode, e.output.decode('ascii','ignore')
 
     if no_output:
         return 0, None
     else:
-        return 0, output.decode('utf-8').encode('ascii', 'ignore')
+        return 0, output.decode('ascii','ignore')
