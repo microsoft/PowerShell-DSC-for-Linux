@@ -516,39 +516,13 @@ int Directory_Remove( _In_z_ TChar *path)
 #endif
 }
 
+char * RunCommand(const char* command);
 
-TChar * Generate_UUID( NitsCallSite cs)
+char * Generate_UUID( NitsCallSite cs)
 {
-    TChar *uuidString;
-#if defined(_MSC_VER) 
-        UUID uuid;
-#else
-//        uuid_t uuid;
-#endif
+    char * uuidString;
+    uuidString = (char*)RunCommand("cat /proc/sys/kernel/random/uuid | awk '{print toupper($0)}' | tr -d \"\n\"");
 
-        /* Allocate and zero-fill struct */
-    uuidString = (TChar*)PAL_CallocCallsite(cs, 1, sizeof(TChar) * 40); //holds both windows (40 chars) and non-windows( 37 chars).
-
-    if (!uuidString)
-        return NULL;  
-    
-#if defined(_MSC_VER)
-    if( UuidCreateSequential( &uuid) != RPC_S_OK )
-    {
-        PAL_Free(uuidString);
-        return NULL;
-    }
-
-    if( StringFromGUID2(&uuid, uuidString, 40) == 0 )
-    {
-        PAL_Free(uuidString);
-        return NULL;
-    }
-#else
-//    uuid_generate(uuid);
-//    uuid_unparse_upper(uuid, uuidString);
-#endif
-    
     return uuidString;
 }
 

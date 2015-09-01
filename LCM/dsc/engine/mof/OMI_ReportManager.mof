@@ -1,0 +1,27 @@
+
+// ===============================================================
+//  Report Managers
+// ===============================================================
+
+[Abstract, ClassVersion("1.0.0"), 
+ Description("Class defining a report manager") ] 
+class OMI_ReportManager : OMI_MetaConfigurationResource 
+{
+};
+
+[ClassVersion("1.0.0"), 
+ Description("Web report manager class inheriting from OMI_ReportManager class") ]  
+class MSFT_WebReportManager : OMI_ReportManager
+{
+   [Description ("URL of the server used by report manager." ) , Key]
+   string  ServerURL;    
+
+   [Description ("The certificate ID used to locate the certificate for secure connections." ) ]
+   string  CertificateID;
+
+   [Description("Specifies whether report manager can use unsecure connection over http.")]
+   boolean AllowUnsecureConnection; 
+
+   [Description ("Registration Key with which to register with the Reporting Server" )  ]
+   string RegistrationKey;   
+};

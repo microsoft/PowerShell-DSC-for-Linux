@@ -24,11 +24,7 @@
 
 #include "MI.h"
 
-#if defined(_MSC_VER)
 #include "MSFT_DSCLocalConfigurationManager.h"
-#else
-#include "omi_msft_dsclocalconfigurationmanager.h"
-#endif
 
 #include <EngineHelper.h>
 #include "LocalConfigManagerHelper.h"
@@ -631,10 +627,6 @@ void Invoke_ApplyConfiguration(
                 miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
                 if (miResult != MI_RESULT_OK)
                 {
-                    if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
-                    {
-                        restartOMI = MI_TRUE;
-                    }
                     SetThreadToken(NULL, m_clientThreadToken);
                     CloseHandle(m_clientThreadToken);
                     MI_Instance_Delete((MI_Instance *)metaConfigInstance);
@@ -701,10 +693,6 @@ ExitWithError:
     MI_PostCimError(context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     ResetJobId();
-    if (restartOMI == MI_TRUE)
-    {
-        ReloadOMI();
-    }
 }
 
 void Invoke_SendMetaConfigurationApply(
@@ -1255,7 +1243,6 @@ void Invoke_PerformRequiredConfigurationChecks(
     MSFT_DSCMetaConfiguration *metaConfigInstance = NULL;
     MI_Value value;
     MI_Uint32 flags = 0;
-    MI_Boolean restartOMI = MI_FALSE;
 
     if (!OpenThreadToken(GetCurrentThread(), TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_DUPLICATE, TRUE, &m_clientThreadToken))
     {
@@ -1351,10 +1338,6 @@ void Invoke_PerformRequiredConfigurationChecks(
         miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
-            if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
-            {
-                restartOMI = MI_TRUE;
-            }
             SetThreadToken(NULL, m_clientThreadToken);
             CloseHandle(m_clientThreadToken);
             MI_Instance_Delete((MI_Instance *)metaConfigInstance);
@@ -1418,10 +1401,6 @@ ExitSimple:
     // Debug log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();    
-    if (restartOMI == MI_TRUE)
-    {
-        ReloadOMI();
-    }
 }
 
 void Invoke_StopConfiguration(
@@ -1586,6 +1565,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_SendConfigurationApply_Internal(void *p
     GetRealBufferIndex( &args->data, &bufferIndex);
 
     start=CPU_GetTimeStamp();
+    SetLCMStatusBusy();
     miResult = CallSetConfiguration(args->data.data + bufferIndex, 
         args->data.size - bufferIndex, args->flag, 
         args->force, args->context, &cimErrorDetails); 
@@ -1617,6 +1597,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_SendConfigurationApply_Internal(void *p
     LCM_WriteMessage_Internal_TimeTaken(args->context,EMPTY_STRING, ID_LCM_TIMEMESSAGE,  ID_OUTPUT_ITEM_SET,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
     // Debug Log 
@@ -1629,6 +1610,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_SendConfigurationApply_Internal(void *p
 ExitWithError:
     ResetJobId();
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails); 
     PAL_Free(args->data.data);
@@ -1725,6 +1707,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     }   
 
     start=CPU_GetTimeStamp();
+    SetLCMStatusBusy();
     miResult = CallGetConfiguration(dataValue.data, 
         dataValue.size, &outInstances, 
         args->context, &cimErrorDetails);
@@ -1765,6 +1748,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     LCM_WriteMessage_Internal_TimeTaken(args->context,EMPTY_STRING, ID_LCM_TIMEMESSAGE,  ID_OUTPUT_ITEM_GET,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
     //Debug Log 
@@ -1786,6 +1770,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
 ExitWithError:
     ResetJobId();
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     if (!args->dataExist)
@@ -1845,6 +1830,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
         goto ExitWithError;
     }       
 
+    SetLCMStatusBusy();
     miResult = CallConsistencyEngine(args->context, TASK_REGULAR, &cimErrorDetails); 
     if (miResult != MI_RESULT_OK)
     {
@@ -1867,6 +1853,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
     }    
 
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
     // Debug Log 
@@ -1877,6 +1864,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
 
 ExitWithError:
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     ResetJobId();      
@@ -1922,6 +1910,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
         return 0;
     }
 
+    SetLCMStatusBusy();
     miResult = GetMetaConfig(&metaConfigInstance);
     if (miResult != MI_RESULT_OK)
     {
@@ -1968,6 +1957,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
     }
 
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
     //Debug Log 
@@ -1978,6 +1968,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
 
 ExitWithError:
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     ResetJobId();  
@@ -2028,6 +2019,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_RollBack_Internal(void *param)
 
     //Log operational event for restoring configuration
     DSC_EventWriteRestoringConfiguration();
+    SetLCMStatusBusy();
     miResult = CallRestoreConfiguration(args->flag, args->context, &cimErrorDetails); 
     if (miResult != MI_RESULT_OK)
     {
@@ -2040,6 +2032,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_RollBack_Internal(void *param)
     LCM_WriteMessage_Internal_TimeTaken(args->context,EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_ROLLBACK,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
     //Debug Log 
@@ -2050,6 +2043,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_RollBack_Internal(void *param)
 
 ExitWithError:
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     ResetJobId();
@@ -2109,6 +2103,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_TestConfiguration_Internal(void *param)
         goto ExitWithError;
     }   
 
+    SetLCMStatusBusy();
     miResult = CallTestConfiguration(&testStatus, &resourceId, args->context, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
     {
@@ -2160,6 +2155,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_TestConfiguration_Internal(void *param)
     LCM_WriteMessage_Internal_TimeTaken(args->context,EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_TEST, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
     // Debug log
@@ -2170,6 +2166,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_TestConfiguration_Internal(void *param)
 
 ExitWithError:
     EndLcmOperation();
+    SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     ResetJobId();  
@@ -2186,7 +2183,6 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
     MI_Value value;
     MI_Uint32 flags = 0;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*) param;
-    MI_Boolean restartOMI = MI_FALSE;
 
     if( args == NULL )
     {
@@ -2218,6 +2214,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
         return 0;
     }
 
+    SetLCMStatusBusy();
     miResult = GetMetaConfig((MSFT_DSCMetaConfiguration **)&metaConfigInstance);
     if (miResult != MI_RESULT_OK)
     {
@@ -2255,10 +2252,6 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
         miResult = DoPullServerRefresh(metaConfigInstance, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
-            if (miResult == MI_RESULT_SERVER_IS_SHUTTING_DOWN)
-            {
-                restartOMI = MI_TRUE;
-            }
             MI_Instance_Delete((MI_Instance *)metaConfigInstance);
             MI_Context_PostCimError(args->context, cimErrorDetails);
             MI_Instance_Delete(cimErrorDetails);
@@ -2299,15 +2292,11 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
 
 ExitSimple:
     EndLcmOperation();
-
+    SetLCMStatusReady();
     // Debug log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();     
     PAL_Free(args);
-    if (restartOMI == MI_TRUE)
-    {
-        ReloadOMI();
-    }
     return 0;
 }
 
@@ -2375,10 +2364,12 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_StopConfiguration_Internal(void *param)
         return 0;
     }
 
+    SetLCMStatusBusy();
     miResult = MSFT_DSCLocalConfigurationManager_StopConfiguration_Post(&outputObject, args->context);
     MSFT_DSCLocalConfigurationManager_StopConfiguration_Destruct(&outputObject);
     MI_Context_PostResult(args->context, miResult);
 
+    SetLCMStatusReady();
     // Debug log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();

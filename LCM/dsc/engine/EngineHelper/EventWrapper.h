@@ -491,6 +491,30 @@ void DSCFilePutLog(
         ExpandEvent(CUMethodWarning( g_ConfigurationDetails.jobGuidString, WarningMessage))
 
 
+//*********************Registration for Pull and Reporting Events ********************//
+#define DSC_EventWriteLCMAgentGeneratingAgentId(JobGuidString) \
+    ExpandEvent(LCMAgentGeneratingAgentId(JobGuidString))
+
+#define DSC_EventWriteLCMAgentRegistered(JobGuidString, AgentIdString) \
+    ExpandEvent(LCMAgentRegistered(JobGuidString, AgentIdString))
+
+#define DSC_EventWriteLCMServerURLRegistered(JobGuidString, AgentIdString, ServerURLString) \
+    ExpandEvent(LCMServerURLRegistered(JobGuidString, AgentIdString, ServerURLString))
+
+#define DSC_EventWriteLCMProtocolVersion1InUse(JobGuidString) \
+    ExpandEvent(LCMProtocolVersion1InUse(JobGuidString))
+
+#define DSC_EventWriteLCMAgentAttemptRegistration(JobGuidString, AgentIdString, ServerURLString) \
+    ExpandEvent(LCMAgentAttemptRegistration(JobGuidString, AgentIdString, ServerURLString))
+
+#define DSC_EventWriteLCMServerRegCertGenFailed(JobGuidString, AgentIdString) \
+    ExpandEvent(LCMServerRegCertGenFailed(JobGuidString, AgentIdString))
+
+#define DSC_EventWriteLCMAgentIdWriteToRegistrySuccess(JobGuidString, AgentIdString) \
+    ExpandEvent(LCMAgentIdWriteToRegistrySuccess(JobGuidString, AgentIdString))
+
+//********************* End DscTimer Events ********************//
+
 
 #ifdef __cplusplus
 

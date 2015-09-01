@@ -10,7 +10,6 @@
 #define _OMI_ConfigurationDownloadManager_h
 
 #include <MI.h>
-#include "OMI_MetaConfigurationResource.h"
 
 /*
 **==============================================================================
@@ -22,14 +21,9 @@
 **==============================================================================
 */
 
-typedef struct _OMI_ConfigurationDownloadManager /* extends OMI_MetaConfigurationResource */
+typedef struct _OMI_ConfigurationDownloadManager
 {
     MI_Instance __instance;
-    /* OMI_MetaConfigurationResource properties */
-    MI_ConstStringField ResourceId;
-    MI_ConstStringField SourceInfo;
-    MI_ConstStringField ModuleName;
-    MI_ConstStringField ModuleVersion;
     /* OMI_ConfigurationDownloadManager properties */
     MI_ConstStringField Name;
 }
@@ -123,141 +117,13 @@ MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Post(
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Set_ResourceId(
-    _Inout_ OMI_ConfigurationDownloadManager* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        0,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_SetPtr_ResourceId(
-    _Inout_ OMI_ConfigurationDownloadManager* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        0,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Clear_ResourceId(
-    _Inout_ OMI_ConfigurationDownloadManager* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Set_SourceInfo(
-    _Inout_ OMI_ConfigurationDownloadManager* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_SetPtr_SourceInfo(
-    _Inout_ OMI_ConfigurationDownloadManager* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Clear_SourceInfo(
-    _Inout_ OMI_ConfigurationDownloadManager* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        1);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Set_ModuleName(
-    _Inout_ OMI_ConfigurationDownloadManager* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        2,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_SetPtr_ModuleName(
-    _Inout_ OMI_ConfigurationDownloadManager* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        2,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Clear_ModuleName(
-    _Inout_ OMI_ConfigurationDownloadManager* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        2);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Set_ModuleVersion(
-    _Inout_ OMI_ConfigurationDownloadManager* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        3,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_SetPtr_ModuleVersion(
-    _Inout_ OMI_ConfigurationDownloadManager* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        3,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Clear_ModuleVersion(
-    _Inout_ OMI_ConfigurationDownloadManager* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        3);
-}
-
 MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Set_Name(
     _Inout_ OMI_ConfigurationDownloadManager* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        4,
+        0,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -269,7 +135,7 @@ MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_SetPtr_Name(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        4,
+        0,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -280,7 +146,7 @@ MI_INLINE MI_Result MI_CALL OMI_ConfigurationDownloadManager_Clear_Name(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        4);
+        0);
 }
 
 

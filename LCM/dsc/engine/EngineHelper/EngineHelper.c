@@ -37,6 +37,8 @@
 
 extern Loc_Mapping g_LocMappingTable[];
 extern MI_Uint32 g_LocMappingTableSize;
+void *g_registrationManager;
+char g_currentError[5001];
 
 
 BaseResourceConfiguration g_BaseResourceConfiguration[] =
@@ -141,6 +143,7 @@ MI_Result GetCimMIError(MI_Result result ,
     GetResourceString(errorStringId, &intlstr);
 
     MI_Utilities_CimErrorFromErrorCode( (MI_Uint32)result, MI_RESULT_TYPE_MI, intlstr.str, cimErrorDetails);
+    strncpy(g_currentError, intlstr.str, 5000);
     DSC_EventWriteCIMError(intlstr.str,(MI_Uint32)result);
     if( intlstr.str)
         Intlstr_Free(intlstr);
@@ -156,6 +159,7 @@ MI_Result GetCimWin32Error(MI_Uint32 result ,
     GetResourceString(errorStringId, &intlstr);
 
     MI_Utilities_CimErrorFromErrorCode( (MI_Uint32)result, MI_RESULT_TYPE_WIN32, intlstr.str, cimErrorDetails);
+    strncpy(g_currentError, intlstr.str, 5000);
     DSC_EventWriteCIMError(intlstr.str,(MI_Uint32)result);
     if( intlstr.str)
         Intlstr_Free(intlstr);
@@ -179,6 +183,7 @@ MI_Result GetCimMIError1Param(MI_Result result ,
     if( resIntlstr.str )
     {
         MI_Utilities_CimErrorFromErrorCode((MI_Uint32)result, MI_RESULT_TYPE_MI, resIntlstr.str, cimErrorDetails);
+        strncpy(g_currentError, resIntlstr.str, 5000);
         DSC_EventWriteCIMError(resIntlstr.str,(MI_Uint32)result);
         errorInitialized = TRUE;
         Intlstr_Free(resIntlstr);
@@ -206,6 +211,7 @@ MI_Result GetCimMIError2Params(MI_Result result ,
     if( resIntlstr.str )
     {
         MI_Utilities_CimErrorFromErrorCode((MI_Uint32)result, MI_RESULT_TYPE_MI, resIntlstr.str, cimErrorDetails);
+        strncpy(g_currentError, resIntlstr.str, 5000);
         DSC_EventWriteCIMError(resIntlstr.str,(MI_Uint32)result);
         errorInitialized = TRUE;
         Intlstr_Free(resIntlstr);
@@ -235,6 +241,7 @@ MI_Result GetCimMIError3Params(MI_Result result ,
     if( resIntlstr.str )
     {
         MI_Utilities_CimErrorFromErrorCode((MI_Uint32)result, MI_RESULT_TYPE_MI, resIntlstr.str, cimErrorDetails);
+        strncpy(g_currentError, resIntlstr.str, 5000);
         DSC_EventWriteCIMError(resIntlstr.str,(MI_Uint32)result);
         errorInitialized = TRUE;
         Intlstr_Free(resIntlstr);
@@ -265,6 +272,7 @@ MI_Result GetCimMIError4Params(MI_Result result ,
     if( resIntlstr.str )
     {
         MI_Utilities_CimErrorFromErrorCode((MI_Uint32)result, MI_RESULT_TYPE_MI, resIntlstr.str, cimErrorDetails);
+        strncpy(g_currentError, resIntlstr.str, 5000);
         DSC_EventWriteCIMError(resIntlstr.str,(MI_Uint32)result);
         errorInitialized = TRUE;
         Intlstr_Free(resIntlstr);
@@ -389,12 +397,13 @@ MI_Result ResolvePath(_Outptr_opt_result_maybenull_z_ MI_Char **envResolvedPath,
     return MI_RESULT_OK;
 }
 
-
 void SetJobId()
 {
     MI_Char *palUuid;
     if(g_ConfigurationDetails.hasSetDetail==MI_TRUE)
+    {
         return; //Which means details were set before.
+    }
 
     palUuid = Generate_UUID(  NitsMakeCallSite(-3, NULL, NULL, 0) );
     if(palUuid == NULL)
@@ -402,6 +411,7 @@ void SetJobId()
         return;
     }
     memcpy(g_ConfigurationDetails.jobGuidString, palUuid, JOB_UUID_LENGTH);
+    g_ConfigurationDetails.jobGuidString[36] = '\0';
     PAL_Free(palUuid);
     g_ConfigurationDetails.hasSetDetail=MI_TRUE;
 }
@@ -1044,3 +1054,164 @@ MI_Result DSCConcatStrings(_Outptr_result_z_ MI_Char** target, _In_ MI_Uint32 pa
     return result;
 }
 
+MI_Datetime PalDatetimeToMiDatetime(_In_ PAL_Datetime inDatetime)
+{
+    MI_Datetime outDatetime;
+
+    outDatetime.isTimestamp = inDatetime.isTimestamp == 0 ? 0 : 1;
+
+    outDatetime.u.timestamp.year = (MI_Uint32)inDatetime.u.timestamp.year;
+    outDatetime.u.timestamp.month = (MI_Uint32)inDatetime.u.timestamp.month;
+    outDatetime.u.timestamp.day = (MI_Uint32)inDatetime.u.timestamp.day;
+    outDatetime.u.timestamp.hour = (MI_Uint32)inDatetime.u.timestamp.hour;
+    outDatetime.u.timestamp.minute = (MI_Uint32)inDatetime.u.timestamp.minute;
+    outDatetime.u.timestamp.second = (MI_Uint32)inDatetime.u.timestamp.second;
+    outDatetime.u.timestamp.microseconds = (MI_Uint32)inDatetime.u.timestamp.microseconds;
+    outDatetime.u.timestamp.utc = (MI_Uint32)inDatetime.u.timestamp.utc;
+    
+    return outDatetime;
+}
+
+
+
+MI_Result UpdateMetaConfigWithAgentId(
+    _In_z_ MI_Char *agentId,
+    _Inout_ MI_Instance *metaConfigInstance)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_Value value;
+    // set default value
+    value.string = agentId;
+
+    r = MI_Instance_SetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_AgentId, &value, MI_STRING, 0);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+
+    return MI_RESULT_OK;
+}
+
+
+MI_Result StripBracesFromGuid(
+    _In_z_ MI_Char* inputGuid,
+    _Outptr_result_maybenull_z_ MI_Char** resultGuid, 
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    size_t resultGuidLength = 0;
+    int retValue;
+    MI_Char* token = NULL;
+    MI_Char* next_token = NULL;
+
+    resultGuidLength = Tcslen(inputGuid) - 2 /* For removing { and } */ + 1 /* For \0 */;
+    *resultGuid = (MI_Char*)DSC_malloc(resultGuidLength * sizeof(MI_Char), NitsHere());
+
+    token = Tcstok(inputGuid, "{", &next_token);
+    // At this point, token = 77762b23-8e52-4610-afa7-e480f7f18684}
+    // We write everything except the last "}"    
+    retValue = Stprintf(*resultGuid, resultGuidLength + 1, MI_T("%T"), token);
+    if (retValue == -1 || NitsShouldFault(NitsHere(), NitsAutomatic))
+    {
+        DSC_free(*resultGuid);
+    }
+    (*resultGuid)[resultGuidLength - 1] = MI_T('\0');
+
+EH_UNWIND:
+        return MI_RESULT_OK;
+}
+
+extern void * g_metaConfig;
+
+MI_Result ShouldUseV1Protocol(
+    _Inout_ MI_Boolean* isV1MetaConfig)
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Value value;
+    MI_Uint32 flags;
+
+    result = result = DSC_MI_Instance_GetElement((MI_Instance*)g_metaConfig, MSFT_DSCMetaConfiguration_ConfigurationID, &value, NULL, &flags, NULL);    
+    if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && (Tcscasecmp(MI_T(""), value.string) != 0))
+    {
+        *isV1MetaConfig = MI_TRUE;
+    }
+
+    return result;
+}
+
+
+MI_Result GetAgentInformation(
+    _Inout_ MI_Instance** registrationPayload)
+{
+    MI_Application miApp = MI_APPLICATION_NULL;
+    MI_Boolean applicationInitialized = MI_FALSE;
+//    NetworkInformation networkInformation = { 0 };
+    MI_Result result = MI_RESULT_OK;
+    MI_Value value;
+    MI_Char *ipAddress = NULL;
+    MI_Uint32 count = 0;
+    if (g_metaConfig == NULL)
+    {
+        assert(1);
+        return MI_RESULT_FAILED;
+    }
+    result = DSC_MI_Application_Initialize(0, NULL, NULL, &miApp);
+    EH_CheckResult(result);
+
+    result = DSC_MI_Application_NewInstance(&miApp, AGENT_REGISTRATION_CLASS, NULL, registrationPayload);
+    EH_CheckResult(result);
+    applicationInitialized = MI_TRUE;
+
+/* TODO: implement these
+    // Set IPAddress 
+    result = GetIPAndMacAddresses(lcmContext, &networkInformation);
+    // TODO : TO be uncommented afer Jane's fix for MSFT:2004179 FIs to REL
+    //EH_CheckResult(result);    
+
+    result = GetIpAddressesInStringFormat(networkInformation.ipV4Addresses, networkInformation.ipV4Count, networkInformation.ipV6Addresses, networkInformation.ipV6Count, &ipAddress);
+    EH_CheckResult(result);
+
+    value.string = ipAddress;
+    result = MI_Instance_AddElement(*registrationPayload, REPORTING_IPADDRESS, &value, MI_STRING, 0);
+    EH_CheckResult(result);    
+
+    // Set HostName
+    value.string = g_JobInformation.deviceName;
+    result = MI_Instance_AddElement(*registrationPayload, REPORTING_NODENAME, &value, MI_STRING, 0);
+    EH_CheckResult(result);
+
+    // Set LCMVersion
+    value.string = LCM_CURRENT_VERSION;
+    result = MI_Instance_AddElement(*registrationPayload, REPORTING_LCMVERSION, &value, MI_STRING, 0);
+    EH_CheckResult(result);
+
+    EH_UNWIND
+    if (applicationInitialized == MI_TRUE)
+    {
+        MI_Application_Close(&miApp);
+        applicationInitialized = MI_FALSE;
+    }
+    for (count = 0; count < networkInformation.ipV4Count; count++)
+    {
+        DSCFREE_IF_NOT_NULL(networkInformation.ipV4Addresses[count]);
+    }
+    DSCFREE_IF_NOT_NULL(networkInformation.ipV4Addresses);
+    for (count = 0; count < networkInformation.ipV6Count; count++)
+    {
+        DSCFREE_IF_NOT_NULL(networkInformation.ipV6Addresses[count]);
+    }
+    DSCFREE_IF_NOT_NULL(networkInformation.ipV6Addresses);
+    for (count = 0; count < networkInformation.macCount; count++)
+    {
+        DSCFREE_IF_NOT_NULL(networkInformation.macAddresses[count]);
+    }
+    DSCFREE_IF_NOT_NULL(networkInformation.macAddresses);
+    networkInformation.ipV4Count = 0;
+    networkInformation.ipV6Count = 0;
+    networkInformation.macCount = 0;
+    networkInformation.addressCount = 0;
+
+    DSC_free(ipAddress);
+*/
+EH_UNWIND:
+    return result;
+}

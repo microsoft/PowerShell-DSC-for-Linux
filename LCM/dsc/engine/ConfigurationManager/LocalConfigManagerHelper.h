@@ -27,11 +27,7 @@
 #include "MI.h"
 
 #include "ModuleHandler.h"
-#if defined(_MSC_VER)
 #include "MSFT_DSCMetaConfiguration.h"
-#else
-#include "omi_msft_dsclocalconfigurationmanager.h"
-#endif
 
 #include "LocalConfigManagerHelperForCA.h"
 #include "hashmap.h"
@@ -285,7 +281,8 @@ extern "C"
     MI_Result UpdateCurrentStatus(
         _In_opt_ MI_Boolean *complianceStatus,
         _In_opt_ MI_Uint32 *getActionStatusCode,
-                _In_opt_ MI_Uint32 *lcmStatusCode,
+        _In_opt_ MI_Uint32 *lcmStatusCode,
+        _In_opt_ MI_Char *registeredServerURLs,
         _Outptr_result_maybenull_ MI_Instance **extendedError);
 
     void GetLatestStatus(
@@ -314,6 +311,7 @@ extern "C"
         _In_opt_ MI_Boolean* complianceStatus,
         _In_opt_ MI_Uint32* getActionStatusCode,
                 _In_opt_ MI_Uint32* lcmStatusCode,
+        _In_opt_ MI_Char* registeredServerURLs,
         _Outptr_result_maybenull_ MI_Instance **extendedError);
 
         MI_Result UpdateLCMStatusCodeHistory(
@@ -419,6 +417,39 @@ extern "C"
         MI_Result SetLCMStatusReady();
         
         MI_Result SetLCMStatusReboot();
+
+
+    MI_Result DeleteRegistrationKeyFromManagerInstance(
+        _In_ LCMProviderContext *lcmContext,
+        _Inout_ MI_Instance **managerInstance,
+        MI_Uint32 typeOfDownloadManagerInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result RegisterWithServers(_In_ LCMProviderContext *lcmContext,
+        _In_ MI_Instance *metaConfigInstance,
+        _In_ MI_Uint32 isPull,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result RegisterWithPullServers(_In_ LCMProviderContext *lcmContext,
+        _In_ MI_Instance *metaConfigInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result RegisterWithReportingServers(_In_ LCMProviderContext *lcmContext,
+        _In_ MI_Instance *metaConfigInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result DoRegistration(
+        _In_ LCMProviderContext* lcmContext,
+        _Inout_ MI_InstanceA *managerInstances,        
+        _In_ MI_Uint32 typeOfDownloadManagerInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result SetDownloadManagerInstancesInMetaConfig(
+        _In_ LCMProviderContext* lcmContext,
+        _In_ MI_InstanceA downloadManagerInstances,
+        _In_ MI_Uint32 typeOfDownloadManagerInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+        
     
     MI_Result LCM_Pull_GetConfiguration(
         _In_ LCMProviderContext *lcmContext,
@@ -426,6 +457,7 @@ extern "C"
         _In_ MI_Instance *metaConfigInstance,
         _In_opt_z_ MI_Char *partialConfigName,
         _Out_ MI_Uint32 * numModulesInstalled,
+        _In_opt_z_ MI_Char *assignedConfiguration,
         _Inout_ MI_Uint32 *resultExecutionStatus,
         _Out_ MI_Uint32 *getActionStatusCode,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
@@ -438,7 +470,20 @@ extern "C"
                                  _In_ MI_Uint32 lastGetActionStatusCode,
                                  _Outptr_result_maybenull_z_  MI_Char** resultStatus,
                                  _Out_  MI_Uint32* getActionStatusCode,
+                                 _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
                                  _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+     MI_Result LCM_Do_Register(
+         _In_ MI_Instance *metaConfigInstance,
+         _In_ MI_Instance *managerInstance,
+         _In_z_ MI_Char *agentId,
+         _In_z_ MI_Char *thumbprint,
+         _In_ MI_Instance *registrationPayload,
+         _In_ MI_StringA *configurationNames,
+         _In_ MI_Uint32 typeOfManagerInstance,
+         _Outptr_result_maybenull_z_  MI_Char** result,
+         _Out_ MI_Uint32* getActionStatusCode,
+         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
     
     MI_Result MI_CALL LCM_Pull_Execute(
         _In_ LCMProviderContext *lcmContext,
