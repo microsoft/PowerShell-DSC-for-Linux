@@ -12,7 +12,7 @@ all:
 ifeq ($(BUILD_LOCAL),1)
 	make local
 else
-	cd ../pal/build; ./configure
+	cd ../pal/build; ./configure --enable-ulinux
 	for f in Providers/Scripts/InstalledScripts/*.py; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@/opt/omi/bin@" | \
