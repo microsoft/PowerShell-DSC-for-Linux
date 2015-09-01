@@ -12,18 +12,21 @@ all:
 ifeq ($(BUILD_LOCAL),1)
 	make local
 else
+	cd ../pal/build; ./configure
 	for f in Providers/Scripts/InstalledScripts/*.py; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@/opt/omi/bin@" | \
 	  sed "s@<CONFIG_LIBDIR>@/opt/omi/lib@" | \
-	  sed "s@<CONFIG_SYSCONFDIR>@/opt/omi/etc@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@/etc/opt/omi/conf@" | \
 	  sed "s@<DSC_PATH>@/opt/microsoft/dsc@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
  ifeq ($(BUILD_SSL_098),1)
+	rm -rf omi-1.0.8/output_openssl_0.9.8/lib/libdsccore.so
 	make kit098 
  endif
  ifeq ($(BUILD_SSL_100),1)
+	rm -rf omi-1.0.8/output_openssl_1.0.0/lib/libdsccore.so
 	make kit100 
  endif
 	make nxNetworking
@@ -48,20 +51,20 @@ omi098:
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_0.9.8 omi-1.0.8/output
 	make -C omi-1.0.8
-	make -C omi-1.0.8/installbuilder-generic SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	make -C omi-1.0.8/installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 omi100:
 	make configureomi100
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_1.0.0 omi-1.0.8/output
 	make -C omi-1.0.8
-	make -C omi-1.0.8/installbuilder-generic SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	make -C omi-1.0.8/installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 configureomi098:
-	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_0.9.8 --opensslcflags=$(openssl098_cflags) --openssllibs=$(openssl098_libs) --openssllibdir=$(openssl098_libdir))
+	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_0.9.8 --sysconfdir=/etc/opt/omi/conf --certsdir=/etc/opt/omi/ssl --opensslcflags=$(openssl098_cflags) --openssllibs=$(openssl098_libs) --openssllibdir=$(openssl098_libdir))
 
 configureomi100:
-	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_1.0.0 --opensslcflags=$(openssl100_cflags) --openssllibs=$(openssl100_libs) --openssllibdir=$(openssl100_libdir))
+	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_1.0.0 --sysconfdir=/etc/opt/omi/conf --certsdir=/etc/opt/omi/ssl --opensslcflags=$(openssl100_cflags) --openssllibs=$(openssl100_libs) --openssllibdir=$(openssl100_libdir))
 
 lcm098:
 	make -C LCM

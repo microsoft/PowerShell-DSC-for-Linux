@@ -43,8 +43,6 @@ BaseResourceConfiguration g_MetaConfigurationResourceProperties[] =
 {
     { OMI_MetaConfigurationResource_ResourceId, MI_STRING },
     { OMI_MetaConfigurationResource_SourceInfo, MI_STRING },
-    { OMI_MetaConfigurationResource_ModuleName, MI_STRING },
-    { OMI_MetaConfigurationResource_ModuleVersion, MI_STRING },
     { NULL, 0 }
 };
 
@@ -56,6 +54,12 @@ BaseResourceConfiguration g_WebDownloadManagerProperties[] =
     { NULL, 0 }
 };
 
+
+MI_Result  IgnoreValidation(_In_ MI_Class *configDocumentClass,
+                            _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    return MI_RESULT_OK;
+}
 
 InfraSchemaValidator g_InfraSchemaValidators[] =
 {
@@ -69,8 +73,17 @@ InfraSchemaValidator g_InfraSchemaValidators[] =
     {MSFT_KEYVALUEPAIR_CLASSNAME, ValidateKeyValuePairClass},
     { MSFT_PARTIALCONFIGURATION_CLASSNAME,            ValidateClassPropertiesForMetaConfResourceChildren },
     { METACONF_RESOURCE_CLASSNAME,                    ValidateMetaConfResourceProperties},
-    { OMI_CONFIGURATIONDOWNLOADMANAGER_CLASSNAME,     ValidateConfigurationDownloadManagerProperties },
-    { MSFT_WEBCONFIGURATIONDOWNLOADMANAGER_CLASSNAME, ValidateWebDownloadManagerProperties },
+    { OMI_CONFIGURATIONDOWNLOADMANAGER_CLASSNAME,     IgnoreValidation },
+    { MSFT_WEBCONFIGURATIONDOWNLOADMANAGER_CLASSNAME, IgnoreValidation },
+    { MSFT_FILECONFIGURATIONDOWNLOADMANAGER_CLASSNAME, IgnoreValidation },
+
+    { OMI_RESOURCEMODULEMANAGER_CLASSNAME,     IgnoreValidation },
+    { MSFT_WEBRESOURCEMODULEMANAGER_CLASSNAME, IgnoreValidation },
+    { MSFT_FILERESOURCEMODULEMANAGER_CLASSNAME, IgnoreValidation },
+
+    { OMI_REPORTMANAGER_CLASSNAME,     IgnoreValidation },
+    { MSFT_OAASREPORTMANAGER_CLASSNAME, IgnoreValidation },
+    { MSFT_WEBREPORTMANAGER_CLASSNAME, IgnoreValidation },
 
     {NULL, NULL}
 };
@@ -93,7 +106,6 @@ BaseResourceConfiguration g_ConfigurationDocumentProperties[] =
 
 BaseResourceConfiguration g_ConfigurationDownloadManagerProperties[] =
 {
-    {OMI_ConfigurationDownloadManager_Name,         MI_STRING},
     {NULL,                                                        0}
 };
 
@@ -154,7 +166,17 @@ BaseResourceConfiguration g_MetaConfigProperties[] =
     { MSFT_DSCMetaConfiguration_AllowModuleOverwrite,                       MI_BOOLEAN},
     { MSFT_DSCMetaConfiguration_LocalConfigurationManagerState,             MI_STRING},
     { MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers,              MI_INSTANCEA },
+    { MSFT_DSCMetaConfiguration_ResourceModuleManagers,                     MI_INSTANCEA },
+    { MSFT_DSCMetaConfiguration_ReportManagers,                             MI_INSTANCEA },
     { MSFT_DSCMetaConfiguration_PartialConfigurations,                      MI_INSTANCEA },
+    { MSFT_DSCMetaConfiguration_AgentId,                                    MI_STRING },
+    { MSFT_DSCMetaConfiguration_DebugMode,                                  MI_STRINGA },
+    { MSFT_DSCMetaConfiguration_LCMVersion,                                 MI_STRING},
+    { MSFT_DSCMetaConfiguration_LCMCompatibleVersions,                      MI_STRINGA},
+    { MSFT_DSCMetaConfiguration_LCMState,                                   MI_STRING},
+    { MSFT_DSCMetaConfiguration_LCMStateDetail,                             MI_STRING},
+    { MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays,                  MI_UINT32 },
+    { MSFT_DSCMetaConfiguration_ActionAfterReboot,                          MI_STRING },
     {NULL,                                                                  0}
 };
 
@@ -1690,21 +1712,3 @@ MI_Result ValidateMetaConfResourceProperties(_In_ MI_Class *configDocumentClass,
     return r;
 }
 
-MI_Result  ValidateConfigurationDownloadManagerProperties(_In_ MI_Class *configDocumentClass,
-                                                          _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r;
-    r = ValidateClassProperties(configDocumentClass, g_ConfigurationDownloadManagerProperties, OMI_MetaConfigurationResource_Property_Count, extendedError);
-
-    return r;
-}
-
-
-MI_Result  ValidateWebDownloadManagerProperties(_In_ MI_Class *configDocumentClass,
-                                                _Outptr_result_maybenull_ MI_Instance **extendedError)
-{
-    MI_Result r;
-    r = ValidateClassProperties(configDocumentClass,  g_WebDownloadManagerProperties, OMI_MetaConfigurationResource_Property_Count + 1, extendedError);
-
-    return r;
-}

@@ -65,6 +65,7 @@ void MI_CALL FreeExecutionOrderContainer(_Inout_ ExecutionOrderContainer *contai
 MI_Result MI_CALL Pull_GetConfiguration(_In_ LCMProviderContext *lcmContext,
                                         _In_ MI_Instance *metaConfig,
                                         _In_opt_z_ MI_Char *partialConfigName,
+                                        _In_opt_z_ MI_Char *assignedConfiguration,
                                         _Outptr_result_maybenull_z_  MI_Char** mofFileName,
                                         _Outptr_result_maybenull_z_  MI_Char** result,
                                         _Out_ MI_Uint32* getActionStatusCode,
@@ -78,11 +79,13 @@ MI_Result MI_CALL Pull_GetAction(_In_ LCMProviderContext *lcmContext,
                                  _In_ MI_Uint32 lastGetActionStatusCode,
                                  _Outptr_result_maybenull_z_  MI_Char** result,
                                  _Out_ MI_Uint32* getActionStatusCode,
+                                 _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
                                  _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContext *lcmContext,
                                                           _In_ MI_Instance *metaConfig,
                                                           _In_opt_z_ MI_Char *partialConfigName,
+                                                          _In_opt_z_ MI_Char *assignedConfiguration,
                                                           _Outptr_result_maybenull_z_  MI_Char** mofFileName,
                                                           _Outptr_result_maybenull_z_  MI_Char** directoryName,
                                                           _Out_ MI_Uint32 * numModulesInstalled,
@@ -98,7 +101,28 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
                                                    _In_ MI_Uint32 lastGetActionStatusCode,
                                                    _Outptr_result_maybenull_z_  MI_Char** result,
                                                    _Out_ MI_Uint32* getActionStatusCode,
+                                                   _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
                                                    _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+
+MI_Result MI_CALL Do_Register(
+    _In_ MI_Instance *metaConfig,
+    _In_ MI_Instance *managerInstance,
+    _In_z_ MI_Char *agentId,
+    _In_z_ MI_Char *thumbprint,
+    _In_ MI_Instance *registrationPayload,
+    _In_ MI_StringA *configurationNames,
+    _In_ MI_Uint32 typeOfManagerInstance,
+    _Outptr_result_maybenull_z_  MI_Char** result,
+    _Out_ MI_Uint32* getActionStatusCode,
+    _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext, 
+                                                      _In_ MI_Instance *metaConfig,
+                                                      _In_ MI_Instance *statusReport,
+                                                      _In_ MI_Uint32 isStatusReport,
+                                                      _Out_ MI_Uint32* getActionStatusCode,
+                                                      _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 void SetMessageInContext(MI_Uint32 msgOperation,MI_Uint32 msgItem,LCMProviderContext *lcmContext);
 

@@ -96,7 +96,7 @@ int Internal_Dir_Close(Internal_Dir* dir);
 
 int Directory_Remove( _In_z_ TChar *path);
 
-TChar * Generate_UUID(NitsCallSite cs);
+char* Generate_UUID(NitsCallSite cs);
 
 int GetComputerHostName(_Inout_updates_z_(length) TChar *buffer, unsigned int length);
 

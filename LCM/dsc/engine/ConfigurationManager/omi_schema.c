@@ -8,7 +8,7 @@
 */
 #include <ctype.h>
 #include <MI.h>
-#include "omi_msft_dsclocalconfigurationmanager.h"
+#include "MSFT_DSCLocalConfigurationManager.h"
 #include "MSFT_DSCMetaConfiguration.h"
 
 /*
@@ -63,16 +63,6 @@ static MI_CONST MI_QualifierDecl Aggregation_qual_decl =
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Aggregation_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_QualifierDecl Alias_qual_decl =
-{
-    MI_T("Alias"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_METHOD|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
 };
 
 static MI_CONST MI_Char* ArrayType_qual_decl_value = MI_T("Bag");
@@ -173,18 +163,6 @@ static MI_CONST MI_QualifierDecl Counter_qual_decl =
     &Counter_qual_decl_value, /* value */
 };
 
-static MI_CONST MI_Boolean Delete_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Delete_qual_decl =
-{
-    MI_T("Delete"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_ASSOCIATION|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Delete_qual_decl_value, /* value */
-};
-
 static MI_CONST MI_QualifierDecl Deprecated_qual_decl =
 {
     MI_T("Deprecated"), /* name */
@@ -198,16 +176,6 @@ static MI_CONST MI_QualifierDecl Deprecated_qual_decl =
 static MI_CONST MI_QualifierDecl Description_qual_decl =
 {
     MI_T("Description"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_ANY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
-static MI_CONST MI_QualifierDecl DisplayDescription_qual_decl =
-{
-    MI_T("DisplayDescription"), /* name */
     MI_STRING, /* type */
     MI_FLAG_ANY, /* scope */
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE, /* flavor */
@@ -271,18 +239,6 @@ static MI_CONST MI_QualifierDecl Exception_qual_decl =
     &Exception_qual_decl_value, /* value */
 };
 
-static MI_CONST MI_Boolean Expensive_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Expensive_qual_decl =
-{
-    MI_T("Expensive"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_ANY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Expensive_qual_decl_value, /* value */
-};
-
 static MI_CONST MI_Boolean Experimental_qual_decl_value = 0;
 
 static MI_CONST MI_QualifierDecl Experimental_qual_decl =
@@ -305,18 +261,6 @@ static MI_CONST MI_QualifierDecl Gauge_qual_decl =
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Gauge_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_Boolean Ifdeleted_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Ifdeleted_qual_decl =
-{
-    MI_T("Ifdeleted"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_ASSOCIATION|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Ifdeleted_qual_decl_value, /* value */
 };
 
 static MI_CONST MI_Boolean In_qual_decl_value = 1;
@@ -343,18 +287,6 @@ static MI_CONST MI_QualifierDecl Indication_qual_decl =
     &Indication_qual_decl_value, /* value */
 };
 
-static MI_CONST MI_Boolean Invisible_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Invisible_qual_decl =
-{
-    MI_T("Invisible"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_ASSOCIATION|MI_FLAG_CLASS|MI_FLAG_METHOD|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Invisible_qual_decl_value, /* value */
-};
-
 static MI_CONST MI_Boolean IsPUnit_qual_decl_value = 0;
 
 static MI_CONST MI_QualifierDecl IsPUnit_qual_decl =
@@ -377,18 +309,6 @@ static MI_CONST MI_QualifierDecl Key_qual_decl =
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Key_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_Boolean Large_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Large_qual_decl =
-{
-    MI_T("Large"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_CLASS|MI_FLAG_PROPERTY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Large_qual_decl_value, /* value */
 };
 
 static MI_CONST MI_QualifierDecl MappingStrings_qual_decl =
@@ -569,28 +489,6 @@ static MI_CONST MI_QualifierDecl PropertyConstraint_qual_decl =
     NULL, /* value */
 };
 
-static MI_CONST MI_Char* PropertyUsage_qual_decl_value = MI_T("CurrentContext");
-
-static MI_CONST MI_QualifierDecl PropertyUsage_qual_decl =
-{
-    MI_T("PropertyUsage"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_PROPERTY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &PropertyUsage_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_QualifierDecl Provider_qual_decl =
-{
-    MI_T("Provider"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_ANY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
 static MI_CONST MI_QualifierDecl PUnit_qual_decl =
 {
     MI_T("PUnit"), /* name */
@@ -689,26 +587,6 @@ static MI_CONST MI_QualifierDecl Stream_qual_decl =
     &Stream_qual_decl_value, /* value */
 };
 
-static MI_CONST MI_QualifierDecl Syntax_qual_decl =
-{
-    MI_T("Syntax"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_METHOD|MI_FLAG_PARAMETER|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
-static MI_CONST MI_QualifierDecl SyntaxType_qual_decl =
-{
-    MI_T("SyntaxType"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_METHOD|MI_FLAG_PARAMETER|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
 static MI_CONST MI_Boolean Terminal_qual_decl_value = 0;
 
 static MI_CONST MI_QualifierDecl Terminal_qual_decl =
@@ -719,16 +597,6 @@ static MI_CONST MI_QualifierDecl Terminal_qual_decl =
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Terminal_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_QualifierDecl TriggerType_qual_decl =
-{
-    MI_T("TriggerType"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_ASSOCIATION|MI_FLAG_CLASS|MI_FLAG_INDICATION|MI_FLAG_METHOD|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
 };
 
 static MI_CONST MI_QualifierDecl UMLPackagePath_qual_decl =
@@ -747,26 +615,6 @@ static MI_CONST MI_QualifierDecl Units_qual_decl =
     MI_STRING, /* type */
     MI_FLAG_METHOD|MI_FLAG_PARAMETER|MI_FLAG_PROPERTY, /* scope */
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
-static MI_CONST MI_QualifierDecl UnknownValues_qual_decl =
-{
-    MI_T("UnknownValues"), /* name */
-    MI_STRINGA, /* type */
-    MI_FLAG_PROPERTY, /* scope */
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
-static MI_CONST MI_QualifierDecl UnsupportedValues_qual_decl =
-{
-    MI_T("UnsupportedValues"), /* name */
-    MI_STRINGA, /* type */
-    MI_FLAG_PROPERTY, /* scope */
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     NULL, /* value */
 };
@@ -830,7 +678,6 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &Abstract_qual_decl,
     &Aggregate_qual_decl,
     &Aggregation_qual_decl,
-    &Alias_qual_decl,
     &ArrayType_qual_decl,
     &Association_qual_decl,
     &BitMap_qual_decl,
@@ -840,25 +687,19 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &Composition_qual_decl,
     &Correlatable_qual_decl,
     &Counter_qual_decl,
-    &Delete_qual_decl,
     &Deprecated_qual_decl,
     &Description_qual_decl,
-    &DisplayDescription_qual_decl,
     &DisplayName_qual_decl,
     &DN_qual_decl,
     &EmbeddedInstance_qual_decl,
     &EmbeddedObject_qual_decl,
     &Exception_qual_decl,
-    &Expensive_qual_decl,
     &Experimental_qual_decl,
     &Gauge_qual_decl,
-    &Ifdeleted_qual_decl,
     &In_qual_decl,
     &Indication_qual_decl,
-    &Invisible_qual_decl,
     &IsPUnit_qual_decl,
     &Key_qual_decl,
-    &Large_qual_decl,
     &MappingStrings_qual_decl,
     &Max_qual_decl,
     &MaxLen_qual_decl,
@@ -876,8 +717,6 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &Override_qual_decl,
     &Propagated_qual_decl,
     &PropertyConstraint_qual_decl,
-    &PropertyUsage_qual_decl,
-    &Provider_qual_decl,
     &PUnit_qual_decl,
     &Read_qual_decl,
     &Required_qual_decl,
@@ -887,14 +726,9 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &SourceType_qual_decl,
     &Static_qual_decl,
     &Stream_qual_decl,
-    &Syntax_qual_decl,
-    &SyntaxType_qual_decl,
     &Terminal_qual_decl,
-    &TriggerType_qual_decl,
     &UMLPackagePath_qual_decl,
     &Units_qual_decl,
-    &UnknownValues_qual_decl,
-    &UnsupportedValues_qual_decl,
     &ValueMap_qual_decl,
     &Values_qual_decl,
     &Version_qual_decl,
@@ -996,44 +830,44 @@ static MI_CONST MI_PropertyDecl OMI_BaseResource_SourceInfo_prop =
     NULL,
 };
 
-static MI_CONST MI_Char* OMI_BaseResource_DependsOn_Description_qual_value = MI_T("535");
+static MI_CONST MI_Char* OMI_BaseResource_Requires_Description_qual_value = MI_T("535");
 
-static MI_CONST MI_Qualifier OMI_BaseResource_DependsOn_Description_qual =
+static MI_CONST MI_Qualifier OMI_BaseResource_Requires_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &OMI_BaseResource_DependsOn_Description_qual_value
+    &OMI_BaseResource_Requires_Description_qual_value
 };
 
-static MI_CONST MI_Boolean OMI_BaseResource_DependsOn_Write_qual_value = 1;
+static MI_CONST MI_Boolean OMI_BaseResource_Requires_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier OMI_BaseResource_DependsOn_Write_qual =
+static MI_CONST MI_Qualifier OMI_BaseResource_Requires_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_BaseResource_DependsOn_Write_qual_value
+    &OMI_BaseResource_Requires_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST OMI_BaseResource_DependsOn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST OMI_BaseResource_Requires_quals[] =
 {
-    &OMI_BaseResource_DependsOn_Description_qual,
-    &OMI_BaseResource_DependsOn_Write_qual,
+    &OMI_BaseResource_Requires_Description_qual,
+    &OMI_BaseResource_Requires_Write_qual,
 };
 
-/* property OMI_BaseResource.DependsOn */
-static MI_CONST MI_PropertyDecl OMI_BaseResource_DependsOn_prop =
+/* property OMI_BaseResource.Requires */
+static MI_CONST MI_PropertyDecl OMI_BaseResource_Requires_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
-    0x00646E09, /* code */
-    MI_T("DependsOn"), /* name */
-    OMI_BaseResource_DependsOn_quals, /* qualifiers */
-    MI_COUNT(OMI_BaseResource_DependsOn_quals), /* numQualifiers */
+    0x00727308, /* code */
+    MI_T("Requires"), /* name */
+    OMI_BaseResource_Requires_quals, /* qualifiers */
+    MI_COUNT(OMI_BaseResource_Requires_quals), /* numQualifiers */
     MI_STRINGA, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(OMI_BaseResource, DependsOn), /* offset */
+    offsetof(OMI_BaseResource, Requires), /* offset */
     MI_T("OMI_BaseResource"), /* origin */
     MI_T("OMI_BaseResource"), /* propagator */
     NULL,
@@ -1172,10 +1006,20 @@ static MI_PropertyDecl MI_CONST* MI_CONST OMI_BaseResource_props[] =
 {
     &OMI_BaseResource_ResourceId_prop,
     &OMI_BaseResource_SourceInfo_prop,
-    &OMI_BaseResource_DependsOn_prop,
+    &OMI_BaseResource_Requires_prop,
     &OMI_BaseResource_ModuleName_prop,
     &OMI_BaseResource_ModuleVersion_prop,
     &OMI_BaseResource_ConfigurationName_prop,
+};
+
+static MI_CONST MI_Boolean OMI_BaseResource_Abstract_qual_value = 1;
+
+static MI_CONST MI_Qualifier OMI_BaseResource_Abstract_qual =
+{
+    MI_T("Abstract"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
+    &OMI_BaseResource_Abstract_qual_value
 };
 
 static MI_CONST MI_Char* OMI_BaseResource_ClassVersion_qual_value = MI_T("1.0.0");
@@ -1200,6 +1044,7 @@ static MI_CONST MI_Qualifier OMI_BaseResource_Description_qual =
 
 static MI_Qualifier MI_CONST* MI_CONST OMI_BaseResource_quals[] =
 {
+    &OMI_BaseResource_Abstract_qual,
     &OMI_BaseResource_ClassVersion_qual,
     &OMI_BaseResource_Description_qual,
 };
@@ -1207,7 +1052,7 @@ static MI_Qualifier MI_CONST* MI_CONST OMI_BaseResource_quals[] =
 /* class OMI_BaseResource */
 MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 {
-    MI_FLAG_CLASS, /* flags */
+    MI_FLAG_CLASS|MI_FLAG_ABSTRACT, /* flags */
     0x006F6510, /* code */
     MI_T("OMI_BaseResource"), /* name */
     OMI_BaseResource_quals, /* qualifiers */
@@ -1508,82 +1353,6 @@ MI_CONST MI_ClassDecl MSFT_KeyValuePair_rtti =
 /*
 **==============================================================================
 **
-** OMI_ConfigurationDownloadManager
-**
-**==============================================================================
-*/
-
-/* property OMI_ConfigurationDownloadManager.Name */
-static MI_CONST MI_PropertyDecl OMI_ConfigurationDownloadManager_Name_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
-    0x006E6504, /* code */
-    MI_T("Name"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_ConfigurationDownloadManager, Name), /* offset */
-    MI_T("OMI_ConfigurationDownloadManager"), /* origin */
-    MI_T("OMI_ConfigurationDownloadManager"), /* propagator */
-    NULL,
-};
-
-static MI_PropertyDecl MI_CONST* MI_CONST OMI_ConfigurationDownloadManager_props[] =
-{
-    &OMI_ConfigurationDownloadManager_Name_prop,
-};
-
-static MI_CONST MI_Boolean OMI_ConfigurationDownloadManager_Abstract_qual_value = 1;
-
-static MI_CONST MI_Qualifier OMI_ConfigurationDownloadManager_Abstract_qual =
-{
-    MI_T("Abstract"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &OMI_ConfigurationDownloadManager_Abstract_qual_value
-};
-
-static MI_CONST MI_Char* OMI_ConfigurationDownloadManager_ClassVersion_qual_value = MI_T("1.0.0");
-
-static MI_CONST MI_Qualifier OMI_ConfigurationDownloadManager_ClassVersion_qual =
-{
-    MI_T("ClassVersion"),
-    MI_STRING,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &OMI_ConfigurationDownloadManager_ClassVersion_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST OMI_ConfigurationDownloadManager_quals[] =
-{
-    &OMI_ConfigurationDownloadManager_Abstract_qual,
-    &OMI_ConfigurationDownloadManager_ClassVersion_qual,
-};
-
-/* class OMI_ConfigurationDownloadManager */
-MI_CONST MI_ClassDecl OMI_ConfigurationDownloadManager_rtti =
-{
-    MI_FLAG_CLASS|MI_FLAG_ABSTRACT, /* flags */
-    0x006F7220, /* code */
-    MI_T("OMI_ConfigurationDownloadManager"), /* name */
-    OMI_ConfigurationDownloadManager_quals, /* qualifiers */
-    MI_COUNT(OMI_ConfigurationDownloadManager_quals), /* numQualifiers */
-    OMI_ConfigurationDownloadManager_props, /* properties */
-    MI_COUNT(OMI_ConfigurationDownloadManager_props), /* numProperties */
-    sizeof(OMI_ConfigurationDownloadManager), /* size */
-    NULL, /* superClass */
-    NULL, /* superClassDecl */
-    NULL, /* methods */
-    0, /* numMethods */
-    &schemaDecl, /* schema */
-    NULL, /* functions */
-    NULL /* owningClass */
-};
-
-/*
-**==============================================================================
-**
 ** OMI_MetaConfigurationResource
 **
 **==============================================================================
@@ -1653,76 +1422,10 @@ static MI_CONST MI_PropertyDecl OMI_MetaConfigurationResource_SourceInfo_prop =
     NULL,
 };
 
-static MI_CONST MI_Boolean OMI_MetaConfigurationResource_ModuleName_Required_qual_value = 1;
-
-static MI_CONST MI_Qualifier OMI_MetaConfigurationResource_ModuleName_Required_qual =
-{
-    MI_T("Required"),
-    MI_BOOLEAN,
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_MetaConfigurationResource_ModuleName_Required_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST OMI_MetaConfigurationResource_ModuleName_quals[] =
-{
-    &OMI_MetaConfigurationResource_ModuleName_Required_qual,
-};
-
-/* property OMI_MetaConfigurationResource.ModuleName */
-static MI_CONST MI_PropertyDecl OMI_MetaConfigurationResource_ModuleName_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED|MI_FLAG_READONLY, /* flags */
-    0x006D650A, /* code */
-    MI_T("ModuleName"), /* name */
-    OMI_MetaConfigurationResource_ModuleName_quals, /* qualifiers */
-    MI_COUNT(OMI_MetaConfigurationResource_ModuleName_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_MetaConfigurationResource, ModuleName), /* offset */
-    MI_T("OMI_MetaConfigurationResource"), /* origin */
-    MI_T("OMI_MetaConfigurationResource"), /* propagator */
-    NULL,
-};
-
-static MI_CONST MI_Boolean OMI_MetaConfigurationResource_ModuleVersion_Required_qual_value = 1;
-
-static MI_CONST MI_Qualifier OMI_MetaConfigurationResource_ModuleVersion_Required_qual =
-{
-    MI_T("Required"),
-    MI_BOOLEAN,
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &OMI_MetaConfigurationResource_ModuleVersion_Required_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST OMI_MetaConfigurationResource_ModuleVersion_quals[] =
-{
-    &OMI_MetaConfigurationResource_ModuleVersion_Required_qual,
-};
-
-/* property OMI_MetaConfigurationResource.ModuleVersion */
-static MI_CONST MI_PropertyDecl OMI_MetaConfigurationResource_ModuleVersion_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED|MI_FLAG_READONLY, /* flags */
-    0x006D6E0D, /* code */
-    MI_T("ModuleVersion"), /* name */
-    OMI_MetaConfigurationResource_ModuleVersion_quals, /* qualifiers */
-    MI_COUNT(OMI_MetaConfigurationResource_ModuleVersion_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_MetaConfigurationResource, ModuleVersion), /* offset */
-    MI_T("OMI_MetaConfigurationResource"), /* origin */
-    MI_T("OMI_MetaConfigurationResource"), /* propagator */
-    NULL,
-};
-
 static MI_PropertyDecl MI_CONST* MI_CONST OMI_MetaConfigurationResource_props[] =
 {
     &OMI_MetaConfigurationResource_ResourceId_prop,
     &OMI_MetaConfigurationResource_SourceInfo_prop,
-    &OMI_MetaConfigurationResource_ModuleName_prop,
-    &OMI_MetaConfigurationResource_ModuleVersion_prop,
 };
 
 static MI_CONST MI_Boolean OMI_MetaConfigurationResource_Abstract_qual_value = 1;
@@ -1775,6 +1478,219 @@ MI_CONST MI_ClassDecl OMI_MetaConfigurationResource_rtti =
     sizeof(OMI_MetaConfigurationResource), /* size */
     NULL, /* superClass */
     NULL, /* superClassDecl */
+    NULL, /* methods */
+    0, /* numMethods */
+    &schemaDecl, /* schema */
+    NULL, /* functions */
+    NULL /* owningClass */
+};
+
+/*
+**==============================================================================
+**
+** OMI_ConfigurationDownloadManager
+**
+**==============================================================================
+*/
+
+static MI_PropertyDecl MI_CONST* MI_CONST OMI_ConfigurationDownloadManager_props[] =
+{
+    &OMI_MetaConfigurationResource_ResourceId_prop,
+    &OMI_MetaConfigurationResource_SourceInfo_prop,
+};
+
+static MI_CONST MI_Char* OMI_ConfigurationDownloadManager_Description_qual_value = MI_T("471");
+
+static MI_CONST MI_Qualifier OMI_ConfigurationDownloadManager_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &OMI_ConfigurationDownloadManager_Description_qual_value
+};
+
+static MI_CONST MI_Boolean OMI_ConfigurationDownloadManager_Abstract_qual_value = 1;
+
+static MI_CONST MI_Qualifier OMI_ConfigurationDownloadManager_Abstract_qual =
+{
+    MI_T("Abstract"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
+    &OMI_ConfigurationDownloadManager_Abstract_qual_value
+};
+
+static MI_CONST MI_Char* OMI_ConfigurationDownloadManager_ClassVersion_qual_value = MI_T("1.0.0");
+
+static MI_CONST MI_Qualifier OMI_ConfigurationDownloadManager_ClassVersion_qual =
+{
+    MI_T("ClassVersion"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
+    &OMI_ConfigurationDownloadManager_ClassVersion_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST OMI_ConfigurationDownloadManager_quals[] =
+{
+    &OMI_ConfigurationDownloadManager_Description_qual,
+    &OMI_ConfigurationDownloadManager_Abstract_qual,
+    &OMI_ConfigurationDownloadManager_ClassVersion_qual,
+};
+
+/* class OMI_ConfigurationDownloadManager */
+MI_CONST MI_ClassDecl OMI_ConfigurationDownloadManager_rtti =
+{
+    MI_FLAG_CLASS|MI_FLAG_ABSTRACT, /* flags */
+    0x006F7220, /* code */
+    MI_T("OMI_ConfigurationDownloadManager"), /* name */
+    OMI_ConfigurationDownloadManager_quals, /* qualifiers */
+    MI_COUNT(OMI_ConfigurationDownloadManager_quals), /* numQualifiers */
+    OMI_ConfigurationDownloadManager_props, /* properties */
+    MI_COUNT(OMI_ConfigurationDownloadManager_props), /* numProperties */
+    sizeof(OMI_ConfigurationDownloadManager), /* size */
+    MI_T("OMI_MetaConfigurationResource"), /* superClass */
+    &OMI_MetaConfigurationResource_rtti, /* superClassDecl */
+    NULL, /* methods */
+    0, /* numMethods */
+    &schemaDecl, /* schema */
+    NULL, /* functions */
+    NULL /* owningClass */
+};
+
+/*
+**==============================================================================
+**
+** OMI_ResourceModuleManager
+**
+**==============================================================================
+*/
+
+static MI_PropertyDecl MI_CONST* MI_CONST OMI_ResourceModuleManager_props[] =
+{
+    &OMI_MetaConfigurationResource_ResourceId_prop,
+    &OMI_MetaConfigurationResource_SourceInfo_prop,
+};
+
+static MI_CONST MI_Char* OMI_ResourceModuleManager_Description_qual_value = MI_T("473");
+
+static MI_CONST MI_Qualifier OMI_ResourceModuleManager_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &OMI_ResourceModuleManager_Description_qual_value
+};
+
+static MI_CONST MI_Boolean OMI_ResourceModuleManager_Abstract_qual_value = 1;
+
+static MI_CONST MI_Qualifier OMI_ResourceModuleManager_Abstract_qual =
+{
+    MI_T("Abstract"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
+    &OMI_ResourceModuleManager_Abstract_qual_value
+};
+
+static MI_CONST MI_Char* OMI_ResourceModuleManager_ClassVersion_qual_value = MI_T("1.0.0");
+
+static MI_CONST MI_Qualifier OMI_ResourceModuleManager_ClassVersion_qual =
+{
+    MI_T("ClassVersion"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
+    &OMI_ResourceModuleManager_ClassVersion_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST OMI_ResourceModuleManager_quals[] =
+{
+    &OMI_ResourceModuleManager_Description_qual,
+    &OMI_ResourceModuleManager_Abstract_qual,
+    &OMI_ResourceModuleManager_ClassVersion_qual,
+};
+
+/* class OMI_ResourceModuleManager */
+MI_CONST MI_ClassDecl OMI_ResourceModuleManager_rtti =
+{
+    MI_FLAG_CLASS|MI_FLAG_ABSTRACT, /* flags */
+    0x006F7219, /* code */
+    MI_T("OMI_ResourceModuleManager"), /* name */
+    OMI_ResourceModuleManager_quals, /* qualifiers */
+    MI_COUNT(OMI_ResourceModuleManager_quals), /* numQualifiers */
+    OMI_ResourceModuleManager_props, /* properties */
+    MI_COUNT(OMI_ResourceModuleManager_props), /* numProperties */
+    sizeof(OMI_ResourceModuleManager), /* size */
+    MI_T("OMI_MetaConfigurationResource"), /* superClass */
+    &OMI_MetaConfigurationResource_rtti, /* superClassDecl */
+    NULL, /* methods */
+    0, /* numMethods */
+    &schemaDecl, /* schema */
+    NULL, /* functions */
+    NULL /* owningClass */
+};
+
+/*
+**==============================================================================
+**
+** OMI_ReportManager
+**
+**==============================================================================
+*/
+
+static MI_PropertyDecl MI_CONST* MI_CONST OMI_ReportManager_props[] =
+{
+    &OMI_MetaConfigurationResource_ResourceId_prop,
+    &OMI_MetaConfigurationResource_SourceInfo_prop,
+};
+
+static MI_CONST MI_Char* OMI_ReportManager_Description_qual_value = MI_T("475");
+
+static MI_CONST MI_Qualifier OMI_ReportManager_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &OMI_ReportManager_Description_qual_value
+};
+
+static MI_CONST MI_Boolean OMI_ReportManager_Abstract_qual_value = 1;
+
+static MI_CONST MI_Qualifier OMI_ReportManager_Abstract_qual =
+{
+    MI_T("Abstract"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
+    &OMI_ReportManager_Abstract_qual_value
+};
+
+static MI_CONST MI_Char* OMI_ReportManager_ClassVersion_qual_value = MI_T("1.0.0");
+
+static MI_CONST MI_Qualifier OMI_ReportManager_ClassVersion_qual =
+{
+    MI_T("ClassVersion"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
+    &OMI_ReportManager_ClassVersion_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST OMI_ReportManager_quals[] =
+{
+    &OMI_ReportManager_Description_qual,
+    &OMI_ReportManager_Abstract_qual,
+    &OMI_ReportManager_ClassVersion_qual,
+};
+
+/* class OMI_ReportManager */
+MI_CONST MI_ClassDecl OMI_ReportManager_rtti =
+{
+    MI_FLAG_CLASS|MI_FLAG_ABSTRACT, /* flags */
+    0x006F7211, /* code */
+    MI_T("OMI_ReportManager"), /* name */
+    OMI_ReportManager_quals, /* qualifiers */
+    MI_COUNT(OMI_ReportManager_quals), /* numQualifiers */
+    OMI_ReportManager_props, /* properties */
+    MI_COUNT(OMI_ReportManager_props), /* numProperties */
+    sizeof(OMI_ReportManager), /* size */
+    MI_T("OMI_MetaConfigurationResource"), /* superClass */
+    &OMI_MetaConfigurationResource_rtti, /* superClassDecl */
     NULL, /* methods */
     0, /* numMethods */
     &schemaDecl, /* schema */
@@ -1910,10 +1826,53 @@ static MI_CONST MI_PropertyDecl MSFT_PartialConfiguration_ConfigurationSource_pr
     MI_T("ConfigurationSource"), /* name */
     MSFT_PartialConfiguration_ConfigurationSource_quals, /* qualifiers */
     MI_COUNT(MSFT_PartialConfiguration_ConfigurationSource_quals), /* numQualifiers */
-    MI_STRING, /* type */
+    MI_STRINGA, /* type */
     NULL, /* className */
     0, /* subscript */
     offsetof(MSFT_PartialConfiguration, ConfigurationSource), /* offset */
+    MI_T("MSFT_PartialConfiguration"), /* origin */
+    MI_T("MSFT_PartialConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Char* MSFT_PartialConfiguration_ResourceModuleSource_Description_qual_value = MI_T("856");
+
+static MI_CONST MI_Qualifier MSFT_PartialConfiguration_ResourceModuleSource_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_PartialConfiguration_ResourceModuleSource_Description_qual_value
+};
+
+static MI_CONST MI_Boolean MSFT_PartialConfiguration_ResourceModuleSource_Write_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_PartialConfiguration_ResourceModuleSource_Write_qual =
+{
+    MI_T("Write"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_PartialConfiguration_ResourceModuleSource_Write_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_PartialConfiguration_ResourceModuleSource_quals[] =
+{
+    &MSFT_PartialConfiguration_ResourceModuleSource_Description_qual,
+    &MSFT_PartialConfiguration_ResourceModuleSource_Write_qual,
+};
+
+/* property MSFT_PartialConfiguration.ResourceModuleSource */
+static MI_CONST MI_PropertyDecl MSFT_PartialConfiguration_ResourceModuleSource_prop =
+{
+    MI_FLAG_PROPERTY, /* flags */
+    0x00726514, /* code */
+    MI_T("ResourceModuleSource"), /* name */
+    MSFT_PartialConfiguration_ResourceModuleSource_quals, /* qualifiers */
+    MI_COUNT(MSFT_PartialConfiguration_ResourceModuleSource_quals), /* numQualifiers */
+    MI_STRINGA, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_PartialConfiguration, ResourceModuleSource), /* offset */
     MI_T("MSFT_PartialConfiguration"), /* origin */
     MI_T("MSFT_PartialConfiguration"), /* propagator */
     NULL,
@@ -1962,16 +1921,92 @@ static MI_CONST MI_PropertyDecl MSFT_PartialConfiguration_DependsOn_prop =
     NULL,
 };
 
+static MI_CONST MI_Char* MSFT_PartialConfiguration_RefreshMode_Description_qual_value = MI_T("366");
+
+static MI_CONST MI_Qualifier MSFT_PartialConfiguration_RefreshMode_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_PartialConfiguration_RefreshMode_Description_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_PartialConfiguration_RefreshMode_ValueMap_qual_data_value[] =
+{
+    MI_T("Push"),
+    MI_T("Pull"),
+    MI_T("Disabled"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_PartialConfiguration_RefreshMode_ValueMap_qual_value =
+{
+    MSFT_PartialConfiguration_RefreshMode_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_PartialConfiguration_RefreshMode_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_PartialConfiguration_RefreshMode_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_PartialConfiguration_RefreshMode_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_PartialConfiguration_RefreshMode_Values_qual_data_value[] =
+{
+    MI_T("411"),
+    MI_T("412"),
+    MI_T("413"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_PartialConfiguration_RefreshMode_Values_qual_value =
+{
+    MSFT_PartialConfiguration_RefreshMode_Values_qual_data_value,
+    MI_COUNT(MSFT_PartialConfiguration_RefreshMode_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_PartialConfiguration_RefreshMode_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_PartialConfiguration_RefreshMode_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_PartialConfiguration_RefreshMode_quals[] =
+{
+    &MSFT_PartialConfiguration_RefreshMode_Description_qual,
+    &MSFT_PartialConfiguration_RefreshMode_ValueMap_qual,
+    &MSFT_PartialConfiguration_RefreshMode_Values_qual,
+};
+
+/* property MSFT_PartialConfiguration.RefreshMode */
+static MI_CONST MI_PropertyDecl MSFT_PartialConfiguration_RefreshMode_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x0072650B, /* code */
+    MI_T("RefreshMode"), /* name */
+    MSFT_PartialConfiguration_RefreshMode_quals, /* qualifiers */
+    MI_COUNT(MSFT_PartialConfiguration_RefreshMode_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_PartialConfiguration, RefreshMode), /* offset */
+    MI_T("MSFT_PartialConfiguration"), /* origin */
+    MI_T("MSFT_PartialConfiguration"), /* propagator */
+    NULL,
+};
+
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_PartialConfiguration_props[] =
 {
     &OMI_MetaConfigurationResource_ResourceId_prop,
     &OMI_MetaConfigurationResource_SourceInfo_prop,
-    &OMI_MetaConfigurationResource_ModuleName_prop,
-    &OMI_MetaConfigurationResource_ModuleVersion_prop,
     &MSFT_PartialConfiguration_Description_prop,
     &MSFT_PartialConfiguration_ExclusiveResources_prop,
     &MSFT_PartialConfiguration_ConfigurationSource_prop,
+    &MSFT_PartialConfiguration_ResourceModuleSource_prop,
     &MSFT_PartialConfiguration_DependsOn_prop,
+    &MSFT_PartialConfiguration_RefreshMode_prop,
 };
 
 static MI_CONST MI_Char* MSFT_PartialConfiguration_Description_qual_value = MI_T("522");
@@ -2028,14 +2063,29 @@ MI_CONST MI_ClassDecl MSFT_PartialConfiguration_rtti =
 **==============================================================================
 */
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_Description_qual_value = MI_T("341");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_Description_qual,
+};
+
 /* property MSFT_DSCMetaConfiguration.ConfigurationModeFrequencyMins */
 static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x0063731E, /* code */
     MI_T("ConfigurationModeFrequencyMins"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
+    MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
@@ -2045,7 +2095,20 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_ConfigurationModeFrequ
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_value = 0;
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_Description_qual_value = MI_T("355");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_Description_qual,
+};
 
 /* property MSFT_DSCMetaConfiguration.RebootNodeIfNeeded */
 static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_prop =
@@ -2053,15 +2116,25 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_pro
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x00726412, /* code */
     MI_T("RebootNodeIfNeeded"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
+    MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
     offsetof(MSFT_DSCMetaConfiguration, RebootNodeIfNeeded), /* offset */
     MI_T("MSFT_DSCMetaConfiguration"), /* origin */
     MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
-    &MSFT_DSCMetaConfiguration_RebootNodeIfNeeded_value,
+    NULL,
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ConfigurationMode_Description_qual_value = MI_T("356");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ConfigurationMode_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_ConfigurationMode_Description_qual_value
 };
 
 static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ConfigurationMode_ValueMap_qual_data_value[] =
@@ -2108,6 +2181,7 @@ static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ConfigurationMode_Values_
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_ConfigurationMode_quals[] =
 {
+    &MSFT_DSCMetaConfiguration_ConfigurationMode_Description_qual,
     &MSFT_DSCMetaConfiguration_ConfigurationMode_ValueMap_qual,
     &MSFT_DSCMetaConfiguration_ConfigurationMode_Values_qual,
 };
@@ -2139,9 +2213,20 @@ static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_Credential_EmbeddedInstan
     &MSFT_DSCMetaConfiguration_Credential_EmbeddedInstance_qual_value
 };
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_Credential_Description_qual_value = MI_T("354");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_Credential_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_Credential_Description_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_Credential_quals[] =
 {
     &MSFT_DSCMetaConfiguration_Credential_EmbeddedInstance_qual,
+    &MSFT_DSCMetaConfiguration_Credential_Description_qual,
 };
 
 /* property MSFT_DSCMetaConfiguration.Credential */
@@ -2159,6 +2244,16 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_Credential_prop =
     MI_T("MSFT_DSCMetaConfiguration"), /* origin */
     MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
     NULL,
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_RefreshMode_Description_qual_value = MI_T("865");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_RefreshMode_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_RefreshMode_Description_qual_value
 };
 
 static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_RefreshMode_ValueMap_qual_data_value[] =
@@ -2203,6 +2298,7 @@ static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_RefreshMode_Values_qual =
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_RefreshMode_quals[] =
 {
+    &MSFT_DSCMetaConfiguration_RefreshMode_Description_qual,
     &MSFT_DSCMetaConfiguration_RefreshMode_ValueMap_qual,
     &MSFT_DSCMetaConfiguration_RefreshMode_Values_qual,
 };
@@ -2224,14 +2320,29 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_RefreshMode_prop =
     NULL,
 };
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_CertificateID_Description_qual_value = MI_T("344");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_CertificateID_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_CertificateID_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_CertificateID_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_CertificateID_Description_qual,
+};
+
 /* property MSFT_DSCMetaConfiguration.CertificateID */
 static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_CertificateID_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x0063640D, /* code */
     MI_T("CertificateID"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
+    MSFT_DSCMetaConfiguration_CertificateID_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_CertificateID_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
@@ -2241,14 +2352,29 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_CertificateID_prop =
     NULL,
 };
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ConfigurationID_Description_qual_value = MI_T("346");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ConfigurationID_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_ConfigurationID_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_ConfigurationID_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_ConfigurationID_Description_qual,
+};
+
 /* property MSFT_DSCMetaConfiguration.ConfigurationID */
 static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_ConfigurationID_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x0063640F, /* code */
     MI_T("ConfigurationID"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
+    MSFT_DSCMetaConfiguration_ConfigurationID_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_ConfigurationID_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
@@ -2258,14 +2384,29 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_ConfigurationID_prop =
     NULL,
 };
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_DownloadManagerName_Description_qual_value = MI_T("347");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_DownloadManagerName_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_DownloadManagerName_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_DownloadManagerName_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_DownloadManagerName_Description_qual,
+};
+
 /* property MSFT_DSCMetaConfiguration.DownloadManagerName */
 static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_DownloadManagerName_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x00646513, /* code */
     MI_T("DownloadManagerName"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
+    MSFT_DSCMetaConfiguration_DownloadManagerName_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_DownloadManagerName_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
@@ -2273,6 +2414,16 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_DownloadManagerName_pr
     MI_T("MSFT_DSCMetaConfiguration"), /* origin */
     MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
     NULL,
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_DownloadManagerCustomData_Description_qual_value = MI_T("348");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_DownloadManagerCustomData_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_DownloadManagerCustomData_Description_qual_value
 };
 
 static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_DownloadManagerCustomData_EmbeddedInstance_qual_value = MI_T("MSFT_KeyValuePair");
@@ -2287,6 +2438,7 @@ static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_DownloadManagerCustomData
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_DownloadManagerCustomData_quals[] =
 {
+    &MSFT_DSCMetaConfiguration_DownloadManagerCustomData_Description_qual,
     &MSFT_DSCMetaConfiguration_DownloadManagerCustomData_EmbeddedInstance_qual,
 };
 
@@ -2307,14 +2459,29 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_DownloadManagerCustomD
     NULL,
 };
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_RefreshFrequencyMins_Description_qual_value = MI_T("349");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_RefreshFrequencyMins_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_RefreshFrequencyMins_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_RefreshFrequencyMins_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_RefreshFrequencyMins_Description_qual,
+};
+
 /* property MSFT_DSCMetaConfiguration.RefreshFrequencyMins */
 static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_RefreshFrequencyMins_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x00727314, /* code */
     MI_T("RefreshFrequencyMins"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
+    MSFT_DSCMetaConfiguration_RefreshFrequencyMins_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_RefreshFrequencyMins_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
@@ -2324,18 +2491,120 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_RefreshFrequencyMins_p
     NULL,
 };
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_AllowModuleOverwrite_Description_qual_value = MI_T("389");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_AllowModuleOverwrite_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_AllowModuleOverwrite_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_AllowModuleOverwrite_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_AllowModuleOverwrite_Description_qual,
+};
+
 /* property MSFT_DSCMetaConfiguration.AllowModuleOverwrite */
 static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_AllowModuleOverwrite_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
     0x00616514, /* code */
     MI_T("AllowModuleOverwrite"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
+    MSFT_DSCMetaConfiguration_AllowModuleOverwrite_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_AllowModuleOverwrite_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
     offsetof(MSFT_DSCMetaConfiguration, AllowModuleOverwrite), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Boolean MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Read_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Read_qual =
+{
+    MI_T("Read"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Read_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Description_qual_value = MI_T("423");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Description_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_data_value[] =
+{
+    MI_T("Ready"),
+    MI_T("Busy"),
+    MI_T("PendingReboot"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_value =
+{
+    MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_data_value[] =
+{
+    MI_T("866"),
+    MI_T("422"),
+    MI_T("425"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_value =
+{
+    MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_data_value,
+    MI_COUNT(MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Read_qual,
+    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Description_qual,
+    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual,
+    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.LocalConfigurationManagerState */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x006C651E, /* code */
+    MI_T("LocalConfigurationManagerState"), /* name */
+    MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, LocalConfigurationManagerState), /* offset */
     MI_T("MSFT_DSCMetaConfiguration"), /* origin */
     MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
     NULL,
@@ -2384,77 +2653,87 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_ConfigurationDownloadM
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Read_qual_value = 1;
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ResourceModuleManagers_Description_qual_value = MI_T("493");
 
-static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Read_qual =
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ResourceModuleManagers_Description_qual =
 {
-    MI_T("Read"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Read_qual_value
-};
-
-static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_data_value[] =
-{
-    MI_T("Ready"),
-    MI_T("Busy"),
-    MI_T("PendingReboot"),
-};
-
-static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_value =
-{
-    MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_data_value,
-    MI_COUNT(MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_data_value),
-};
-
-static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual =
-{
-    MI_T("ValueMap"),
-    MI_STRINGA,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual_value
-};
-
-static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_data_value[] =
-{
-    MI_T("856"),
-    MI_T("422"),
-    MI_T("425"),
-};
-
-static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_value =
-{
-    MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_data_value,
-    MI_COUNT(MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_data_value),
-};
-
-static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual =
-{
-    MI_T("Values"),
-    MI_STRINGA,
+    MI_T("Description"),
+    MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual_value
+    &MSFT_DSCMetaConfiguration_ResourceModuleManagers_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_quals[] =
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ResourceModuleManagers_EmbeddedInstance_qual_value = MI_T("OMI_ResourceModuleManager");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ResourceModuleManagers_EmbeddedInstance_qual =
 {
-    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Read_qual,
-    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_ValueMap_qual,
-    &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_Values_qual,
+    MI_T("EmbeddedInstance"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_ResourceModuleManagers_EmbeddedInstance_qual_value
 };
 
-/* property MSFT_DSCMetaConfiguration.LocalConfigurationManagerState */
-static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_prop =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_ResourceModuleManagers_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_ResourceModuleManagers_Description_qual,
+    &MSFT_DSCMetaConfiguration_ResourceModuleManagers_EmbeddedInstance_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.ResourceModuleManagers */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_ResourceModuleManagers_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
-    0x006C651E, /* code */
-    MI_T("LocalConfigurationManagerState"), /* name */
-    MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_quals, /* qualifiers */
-    MI_COUNT(MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
+    0x00727316, /* code */
+    MI_T("ResourceModuleManagers"), /* name */
+    MSFT_DSCMetaConfiguration_ResourceModuleManagers_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_ResourceModuleManagers_quals), /* numQualifiers */
+    MI_INSTANCEA, /* type */
+    MI_T("OMI_ResourceModuleManager"), /* className */
     0, /* subscript */
-    offsetof(MSFT_DSCMetaConfiguration, LocalConfigurationManagerState), /* offset */
+    offsetof(MSFT_DSCMetaConfiguration, ResourceModuleManagers), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ReportManagers_Description_qual_value = MI_T("496");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ReportManagers_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_ReportManagers_Description_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ReportManagers_EmbeddedInstance_qual_value = MI_T("OMI_ReportManager");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ReportManagers_EmbeddedInstance_qual =
+{
+    MI_T("EmbeddedInstance"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_ReportManagers_EmbeddedInstance_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_ReportManagers_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_ReportManagers_Description_qual,
+    &MSFT_DSCMetaConfiguration_ReportManagers_EmbeddedInstance_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.ReportManagers */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_ReportManagers_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x0072730E, /* code */
+    MI_T("ReportManagers"), /* name */
+    MSFT_DSCMetaConfiguration_ReportManagers_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_ReportManagers_quals), /* numQualifiers */
+    MI_INSTANCEA, /* type */
+    MI_T("OMI_ReportManager"), /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, ReportManagers), /* offset */
     MI_T("MSFT_DSCMetaConfiguration"), /* origin */
     MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
     NULL,
@@ -2492,6 +2771,451 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_PartialConfigurations_
     NULL,
 };
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ActionAfterReboot_Description_qual_value = MI_T("619");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ActionAfterReboot_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_ActionAfterReboot_Description_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ActionAfterReboot_ValueMap_qual_data_value[] =
+{
+    MI_T("ContinueConfiguration"),
+    MI_T("StopConfiguration"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_ActionAfterReboot_ValueMap_qual_value =
+{
+    MSFT_DSCMetaConfiguration_ActionAfterReboot_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_DSCMetaConfiguration_ActionAfterReboot_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ActionAfterReboot_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_ActionAfterReboot_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ActionAfterReboot_Values_qual_data_value[] =
+{
+    MI_T("620"),
+    MI_T("621"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_ActionAfterReboot_Values_qual_value =
+{
+    MSFT_DSCMetaConfiguration_ActionAfterReboot_Values_qual_data_value,
+    MI_COUNT(MSFT_DSCMetaConfiguration_ActionAfterReboot_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ActionAfterReboot_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_ActionAfterReboot_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_ActionAfterReboot_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_ActionAfterReboot_Description_qual,
+    &MSFT_DSCMetaConfiguration_ActionAfterReboot_ValueMap_qual,
+    &MSFT_DSCMetaConfiguration_ActionAfterReboot_Values_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.ActionAfterReboot */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_ActionAfterReboot_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x00617411, /* code */
+    MI_T("ActionAfterReboot"), /* name */
+    MSFT_DSCMetaConfiguration_ActionAfterReboot_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_ActionAfterReboot_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, ActionAfterReboot), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_DebugMode_Description_qual_value = MI_T("609");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_DebugMode_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_DebugMode_Description_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_DebugMode_ValueMap_qual_data_value[] =
+{
+    MI_T("None"),
+    MI_T("ForceModuleImport"),
+    MI_T("All"),
+    MI_T("ResourceScriptBreakAll"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_DebugMode_ValueMap_qual_value =
+{
+    MSFT_DSCMetaConfiguration_DebugMode_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_DSCMetaConfiguration_DebugMode_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_DebugMode_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_DebugMode_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_DebugMode_Values_qual_data_value[] =
+{
+    MI_T("610"),
+    MI_T("611"),
+    MI_T("612"),
+    MI_T("851"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_DebugMode_Values_qual_value =
+{
+    MSFT_DSCMetaConfiguration_DebugMode_Values_qual_data_value,
+    MI_COUNT(MSFT_DSCMetaConfiguration_DebugMode_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_DebugMode_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_DebugMode_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_DebugMode_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_DebugMode_Description_qual,
+    &MSFT_DSCMetaConfiguration_DebugMode_ValueMap_qual,
+    &MSFT_DSCMetaConfiguration_DebugMode_Values_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.DebugMode */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_DebugMode_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x00646509, /* code */
+    MI_T("DebugMode"), /* name */
+    MSFT_DSCMetaConfiguration_DebugMode_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_DebugMode_quals), /* numQualifiers */
+    MI_STRINGA, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, DebugMode), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Boolean MSFT_DSCMetaConfiguration_LCMVersion_Read_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMVersion_Read_qual =
+{
+    MI_T("Read"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_LCMVersion_Read_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LCMVersion_Description_qual_value = MI_T("459");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMVersion_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_LCMVersion_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_LCMVersion_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_LCMVersion_Read_qual,
+    &MSFT_DSCMetaConfiguration_LCMVersion_Description_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.LCMVersion */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_LCMVersion_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x006C6E0A, /* code */
+    MI_T("LCMVersion"), /* name */
+    MSFT_DSCMetaConfiguration_LCMVersion_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_LCMVersion_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, LCMVersion), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Boolean MSFT_DSCMetaConfiguration_LCMCompatibleVersions_Read_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMCompatibleVersions_Read_qual =
+{
+    MI_T("Read"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_LCMCompatibleVersions_Read_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LCMCompatibleVersions_Description_qual_value = MI_T("458");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMCompatibleVersions_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_LCMCompatibleVersions_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_LCMCompatibleVersions_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_LCMCompatibleVersions_Read_qual,
+    &MSFT_DSCMetaConfiguration_LCMCompatibleVersions_Description_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.LCMCompatibleVersions */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_LCMCompatibleVersions_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x006C7315, /* code */
+    MI_T("LCMCompatibleVersions"), /* name */
+    MSFT_DSCMetaConfiguration_LCMCompatibleVersions_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_LCMCompatibleVersions_quals), /* numQualifiers */
+    MI_STRINGA, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, LCMCompatibleVersions), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Boolean MSFT_DSCMetaConfiguration_LCMState_Read_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMState_Read_qual =
+{
+    MI_T("Read"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_LCMState_Read_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LCMState_Description_qual_value = MI_T("423");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMState_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_LCMState_Description_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LCMState_ValueMap_qual_data_value[] =
+{
+    MI_T("Idle"),
+    MI_T("Busy"),
+    MI_T("PendingReboot"),
+    MI_T("PendingConfiguration"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_LCMState_ValueMap_qual_value =
+{
+    MSFT_DSCMetaConfiguration_LCMState_ValueMap_qual_data_value,
+    MI_COUNT(MSFT_DSCMetaConfiguration_LCMState_ValueMap_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMState_ValueMap_qual =
+{
+    MI_T("ValueMap"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_LCMState_ValueMap_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LCMState_Values_qual_data_value[] =
+{
+    MI_T("853"),
+    MI_T("422"),
+    MI_T("425"),
+    MI_T("854"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_LCMState_Values_qual_value =
+{
+    MSFT_DSCMetaConfiguration_LCMState_Values_qual_data_value,
+    MI_COUNT(MSFT_DSCMetaConfiguration_LCMState_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMState_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_LCMState_Values_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_LCMState_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_LCMState_Read_qual,
+    &MSFT_DSCMetaConfiguration_LCMState_Description_qual,
+    &MSFT_DSCMetaConfiguration_LCMState_ValueMap_qual,
+    &MSFT_DSCMetaConfiguration_LCMState_Values_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.LCMState */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_LCMState_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x006C6508, /* code */
+    MI_T("LCMState"), /* name */
+    MSFT_DSCMetaConfiguration_LCMState_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_LCMState_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, LCMState), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Boolean MSFT_DSCMetaConfiguration_LCMStateDetail_Read_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMStateDetail_Read_qual =
+{
+    MI_T("Read"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_LCMStateDetail_Read_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_LCMStateDetail_Description_qual_value = MI_T("855");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_LCMStateDetail_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_LCMStateDetail_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_LCMStateDetail_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_LCMStateDetail_Read_qual,
+    &MSFT_DSCMetaConfiguration_LCMStateDetail_Description_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.LCMStateDetail */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_LCMStateDetail_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x006C6C0E, /* code */
+    MI_T("LCMStateDetail"), /* name */
+    MSFT_DSCMetaConfiguration_LCMStateDetail_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_LCMStateDetail_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, LCMStateDetail), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_Description_qual_value = MI_T("596");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_Description_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.StatusRetentionTimeInDays */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x00737319, /* code */
+    MI_T("StatusRetentionTimeInDays"), /* name */
+    MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_quals), /* numQualifiers */
+    MI_UINT32, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, StatusRetentionTimeInDays), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Boolean MSFT_DSCMetaConfiguration_AgentId_Read_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_AgentId_Read_qual =
+{
+    MI_T("Read"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCMetaConfiguration_AgentId_Read_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_AgentId_Description_qual_value = MI_T("861");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_AgentId_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_AgentId_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_AgentId_quals[] =
+{
+    &MSFT_DSCMetaConfiguration_AgentId_Read_qual,
+    &MSFT_DSCMetaConfiguration_AgentId_Description_qual,
+};
+
+/* property MSFT_DSCMetaConfiguration.AgentId */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_AgentId_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x00616407, /* code */
+    MI_T("AgentId"), /* name */
+    MSFT_DSCMetaConfiguration_AgentId_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCMetaConfiguration_AgentId_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, AgentId), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_props[] =
 {
     &MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_prop,
@@ -2505,9 +3229,19 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_props[] =
     &MSFT_DSCMetaConfiguration_DownloadManagerCustomData_prop,
     &MSFT_DSCMetaConfiguration_RefreshFrequencyMins_prop,
     &MSFT_DSCMetaConfiguration_AllowModuleOverwrite_prop,
-    &MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers_prop,
     &MSFT_DSCMetaConfiguration_LocalConfigurationManagerState_prop,
+    &MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers_prop,
+    &MSFT_DSCMetaConfiguration_ResourceModuleManagers_prop,
+    &MSFT_DSCMetaConfiguration_ReportManagers_prop,
     &MSFT_DSCMetaConfiguration_PartialConfigurations_prop,
+    &MSFT_DSCMetaConfiguration_ActionAfterReboot_prop,
+    &MSFT_DSCMetaConfiguration_DebugMode_prop,
+    &MSFT_DSCMetaConfiguration_LCMVersion_prop,
+    &MSFT_DSCMetaConfiguration_LCMCompatibleVersions_prop,
+    &MSFT_DSCMetaConfiguration_LCMState_prop,
+    &MSFT_DSCMetaConfiguration_LCMStateDetail_prop,
+    &MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_prop,
+    &MSFT_DSCMetaConfiguration_AgentId_prop,
 };
 
 static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ClassVersion_qual_value = MI_T("1.0.0");
@@ -2520,9 +3254,20 @@ static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_ClassVersion_qual =
     &MSFT_DSCMetaConfiguration_ClassVersion_qual_value
 };
 
+static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_Description_qual_value = MI_T("350");
+
+static MI_CONST MI_Qualifier MSFT_DSCMetaConfiguration_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCMetaConfiguration_Description_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_quals[] =
 {
     &MSFT_DSCMetaConfiguration_ClassVersion_qual,
+    &MSFT_DSCMetaConfiguration_Description_qual,
 };
 
 /* class MSFT_DSCMetaConfiguration */
@@ -2940,6 +3685,16 @@ static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_GetConfigurat
     offsetof(MSFT_DSCLocalConfigurationManager_GetConfiguration, configurationData), /* offset */
 };
 
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Stream_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Stream_qual =
+{
+    MI_T("Stream"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Stream_qual_value
+};
+
 static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_EmbeddedInstance_qual_value = MI_T("OMI_BaseResource");
 
 static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_EmbeddedInstance_qual =
@@ -2962,6 +3717,7 @@ static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetConfiguration_
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_quals[] =
 {
+    &MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Stream_qual,
     &MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_EmbeddedInstance_qual,
     &MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_Out_qual,
 };
@@ -2969,7 +3725,7 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_GetConf
 /* parameter MSFT_DSCLocalConfigurationManager.GetConfiguration(): configurations */
 static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_param =
 {
-    MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
+    MI_FLAG_PARAMETER|MI_FLAG_OUT|MI_FLAG_STREAM, /* flags */
     0x0063730E, /* code */
     MI_T("configurations"), /* name */
     MSFT_DSCLocalConfigurationManager_GetConfiguration_configurations_quals, /* qualifiers */
@@ -2977,7 +3733,7 @@ static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_GetConfigurat
     MI_INSTANCEA, /* type */
     MI_T("OMI_BaseResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_DSCLocalConfigurationManager_GetConfiguration, configurations), /* offset */
+    0xFFFFFFFF, /* offset */
 };
 
 static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_GetConfiguration_MIReturn_Static_qual_value = 1;
@@ -3743,7 +4499,7 @@ static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformRequiredCo
     &MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_Description_qual_value = MI_T("857");
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_Description_qual_value = MI_T("867");
 
 static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_Description_qual =
 {
@@ -3798,7 +4554,7 @@ static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformRequiredCo
     &MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_MIReturn_Description_qual_value = MI_T("857");
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_MIReturn_Description_qual_value = MI_T("867");
 
 static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_MIReturn_Description_qual =
 {
@@ -4076,6 +4832,8 @@ static MI_ClassDecl MI_CONST* MI_CONST classes[] =
     &OMI_BaseResource_rtti,
     &OMI_ConfigurationDownloadManager_rtti,
     &OMI_MetaConfigurationResource_rtti,
+    &OMI_ReportManager_rtti,
+    &OMI_ResourceModuleManager_rtti,
 };
 
 MI_SchemaDecl schemaDecl =

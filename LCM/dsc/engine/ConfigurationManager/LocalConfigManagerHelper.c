@@ -37,6 +37,7 @@
 #include "Resources_LCM.h"
 #include "common.h"
 #include "MSFT_WebDownloadManager.h"
+#include "RegistrationManager.h"
 
 #if defined(_MSC_VER)
 #include "Win32_LocalConfigManagerHelper.h"
@@ -59,7 +60,20 @@ MI_Char* overWroteUserSpecifiedConfModeFreqMins = NULL;
 MI_Boolean MetaMofCorrupted = MI_FALSE;
 volatile MI_Char* g_inializingOperationMethodName = NULL;
 volatile ptrdiff_t g_InitializationState = NOT_INITIALIZED;
+void * g_registrationManager = NULL;
+MI_Boolean g_bNotFirstTimeReport = MI_FALSE;
+LCMProviderContext g_baselcmContext = {0};
+LCMProviderContext * g_lcmContext = &g_baselcmContext;
 
+MI_Result ReportStatusToServer(
+        _In_ LCMProviderContext *lcmContext,
+        _In_opt_z_ const MI_Char * errorMessage,
+        _In_opt_z_ const MI_Char *errorSource,
+        _In_opt_z_ const MI_Char *resourceId,
+        _In_ MI_Uint32 errorCode,
+        _In_ MI_Boolean bLastReport,
+        _In_ MI_Uint32 isStatusReport,
+        _In_opt_ MI_Instance* instanceMIError);
 
 ExpandedSystemPath g_ExpandedSystemPath[] =
 {
@@ -346,6 +360,9 @@ MI_Result InitHandler(
     InitLocTable();
 
     SetJobDeviceName();
+
+    RegistrationManager_New((RegistrationManager**)&(g_registrationManager), cimErrorDetails);
+
     Atomic_Swap(&g_InitializationState, INITIALIZED);
     g_inializingOperationMethodName = NULL;
     return MI_RESULT_OK;
@@ -564,6 +581,12 @@ MI_Result UnInitHandler(
         return GetCimWin32Error(error, cimErrorDetails, ID_LCMHELPER_ETWUNREGISTREATION_FAILED);
     }
 
+    if (g_registrationManager)
+    {
+        RegistrationManager_Destroy((RegistrationManager*)g_registrationManager);
+        g_registrationManager = NULL;
+    }
+
     Atomic_Swap(&g_InitializationState, NOT_INITIALIZED);
     return MI_RESULT_OK;
 }
@@ -582,13 +605,12 @@ MI_Result CallTestConfiguration(
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,0,0,lcmContext.executionMode);
 
-        SetLCMStatusBusy();
     *testStatus = MI_FALSE;
 
     //If the current configuration file is not found, function ends with a corresponding error message
     if (File_ExistT(GetCurrentConfigFileName()) == -1)
     {
-                SetLCMStatusReady();
+        SetLCMStatusReady();
         return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
     }
 
@@ -597,13 +619,13 @@ MI_Result CallTestConfiguration(
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);    
     if (result != MI_RESULT_OK)
     {
-                SetLCMStatusReady();
+        SetLCMStatusReady();
         return result;
     }
     
     if (moduleManager == NULL || moduleManager->ft == NULL)
     {
-                SetLCMStatusReady();
+        SetLCMStatusReady();
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails,ID_MODMAN_MODMAN_NULLPARAM);   
     }
 
@@ -633,8 +655,6 @@ MI_Result CallTestConfiguration(
         LCM_BuildMessage(&lcmContext, ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FAIL, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);  
     }
 
-        SetLCMStatusReady();    
-
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -657,8 +677,6 @@ MI_Result CallGetConfiguration(
     BOOL fResult;
     ModuleManager *moduleManager = NULL;
 
-        SetLCMStatusBusy();     
-
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,0,lcmContext.executionMode);
 
@@ -673,7 +691,7 @@ MI_Result CallGetConfiguration(
     result = ValidateConfigurationDirectory(cimErrorDetails);
     if (result != MI_RESULT_OK)
     {
-                SetLCMStatusReady();
+        SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
 
@@ -685,7 +703,7 @@ MI_Result CallGetConfiguration(
         fResult = File_RemoveT(GetGetConfigFileName());
         if (fResult || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
-                        SetLCMStatusReady();
+            SetLCMStatusReady();
             return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_GETFILEBEFORE_FAILED);
         } 
     }
@@ -694,7 +712,7 @@ MI_Result CallGetConfiguration(
 
     if (result != MI_RESULT_OK )
     {
-                SetLCMStatusReady();
+        SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
 
@@ -704,7 +722,7 @@ MI_Result CallGetConfiguration(
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
     if (result != MI_RESULT_OK)
     {
-                SetLCMStatusReady();
+        SetLCMStatusReady();
         return result;
     }
 
@@ -712,10 +730,10 @@ MI_Result CallGetConfiguration(
     if (result != MI_RESULT_OK)
     {
         moduleManager->ft->Close(moduleManager, NULL);
-                SetLCMStatusReady();
+        SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
-
+        
         return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_LOAD_GETFILE_FAILED);
     }
 
@@ -735,9 +753,9 @@ MI_Result CallGetConfiguration(
     // Check if at least 1 resource was specified in the instance document
     if (getInstances.size == 0 )
     {
-                MI_Instance_Delete(documentIns);
+        MI_Instance_Delete(documentIns);
         moduleManager->ft->Close(moduleManager, NULL);
-                SetLCMStatusReady();
+        SetLCMStatusReady();
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_LCMHELPER_NORESOURCESPECIFIED);
     }
 
@@ -745,8 +763,8 @@ MI_Result CallGetConfiguration(
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     result = GetConfiguration(&lcmContext, 0, &getInstances, moduleManager, documentIns, &getResultInstances, cimErrorDetails);
-
-        MI_Instance_Delete(documentIns);
+    
+    MI_Instance_Delete(documentIns);
 
     moduleManager->ft->Close(moduleManager, NULL);
 
@@ -770,8 +788,6 @@ MI_Result CallGetConfiguration(
     outInstances->data = getResultInstances.data;
     outInstances->size = getResultInstances.size;
 
-        SetLCMStatusReady();
-        
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -791,7 +807,6 @@ MI_Result CallSetConfiguration(
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,dwFlags,lcmContext.executionMode);
 
-        SetLCMStatusBusy();
 
     lcmContext.executionMode = (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE);
     lcmContext.context = (void*)context;
@@ -803,8 +818,6 @@ MI_Result CallSetConfiguration(
     SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_SET,&lcmContext);
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
     r =  SetConfiguration(ConfigData, dataSize, force, &lcmContext, dwFlags, cimErrorDetails);
-
-        SetLCMStatusReady();
 
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
@@ -824,8 +837,6 @@ MI_Result CallRestoreConfiguration(
 
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,0,dwFlags,lcmContext.executionMode);
-
-        SetLCMStatusBusy();     
 
     //If the previous configuration file does not exist, output a corresponding error message and return
     if (File_ExistT(GetPreviousConfigFileName())== -1)
@@ -854,8 +865,6 @@ MI_Result CallRestoreConfiguration(
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
     r =  SetConfiguration(PreviousConfigValue.data + bufferIndex, PreviousConfigValue.size - bufferIndex,MI_FALSE,&lcmContext, dwFlags, cimErrorDetails);
 
-        SetLCMStatusReady();
-        
         //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -876,8 +885,6 @@ MI_Result CallConsistencyEngine(
     MI_Value configModeValue;
         
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,0,0,lcmContext.executionMode);
-
-        SetLCMStatusBusy();
 
     if (cimErrorDetails == NULL)
     {        
@@ -996,8 +1003,6 @@ MI_Result CallConsistencyEngine(
     LCM_BuildMessage(&lcmContext, ID_LCM_WRITEMESSAGE_ENDCONSISTENCY, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);  
     MSFT_DSCMetaConfiguration_Delete((MSFT_DSCMetaConfiguration *)metaConfigInstance);
     moduleManager->ft->Close(moduleManager, NULL);
-
-        SetLCMStatusReady();
 
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
@@ -1855,7 +1860,7 @@ MI_Result SetConfiguration(
     else
     {
         //If there's a partial configuration in the metaconfig, do not save as pending, save in data store instead.
-        if (ShouldUsePartialConfigurations(metaConfigInstance, MI_FALSE)) //Don't need to check if there are files in the partial config directory
+        if (ShouldUsePartialConfigurations((MI_Instance*)metaConfigInstance, MI_FALSE)) //Don't need to check if there are files in the partial config directory
         {
             //If it isn't a publishonly command, then this is not supported. Throw an error
             if (!(dwFlags & LCM_SETFLAGS_SAVETOPENDINGONLY))
@@ -2072,15 +2077,23 @@ MI_Result ApplyMetaConfig(
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result miResult;
-
+        
     if (cimErrorDetails == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
+    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
 
     miResult = ApplyConfig(lcmContext, GetMetaConfigTmpFileName(), moduleManager, flags, resultStatus, cimErrorDetails);
+    EH_CheckResult(miResult);
 
+    miResult = RegisterWithPullServers(lcmContext, (MI_Instance*) g_metaConfig, cimErrorDetails);
+    EH_CheckResult(miResult);
+
+    miResult = RegisterWithReportingServers(lcmContext, (MI_Instance*)g_metaConfig, cimErrorDetails);
+    EH_CheckResult(miResult);
+
+EH_UNWIND:
     return miResult;
 }
 
@@ -3316,6 +3329,13 @@ void LCM_WriteError(
 {
     MI_Result result = MI_RESULT_OK;
     MI_Boolean flag = FALSE;
+    MI_Uint32 errorCategory;
+    MI_Uint32 errorCode;
+    MI_ConstStringPtr errorMessage;
+    MI_ConstStringPtr messageId;
+    MI_ConstStringPtr errorType;
+
+    ExtractCimErrorFields(instanceMIError, &result, &errorCategory, &errorCode, &errorMessage, &messageId, &errorType);
 
     if (lcmContext != NULL && instanceMIError != NULL)
     {
@@ -3327,6 +3347,11 @@ void LCM_WriteError(
             {
                 // Ignore the failure, this doesn't impact the functionality.
             }
+        }
+
+        if (lcmContext->bReportErrorsToServer)
+        {
+            ReportStatusToServer(lcmContext, errorMessage, MI_T("LCM_WriteError"), MI_T("LCM_WriteError"), errorCode, MI_FALSE, /*isStatusReport*/ 0, instanceMIError);
         }
     }
 }
@@ -3537,7 +3562,7 @@ MI_Result RunConsistencyEngine(
     {
         // update compliance result.
         complianceStatus = MI_TRUE;
-        r = UpdateCurrentStatus(&complianceStatus, NULL, NULL, cimErrorDetails);
+        r = UpdateCurrentStatus(&complianceStatus, NULL, NULL, NULL, cimErrorDetails);
         DSC_EventWriteLCMConsistencyEngineRunSuccess();
     }
     else
@@ -3546,7 +3571,7 @@ MI_Result RunConsistencyEngine(
         // update compliance result.
         complianceStatus = MI_FALSE;
         // Consistency Engine already failed, ignore the error from updating current status. This change is needed for NITS fault injection.
-        UpdateCurrentStatus(&complianceStatus, NULL, NULL, &tempCimErrorDetails);
+        UpdateCurrentStatus(&complianceStatus, NULL, NULL, NULL, &tempCimErrorDetails);
         MI_Instance_Delete(tempCimErrorDetails);
     }
 
@@ -3689,32 +3714,951 @@ MI_Result DoPullServerRefresh(
 {
     MI_Result result = MI_RESULT_OK;
     
-    SetLCMStatusBusy();     
-    
     LCMProviderContext lcmContext;
     result = LCM_Pull_Execute(&lcmContext, metaConfigInstance, cimErrorDetails);
     
-    SetLCMStatusReady();
+    return result;
+}
+
+MI_Result GetConfigurationDownloadManagerInformation(_In_ LCMProviderContext* lcmContext, _In_ MI_Instance *metaInstance, _Out_opt_ MI_Value* v, _Out_opt_ MI_Uint32* flags, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    if (cimErrorDetails == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+
+    MI_Result result = DSC_MI_Instance_GetElement(metaInstance, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, v, NULL, flags, NULL);
+    if (result != MI_RESULT_OK)
+    {
+        return result = GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, OMI_CONFIGURATIONDOWNLOADMANAGER_CLASSNAME);
+    }
+    return result;
+}
+
+MI_Result GetResourceModuleManagerInformation(_In_ LCMProviderContext* lcmContext, _In_ MI_Instance *metaInstance, _Out_opt_ MI_Value* v, _Out_opt_ MI_Uint32* flags, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    if (cimErrorDetails == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+
+    MI_Result result = DSC_MI_Instance_GetElement(metaInstance, MSFT_DSCMetaConfiguration_ResourceModuleManagers, v, NULL, flags, NULL);
+    if (result != MI_RESULT_OK)
+    {
+        return result = GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_DSCMetaConfiguration_ResourceModuleManagers, OMI_RESOURCEMODULEMANAGER_CLASSNAME);
+    }
+    return result;
+}
+
+MI_Result GetReportManagerInformation(_In_ LCMProviderContext* lcmContext, _In_ MI_Instance *metaInstance, _Out_opt_ MI_Value* v, _Out_opt_ MI_Uint32* flags, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    if (cimErrorDetails == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+
+    MI_Result result = DSC_MI_Instance_GetElement(metaInstance, MSFT_DSCMetaConfiguration_ReportManagers, v, NULL, flags, NULL);
+    if (result != MI_RESULT_OK)
+    {
+        return result = GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_DSCMetaConfiguration_ReportManagers, OMI_REPORTMANAGER_CLASSNAME);
+    }
+    return result;
+}
+
+/*Returns registration information for the ConfigurationManager, resource manager and report manager*/
+MI_Result GetRegistrationInformation(_In_ LCMProviderContext* lcmContext, _In_ MI_Instance *metaInstance, _In_ MI_Uint32 isPull, 
+    _Inout_ MI_InstanceA *configurationDownloadManagerInstances, _Inout_ MI_InstanceA *resourceModuleManagerInstances, _Inout_ MI_InstanceA *reportManagerInstances,    
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Value value;
+    MI_Result result;
+    MI_Uint32 flags;
+
+    memset(configurationDownloadManagerInstances, 0, sizeof(MI_InstanceA));
+    memset(resourceModuleManagerInstances, 0, sizeof(MI_InstanceA));
+    memset(reportManagerInstances, 0, sizeof(MI_InstanceA));
+    
+    if (cimErrorDetails == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *cimErrorDetails = NULL;
+
+    if (isPull)
+    {
+        result = GetConfigurationDownloadManagerInformation(lcmContext, metaInstance, &value, &flags, cimErrorDetails);
+        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+        {
+            configurationDownloadManagerInstances->data = value.instancea.data;
+            configurationDownloadManagerInstances->size = value.instancea.size;
+        }
+
+        result = GetResourceModuleManagerInformation(lcmContext, metaInstance, &value, &flags, cimErrorDetails);
+        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+        {
+            resourceModuleManagerInstances->data = value.instancea.data;
+            resourceModuleManagerInstances->size = value.instancea.size;
+        }
+    }
+    else
+    {
+        result = GetReportManagerInformation(lcmContext, metaInstance, &value, &flags, cimErrorDetails);
+        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+        {
+            reportManagerInstances->data = value.instancea.data;
+            reportManagerInstances->size = value.instancea.size;
+        }
+    }
+    
+    return result;
+}
+
+MI_Result LCM_Do_Register(
+    _In_ MI_Instance *metaConfigInstance,
+    _In_ MI_Instance *managerInstance,
+    _In_z_ MI_Char* agentId,
+    _In_z_ MI_Char *thumbprint,
+    _In_ MI_Instance *registrationPayload,
+    _In_ MI_StringA *configurationNames,
+    _In_  MI_Uint32 typeOfManagerInstance,
+    _Outptr_result_maybenull_z_  MI_Char** resultStatus,
+    _Out_ MI_Uint32* getActionStatusCode,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Result result = MI_RESULT_OK;
+
+    if (cimErrorDetails)
+    {
+        *cimErrorDetails = NULL;
+    }
+
+    result = Do_Register(metaConfigInstance, managerInstance, agentId, thumbprint, registrationPayload, configurationNames, 
+        typeOfManagerInstance, resultStatus, getActionStatusCode, cimErrorDetails);
+    if (result != MI_RESULT_OK)
+    {
+        return result;
+    }
+
+    if (*resultStatus == NULL)
+    {
+        return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_REGISTER_NORESULTSTATUS);
+    }
+
+    //Validate valid status codes
+    if (!(Tcscasecmp(*resultStatus, REGISTER_STATUSCODE_CREATED) == 0))
+    {
+        //Unknown status code return error.
+        return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_REGISTER_UNEXPECTEDRESULTSTATUS);
+    }
 
     return result;
 }
+
+MI_Result RegisterWithServers(_In_ LCMProviderContext *lcmContext,
+    _In_ MI_Instance *metaConfigInstance,
+    _In_ MI_Uint32 isPull,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Result result = MI_RESULT_OK;    
+    MI_InstanceA configurationDownloadManagerInstances = { 0 };
+    MI_InstanceA resourceModuleManagerInstances = { 0 };
+    MI_InstanceA reportManagerInstances = { 0 };
+    MI_Boolean shouldUseV1Protocol = MI_FALSE;
+    
+    if (cimErrorDetails)
+    {
+        *cimErrorDetails = NULL;
+    }    
+
+    ShouldUseV1Protocol(&shouldUseV1Protocol);
+    if (shouldUseV1Protocol == MI_FALSE)
+    {
+        result = GetRegistrationInformation(lcmContext, metaConfigInstance, isPull,
+            &configurationDownloadManagerInstances, &resourceModuleManagerInstances, &reportManagerInstances,
+            cimErrorDetails);
+        EH_CheckResult(result);
+
+        if (isPull)
+        {
+            if (configurationDownloadManagerInstances.data != NULL)
+            {
+                result = DoRegistration(lcmContext, &configurationDownloadManagerInstances, /*typeOfDownloadManagerInstance */ 1, cimErrorDetails);
+                EH_CheckResult(result);                
+                result = SetDownloadManagerInstancesInMetaConfig(lcmContext, configurationDownloadManagerInstances, /*typeOfDownloadManagerInstance */ 1, cimErrorDetails);
+                EH_CheckResult(result);
+            }
+            if (resourceModuleManagerInstances.data != NULL)
+            {
+                result = DoRegistration(lcmContext, &resourceModuleManagerInstances, /*typeOfDownloadManagerInstance */ 2, cimErrorDetails);
+                EH_CheckResult(result);
+                result = SetDownloadManagerInstancesInMetaConfig(lcmContext, resourceModuleManagerInstances, /*typeOfDownloadManagerInstance */ 2, cimErrorDetails);
+                EH_CheckResult(result);                
+            }
+        }
+        else
+        {
+            if (reportManagerInstances.data != NULL)
+            {
+                result = DoRegistration(lcmContext, &reportManagerInstances, /*typeOfDownloadManagerInstance */ 3, cimErrorDetails);
+                EH_CheckResult(result);                
+                result = SetDownloadManagerInstancesInMetaConfig(lcmContext, reportManagerInstances, /*typeOfDownloadManagerInstance */ 3, cimErrorDetails);
+                EH_CheckResult(result);
+            }
+        }
+        // Update the metaconfig
+        result = SetMetaConfig((MI_Instance*)g_metaConfig, cimErrorDetails);
+        EH_CheckResult(result);
+    }
+    else
+    {
+//        DSC_EventWriteLCMProtocolVersion1InUse(lcmContext->configurationDetails.jobGuidString);
+    }
+
+
+EH_UNWIND:   
+    return result;
+}
+
+MI_Result DoRegistration(
+    _In_ LCMProviderContext* lcmContext,
+    _Inout_ MI_InstanceA *managerInstances,    
+    _In_ MI_Uint32 typeOfDownloadManagerInstance,    
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)    
+{
+    MI_Uint32 i = 0;
+    MI_Result result = MI_RESULT_OK;
+    RegistrationRequest *registrationRequest = NULL;
+    RegistrationManager *registrationManager = (RegistrationManager*)g_registrationManager;
+    MI_Value value;
+    MI_Uint32 flags = 0;    
+
+    if (cimErrorDetails)
+    {
+        *cimErrorDetails = NULL;
+    }
+    for (i = 0; i < managerInstances->size; i++)
+    {
+        registrationRequest = (RegistrationRequest*)DSC_malloc(sizeof(RegistrationRequest), NitsHere());
+        if (registrationRequest == NULL)
+        {
+            EH_Fail_(GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR));
+        }
+
+        registrationRequest->registrationData = managerInstances->data[i];
+        registrationRequest->typeOfManagerInstance = typeOfDownloadManagerInstance;
+
+        if (typeOfDownloadManagerInstance == 1)
+        {
+            result = DSC_MI_Instance_GetElement(managerInstances->data[i], MSFT_ConfigurationNames_Name, &value, NULL, &flags, NULL);
+            if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+            {
+                registrationRequest->configurationNames = value.stringa;
+            }
+        }
+
+        result = RegistrationManager_RunRequest(registrationManager, registrationRequest, cimErrorDetails);
+        EH_CheckResult(result);
+
+        result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
+        EH_CheckResult(result);
+
+        // TODO, insivara : Write events
+        result = UpdateMetaConfigWithAgentId(registrationManager->agentId, (MI_Instance*)g_metaConfig);
+        EH_CheckResult(result);    
+
+        // In a loop the variable will be reallocated and we lose the reference to the original memory.
+        if (registrationRequest != NULL)
+        {
+            DSC_free(registrationRequest);
+            registrationRequest = NULL;
+        }
+    }
+
+EH_UNWIND:
+    if (registrationRequest != NULL)
+    {
+        DSC_free(registrationRequest);
+    }
+    return result;
+}
+
+// Update DownloadManagerInstances in MetaConfig (These downloadmanager instances will not have the RegistrationKey if Registration has succeeded)
+MI_Result SetDownloadManagerInstancesInMetaConfig(
+    _In_ LCMProviderContext* lcmContext,
+    _In_ MI_InstanceA downloadManagerInstances,
+    _In_ MI_Uint32 typeOfDownloadManagerInstance,    
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Value value;
+    MI_Result result = MI_RESULT_OK;
+
+    if (cimErrorDetails)
+    {
+        *cimErrorDetails = NULL;
+    }
+
+    if (typeOfDownloadManagerInstance == 1)
+    {
+        value.instancea = downloadManagerInstances;
+        result = MI_Instance_SetElement((MI_Instance*)g_metaConfig, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, &value, MI_INSTANCEA, 0);
+        if (result != MI_RESULT_OK)
+        {
+            EH_Fail_(GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_RegistrationKey_Name, OMI_CONFIGURATIONDOWNLOADMANAGER_CLASSNAME));
+        }
+    }
+    else if (typeOfDownloadManagerInstance == 2)
+    {
+        value.instancea = downloadManagerInstances;
+        result = MI_Instance_SetElement((MI_Instance*)g_metaConfig, MSFT_DSCMetaConfiguration_ResourceModuleManagers, &value, MI_INSTANCEA, 0);
+        if (result != MI_RESULT_OK)
+        {
+            EH_Fail_(GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_RegistrationKey_Name, OMI_RESOURCEMODULEMANAGER_CLASSNAME));
+        }
+    }
+    else if (typeOfDownloadManagerInstance == 3)
+    {
+        value.instancea = downloadManagerInstances;
+        result = MI_Instance_SetElement((MI_Instance*)g_metaConfig, MSFT_DSCMetaConfiguration_ReportManagers, &value, MI_INSTANCEA, 0);
+        if (result != MI_RESULT_OK)
+        {
+            EH_Fail_(GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_RegistrationKey_Name, OMI_REPORTMANAGER_CLASSNAME));
+        }
+    }
+EH_UNWIND:
+        return result;
+}
+
+MI_Result RegisterWithPullServers(_In_ LCMProviderContext *lcmContext,
+    _In_ MI_Instance *metaConfigInstance,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    if (cimErrorDetails)
+    {
+        *cimErrorDetails = NULL;
+    }
+    return RegisterWithServers(lcmContext, metaConfigInstance, 1 /*IsPull*/, cimErrorDetails);
+}
+
+MI_Result RegisterWithReportingServers(_In_ LCMProviderContext *lcmContext,
+    _In_ MI_Instance *metaConfigInstance,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    if (cimErrorDetails)
+    {
+        *cimErrorDetails = NULL;
+    }
+    return RegisterWithServers(lcmContext, metaConfigInstance, 0 /*IsPull*/, cimErrorDetails);
+}
+
+MI_Result DeleteRegistrationKeyFromManagerInstance(_In_ LCMProviderContext *lcmContext,
+    _Inout_ MI_Instance **managerInstance,
+    MI_Uint32 typeOfDownloadManagerInstance,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Value registrationKeyValue;
+    MI_Uint32 flags;
+    MI_Char* downloadManagerClassName = NULL;
+
+    switch (typeOfDownloadManagerInstance)
+    {
+        case 1:
+            downloadManagerClassName = OMI_CONFIGURATIONDOWNLOADMANAGER_CLASSNAME;
+            break;
+        case 2:
+            downloadManagerClassName = OMI_RESOURCEMODULEMANAGER_CLASSNAME;
+            break;
+        case 3:
+            downloadManagerClassName = OMI_REPORTMANAGER_CLASSNAME;
+        default:
+            break;
+    }
+
+    if (cimErrorDetails)
+    {
+        *cimErrorDetails = NULL;
+    }
+
+    result = DSC_MI_Instance_GetElement(*managerInstance, MSFT_RegistrationKey_Name, &registrationKeyValue, NULL, &flags, NULL);
+    if (result != MI_RESULT_OK)
+    {
+        EH_Fail_(GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_RegistrationKey_Name, downloadManagerClassName));
+    }
+
+    registrationKeyValue.string = MI_T("");
+
+    result = MI_Instance_SetElement(*managerInstance, MSFT_RegistrationKey_Name, &registrationKeyValue, MI_STRING, 0);
+    if (result != MI_RESULT_OK)
+    {
+        EH_Fail_(GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_RegistrationKey_Name, downloadManagerClassName));
+    }
+
+EH_UNWIND:
+        return result;
+}
+
+
+void ExtractCimErrorFields(
+    _In_opt_ MI_Instance* errorDetails,
+    _Inout_ MI_Result* miResult,
+    _Out_ MI_Uint32* errorCategory,
+    _Out_ MI_Uint32* errorCode,
+    _Out_ MI_ConstStringPtr* errorMessage,
+    _Out_ MI_ConstStringPtr* messageId,
+    _Out_ MI_ConstStringPtr* errorType)
+{
+    /* Extract properties from the error object so we can log them.
+    * These calls are best-effort - ignore failures to find/match things. */
+    MI_Value value;
+    MI_Type type;
+    MI_Uint32 flags;
+    MI_Result tempResult;
+
+    MI_ConstStringPtr emptyString = MI_T("");
+
+    *errorCategory = MI_ERRORCATEGORY_NOT_SPECIFIED;
+    *errorCode = MI_RESULT_FAILED;
+    *errorMessage = emptyString;
+    *messageId = emptyString;
+    *errorType = emptyString;
+
+    tempResult = DSC_MI_Instance_GetElement(errorDetails, MI_T("CIMStatusCode"), &value, &type, &flags, NULL);
+    if (tempResult == MI_RESULT_OK &&
+        type == MI_UINT16 &&
+        (flags & MI_FLAG_NULL) == 0)
+    {
+        *miResult = value.uint16;
+    }
+
+    tempResult = DSC_MI_Instance_GetElement(errorDetails, MI_T("error_Category"), &value, &type, &flags, NULL);
+    if (tempResult == MI_RESULT_OK &&
+        type == MI_UINT16 &&
+        (flags & MI_FLAG_NULL) == 0)
+    {
+        *errorCategory = value.uint16;
+    }
+
+    tempResult = DSC_MI_Instance_GetElement(errorDetails, MI_T("error_Code"), &value, &type, &flags, NULL);
+    if (tempResult == MI_RESULT_OK &&
+        type == MI_UINT32 &&
+        (flags & MI_FLAG_NULL) == 0)
+    {
+        *errorCode = value.uint32;
+    }
+
+    tempResult = DSC_MI_Instance_GetElement(errorDetails, MI_T("Message"), &value, &type, &flags, NULL);
+    if (tempResult == MI_RESULT_OK &&
+        type == MI_STRING &&
+        (flags & MI_FLAG_NULL) == 0)
+    {
+        *errorMessage = value.string;
+    }
+
+    tempResult = DSC_MI_Instance_GetElement(errorDetails, MI_T("MessageID"), &value, &type, &flags, NULL);
+    if (tempResult == MI_RESULT_OK &&
+        type == MI_STRING &&
+        (flags & MI_FLAG_NULL) == 0)
+    {
+        *messageId = value.string;
+    }
+
+    tempResult = DSC_MI_Instance_GetElement(errorDetails, MI_T("error_Type"), &value, &type, &flags, NULL);
+    if (tempResult == MI_RESULT_OK &&
+        type == MI_STRING &&
+        (flags & MI_FLAG_NULL) == 0)
+    {
+        *errorType = value.string;
+    }
+}
+
+
+MI_Result GetErrorForServer(
+    _In_ LCMProviderContext *lcmContext,
+    _In_ MI_Application *miApp,
+    _In_ MI_Instance* instanceMIError,
+    _In_opt_z_ const MI_Char * errorMessage,
+    _In_opt_z_ const MI_Char *errorSource,
+    _In_opt_z_ const MI_Char *resourceId,
+    _In_ MI_Uint32 errorCode,
+    _Outptr_result_maybenull_ MI_Instance **errorObject)
+{
+    MI_Value value;
+    MI_Value inValue;
+    MI_Uint32 flags;
+    MI_Boolean couldSetLocaleFromConfStatus = MI_FALSE;
+    const MI_Char *internalResourceId = REPORTING_DEFAULT_MESSAGE;
+    const MI_Char *internalErrorMessage = REPORTING_DEFAULT_MESSAGE;
+    const MI_Char *internalErrorSource = REPORTING_DEFAULT_MESSAGE;
+    //const MI_Char *internalLocal = REPORTING_DEFAULT_MESSAGE;
+    MI_Result r = MI_RESULT_OK;
+
+    r = DSC_MI_Application_NewInstance(miApp, REPORTING_ERRORCLASSNAME, NULL, errorObject);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+    // ErrorSource
+    if (errorSource != NULL)
+        internalErrorSource = errorSource;
+    value.string = (MI_Char*)internalErrorSource;
+    r = MI_Instance_AddElement(*errorObject, REPORTING_ERRORSOURCE, &value, MI_STRING, 0);
+    if (r != MI_RESULT_OK)
+    {
+        MI_Instance_Delete(*errorObject);
+        *errorObject = NULL;
+        return r;
+    }
+    // ResourceId
+    if (resourceId != NULL)
+        internalResourceId = resourceId;
+    value.string = (MI_Char*)internalResourceId;
+    r = MI_Instance_AddElement(*errorObject, REPORTING_RESOURCEID, &value, MI_STRING, 0);
+    if (r != MI_RESULT_OK)
+    {
+        MI_Instance_Delete(*errorObject);
+        *errorObject = NULL;
+        return r;
+    }
+    // ErrorCode
+    value.uint32 = errorCode;
+    r = MI_Instance_AddElement(*errorObject, REPORTING_ERRORCODE, &value, MI_UINT32, 0);
+    if (r != MI_RESULT_OK)
+    {
+        MI_Instance_Delete(*errorObject);
+        *errorObject = NULL;
+        return r;
+    }
+    // ErrorMessage
+    if (errorMessage != NULL)
+        internalErrorMessage = errorMessage;
+    value.string = (MI_Char*)internalErrorMessage;
+    r = MI_Instance_AddElement(*errorObject, REPORTING_ERRORMESSAGE, &value, MI_STRING, 0);
+    if (r != MI_RESULT_OK)
+    {
+        MI_Instance_Delete(*errorObject);
+        *errorObject = NULL;
+        return r;
+    }
+    // Locale
+/* TODO remove:
+    if (lcmContext->configurationStatus.size >= 1)
+    {
+        MSFT_DSCConfigurationStatus *configurationStatus = lcmContext->configurationStatus.data[0];
+        if (configurationStatus->Locale.exists)
+        {
+            couldSetLocaleFromConfStatus = MI_TRUE;
+            value.string = (MI_Char*)configurationStatus->Locale.value;
+            r = MI_Instance_AddElement(*errorObject, REPORTING_LOCALE, &value, MI_STRING, 0);
+            if (r != MI_RESULT_OK)
+            {
+                MI_Instance_Delete(*errorObject);
+                *errorObject = NULL;
+                return r;
+            }
+        }
+    }
+*/
+    //Set the default value of Locale if we could not find it from the ConfigurationStatus structure.
+    if (!couldSetLocaleFromConfStatus)
+    {
+        value.string = REPORTING_DEFAULT_MESSAGE;
+        r = MI_Instance_AddElement(*errorObject, REPORTING_LOCALE, &value, MI_STRING, 0);
+        if (r != MI_RESULT_OK)
+        {
+            MI_Instance_Delete(*errorObject);
+            *errorObject = NULL;
+            return r;
+        }
+    }
+    // Serialized Error
+    r = MI_Instance_GetElement(instanceMIError, REPORTING_SERIALIZEDERROR, &inValue, NULL, &flags, NULL);
+    if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+    {
+        value.string = inValue.string;
+        r = MI_Instance_AddElement(*errorObject, REPORTING_INTERNALERRORS, &value, MI_STRING, 0);
+        if (r != MI_RESULT_OK)
+        {
+            MI_Instance_Delete(*errorObject);
+            *errorObject = NULL;
+            return r;
+        }
+    }
+    return MI_RESULT_OK;
+}
+
+MI_Result GetStatusForServer(
+    _In_ LCMProviderContext *lcmContext,
+    _In_ MI_Application *miApp,
+    _Outptr_result_maybenull_ MI_Instance **statusObject)
+{
+    MI_Value value;
+    MI_Boolean couldSetLocaleFromConfStatus = MI_FALSE;
+    MI_Result r = MI_RESULT_OK;
+
+    r = DSC_MI_Application_NewInstance(miApp, REPORTING_STATUSCLASSNAME, NULL, statusObject);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+
+/* TODO remove:
+    if (lcmContext->configurationStatus.size >= 1)
+    {
+        MSFT_DSCConfigurationStatus *configurationStatus = lcmContext->configurationStatus.data[0];
+        // Locale
+        if (configurationStatus->Locale.exists)
+        {
+            couldSetLocaleFromConfStatus = MI_TRUE;
+            value.string = (MI_Char*)configurationStatus->Locale.value;
+            r = MI_Instance_AddElement(*statusObject, REPORTING_LOCALE, &value, MI_STRING, 0);
+            if (r != MI_RESULT_OK)
+            {
+                MI_Instance_Delete(*statusObject);
+                *statusObject = NULL;
+                return r;
+            }
+        }
+        // Number of resources
+        if (configurationStatus->NumberOfResources.exists)
+        {
+            value.uint32 = configurationStatus->NumberOfResources.value;
+            r = MI_Instance_AddElement(*statusObject, REPORTING_NUMBEROFRESOURCES, &value, MI_UINT32, 0);
+            if (r != MI_RESULT_OK)
+            {
+                MI_Instance_Delete(*statusObject);
+                *statusObject = NULL;
+                return r;
+            }
+        }
+        // Resources In Desired State
+        if (configurationStatus->ResourcesInDesiredState.exists && configurationStatus->ResourcesInDesiredState.value.size >= 1)
+        {
+            value.instancea.data = (MI_Instance**)configurationStatus->ResourcesInDesiredState.value.data;
+            value.instancea.size = configurationStatus->ResourcesInDesiredState.value.size;
+            r = MI_Instance_AddElement(*statusObject, REPORTING_RESOURCESINDESIREDSTATE, &value, MI_INSTANCEA, 0);
+            if (r != MI_RESULT_OK)
+            {
+                MI_Instance_Delete(*statusObject);
+                *statusObject = NULL;
+                return r;
+            }
+        }
+        // Resources Not In Desired State
+        if (configurationStatus->ResourcesNotInDesiredState.exists && configurationStatus->ResourcesNotInDesiredState.value.size >= 1)
+        {
+            value.instancea.data = (MI_Instance**)configurationStatus->ResourcesNotInDesiredState.value.data;
+            value.instancea.size = configurationStatus->ResourcesNotInDesiredState.value.size;
+            r = MI_Instance_AddElement(*statusObject, REPORTING_RESOURCESNOTINDESIREDSTATE, &value, MI_INSTANCEA, 0);
+            if (r != MI_RESULT_OK)
+            {
+                MI_Instance_Delete(*statusObject);
+                *statusObject = NULL;
+                return r;
+            }
+        }
+    }
+*/
+    //Set the default value of Locale if we could not find it from the ConfigurationStatus structure.
+    if (!couldSetLocaleFromConfStatus)
+    {
+        value.string = REPORTING_DEFAULT_MESSAGE;
+        r = MI_Instance_AddElement(*statusObject, REPORTING_LOCALE, &value, MI_STRING, 0);
+        if (r != MI_RESULT_OK)
+        {
+            MI_Instance_Delete(*statusObject);
+            *statusObject = NULL;
+            return r;
+        }
+    }
+
+    return MI_RESULT_OK;
+}
+
+MI_Result ReportStatusToServer(
+        _In_ LCMProviderContext *lcmContext,
+        _In_opt_z_ const MI_Char * errorMessage,
+        _In_opt_z_ const MI_Char *errorSource,
+        _In_opt_z_ const MI_Char *resourceId,
+        _In_ MI_Uint32 errorCode,
+        _In_ MI_Boolean bLastReport,
+        _In_ MI_Uint32 isStatusReport,
+        _In_opt_ MI_Instance* instanceMIError)
+{
+    MI_Application miApp = MI_APPLICATION_NULL;
+    MI_Instance *statusReport = NULL;
+    MI_Instance *errorObject = NULL;
+    MI_Instance *statusObject = NULL;
+    MI_Instance *extendedError = NULL;
+    MI_Uint32 getActionStatusCode = 0;
+    MI_Result r = MI_RESULT_OK;
+    MI_Value value;
+
+    if (g_metaConfig == NULL)
+    {
+        assert(1);
+        return MI_RESULT_FAILED;
+    }
+    r = DSC_MI_Application_Initialize(0, NULL, NULL, &miApp);
+        if (r != MI_RESULT_OK)
+        {
+                return r;
+        }
+    r = RegisterWithReportingServers(lcmContext, (MI_Instance*)g_metaConfig, &extendedError);
+    if (r != MI_RESULT_OK)
+    {
+        MI_Application_Close(&miApp);
+        return r;
+    }
+
+        r = DSC_MI_Application_NewInstance(&miApp, REPORTING_CLASS, NULL, &statusReport);
+        if (r != MI_RESULT_OK)
+        {
+                MI_Application_Close(&miApp);
+                return r;
+        }
+        if (instanceMIError && (isStatusReport == 0 ))
+        {
+                // Set error object
+                r = GetErrorForServer(lcmContext, &miApp, instanceMIError, errorMessage, errorSource, resourceId, errorCode, &errorObject);
+                if (r != MI_RESULT_OK)
+                {
+                        MI_Instance_Delete(statusReport);
+                        MI_Application_Close(&miApp);
+                        return r;
+                }
+                if (errorObject != NULL)
+                {
+                        value.instancea.size = 1;
+                        value.instancea.data = &errorObject;
+                        r = MI_Instance_AddElement(statusReport, REPORTING_ERRORREPORTNAME, &value, MI_INSTANCEA, 0);
+                }
+        }
+        else if (isStatusReport == 1)
+        {
+                // Set status object
+                r = GetStatusForServer(lcmContext, &miApp, &statusObject);
+                if (r != MI_RESULT_OK)
+                {
+                        MI_Instance_Delete(statusReport);
+                        MI_Application_Close(&miApp);
+                        return r;
+                }
+                if (statusObject != NULL)
+                {
+                        value.instancea.size = 1;
+                        value.instancea.data = &statusObject;
+                        r = MI_Instance_AddElement(statusReport, REPORTING_STATUSREPORTNAME, &value, MI_INSTANCEA, 0);
+                }
+        }
+        
+        
+        
+        if (!g_bNotFirstTimeReport)
+        {
+            // Set Report Format version
+            value.string = REPORTFORMAT_VERSION_1_0;
+            r = MI_Instance_AddElement(statusReport, REPORTING_REPORTFORMATVERSION, &value, MI_STRING, 0);
+            if (r != MI_RESULT_OK)
+            {
+                MI_Application_Close(&miApp);
+                MI_Instance_Delete(statusReport);
+                MI_Instance_Delete(errorObject);
+                MI_Instance_Delete(statusObject);
+                return r;
+            }
+        }
+
+        // Set EndTime
+        if (bLastReport)
+        {
+            PAL_Datetime time;
+            // fill start datetime property of configuration status
+            CPU_GetLocalTimestamp(&time);
+            value.datetime = PalDatetimeToMiDatetime(time);
+            r = MI_Instance_AddElement(statusReport, REPORTING_ENDTIME, &value, MI_DATETIME, 0);
+            if (r != MI_RESULT_OK)
+            {
+                MI_Application_Close(&miApp);
+                MI_Instance_Delete(statusReport);
+                MI_Instance_Delete(errorObject);
+                MI_Instance_Delete(statusObject);
+                return r;
+            }
+        }
+        
+    // Set JobId
+    value.string = g_ConfigurationDetails.jobGuidString;
+    r = MI_Instance_AddElement(statusReport, REPORTING_JOBID, &value, MI_STRING, 0);
+    if (r != MI_RESULT_OK)
+    {
+        MI_Application_Close(&miApp);
+        MI_Instance_Delete(statusReport);
+        MI_Instance_Delete(errorObject);
+        MI_Instance_Delete(statusObject);
+        return r;
+    }
+    // Set OperationType
+    // Set Configuration version
+    // Set Start Time
+    // Set End Time
+    // Set NodeName
+    // Set IpAddress
+    // Set LCM Version
+    // Send these values from ConfigurationStatus
+
+/*
+    {
+        if (lcmContext->configurationStatus.size >= 1)
+        {
+            MSFT_DSCConfigurationStatus *configurationStatus = lcmContext->configurationStatus.data[0];
+            if (!lcmContext->bNotFirstTimeReport)
+            {
+                // Set Start Time
+                if (configurationStatus->StartDate.exists)
+                {
+                    value.datetime = configurationStatus->StartDate.value;
+                    r = MI_Instance_AddElement(statusReport, REPORTING_STARTTIME, &value, MI_DATETIME, 0);
+                    if (r != MI_RESULT_OK)
+                    {
+                        MI_Application_Close(&miApp);
+                        MI_Instance_Delete(statusReport);
+                        MI_Instance_Delete(errorObject);
+                        MI_Instance_Delete(statusObject);
+                        return r;
+                    }
+                }
+
+                // Set OperationType
+                if (configurationStatus->Type.exists)
+                {
+                    value.string = (MI_Char*)configurationStatus->Type.value;
+                    r = MI_Instance_AddElement(statusReport, REPORTING_OPERATIONTYPE, &value, MI_STRING, 0);
+                    if (r != MI_RESULT_OK)
+                    {
+                        MI_Application_Close(&miApp);
+                        MI_Instance_Delete(statusReport);
+                        MI_Instance_Delete(errorObject);
+                        MI_Instance_Delete(statusObject);
+                        return r;
+                    }
+                }
+                // Set NodeName
+                if (configurationStatus->HostName.exists)
+                {
+                    value.string = (MI_Char*)configurationStatus->HostName.value;
+                    r = MI_Instance_AddElement(statusReport, REPORTING_NODENAME, &value, MI_STRING, 0);
+                    if (r != MI_RESULT_OK)
+                    {
+                        MI_Application_Close(&miApp);
+                        MI_Instance_Delete(statusReport);
+                        MI_Instance_Delete(errorObject);
+                        MI_Instance_Delete(statusObject);
+                        return r;
+                    }
+                }
+                // Set Ipadress
+                if (configurationStatus->IPV4Addresses.exists || configurationStatus->IPV6Addresses.exists)
+                {
+                    r = SetIpAddress(configurationStatus, statusReport);
+                    if (r != MI_RESULT_OK)
+                    {
+                        MI_Application_Close(&miApp);
+                        MI_Instance_Delete(statusReport);
+                        MI_Instance_Delete(errorObject);
+                        MI_Instance_Delete(statusObject);
+                        return r;
+
+                    }
+                }
+                // Set LCM version
+                if (configurationStatus->LCMVersion.exists)
+                {
+                    value.string = (MI_Char*)configurationStatus->LCMVersion.value;
+                    r = MI_Instance_AddElement(statusReport, REPORTING_LCMVERSION, &value, MI_STRING, 0);
+                    if (r != MI_RESULT_OK)
+                    {
+                        MI_Application_Close(&miApp);
+                        MI_Instance_Delete(statusReport);
+                        MI_Instance_Delete(errorObject);
+                        MI_Instance_Delete(statusObject);
+                        return r;
+                    }
+                }
+                // Set Configuration version
+                if (lcmContext->documentMetaData.Version)
+                {
+                    value.string = (MI_Char*)lcmContext->documentMetaData.Version;
+                    r = MI_Instance_AddElement(statusReport, REPORTING_CONFIGURATIONVERSION, &value, MI_STRING, 0);
+                    if (r != MI_RESULT_OK)
+                    {
+                        MI_Application_Close(&miApp);
+                        MI_Instance_Delete(statusReport);
+                        MI_Instance_Delete(errorObject);
+                        MI_Instance_Delete(statusObject);
+                        return r;
+                    }
+                }
+            }
+            // Set Job Id
+            if (configurationStatus->JobID.exists)
+            {
+                value.string = (MI_Char*)configurationStatus->JobID.value;
+                // Already added above hence using SetElement
+                r = MI_Instance_SetElement(statusReport, REPORTING_JOBID, &value, MI_STRING, 0);
+                if (r != MI_RESULT_OK)
+                {
+                    MI_Application_Close(&miApp);
+                    MI_Instance_Delete(statusReport);
+                    MI_Instance_Delete(errorObject);
+                    MI_Instance_Delete(statusObject);
+                    return r;
+                }
+            }
+
+        }
+    }
+*/
+
+    // Send it along.
+
+    r = Pull_SendStatusReport(lcmContext, (MI_Instance*)g_metaConfig, statusReport, isStatusReport, &getActionStatusCode, &extendedError);
+    MI_Instance_Delete(statusReport);
+    MI_Instance_Delete(errorObject);
+    MI_Instance_Delete(statusObject);
+    MI_Application_Close(&miApp);
+
+    if (!g_bNotFirstTimeReport)
+        g_bNotFirstTimeReport = MI_TRUE;
+
+    return r;
+}
+
 
 MI_Result GetMetaConfig(
     _Outptr_ MSFT_DSCMetaConfiguration ** metaConfigInstance)
 {
     MI_Result r;
     MI_Boolean bComplianceStatus;
-        MI_Uint32 getActionStatusCode;
-        MI_Uint32 lcmStatusCode;
-        DSC_EventWriteMessageGettingMetaConfig();
-
-        GetLatestStatus(&bComplianceStatus, &getActionStatusCode, &lcmStatusCode);
-        
-        r = UpdateMetaConfigWithLCMState(&lcmStatusCode, (MI_Instance *)g_metaConfig);
-        if (r != MI_RESULT_OK)
-        {
-                return r;
-        }
+    MI_Uint32 getActionStatusCode;
+    MI_Uint32 lcmStatusCode;
+    DSC_EventWriteMessageGettingMetaConfig();
+    
+    GetLatestStatus(&bComplianceStatus, &getActionStatusCode, &lcmStatusCode);
+    
+    r = UpdateMetaConfigWithLCMState(&lcmStatusCode, (MI_Instance *)g_metaConfig);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+    
+    r = UpdateMetaConfigWithAgentId(((RegistrationManager*)g_registrationManager)->agentId, (MI_Instance *)g_metaConfig);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
 
     r = DSC_MSFT_DSCMetaConfiguration_Clone(g_metaConfig, metaConfigInstance);
     return r;
@@ -3767,6 +4711,12 @@ MI_Result SetMetaConfig(
         return r;
     }
 
+    r = UpdateMetaConfigWithAgentId(((RegistrationManager*)g_registrationManager)->agentId, (MI_Instance*)tmpInstance);
+    if (r != MI_RESULT_OK)
+    {
+        return r;
+    }
+
     if (g_metaConfig != NULL)
     {
         MSFT_DSCMetaConfiguration_Delete(g_metaConfig);
@@ -3782,12 +4732,74 @@ MI_Result SetMetaConfig(
     return r;
 }
 
+void LCM_FinishOperation(
+    _In_ LCMProviderContext* lcmContext,
+    _In_z_ const MI_Char *operationType,
+    _In_opt_ MI_Instance* errorDetails,
+    MI_Result result)
+{
+    MI_Uint32 errorCategory = 0;
+    MI_Uint32 errorCode = 0;
+    MI_ConstStringPtr errorMessage = NULL;
+    MI_ConstStringPtr messageId = NULL;
+    MI_ConstStringPtr errorType = NULL;
+
+    if (errorDetails)
+    {
+        ExtractCimErrorFields(errorDetails, &result, &errorCategory, &errorCode, &errorMessage, &messageId, &errorType);
+    }
+
+    if (MI_RESULT_OK == result && errorDetails == NULL)
+    {
+//        DSC_EventWriteCUMethodResult(g_ConfigurationDetails.jobGuidString, operationType);
+    }
+    else
+    {
+//        DSC_EventWriteCUMethodError(g_ConfigurationDetails.jobGuidString, result, errorMessage, messageId, errorCategory, errorCode, errorType);
+    }
+    if (lcmContext)
+    {
+        if (lcmContext->bReportErrorsToServer && g_metaConfig && result != MI_RESULT_OK)
+        {
+            MI_Instance *cimError = errorDetails;
+            if (errorDetails == NULL)
+            {
+                MI_Utilities_CimErrorFromErrorCode((MI_Uint32)result, MI_RESULT_TYPE_MI, NULL, &cimError);
+            }
+            ReportStatusToServer(lcmContext, errorMessage, REPORTING_TYPE_DSCENGINERESOURCE, REPORTING_TYPE_DSCENGINERESOURCE, errorCode, MI_FALSE, /*isStatusReport*/ 0, cimError);
+
+            ReportStatusToServer(lcmContext, errorMessage, REPORTING_TYPE_DSCENGINERESOURCE, REPORTING_TYPE_DSCENGINERESOURCE, errorCode, MI_FALSE, /*isStatusReport*/ 0, cimError);
+
+            if (errorDetails != cimError && cimError != NULL)
+            {
+                MI_Instance_Delete(cimError);
+            }
+        }
+    }
+    // Clean up CimStatusCodeDesription property as not needed by the client( it was used
+    // as a mechanism to move JSON representation of the ErrorRecord (if any) for errors.
+    if (errorDetails)
+    {
+        MI_Value value;
+        MI_Uint32 flags;
+        result = MI_Instance_GetElement(errorDetails, REPORTING_SERIALIZEDERROR, &value, NULL, &flags, NULL);
+        if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
+        {
+            value.string = MI_T("");
+            MI_Instance_SetElement(errorDetails, REPORTING_SERIALIZEDERROR, &value, MI_STRING, 0);
+        }
+    }
+    return;
+}
+
+
 MI_Result UpdateDSCCacheInstance(
     _In_ MI_Application *miApp,
     _Inout_ MI_Instance **dscCacheInstance, 
     _In_opt_ MI_Boolean* complianceStatus,
     _In_opt_ MI_Uint32* getActionStatusCode,
         _In_opt_ MI_Uint32* lcmStatusCode,
+    _In_opt_ MI_Char* registeredServerURLs,
     _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
@@ -3833,6 +4845,16 @@ MI_Result UpdateDSCCacheInstance(
                                 return r;
                         }
                 }
+
+        if (registeredServerURLs)
+        {
+            value.string = registeredServerURLs;
+            r = MI_Instance_SetElement(*dscCacheInstance, DSC_InternalStateCache_RegisteredServerURLs, &value, MI_STRING, 0);
+            if (r != MI_RESULT_OK)
+            {
+                return r;
+            }
+        }
     }
     else
     {
@@ -3865,6 +4887,15 @@ MI_Result UpdateDSCCacheInstance(
                         MI_Instance_Delete(cacheElement);
                         return r;
                 }
+
+        value.string = registeredServerURLs ? registeredServerURLs : MI_T("");
+        r = MI_Instance_AddElement(cacheElement, DSC_InternalStateCache_RegisteredServerURLs, &value, MI_STRING, 0);
+        if (r != MI_RESULT_OK)
+        {
+            MI_Instance_Delete(cacheElement);
+            return r;
+        }
+
         *dscCacheInstance = cacheElement;
     }
 
@@ -3900,7 +4931,7 @@ MI_Result InitDSCInternalCache(
         DSC_free(fileExpandedPath);
 
         // reset to default values.
-        r = UpdateDSCCacheInstance(moduleLoader->application, DSCInternalCache, NULL, NULL, NULL, cimErrorDetails);
+        r = UpdateDSCCacheInstance(moduleLoader->application, DSCInternalCache, NULL, NULL, NULL, NULL, cimErrorDetails);
         if (r != MI_RESULT_OK)
         {
             return r;
@@ -4819,6 +5850,7 @@ MI_Result UpdateCurrentStatus(
     _In_opt_ MI_Boolean *complianceStatus,
     _In_opt_ MI_Uint32 *getActionStatusCode,
         _In_opt_ MI_Uint32 *lcmStatusCode,
+    _In_opt_ MI_Char* registeredServerURLs,
     _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Application miApp = MI_APPLICATION_NULL;
@@ -4835,7 +5867,7 @@ MI_Result UpdateCurrentStatus(
         return GetCimMIError(r, extendedError, ID_MODMAN_APPINIT_FAILED);
     }
 
-    r = UpdateDSCCacheInstance(&miApp, &g_DSCInternalCache, complianceStatus, getActionStatusCode, lcmStatusCode, extendedError);
+    r = UpdateDSCCacheInstance(&miApp, &g_DSCInternalCache, complianceStatus, getActionStatusCode, lcmStatusCode, registeredServerURLs, extendedError);
     if (r != MI_RESULT_OK)
     {
         MI_Application_Close(&miApp);
@@ -4924,23 +5956,31 @@ MI_Result LCM_Pull_ExecuteActionPerConfiguration(
         _Out_ MI_Uint32 * numModulesInstalled,
         _Outptr_result_maybenull_z_  MI_Char** resultStatus,
         _Inout_ MI_Uint32* getActionStatusCode,
+        _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
         _In_ ModuleManager *moduleManager,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
         MI_Result result = MI_RESULT_OK;
         MI_Uint32 resultExecutionStatus = 0;
-        result = LCM_Pull_GetAction(lcmContext, metaConfigInstance, partialConfigName, checkSum, bIsCompliant, *getActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
+        result = LCM_Pull_GetAction(lcmContext, metaConfigInstance, partialConfigName, checkSum, bIsCompliant, *getActionStatusCode, resultStatus, getActionStatusCode, serverAssignedConfigurations, cimErrorDetails);
         if (result == MI_RESULT_OK)
         {
                 // only if we are asked to get the current configuration, we will do it immediately
                 if (*resultStatus && Tcscasecmp(*resultStatus, PULL_STATUSCODE_GETCONFIG) == 0)
                 {
-                        result = LCM_Pull_GetConfiguration(lcmContext, moduleManager, metaConfigInstance, partialConfigName,
-                                                           numModulesInstalled, &resultExecutionStatus, getActionStatusCode, cimErrorDetails);
+                        // for now download just the first configuration until partial configuration supported
+                        MI_Char* assignedConfig = NULL;
+                        
+                        // MI_Char* status = ((*serverAssignedConfigurations)->Details)->Status;
+                        if (serverAssignedConfigurations != NULL && *serverAssignedConfigurations != NULL && ((*serverAssignedConfigurations)->Details) != NULL)
+                        {
+                            assignedConfig = ((*serverAssignedConfigurations)->Details)->ConfigurationName;
+                        }
+                        result = LCM_Pull_GetConfiguration(lcmContext, moduleManager, metaConfigInstance, partialConfigName, numModulesInstalled, assignedConfig, &resultExecutionStatus, getActionStatusCode, cimErrorDetails);
                         if (result != MI_RESULT_OK)
                         {
-                                DSC_free(*resultStatus);
-                                *resultStatus = NULL;
+                            DSC_free(*resultStatus);
+                            *resultStatus = NULL;
                         }
                 }
         }
@@ -4986,9 +6026,10 @@ MI_Result MI_CALL LCM_Pull_Execute(
         MI_Uint32 xCount;
         MI_Uint32 numModulesInstalled = 0;
         int retval;
+        OverAllGetActionResponse* serverAssignedConfigurations = NULL;
 
-    SetLCMStatusBusy(MI_FALSE, lcmContext, MSFT_DSCConfigurationStatus_Type_Initial);
-    SetLCMProviderContext( lcmContext, (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE) , NULL);
+
+        SetLCMProviderContext( lcmContext, (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE) , NULL);
         result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
         if (result != MI_RESULT_OK)
         {
@@ -4998,6 +6039,13 @@ MI_Result MI_CALL LCM_Pull_Execute(
         if (moduleManager == NULL)
         {
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);
+        }
+
+        result = RegisterWithPullServers(lcmContext, metaConfigInstance, cimErrorDetails);
+        if (result != MI_RESULT_OK)
+        {
+            moduleManager->ft->Close(moduleManager, NULL);
+            return result;
         }
 
         GetLatestStatus(&bComplianceStatus, &getActionStatusCode, &lcmStatusCode);
@@ -5022,7 +6070,7 @@ MI_Result MI_CALL LCM_Pull_Execute(
         }
         for (xCount = 0; xCount < partialConfigurations.size && result == MI_RESULT_OK; xCount++)
         {
-                result = GetPartialConfigurationName(bFullConfiguration ? NULL : partialConfigurations.data[xCount], &partialConfigName, cimErrorDetails);
+            result = GetPartialConfigurationName(bFullConfiguration ? NULL : partialConfigurations.data[xCount], (const MI_Char**)&partialConfigName, cimErrorDetails);
                 if (partialConfigName != NULL)
                 {
                     DSC_EventWriteLCMPullingPartial(partialConfigName);//Log that we're pulling this partial configuration
@@ -5040,9 +6088,32 @@ MI_Result MI_CALL LCM_Pull_Execute(
                 }
                 result = LCM_Pull_ExecuteActionPerConfiguration(lcmContext, metaConfigInstance, partialConfigName,
                                                                 checkSumValue, bComplianceStatus, getActionStatusCode, 
-                                                                &numModulesInstalled, &resultStatus, &getActionStatusCode, 
+                                                                &numModulesInstalled, &resultStatus, &getActionStatusCode, &serverAssignedConfigurations,
                                                                 moduleManager, cimErrorDetails);
                 DSC_free(checkSumValue);
+
+                if (serverAssignedConfigurations)
+                {
+                    // Release the memory block assigned to each configuration status and then release the overall configurationstatus (serverAssignedConfigurations)
+                    // Please refer to the struct definition of 'OverAllGetActionResponse' to understand the logic below easily. 
+                    if (serverAssignedConfigurations != NULL)
+                    {
+                        MI_Uint32 totalConfigCounts = (serverAssignedConfigurations)->NumberOfConfiguration;
+                        MI_Uint32 memoryOffset;
+                        for (memoryOffset = 0; memoryOffset < totalConfigCounts; memoryOffset++)
+                        {
+                            ConfigurationStatus* currentMemoryBlock = (serverAssignedConfigurations)->Details + memoryOffset;
+                            if (currentMemoryBlock != NULL)
+                            {
+                                DSC_free(currentMemoryBlock);
+                                currentMemoryBlock = NULL;
+                            }
+                        }
+                        DSC_free(serverAssignedConfigurations);
+                    }            
+                    serverAssignedConfigurations = NULL;       
+                }
+
                 if (result == MI_RESULT_OK)
                 {
                         // If GetAction required us to get the configuraiton then only we have to apply the new configuration.
@@ -5082,7 +6153,7 @@ MI_Result MI_CALL LCM_Pull_Execute(
 
                 if (numModulesInstalled > 0)
                 {
-                    return GetCimMIError(MI_RESULT_SERVER_IS_SHUTTING_DOWN, cimErrorDetails, ID_PULL_RESTARTINGSERVER);
+		    system(OMI_RELOAD_COMMAND);
                 }
 
                 result = ApplyPendingConfig(lcmContext, moduleManager, 0, &resultExecutionStatus, cimErrorDetails);
@@ -5098,7 +6169,7 @@ MI_Result MI_CALL LCM_Pull_Execute(
                 {
                     // update compliance result.
                     complianceStatus = MI_TRUE;
-                    result = UpdateCurrentStatus(&complianceStatus, NULL, NULL, cimErrorDetails);
+                    result = UpdateCurrentStatus(&complianceStatus, NULL, NULL, NULL, cimErrorDetails);
                     if (result == MI_RESULT_OK)
                     {
                         // result = CopyConfigurationChecksum(mofFileName, cimErrorDetails);
@@ -5116,7 +6187,7 @@ MI_Result MI_CALL LCM_Pull_Execute(
                         GetErrorDetail(*cimErrorDetails));
         }
 
-        updateResult = UpdateCurrentStatus(NULL, &getActionStatusCode, NULL, &updateErrorDetails);
+        updateResult = UpdateCurrentStatus(NULL, &getActionStatusCode, NULL, NULL, &updateErrorDetails);
         if (updateResult != MI_RESULT_OK)
         {
                 if (result == MI_RESULT_OK)
@@ -5138,7 +6209,6 @@ MI_Result MI_CALL LCM_Pull_Execute(
 EH_UNWIND:
         moduleManager->ft->Close(moduleManager, NULL);
 
-        SetLCMStatusReady(lcmContext, result);
 
         return result;
 }
@@ -5152,6 +6222,7 @@ MI_Result LCM_Pull_GetAction(
     _In_ MI_Uint32 lastGetActionStatusCode,
     _Outptr_result_maybenull_z_  MI_Char** resultStatus,
     _Out_ MI_Uint32* getActionStatusCode,
+    _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result result = MI_RESULT_OK;
@@ -5172,7 +6243,7 @@ MI_Result LCM_Pull_GetAction(
         result = Pull_GetAction(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
     }
 #else
-    result = Pull_GetActionWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
+    result = Pull_GetActionWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, serverAssignedConfigurations, cimErrorDetails);
 #endif
 
     if (result != MI_RESULT_OK)
@@ -5187,7 +6258,8 @@ MI_Result LCM_Pull_GetAction(
 
     //Validate valid status codes
     if (!(Tcscasecmp(*resultStatus, PULL_STATUSCODE_OK) == 0 ||
-        Tcscasecmp(*resultStatus, PULL_STATUSCODE_GETCONFIG) == 0))
+        Tcscasecmp(*resultStatus, PULL_STATUSCODE_GETCONFIG) == 0 ||
+        Tcscasecmp(*resultStatus, PULL_STATUSCODE_UPDATEMETACONFIG) == 0))
     {
         //Uknown status code return error.
         return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_PULL_GETACTION_UNEXPECTEDRESULTSTATUS);       
@@ -5203,6 +6275,7 @@ MI_Result LCM_Pull_GetConfiguration(
         _In_ MI_Instance *metaConfigInstance,
         _In_opt_z_ MI_Char *partialConfigName,
         _Out_ MI_Uint32 * numModulesInstalled,
+        _In_opt_z_ MI_Char *assignedConfiguration,
         _Inout_ MI_Uint32 *resultExecutionStatus,
         _Out_ MI_Uint32 *getActionStatusCode,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
@@ -5222,7 +6295,7 @@ MI_Result LCM_Pull_GetConfiguration(
 
         *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
 
-        result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, &mofFileName, &directoryName, numModulesInstalled, &resultStatus, getActionStatusCode, cimErrorDetails);
+        result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, assignedConfiguration, &mofFileName, &directoryName, numModulesInstalled, &resultStatus, getActionStatusCode, cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
             if (directoryName != NULL)
@@ -5469,11 +6542,13 @@ MI_Result SetLCMStatusBusy()
         MI_Uint32 lcmStatus;
         MI_Instance *extendedError;
         MI_Result r;
+        
+        g_currentError[0] = '\0';
 
         if (!g_LCMPendingReboot)
         {
                 lcmStatus = LCM_STATUSCODE_BUSY;
-                r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
+                r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, NULL, &extendedError);
 #ifdef TEST_BUILD
                 NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
@@ -5482,6 +6557,8 @@ MI_Result SetLCMStatusBusy()
                 NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
         }
+
+        ReportStatusToServer(NULL, NULL, NULL, NULL, 0, MI_FALSE, /*isStatusReport*/ 1, (MI_Instance*)NULL);
 
         // errors in above invocation are silently ignored since failure of updating status should not block other operations
         r = MI_RESULT_OK;
@@ -5497,7 +6574,7 @@ MI_Result SetLCMStatusReady()
         if (!g_LCMPendingReboot)
         {
                 lcmStatus = LCM_STATUSCODE_READY;
-                r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
+                r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, NULL, &extendedError);
 #ifdef TEST_BUILD
                 NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
@@ -5506,6 +6583,8 @@ MI_Result SetLCMStatusReady()
                 NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
         }
+
+        ReportStatusToServer(NULL, NULL, NULL, NULL, 0, MI_TRUE, /*isStatusReport*/ 1, (MI_Instance*)NULL);
 
         // errors in above invocation are silently ignored since failure of updating status should not block other operations
         r = MI_RESULT_OK;
@@ -5520,7 +6599,7 @@ MI_Result SetLCMStatusReboot()
 
         g_LCMPendingReboot = MI_TRUE;
         lcmStatus = LCM_STATUSCODE_REBOOT;
-        r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, &extendedError);
+        r = UpdateCurrentStatus(NULL, NULL, &lcmStatus, NULL, &extendedError);
 #ifdef TEST_BUILD
                 NitsAssert(r == MI_RESULT_OK, "UpdateCurrentStatus should succeed");
 #endif
@@ -5630,6 +6709,6 @@ MI_Result GetLCMStatusCodeHistory(
         g_LCMStatusCodeHistory = NULL;
 
         lcmStatus = LCM_STATUSCODE_READY;
-        UpdateCurrentStatus(NULL, NULL, &lcmStatus, cimErrorDetails);
+        UpdateCurrentStatus(NULL, NULL, &lcmStatus, NULL, cimErrorDetails);
         return MI_RESULT_OK;
 }

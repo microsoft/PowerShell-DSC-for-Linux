@@ -737,3 +737,123 @@ FILE_EVENT3(4249, MessageFromEngineConsistency_Impl, LOG_WARNING, PAL_T("Job %s 
 #define ExceptionMessage(a0, a1, a2, a3) ExceptionMessage_Impl(0, 0, tcs(a0), tcs(a1), a2, tcs(a3))
 #endif
 FILE_EVENT4(4250, ExceptionMessage_Impl, LOG_INFO, PAL_T("Job %1 : \nMessage %2 \nHResult %3 \nStackTrack %4"), const TChar*, const TChar*, MI_Uint32, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMRegisterAgentAttempt(a0, a1, a2, a3) LCMRegisterAgentAttempt_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2), tcs(a3))
+#else
+#define LCMRegisterAgentAttempt(a0, a1, a2, a3) LCMRegisterAgentAttempt_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2), tcs(a3))
+#endif
+FILE_EVENT4(4401, LCMRegisterAgentAttempt_Impl, LOG_INFO, PAL_T("Job %1 : \nAttempting to register the Dsc agent with AgentId %2 with the server %3 using Download Manager %4."), const TChar*, const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMRegisterAgentSuccess(a0, a1, a2, a3) LCMRegisterAgentSuccess_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2), tcs(a3))
+#else
+#define LCMRegisterAgentSuccess(a0, a1, a2, a3) LCMRegisterAgentSuccess_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2), tcs(a3))
+#endif
+FILE_EVENT4(4402, LCMRegisterAgentSuccess_Impl, LOG_INFO, PAL_T("Job %1 : \nSuccessfully registered the Dsc agent with AgentId %2 with the server %3 using Download Manager %4."), const TChar*, const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define RegisterAgentUrl(a0, a1, a2) RegisterAgentUrl_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define RegisterAgentUrl(a0, a1, a2) RegisterAgentUrl_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4403, RegisterAgentUrl_Impl, LOG_INFO, PAL_T("Job %1 : \nRegistering Dsc Agent with Agent Id %2. Register-DscAgent command, PUT Url: %3."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define RegisterAgentHttpClient(a0, a1, a2) RegisterAgentHttpClient_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define RegisterAgentHttpClient(a0, a1, a2) RegisterAgentHttpClient_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4404, RegisterAgentHttpClient_Impl, LOG_ERR, PAL_T("Job %1 : \nHttp Client %2 failed to register Dsc Agent: %3."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define RegisterAgentPostCall(a0, a1) RegisterAgentPostCall_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define RegisterAgentPostCall(a0, a1) RegisterAgentPostCall_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4405, RegisterAgentPostCall_Impl, LOG_INFO, PAL_T("Job %1 : \nRegister-DscAgent command for AgentId %2 succeeded."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define RegisterAgentCertId(a0, a1, a2) RegisterAgentCertId_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define RegisterAgentCertId(a0, a1, a2) RegisterAgentCertId_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4406, RegisterAgentCertId_Impl, LOG_INFO, PAL_T("Job %1 : \nRegister-DscAgent command for AgentId %2 using certificate id: %3."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMAgentNotRegistered(a0) LCMAgentNotRegistered_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define LCMAgentNotRegistered(a0) LCMAgentNotRegistered_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4407, LCMAgentNotRegistered_Impl, LOG_INFO, PAL_T("Job %1 : \nThe Dsc Agent has not been registered. Registration will be attempted."), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define WriteAgentIdToRegistryFailure(a0, a1) WriteAgentIdToRegistryFailure_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define WriteAgentIdToRegistryFailure(a0, a1) WriteAgentIdToRegistryFailure_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4408, WriteAgentIdToRegistryFailure_Impl, LOG_ERR, PAL_T("Job %1 : \nUnable to write AgentId %2 to registry."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMServerURLRegistered(a0, a1, a2) LCMServerURLRegistered_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define LCMServerURLRegistered(a0, a1, a2) LCMServerURLRegistered_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4409, LCMServerURLRegistered_Impl, LOG_INFO, PAL_T("Job %1 : \nThe Dsc Agent with AgentId %2 has already been registered for the Server URL %3. Registration will be skipped for this Server URL."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMProtocolVersion1InUse(a0) LCMProtocolVersion1InUse_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define LCMProtocolVersion1InUse(a0) LCMProtocolVersion1InUse_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4410, LCMProtocolVersion1InUse_Impl, LOG_INFO, PAL_T("Job %s : \nUsing Version 1 protocol of Dsc PULL."), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMAgentAttemptRegistration(a0, a1, a2) LCMAgentAttemptRegistration_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define LCMAgentAttemptRegistration(a0, a1, a2) LCMAgentAttemptRegistration_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4411, LCMAgentAttemptRegistration_Impl, LOG_INFO, PAL_T("Job %1 : \nAttempt to register the Dsc Agent AgentId %2 with Server URL %3 since RegistrationKey was specified."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMServerRegCertGenFailed(a0, a1) LCMServerRegCertGenFailed_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMServerRegCertGenFailed(a0, a1) LCMServerRegCertGenFailed_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4331, LCMServerRegCertGenFailed_Impl, LOG_INFO, PAL_T("Job %1 : \nThe Dsc Agent with AgentId %2 failed to create a self-signed certificate."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMRunAsUser(a0, a1) LCMRunAsUser_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMRunAsUser(a0, a1) LCMRunAsUser_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4321, LCMRunAsUser_Impl, LOG_INFO, PAL_T("Job %1 : \n PsDscRunAsCredential has been specified. The user name is %2."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMImpersonationSuccessful(a0, a1) LCMImpersonationSuccessful_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMImpersonationSuccessful(a0, a1) LCMImpersonationSuccessful_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4322, LCMImpersonationSuccessful_Impl, LOG_INFO, PAL_T("Job %1 : \n Impersonation successful. Thread is running under the context of %2."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LCMImpersonationReverted(a0, a1) LCMImpersonationReverted_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define LCMImpersonationReverted(a0, a1) LCMImpersonationReverted_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4323, LCMImpersonationReverted_Impl, LOG_INFO, PAL_T("Job %1 : \n Impersonation reverted. Thread is running under the context of %2."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define WebDownloadManagerDoActionServerUrlVersion2(a0, a1, a2) WebDownloadManagerDoActionServerUrlVersion2_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define WebDownloadManagerDoActionServerUrlVersion2(a0, a1, a2) WebDownloadManagerDoActionServerUrlVersion2_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4324, WebDownloadManagerDoActionServerUrlVersion2_Impl, LOG_INFO, PAL_T("Job %s : \nWebDownloadManager for AgentId %s Do-DscAction command with server url: %s."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define WebDownloadManagerDoActionCertIdVersion2(a0, a1, a2) WebDownloadManagerDoActionCertIdVersion2_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define WebDownloadManagerDoActionCertIdVersion2(a0, a1, a2) WebDownloadManagerDoActionCertIdVersion2_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4325, WebDownloadManagerDoActionCertIdVersion2_Impl, LOG_INFO, PAL_T("Job %s : \nWebDownloadManager for AgentId %s Do-DscAction command using certificate id: %s."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define WebDownloadManagerDoActionHttpClientVersion2(a0, a1, a2) WebDownloadManagerDoActionHttpClientVersion2_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define WebDownloadManagerDoActionHttpClientVersion2(a0, a1, a2) WebDownloadManagerDoActionHttpClientVersion2_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4326, WebDownloadManagerDoActionHttpClientVersion2_Impl, LOG_INFO, PAL_T("Job %s : \nWebDownloadManager for AgentId %s Do-DscAction command, Http Client failed: %s."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define WebDownloadManagerDoActionGetUrlVersion2(a0, a1, a2) WebDownloadManagerDoActionGetUrlVersion2_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define WebDownloadManagerDoActionGetUrlVersion2(a0, a1, a2) WebDownloadManagerDoActionGetUrlVersion2_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4327, WebDownloadManagerDoActionGetUrlVersion2_Impl, LOG_INFO, PAL_T("Job %s : \nWebDownloadManager for AgentId %s Do-DscAction command, GET Url: %s."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define WebDownloadManagerDoActionGetCallVersion2(a0, a1, a2) WebDownloadManagerDoActionGetCallVersion2_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define WebDownloadManagerDoActionGetCallVersion2(a0, a1, a2) WebDownloadManagerDoActionGetCallVersion2_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4328, WebDownloadManagerDoActionGetCallVersion2_Impl, LOG_INFO, PAL_T("Job %s : \nWebDownloadManager for AgentId %s Do-DscAction command, GET call result: %s."), const TChar*, const TChar*, const TChar*)

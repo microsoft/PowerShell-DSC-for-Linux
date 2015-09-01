@@ -120,6 +120,7 @@
 #define QUALIFIER_REQUIRED                  MI_T("Required")
 #define METACONF_RESOURCE_CLASSNAME         MI_T("OMI_MetaConfigurationResource")
 
+#define MSFT_ServerURL_Name MI_T("ServerURL")
 
 #define OMI_BaseResource_GetMethodName                        MI_T("GetTargetResource")
 #define OMI_BaseResource_TestMethodName                       MI_T("TestTargetResource")
@@ -132,9 +133,18 @@
 #define OMI_BaseResource_Method_Configurations                MI_T("Configurations")
 #define OMI_BaseResource_Method_OutputResource                MI_T("OutputResource")
 
-#define MSFT_WEBCONFIGURATIONDOWNLOADMANAGER_CLASSNAME              MI_T("MSFT_WebDownloadManager")
 
+#define OMI_RESOURCEMODULEMANAGER_CLASSNAME                         MI_T("OMI_ResourceModuleManager")
+#define OMI_CONFIGURATIONDOWNLOADMANAGER_CLASSNAME                  MI_T("OMI_ConfigurationDownloadManager")
+#define OMI_REPORTMANAGER_CLASSNAME                                 MI_T("OMI_ReportManager")
 #define MSFT_PARTIALCONFIGURATION_CLASSNAME                         MI_T("MSFT_PartialConfiguration")
+/*derived manager names*/
+#define MSFT_WEBRESOURCEMODULEMANAGER_CLASSNAME                     MI_T("MSFT_WebResourceManager")
+#define MSFT_FILERESOURCEMODULEMANAGER_CLASSNAME                    MI_T("MSFT_FileResourceManager")
+#define MSFT_WEBCONFIGURATIONDOWNLOADMANAGER_CLASSNAME              MI_T("MSFT_WebDownloadManager")
+#define MSFT_FILECONFIGURATIONDOWNLOADMANAGER_CLASSNAME             MI_T("MSFT_FileDownloadManager")
+#define MSFT_OAASREPORTMANAGER_CLASSNAME                            MI_T("MSFT_OaaSReportManager")
+#define MSFT_WEBREPORTMANAGER_CLASSNAME                             MI_T("MSFT_WebReportManager")
 
 /*OMI_BaseResource*/
 #define OMI_BaseResource_ResourceId           MI_T("ResourceId")
@@ -208,9 +218,13 @@
 #define MSFT_DSCMetaConfiguration_ResourceModuleManagers                                        MI_T("ResourceModuleManagers")
 #define MSFT_DSCMetaConfiguration_ReportManagers                                                    MI_T("ReportManagers")
 #define MSFT_DSCMetaConfiguration_PartialConfigurations                                     MI_T("PartialConfigurations")
+#define MSFT_DSCMetaConfiguration_AgentId                                                                       MI_T("AgentId")
 #define MSFT_DSCMetaConfiguration_LCMUpdateName                                                 MI_T("LcmUpdateName")
 #define MSFT_DSCMetaConfiguration_MaxPendingConfigRetryCount                MI_T("MaxPendingConfigRetryCount")
 #define MSFT_DSCMetaConfiguration_LocalConfigurationManagerState            MI_T("LocalConfigurationManagerState")
+#define MSFT_DSCMetaConfiguration_LCMStateDetail                            MI_T("LCMStateDetail")
+#define MSFT_DSCMetaConfiguration_ActionAfterReboot  						MI_T("ActionAfterReboot")
+#define MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays					MI_T("StatusRetentionTimeInDays")
 
 #define MSFT_DSCMetaConfiguration_BaseProperty_Count    0
 
@@ -251,7 +265,7 @@
 #define OMI_MetaConfigurationResource_SourceInfo           OMI_BaseResource_SourceInfo
 #define OMI_MetaConfigurationResource_ModuleName           OMI_BaseResource_ModuleName
 #define OMI_MetaConfigurationResource_ModuleVersion        OMI_BaseResource_ModuleVersion
-#define OMI_MetaConfigurationResource_Property_Count       4
+#define OMI_MetaConfigurationResource_Property_Count       2
 
 #define MSFT_DSCMetaConfiguration_PartialConfigurations                                     MI_T("PartialConfigurations")
 
@@ -285,6 +299,20 @@
 
 
 #define MSFT_PartialConfiguration_FriendlyName                                      MI_T("PartialConfiguration")
+
+
+#define MSFT_RegistrationKey_Name MI_T("RegistrationKey")
+#define MSFT_ConfigurationNames_Name MI_T("ConfigurationNames")
+#define DSC_InternalStateCache_RegisteredServerURLs     MI_T("RegisteredServerURLs")
+#define AGENT_REGISTRATION_CLASS MI_T("MSFT_PSDSCAgentRegistration")
+#define PULL_STATUSCODE_UPDATEMETACONFIG    MI_T("UpdateMetaConfiguration")
+#define REGISTER_STATUSCODE_CREATED           MI_T("CREATED")
+#define DSC_OAAS_CERTIFICATE_SUBJECT_CN       MI_T("CN=DSC-OaaS")
+#define DSC_OAAS_CERTIFICATE_SUBJECT          MI_T("DSC-OaaS")
+#define DSC_OAAS_CERTIFICATE_FRIENDLYNAME     MI_T("DSC-OaaS Client Authentication")
+#define DSC_OAAS_CERTIFICATE_LIFETIME_YEARS   1
+#define DSC_OAAS_SYSTEM_STORE_PATH            MI_T("My")
+
 
 /*MSFT_ConfigurationDocumen*/
 #define MSFT_WMIERROR_MESSAGE                  MI_T("Message")
@@ -486,6 +514,44 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define CONSISTENCY_TASKSCHEDULE_NAME CONSISTENCY_TASKSCHEDULE_NAME_BASE MI_T("Consistency")
 #else
 
+#define OMI_RESOURCEMODULEMANAGER_CLASSNAME                         MI_T("OMI_ResourceModuleManager")
+#define OMI_REPORTMANAGER_CLASSNAME                                 MI_T("OMI_ReportManager")
+/* Error/Status Reporting */
+#define REPORTING_SERIALIZEDERROR MI_T("CIMStatusCodeDescription")
+#define REPORTING_ERRORSOURCE MI_T("ErrorSource")
+#define REPORTING_RESOURCEID MI_T("ResourceId")
+#define REPORTING_ERRORCODE MI_T("ErrorCode")
+#define REPORTING_ERRORMESSAGE MI_T("ErrorMessage")
+#define REPORTING_LOCALE MI_T("Locale")
+#define REPORTING_ERRORCLASSNAME MI_T("MSFT_PSDSCError")
+#define REPORTING_STATUSCLASSNAME MI_T("MSFT_PSDSCStatus")
+#define REPORTING_CLASS MI_T("MSFT_PSDSCStatusReporting")
+#define REPORTING_ERRORREPORTNAME   MI_T("ErrorReport")
+#define REPORTING_STATUSREPORTNAME   MI_T("StatusReport")
+#define REPORTING_JOBID MI_T("JobId")
+#define REPORTING_STARTTIME MI_T("StartTime")
+#define REPORTING_OPERATIONTYPE MI_T("OperationType")
+#define REPORTING_CONFIGURATIONVERSION MI_T("ConfigurationVersion")
+#define REPORTING_ENDTIME MI_T("EndTime")
+#define REPORTING_NODENAME MI_T("NodeName")
+#define REPORTING_IPADDRESS MI_T("IpAddress")
+#define REPORTING_NUMBEROFRESOURCES MI_T("NumberOfResources")
+#define REPORTING_RESOURCESINDESIREDSTATE MI_T("ResourcesInDesiredState")
+#define REPORTING_RESOURCESNOTINDESIREDSTATE MI_T("ResourcesNotInDesiredState")
+#define REPORTING_REPORTFORMATVERSION MI_T("ReportFormatVersion")
+
+#define REPORTING_LCMVERSION MI_T("LcmVersion")
+#define REPORTING_INTERNALERRORS MI_T("Errors")
+/* Constants*/
+#define REPORTING_DEFAULT_MESSAGE MI_T("Unknown")
+#define REPORTING_TYPE_PSDSCRESOURCE MI_T("DSCPowershellResource")
+#define REPORTING_TYPE_PSWMIRESOURCE MI_T("DSCWMIResource")
+#define REPORTING_TYPE_DSCENGINERESOURCE MI_T("DSCEngine")
+
+/* Agent Registration Payload */
+#define AGENT_REGISTRATION_CLASS MI_T("MSFT_PSDSCAgentRegistration")
+
+
 #if defined(DSC_PACKAGE_BUILD)
 #define DSC_PATH MI_T("/opt/microsoft/dsc")
 #else
@@ -497,7 +563,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define OMI_CONSISTENCY_TASKSCHEDULE_NAME CONFIG_BINDIR PATH_SEPARATOR MI_T("ConsistencyInvoker")
 #define OMI_CONF_FILE_PATH CONFIG_SYSCONFDIR PATH_SEPARATOR MI_T("dsc") PATH_SEPARATOR MI_T("dsc.conf")
 #define OMI_SERVER_PATH CONFIG_BINDIR PATH_SEPARATOR MI_T("omiserver")
-#define OMI_RELOAD_COMMAND MI_T("exec setsid /bin/sh -c 'sleep 5; ") OMI_SERVER_PATH MI_T(" -r; sleep 5; ") OMI_CONSISTENCY_TASKSCHEDULE_NAME MI_T("'&")
+#define OMI_RELOAD_COMMAND OMI_SERVER_PATH MI_T(" --reload-dispatcher; sleep 1")
 #endif
 #define TASK_PARAMETER_SC_DAILY MI_T("DAILY")
 #define TASK_PARAMETER_DU_DAILY MI_T("24:00")
@@ -505,7 +571,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define DSCWHATIFENABLED MI_T("DSC_WHATIF_ENABLED")
 #define DSC_JOBIDSTRING MI_T("DSC_JOBID_STRING")
 
-
+#define REPORTFORMAT_VERSION_1_0                                                MI_T("1.0")
 #define RETRY_LOOP_COUNT        10
 #define RETRY_LOOP_SLEEP        500
 #define CHECKSUM_SIZE 64
@@ -554,7 +620,23 @@ typedef struct _LCMProviderContext
     const MI_Instance *metaConfig; //Read only meta Config.
     MI_Boolean bNotFirstTimeReport; //signifies if this is the first time report is being sent.
     MI_Serializer *serializer;
+    void * registrationManager;
 } LCMProviderContext;
+
+// Structres to represent the V2 pullserver response for GetAction
+typedef struct GetActionConfigurationStatus
+{
+    MI_Char *ConfigurationName;
+    MI_Char *Status;
+}ConfigurationStatus;
+
+typedef struct OverAllGetActionResponse
+{
+    MI_Char *NodeOverAllStatus;
+    MI_Uint32 NumberOfConfiguration;
+    ConfigurationStatus *Details;
+}OverAllGetActionResponse;
+
 
 /* TODO: remove
 typedef struct _LCMProviderContext
@@ -753,10 +835,24 @@ MI_Boolean ShouldUsePartialConfigurations(_In_ MI_Instance*  metaConfigInstance,
 
 void InitLocTable();
 
+MI_Result GetAgentInformation(
+    _Inout_ MI_Instance** registrationPayload);
+
+MI_Result UpdateMetaConfigWithAgentId(_In_z_ MI_Char *agentId, _Inout_ MI_Instance *metaConfigInstance);
+
+MI_Result ShouldUseV1Protocol(
+    _Inout_ MI_Boolean* isV1MetaConfig);
+
+MI_Result StripBracesFromGuid(
+    _In_z_ MI_Char* inputGuid,
+    _Outptr_result_maybenull_z_ MI_Char** resultGuid,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+MI_Datetime PalDatetimeToMiDatetime(_In_ PAL_Datetime inDatetime);
 
 #ifndef g_ConfigurationDetails
 
-#define JOB_UUID_LENGTH 40*sizeof(MI_Char)
+#define JOB_UUID_LENGTH 41*sizeof(MI_Char)
     typedef struct _ConfigurationDetails
         { 
             MI_Char jobGuidString[JOB_UUID_LENGTH]; 
@@ -764,6 +860,7 @@ void InitLocTable();
         } ConfigurationDetails;
 
     extern ConfigurationDetails g_ConfigurationDetails;
+    extern char g_currentError[5001];
 #endif
 
 #if defined(_MSC_VER)

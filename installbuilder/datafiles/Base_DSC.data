@@ -90,6 +90,9 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/InstallModule.py; intermediate/Scripts/InstallModule.py; 755; root; root
 /opt/microsoft/dsc/Scripts/RemoveModule.py; intermediate/Scripts/RemoveModule.py; 755; root; root
 /opt/microsoft/dsc/Scripts/RegenerateInitFiles.py; intermediate/Scripts/RegenerateInitFiles.py; 755; root; root
+/opt/microsoft/dsc/Scripts/RegisterHelper.sh; LCM/scripts/RegisterHelper.sh; 755; root; root
+/opt/microsoft/dsc/Scripts/Register.py; LCM/scripts/Register.py; 755; root; root
+/opt/microsoft/dsc/Scripts/StatusReport.sh; LCM/scripts/StatusReport.sh; 755; root; root
 
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFile.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFile.py; 755; root; root
@@ -124,7 +127,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxFileLine.py; Providers/Scripts/3.x/Scripts/nxFileLine.py; 755; root; root
 
-/opt/omi/etc/dsc/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; root; root
+/etc/opt/omi/conf/dsc/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; root; root
 
 %Directories
 /opt/microsoft;          755; root; root
@@ -141,7 +144,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts; 755; root; root
-/opt/omi/etc/dsc;        755; root; root; sysdir
+/etc/opt/omi/conf;            755; root; root; sysdir
+/etc/opt/omi/conf/dsc;        755; root; root
 /etc/logrotate.d;        755; root; root; sysdir
 
 
@@ -158,14 +162,14 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 OMISERVER_INSTALLED=1
 PREREQ_ERROR=0
 
-rpm -q omiserver 2> /dev/null 1> /dev/null
+rpm -q omi 2> /dev/null 1> /dev/null
 if [ $? -ne 0 ]; then
     OMISERVER_INSTALLED=0
     PREREQ_ERROR=1
 fi
 
 if [ $OMISERVER_INSTALLED -eq 0 ]; then
-    echo "Error: dsc requires the omiserver package to be installed"
+    echo "Error: dsc requires the omi package to be installed"
 fi
 if [ $PREREQ_ERROR -eq 1 ]; then
     exit 1
@@ -176,14 +180,14 @@ fi
 OMISERVER_INSTALLED=1
 PREREQ_ERROR=0
 
-dpkg -s omiserver 2> /dev/null 1> /dev/null
+dpkg -s omi 2> /dev/null 1> /dev/null
 if [ $? -ne 0 ]; then
     OMISERVER_INSTALLED=0
     PREREQ_ERROR=1
 fi
 
 if [ $OMISERVER_INSTALLED -eq 0 ]; then
-    echo "Error: dsc requires the omiserver package to be installed"
+    echo "Error: dsc requires the omi package to be installed"
 fi
 
 LIBCURL_SO=`ldconfig -p | grep "libcurl.so" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
@@ -209,7 +213,7 @@ chmod u+x $tmpfile
 $tmpfile 1> /dev/null 2> /dev/null
 if [ $? -ne 0 ]; then
     echo "Error: Python does not support ctypes on this system.  Please install the ctypes module for Python or upgrade to a newer version of python that comes with the ctypes module."
-    echo "Please remove the omiserver package and try again after installing the ctypes module or upgrading Python.  You can check if the ctypes module is installed by starting python and running the command: 'import ctypes'"
+    echo "Please remove the omi package and try again after installing the ctypes module or upgrading Python.  You can check if the ctypes module is installed by starting python and running the command: 'import ctypes'"
 	rm $tmpfile
     exit 1
 else
@@ -220,8 +224,8 @@ fi
 %Postinstall_10
 # TODO: Detect omi install directory?
 OMI_HOME=/opt/omi
-OMI_REGISTER_DIR=$OMI_HOME/etc/omiregister
-CONFIG_SYSCONFDIR=$OMI_HOME/etc
+OMI_REGISTER_DIR=/etc/opt/omi/conf/omiregister/
+CONFIG_SYSCONFDIR=/etc/opt/omi/conf
 CONFIG_DATADIR=$OMI_HOME/share
 OMI_LIB=$OMI_HOME/lib
 
@@ -236,7 +240,8 @@ mkdir -p $CONFIG_SYSCONFDIR/dsc/configuration/BuiltinProvCache
 mkdir -p $CONFIG_DATADIR/dsc
 mkdir -p $CONFIG_DATADIR/dsc/configuration
 mkdir -p $CONFIG_DATADIR/dsc/configuration/schema
-mkdir -p $CONFIG_DATADIR/dsc/configuration/registration      
+mkdir -p $CONFIG_DATADIR/dsc/configuration/registration
+chmod 700 $CONFIG_SYSCONFDIR/dsc
 
 # Create links in omi's directories for DSC data
 mkdir -p $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
@@ -277,26 +282,26 @@ ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.3
 
 pidof systemd 1> /dev/null 2> /dev/null
 if [ $? -eq 0 ]; then
-    if [ -f /opt/omi/var/run/omiserver.pid ]; then
-        systemctl restart omiserver
+    if [ -f /var/opt/omi/run/omiserver.pid ]; then
+        systemctl restart omiserverd
         if [ $? -eq 0 ]; then
-            echo "DSC has successfully restarted omiserver."
+            echo "DSC has successfully restarted omiserverd."
         else
-            echo "Failed to restart omiserver."
+            echo "Failed to restart omiserverd."
         fi
     else
-        systemctl start omiserver
+        systemctl start omiserverd
     fi
 else
-    if [ -f /opt/omi/var/run/omiserver.pid ]; then
-        /etc/init.d/omiserver restart
+    if [ -f /var/opt/omi/run/omiserver.pid ]; then
+        /etc/init.d/omiserverd restart
         if [ $? -eq 0 ]; then
-            echo "DSC has successfully restarted omiserver."
+            echo "DSC has successfully restarted omiserverd."
         else
-            echo "Failed to restart omiserver."
+            echo "Failed to restart omiserverd."
         fi
     else
-        /etc/init.d/omiserver start
+        /etc/init.d/omiserverd start
     fi
 fi
 
@@ -310,19 +315,18 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
 fi
 
 %Postuninstall_999
-# TODO: Detect omi install directory?
 OMI_HOME=/opt/omi
-OMI_REGISTER_DIR=$OMI_HOME/etc/omiregister
-CONFIG_SYSCONFDIR=$OMI_HOME/etc
+OMI_REGISTER_DIR=/etc/opt/omi/conf/omiregister
+CONFIG_SYSCONFDIR=/etc/opt/omi/conf
 CONFIG_DATADIR=$OMI_HOME/share
 OMI_LIB=$OMI_HOME/lib
 
 # if this is a package removal, not an upgrade, remove the modules
 if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
-    rm -rf $OMI_ETC_DIR/conf/omiregister/root-Microsoft-DesiredStateConfiguration
+    rm -rf $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
-    rm -rf $CONFIG_SYSCONFDIR/dsc
-    rm -rf $CONFIG_DATADIR/dsc
+    rm -rf $CONFIG_SYSCONFDIR/dsc/configuration
+    rm -rf $CONFIG_DATADIR/dsc/
     rm -rf $OMI_LIB/Scripts
     
     rm $OMI_HOME/bin/ConsistencyInvoker

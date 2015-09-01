@@ -27,7 +27,7 @@ typedef struct _OMI_BaseResource
     /* OMI_BaseResource properties */
     MI_ConstStringField ResourceId;
     MI_ConstStringField SourceInfo;
-    MI_ConstStringAField DependsOn;
+    MI_ConstStringAField Requires;
     MI_ConstStringField ModuleName;
     MI_ConstStringField ModuleVersion;
     MI_ConstStringField ConfigurationName;
@@ -186,7 +186,7 @@ MI_INLINE MI_Result MI_CALL OMI_BaseResource_Clear_SourceInfo(
         1);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_BaseResource_Set_DependsOn(
+MI_INLINE MI_Result MI_CALL OMI_BaseResource_Set_Requires(
     _Inout_ OMI_BaseResource* self,
     _In_reads_opt_(size) const MI_Char** data,
     _In_ MI_Uint32 size)
@@ -202,7 +202,7 @@ MI_INLINE MI_Result MI_CALL OMI_BaseResource_Set_DependsOn(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_BaseResource_SetPtr_DependsOn(
+MI_INLINE MI_Result MI_CALL OMI_BaseResource_SetPtr_Requires(
     _Inout_ OMI_BaseResource* self,
     _In_reads_opt_(size) const MI_Char** data,
     _In_ MI_Uint32 size)
@@ -218,7 +218,7 @@ MI_INLINE MI_Result MI_CALL OMI_BaseResource_SetPtr_DependsOn(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_BaseResource_Clear_DependsOn(
+MI_INLINE MI_Result MI_CALL OMI_BaseResource_Clear_Requires(
     _Inout_ OMI_BaseResource* self)
 {
     return self->__instance.ft->ClearElementAt(

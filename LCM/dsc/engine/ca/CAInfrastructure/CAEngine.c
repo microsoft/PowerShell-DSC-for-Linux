@@ -34,6 +34,7 @@
 #include "CAEngineInternal.h"
 #include "CACrypto.h"
 #include "CAValidate.h"
+#include <curl/curl.h>
 
 #define _CA_IMPORT_ 1
 
@@ -1918,6 +1919,144 @@ MI_Result  MI_CALL StopCurrentConfiguration(_Outptr_result_maybenull_ MI_Instanc
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_CA_FAILED_TO_WAIT_EVENT);
     }
     
+    return MI_RESULT_OK;
+}
+
+MI_Char* RunCommand(const MI_Char* command)
+{
+    MI_Char* result = NULL;
+    FILE * fp;
+    const int bufferSize = 5000;
+    char buffer[bufferSize * 10 + 1];
+    char curBuffer[bufferSize + 1];
+    size_t cur_loc = 0;
+    size_t count = 0;
+    int status;
+
+    curBuffer[bufferSize] = '\0';
+    
+    fp = popen(command, "r");
+    if (fp == NULL)
+    {
+        return NULL;
+    }
+
+    while (fgets(curBuffer, 5000, fp) != NULL)
+    {
+        count = strlen(curBuffer);
+	if (count + cur_loc > bufferSize * 10)
+	  {
+	    // Too much data printed to stdout of the command.  Let's just cut it short here.
+	    // Since this isn't a PAL function, and we know that we won't get anywhere near this limit
+	    // in any reasonable normal or error situation, this should suffice.
+	    break;
+	  }
+        memcpy(buffer + cur_loc, curBuffer, count);
+        cur_loc += count;
+	
+    }
+
+    buffer[cur_loc] = '\0';
+    
+    pclose(fp);
+    result = (MI_Char*)DSC_malloc((cur_loc + 1) * sizeof(MI_Char*), NitsHere());
+    memcpy(result, buffer, cur_loc + 1);
+
+    return result;
+}
+
+
+extern MI_Result Pull_Register(MI_Char* serverURL,
+                               MI_Char* agentId,
+                               MI_Char* x_ms_header,
+                               MI_Char* auth_header,
+                               MI_Char* requestBody);
+
+static const char * const s_ManagerInstanceNames[] = { "",
+                                                       "ConfigurationRepository",
+                                                       "ResourceRepository",
+                                                       "ReportServer" };
+
+MI_Char* DSC_strdup(MI_Char* s)
+{
+    MI_Char* result;
+    size_t s_len;
+
+    if (s == NULL)
+    {
+        return NULL;
+    }
+    
+    s_len = strlen(s);
+    result = DSC_malloc((s_len + 1) * sizeof(MI_Char), NitsHere());
+    memcpy(result, s, s_len);
+    result[s_len] = '\0';
+    return result;
+}
+
+MI_Result MI_CALL Do_Register(
+    _In_ MI_Instance *metaConfig,
+    _In_ MI_Instance *managerInstance,
+    _In_z_ MI_Char *agentId,
+    _In_z_ MI_Char *thumbprint,
+    _In_ MI_Instance *registrationPayload,
+    _In_ MI_StringA *configurationNames,
+    _In_ MI_Uint32 typeOfManagerInstance,
+    _Outptr_result_maybenull_z_  MI_Char** result,
+    _Out_ MI_Uint32* getActionStatusCode,
+    _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r;
+    const size_t c_bufferSize = 2048;
+    MI_Char buffer[c_bufferSize];
+    MI_Char* requestBody;
+    MI_Char* header;
+    MI_Char* x_ms_header;
+    MI_Char* auth_header;
+    char * saveptr;
+    MI_Value val;
+    
+    r = MI_Instance_GetElement(managerInstance, "RegistrationKey", &val, NULL, NULL, NULL);
+
+    if (typeOfManagerInstance == 1)
+    {
+        char* configName = "";
+        if (configurationNames->size != 0)
+        {
+            configName = configurationNames->data[0];
+        }
+        const char * bodyFormatString = "%s/RegisterHelper.sh body %s %s %s";
+        const char * headerFormatString = "%s/RegisterHelper.sh header %s %s %s";
+        snprintf(buffer, c_bufferSize, bodyFormatString, DSC_PATH "/Scripts", s_ManagerInstanceNames[typeOfManagerInstance], val.string, configName);
+        requestBody = RunCommand(buffer);
+        snprintf(buffer, c_bufferSize, headerFormatString, DSC_PATH "/Scripts", s_ManagerInstanceNames[typeOfManagerInstance], val.string, configName);
+        header = RunCommand(buffer);
+    }
+    else
+    {
+        const char * bodyFormatString = "%s/RegisterHelper.sh body %s %s";
+        const char * headerFormatString = "%s/RegisterHelper.sh header %s %s";
+        snprintf(buffer, c_bufferSize, bodyFormatString, DSC_PATH "/Scripts", s_ManagerInstanceNames[typeOfManagerInstance], val.string);
+        requestBody = RunCommand(buffer);
+        snprintf(buffer, c_bufferSize, headerFormatString, DSC_PATH "/Scripts", s_ManagerInstanceNames[typeOfManagerInstance], val.string);
+        header = RunCommand(buffer);
+    }
+
+    x_ms_header = strtok_r(header, "\n", &saveptr);
+    auth_header = strtok_r(NULL, "\n", &saveptr);
+
+    r = MI_Instance_GetElement(managerInstance, "ServerURL", &val, NULL, NULL, NULL);
+    
+    r = Pull_Register(val.string, agentId, x_ms_header, auth_header, requestBody);
+    if (r != MI_RESULT_OK)
+    {
+        *result = DSC_strdup("FailedToRegister");
+        *getActionStatusCode = 32;
+        return MI_RESULT_FAILED;
+    }
+
+    *result = DSC_strdup(REGISTER_STATUSCODE_CREATED);
+    *getActionStatusCode = 0;
     return MI_RESULT_OK;
 }
 

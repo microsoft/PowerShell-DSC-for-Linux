@@ -25,11 +25,7 @@
 /* @migen@ */
 
 #include "MI.h"
-#if defined(_MSC_VER)
 #include "MSFT_DSCLocalConfigurationManager.h"
-#else
-#include "omi_msft_dsclocalconfigurationmanager.h"
-#endif
 #include "LocalConfigurationManager.h"
 #include "EngineHelper.h"
 #include "EventWrapper.h"
