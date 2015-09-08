@@ -62,21 +62,22 @@ void MI_CALL RegistrationManager_Destroy(
     MI_Uint32 i = 0;
         if (self != NULL)
         {
-                for (i = 0; i < self->numberOfServerURLs; i++)
-                {
-                        if (self->serverURLs[i] != NULL)
-                        {
-                                DSC_free(self->serverURLs[i]);
-                        }
-            if (self->serverCertificateThumbprints[i] != NULL)
-            {
-                DSC_free(self->serverCertificateThumbprints[i]);
-            }
-        }
-        self->numberOfServerURLs = 0;
-    
-                free(self);
-                self = NULL;
+	    for (i = 0; i < self->numberOfServerURLs; i++)
+	    {
+		if (self->serverURLs[i] != NULL)
+		{
+		    DSC_free(self->serverURLs[i]);
+		}
+		if (self->serverCertificateThumbprints[i] != NULL)
+		{
+		    DSC_free(self->serverCertificateThumbprints[i]);
+		}
+	    }
+	    self->numberOfServerURLs = 0;
+
+	    DSC_free(self->agentId);
+	    free(self);
+	    self = NULL;
         }
 }
 

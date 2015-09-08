@@ -87,6 +87,7 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/GetConfiguration.py; intermediate/Scripts/GetConfiguration.py; 755; root; root
 /opt/microsoft/dsc/Scripts/SendMetaConfigurationApply.py; intermediate/Scripts/SendMetaConfigurationApply.py; 755; root; root
 /opt/microsoft/dsc/Scripts/GetMetaConfiguration.py; intermediate/Scripts/GetMetaConfiguration.py; 755; root; root
+/opt/microsoft/dsc/Scripts/RollBackConfiguration.py; intermediate/Scripts/RollBackConfiguration.py; 755; root; root
 /opt/microsoft/dsc/Scripts/InstallModule.py; intermediate/Scripts/InstallModule.py; 755; root; root
 /opt/microsoft/dsc/Scripts/RemoveModule.py; intermediate/Scripts/RemoveModule.py; 755; root; root
 /opt/microsoft/dsc/Scripts/RegenerateInitFiles.py; intermediate/Scripts/RegenerateInitFiles.py; 755; root; root
