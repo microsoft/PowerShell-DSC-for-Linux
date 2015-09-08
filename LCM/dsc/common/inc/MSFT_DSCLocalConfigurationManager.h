@@ -383,6 +383,7 @@ typedef struct _MSFT_DSCLocalConfigurationManager_GetConfiguration
     MI_Instance __instance;
     /*OUT*/ MI_ConstUint32Field MIReturn;
     /*IN*/ MI_ConstUint8AField configurationData;
+    /*OUT*/ OMI_BaseResource_ConstArrayRef configurations;
 }
 MSFT_DSCLocalConfigurationManager_GetConfiguration;
 
@@ -477,6 +478,46 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetConfiguration_C
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         1);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetConfiguration_Set_configurations(
+    _Inout_ MSFT_DSCLocalConfigurationManager_GetConfiguration* self,
+    _In_reads_opt_(size) const OMI_BaseResource * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        2,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetConfiguration_SetPtr_configurations(
+    _Inout_ MSFT_DSCLocalConfigurationManager_GetConfiguration* self,
+    _In_reads_opt_(size) const OMI_BaseResource * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        2,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetConfiguration_Clear_configurations(
+    _Inout_ MSFT_DSCLocalConfigurationManager_GetConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        2);
 }
 
 /*
