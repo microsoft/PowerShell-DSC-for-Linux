@@ -2048,6 +2048,8 @@ MI_Result MI_CALL Do_Register(
     r = MI_Instance_GetElement(managerInstance, "ServerURL", &val, NULL, NULL, NULL);
     
     r = Pull_Register(val.string, agentId, x_ms_header, auth_header, requestBody);
+    DSC_free(requestBody);
+    DSC_free(header);
     if (r != MI_RESULT_OK)
     {
         *result = DSC_strdup("FailedToRegister");

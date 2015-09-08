@@ -179,7 +179,7 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_RollBack(
     MI_Instance *cimErrorDetails = NULL;
     SetJobId();
     DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
-    if (in->configurationNumber.exists)
+    if (in && in->configurationNumber.exists)
     {
         GetCimMIError(MI_RESULT_INVALID_PARAMETER, &cimErrorDetails, ID_LCM_CONF_NUMBEREXIST);
         MI_PostCimError(context, cimErrorDetails);
