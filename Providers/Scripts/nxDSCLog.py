@@ -35,9 +35,12 @@ class DSCLog(object):
         prefix = '/opt/omi'
         if 'OMI_HOME' in os.environ.keys():
             prefix = os.environ['OMI_HOME']
-        if not os.path.exists(prefix+'/var/log'):
-            os.system('mkdir -p ' + prefix+'/var/log') 
-        self.file_path = prefix+'/var/log/dsc.log'
+        if prefix == "/opt/omi":
+            self.file_path = "/var/opt/omi/log/dsc.log"
+        else:
+            if not os.path.exists(prefix+'/var/log'):
+                os.system('mkdir -p ' + prefix+'/var/log')
+            self.file_path = prefix+'/var/log/dsc.log'
 
     def Log(self, log_level, message):
         last_frame = inspect.currentframe().f_back
