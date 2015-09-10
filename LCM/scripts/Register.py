@@ -1,4 +1,4 @@
-#!/usr/bin/python
+﻿#!/usr/bin/python
 import sys
 import os
 import os.path
@@ -101,6 +101,6 @@ f = open(meta_path, "w")
 f.write(metaConfig)
 f.close()
 
-os.system("/opt/microsoft/dsc/Scripts/SendMetaConfigurationApply.py -configurationmof " + meta_path)
+os.system("/opt/microsoft/dsc/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
 shutil.rmtree(tempdir)
