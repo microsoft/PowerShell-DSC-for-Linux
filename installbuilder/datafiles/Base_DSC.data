@@ -246,6 +246,10 @@ mkdir -p $CONFIG_DATADIR/dsc/configuration/schema
 mkdir -p $CONFIG_DATADIR/dsc/configuration/registration
 chmod 700 $CONFIG_SYSCONFDIR/dsc
 
+# Make OMI listen on the standard DSC port
+$OMI_HOME/bin/omiconfigeditor httpsport -a 5986 < $CONFIG_SYSCONFDIR/omiserver.conf > $CONFIG_SYSCONFDIR/omiserver.conf_temp
+mv $CONFIG_SYSCONFDIR/omiserver.conf_temp $CONFIG_SYSCONFDIR/omiserver.conf
+
 # Create links in omi's directories for DSC data
 mkdir -p $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
 cp -f /opt/microsoft/dsc/etc/*.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
