@@ -104,18 +104,18 @@ MI_Result Register(
     result = GetThumbprintForRegisteredServerURL(self, request->registrationData, &thumbprint, cimErrorDetails);
     if (thumbprint == NULL)
     {
-        systemResult = system("openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " CONFIG_CERTSDIR "/oaas.key -out " CONFIG_CERTSDIR "/oaas.crt");
+        systemResult = system("openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " CONFIG_CERTSDIR "/oaas.key_old -out " CONFIG_CERTSDIR "/oaas.crt && openssl rsa -in " CONFIG_CERTSDIR "/oaas.key_old -out " CONFIG_CERTSDIR "/oaas.key && rm -f " CONFIG_CERTSDIR "/oaas.key_old");
         if (systemResult != 0 && errno != 10)
         {
             DSC_EventWriteLCMServerRegCertGenFailed(g_ConfigurationDetails.jobGuidString, self->agentId);
-            return MI_RESULT_FAILED;
+	    return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_PULL_FAILEDTOGENERATECERT);
         }
         
         systemResult = system("openssl x509 -noout -in " CONFIG_CERTSDIR "/oaas.crt -fingerprint | sed 's/^.*=//' > " CONFIG_CERTSDIR "/oaas.thumbprint");
         if (systemResult != 0 && errno != 10)
         {
             DSC_EventWriteLCMServerRegCertGenFailed(g_ConfigurationDetails.jobGuidString, self->agentId);
-            return MI_RESULT_FAILED;
+	    return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_PULL_FAILEDTOGENERATECERT);
         }
         
         {

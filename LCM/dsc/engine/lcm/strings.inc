@@ -528,3 +528,18 @@ INTERNAL_Intlstr_Define1( ID_APPLYCONFIG_RESOURCEERRORLIST,
       			  _In_z_ const PAL_Char*, firstString,
                  	  "Failed to apply the configuration.  These resources produced errors: "  Intlstr_tstr(1) ". Detailed error information can be found in the log file.")
 
+INTERNAL_Intlstr_Define1( ID_PULL_REPORTINGFAILED,
+			  ID_PULL_REPORTINGFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "Failed to report to all reporting servers.  Last server failed with HTTP response code: "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODEREGISTER,
+			  ID_PULL_SERVERHTTPERRORCODEREGISTER,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Failed to register with a pull server at url: " Intlstr_tstr(1) ". It responded with error code: "  Intlstr_tstr(2) " for a module.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CERTOPTS_NOT_SUPPORTED,ID_PULL_CERTOPTS_NOT_SUPPORTED,"cURL does not support setting certificate options on this system.")
+
+
+INTERNAL_Intlstr_Define0( ID_PULL_FAILEDTOGENERATECERT, ID_PULL_FAILEDTOGENERATECERT,"Failed to generate certificate and private key for pull server communication.")  
