@@ -1970,7 +1970,8 @@ extern MI_Result Pull_Register(MI_Char* serverURL,
                                MI_Char* agentId,
                                MI_Char* x_ms_header,
                                MI_Char* auth_header,
-                               MI_Char* requestBody);
+                               MI_Char* requestBody,
+			       _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 static const char * const s_ManagerInstanceNames[] = { "",
                                                        "ConfigurationRepository",
@@ -2047,14 +2048,14 @@ MI_Result MI_CALL Do_Register(
 
     r = MI_Instance_GetElement(managerInstance, "ServerURL", &val, NULL, NULL, NULL);
     
-    r = Pull_Register(val.string, agentId, x_ms_header, auth_header, requestBody);
+    r = Pull_Register(val.string, agentId, x_ms_header, auth_header, requestBody, extendedError);
     DSC_free(requestBody);
     DSC_free(header);
     if (r != MI_RESULT_OK)
     {
         *result = DSC_strdup("FailedToRegister");
         *getActionStatusCode = 32;
-        return MI_RESULT_FAILED;
+        return r;
     }
 
     *result = DSC_strdup(REGISTER_STATUSCODE_CREATED);

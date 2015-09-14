@@ -2570,7 +2570,8 @@ MI_Result Pull_Register(MI_Char* serverURL,
                         MI_Char* agentId,
                         MI_Char* x_ms_header,
                         MI_Char* auth_header,
-                        MI_Char* requestBody)
+                        MI_Char* requestBody,
+			_Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     const char *emptyString = "";
@@ -2607,7 +2608,7 @@ MI_Result Pull_Register(MI_Char* serverURL,
         {
             curl_easy_cleanup(curl);
             curl_global_cleanup();
-            return MI_RESULT_FAILED;
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
         }
     }
     
@@ -2632,8 +2633,30 @@ MI_Result Pull_Register(MI_Char* serverURL,
     curl_easy_setopt(curl, CURLOPT_READDATA, &readChunk);
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)strlen(requestBody));
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+    if (res != CURLE_OK)
+      {
+	curl_slist_free_all(list);
+	curl_easy_cleanup(curl);
+	curl_global_cleanup();
+	return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+      }
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
+    if (res != CURLE_OK)
+      {
+	curl_slist_free_all(list);
+	curl_easy_cleanup(curl);
+	curl_global_cleanup();
+	return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+      };
+    res = curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+    if (res != CURLE_OK)
+      {
+	curl_slist_free_all(list);
+	curl_easy_cleanup(curl);
+	curl_global_cleanup();
+	return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+      }
 
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -2650,7 +2673,7 @@ MI_Result Pull_Register(MI_Char* serverURL,
       
       free(headerChunk.data);
       free(dataChunk.data);
-      return MI_RESULT_FAILED;
+      return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, actionUrl, curl_easy_strerror(res));
     }
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
@@ -2665,7 +2688,7 @@ MI_Result Pull_Register(MI_Char* serverURL,
 
       free(headerChunk.data);
       free(dataChunk.data);
-      return MI_RESULT_FAILED;
+      return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_SERVERHTTPERRORCODEREGISTER, actionUrl, responseCode);
     }
 
     curl_slist_free_all(list);
@@ -2820,7 +2843,8 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
     }
     else
     {
-        return MI_RESULT_FAILED;
+      snprintf(dataBuffer, "%d", responseCode);
+      return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_REPORTINGFAILED, dataBuffer);
     }
 
 }

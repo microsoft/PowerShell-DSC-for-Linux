@@ -174,10 +174,12 @@ fi
 if [ $OMISERVER_INSTALLED -eq 0 ]; then
     echo "Error: dsc requires the omi package to be installed"
 fi
-if [ $PREREQ_ERROR -eq 1 ]; then
-    exit 1
-fi
 
+LIBCURL_SO=`ldconfig -p | grep "libcurl.so" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
+if [ -z "$LIBCURL_SO" ]; then
+   echo "Error: Unable to find libcurl.so in ldconfig.  Please install curl."
+   PREREQ_ERROR=1
+fi
 
 #else
 OMISERVER_INSTALLED=1
@@ -199,10 +201,26 @@ if [ -z "$LIBCURL_SO" ]; then
    PREREQ_ERROR=1
 fi
 
+#endif
+
+# test if able to perform an hmac sha256 hash
+hmacSHA256=`echo -n "TestPlaintext" | openssl dgst -sha256 -hmac "mykey"`
+if [ $? -ne 0 ]; then
+   echo "Error: Unable to perform a SHA256 HMAC operation.  Please install a more recent version of OpenSSL that supports this operation."
+   PREREQ_ERROR=1
+   exit 1
+fi
+
+base64hmac=`echo -n "TestPlaintext" | openssl dgst -sha256 -hmac "mykey" | openssl enc -base64 | tr -d "\n"`
+if [ "$base64hmac" != "KHN0ZGluKT0gMGJkNzg3MmNmNGQ4OWQ3Y2FiNjE3MmYzOThjYjMyNmI2MTU2N2MyMTRkNDY1NmFhZWY5YjJkMzg4ZGIwNmNiYwo=" ]; then
+    echo "Error: The SHA256 HMAC operation did not create proper output on this system.  Please ensure that your openssl libraries are working properly (you may need to reinstall or upgrade them) and then reinstall this agent."
+    PREREQ_ERROR=1
+    exit 1
+fi
+       
 if [ $PREREQ_ERROR -eq 1 ]; then
     exit 1
 fi
-#endif
 
 %Preinstall_200
 tmpfile=`mktemp`
