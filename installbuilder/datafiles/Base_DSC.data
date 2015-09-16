@@ -204,15 +204,15 @@ fi
 #endif
 
 # test if able to perform an hmac sha256 hash
-hmacSHA256=`echo -n "TestPlaintext" | openssl dgst -sha256 -hmac "mykey"`
+hmacSHA256=`echo -n "TestPlaintext" | openssl dgst -binary -sha256 -hmac "mykey"`
 if [ $? -ne 0 ]; then
    echo "Error: Unable to perform a SHA256 HMAC operation.  Please install a more recent version of OpenSSL that supports this operation."
    PREREQ_ERROR=1
    exit 1
 fi
 
-base64hmac=`echo -n "TestPlaintext" | openssl dgst -sha256 -hmac "mykey" | openssl enc -base64 | tr -d "\n"`
-if [ "$base64hmac" != "KHN0ZGluKT0gMGJkNzg3MmNmNGQ4OWQ3Y2FiNjE3MmYzOThjYjMyNmI2MTU2N2MyMTRkNDY1NmFhZWY5YjJkMzg4ZGIwNmNiYwo=" ]; then
+base64hmac=`echo -n "TestPlaintext" | openssl dgst -binary -sha256 -hmac "mykey" | openssl enc -base64 | tr -d "\n"`
+if [ "$base64hmac" != "C9eHLPTYnXyrYXLzmMsya2FWfCFNRlaq75stOI2wbLw=" ]; then
     echo "Error: The SHA256 HMAC operation did not create proper output on this system.  Please ensure that your openssl libraries are working properly (you may need to reinstall or upgrade them) and then reinstall this agent."
     PREREQ_ERROR=1
     exit 1
