@@ -110,12 +110,12 @@ BUILD_LOCAL=$BUILD_LOCAL
 BUILD_DEBUG=$BUILD_DEBUG
 DEBUG_FLAGS=$DEBUG_FLAGS
 
-openssl098_cflags="$openssl098_cflags"
-openssl098_libs="$openssl098_libs"
-openssl098_libdir="$openssl098_libdir"
-openssl100_cflags="$openssl100_cflags"
-openssl100_libs="$openssl100_libs"
-openssl100_libdir="$openssl100_libdir"
+openssl098_cflags=$openssl098_cflags
+openssl098_libs=$openssl098_libs
+openssl098_libdir=$openssl098_libdir
+openssl100_cflags=$openssl100_cflags
+openssl100_libs=$openssl100_libs
+openssl100_libdir=$openssl100_libdir
 EOF
 
 echo "Configured DSC"
