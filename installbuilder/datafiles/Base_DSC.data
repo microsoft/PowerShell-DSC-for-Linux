@@ -294,14 +294,14 @@ if [ -d  $OMI_LIB/Scripts ]; then
 fi
 cp -R /opt/microsoft/dsc/Scripts $OMI_LIB/Scripts
 
-# create symlink from /opt/omi/lib/libcurl.so.3 to wherever libcurl.so is on the system
+# create symlink from /opt/omi/lib/libcurl.so.4 to wherever libcurl.so is on the system
 LIBCURL_SO=`ldconfig -p | grep "libcurl.so" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
    echo "Error: Unable to find libcurl.so in ldconfig.  Please install curl."
    exit 1
 fi
 
-ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.3
+ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.4
 
 /opt/microsoft/dsc/Scripts/RegenerateInitFiles.py
 
