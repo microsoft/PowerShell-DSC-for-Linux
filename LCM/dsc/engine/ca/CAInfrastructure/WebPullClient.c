@@ -2571,7 +2571,7 @@ MI_Result Pull_Register(MI_Char* serverURL,
                         MI_Char* x_ms_header,
                         MI_Char* auth_header,
                         MI_Char* requestBody,
-			_Outptr_result_maybenull_ MI_Instance **extendedError)
+                        _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     const char *emptyString = "";
@@ -2636,26 +2636,26 @@ MI_Result Pull_Register(MI_Char* serverURL,
     res = curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
     if (res != CURLE_OK)
       {
-	curl_slist_free_all(list);
-	curl_easy_cleanup(curl);
-	curl_global_cleanup();
-	return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       }
     res = curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
     if (res != CURLE_OK)
       {
-	curl_slist_free_all(list);
-	curl_easy_cleanup(curl);
-	curl_global_cleanup();
-	return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       };
     res = curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
     if (res != CURLE_OK)
       {
-	curl_slist_free_all(list);
-	curl_easy_cleanup(curl);
-	curl_global_cleanup();
-	return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       }
 
 
@@ -2680,15 +2680,17 @@ MI_Result Pull_Register(MI_Char* serverURL,
 
     if (responseCode != 200 && responseCode != 201 && responseCode != 204)
     {
-      // Error on register
-      
-      curl_slist_free_all(list);
-      curl_easy_cleanup(curl);
-      curl_global_cleanup();
-
-      free(headerChunk.data);
-      free(dataChunk.data);
-      return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_SERVERHTTPERRORCODEREGISTER, actionUrl, responseCode);
+        MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};
+        // Error on register
+        
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        curl_global_cleanup();
+        
+        free(headerChunk.data);
+        free(dataChunk.data);
+        Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), responseCode);
+        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_SERVERHTTPERRORCODEREGISTER, actionUrl, statusCodeValue);
     }
 
     curl_slist_free_all(list);
@@ -2843,7 +2845,8 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
     }
     else
     {
-      snprintf(dataBuffer, "%d", responseCode);
+      MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};
+      Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), responseCode);
       return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_REPORTINGFAILED, dataBuffer);
     }
 
