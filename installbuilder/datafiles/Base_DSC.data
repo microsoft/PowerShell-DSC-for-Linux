@@ -301,6 +301,7 @@ if [ -z "$LIBCURL_SO" ]; then
    exit 1
 fi
 
+ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.3
 ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.4
 
 /opt/microsoft/dsc/Scripts/RegenerateInitFiles.py
