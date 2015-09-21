@@ -1,0 +1,26 @@
+/*
+@TargetNode='10.0.2.2'
+@GeneratedBy=matt
+@GenerationDate=01/07/2015 15:32:47
+@GenerationHost=EGWIN7
+*/
+
+instance of MSFT_nxServiceResource as $MSFT_nxServiceResource1ref
+{
+  ResourceID = "[nxService]myTestService";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+  Name="mysql";
+  Controller="init";
+  Enabled=True;
+  State="Stopped";
+};
+
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};
+

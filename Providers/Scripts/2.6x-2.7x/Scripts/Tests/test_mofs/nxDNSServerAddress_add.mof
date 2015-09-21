@@ -1,0 +1,26 @@
+/*
+@TargetNode='10.0.2.2'
+@GeneratedBy=matt
+@GenerationDate=01/07/2015 15:32:47
+@GenerationHost=EGWIN7
+*/
+
+instance of MSFT_nxDNSServerAddressResource as $MSFT_nxDNSServerAddressResource1ref
+{
+  ResourceID = "[nxDNSServerAddress]myDNS";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+  Address = { "1.1.1.1","2.2.2.2","3.3.3.3" } ;
+  AddressFamily = "IPv4";
+  Ensure = "Present";
+
+};
+
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};
+
