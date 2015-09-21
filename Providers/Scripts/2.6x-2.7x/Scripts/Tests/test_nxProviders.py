@@ -13,7 +13,9 @@ import base64
 import platform
 import pwd
 import codecs
-
+import ctypes
+import re
+import inspect
 from contextlib import contextmanager
 
 @contextmanager
@@ -33,6 +35,84 @@ def opened_w_error(filename, mode="r"):
 
 os.system('tar -zxvf ./unittest2-0.5.1.tar.gz ')
 os.system('cd ./unittest2-0.5.1 && python ./setup.py install --prefix=/usr/local')
+
+def ParseMOF(mof_file):
+    srch_list_elem=r'(=[ ]+)({)(.*?)(})([ ]?;)'
+    repl_list_elem = r'\1[\3]\5'
+    srch_instance=r'(?P<instance>instance)[ ,\n]+of[ ,\n]+(?!OMI)(?P<inst_type>.*?)[ ,\n]+as[ ,\n]+(?P<inst_value>.*?)[ ,\n]?{([ ,\n]+)?(?P<inst_text>.*?)}[ ,\n]?;'
+    value_srch_str=r'([ ,\n]+)?(?P<name>.*?)([ ]+)?=([ ]+)?(?P<value>.*?)([ ]+)?;'
+    instance_srch_str=r'([ ,\n]+)?ResourceID([ ]+)?=([ ]+)?"\[(?P<module>.*?)\](?P<ResourceID>.*?)"([ ]+)?;'
+    list_elem=re.compile(srch_list_elem,re.M|re.S)
+    instance=re.compile(srch_instance,re.M|re.S)
+    value_srch=re.compile(value_srch_str,re.M|re.S)
+    instance_srch=re.compile(instance_srch_str,re.M|re.S)
+    mof_text=open(mof_file,'r').read()
+    mof_text=list_elem.sub(repl_list_elem,mof_text)
+    matches=instance.finditer(mof_text)
+    d={}
+    d.clear()
+    curinst=''
+    for match in matches:
+        values=match.group('inst_text')
+        values=re.sub('(/[*].*?[*]/)','',values)
+        i=instance_srch.search(values)
+        curinst='['+i.group('module')+']'+i.group('ResourceID').strip('"')
+        d[curinst]={}
+        v=value_srch.finditer(values)
+        for pair in v:
+            name=pair.group('name')
+            value=pair.group('value')
+            if value.lower().strip() == 'false':
+                value='False'
+            if value.lower().strip() == 'true':
+                value='True'
+            d[curinst][name]=eval(value)
+    d[curinst].pop('ResourceID')
+    d[curinst].pop('ModuleName')
+    d[curinst].pop('ModuleVersion')
+    if 'DependsOn' in d[curinst].keys():
+        d[curinst].pop('DependsOn')
+    the_module = globals ()[i.group('module')]
+    argspec=inspect.getargspec(the_module.__dict__['Set_Marshall'])
+    if type(argspec) == tuple :
+        args=argspec[0]
+    else :
+        args=argspec.args
+    for arg in args:
+        if arg not in d[curinst].keys():
+            d[curinst][arg]=None
+    return d[curinst]
+
+def check_values(s,d):
+    if s[0] != d[0]:
+        return False
+    sd=s[1]
+    dd=d[1]
+    for k in sd.keys():
+        if sd[k] == None or dd[k] == None:
+            continue
+        if sd[k].value==None or dd[k].value==None:
+            continue
+        if type(sd[k].value) == ctypes.c_bool:
+            if sd[k].value.value==None or dd[k].value.value==None:
+                continue
+            if sd[k].value.value != dd[k].value.value:
+                print k+': '+str(sd[k].value.value)+' != '+str(dd[k].value.value)+'\n'
+                return False
+            continue
+        if type(sd[k].value) == list:
+            l=[]
+            for e in sd[k].value:
+                if type(e) == unicode:
+                    e=e.decode('ascii','ignore')
+                l.append(e)
+            sd[k].value = l
+        if type(sd[k].value) == unicode:
+           sd[k].value = sd[k].value.decode('ascii','ignore')
+        elif sd[k].value != dd[k].value:
+            print k+': '+str(sd[k].value)+' != '+str(dd[k].value)+'\n'
+            return False
+    return True
 
 def RunGetOutput(cmd,no_output,chk_err=True):
     """
@@ -101,9 +181,17 @@ nxService=imp.load_source('nxService','../nxService.py')
 nxPackage=imp.load_source('nxPackage','../nxPackage.py') 
 nxSshAuthorizedKeys=imp.load_source('nxSshAuthorizedKeys','../nxSshAuthorizedKeys.py')
 nxEnvironment=imp.load_source('nxEnvironment','../nxEnvironment.py')
-nxExec=imp.load_source('nxExec','../nxExec.py')
+nxFirewall=imp.load_source('nxFirewall','../nxFirewall.py')
+nxIPAddress=imp.load_source('nxIPAddress', '../nxIPAddress.py')
+nxComputer=imp.load_source('nxComputer', '../nxComputer.py')
+nxDNSServerAddress=imp.load_source('nxDNSServerAddress', '../nxDNSServerAddress.py')
+nxFileLine=imp.load_source('nxFileLine', '../nxFileLine.py')
+nxArchive=imp.load_source('nxArchive', '../nxArchive.py')
+nxMySqlUser=imp.load_source('nxMySqlUser', '../nxMySqlUser.py')
+nxMySqlGrant=imp.load_source('nxMySqlGrant', '../nxMySqlGrant.py')
+nxMySqlDatabase=imp.load_source('nxMySqlDatabase', '../nxMySqlDatabase.py')
 
-class LinuxUserTestCases(unittest2.TestCase):
+class nxUserTestCases(unittest2.TestCase):
     """
     Test cases for nxUser.py
     """
@@ -135,19 +223,60 @@ class LinuxUserTestCases(unittest2.TestCase):
         m = hashlib.sha1()
         m.update(pswd+salt)
         return base64.b64encode(m.digest()+salt)
+
+    def make_MI(self,retval,UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+        d=dict();
+        if UserName == None :
+            d['UserName'] = None
+        else :
+            d['UserName'] = nxUser.protocol.MI_String(UserName)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxUser.protocol.MI_String(Ensure)
+        if FullName == None :
+            d['FullName'] = None
+        else :
+            d['FullName'] = nxUser.protocol.MI_String(FullName)
+        if PasswordChangeRequired == None :
+            d['PasswordChangeRequired'] = None
+        else :
+            d['PasswordChangeRequired'] = nxUser.protocol.MI_Boolean(PasswordChangeRequired)
+        if Disabled == None :
+            d['Disabled'] = None
+        else :
+            d['Disabled'] = nxUser.protocol.MI_Boolean(Disabled)
+        if Description == None :
+            d['Description'] = None
+        else :
+            d['Description'] = nxUser.protocol.MI_String(Description)
+        if Password == None :
+            d['Password'] = None
+        else :
+            d['Password'] = nxUser.protocol.MI_String(Password)
+        if HomeDirectory == None :
+            d['HomeDirectory'] = None
+        else :
+            d['HomeDirectory'] = nxUser.protocol.MI_String(HomeDirectory)
+        if GroupID == None :
+            d['GroupID'] = None
+        else :
+            d['GroupID'] = nxUser.protocol.MI_String(GroupID)
+        return retval,d
     
     def testSetUserAbsentError(self):
-        self.assertTrue(nxUser.Set("jojoma", "Absent", "", "", "", "", "", "", "" )!=
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Absent", "", "", "", "", "", "", "" )!=
                         [0],'Set("jojoma", "Absent", "", "", "", "", "", "", "" ) should return !=[0]')
 
     def testSetUserPresent(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
 
     def testGetUserAbsent(self):
-        assert nxUser.Get("jojoma", "", "", "", "", "", "", "", "" )[:3]== \
-               [0,"jojoma","Absent"],'Get("jojoma", "", "", "", "", "", "", "", "" )[:3] should return ==[0,"jojoma","Absent"]'
+        assert check_values(nxUser.Get_Marshall("jojoma", "absent", "", "", "", "", "", "", "" ), \
+                self.make_MI(0,"jojoma", "absent", "", "", "", "", "", "", ""))  ==  True, \
+                'Get("jojoma", "", "", "", "", "", "", "", "" )[:3] should return ==[0,"jojoma","absent"]'
 
     def testGetUserPresent(self):
         """
@@ -155,137 +284,139 @@ class LinuxUserTestCases(unittest2.TestCase):
         """
         pswd=self.pswd_hash('jojoma')
         grpid=str(grp.getgrnam('mail')[2])
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
-                        [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Get("jojoma", "", "", "", "", "", "", "", "" )==[0,"jojoma","Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma",grpid],
-                        'Get("jojoma", "", "", "", "", "", "", "", "" )[:3] should return ==[0,"jojoma","Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail"]')
-
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", grpid )==  [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "8" ) should return == [0]')
+        self.assertTrue(check_values(nxUser.Get_Marshall \
+        ("jojoma", "", "", "", "", "", "", "", "" ),self.make_MI(0,"jojoma","present", \
+        "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma",grpid)), \
+        'Get("jojoma", "", "", "", "", "", "", "", "" )[:3] should return ==[0,"jojoma","present", "JO JO MA", "JOJOMA", ' \
+        +pswd+', False, False, "/home/jojoma", "'+grpid+'"]')
+        
     def testTestUserAbsent(self):
-        self.assertTrue(nxUser.Test("jojoma", "Absent", "", "", "", "", "", "", "" ) ==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Absent", "", "", "", "", "", "", "" ) ==
                         [0],'Test("jojoma", "Absent", "", "", "", "", "", "", "" ) should return ==[0]')
 
     def testTestUserAbsentError(self):
-        self.assertTrue(nxUser.Test("root", "Absent", "", "", "", "", "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("root", "Absent", "", "", "", "", "", "", "" )==
                         [-1],'Test("root", "", "", "", "", "", "", "", "" ) should return ==[-1]')
         
     def testTestUserPresent(self):
-        self.assertTrue(nxUser.Test("root", "Present", "", "", "", "", "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("root", "Present", "", "", "", "", "", "", "" )==
                         [0],'Test("root", "Present", "", "", "", "", "", "", "" ) should return ==[0]')
 
     def testTestUserPresentError(self):
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", "", "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "", "", "", "", "", "" )==
                         [-1],'Test("jojoma", "Present", "", "", "", "", "", "", "" ) should return ==[-1]')
 
     def testTestUserFullName(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "", "", "", "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MA", "", "", "", "", "", "" )==
                         [0],'Test("jojoma", "Present", "JO JO MA", "", "", "", "", "", "" ) should return ==[0]')
 
     def testTestUserDescription(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "JOJOMA", "", "", "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "JOJOMA", "", "", "", "", "" )==
                         [0],'Test("jojoma", "Present", "", "JOJOMA", "", "", "", "", "" ) should return ==[0]')
 
     def testTestUserHomeDirectory(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", False, False, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "", "", False, False, "/home/jojoma", "" )==
                         [0],'Test("jojoma", "Present", "", "", "", False, False, "/home/jojoma", "" ) should return ==[0]')
 
     def testTestUserGroupID(self):
         pswd=self.pswd_hash('jojoma')
         grpid=str(grp.getgrnam('mail')[2])
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", "", "", "", grpid )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "", "", "", "", "", grpid )==
                         [0],'Test("jojoma", "Present", "", "", "", "", "", "", "'+ grpid+ '" ) should return ==[0]')
         
     def testTestUserPassword(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", pswd, "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "", "", pswd, "", "", "" )==
                         [0],'Test("jojoma", "Present", "", "", "", '+pswd+', "", "", "" ) should return ==[0]')
 
     def testTestUserFullNameError(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MAMA", "", "", "", "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MAMA", "", "", "", "", "", "" )==
                         [-1],'Test("jojoma", "Present", "JO JO MAMA", "", "", "", "", "", "" ) should return ==[-1]')
 
     def testTestUserDescriptionError(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "", "JOJOMA", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "NOTJOJOMA", "", "", "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "NOTJOJOMA", "", "", "", "", "" )==
                         [-1],'Test("jojoma", "Present", "", "NOTJOJOMA", "", "", "", "", "" ) should return ==[-1]')
 
     def testTestUserHomeDirectoryError(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", "", "", "/home/ojoma", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "", "", "", "", "/home/ojoma", "" )==
                         [-1],'Test("jojoma", "Present", "", "", "", "", "", "/home/ojoma", "" ) should return ==[-1]')
 
     def testTestUserGroupIDError(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "", "", "", "", "", 1200 )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "", "", "", "", "", '1200' )==
                         [-1],'Test("jojoma", "Present", "", "", "", "", "", "", 1200 ) should return ==[-1]')
 
     def testTestUserPasswordError(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "", "", pswd, False, False, "/home/jojoma", "mail" )==
                         [0],'Set("jojoma", "Present", "", "", '+pswd+', False, False, "/home/jojoma", "mail" ) should return == [0]')
         pswd=self.pswd_hash('jojomama')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "", "", pswd , "", "", "", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "", "", pswd , "", "", "", "" )==
                         [-1],'Test("jojoma", "Present", "", "", "'+pswd+'", "", "", "", "" ) should return ==[-1]')
 
     def testSetUserDisabled(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', True, False, "/home/jojoma", "" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
                         [0],'Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" ) should return ==[0]')
         
 
     def testSetUserDisabledError(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" )==
                         [-1],'Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, True, False, "/home/jojoma", "" ) should return ==[-1]')
 
     def testSetUserExpired(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, True, "/home/jojoma", "" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
                         [0],'Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" ) should return ==[0]')
 
 
     def testSetUserExpiredError(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
                         [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
                         [-1],'Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" ) should return ==[-1]')
 
     def testSetUserNotExpiredError(self):
         pswd=self.pswd_hash('jojoma')
-        self.assertTrue(nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
  [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, True, "/home/jojoma", "" ) should return == [0]')
-        self.assertTrue(nxUser.Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
+        self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
  [-1],'Test("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "" ) should return == [-1]')
 
-class LinuxGroupTestCases(unittest2.TestCase):
+class nxGroupTestCases(unittest2.TestCase):
     """
     Test cases for nxGroup.py
     """
@@ -320,87 +451,117 @@ class LinuxGroupTestCases(unittest2.TestCase):
         m.update(pswd+salt)
         return base64.b64encode(m.digest()+salt)
 
+    def make_MI(self,retval,GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
+        d=dict();
+        if GroupName == None :
+            d['GroupName'] = None
+        else :
+            d['GroupName'] = nxGroup.protocol.MI_String(GroupName)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxGroup.protocol.MI_String(Ensure)
+        if Members == None :
+            d['Members'] = None
+        else :
+            d['Members'] = nxGroup.protocol.MI_StringA(Members)
+        if MembersToInclude == None :
+            d['MembersToInclude'] = None
+        else :
+            d['MembersToInclude'] = nxGroup.protocol.MI_StringA(MembersToInclude)
+        if MembersToExclude == None :
+            d['MembersToExclude'] = None
+        else :
+            d['MembersToExclude'] = nxGroup.protocol.MI_StringA(MembersToExclude)
+        if PreferredGroupID == None :
+            d['PreferredGroupID'] = None
+        else :
+            d['PreferredGroupID'] = nxGroup.protocol.MI_String(PreferredGroupID)
+        return retval,d
+
     # Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID)
     
     def testSetGroupPresent(self):
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) should return == [0]')
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", ["jojoma"], "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", ["jojoma"], "", "", "1101" ) should return == [0]')
 
     def testSetGroupAbsent(self):
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) should return == [0]')
-        self.assertTrue(nxGroup.Set("jojomamas", "Absent", ["jojoma"], "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Absent", ["jojoma"], "", "", 1101 ) should return == [0]')
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", ["jojoma"], "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", ["jojoma"], "", "", "1101" ) should return == [0]')
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Absent", ["jojoma"], "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Absent", ["jojoma"], "", "", "1101" ) should return == [0]')
 
     def testGetGroupAbsent(self):
-        self.assertTrue(nxGroup.Get("jojomamas", "", "", "", "", "")[:3]==
-                        [0,"jojomamas","Absent"],'Get("jojomamas", "", "", "", "", "")[:3] should return ==[0,"jojomamas","Absent"]')
+        self.assertTrue(check_values(nxGroup.Get_Marshall \
+        ("jojomamas", "Absent", "", "", "", ""),self.make_MI(0,"jojomamas","absent",None ,None ,None , None )), \
+        'Get("jojomamas", "", "", "", "", "")[:3] should return ==[0,"jojomamas","absent"]')
 
     def testGetGroupPresent(self):
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", ["jojoma"], "", "", 1101 ) should return == [0]')
-        print 'GET='+repr(nxGroup.Get("jojomamas", "", "", "", "", "")[:6])
-        self.assertTrue(nxGroup.Get("jojomamas", "", "", "", "", "")[:6]==
-                        [0,"jojomamas","Present", ['jojoma'], "", ""],                'Get("jojomamas", "", "", "", "", "")[:6] should return ==[0,"jojomamas","Present", "", "", ""]')
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", ["jojoma"], "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", ["jojoma"], "", "", "1101" ) should return == [0]')
+        grpid=str(grp.getgrnam('jojomamas')[2])
+        self.assertTrue(check_values(nxGroup.Get_Marshall("jojomamas", "Present", ['jojoma'], "", "", grpid), \
+        self.make_MI(0,"jojomamas","present", ['jojoma'],None ,None , grpid)),'Get("jojomamas", "", "", "", "", "")[:6] should return ==[0,"jojomamas","present", "", "", ""]')
 
     def testTestGroupAbsent(self):
-        self.assertTrue(nxGroup.Test("jojomamas", "Absent", "", "", "", "") ==
+        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Absent", "", "", "", "") ==
                         [0],'Test("jojomamas", "Absent", "", "", "", "") should return ==[0]')
 
     def testTestGroupAbsentError(self):
-        self.assertTrue(nxGroup.Test("mail", "Absent", "", "", "", "")==
+        self.assertTrue(nxGroup.Test_Marshall("mail", "Absent", "", "", "", "")==
                         [-1],'Test("mail", "Absent", "", "", "", "") should return ==[-1]')
 
     def testTestGroupPresent(self):
-        self.assertTrue(nxGroup.Test("mail", "Present", "", "", "", "")==
+        self.assertTrue(nxGroup.Test_Marshall("mail", "Present", "", "", "", "")==
                         [0],'Test("mail", "Present", "", "", "", "") should return ==[0]')
 
     def testTestGroupPresentError(self):
-        self.assertTrue(nxGroup.Test("jojomamas", "Present", "", "", "", "")==
+        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", "", "", "", "")==
                         [-1],'Test("jojomamas", "Present", "", "", "", "") should return ==[-1]')
 
     def testSetGroupPresentMembers(self):
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", ("jojoma","root"), "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", ("jojoma","root"), "", "", 1101 ) should return == [0]')
-        self.assertTrue(nxGroup.Test("jojomamas", "Present", ("jojoma","root"), "", "", "")==
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", ("jojoma","root"), "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", ("jojoma","root"), "", "", "1101" ) should return == [0]')
+        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", ("jojoma","root"), "", "", "")==
                         [0],'Test("jojomamas", "Present", ("jojoma","root"), "", "", "") should return ==[0]')
 
     def testSetGroupPresentMembersInclude(self):
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", "", "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", "", "", "", 1101 ) should return == [0]')
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", "", ["jojoma"], "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", "", ["jojoma"], "", 1101 ) should return == [0]')
-        self.assertTrue(nxGroup.Test("jojomamas", "Present", ["jojoma"], "", "", "")==
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", "", "", "", "1101" ) should return == [0]')
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", ["jojoma"], "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", "", ["jojoma"], "", "1101" ) should return == [0]')
+        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", ["jojoma"], "", "", "")==
                         [0],'Test("jojomamas", "Present", ["jojoma"], "", "", "") should return ==[0]')
 
     def testSetGroupPresentMembersExclude(self):
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", ("jojoma","root"), "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", ("jojoma","root"), "", "", 1101 ) should return == [0]')
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", "", "", ["jojoma"], 1101 ) ==
-                        [0],'Set("jojomamas", "Present", "", "", ("jojoma"), 1101 ) should return == [0]')
-        self.assertTrue(nxGroup.Test("jojomamas", "Present", ["root"], "", "", "")==
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", ["jojoma","root"], "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", ("jojoma","root"), "", "", "1101" ) should return == [0]')
+        # Below is a bug in nxGroup
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", "", ["jojoma"], "1101" ) ==
+                        [0],'Set("jojomamas", "Present", "", "", ("jojoma"), "1101" ) should return == [0]')
+        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", ["root"], "", "", "")==
                         [0],'Test("jojomamas", "Present", "root", "", "", "") should return ==[0]')
 
     def testSetGroupPresentMembersIncludeError(self):
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", "", "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", "", "", "", 1101 ) should return == [0]')
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", "", ["ojoma"], "", 1101 ) ==
-                        [-1],'Set("jojomamas", "Present", "", "ojoma", "", 1101 ) should return == [-1]')
-        print "TEST="+repr(nxGroup.Test("jojomamas", "Present", ["ojoma"], "", "", ""))
-        self.assertTrue(nxGroup.Test("jojomamas", "Present", ["ojoma"], "", "", "")==
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", "", "", "", "1101" ) should return == [0]')
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", ["ojoma"], "", "1101" ) ==
+                        [-1],'Set("jojomamas", "Present", "", "ojoma", "", "1101" ) should return == [-1]')
+        print "TEST="+repr(nxGroup.Test_Marshall("jojomamas", "Present", ["ojoma"], "", "", ""))
+        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", ["ojoma"], "", "", "")==
                         [-1],'Test("jojomamas", "Present", ["ojoma"], "", "", "") should return ==[-1]')
 
     def testSetGroupPresentMembersExcludeError(self):
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", ["root"], "", "", 1101 ) ==
-                        [0],'Set("jojomamas", "Present", ["root"], "", "", 1101 ) should return == [0]')
-        self.assertTrue(nxGroup.Set("jojomamas", "Present", "", "", ["jojoma"], 1101 ) ==
-                        [0],'Set("jojomamas", "Present", "", "", ["jojoma"], 1101 ) should return == [0]')
-        print "TEST="+repr(nxGroup.Test("jojomamas", "Present", ["jojoma"], "", "", ""))
-        self.assertTrue(nxGroup.Test("jojomamas", "Present", ["jojoma"], "", "", "")==
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", ["root"], "", "", "1101" ) ==
+                        [0],'Set("jojomamas", "Present", ["root"], "", "", "1101" ) should return == [0]')
+        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", "", ["jojoma"], "1101" ) ==
+                        [0],'Set("jojomamas", "Present", "", "", ["jojoma"], "1101" ) should return == [0]')
+        print "TEST="+repr(nxGroup.Test_Marshall("jojomamas", "Present", ["jojoma"], "", "", ""))
+        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", ["jojoma"], "", "", "")==
                         [-1],'Test("jojomamas", "Present", "root", "", "", "") should return ==[-1]')
 
 
-class LinuxScriptTestCases(unittest2.TestCase):
+class nxScriptTestCases(unittest2.TestCase):
     """
     Test cases for nxScript.py
     """
@@ -410,11 +571,9 @@ class LinuxScriptTestCases(unittest2.TestCase):
         """
         os.system('useradd -m jojoma ')
         time.sleep(1)
-        self.get_script='#!/bin/bash \ncd ~\nls -lart\n'
-        self.test_script='#!/bin/bash \ncd ~\ntouch ./testfile\n'
+        self.get_script='#!/bin/bash \ncd ~\ncat ./testfile\n'
+        self.test_script='#!/bin/bash \ncd ~\ngrep  "set script successfull" ./testfile\n'
         self.set_script='#!/bin/bash \ncd ~\necho "set script successfull" > ./testfile\n'
-        self.get_script_loop='#!/bin/bash \ncd ~\nwhile true ; do ls -lart; sleep 5; done\n'
-
         
     def tearDown(self):
         """
@@ -429,68 +588,104 @@ class LinuxScriptTestCases(unittest2.TestCase):
         """
         pass
 
+    def make_MI(self,retval,GetScript, SetScript, TestScript, User, Group, Result):
+        d=dict();
+        if GetScript == None :
+            d['GetScript'] = None
+        else :
+            d['GetScript'] = nxScript.protocol.MI_String(GetScript)
+        if SetScript == None :
+            d['SetScript'] = None
+        else :
+            d['SetScript'] = nxScript.protocol.MI_String(SetScript)
+        if TestScript == None :
+            d['TestScript'] = None
+        else :
+            d['TestScript'] = nxScript.protocol.MI_String(TestScript)
+        if User == None :
+            d['User'] = None
+        else :
+            d['User'] = nxScript.protocol.MI_String(User)
+        if Group == None :
+            d['Group'] = None
+        else :
+            d['Group'] = nxScript.protocol.MI_String(Group)
+        if Result == None :
+            d['Result'] = None
+        else :
+            d['Result'] = nxScript.protocol.MI_String(Result)
+        return retval,d
+
     def testGetScriptUser(self):
-        r=nxScript.Get(self.get_script,self.set_script,self.test_script, "jojoma", "" )
+        nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
+        r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
         print 'GET='+repr(r)
-        self.assertTrue(r[0] == 0,'nxScript.Get(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
+        self.assertTrue(check_values(r,self.make_MI(0,self.get_script,self.set_script,self.test_script, "jojoma", "", "set script successfull\n" )) == True,'nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testTestScriptUser(self):
-        r=nxScript.Test(self.get_script,self.set_script,self.test_script, "jojoma", "" )
+        nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
+        r=nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
         print 'TEST='+repr(r)
-        self.assertTrue(r == [0],'nxScript.Test(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
+        self.assertTrue(r == [0],'nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testSetScriptUser(self):
-        r=nxScript.Set(self.get_script,self.set_script,self.test_script, "jojoma", "" )
+        r=nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
         print 'SET='+repr(r)
-        self.assertTrue(r[0] == 0,'nxScript.Set(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
+        self.assertTrue(r[0] == 0,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testGetScriptGroup(self):
-        r=nxScript.Get(self.get_script,self.set_script,self.test_script, "", "mail" )
+        nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
+        r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
         print 'GET='+repr(r)
-        self.assertTrue(r[0] == 0,'nxScript.Get(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
+        self.assertTrue(check_values(r,self.make_MI(0,self.get_script,self.set_script,self.test_script, "", "mail", "set script successfull\n" )) == True,'nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
     def testTestScriptGroup(self):
-        r=nxScript.Test(self.get_script,self.set_script,self.test_script, "", "mail" )
+        nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
+        r=nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
         print 'TEST='+repr(r)
-        self.assertTrue(r == [0],'nxScript.Test(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
+        self.assertTrue(r == [0],'nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
     def testSetScriptGroup(self):
-        r=nxScript.Set(self.get_script,self.set_script,self.test_script, "", "mail" )
+        r=nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
         print 'SET='+repr(r)
-        self.assertTrue(r[0] == 0,'nxScript.Set(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
+        self.assertTrue(r[0] == 0,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
 
     def testGetScriptUserError(self):
-        r=nxScript.Get(self.get_script,self.set_script,self.test_script, "ojoma", "" )
+        nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
+        r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )
         print 'GET='+repr(r)
-        self.assertTrue(r[0] == -1,'nxScript.Get(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
+        self.assertTrue(check_values(r,self.make_MI(0,self.get_script,self.set_script,self.test_script, "ojoma", "", "set script successfull\n") ) == False,'nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testTestScriptUserError(self):
-        r=nxScript.Test(self.get_script,self.set_script,self.test_script, "ojoma", "" )
+        nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
+        r=nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )
         print 'TEST='+repr(r)
-        self.assertTrue(r == [-1],'nxScript.Test(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
+        self.assertTrue(r == [-1],'nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testSetScriptUserError(self):
-        r=nxScript.Set(self.get_script,self.set_script,self.test_script, "ojoma", "" )
+        r=nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )
         print 'SET='+repr(r)
-        self.assertTrue(r[0] == -1,'nxScript.Set(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
+        self.assertTrue(r[0] == -1,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testGetScriptGroupError(self):
-        r=nxScript.Get(self.get_script,self.set_script,self.test_script, "", "ojoma" )
+        nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
+        r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
         print 'GET='+repr(r)
-        self.assertTrue(r[0] == -1,'nxScript.Get(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
+        self.assertTrue(check_values(r,self.make_MI(0,self.get_script,self.set_script,self.test_script, "", "ojoma" , "set script successfull\n")) == False,'nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
     def testTestScriptGroupError(self):
-        r=nxScript.Test(self.get_script,self.set_script,self.test_script, "", "ojoma" )
+        nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
+        r=nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
         print 'TEST='+repr(r)
-        self.assertTrue(r == [-1],'nxScript.Test(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
+        self.assertTrue(r == [-1],'nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
     def testSetScriptGroupError(self):
-        r=nxScript.Set(self.get_script,self.set_script,self.test_script, "", "ojoma" )
+        r=nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
         print 'SET='+repr(r)
-        self.assertTrue(r[0] == -1,'nxScript.Set(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
+        self.assertTrue(r[0] == -1,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
-class LinuxPackageTestCases(unittest2.TestCase):
+class nxPackageTestCases(unittest2.TestCase):
     """
     Test cases for nxPackage
     """
@@ -531,6 +726,63 @@ class LinuxPackageTestCases(unittest2.TestCase):
         """
         pass
     
+    def make_MI(self, retval, Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments,
+                ReturnCode,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
+        d=dict();
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxPackage.protocol.MI_String(Ensure)
+        if PackageManager == None :
+            d['PackageManager'] = None
+        else :
+            d['PackageManager'] = nxPackage.protocol.MI_String(PackageManager)
+        if Name == None :
+            d['Name'] = None
+        else :
+            d['Name'] = nxPackage.protocol.MI_String(Name)
+        if FilePath == None :
+            d['FilePath'] = None
+        else :
+            d['FilePath'] = nxPackage.protocol.MI_String(FilePath)
+        if PackageGroup == None :
+            d['PackageGroup'] = None
+        else :
+            d['PackageGroup'] = nxPackage.protocol.MI_Boolean(PackageGroup)
+        if Arguments == None :
+            d['Arguments'] = None
+        else :
+            d['Arguments'] = nxPackage.protocol.MI_String(Arguments)
+        if ReturnCode == None :
+            d['ReturnCode'] = None
+        else :
+            d['ReturnCode'] = nxPackage.protocol.MI_Uint32(ReturnCode)
+        if PackageDescription == None :
+            d['PackageDescription'] = None
+        else:
+            d['PackageDescription'] = nxPackage.protocol.MI_String(PackageDescription)
+        if Publisher == None:
+            d['Publisher'] = None
+        else:
+            d['Publisher'] = nxPackage.protocol.MI_String(Publisher)
+        if InstalledOn == None:
+            d['InstalledOn'] = None
+        else:
+            d['InstalledOn'] = nxPackage.protocol.MI_String(InstalledOn)
+        if Size == None:
+            d['Size'] = None
+        else:
+            d['Size'] = nxPackage.protocol.MI_Uint32(int(Size))
+        if Version == None:
+            d['Version'] = None
+        else:
+            d['Version'] = nxPackage.protocol.MI_String(Version)
+        if Installed == None:
+            d['Installed'] = None
+        else:
+            d['Installed'] = nxPackage.protocol.MI_Boolean(Installed)
+        return retval,d
+    
     def testSetEnableNameDefaultProviderArguments(self):
         """
         use the appropriate argument to try-out a package
@@ -546,164 +798,165 @@ class LinuxPackageTestCases(unittest2.TestCase):
         args=dryrun[pm]
         if pm == 'zypper':
             args='|'+args
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,args,True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,args,0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',True,0) should return ==[0]")
         
     def testSetEnablePathAndNameDefaultProvider(self):
         """
         Test that when Path and Name are set, Path is used.
         """
-        self.assertTrue(nxPackage.Set('Present','','nano',self.package_path,True,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','nano','','"+ self.package_path +"',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano',self.package_path,False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','nano','','"+ self.package_path +"',False,'',0) should return ==[0]")
 
     def testSetEnableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
 
     def testSetEnableNameExplicitProvider(self):
         pm=nxPackage.GetPackageManager()
-        self.assertTrue(nxPackage.Set('Present',pm,'nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','"+pm+"','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present',pm,'nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','"+pm+"','nano','',False,'',0) should return ==[0]")
  
     def testSetEnableNameBadExplicitProviderError(self):
         pm=nxPackage.GetPackageManager()
         for b in ('zypper','yum','apt-get'):
             if b != pm:
                 break
-        self.assertTrue(nxPackage.Set('Present',b,'nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [-1],"nxPackage.Set('Present','"+b+"','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[-1]")
+        self.assertTrue(nxPackage.Set_Marshall('Present',b,'nano','',False,'',0)==
+                        [-1],"nxPackage.Set_Marshall('Present','"+b+"','nano','',False,'',0) should return ==[-1]")
 
     def testSetEnableNameDefaultProviderBadReturnCodeError(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')==
-                        [-1],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[-1]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',6)==
+                        [-1],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[-1]")
 
     def testGetEnableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
-        print 'GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0]==
-                        0,"nxPackage.Get('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0] should return == 0")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
+        r=nxPackage.Get_Marshall('Present','','nano','',False,'',0)
+        print 'GET:'+repr(r)
+
+        self.assertTrue(check_values(r,self.make_MI(0,'Present','','nano','',False,'',0, None, None, None, None, None, None )) == True
+                        ,"nxPackage.Get_Marshall('Present','','nano','',False,'',0)[0] should return == 0")
 
     def testTestEnableNameDefaultProviderBadReturnCodeError(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
-        print 'TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')==
-                        [-1],"nxPackage.Test('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log') should return == [-1]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
+        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','','nano','',False,'',6))
+
+        self.assertTrue(nxPackage.Test_Marshall('Present','','nano','',False,'',6)==
+                        [-1],"nxPackage.Test_Marshall('Present','','nano','',False,'',True,6) should return == [-1]")
 
     def testGetEnableNameDefaultProviderBadReturnCodeError(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
-        print 'GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')[0]==
-                        -1,"nxPackage.Get('Present','','nano','',False,'',True,6,'/tmp/DSC-nxPackage.log')[0] should return == -1")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
+        r=nxPackage.Get_Marshall('Present','','nano','',False,'',6)
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,'Present','','nano','',False,'',6, None, None, None, None, None, None )) == False
+                        ,"nxPackage.Get_Marshall('Present','','nano','',False,'',True,6)[0] should return == -1")
 
     def testTestEnableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
-        print 'TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Test('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return == [0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
+        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','','nano','',False,'',0))
+
+        self.assertTrue(nxPackage.Test_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Test_Marshall('Present','','nano','',False,'',0) should return == [0]")
 
     @unittest2.skipUnless(os.system('which yum ') ==
                           0,'groupmode is not implemented.')
     def testSetEnableGroupDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','Remote Desktop Clients','',True,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','Remote Desktop Clients','',True,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',True,'',0) should return ==[0]")
             
     def testSetEnablePathDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','',self.package_path,True,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','','"+ self.package_path +"',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','',self.package_path,False,'',0)==
+        [0],"nxPackage.Set_Marshall('Present','','','"+ self.package_path +"',False,'',0) should return ==[0]")
 
     def testSetDisableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
         time.sleep(4)
-        self.assertTrue(nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','nano','',False,'',0) should return ==[0]")
 
     def testGetDisableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
         time.sleep(4)
-        self.assertTrue(nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','nano','',False,'',0) should return ==[0]")
         time.sleep(4)
-        print 'GET:'+repr(nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0]==
-                        0,"nxPackage.Get('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0] should return == 0")
+        r=nxPackage.Get_Marshall('Absent','','nano','',False,'',0)
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,'Absent','','nano','',False,'',0, None, None, None, None, None, None )) == True
+                        ,"nxPackage.Get_Marshall('Absent','','nano','',False,'',0)[0] should return == 0")
 
     def testTestDisableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
         time.sleep(4)
-        self.assertTrue(nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','','nano','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','nano','',False,'',0) should return ==[0]")
         time.sleep(4)
-        print 'TEST:'+repr(nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Test('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return == [0]")
+        print 'TEST:'+repr(nxPackage.Test_Marshall('Absent','','nano','',False,'',0))
+
+        self.assertTrue(nxPackage.Test_Marshall('Absent','','nano','',False,'',0)==
+                        [0],"nxPackage.Test_Marshall('Absent','','nano','',False,'',0) should return == [0]")
 
     @unittest2.skipUnless(os.system('which yum ') ==
                           0,'groupmode is not implemented.')
     def testSetDisableGroupDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','Remote Desktop Clients','',True,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','Remote Desktop Clients','',True,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','nano','',True,'',0) should return ==[0]")
         time.sleep(4)
-        self.assertTrue(nxPackage.Set('Absent','','Remote Desktop Clients','',True,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Absent','','nano','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','','Remote Desktop Clients','',True,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','nano','',True,'',0) should return ==[0]")
             
     def testSetDisablePathDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Absent','','',self.package_path,True,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','','"+ self.package_path +"',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','','',self.package_path,False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','','"+ self.package_path +"',False,'',0) should return == [0]")
 
     def testSetEnableBadNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [-1],"nxPackage.Set('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[-1]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','nanoo','',False,'',0)==
+                        [-1],"nxPackage.Set_Marshall('Present','','nanoo','',False,'',0) should return == [-1]")
 
     def testGetEnableBadNameDefaultProvider(self):
-        print 'GET:'+repr(nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0]==
-                        -1,"nxPackage.Get('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')[-1] should return == -1")
+        r=nxPackage.Get_Marshall('Present','','nanoo','',False,'',0)
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,'Present','','nanoo','',False,'',0, None, None, None, None, None, None )) == False
+                        ,"nxPackage.Get_Marshall('Present','','nanoo','',False,'',0)[-1] should return == -1")
 
     def testTestEnableBadNameDefaultProvider(self):
-        print 'TEST:'+repr(nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [-1],"nxPackage.Test('Present','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return == [-1]")
+        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','','nanoo','',False,'',0))
+
+        self.assertTrue(nxPackage.Test_Marshall('Present','','nanoo','',False,'',0)==
+                        [-1],"nxPackage.Test_Marshall('Present','','nanoo','',False,'',0) should return == [-1]")
 
     def testSetEnableBadPathDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Present','','','BADPATH'+self.package_path,True,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [-1],"nxPackage.Set('Present','','','"+ 'BADPATH'+ self.package_path +"',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[-1]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','','BADPATH'+self.package_path,False,'',0)==
+                        [-1],"nxPackage.Set_Marshall('Present','','','"+ 'BADPATH'+ self.package_path +"',False,'',0) should return ==[-1]")
 
     def testSetDisableBadNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','','nanoo','',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','nanoo','',False,'',0) should return ==[0]")
 
     def testGetDisableBadNameDefaultProvider(self):
-        print 'GET:'+repr(nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','GET:'+repr(nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0]==
-                        0,"nxPackage.Get('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')[0] should return == 0")
+        r=nxPackage.Get_Marshall('Absent','','nanoo','',False,'',0)
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,'Absent','','nanoo','',False,'',0, None, None, None, None, None, None )) == True
+                        ,"nxPackage.Get_Marshall('Absent','','nanoo','',False,'',0)[0] should return == 0")
 
     def testTestDisableBadNameDefaultProvider(self):
-        print 'TEST:'+repr(nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log'))
-        nxPackage.Log('/tmp/DSC-nxPackage.log','TEST:'+repr(nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')))
-        self.assertTrue(nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Test('Absent','','nanoo','',False,'',True,0,'/tmp/DSC-nxPackage.log') should return == [0]")
+        print 'TEST:'+repr(nxPackage.Test_Marshall('Absent','','nanoo','',False,'',0))
+
+        self.assertTrue(nxPackage.Test_Marshall('Absent','','nanoo','',False,'',0)==
+                        [0],"nxPackage.Test_Marshall('Absent','','nanoo','',False,'',0) should return == [0]")
 
     def testSetDisableBadPathDefaultProvider(self):
-        self.assertTrue(nxPackage.Set('Absent','','', 'BADPATH'+ self.package_path,True,'',True,0,'/tmp/DSC-nxPackage.log')==
-                        [0],"nxPackage.Set('Present','','','"+  'BADPATH'+ self.package_path +"',False,'',True,0,'/tmp/DSC-nxPackage.log') should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','','', 'BADPATH'+ self.package_path,False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','','"+  'BADPATH'+ self.package_path +"',False,'',0) should return ==[0]")
 
-class LinuxFileTestCases(unittest2.TestCase):
+class nxFileTestCases(unittest2.TestCase):
     """
     Test cases for nxFile
     """
@@ -727,256 +980,315 @@ class LinuxFileTestCases(unittest2.TestCase):
         """
         pass
 
+    def make_MI(self,retval,DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate):
+        d=dict();
+        if DestinationPath == None :
+            d['DestinationPath'] = None
+        else :
+            d['DestinationPath'] = nxFile.protocol.MI_String(DestinationPath)
+        if SourcePath == None :
+            d['SourcePath'] = None
+        else :
+            d['SourcePath'] = nxFile.protocol.MI_String(SourcePath)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxFile.protocol.MI_String(Ensure)
+        if Type == None :
+            d['Type'] = None
+        else :
+            d['Type'] = nxFile.protocol.MI_String(Type)
+        if Force == None :
+            d['Force'] = None
+        else :
+            d['Force'] = nxFile.protocol.MI_Boolean(Force)
+        if Contents == None :
+            d['Contents'] = None
+        else :
+            d['Contents'] = nxFile.protocol.MI_String(Contents)
+        if Checksum == None :
+            d['Checksum'] = None
+        else :
+            d['Checksum'] = nxFile.protocol.MI_String(Checksum)
+        if Recurse == None :
+            d['Recurse'] = None
+        else :
+            d['Recurse'] = nxFile.protocol.MI_Boolean(Recurse)
+        if Links == None :
+            d['Links'] = None
+        else :
+            d['Links'] = nxFile.protocol.MI_String(Links)
+        if Owner == None :
+            d['Owner'] = None
+        else :
+            d['Owner'] = nxFile.protocol.MI_String(Owner)
+        if Group == None :
+            d['Group'] = None
+        else :
+            d['Group'] = nxFile.protocol.MI_String(Group)
+        if Mode == None :
+            d['Mode'] = None
+        else :
+            d['Mode'] = nxFile.protocol.MI_String(Mode)
+        if ModifiedDate == None :
+            d['ModifiedDate'] = None
+        else :
+            d['ModifiedDate'] = nxFile.protocol.MI_Timestamp.from_time(ModifiedDate)
+        return retval,d
+
     def testSetFileAbsent(self):
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testSetFileAbsentError(self):
-        self.assertTrue(nxFile.Set("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testSetFileData(self):
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
         d,e=nxFile.ReadFile('/tmp/1.pp')
         self.assertTrue(d==
                         "These are the contents of 1.pp","File contents mismatch:"+d)
 
     def testSetFileDataError(self):
-        self.assertTrue(nxFile.Set("/tp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [-1],'nxFile.Set("/tp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [-1],'nxFile.Set_Marshall("/tp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [-1]')
 
     def testSetFileNoData(self):
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
         d,e=nxFile.ReadFile('/tmp/1.pp')
         self.assertTrue(len(d)==
                         0,"The contents of 1.pp should be empty.  File contents mismatch:"+d)
 
     def testTestCompareFilesMD5Same(self):
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Test_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
         
     def testTestCompareFilesMD5Different(self):
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Test_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
         
     def testTestCompareFilesMD5Error(self):
-        self.assertTrue(nxFile.Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
-                        [-1],'nxFile.Test("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [-1]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
+                        [-1],'nxFile.Test_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [-1]')
 
     def testSetFileCopy(self):
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/12.pp", "/tmp/1.pp", "", "", "", "", "md5", "", "", "", "", "") should return [0]')
         d,e=nxFile.ReadFile('/tmp/12.pp')
         self.assertTrue(d==
                         "These are the contents of 1.pp","File contents mismatch:"+d)
 
     def testSetDirectoryPresent(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
         self.assertTrue(os.path.isdir('/tmp/pp') ==
                         True,'Directory /tmp/pp is missing.')
 
     def testSetDirectoryAbsent(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
         self.assertTrue(os.path.isdir('/tmp/pp') ==
                         False,'Directory /tmp/pp is present.')
 
     def testSetDirectoryAbsentError(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Absent", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testSetCopyDirectoryToNew(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
         self.assertTrue(os.path.isdir('/tmp/pp') ==
                         True,'Directory /tmp/pp is missing.')
-        self.assertTrue(nxFile.Set("/tmp/ppp", "/tmp/pp", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/ppp", "/tmp/pp", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
         self.assertTrue(os.path.isdir('/tmp/ppp') ==
                         True,'Directory /tmp/ppp is missing.')
         
     def testSetCopyDirectoryToExistingForce(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
         self.assertTrue(os.path.isdir('/tmp/pp') ==
                         True,'Directory /tmp/pp is missing.')
-        self.assertTrue(nxFile.Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
         d,e=nxFile.ReadFile('/tmp/pp/1.pp')
         self.assertTrue(d==
                         "These are the contents of 1.pp","File contents mismatch:"+d)
-        self.assertTrue(nxFile.Set("/tmp/ppp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/ppp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
         self.assertTrue(os.path.isdir('/tmp/ppp') ==
                         True,'Directory /tmp/ppp is missing.')
-        self.assertTrue(nxFile.Set("/tmp/ppp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/ppp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/ppp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/ppp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
         d,e=nxFile.ReadFile('/tmp/ppp/1.pp')
         self.assertTrue(d==
                         "These are the contents of 1.pp","File contents mismatch:"+d)
-        self.assertTrue(nxFile.Set("/tmp/ppp", "/tmp/pp", "Present", "Directory", "Force", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/ppp", "/tmp/pp", "Present", "Directory", "Force", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testSetModeRecursive(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
         self.assertTrue((nxFile.StatFile('/tmp/pp/1.pp').st_mode & 0755 ) ==
                         0755 and (nxFile.StatFile('/tmp/pp/12.pp').st_mode & 0755) == 0755,'Mode of /tmp/pp/1.pp and /tmp/pp/12.pp should be 755')
 
     def testSetOwnerRecursive(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp/1.pp", "", "Present", "File", "", "These are the contents of 1.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp/12.pp", "", "Present", "File", "", "These are the contents of 12.pp", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "") should return [0]')
         self.assertTrue(nxFile.StatFile('/tmp/pp/1.pp').st_gid ==
                         grp.getgrnam('mail')[2]  and nxFile.StatFile('/tmp/pp/12.pp').st_gid == grp.getgrnam('mail')[2] ,'Group of /tmp/pp/1.pp and /tmp/pp/12.pp should be mail')
 
     def testTestNoDestPathError(self):
-        self.assertTrue(nxFile.Test("", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [-1],'nxFile.Test("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]')
+        self.assertTrue(nxFile.Test_Marshall("", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [-1],'nxFile.Test_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]')
 
     def testTestFilePresentError(self):
-        self.assertTrue(nxFile.Test("/tp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [-1],'nxFile.Test("/tp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]')
+        self.assertTrue(nxFile.Test_Marshall("/tp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [-1],'nxFile.Test_Marshall("/tp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]')
 
     def testTestFilePresent(self):
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Test("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Test_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testTestFileAbsentError(self):
-        self.assertTrue(nxFile.Test("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Test("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Test_Marshall("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testTestFileAbsent(self):
-        self.assertTrue(nxFile.Test("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Test("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Test_Marshall("/tp/1.pp", "", "Absent", "File", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testTestDirectoryRecurseCheckOwnerError(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "udos", "", "")==
-                        [-1],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "udos", "", "") should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "udos", "", "")==
+                        [-1],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "udos", "", "") should return [-1]')
 
     def testTestDirectoryRecurseCheckGroupError(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "udos", "")==
-                        [-1],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "udos", "") should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "udos", "")==
+                        [-1],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "udos", "") should return [-1]')
 
     def testTestDirectoryRecurseCheckModeError(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", '755')==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", 755) should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '744')==
-                        [-1],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 744) should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", '755')==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", 755) should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '744')==
+                        [-1],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 744) should return [-1]')
 
     def testTestDirectoryRecurseCheckOwner(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
         me =  pwd.getpwuid(os.getuid()).pw_name
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", me, "", "")==
-                        [0],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "'+me+'", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", me, "", "")==
+                        [0],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "'+me+'", "", "") should return [0]')
 
     def testTestDirectoryRecurseCheckGroup(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "") should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "mail", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
         me = grp.getgrgid(os.getgid()).gr_name
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", me, "")==
-                        [0],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "'+me+'", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", me, "")==
+                        [0],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "'+me+'", "", "") should return [0]')
 
     def testTestDirectoryRecurseCheckMode(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", '755')==
-                        [0],'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", 755) should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
-                        [0],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", '755')==
+                        [0],'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", 755) should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", '755')==
+                        [0],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", True, "", "", "", 755) should return [0]')
 
     def testGetNoDestPathError(self):
-        self.assertTrue(nxFile.Get("", "", "Present", "File", "", "", "md5", "", "", "", "", "")[0]==
-                        -1,'nxFile.Get("", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]')
+        r=nxFile.Get_Marshall("", "", "Present", "File", "", "", "md5", "", "", "", "", "")
+        self.assertTrue(check_values(r,self.make_MI(0,"", "", "present", "file", "", None, "md5", "", "", "", "", "",None)) == False
+                        ,'nxFile.Get_Marshall("", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [-1]')
 
     def testGetFilePresent(self):
-        self.assertTrue(nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")[0]==
-                        0,'nxFile.Set("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Get("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")[0]==
-                        0,'nxFile.Get("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "")[0]==
+                        0,'nxFile.Set_Marshall("/tmp/1.pp", "", "Present", "File", "", "", "md5", "", "", "", "", "") should return [0]')
+        r=nxFile.Get_Marshall("/tmp/1.pp", "", "present", "file", "", "", "md5", "", "", "", "", "")
+        self.assertTrue(check_values(r,self.make_MI(0,"/tmp/1.pp", "", "present", "file", "", None, "md5", "", "", None, None, None, None)) == True
+                        ,'nxFile.Get_Marshall("/tmp/1.pp", "", "present", "file", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testGetDirectoryPresent(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")[0]==
-                        0,'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "","", "")==
-                        [0],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Get("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")[0]==
-                        0,'nxFile.Get("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")[0]==
+                        0,'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "","", "")==
+                        [0],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        r=nxFile.Get_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")
+        self.assertTrue(check_values(r,self.make_MI(0,"/tmp/pp", "", "present", "directory", "", None, "md5", "", "", None, None, None, None)) == True
+                        ,'nxFile.Get_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
 
     def testTestDirectoryCheckOwnerError(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "udos", "", "")==
-                        [-1],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "udos", "", "") should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "udos", "", "")==
+                        [-1],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "udos", "", "") should return [-1]')
 
     def testTestDirectoryCheckGroupError(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "") should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "udos", "")==
-                        [-1],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "udos", "") should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "udos", "")==
+                        [-1],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "udos", "") should return [-1]')
 
     def testTestDirectoryCheckOwner(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "") should return [0]')
         me =  pwd.getpwuid(os.getuid()).pw_name
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", me, "", "")==
-                        [0],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "'+me+'", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", me, "", "")==
+                        [0],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "'+me+'", "", "") should return [0]')
 
     def testTestDirectoryCheckGroup(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "") should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", "")==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "mail", "") should return [0]')
         me = grp.getgrgid(os.getgid()).gr_name
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", me, "")==
-                        [0],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "'+me+'", "", "") should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", me, "")==
+                        [0],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "'+me+'", "", "") should return [0]')
 
     def testTestDirectoryCheckMode(self):
-        self.assertTrue(nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", '776')==
-                        [0],'nxFile.Set("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", 776) should return [0]')
-        self.assertTrue(nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", '776')==
-                        [0],'nxFile.Test("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", 776) should return [0]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", '776')==
+                        [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", 776) should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", '776')==
+                        [0],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", 776) should return [0]')
 
 dummy_service_file=r"""#!/usr/bin/env python
 from __future__ import with_statement
@@ -1374,7 +1686,7 @@ exit $RETVAL
 
 
 
-class LinuxServiceTestCases(unittest2.TestCase):
+class nxServiceTestCases(unittest2.TestCase):
     """
     Test cases for nxService
     """
@@ -1386,6 +1698,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
         nxService.SetShowMof(True)
         print self.id() + '\n'
         dist=platform.dist()[0].lower()
+        init_file=''
         if 'suse' in dist:
             init_file=suse_init_file
         elif 'redhat' in dist:
@@ -1406,8 +1719,7 @@ class LinuxServiceTestCases(unittest2.TestCase):
                 os.chmod('/usr/sbin/dummy_service.py',0744)
             except:
                 print repr(sys.exc_info())
-                sys.exit(1)
-        elif nxService.SystemdExists():
+        elif nxService.SystemdExists() and 'ubuntu' not in dist:
             self.provider='systemd'
             try:
                 nxService.WriteFile('/etc/rc.d/dummy_service',init_file)
@@ -1416,7 +1728,6 @@ class LinuxServiceTestCases(unittest2.TestCase):
                 os.chmod('/usr/sbin/dummy_service.py',0744)
             except:
                 print repr(sys.exc_info())
-                sys.exit(1)
 
         elif nxService.InitExists():
             self.provider='init'
@@ -1427,7 +1738,6 @@ class LinuxServiceTestCases(unittest2.TestCase):
                 os.chmod('/usr/sbin/dummy_service.py',0744)
             except:
                 print repr(sys.exc_info())
-                sys.exit(1)
             
 
     def tearDown(self):
@@ -1454,85 +1764,113 @@ class LinuxServiceTestCases(unittest2.TestCase):
         """
         pass
     
+    def make_MI(self,retval, Name, Controller, Enabled, State, Path):
+        d=dict();
+        if Name == None :
+            d['Name'] = None
+        else :
+            d['Name'] = nxService.protocol.MI_String(Name)
+        if Controller == None :
+            d['Controller'] = None
+        else :
+            d['Controller'] = nxService.protocol.MI_String(Controller)
+        if Enabled == None :
+            d['Enabled'] = None
+        else :
+            d['Enabled'] = nxService.protocol.MI_Boolean(Enabled)
+        if State == None :
+            d['State'] = None
+        else :
+            d['State'] = nxService.protocol.MI_String(State)
+        if Path == None :
+            d['Path'] = None
+        else :
+            d['Path'] = nxService.protocol.MI_String(Path)
+        return retval,d
+
     def testSetEnable(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
 
     def testSetDisable(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", True, "running") should return ==[0]')
-        self.assertTrue(nxService.Set("dummy_service", provider, False, "stopped")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, False, "stopped")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
 
     def testSetEnableError(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("yummyservice", provider, True, "running")==
-                        [-1],'nxService.Set("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
+        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, True, "running")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
 
     def testSetDisableError(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("yummyservice", provider, False, "stopped")==
-                        [-1],'nxService.Set("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
+        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, False, "stopped")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
 
     def testGetEnable(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", True, "running") should return ==[0]')
-        self.assertTrue(nxService.Get("dummy_service", provider, True, "running")[0:5]==
-                        [0,"dummy_service",provider,True,"running"],'nxService.Get("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        r=nxService.Get_Marshall("dummy_service", provider, True, "running")
+        self.assertTrue(check_values(r,self.make_MI(0,"dummy_service", provider, True, "running")) == True
+                        ,'nxService.Get_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
 
     def testGetDisable(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", True, "running") should return ==[0]')
-        self.assertTrue(nxService.Set("dummy_service", provider, False, "stopped")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
-        print 'GET:'+repr(nxService.Get("dummy_service", provider, False, "stopped"))
-        self.assertTrue(nxService.Get("dummy_service", provider, False, "stopped")[0:5]==
-                        [0,"dummy_service", provider, False, "stopped"],'nxService.Get("dummy_service", "'+provider+'", False, "stopped") should return ==[0,"dummy_service", provider, False, "stopped"]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, False, "stopped")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
+        r=nxService.Get_Marshall("dummy_service", provider, False, "stopped")
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,"dummy_service", provider, False, "stopped")) == True
+                        ,'nxService.Get_Marshall("dummy_service", "'+provider+'", False, "stopped") should return ==[0,"dummy_service", provider, False, "stopped"]')
 
     def testGetEnableError(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("yummyservice", provider, True, "running")==
-                        [-1],'nxService.Set("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
-        print 'GET:'+repr(nxService.Get("yummyservice", provider, True, "running")[0:5])
-        self.assertTrue(nxService.Get("yummyservice", provider, True, "running")[0:5]==
-                        [-1,"yummyservice", provider, True, "running"],'nxService.Get("yummyservice", "'+provider+'", True, "running")[0:5] should return ==[-1,"yummyservice", provider, True, "running"]')
+        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, True, "running")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
+        r=nxService.Get_Marshall("yummyservice", provider, True, "running")
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,"yummyservice", provider, True, "running")) == False
+                        ,'nxService.Get_Marshall("yummyservice", "'+provider+'", True, "running")[0:5] should return ==[-1,"yummyservice", provider, True, "running"]')
 
     def testGetDisableError(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("yummyservice", provider, False, "stopped")==
-                        [-1],'nxService.Set("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
-        print 'GET:'+repr(nxService.Get("yummyservice", provider, False, "stopped"))
-        self.assertTrue(nxService.Get("yummyservice", provider, False, "stopped")[0:5]==
-                        [-1,"yummyservice", provider, False, "stopped"],'nxService.Get("yummyservice", "'+provider+'", False, "stopped")[0:5] should return ==[-1,"yummyservice", provider, False, "stopped"]')
+        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, False, "stopped")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
+        r=nxService.Get_Marshall("yummyservice", provider, False, "stopped")
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,"yummyservice", provider, False, "stopped")) == False
+                        ,'nxService.Get_Marshall("yummyservice", "'+provider+'", False, "stopped")[0:5] should return ==[-1,"yummyservice", provider, False, "stopped"]')
 
     def testTestEnable(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", True, "running") should return ==[0]')
-        self.assertTrue(nxService.Test("dummy_service", provider, True, "running")==
-                        [0],'nxService.Test("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Test_Marshall("dummy_service", provider, True, "running")==
+                        [0],'nxService.Test_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
 
     def testTestDisable(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", True, "running") should return ==[0]')
-        self.assertTrue(nxService.Set("dummy_service", provider, False, "stopped")==
-                        [0],'nxService.Set("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
-        print 'GET:'+repr(nxService.Test("dummy_service", provider, False, "stopped"))
-        self.assertTrue(nxService.Test("dummy_service", provider, False, "stopped")==
-                        [0],'nxService.Test("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, False, "stopped")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
+        print 'GET:'+repr(nxService.Test_Marshall("dummy_service", provider, False, "stopped"))
+        self.assertTrue(nxService.Test_Marshall("dummy_service", provider, False, "stopped")==
+                        [0],'nxService.Test_Marshall("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
 
     def testTestEnableError(self):
         provider=self.provider
-        self.assertTrue(nxService.Set("yummyservice", provider, True, "running")==
-                        [-1],'nxService.Set("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
-        print 'GET:'+repr(nxService.Test("yummyservice", provider, True, "running")[0:5])
-        self.assertTrue(nxService.Test("yummyservice", provider, True, "running")==
-                        [-1],'nxService.Test("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
+        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, True, "running")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
+        print 'GET:'+repr(nxService.Test_Marshall("yummyservice", provider, True, "running")[0:5])
+        self.assertTrue(nxService.Test_Marshall("yummyservice", provider, True, "running")==
+                        [-1],'nxService.Test_Marshall("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
 
     def testTestDisableError(self):
         """
@@ -1541,14 +1879,14 @@ class LinuxServiceTestCases(unittest2.TestCase):
         To foce the error, we send enabled = True.
         """
         provider=self.provider
-        self.assertTrue(nxService.Set("yummyservice", provider, False, "stopped")==
-                        [-1],'nxService.Set("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
-        print 'GET:'+repr(nxService.Test("yummyservice", provider, False, "stopped"))
-        self.assertTrue(nxService.Test("yummyservice", provider, True, "stopped")==
-                        [-1],'nxService.Test("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
+        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, False, "stopped")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
+        print 'GET:'+repr(nxService.Test_Marshall("yummyservice", provider, False, "stopped"))
+        self.assertTrue(nxService.Test_Marshall("yummyservice", provider, True, "stopped")==
+                        [-1],'nxService.Test_Marshall("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
 
 
-class LinuxSshAuthorizedKeysTestCases(unittest2.TestCase):
+class nxSshAuthorizedKeysTestCases(unittest2.TestCase):
     """
     Test cases for nxSshAuthorizedKeys.py
     """
@@ -1558,7 +1896,7 @@ class LinuxSshAuthorizedKeysTestCases(unittest2.TestCase):
         """
         self.mykey='MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB'
         if not os.path.isdir('/home/jojoma') :
-            nxUser.Set("jojoma", "Present", "JO JO MA", "JOJOMA", 'badpass', False, False, "/home/jojoma", "mail" )    
+            nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", 'badpass', False, False, "/home/jojoma", "mail" )    
         path='/home/jojoma/.ssh/authorized_keys'
         if not os.path.isfile(path):
             os.system('echo '+ self.mykey + ' > ' + path +' ; echo ' + self.mykey +' >> ' + path )
@@ -1580,68 +1918,81 @@ class LinuxSshAuthorizedKeysTestCases(unittest2.TestCase):
         """
         pass
 
+    def make_MI(self,retval, KeyComment, Ensure, UserName, Key):
+        d=dict();
+        if KeyComment == None :
+            d['KeyComment'] = None
+        else :
+            d['KeyComment'] = nxSshAuthorizedKeys.protocol.MI_String(KeyComment)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxSshAuthorizedKeys.protocol.MI_String(Ensure)
+        if UserName == None :
+            d['UserName'] = None
+        else :
+            d['UserName'] = nxSshAuthorizedKeys.protocol.MI_String(UserName)
+        if Key == None :
+            d['Key'] = None
+        else :
+            d['Key'] = nxSshAuthorizedKeys.protocol.MI_String(Key)
+        return retval,d
+
     def testSetKeyPresentTwice(self):
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',self.mykey) ==
-                        [0],"assert nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',key) should be == [0]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',key) should be == [0]")
         # do this twice to prove there is no error if the same key already exists
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',self.mykey) ==
-                        [0],"assert nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',key) should be == [0]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',key) should be == [0]")
 
     def testSetKeyAbsentTwice(self):
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',self.mykey) ==
-                        [0],"assert nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',key) should be == [0]")
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Absent','jojoma',self.mykey) ==
-                        [0],"assert nxSshAuthorizedKeys.Set('MyKey','Absent','jojoma',key) should be == [0]")
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Absent','jojoma',self.mykey) ==
-                        [0],"assert nxSshAuthorizedKeys.Set('MyKey','Absent','jojoma',key) should be == [0]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',key) should be == [0]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Absent','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Absent','jojoma',key) should be == [0]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Absent','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Absent','jojoma',key) should be == [0]")
 
     def testTestKeyPresent(self):
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',self.mykey) ==
-                        [0],"assert nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',key) should be == [0]")
-        self.assertTrue(nxSshAuthorizedKeys.Test('MyKey','Present','jojoma',self.mykey) ==
-                        [0],"assert nxSshAuthorizedKeys.Test('MyKey','Present','jojoma',key) should be == [0]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',key) should be == [0]")
+        self.assertTrue(nxSshAuthorizedKeys.Test_Marshall('MyKey','Present','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Test_Marshall('MyKey','Present','jojoma',key) should be == [0]")
         
     def testTestKeyPresentError(self):
-        self.assertTrue(nxSshAuthorizedKeys.Test('MyKey','Present','jojoma',self.mykey) ==
-                        [-1],"assert nxSshAuthorizedKeys.Test('MyKey','Present','jojoma',key) should be == [-1]")
+        self.assertTrue(nxSshAuthorizedKeys.Test_Marshall('MyKey','Present','jojoma',self.mykey) ==
+                        [-1],"assert nxSshAuthorizedKeys.Test_Marshall('MyKey','Present','jojoma',key) should be == [-1]")
         
     def testGetKeyPresent(self):
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',self.mykey) ==
-                        [0],"assert nxSshAuthorizedKeys.Set('MyKey','Present','jojoma',key) should be == [0]")
-        self.assertTrue(nxSshAuthorizedKeys.Get('MyKey','Present','jojoma',self.mykey)[0] ==
-                        0,"assert nxSshAuthorizedKeys.Get('MyKey','Present','jojoma',key)[0] should be == 0")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma',key) should be == [0]")
+        r=nxSshAuthorizedKeys.Get_Marshall('MyKey','Present','jojoma',self.mykey)
+        self.assertTrue(check_values(r,self.make_MI(0,'MyKey','present','jojoma',self.mykey)) == True
+                        ,"assert nxSshAuthorizedKeys.Get_Marshall('MyKey','Present','jojoma',key)[0] should be == 0")
         
-    def testGetKeyPresentError(self):
-        self.assertTrue(nxSshAuthorizedKeys.Get('MyKey','Present','jojoma',self.mykey)[0] ==
-                        -1,"assert nxSshAuthorizedKeys.Get('MyKey','Present','jojoma',key)[0] should be == -1")
-
-    def testGetKeyPresentBadUser(self):
-        self.assertTrue(nxSshAuthorizedKeys.Get('MyKey','Present','jojoma',self.mykey)[0] ==
-                        -1,"assert nxSshAuthorizedKeys.Get('MyKey','Present','jojoma',key)[0] should be == -1")
-
     def testTestKeyPresentBadUser(self):
-        self.assertTrue(nxSshAuthorizedKeys.Test('MyKey','Present','jojoma',self.mykey) ==
-                        [-1],"assert nxSshAuthorizedKeys.Test('MyKey','Present','jojoma',key) should be == [-1]")
+        self.assertTrue(nxSshAuthorizedKeys.Test_Marshall('MyKey','Present','jojoma',self.mykey) ==
+                        [-1],"assert nxSshAuthorizedKeys.Test_Marshall('MyKey','Present','jojoma',key) should be == [-1]")
 
     def testSetKeyPresentMissingKeyComment(self):
-        self.assertTrue(nxSshAuthorizedKeys.Set('','Present','jojoma',self.mykey) ==
-                        [-1],"assert nxSshAuthorizedKeys.Set('','Present','jojoma',key) should be == [-1]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('','Present','jojoma',self.mykey) ==
+                        [-1],"assert nxSshAuthorizedKeys.Set_Marshall('','Present','jojoma',key) should be == [-1]")
         
     def testSetKeyPresentMissingEnsure(self):
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','','jojoma',self.mykey) ==
-                        [-1],"assert nxSshAuthorizedKeys.Set('MyKey','','jojoma',key) should be == [-1]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','','jojoma',self.mykey) ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','','jojoma',key) should be == [0]")
         
     def testSetKeyPresentMissingUserName(self):
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Present','',self.mykey) ==
-                        [-1],"assert nxSshAuthorizedKeys.Set('MyKey','Present','',key) should be == [-1]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','',self.mykey) ==
+                        [-1],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','',key) should be == [-1]")
         
     def testSetKeyPresentMissingKey(self):
-        self.assertTrue(nxSshAuthorizedKeys.Set('MyKey','Present','jojoma','') ==
-                        [-1],"assert nxSshAuthorizedKeys.Set('MyKey','Present','jojoma','') should be == [-1]")
+        self.assertTrue(nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma','') ==
+                        [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma','') should be == [0]")
 
 
 
-class LinuxEnvironmentTestCases(unittest2.TestCase):
+class nxEnvironmentTestCases(unittest2.TestCase):
     """
     Test cases for nxEnvironment.py
     """
@@ -1684,136 +2035,513 @@ class LinuxEnvironmentTestCases(unittest2.TestCase):
         """
         pass
 
+    def make_MI(self, retval, Name, Value, Ensure, Path):
+        d=dict();
+        if Name == None :
+            d['Name'] = None
+        else :
+            d['Name'] = nxEnvironment.protocol.MI_String(Name)
+        if Value == None :
+            d['Value'] = None
+        else :
+            d['Value'] = nxEnvironment.protocol.MI_String(Value)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxEnvironment.protocol.MI_String(Ensure)
+        if Path == None :
+            d['Path'] = None
+        else :
+            d['Path'] = nxEnvironment.protocol.MI_Boolean(Path)
+        return retval,d
 
     def testSetVarPresentTwice(self):
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) ==
-                        [0],"self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) ==
+                        [0],"self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
         # do this twice to prove there is no error if the same path already exists
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) ==
-                        [0],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
 
     def testSetVarPresentTwoValues(self):
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) ==
-                        [0],"self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) ==
+                        [0],"self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
         # do this twice to prove there is no error if the same path already exists
-        self.assertTrue(nxEnvironment.Set('MYVAR2','/tmp','Present',False) ==
-                        [0],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [0]")
-        self.assertTrue(nxEnvironment.Get('MYVAR','/tmp','Present',False)[0] ==
-                        0,"assert nxEnvironment.Get('MYVAR','/tmp','Present',False)[0] should == [0]")
-        self.assertTrue(nxEnvironment.Get('MYVAR2','/tmp','Present',False)[0] ==
-                        0,"assert nxEnvironment.Get('MYVAR2','/tmp','Present',False)[0] should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR2','/tmp','Present',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
+        r=nxEnvironment.Get_Marshall('MYVAR','/tmp','Present',False)
+        self.assertTrue(check_values(r,self.make_MI(0,'MYVAR','/tmp','present',False)) == True
+                        ,"assert nxEnvironment.Get_Marshall('MYVAR','/tmp','Present',False)[0] should == [0]")
+        r=nxEnvironment.Get_Marshall('MYVAR2','/tmp','Present',False)
+        self.assertTrue(check_values(r,self.make_MI(0,'MYVAR2','/tmp','present',False)) == True
+                        ,"assert nxEnvironment.Get_Marshall('MYVAR2','/tmp','Present',False)[0] should == [0]")
 
 
     def testSetVarAbsentTwice(self):
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) ==
-                        [0],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [0]")
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Absent',False) ==
-                        [0],"assert nxEnvironment.Set('MYVAR','/tmp','Absent',False) should == [0]")
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Absent',False) ==
-                        [0],"assert nxEnvironment.Set('MYVAR','/tmp','Absent',False) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Absent',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Absent',False) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Absent',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Absent',False) should == [0]")
 
     def testTestVarPresent(self):
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) ==
-                        [0],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [0]")
-        self.assertTrue(nxEnvironment.Test('MYVAR','/tmp','Present',False) ==
-                        [0],"assert nxEnvironment.Test('MYVAR','/tmp','Present',False) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
+        self.assertTrue(nxEnvironment.Test_Marshall('MYVAR','/tmp','Present',False) ==
+                        [0],"assert nxEnvironment.Test_Marshall('MYVAR','/tmp','Present',False) should == [0]")
         
     def testTestVarPresentError(self):
-        self.assertTrue(nxEnvironment.Test('MYVAR','/tp','Present',False) ==
-                        [-1],"assert nxEnvironment.Test('MYVAR','/tmp','Present',False) should == [-1]")
+        self.assertTrue(nxEnvironment.Test_Marshall('MYVAR','/tp','Present',False) ==
+                        [-1],"assert nxEnvironment.Test_Marshall('MYVAR','/tmp','Present',False) should == [-1]")
 
     def testGetVarPresent(self):
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present',False) ==
-                        [0],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [0]")
-        print 'GET:'+repr(nxEnvironment.Get('MYVAR','/tmp','Present',False))
-        self.assertTrue(nxEnvironment.Get('MYVAR','/tmp','Present',False)[0] ==
-                        0,"assert nxEnvironment.Get('MYVAR','/tmp','Present',False)[0] should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
+        r=nxEnvironment.Get_Marshall('MYVAR','/tmp','Present',False)
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,'MYVAR','/tmp','present',False)) == True
+                        ,"assert nxEnvironment.Get_Marshall('MYVAR','/tmp','Present',False)[0] should == [0]")
         
-    def testGetVarPresentError(self):
-        print 'GET:'+repr(nxEnvironment.Get('MYVAR','/tp','Present',False))
-        self.assertTrue(nxEnvironment.Get('MYVAR','/tp','Present',False)[0] ==
-                        -1,"assert nxEnvironment.Get('MYVAR','/tmp','Present',False)[0] should == [-1]")
-
     def testSetPathPresentTwice(self):
-        self.assertTrue(nxEnvironment.Set('','/tmp','Present',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp','Present',True) should == [0]")
         # do this twice to prove there is no error if the same path already exists
-        self.assertTrue(nxEnvironment.Set('','/tmp','Present',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp','Present',True) should == [0]")
 
 
     def testSetPathAbsentTwice(self):
-        self.assertTrue(nxEnvironment.Set('','/tmp','Present',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp','Present',True) should == [0]")
-        self.assertTrue(nxEnvironment.Set('','/tmp','Absent',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp','Absent',True) should == [0]")
-        self.assertTrue(nxEnvironment.Set('','/tmp','Absent',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp','Absent',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Absent',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp','Absent',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Absent',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp','Absent',True) should == [0]")
 
     def testTestPathPresent(self):
-        self.assertTrue(nxEnvironment.Set('','/tmp','Present',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp','Present',True) should == [0]")
-        self.assertTrue(nxEnvironment.Test('','/tmp','Present',True) ==
-                        [0],"assert nxEnvironment.Test('','/tmp','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Test_Marshall('','/tmp','Present',True) ==
+                        [0],"assert nxEnvironment.Test_Marshall('','/tmp','Present',True) should == [0]")
 
     def testTestPathPresentTwoValues(self):
-        self.assertTrue(nxEnvironment.Set('','/tmp','Present',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp','Present',True) should == [0]")
-        self.assertTrue(nxEnvironment.Set('','/tmp2','Present',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp2','Present',True) should == [0]")
-        self.assertTrue(nxEnvironment.Test('','/tmp','Present',True) ==
-                        [0],"assert nxEnvironment.Test('','/tmp','Present',True) should == [0]")
-        self.assertTrue(nxEnvironment.Test('','/tmp2','Present',True) ==
-                        [0],"assert nxEnvironment.Test('','/tmp2','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp2','Present',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp2','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Test_Marshall('','/tmp','Present',True) ==
+                        [0],"assert nxEnvironment.Test_Marshall('','/tmp','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Test_Marshall('','/tmp2','Present',True) ==
+                        [0],"assert nxEnvironment.Test_Marshall('','/tmp2','Present',True) should == [0]")
         
     def testTestPathPresentError(self):
-        self.assertTrue(nxEnvironment.Test('','/tp','Present',True) ==
-                        [-1],"assert nxEnvironment.Test('','/tmp','Present',True) should == [-1]")
+        self.assertTrue(nxEnvironment.Test_Marshall('','/tp','Present',True) ==
+                        [-1],"assert nxEnvironment.Test_Marshall('','/tmp','Present',True) should == [-1]")
 
     def testGetPathPresent(self):
-        self.assertTrue(nxEnvironment.Set('','/tmp','Present',True) ==
-                        [0],"assert nxEnvironment.Set('','/tmp','Present',True) should == [0]")
-        print 'GET:'+repr(nxEnvironment.Get('','/tmp','Present',True))
-        self.assertTrue(nxEnvironment.Get('','/tmp','Present',True)[0] ==
-                        0,"assert nxEnvironment.Get('','/tmp','Present',True) should == [0]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
+                        [0],"assert nxEnvironment.Set_Marshall('','/tmp','Present',True) should == [0]")
+        r=nxEnvironment.Get_Marshall('','/tmp','Present',True)
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,'','/tmp','present',True)) == True
+                        ,"assert nxEnvironment.Get_Marshall('','/tmp','Present',True) should == [0]")
         
     def testGetPathPresentError(self):
-        print 'GET:'+repr(nxEnvironment.Get('','/tp','Present',True))
-        self.assertTrue(nxEnvironment.Get('','/tp','Present',True)[0] ==
-                        -1,"assert nxEnvironment.Get('','/tmp','Present',True)[0] should == [-1]")
+        r=nxEnvironment.Get_Marshall('','/tp','Present',True)
+        print 'GET:'+repr(r)
+        self.assertTrue(check_values(r,self.make_MI(0,'','/tp','present',True)) == False
+                        ,"assert nxEnvironment.Get_Marshall('','/tmp','Present',True)[0] should == [-1]")
 
     def testSetPathPresentMissingPath(self):
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','Present','') ==
-                        [-1],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [-1]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present','') ==
+                        [-1],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [-1]")
 
         
     def testSetPathPresentMissingEnsure(self):
-        self.assertTrue(nxEnvironment.Set('MYVAR','/tmp','',False) ==
-                        [-1],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [-1]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [-1]")
 
         
     def testSetPathPresentMissingNamePathFalse(self):
-        self.assertTrue(nxEnvironment.Set('','/tmp','Present',False) ==
-                        [-1],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [-1]")
+        self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',False) ==
+                        [-1],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [-1]")
 
     def testSetPathPresentMissingValue(self):
-        self.assertTrue(nxEnvironment.Set('MYVAR','','Present',False) ==
-                        [-1],"assert nxEnvironment.Set('MYVAR','/tmp','Present',False) should == [-1]")
+        self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','','Present',False) ==
+                        [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [-1]")
 
+class tBag(object):
+    def __init__(self,Name, FirewallType, Protocol, Ensure,
+    AddressFamily, Access, State,  Direction, Position, SourceHost,
+    SourcePort, DestinationHost, DestinationPort) :
+        self.Name = Name
+        self.FirewallType = FirewallType
+        self.Protocol = Protocol
+        self.Ensure = Ensure
+        self.AddressFamily =AddressFamily 
+        self.Access = Access
+        self.State = State
+        self.Direction = Direction
+        self.Position = Position
+        self.SourceHost = SourceHost
+        self.SourcePort = SourcePort
+        self.DestinationHost = DestinationHost
+        self.DestinationPort = DestinationPort
  
+def FirewallTypeIs():
+    t=['ufw','SuSEfirewall2','firewall-cmd','iptables']
+    for f in t:
+        if os.system('which ' + f) == 0:
+            return f.lower()
+    return 'iptables'
 
-class LinuxExecTestCases(unittest2.TestCase):
+
+def StartFirewall(firewall):
+    if firewall == 'iptables':
+        return
+    t={}
+    t['ufw']='yes | ufw enable '
+    t['SuSEfirewall2']='SuSEfirewall2 start'
+    t['firewall-cmd']='service firewalld start'
+    os.system(t[firewall])
+
+def StopFirewall(firewall):
+    if firewall == 'iptables':
+        return
+    t={}
+    t['ufw']='ufw disable'
+    t['SuSEfirewall2']='SuSEfirewall2 stop'
+    t['firewall-cmd']='service firewalld stop'
+    os.system(t[firewall])
+
+class nxFirewallTestCases(unittest2.TestCase):
     """
-    Test cases for nxExec.py
+    Test cases for nxFirewall.py
     """
+
+    @classmethod    
+    def setUpClass(cls):
+        StartFirewall(FirewallTypeIs())
+
+    @classmethod
+    def tearDownClass(cls):
+        StopFirewall(FirewallTypeIs())
     
     def setUp(self):
         """
         Setup test resources
         """
-        nxExec.SetShowMof(True)
         print self.id() + '\n'
+        self.FirewallType=FirewallTypeIs()
+        self.min_rule={}
+        self.min_rule['Name'] = "rule1"
+        self.min_rule['InterfaceName'] = "eth1"
+        self.min_rule['FirewallType'] = self.FirewallType
+        self.min_rule['Protocol'] = ""
+        self.min_rule['Ensure'] = "Present"
+        self.min_rule['AddressFamily'] = ""
+        self.min_rule['Access'] = "Allow"
+        self.min_rule['State'] = ""
+        self.min_rule['Direction'] = "INPUT"
+        self.min_rule['Position'] = ""
+        self.min_rule['SourceHost'] = ""
+        self.min_rule['SourcePort'] = "22"
+        self.min_rule['DestinationHost'] = ""
+        self.min_rule['DestinationPort'] = ""
+        self.max_rule={}
+        self.max_rule['Name'] = "rule1"
+        self.max_rule['InterfaceName'] = "eth1"
+        self.max_rule['FirewallType'] = self.FirewallType
+        self.max_rule['Protocol'] = "tcp"
+        self.max_rule['Ensure'] = "Present"
+        self.max_rule['AddressFamily'] = "IPv4"
+        self.max_rule['Access'] = "Allow"
+        self.max_rule['State'] = {"NEW" , "RELATED"}
+        self.max_rule['Direction'] = "INPUT"
+        self.max_rule['Position'] = "top"
+        self.max_rule['SourceHost'] = "0.0.0.0"
+        self.max_rule['SourcePort'] = "22"
+        self.max_rule['DestinationHost'] = "0.0.0.1"
+        self.max_rule['DestinationPort'] = "22"
 
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        self.max_rule['Ensure'] = "Absent"
+        nxFirewall.Set_Marshall(**self.max_rule)
+        self.min_rule['Ensure'] = "Absent"
+        nxFirewall.Set_Marshall(**self.min_rule)
+        
+    def noop(self,arg2):
+        """
+        Set a method to noop() to prevent its operation.
+        """
+        pass
+
+    def make_MI(self,retval,Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
+                Access, State,  Direction, Position, SourceHost, SourcePort,
+                DestinationHost, DestinationPort):
+        d=dict();
+        if Name == None :
+            d['Name'] = None
+        else :
+            d['Name'] = nxFirewall.protocol.MI_String(Name)
+        if InterfaceName == None :
+            d['InterfaceName'] = None
+        else :
+            d['InterfaceName'] = nxFirewall.protocol.MI_String(InterfaceName)
+        if FirewallType == None :
+            d['FirewallType'] = None
+        else :
+            d['FirewallType'] = nxFirewall.protocol.MI_String(FirewallType)
+        if Protocol == None :
+            d['Protocol'] = None
+        else :
+            d['Protocol'] = nxFirewall.protocol.MI_String(Protocol)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxFirewall.protocol.MI_String(Ensure)
+        if AddressFamily == None :
+            d['AddressFamily'] = None
+        else :
+            d['AddressFamily'] = nxFirewall.protocol.MI_String(AddressFamily)
+        if Access == None :
+            d['Access'] = None
+        else :
+            d['Access'] = nxFirewall.protocol.MI_String(Access)
+        if State == None :
+            d['State'] = None
+        else :
+            d['State'] = nxFirewall.protocol.MI_StringA(State)
+        if Direction == None :
+            d['Direction'] = None
+        else :
+            d['Direction'] = nxFirewall.protocol.MI_String(Direction)
+        if Position == None :
+            d['Position'] = None
+        else :
+            d['Position'] = nxFirewall.protocol.MI_String(Position)
+        if SourceHost == None :
+            d['SourceHost'] = None
+        else :
+            d['SourceHost'] = nxFirewall.protocol.MI_String(SourceHost)
+        if SourcePort == None :
+            d['SourcePort'] = None
+        else :
+            d['SourcePort'] = nxFirewall.protocol.MI_String(SourcePort)
+        if DestinationHost == None :
+            d['DestinationHost'] = None
+        else :
+            d['DestinationHost'] = nxFirewall.protocol.MI_String(DestinationHost)
+        if DestinationPort == None :
+            d['DestinationPort'] = None
+        else :
+            d['DestinationPort'] = nxFirewall.protocol.MI_String(DestinationPort)
+        return retval,d
+
+    def testTestPassMaxArgs(self):
+        nxFirewall.Set_Marshall(**self.max_rule)
+        self.assertTrue(nxFirewall.Test_Marshall(**self.max_rule) ==
+        [0],"self.assertTrue(nxFirewall.Test_Marshall(" + repr(self.max_rule) + ") should == [0]")
+        
+    def testTestFailMaxArgs(self):
+        nxFirewall.Set_Marshall(**self.max_rule)
+        self.bag=dict(self.max_rule)
+        self.bag['Direction'] = 'output'
+        self.assertTrue(nxFirewall.Test_Marshall(**self.bag) ==
+        [-1],"self.assertTrue(nxFirewall.Test_Marshall(" + repr(self.bag) + ") should == [-1]")
+
+    def testTestPassMinArgs(self):
+        nxFirewall.Set_Marshall(**self.min_rule)
+        self.bag=dict(self.min_rule)
+        self.assertTrue(nxFirewall.Test_Marshall(**self.bag) ==
+        [0],"self.assertTrue(nxFirewall.Test_Marshall(" + repr(self.bag) + ") should == [0]")
+
+    def testTestFailMinArgs(self):
+        nxFirewall.Set_Marshall(**self.min_rule)
+        self.bag=dict(self.min_rule)
+        self.bag['Direction'] = 'output'
+        self.assertTrue(nxFirewall.Test_Marshall(**self.bag) ==
+                        [-1],"self.assertTrue(nxFirewall.Test_Marshall(" + repr(self.bag) + ") should == [-1]")
+        
+class nxIPAddressTestCases(unittest2.TestCase):
+    """
+    Test cases for nxIPAddress.py
+    """
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        pass
+    
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        pass
+    
+    def noop(self,arg2):
+        """
+        Set a method to noop() to prevent its operation.
+        """
+        pass
+
+    def make_MI(self,retval,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
+        d=dict()
+        d.clear()
+        if IPAddress == None :
+            d['IPAddress'] = None
+        else :
+            d['IPAddress'] = nxIPAddress.protocol.MI_String(IPAddress)
+        if InterfaceName == None :
+            d['InterfaceName'] = None
+        else :
+            d['InterfaceName'] = nxIPAddress.protocol.MI_String(InterfaceName)
+        if BootProtocol == None :
+            d['BootProtocol'] = None
+        else :
+            d['BootProtocol'] = nxIPAddress.protocol.MI_String(BootProtocol)
+        if DefaultGateway == None :
+            d['DefaultGateway'] = None
+        else :
+            d['DefaultGateway'] = nxIPAddress.protocol.MI_String(DefaultGateway)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxIPAddress.protocol.MI_String(Ensure)
+        if PrefixLength == None :
+            d['PrefixLength'] = None
+        else :
+            d['PrefixLength'] = nxIPAddress.protocol.MI_Uint32(PrefixLength)
+        if AddressFamily == None :
+            d['AddressFamily'] = None
+        else :
+            d['AddressFamily'] = nxIPAddress.protocol.MI_String(AddressFamily)
+        return retval,d
+    
+    def testSetIPAddressV4Dynamic(self):
+        d=ParseMOF('./test_mofs/nxIPAddress_eth1_V4_dynamic.mof')
+        self.assertTrue(nxIPAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetIPAddressV4Dynamic(self):
+        d=ParseMOF('./test_mofs/nxIPAddress_eth1_V4_dynamic.mof')
+        self.assertTrue(nxIPAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxIPAddress.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+    def testSetIPAddressV4Static(self):
+        d=ParseMOF('./test_mofs/nxIPAddress_eth1_V4_static.mof')
+        self.assertTrue(nxIPAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetIPAddressV4Static(self):
+        d=ParseMOF('./test_mofs/nxIPAddress_eth1_V4_static.mof')
+        self.assertTrue(nxIPAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxIPAddress.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+    def testSetIPAddressV6Dynamic(self):
+        d=ParseMOF('./test_mofs/nxIPAddress_eth1_V6_dynamic.mof')
+        self.assertTrue(nxIPAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetIPAddressV6Dynamic(self):
+        d=ParseMOF('./test_mofs/nxIPAddress_eth1_V6_dynamic.mof')
+        self.assertTrue(nxIPAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxIPAddress.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+    def testSetIPAddressV6Static(self):
+        d=ParseMOF('./test_mofs/nxIPAddress_eth1_V6_static.mof')
+        self.assertTrue(nxIPAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetIPAddressV6Static(self):
+        d=ParseMOF('./test_mofs/nxIPAddress_eth1_V6_static.mof')
+        self.assertTrue(nxIPAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxIPAddress.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+
+
+class nxComputerTestCases(unittest2.TestCase):
+    """
+    Test cases for nxComputer.py
+    """
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        os.system('cp /etc/localtime /etc/localtime.bak;'+
+                  'date +%Z > /etc/lastdate;' +
+                  'cp /etc/hostname /etc/hostname.bak;' +
+                  'cp /etc/hosts /etc/hosts.bak')
+        
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        os.system('mv /etc/localtime.bak /etc/localtime')
+        os.environ['TZ'] = open('/etc/lastdate').read()
+        time.tzset()
+        os.system('mv /etc/hostname.bak /etc/hostname;' +
+                  'mv /etc/hosts.bak /etc/hosts')
+        os.system('cat /etc/hostname | xargs hostname')
+        time.sleep(1)
+        
+    def noop(self,arg2):
+        """
+        Set a method to noop() to prevent its operation.
+        """
+        pass
+
+    def make_MI(self,retval,Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
+        d=dict()
+        d.clear()
+        if Name == None :
+            d['Name'] = None
+        else :
+            d['Name'] = nxComputer.protocol.MI_String(Name)
+        if DNSDomainName == None :
+            d['DNSDomainName'] = None
+        else :
+            d['DNSDomainName'] = nxComputer.protocol.MI_String(DNSDomainName)
+        if TimeZoneName == None :
+            d['TimeZoneName'] = None
+        else :
+            d['TimeZoneName'] = nxComputer.protocol.MI_String(TimeZoneName)
+        if AlternateTimeZoneName == None :
+            d['AlternateTimeZoneName'] = None
+        else :
+            d['AlternateTimeZoneName'] = nxComputer.protocol.MI_String(AlternateTimeZoneName)
+        return retval,d
+    
+    def testSetComputerNameTimeZone(self):
+        d=ParseMOF('./test_mofs/nxComputer.mof')
+        self.assertTrue(nxComputer.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetComputerNameTimeZone(self):
+        d=ParseMOF('./test_mofs/nxComputer.mof')
+        self.assertTrue(nxComputer.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        d['AlternateTimeZoneName']=''
+        self.assertTrue(check_values(nxComputer.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+
+class nxDNSServerAddressTestCases(unittest2.TestCase):
+    """
+    Test cases for nxDNSServerAddress.py
+    """
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        print self.id() + '\n'
+        
     def tearDown(self):
         """
         Remove test resources.
@@ -1826,102 +2554,414 @@ class LinuxExecTestCases(unittest2.TestCase):
         """
         pass
 
-# (Command,Environment,Shell,Returncode,Timeout,User,Group,TestCommand)
 
-    def testSetShellCmdTestPass(self):
-        #our set cmd should run if the test command returncode == Returncode.
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') ==
-                        [0],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') should == [0]")
+    def make_MI(self,retval,Address,Ensure,AddressFamily):
+        d=dict();
+        d.clear()
+        if Address == None :
+            d['Address'] = None
+        else :
+            d['Address'] = nxDNSServerAddress.protocol.MI_String(Address)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxDNSServerAddress.protocol.MI_String(Ensure)
+        if AddressFamily == None :
+            d['AddressFamily'] = None
+        else :
+            d['AddressFamily'] = nxDNSServerAddress.protocol.MI_String(AddressFamily)
+        return retval,d
+    
+    def testSetDNSServerAddressPresent(self):
+        d=ParseMOF('./test_mofs/nxDNSServerAddress_add.mof')
+        self.assertTrue(nxDNSServerAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
 
-    def testSetShellCmdBadRetcodeFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,-1,30,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,-1,30,'','','echo $JOJO | grep MAMA') should == [-1]")
+    def testGetDNSServerAddressPresent(self):
+        d=ParseMOF('./test_mofs/nxDNSServerAddress_add.mof')
+        self.assertTrue(nxDNSServerAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        print "HERE "+repr(nxDNSServerAddress.Get_Marshall(**d))
+        self.assertTrue(check_values(nxDNSServerAddress.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return [0,'+ repr(d) + ']')
 
-    def testSetShellCmdTestFail(self):
-        #our set cmd should not run if the test command returns != Returncode.
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAM',True,0,30,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAM',True,0,30,'','','echo $JOJO | grep MAMA') should == [-1]")
+    def testGetDNSServerAddressAbsent(self):
+        d=ParseMOF('./test_mofs/nxDNSServerAddress_add.mof')
+        self.assertTrue(nxDNSServerAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        d['Ensure']='Absent'
+        self.assertTrue(nxDNSServerAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxDNSServerAddress.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return [0,'+ repr(d) + ']')
 
-    def testSetCmdTestPass(self):
-        self.assertTrue(nxExec.Set('/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"','JOJO=MAMA',False,0,30,'','','/bin/bash -c "echo $JOJO | grep MAMA"') ==
-                        [0],"self.assertTrue(nxExec.Set('/bin/bash -c export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',False,0,30,'','','/bin/bash -c echo $JOJO | grep MAMA') should == [0]")
 
-    def testSetCmdBadRetcodeFail(self):
-        self.assertTrue(nxExec.Set('/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"','JOJO=MAMA',False,-1,30,'','','/bin/bash -c "echo $JOJO | grep MAMA"') ==
-                        [-1],"self.assertTrue(nxExec.Set(''/bin/bash -c export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',False,-1,30,'','','/bin/bash -c echo $JOJO | grep MAMA') should == [-1]")
+class nxFileLineTestCases(unittest2.TestCase):
+    """
+    Test cases for nxFileLine.py
+    """
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        os.system('echo "joe is coolest" >  /tmp/joe.txt') 
+        print self.id() + '\n'
+        
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        pass
 
-    def testSetCmdTestFail(self):
-        self.assertTrue(nxExec.Set('/bin/bash -c "export JOJO=mama ; echo $JOJO | grep mama"','JOJO=MAM',False,0,30,'','','/bin/bash -c "echo $JOJO | grep MAMA"') ==
-                        [-1],"self.assertTrue(nxExec.Set('/bin/bash -c export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAM',False,0,30,'','','/bin/bash -c echo $JOJO | grep MAMA') should == [-1]")
+    def noop(self,arg2):
+        """
+        Set a method to noop() to prevent its operation.
+        """
+        pass
 
-    def testSetBadCmdFail(self):
-        self.assertTrue(nxExec.Set('/bin/bash -c "export JOJO=mam ; echo $JOJO | grep mama"','JOJO=MAMA',False,0,30,'','','/bin/bash -c "echo $JOJO | grep MAMA"') ==
-                        [-1],"self.assertTrue(nxExec.Set('/bin/bash -c export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA',False,0,30,'','','/bin/bash -c echo $JOJO | grep MAMA') should == [-1]")
 
-    def testSetBadShellCmdFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') should == [-1]")
+    def make_MI(self,retval,FilePath, DoesNotContainPattern, ContainsLine):
+        d=dict()
+        d.clear()
+        if FilePath == None :
+            d['FilePath'] = None
+        else :
+            d['FilePath'] = nxFileLine.protocol.MI_String(FilePath)
+        if DoesNotContainPattern == None :
+            d['DoesNotContainPattern'] = None
+        else :
+            d['DoesNotContainPattern'] = nxFileLine.protocol.MI_String(DoesNotContainPattern)
+        if ContainsLine == None :
+            d['ContainsLine'] = None
+        else :
+            d['ContainsLine'] = nxFileLine.protocol.MI_String(ContainsLine)
+        return retval,d
+    
+    def testSetFileLinePresent(self):
+        d=ParseMOF('./test_mofs/nxFileLine_add.mof')
+        self.assertTrue(nxFileLine.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
 
-    def testSetShellCmdMissingRetcodeFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,'',30,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,'',30,'','','echo $JOJO | grep MAMA') should == [-1]")
+    def testGetFileLine(self):
+        d=ParseMOF('./test_mofs/nxFileLine_add.mof')
+        self.assertTrue(nxFileLine.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxFileLine.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return [0,'+ repr(d) + ']')
 
-    def testSetShellCmdMissingSetFail(self):
-        self.assertTrue(nxExec.Set('','JOJO=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('','JOJO=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') should == [-1]")
 
-    def testSetShellCmdMissingTestFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','','') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','','') should == [-1]")
+class nxArchiveTestCases(unittest2.TestCase):
+    """
+    Test cases for nxArchive.py
+    """
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        if not os.path.exists('/tmp/src.tar.gz'):
+            os.system('cp ./test_mofs/src* /tmp/') 
+        print self.id() + '\n'
+        
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        pass
 
-    def testSetShellCmdMissingShellFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','',0,30,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA','',0,30,'','','echo $JOJO | grep MAMA') should == [-1]")
+    def noop(self,arg2):
+        """
+        Set a method to noop() to prevent its operation.
+        """
+        pass
 
-    def testSetShellCmdMissingTimeoutFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,'','','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,'','','','echo $JOJO | grep MAMA') should == [-1]")
 
-    def testSetBadEnviromentShellCmdFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO"=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO\"=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') should == [-1]")
+    def make_MI(self,retval,DestinationPath, SourcePath, Ensure, Force, Checksum):
+        d=dict();
+        
+        if DestinationPath == None :
+            d['DestinationPath'] = None
+        else :
+            d['DestinationPath'] = nxArchive.protocol.MI_String(DestinationPath)
+        if SourcePath == None :
+            d['SourcePath'] = None
+        else :
+            d['SourcePath'] = nxArchive.protocol.MI_String(SourcePath)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxArchive.protocol.MI_String(Ensure)
+        if Force == None :
+            d['Force'] = None
+        else :
+            d['Force'] = nxArchive.protocol.MI_Boolean(Force)
+        if Checksum == None :
+            d['Checksum'] = None
+        else :
+            d['Checksum'] = nxArchive.protocol.MI_String(Checksum)
+        return retval,d
 
-    def testSetUserPassShellCmdTest(self):
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'root','','echo $JOJO | grep MAMA') ==
-                        [0],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'root','','echo $JOJO | grep MAMA') should == [0]")
+    def testSetTarArchivePresent(self):
+        d=ParseMOF('./test_mofs/nxArchive_tar_ctime_test.mof')
+        self.assertTrue(nxArchive.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
 
-    def testSetBadUserShellCmdFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO"=MAMA',True,0,30,'toor','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'toor','','echo $JOJO | grep MAMA') should == [-1]")
+    def testSetZipArchivePresent(self):
+        d=ParseMOF('./test_mofs/nxArchive_zip_ctime_test.mof')
+        self.assertTrue(nxArchive.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
 
-    def testSetGroupShellCmdTestPass(self):
-        self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','adm','echo $JOJO | grep MAMA') ==
-                        [0],"self.assertTrue(nxExec.Set('export JOJO=mama ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','adm','echo $JOJO | grep MAMA') should == [0]")
+    def testGetArchiveAbsent(self):
+        d=ParseMOF('./test_mofs/nxArchive_tar_ctime_test.mof')
+        d['Ensure']='absent'
+        self.assertTrue(nxArchive.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+        self.assertTrue(check_values(nxArchive.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
 
-    def testSetBadGroupShellCmdFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO"=MAMA',True,0,30,'','toor','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','toor','echo $JOJO | grep MAMA') should == [-1]")
+class nxMySqlUserTestCases(unittest2.TestCase):
+    """
+    Test cases for nxMySqlUser.py
+    """
+    def drop(self):
+        Name = 'jojoma'
+        cmd = "DROP USER " + Name + ";"
+        cmd='mysql -u root -e "' + cmd + ' FLUSH PRIVILEGES;"'
+        os.environ['MYSQL_PWD'] = 'root'
+        os.system(cmd)
+        os.environ['MYSQL_PWD'] = ''
 
-    def testSetExceedTimeoutShellCmdFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mam ; sleep 30; echo $JOJO | grep mama','JOJO"=MAMA',True,0,10,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA',True,0,10,'','','echo $JOJO | grep MAMA') should == [-1]")
 
-    def testSetBadEnviromenShellCmdFail(self):
-        self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO"=MAMA',True,0,0,'','','echo $JOJO | grep MAMA') ==
-                        [-1],"self.assertTrue(nxExec.Set('export JOJO=mam ; echo $JOJO | grep mama','JOJO=MAMA',True,0,30,'','','echo $JOJO | grep MAMA') should == [-1]")
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        self.drop()
+        
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        self.drop()
+
+        
+    def make_MI(self,retval,Name, Credential,  ConnectionCredential, Ensure):
+        d=dict()
+        d.clear()
+        if Name == None :
+            d['Name'] = None
+        else :
+            d['Name'] = nxMySqlUser.protocol.MI_String(Name)
+        if Credential == None :
+            d['Credential'] = None
+        else :
+            d['Credential'] = nxMySqlUser.protocol.MI_String(Credential)
+        if ConnectionCredential == None :
+            d['ConnectionCredential'] = None
+        else :
+            d['ConnectionCredential'] = nxMySqlUser.protocol.MI_String(ConnectionCredential)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxMySqlUser.protocol.MI_String(Ensure)
+        return retval,d
+    
+    def testSetMySqlUser_add(self):
+        d=ParseMOF('./test_mofs/nxMySqlUser_add.mof')
+        self.assertTrue(nxMySqlUser.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetMySqlUser_add(self):
+        d=ParseMOF('./test_mofs/nxMySqlUser_add.mof')
+        self.assertTrue(nxMySqlUser.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxMySqlUser.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+    def testSetMySqlUser_del(self):
+        d=ParseMOF('./test_mofs/nxMySqlUser_del.mof')
+        self.assertTrue(nxMySqlUser.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetMySqlUser_del(self):
+        d=ParseMOF('./test_mofs/nxMySqlUser_del.mof')
+        self.assertTrue(nxMySqlUser.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxMySqlUser.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+    def testSetMySqlUser_upd(self):
+        d=ParseMOF('./test_mofs/nxMySqlUser_upd.mof')
+        self.assertTrue(nxMySqlUser.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetMySqlUser_upd(self):
+        d=ParseMOF('./test_mofs/nxMySqlUser_upd.mof')
+        self.assertTrue(nxMySqlUser.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxMySqlUser.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+
+class nxMySqlDatabaseTestCases(unittest2.TestCase):
+    """
+    Test cases for nxMySqlDatabase.py
+    """
+
+    def drop(self):
+        Name = 'jojoma'
+        cmd = "DROP DATABASE " + Name + ";"
+        cmd='mysql -u root -e "' + cmd + '"'
+        os.environ['MYSQL_PWD'] = 'root'
+        os.system(cmd)
+        os.environ['MYSQL_PWD'] = ''
+
+
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        self.drop()
+        
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        self.drop()
+        
+    def make_MI(self,retval,Name, ConnectionCredential, Ensure):
+        d=dict()
+        d.clear()
+        if Name == None :
+            d['Name'] = None
+        else :
+            d['Name'] = nxMySqlDatabase.protocol.MI_String(Name)
+        if ConnectionCredential == None :
+            d['ConnectionCredential'] = None
+        else :
+            d['ConnectionCredential'] = nxMySqlDatabase.protocol.MI_String(ConnectionCredential)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxMySqlDatabase.protocol.MI_String(Ensure)
+        return retval,d
+    
+    def testSetMySqlDatabase_add(self):
+        d=ParseMOF('./test_mofs/nxMySqlDatabase_add.mof')
+        self.assertTrue(nxMySqlDatabase.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetMySqlDatabase_add(self):
+        d=ParseMOF('./test_mofs/nxMySqlDatabase_add.mof')
+        self.assertTrue(nxMySqlDatabase.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxMySqlDatabase.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+    def testSetMySqlDatabase_del(self):
+        d=ParseMOF('./test_mofs/nxMySqlDatabase_del.mof')
+        self.assertTrue(nxMySqlDatabase.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetMySqlDatabase_del(self):
+        d=ParseMOF('./test_mofs/nxMySqlDatabase_del.mof')
+        self.assertTrue(nxMySqlDatabase.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxMySqlDatabase.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+
+class nxMySqlGrantTestCases(unittest2.TestCase):
+    """
+    Test cases for nxMySqlGrant.py
+    """
+    def revoke(self):
+        UserName="jojoma"
+        Host="127.0.0.1"
+        DatabaseName = "jojoma"
+        PermissionType = "ALL PRIVILEGES"
+        cmd = "REVOKE "+ PermissionType + " ON " + DatabaseName + ".* FROM '" + UserName+"'@'" + Host  + "';"
+        cmd='mysql -u root -e "' + cmd + ' FLUSH PRIVILEGES;"'
+        os.environ['MYSQL_PWD'] = 'root'
+        os.system(cmd)
+        os.environ['MYSQL_PWD'] = ''
+
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        d=ParseMOF('./test_mofs/nxMySqlDatabase_add.mof')
+        nxMySqlDatabase.Set_Marshall(**d)
+        d=ParseMOF('./test_mofs/nxMySqlUser_add.mof')
+        nxMySqlUser.Set_Marshall(**d)
+        self.revoke()
+        
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        self.revoke()
+        d=ParseMOF('./test_mofs/nxMySqlDatabase_del.mof')
+        nxMySqlDatabase.Set_Marshall(**d)
+        d=ParseMOF('./test_mofs/nxMySqlUser_del.mof')
+        nxMySqlUser.Set_Marshall(**d)
+        
+    def make_MI(self,retval,UserName, DatabaseName, ConnectionCredential, PermissionType, Ensure):
+        d=dict()
+        d.clear()
+        if UserName == None :
+            d['UserName'] = None
+        else :
+            d['UserName'] = nxMySqlGrant.protocol.MI_String(UserName)
+        if UserName == None :
+            d['DatabaseName'] = None
+        else :
+            d['DatabaseName'] = nxMySqlGrant.protocol.MI_String(DatabaseName)
+        if ConnectionCredential == None :
+            d['ConnectionCredential'] = None
+        else :
+            d['ConnectionCredential'] = nxMySqlGrant.protocol.MI_String(ConnectionCredential)
+        if Ensure == None :
+            d['Ensure'] = None
+        else :
+            d['Ensure'] = nxMySqlGrant.protocol.MI_String(Ensure)
+        if PermissionType == None :
+            d['PermissionType'] = None
+        else :
+            d['PermissionType'] = nxMySqlGrant.protocol.MI_String(PermissionType)
+        return retval,d
+    
+    def testSetMySqlGrant_add(self):
+        d=ParseMOF('./test_mofs/nxMySqlGrant_add.mof')
+        self.assertTrue(nxMySqlGrant.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetMySqlGrant_add(self):
+        d=ParseMOF('./test_mofs/nxMySqlGrant_add.mof')
+        self.assertTrue(nxMySqlGrant.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxMySqlGrant.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
+
+    def testSetMySqlGrant_del(self):
+        d=ParseMOF('./test_mofs/nxMySqlGrant_del.mof')
+        self.assertTrue(nxMySqlGrant.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetMySqlGrant_del(self):
+        d=ParseMOF('./test_mofs/nxMySqlGrant_del.mof')
+        self.assertTrue(nxMySqlGrant.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(check_values(nxMySqlGrant.Get_Marshall(**d), \
+        self.make_MI(0,**d))  ==  True, \
+        'Get('+repr(d)+' should return ==['+repr(d)+']')
 
     
 ######################################
 if __name__ == '__main__':
-    s1=unittest2.TestLoader().loadTestsFromTestCase(LinuxUserTestCases)
-    s2=unittest2.TestLoader().loadTestsFromTestCase(LinuxGroupTestCases)
-    s3=unittest2.TestLoader().loadTestsFromTestCase(LinuxFileTestCases)
-    s4=unittest2.TestLoader().loadTestsFromTestCase(LinuxScriptTestCases)
-    s5=unittest2.TestLoader().loadTestsFromTestCase(LinuxServiceTestCases)
-    s6=unittest2.TestLoader().loadTestsFromTestCase(LinuxPackageTestCases)
-    s7=unittest2.TestLoader().loadTestsFromTestCase(LinuxSshAuthorizedKeysTestCases)
-    s8=unittest2.TestLoader().loadTestsFromTestCase(LinuxEnvironmentTestCases)
-    s9=unittest2.TestLoader().loadTestsFromTestCase(LinuxExecTestCases)
-    alltests = unittest2.TestSuite([s1,s2,s3,s4,s7,s8,s9,s5,s6,s7,s8,s9])
-    unittest2.TextTestRunner(verbosity=3).run(alltests)
+    s1=unittest2.TestLoader().loadTestsFromTestCase(nxUserTestCases)
+    s2=unittest2.TestLoader().loadTestsFromTestCase(nxGroupTestCases)
+    s3=unittest2.TestLoader().loadTestsFromTestCase(nxFileTestCases)
+    s4=unittest2.TestLoader().loadTestsFromTestCase(nxScriptTestCases)
+    s5=unittest2.TestLoader().loadTestsFromTestCase(nxServiceTestCases)
+    s6=unittest2.TestLoader().loadTestsFromTestCase(nxPackageTestCases)
+    s7=unittest2.TestLoader().loadTestsFromTestCase(nxSshAuthorizedKeysTestCases)
+    s8=unittest2.TestLoader().loadTestsFromTestCase(nxEnvironmentTestCases)
+    s9=unittest2.TestLoader().loadTestsFromTestCase(nxFirewallTestCases)
+    s10=unittest2.TestLoader().loadTestsFromTestCase(nxArchiveTestCases)
+    s11=unittest2.TestLoader().loadTestsFromTestCase(nxFileLineTestCases)
+    s12=unittest2.TestLoader().loadTestsFromTestCase(nxDNSServerAddressTestCases)
+    s13=unittest2.TestLoader().loadTestsFromTestCase(nxComputerTestCases)
+    s14=unittest2.TestLoader().loadTestsFromTestCase(nxIPAddressTestCases)
+    s15=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlDatabaseTestCases)
+    s16=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlUserTestCases)
+    s17=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlGrantTestCases)
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s7,s8,s9,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17])
+    unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)
 

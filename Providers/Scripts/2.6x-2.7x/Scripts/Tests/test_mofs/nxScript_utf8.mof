@@ -1,0 +1,26 @@
+/*
+@TargetNode='10.0.2.2'
+@GeneratedBy=matt
+@GenerationDate=01/07/2015 15:32:47
+@GenerationHost=EGWIN7
+*/
+
+instance of MSFT_nxScriptResource as $MSFT_nxScriptResource1ref
+{
+  ResourceID = "[nxScript]myTestFile";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+/*   SetScript =  "#!/bin/bash\necho 'Joe\xc4\x83' > /tmp/joe"; */
+  SetScript =  "#!/bin/bash\necho 'Zażółć gęślą jaźń!' > /tmp/joe";
+  GetScript =  "#!/bin/bash\ncat /tmp/joe";
+  TestScript = "#!/bin/bash\n ls /tmp/joe";
+};
+
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};
+

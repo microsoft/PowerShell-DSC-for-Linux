@@ -1,0 +1,19 @@
+instance of MSFT_nxMySqlGrantResource as $MSFT_nxMySqlGrantResource1ref
+{
+  ResourceID = "[nxMySqlGrant]myTestMySqlGrant";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+/*   UserName = "jojoma"; */
+  UserName="jojoma@127.0.0.1";
+  DatabaseName = "jojoma";
+  PermissionType = "ALL PRIVILEGES";
+  ConnectionCredential = "root";
+  Ensure = "Absent";
+};
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};

@@ -1,0 +1,36 @@
+/*
+@TargetNode="10.0.2.2"
+@GeneratedBy=matt
+@GenerationDate=01/07/2015 15:32:47
+@GenerationHost=EGWIN7
+*/
+
+instance of MSFT_nxFirewallResource as $MSFT_nxFirewallResource1ref
+{
+  ResourceID = "[nxFirewall]myTestFirewall";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+  Name="rule1";
+  InterfaceName="eth1";
+  FirewallType="ufw";
+  Protocol = "tcp";
+  Ensure = "Present";
+  AddressFamily = "IPv4";
+  Access = "Allow";
+  State = {"NEW" , "RELATED"};
+  Direction = "INPUT";
+  Position="top";
+  SourceHost = "0.0.0.0";
+  SourcePort = "22";
+  DestinationHost = "0.0.0.1"; 
+  DestinationPort = "22"; 
+};
+
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};
+

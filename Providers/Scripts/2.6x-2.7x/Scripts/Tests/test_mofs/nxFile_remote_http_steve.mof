@@ -1,0 +1,27 @@
+/*
+@TargetNode='10.0.2.2'
+@GeneratedBy=matt
+@GenerationDate=01/07/2015 15:32:47
+@GenerationHost=EGWIN7
+*/
+
+instance of MSFT_nxFileResource as $MSFT_nxFileResource1ref
+{
+  ResourceID = "[nxFile]myTestFile";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+  Ensure = "Present";
+  Type="file";
+  DestinationPath = "/tmp/weakies_white_front_small_smaller_images.jpg";
+/*   SourcePath = "http://10.225.29.124/scx-1.5.2-103.universalr.1.x64.sh"; */
+  SourcePath = "http://www.wackypackages.org/stickers/1st_series/whitebacks/weakies_white_front_small_smaller_images.jpg";
+};
+
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};
+

@@ -1,0 +1,24 @@
+/*
+@TargetNode='10.0.2.2'
+@GeneratedBy=matt
+@GenerationDate=01/07/2015 15:32:47
+@GenerationHost=EGWIN7
+*/
+
+instance of MSFT_nxGroupResource as $MSFT_nxGroupResource1ref
+{
+  ResourceID = "[nxGroup]myTestGroup";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+  GroupName = "jojomamas";
+  Ensure = "Absent";
+};
+
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};
+
