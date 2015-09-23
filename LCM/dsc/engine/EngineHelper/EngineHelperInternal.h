@@ -223,8 +223,8 @@
 #define MSFT_DSCMetaConfiguration_MaxPendingConfigRetryCount                MI_T("MaxPendingConfigRetryCount")
 #define MSFT_DSCMetaConfiguration_LocalConfigurationManagerState            MI_T("LocalConfigurationManagerState")
 #define MSFT_DSCMetaConfiguration_LCMStateDetail                            MI_T("LCMStateDetail")
-#define MSFT_DSCMetaConfiguration_ActionAfterReboot  						MI_T("ActionAfterReboot")
-#define MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays					MI_T("StatusRetentionTimeInDays")
+#define MSFT_DSCMetaConfiguration_ActionAfterReboot                                             MI_T("ActionAfterReboot")
+#define MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays                                     MI_T("StatusRetentionTimeInDays")
 
 #define MSFT_DSCMetaConfiguration_BaseProperty_Count    0
 
@@ -623,6 +623,40 @@ typedef struct _LCMProviderContext
     void * registrationManager;
 } LCMProviderContext;
 
+MI_Char* DSC_strdup(MI_Char* s);
+
+typedef struct _StatusReport_ResourceNotInDesiredState
+{
+    char * SourceInfo;
+    char * ModuleName;
+    char * DurationInSeconds;
+    char * InstanceName;
+    char * StartDate;
+    char * ResourceName;
+    char * ModuleVersion;
+    char * RebootRequested;
+    char * ResourceId;
+    char * ConfigurationName;
+    char * InDesiredState;
+
+} StatusReport_ResourceNotInDesiredState;
+
+StatusReport_ResourceNotInDesiredState * Construct_StatusReport_RNIDS(
+    char* SourceInfo,
+    char* ModuleName,
+    char* DurationInSeconds,
+    char* InstanceName,
+    char* StartDate,
+    char* ResourceName,
+    char* ModuleVersion,
+    char* RebootRequested,
+    char* ResourceId,
+    char* ConfigurationName,
+    char* InDesiredState
+    );
+
+void Destroy_StatusReport_RNIDS(StatusReport_ResourceNotInDesiredState* ptr);
+
 // Structres to represent the V2 pullserver response for GetAction
 typedef struct GetActionConfigurationStatus
 {
@@ -850,6 +884,9 @@ MI_Result StripBracesFromGuid(
 
 MI_Datetime PalDatetimeToMiDatetime(_In_ PAL_Datetime inDatetime);
 
+extern char g_currentError[5001];
+extern StatusReport_ResourceNotInDesiredState * g_rnids;
+
 #ifndef g_ConfigurationDetails
 
 #define JOB_UUID_LENGTH 41*sizeof(MI_Char)
@@ -860,7 +897,6 @@ MI_Datetime PalDatetimeToMiDatetime(_In_ PAL_Datetime inDatetime);
         } ConfigurationDetails;
 
     extern ConfigurationDetails g_ConfigurationDetails;
-    extern char g_currentError[5001];
 #endif
 
 #if defined(_MSC_VER)

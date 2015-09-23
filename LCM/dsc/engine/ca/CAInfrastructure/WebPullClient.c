@@ -2586,6 +2586,12 @@ MI_Result Pull_Register(MI_Char* serverURL,
     struct ReadChunk readChunk;
     struct curl_slist *list = NULL;
 
+    r = GetSSLOptions(extendedError);
+    if( r != MI_RESULT_OK)
+    {
+        return r;
+    }
+    
     curl_global_init(CURL_GLOBAL_DEFAULT);
     
     curl = curl_easy_init();
@@ -2766,8 +2772,19 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
             }
             else
             {
-                commandFormat =  DSC_PATH "/Scripts/StatusReport.sh %s EndTime \"%s\"";
-                snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError);
+                if (g_rnids == NULL)
+                {
+                    commandFormat =  DSC_PATH "/Scripts/StatusReport.sh %s EndTime \"%s\"";
+                    snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError);
+                }
+                else
+                {
+                    commandFormat =  DSC_PATH "/Scripts/StatusReport.sh %s EndTime \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ";
+                    snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError, g_rnids->SourceInfo, g_rnids->ModuleName, g_rnids->DurationInSeconds, g_rnids->InstanceName, g_rnids->StartDate, g_rnids->ResourceName, g_rnids->ModuleVersion, g_rnids->RebootRequested, g_rnids->ResourceId, g_rnids->ConfigurationName, g_rnids->InDesiredState);
+                    Destroy_StatusReport_RNIDS(g_rnids);
+                    g_rnids = NULL;
+                    
+                }
             }
         }
 
