@@ -43,6 +43,9 @@
 
 volatile MI_Operation *g_CurrentWmiv2Operation = NULL;
 
+const MI_Char * GetModuleName( _In_ MI_Instance *inst);
+const MI_Char * GetModuleVersion( _In_ MI_Instance *inst);
+
 MI_Result InitResourceErrorList(ResourceErrorList * resourceErrorList)
 {
     if (resourceErrorList == NULL)
@@ -216,6 +219,8 @@ MI_Result GetDocumentEncryptionSetting( _In_ MI_Instance *documentIns,
 
 MI_Result InitCAHandler(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
+    g_rnids = NULL;
+
     if (cimErrorDetails == NULL)
     {        
         return MI_RESULT_INVALID_PARAMETER; 
@@ -234,6 +239,9 @@ MI_Result InitCAHandler(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 
 MI_Result UnInitCAHandler(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
+    Destroy_StatusReport_RNIDS(g_rnids);
+    g_rnids = NULL;
+
     if (cimErrorDetails == NULL)
     {        
         return MI_RESULT_INVALID_PARAMETER; 
@@ -801,6 +809,9 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
             continue;
         }
         // Success Case
+        Destroy_StatusReport_RNIDS(g_rnids);
+        g_rnids = NULL;
+
         executionOrder->ExecutionList[xCount].resourceStatus = ResourceProcessedAndSucceeded;
         r = finalr;
         SetMessageInContext(ID_OUTPUT_OPERATION_END,ID_OUTPUT_ITEM_RESOURCE,lcmContext);
@@ -1379,6 +1390,8 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
             MI_Instance_Delete(params);            
             MI_OperationOptions_Delete(&sessionOptions);
             AddToResourceErrorList(resourceErrorList, provContext->resourceId);
+            Destroy_StatusReport_RNIDS(g_rnids);
+            Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, "0", instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
             return r;
         }
 
@@ -1392,10 +1405,16 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         if (flags & LCM_EXECUTE_TESTONLY)
         {
             if(bTestResult == MI_TRUE)
+            {
                 *resultStatus = 1;
+            }
             else
+            {
                 *resultStatus = 0;
-            
+                Destroy_StatusReport_RNIDS(g_rnids);
+                Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, "0", instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
+            }
+
             MI_Instance_Delete(params);
             MI_OperationOptions_Delete(&sessionOptions);
             return MI_RESULT_OK;
@@ -1457,10 +1476,17 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         {
             MI_OperationOptions_Delete(&sessionOptions);
             AddToResourceErrorList(resourceErrorList, provContext->resourceId);
+            Destroy_StatusReport_RNIDS(g_rnids);
+            Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, NULL, instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
             return r;
         }
 
         *resultStatus = returnValue;
+        if (returnValue != MI_TRUE)
+        {
+            Destroy_StatusReport_RNIDS(g_rnids);
+            Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, NULL, instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
+        }
         //Stop the timer for set
         finish=CPU_GetTimeStamp();
         duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
@@ -1799,6 +1825,33 @@ const MI_Char * GetSourceInfo( _In_ MI_Instance *inst)
     return (const MI_Char*)value.string;
 }
 
+const MI_Char * GetModuleName( _In_ MI_Instance *inst)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_Value value;
+    // Not using DSC version as caller handles the failures as success.
+    r = MI_Instance_GetElement(inst, OMI_BaseResource_ModuleName, &value, NULL, NULL, NULL);
+    if( r != MI_RESULT_OK)
+    {
+        return NULL;
+    }
+    return (const MI_Char*)value.string;
+}
+
+const MI_Char * GetModuleVersion( _In_ MI_Instance *inst)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_Value value;
+    // Not using DSC version as caller handles the failures as success.
+    r = MI_Instance_GetElement(inst, OMI_BaseResource_ModuleVersion, &value, NULL, NULL, NULL);
+    if( r != MI_RESULT_OK)
+    {
+        return NULL;
+    }
+    return (const MI_Char*)value.string;
+}
+
+
 void LogCAMessage(_In_ LCMProviderContext *lcmContext,
                   _In_ MI_Uint32 messageIndex,
                   _In_z_ const MI_Char *resourceId
@@ -1944,16 +1997,16 @@ MI_Char* RunCommand(const MI_Char* command)
     while (fgets(curBuffer, 5000, fp) != NULL)
     {
         count = strlen(curBuffer);
-	if (count + cur_loc > bufferSize * 10)
-	  {
-	    // Too much data printed to stdout of the command.  Let's just cut it short here.
-	    // Since this isn't a PAL function, and we know that we won't get anywhere near this limit
-	    // in any reasonable normal or error situation, this should suffice.
-	    break;
-	  }
+        if (count + cur_loc > bufferSize * 10)
+          {
+            // Too much data printed to stdout of the command.  Let's just cut it short here.
+            // Since this isn't a PAL function, and we know that we won't get anywhere near this limit
+            // in any reasonable normal or error situation, this should suffice.
+            break;
+          }
         memcpy(buffer + cur_loc, curBuffer, count);
         cur_loc += count;
-	
+        
     }
 
     buffer[cur_loc] = '\0';
@@ -1971,29 +2024,13 @@ extern MI_Result Pull_Register(MI_Char* serverURL,
                                MI_Char* x_ms_header,
                                MI_Char* auth_header,
                                MI_Char* requestBody,
-			       _Outptr_result_maybenull_ MI_Instance **extendedError);
+                               _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 static const char * const s_ManagerInstanceNames[] = { "",
                                                        "ConfigurationRepository",
                                                        "ResourceRepository",
                                                        "ReportServer" };
 
-MI_Char* DSC_strdup(MI_Char* s)
-{
-    MI_Char* result;
-    size_t s_len;
-
-    if (s == NULL)
-    {
-        return NULL;
-    }
-    
-    s_len = strlen(s);
-    result = DSC_malloc((s_len + 1) * sizeof(MI_Char), NitsHere());
-    memcpy(result, s, s_len);
-    result[s_len] = '\0';
-    return result;
-}
 
 MI_Result MI_CALL Do_Register(
     _In_ MI_Instance *metaConfig,

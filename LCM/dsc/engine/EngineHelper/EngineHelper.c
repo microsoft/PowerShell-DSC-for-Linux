@@ -39,6 +39,7 @@ extern Loc_Mapping g_LocMappingTable[];
 extern MI_Uint32 g_LocMappingTableSize;
 void *g_registrationManager;
 char g_currentError[5001];
+StatusReport_ResourceNotInDesiredState * g_rnids = NULL;
 
 
 BaseResourceConfiguration g_BaseResourceConfiguration[] =
@@ -1214,4 +1215,80 @@ MI_Result GetAgentInformation(
 */
 EH_UNWIND:
     return result;
+}
+
+MI_Char* DSC_strdup(MI_Char* s)
+{
+    MI_Char* result;
+    size_t s_len;
+
+    if (s == NULL)
+    {
+        return NULL;
+    }
+    
+    s_len = strlen(s);
+    result = DSC_malloc((s_len + 1) * sizeof(MI_Char), NitsHere());
+    memcpy(result, s, s_len);
+    result[s_len] = '\0';
+    return result;
+}
+
+StatusReport_ResourceNotInDesiredState * Construct_StatusReport_RNIDS(
+    char* SourceInfo,
+    char* ModuleName,
+    char* DurationInSeconds,
+    char* InstanceName,
+    char* StartDate,
+    char* ResourceName,
+    char* ModuleVersion,
+    char* RebootRequested,
+    char* ResourceId,
+    char* ConfigurationName,
+    char* InDesiredState
+    )
+{
+    StatusReport_ResourceNotInDesiredState * ptr = (StatusReport_ResourceNotInDesiredState *) DSC_malloc(sizeof(StatusReport_ResourceNotInDesiredState), NitsHere());
+    ptr->SourceInfo = DSC_strdup(SourceInfo);
+    ptr->ModuleName = DSC_strdup(ModuleName);
+    ptr->DurationInSeconds = DSC_strdup(DurationInSeconds);
+    ptr->InstanceName = DSC_strdup(InstanceName);
+    ptr->StartDate = DSC_strdup(StartDate);
+    ptr->ResourceName = DSC_strdup(ResourceName);
+    ptr->ModuleVersion = DSC_strdup(ModuleVersion);
+    ptr->RebootRequested = DSC_strdup(RebootRequested);
+    ptr->ResourceId = DSC_strdup(ResourceId);
+    ptr->ConfigurationName = DSC_strdup(ConfigurationName);
+    ptr->InDesiredState = DSC_strdup(InDesiredState);
+    return ptr;
+}
+
+void Destroy_StatusReport_RNIDS(StatusReport_ResourceNotInDesiredState* ptr)
+{
+    if (ptr == NULL)
+        return;
+    
+    if (ptr->SourceInfo != NULL)
+        DSC_free(ptr->SourceInfo);
+    if (ptr->ModuleName != NULL)
+        DSC_free(ptr->ModuleName);
+    if (ptr->DurationInSeconds != NULL)
+        DSC_free(ptr->DurationInSeconds);
+    if (ptr->InstanceName != NULL)
+        DSC_free(ptr->InstanceName);
+    if (ptr->StartDate != NULL)
+        DSC_free(ptr->StartDate);
+    if (ptr->ResourceName != NULL)
+        DSC_free(ptr->ResourceName);
+    if (ptr->ModuleVersion != NULL)
+        DSC_free(ptr->ModuleVersion);
+    if (ptr->RebootRequested != NULL)
+        DSC_free(ptr->RebootRequested);
+    if (ptr->ResourceId != NULL)
+        DSC_free(ptr->ResourceId);
+    if (ptr->ConfigurationName != NULL)
+        DSC_free(ptr->ConfigurationName);
+    if (ptr->InDesiredState != NULL)
+        DSC_free(ptr->InDesiredState);
+
 }
