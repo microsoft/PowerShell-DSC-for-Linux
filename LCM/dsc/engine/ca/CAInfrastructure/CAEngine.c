@@ -1391,7 +1391,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
             MI_OperationOptions_Delete(&sessionOptions);
             AddToResourceErrorList(resourceErrorList, provContext->resourceId);
             Destroy_StatusReport_RNIDS(g_rnids);
-            Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, "0", instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
+            g_rnids = Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, "0", instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
             return r;
         }
 
@@ -1412,7 +1412,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
             {
                 *resultStatus = 0;
                 Destroy_StatusReport_RNIDS(g_rnids);
-                Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, "0", instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
+                g_rnids = Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, "0", instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
             }
 
             MI_Instance_Delete(params);
@@ -1477,7 +1477,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
             MI_OperationOptions_Delete(&sessionOptions);
             AddToResourceErrorList(resourceErrorList, provContext->resourceId);
             Destroy_StatusReport_RNIDS(g_rnids);
-            Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, NULL, instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
+            g_rnids = Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, NULL, instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
             return r;
         }
 
@@ -1485,7 +1485,7 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         if (returnValue != MI_TRUE)
         {
             Destroy_StatusReport_RNIDS(g_rnids);
-            Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, NULL, instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
+            g_rnids = Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, NULL, instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
         }
         //Stop the timer for set
         finish=CPU_GetTimeStamp();
