@@ -15,7 +15,10 @@ if len(sys.argv) != 3:
 if sys.argv[1].lower() != "-configurationmof":
     usage()
 
-filedata = open(sys.argv[2], "r").read()
+try:
+    filedata = open(sys.argv[2], "r").read()
+except:
+    filedata = open(sys.argv[2], "r", encoding="utf-16").read()
 
 outtokens = []
 for char in filedata:
