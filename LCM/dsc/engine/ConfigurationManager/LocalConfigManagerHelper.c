@@ -3349,10 +3349,10 @@ void LCM_WriteError(
             }
         }
 
-        if (lcmContext->bReportErrorsToServer)
-        {
-            ReportStatusToServer(lcmContext, errorMessage, MI_T("LCM_WriteError"), MI_T("LCM_WriteError"), errorCode, MI_FALSE, /*isStatusReport*/ 0, instanceMIError);
-        }
+//        if (lcmContext->bReportErrorsToServer)
+//        {
+//            ReportStatusToServer(lcmContext, errorMessage, MI_T("LCM_WriteError"), MI_T("LCM_WriteError"), errorCode, MI_FALSE, /*isStatusReport*/ 0, instanceMIError);
+//        }
     }
 }
 
@@ -6153,7 +6153,7 @@ MI_Result MI_CALL LCM_Pull_Execute(
 
                 if (numModulesInstalled > 0)
                 {
-		    system(OMI_RELOAD_COMMAND);
+                    system(OMI_RELOAD_COMMAND);
                 }
 
                 result = ApplyPendingConfig(lcmContext, moduleManager, 0, &resultExecutionStatus, cimErrorDetails);
