@@ -13,9 +13,9 @@ if [ "$2" = "EndTime" ]; then
 	Errors=",\\\"Error\\\":\\\"$3\\\""
     fi
     if [ -n "${14}" ]; then
-	RNIDS="\"ResourcesNotInDesiredState\":[{\"SourceInfo\":\"$4\",\"ModuleName\":\"$5\",\"DurationInSeconds\":\"0\",\"InstanceName\":\"$7\",\"StartDate\":\"$curDate\",\"ResourceName\":\"$9\",\"ModuleVersion\":\"${10}\",\"RebootRequested\":\"${11}\",\"ResourceId\":\"${12}\",\"ConfigurationName\":\"${13}\",\"InDesiredState\":\"${14}\"}],"
+	RNIDS=",\\\"ResourcesNotInDesiredState\\\":[{\\\"SourceInfo\\\":\\\"$4\\\",\\\"ModuleName\\\":\\\"$5\\\",\\\"DurationInSeconds\\\":\\\"0\\\",\\\"InstanceName\\\":\\\"$7\\\",\\\"StartDate\\\":\\\"$curDate\\\",\\\"ResourceName\\\":\\\"$9\\\",\\\"ModuleVersion\\\":\\\"${10}\\\",\\\"RebootRequested\\\":\\\"${11}\\\",\\\"ResourceId\\\":\\\"${12}\\\",\\\"ConfigurationName\\\":\\\"${13}\\\",\\\"InDesiredState\\\":\\\"${14}\\\"}]"
     fi
-    output="{\"JobId\":\"$1\",\"ConfigurationVersion\":\"2.0.0\",\"LCMVersion\":\"2.0\",$RNIDS\"EndTime\":\"$curDate\",\"Errors\":[$ErrorMessage],\"StatusData\":[\"{\\\"Locale\\\":\\\"en-US\\\"$Errors}\"]}"
+    output="{\"JobId\":\"$1\",\"ConfigurationVersion\":\"2.0.0\",\"LCMVersion\":\"2.0\",\"EndTime\":\"$curDate\",\"Errors\":[$ErrorMessage],\"StatusData\":[\"{\\\"Locale\\\":\\\"en-US\\\"$RNIDS$Errors}\"]}"
 else
     IPAddress=`ip addr | grep 'inet' | awk '{print $2}' | sed 's/\/.*//' | tr "\n" ";"`
     NodeName=`hostname`
