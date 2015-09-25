@@ -1253,13 +1253,9 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
     }    
 
-
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    
     curl = curl_easy_init();
     if (!curl)
     {
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
 
@@ -1291,7 +1287,6 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         {
             DSC_free(bodyContent);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
         }
     }
@@ -1326,7 +1321,6 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
             DSC_free(bodyContent);
             curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
     }
@@ -1340,7 +1334,6 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
             DSC_free(bodyContent);
             curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
@@ -1356,14 +1349,12 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         free(dataChunk.data);
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
     curl_slist_free_all(list);
     curl_easy_cleanup(curl);
-    curl_global_cleanup();
 
     if (responseCode != HTTP_SUCCESS_CODE)
     {
@@ -1437,12 +1428,9 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);    
     Stprintf(outputResult,3, MI_T("OK"));
 
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-
     curl = curl_easy_init();
     if (!curl)
     {
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
 
@@ -1471,7 +1459,6 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         if (res != CURLE_OK)
         {
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
         }
     }
@@ -1504,7 +1491,6 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
 
             curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
 
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
@@ -1519,7 +1505,6 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
 
             curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
@@ -1534,13 +1519,11 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         free(dataChunk.data);
         DSC_free(outputResult);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
     curl_easy_cleanup(curl);
-    curl_global_cleanup();
 
     if (responseCode != HTTP_SUCCESS_CODE)
     {
@@ -1794,12 +1777,9 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);
     Stprintf(outputResult,3, MI_T("OK"));
     
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-
     curl = curl_easy_init();
     if (!curl)
     {
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
 
@@ -1829,7 +1809,6 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         if (res != CURLE_OK)
         {
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
         }
     }
@@ -1861,7 +1840,6 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
     }
@@ -1873,7 +1851,6 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
@@ -1888,13 +1865,11 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         free(dataChunk.data);
         DSC_free(outputResult);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
     curl_easy_cleanup(curl);
-    curl_global_cleanup();
 
     if (responseCode != HTTP_SUCCESS_CODE)
     {
@@ -2406,6 +2381,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = DSC_MI_Application_NewOperationOptions(miApp, MI_FALSE, &options);
     if (r != MI_RESULT_OK)
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INITIALIZEMODULETABLEFAILED, "Setting NewOperationOptions failed");
     }
@@ -2413,6 +2389,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = DSC_MI_OperationOptions_SetString(&options, MOFCODEC_SCHEMA_VALIDATION_OPTION_NAME, MOFCODEC_SCHEMA_VALIDATION_IGNORE, 0);
     if (r!=MI_RESULT_OK )
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INITIALIZEMODULETABLEFAILED, "Setting OperationOptions string Failed");
     }
@@ -2420,6 +2397,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = DSC_MI_Application_NewDeserializer_Mof(miApp, 0, MOFCODEC_FORMAT, &deserializer);
     if (r!=MI_RESULT_OK )
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INITIALIZEMODULETABLEFAILED, "Creating New Deserializer Failed");
     }
@@ -2427,6 +2405,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = ReadFileContent(mofFileLocation, &pbuffer, &contentSize, extendedError);
     if(r != MI_RESULT_OK)
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return r;
     }   
@@ -2436,6 +2415,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = MI_Deserializer_DeserializeInstanceArray(&deserializer, 0, &options, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miInstanceArray, extendedError);
     if (r != MI_RESULT_OK)
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return r;
     }
@@ -2523,6 +2503,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
                 MI_Deserializer_Close(&deserializer);
                 MI_OperationOptions_Delete(&options);
                 CleanUpDeserializerInstanceCache(miInstanceArray);
+                MI_Application_Close(miApp);
                 DSC_free(miApp);
                 return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDMODULEVERSION, moduleVersion.string, moduleName.string);
             }
@@ -2535,6 +2516,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     MI_OperationOptions_Delete(&options);
 
     CleanUpDeserializerInstanceCache(miInstanceArray);
+    MI_Application_Close(miApp);
     DSC_free(miApp);
 
     return MI_RESULT_OK;
@@ -2592,8 +2574,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
         return r;
     }
     
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    
     curl = curl_easy_init();
     
     Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')", serverURL, agentId);
@@ -2613,7 +2593,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
         if (res != CURLE_OK)
         {
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
         }
     }
@@ -2644,7 +2623,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
       {
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       }
     res = curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
@@ -2652,7 +2630,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
       {
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       };
     res = curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
@@ -2660,7 +2637,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
       {
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       }
 
@@ -2675,7 +2651,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
       
       curl_slist_free_all(list);
       curl_easy_cleanup(curl);
-      curl_global_cleanup();
       
       free(headerChunk.data);
       free(dataChunk.data);
@@ -2691,7 +2666,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
         
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         
         free(headerChunk.data);
         free(dataChunk.data);
@@ -2701,7 +2675,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
 
     curl_slist_free_all(list);
     curl_easy_cleanup(curl);
-    curl_global_cleanup();
 
     free(headerChunk.data);
     free(dataChunk.data);
@@ -2752,6 +2725,10 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
 
     r = DSC_MI_Instance_GetElement(metaConfig, "AgentId", &agentId, NULL, NULL, NULL);
 
+    list = curl_slist_append(list, "Accept: application/json");
+    list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
+    list = curl_slist_append(list, "ProtocolVersion: 2.0");
+
     for (i = 0; i < managerInstances.stringa.size; ++i)
     {
         r = MI_Instance_GetElement((MI_Instance*)managerInstances.stringa.data[i], MSFT_ServerURL_Name, &serverURL, NULL, NULL, NULL);
@@ -2780,7 +2757,9 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
                 else
                 {
                     commandFormat =  DSC_PATH "/Scripts/StatusReport.sh %s EndTime \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ";
-                    snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError, g_rnids->SourceInfo, g_rnids->ModuleName, g_rnids->DurationInSeconds, g_rnids->InstanceName, g_rnids->StartDate, g_rnids->ResourceName, g_rnids->ModuleVersion, g_rnids->RebootRequested, g_rnids->ResourceId, g_rnids->ConfigurationName, g_rnids->InDesiredState);
+                    snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError, g_rnids->SourceInfo,
+                             g_rnids->ModuleName, g_rnids->DurationInSeconds, g_rnids->InstanceName, g_rnids->StartDate, g_rnids->ResourceName,
+                             g_rnids->ModuleVersion, g_rnids->RebootRequested, g_rnids->ResourceId, g_rnids->ConfigurationName, g_rnids->InDesiredState);
                     Destroy_StatusReport_RNIDS(g_rnids);
                     g_rnids = NULL;
                     
@@ -2789,8 +2768,6 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         }
 
         reportText = RunCommand(dataBuffer);
-        
-        curl_global_init(CURL_GLOBAL_DEFAULT);
         
         curl = curl_easy_init();
         
@@ -2801,10 +2778,6 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         headerChunk.size = 0;
         dataChunk.data = (char *)malloc(1);
         dataChunk.size = 0;
-
-        list = curl_slist_append(list, "Accept: application/json");
-        list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
-        list = curl_slist_append(list, "ProtocolVersion: 2.0");
         
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, reportText);
@@ -2821,7 +2794,6 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         {
             // Error on communication.  Go to next report.
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             
             DSC_free(reportText);
             free(headerChunk.data);
@@ -2834,9 +2806,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         if (responseCode != 200 && responseCode != 201 && responseCode != 204)
         {
             // Error on register
-            curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             
             DSC_free(reportText);
             free(headerChunk.data);
@@ -2846,15 +2816,15 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
 
         bAtLeastOneReportSuccess = 1;
 
-        curl_slist_free_all(list);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         
         DSC_free(reportText);
         free(headerChunk.data);
         free(dataChunk.data);
         
     }
+
+    curl_slist_free_all(list);
     
     if (bAtLeastOneReportSuccess == 1)
     {
