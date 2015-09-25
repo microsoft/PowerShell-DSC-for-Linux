@@ -5977,6 +5977,13 @@ MI_Result LCM_Pull_ExecuteActionPerConfiguration(
                             assignedConfig = ((*serverAssignedConfigurations)->Details)->ConfigurationName;
                         }
                         result = LCM_Pull_GetConfiguration(lcmContext, moduleManager, metaConfigInstance, partialConfigName, numModulesInstalled, assignedConfig, &resultExecutionStatus, getActionStatusCode, cimErrorDetails);
+                        
+                        if (assignedConfig != NULL)
+                        {
+                            DSC_free(assignedConfig);
+                            ((*serverAssignedConfigurations)->Details)->ConfigurationName = NULL;
+                        }
+
                         if (result != MI_RESULT_OK)
                         {
                             DSC_free(*resultStatus);

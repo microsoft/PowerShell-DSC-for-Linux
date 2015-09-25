@@ -1214,6 +1214,8 @@ MI_Result GetAgentInformation(
     DSC_free(ipAddress);
 */
 EH_UNWIND:
+    MI_Application_Close(&miApp);
+    applicationInitialized = MI_FALSE;
     return result;
 }
 
