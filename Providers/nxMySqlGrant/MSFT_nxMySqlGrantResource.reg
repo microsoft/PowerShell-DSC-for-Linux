@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxMySqlGrantResource
+HOSTING=@requestor@
+CLASS=MSFT_nxMySqlGrantResource:OMI_BaseResource
