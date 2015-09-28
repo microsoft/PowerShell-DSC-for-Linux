@@ -990,6 +990,7 @@ MI_Result CallConsistencyEngine(
                 DSC_EventWriteMessageFromEngineConsistency(messageEvent);
                 if(intlstr.str)
                     Intlstr_Free(intlstr);
+                result =  GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FALSE);
             }
         }
     }

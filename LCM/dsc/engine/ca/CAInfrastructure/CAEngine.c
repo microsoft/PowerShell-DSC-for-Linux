@@ -809,8 +809,12 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
             continue;
         }
         // Success Case
-        Destroy_StatusReport_RNIDS(g_rnids);
-        g_rnids = NULL;
+
+        if (resultStatus != NULL && *resultStatus == MI_TRUE)
+        {
+            Destroy_StatusReport_RNIDS(g_rnids);
+            g_rnids = NULL;
+        }
 
         executionOrder->ExecutionList[xCount].resourceStatus = ResourceProcessedAndSucceeded;
         r = finalr;
