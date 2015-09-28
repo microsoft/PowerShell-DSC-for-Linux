@@ -14,7 +14,7 @@ ifeq ($(UNAME_P),x86_64)
 else
  PF_ARCH := x86
 endif
-CONFIG_VERSION := 1.0.0
+CONFIG_VERSION := 1.1.0
 
 all:
 ifeq ($(BUILD_RPM),1)
