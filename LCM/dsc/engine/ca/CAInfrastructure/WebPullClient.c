@@ -2834,7 +2834,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
     {
       MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};
       Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), responseCode);
-      return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_REPORTINGFAILED, dataBuffer);
+      return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_REPORTINGFAILED, statusCodeValue);
     }
 
 }
