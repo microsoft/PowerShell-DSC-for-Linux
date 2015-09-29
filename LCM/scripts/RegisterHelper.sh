@@ -12,14 +12,14 @@ else
 fi
 
 FriendlyName="DSC-OaaS Client Authentication"
-Issuer=`openssl x509 -text -in /etc/opt/omi/ssl/oaas.crt | grep Issuer: | head -n 1 | awk '{print $2}'`
-NotAfter_pre=`openssl x509 -dates -in /etc/opt/omi/ssl/oaas.crt | grep notAfter | sed 's/^.*=//'`
+Issuer=`openssl x509 -text -in <CONFIG_CERTSDIR>/oaas.crt | grep Issuer: | head -n 1 | awk '{print $2}'`
+NotAfter_pre=`openssl x509 -dates -in <CONFIG_CERTSDIR>/oaas.crt | grep notAfter | sed 's/^.*=//'`
 NotAfter=`date --date="${NotAfter_pre}" +%Y-%m-%dT%T.%7N%:z`
-NotBefore_pre=`openssl x509 -dates -in /etc/opt/omi/ssl/oaas.crt | grep notBefore | sed 's/^.*=//'`
+NotBefore_pre=`openssl x509 -dates -in <CONFIG_CERTSDIR>/oaas.crt | grep notBefore | sed 's/^.*=//'`
 NotBefore=`date --date="${NotBefore_pre}" +%Y-%m-%dT%T.%7N%:z`
-Subject=`openssl x509 -text -in /etc/opt/omi/ssl/oaas.crt | grep Subject: | head -n 1 | awk '{print $2}'`
-PublicKey=`openssl x509 -in /etc/opt/omi/ssl/oaas.crt -pubkey -noout | awk 'NR>2 { print line } { line=$0 }' | tr -d "\n"`
-Thumbprint=`openssl x509 -noout -in /etc/opt/omi/ssl/oaas.crt -fingerprint | sed 's/^.*=//' | tr -d :`
+Subject=`openssl x509 -text -in <CONFIG_CERTSDIR>/oaas.crt | grep Subject: | head -n 1 | awk '{print $2}'`
+PublicKey=`openssl x509 -in <CONFIG_CERTSDIR>/oaas.crt -pubkey -noout | awk 'NR>2 { print line } { line=$0 }' | tr -d "\n"`
+Thumbprint=`openssl x509 -noout -in <CONFIG_CERTSDIR>/oaas.crt -fingerprint | sed 's/^.*=//' | tr -d :`
 
 if [ -n "$2" ]; then
     RegistrationMessageType="$2"

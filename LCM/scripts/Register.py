@@ -7,20 +7,6 @@ import shutil
 
 # register Linux DSC agent with AA
 
-#agentidpath = "/etc/opt/omi/conf/dsc/agentid"
-#
-#if os.path.isfile(agentidpath):
-#   agentid = open(agentidpath, "r").read()
-#else:
-#   agentid = open("/proc/sys/kernel/random/uuid", "r").read()
-#   agentid = agentid.upper()
-
-#input:
-#  endpoint
-#  key
-# output:
-#  MetaConfig to apply, OR apply the metaconfig after generating it and silent output?
-
 def usage():
    print("Usage: Register.py RegistrationKey ServerURL")
 
@@ -101,6 +87,6 @@ f = open(meta_path, "w")
 f.write(metaConfig)
 f.close()
 
-os.system("/opt/microsoft/dsc/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
+os.system("<OMI_LIB_SCRIPTS>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
 shutil.rmtree(tempdir)

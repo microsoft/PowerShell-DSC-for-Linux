@@ -93,9 +93,9 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/InstallModule.py; intermediate/Scripts/InstallModule.py; 755; root; root
 /opt/microsoft/dsc/Scripts/RemoveModule.py; intermediate/Scripts/RemoveModule.py; 755; root; root
 /opt/microsoft/dsc/Scripts/RegenerateInitFiles.py; intermediate/Scripts/RegenerateInitFiles.py; 755; root; root
-/opt/microsoft/dsc/Scripts/RegisterHelper.sh; LCM/scripts/RegisterHelper.sh; 755; root; root
-/opt/microsoft/dsc/Scripts/Register.py; LCM/scripts/Register.py; 755; root; root
-/opt/microsoft/dsc/Scripts/StatusReport.sh; LCM/scripts/StatusReport.sh; 755; root; root
+/opt/microsoft/dsc/Scripts/RegisterHelper.sh; intermediate/Scripts/RegisterHelper.sh; 755; root; root
+/opt/microsoft/dsc/Scripts/Register.py; intermediate/Scripts/Register.py; 755; root; root
+/opt/microsoft/dsc/Scripts/StatusReport.sh; intermediate/Scripts/StatusReport.sh; 755; root; root
 
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.4x-2.5x/Scripts/nxFile.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFile.py; 755; root; root
