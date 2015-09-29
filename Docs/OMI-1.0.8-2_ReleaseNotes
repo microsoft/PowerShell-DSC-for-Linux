@@ -1,0 +1,18 @@
+OMI 1.0.8-2 Release Notes
+
+=======================
+
+The sections below describe a new feature or a bug that was fixed in OMI 1.0.8-2.
+
+Important Notes:
+
+==================================
+ -Linux packages (RPM and DEB) are now available for OMI. The package and service name is omiserver. The packages are available for x86 and x64 architectures, and for systems with OpenSSL 0.9.8 and OpenSSL 1.0.x
+
+Issues that are Fixed in this Release:
+ ==================================
+ - When installing OMI from one of the provided packages, the directory layout conforms to the POSIX standard.
+ - Building from source fails on Ubuntu 14.04
+ - Server certificate generation during installation fails if hostname or domain name is not RFC-compliant
+ - SSlv2 is disabled by default but can be enabled in omiserver.conf. SSLv3 can be disabled in omiserver.conf.
+ - OMI server can be configured to listen on multiple TCP ports
