@@ -21,6 +21,10 @@ INCLUDES = \
 	$(TOP)/codec/common \
 	$(OMI)/nits/base
 
+ifeq ($(BUILD_LOCAL),1)
+DEFINES = MI_CONST= HOOK_BUILD
+else
 DEFINES = MI_CONST= HOOK_BUILD DSC_PACKAGE_BUILD
+endif
 
 include $(OMI)/mak/rules.mak

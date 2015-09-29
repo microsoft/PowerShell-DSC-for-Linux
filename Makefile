@@ -11,30 +11,50 @@ current_dir := $(shell pwd)
 
 all:
 	mkdir -p intermediate/Scripts
-ifeq ($(PF_ARCH),x64)
-	ln -fs $(current_dir)/ext/curl/x64 $(current_dir)/ext/curl/current_platform
-else
-	ln -fs $(current_dir)/ext/curl/x86 $(current_dir)/ext/curl/current_platform
-endif
 ifeq ($(BUILD_LOCAL),1)
 	make local
 else
+ ifeq ($(PF_ARCH),x64)
+	ln -fs $(current_dir)/ext/curl/x64 $(current_dir)/ext/curl/current_platform
+ else
+	ln -fs $(current_dir)/ext/curl/x86 $(current_dir)/ext/curl/current_platform
+ endif
 	cd ../pal/build; ./configure --enable-ulinux
-	for f in Providers/Scripts/InstalledScripts/*.py; do \
-	  cat $$f | \
-	  sed "s@<CONFIG_BINDIR>@/opt/omi/bin@" | \
-	  sed "s@<CONFIG_LIBDIR>@/opt/omi/lib@" | \
-	  sed "s@<CONFIG_SYSCONFDIR>@/etc/opt/omi/conf@" | \
-	  sed "s@<DSC_PATH>@/opt/microsoft/dsc@" > intermediate/Scripts/`basename $$f`; \
-	  chmod a+x intermediate/Scripts/`basename $$f`; \
-	done
  ifeq ($(BUILD_SSL_098),1)
 	rm -rf omi-1.0.8/output_openssl_0.9.8/lib/libdsccore.so
-	make kit098 
+	make omi098
+
+	.  omi-1.0.8/output/config.mak; \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_CERTSDIR>@$$$CONFIG_CERTSDIR@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/`basename $$f`; \
+	done
+
+	make dsc098
  endif
  ifeq ($(BUILD_SSL_100),1)
 	rm -rf omi-1.0.8/output_openssl_1.0.0/lib/libdsccore.so
-	make kit100 
+	make omi100
+
+	.  omi-1.0.8/output/config.mak; \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_CERTSDIR>@$$$CONFIG_CERTSDIR@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/`basename $$f`; \
+	done
+
+	make dsc100
  endif
 	make nxNetworking
 	make nxComputerManagement
@@ -42,10 +62,6 @@ else
 	rm -rf release/*.{rpm,deb}; \
 	mv omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 endif
-
-kit098: omi098 dsc098
-
-kit100: omi100 dsc100
 
 dsc098: lcm098 providers
 	make -C installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
@@ -158,12 +174,14 @@ lcmreg:
 	make -C LCM deploydsc
 
 providersreg:
-	for f in Providers/Scripts/InstalledScripts/*.py; do \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$(CONFIG_BINDIR)@" | \
 	  sed "s@<CONFIG_LIBDIR>@$(CONFIG_LIBDIR)@" | \
 	  sed "s@<CONFIG_SYSCONFDIR>@$(CONFIG_SYSCONFDIR)@" | \
-	  sed "s@<DSC_PATH>@$(CONFIG_DATADIR)/dsc@" > intermediate/Scripts/`basename $$f`; \
+	  sed "s@<CONFIG_CERTSDIR>@$(CONFIG_CERTSDIR)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$(CONFIG_LIBDIR)/Scripts@" | \
+	  sed "s@<DSC_MODULES_PATH>@$(CONFIG_DATADIR)/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done 
 	make -C Providers reg

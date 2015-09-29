@@ -2737,26 +2737,26 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL) || (endTime.datetime.u.timestamp.year == 0))
         {
             // not the End report
-            commandFormat =  DSC_PATH "/Scripts/StatusReport.sh %s StartTime";
+            commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s StartTime";
             snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString);
         }
         else
         {
             if (g_currentError[0] == '\0')
             {
-                commandFormat =  DSC_PATH "/Scripts/StatusReport.sh %s EndTime";
+                commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime";
                 snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString);
             }
             else
             {
                 if (g_rnids == NULL)
                 {
-                    commandFormat =  DSC_PATH "/Scripts/StatusReport.sh %s EndTime \"%s\"";
+                    commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime \"%s\"";
                     snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError);
                 }
                 else
                 {
-                    commandFormat =  DSC_PATH "/Scripts/StatusReport.sh %s EndTime \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ";
+                    commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ";
                     snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError, g_rnids->SourceInfo,
                              g_rnids->ModuleName, g_rnids->DurationInSeconds, g_rnids->InstanceName, g_rnids->StartDate, g_rnids->ResourceName,
                              g_rnids->ModuleVersion, g_rnids->RebootRequested, g_rnids->ResourceId, g_rnids->ConfigurationName, g_rnids->InDesiredState);

@@ -2069,18 +2069,18 @@ MI_Result MI_CALL Do_Register(
         }
         const char * bodyFormatString = "%s/RegisterHelper.sh body %s %s %s";
         const char * headerFormatString = "%s/RegisterHelper.sh header %s %s %s";
-        snprintf(buffer, c_bufferSize, bodyFormatString, DSC_PATH "/Scripts", s_ManagerInstanceNames[typeOfManagerInstance], val.string, configName);
+        snprintf(buffer, c_bufferSize, bodyFormatString, OMI_LIB_SCRIPTS, s_ManagerInstanceNames[typeOfManagerInstance], val.string, configName);
         requestBody = RunCommand(buffer);
-        snprintf(buffer, c_bufferSize, headerFormatString, DSC_PATH "/Scripts", s_ManagerInstanceNames[typeOfManagerInstance], val.string, configName);
+        snprintf(buffer, c_bufferSize, headerFormatString, OMI_LIB_SCRIPTS, s_ManagerInstanceNames[typeOfManagerInstance], val.string, configName);
         header = RunCommand(buffer);
     }
     else
     {
         const char * bodyFormatString = "%s/RegisterHelper.sh body %s %s";
         const char * headerFormatString = "%s/RegisterHelper.sh header %s %s";
-        snprintf(buffer, c_bufferSize, bodyFormatString, DSC_PATH "/Scripts", s_ManagerInstanceNames[typeOfManagerInstance], val.string);
+        snprintf(buffer, c_bufferSize, bodyFormatString, OMI_LIB_SCRIPTS, s_ManagerInstanceNames[typeOfManagerInstance], val.string);
         requestBody = RunCommand(buffer);
-        snprintf(buffer, c_bufferSize, headerFormatString, DSC_PATH "/Scripts", s_ManagerInstanceNames[typeOfManagerInstance], val.string);
+        snprintf(buffer, c_bufferSize, headerFormatString, OMI_LIB_SCRIPTS, s_ManagerInstanceNames[typeOfManagerInstance], val.string);
         header = RunCommand(buffer);
     }
 

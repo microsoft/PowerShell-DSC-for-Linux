@@ -40,8 +40,7 @@ moduleName = sys.argv[1]
 omi_bindir = "<CONFIG_BINDIR>"
 omi_libdir = "<CONFIG_LIBDIR>"
 omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
-dsc_path = "<DSC_PATH>"
-baseModulePath = dsc_path + "/modules"
+baseModulePath = "<DSC_MODULES_PATH>"
 modulePath = baseModulePath + "/" + moduleName
 
 if not os.path.isdir(modulePath):

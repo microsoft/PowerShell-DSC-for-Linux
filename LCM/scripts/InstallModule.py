@@ -52,8 +52,7 @@ if "." not in moduleVersion:
 omi_bindir = "<CONFIG_BINDIR>"
 omi_libdir = "<CONFIG_LIBDIR>"
 omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
-dsc_path = "<DSC_PATH>"
-baseModulePath = dsc_path + "/modules"
+baseModulePath = "<DSC_MODULES_PATH>"
 modulePath = baseModulePath + "/" + moduleName
 
 retval = subprocess.call(["unzip","-o","-d", baseModulePath, filepath])

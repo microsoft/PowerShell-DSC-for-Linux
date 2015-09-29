@@ -27,5 +27,5 @@ else
 
 fi
 
-echo $output > /etc/opt/omi/conf/dsc/last_statusreport
+echo $output > <CONFIG_SYSCONFDIR>/dsc/last_statusreport
 echo $output
