@@ -47,10 +47,49 @@ class MSFT_DSCMetaConfiguration
    ValueMap{"Ready","Busy","PendingReboot"},
    Values{"Ready","Busy","PendingReboot"}] 
    string LocalConfigurationManagerState;
+  
+     [Description ("Array of configuration download manager objects that contain location information to download configurations" ) ,
+   EmbeddedInstance("OMI_ConfigurationDownloadManager")]
+   string  ConfigurationDownloadManagers[];    
 
-  [Description ("Array of configuration download manager objects that contain location information to download configurations" ) ,
-  EmbeddedInstance("OMI_ConfigurationDownloadManager")]
-  string  ConfigurationDownloadManagers[];    
+   [Description ("Array of resource module managers pointing to a location to download missing DSCResources" ) ,
+   EmbeddedInstance("OMI_ResourceModuleManager")]
+   string  ResourceModuleManagers[];    
+
+   [Description ("Array of report managers pointing to a location that would help generate reports for DSC" ) ,
+   EmbeddedInstance("OMI_ReportManager")]
+   string  ReportManagers[];  
 
   [EmbeddedInstance("MSFT_PartialConfiguration")] string PartialConfigurations[];
+  
+  
+   [Description ("The action after reboot the server."),
+   ValueMap {"ContinueConfiguration","StopConfiguration"},
+   Values {"ContinueConfiguration","StopConfiguration"}]
+   string ActionAfterReboot;
+  
+     [Description ("The enumeration for DebugMode."),
+   ValueMap {"None","ForceModuleImport", "All", "ResourceScriptBreakAll"},
+   Values {"None","ForceModuleImport", "All", "ResourceScriptBreakAll"}]
+   string DebugMode[];
+   
+     [Read, Description("Current version of local configuration manager.")]
+   string LCMVersion;
+
+   [Read, Description("Compatible versions of current local configuration manager.")]
+   string LCMCompatibleVersions[];
+
+   [Read, Description("Current state of local configuration manager."),
+   ValueMap{"Idle","Busy","PendingReboot","PendingConfiguration"},
+   Values{"Idle","Busy","PendingReboot","PendingConfiguration"}] 
+   string LCMState;
+
+   [Read, Description("State detail of local configuration manager.")]
+   string LCMStateDetail;
+
+   [Description ("Number of days to retain configuration status history.")]
+   uint32 StatusRetentionTimeInDays;
+  
+   [Read, Description("AgentId of the current Dsc Agent.")]
+   string AgentId;   
 };

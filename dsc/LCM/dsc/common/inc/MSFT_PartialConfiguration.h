@@ -1,10 +1,18 @@
 /* @migen@ */
 /*
-**==============================================================================
-**
-** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
-**
-**==============================================================================
+   PowerShell Desired State Configuration for Linux
+
+   Copyright (c) Microsoft Corporation
+
+   All rights reserved. 
+
+   MIT License
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #ifndef _MSFT_PartialConfiguration_h
 #define _MSFT_PartialConfiguration_h
@@ -28,13 +36,13 @@ typedef struct _MSFT_PartialConfiguration /* extends OMI_MetaConfigurationResour
     /* OMI_MetaConfigurationResource properties */
     MI_ConstStringField ResourceId;
     MI_ConstStringField SourceInfo;
-    MI_ConstStringField ModuleName;
-    MI_ConstStringField ModuleVersion;
     /* MSFT_PartialConfiguration properties */
     MI_ConstStringField Description;
     MI_ConstStringAField ExclusiveResources;
-    MI_ConstStringField ConfigurationSource;
+    MI_ConstStringAField ConfigurationSource;
+    MI_ConstStringAField ResourceModuleSource;
     MI_ConstStringAField DependsOn;
+    MI_ConstStringField RefreshMode;
 }
 MSFT_PartialConfiguration;
 
@@ -190,77 +198,13 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_SourceInfo(
         1);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_ModuleName(
-    _Inout_ MSFT_PartialConfiguration* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        2,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_SetPtr_ModuleName(
-    _Inout_ MSFT_PartialConfiguration* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        2,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_ModuleName(
-    _Inout_ MSFT_PartialConfiguration* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        2);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_ModuleVersion(
-    _Inout_ MSFT_PartialConfiguration* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        3,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_SetPtr_ModuleVersion(
-    _Inout_ MSFT_PartialConfiguration* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        3,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_ModuleVersion(
-    _Inout_ MSFT_PartialConfiguration* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        3);
-}
-
 MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_Description(
     _Inout_ MSFT_PartialConfiguration* self,
     _In_z_ const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        4,
+        2,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -272,7 +216,7 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_SetPtr_Description(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        4,
+        2,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -283,7 +227,7 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_Description(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        4);
+        2);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_ExclusiveResources(
@@ -296,7 +240,7 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_ExclusiveResources(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        5,
+        3,
         (MI_Value*)&arr,
         MI_STRINGA,
         0);
@@ -312,7 +256,7 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_SetPtr_ExclusiveResources(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        5,
+        3,
         (MI_Value*)&arr,
         MI_STRINGA,
         MI_FLAG_BORROW);
@@ -323,30 +267,38 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_ExclusiveResources(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        5);
+        3);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_ConfigurationSource(
     _Inout_ MSFT_PartialConfiguration* self,
-    _In_z_ const MI_Char* str)
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
 {
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        6,
-        (MI_Value*)&str,
-        MI_STRING,
+        4,
+        (MI_Value*)&arr,
+        MI_STRINGA,
         0);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_SetPtr_ConfigurationSource(
     _Inout_ MSFT_PartialConfiguration* self,
-    _In_z_ const MI_Char* str)
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
 {
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        6,
-        (MI_Value*)&str,
-        MI_STRING,
+        4,
+        (MI_Value*)&arr,
+        MI_STRINGA,
         MI_FLAG_BORROW);
 }
 
@@ -355,7 +307,47 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_ConfigurationSource(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        6);
+        4);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_ResourceModuleSource(
+    _Inout_ MSFT_PartialConfiguration* self,
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        5,
+        (MI_Value*)&arr,
+        MI_STRINGA,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_SetPtr_ResourceModuleSource(
+    _Inout_ MSFT_PartialConfiguration* self,
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        5,
+        (MI_Value*)&arr,
+        MI_STRINGA,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_ResourceModuleSource(
+    _Inout_ MSFT_PartialConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        5);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_DependsOn(
@@ -368,7 +360,7 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_DependsOn(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        7,
+        6,
         (MI_Value*)&arr,
         MI_STRINGA,
         0);
@@ -384,13 +376,45 @@ MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_SetPtr_DependsOn(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        7,
+        6,
         (MI_Value*)&arr,
         MI_STRINGA,
         MI_FLAG_BORROW);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_DependsOn(
+    _Inout_ MSFT_PartialConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        6);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Set_RefreshMode(
+    _Inout_ MSFT_PartialConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        7,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_SetPtr_RefreshMode(
+    _Inout_ MSFT_PartialConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        7,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_PartialConfiguration_Clear_RefreshMode(
     _Inout_ MSFT_PartialConfiguration* self)
 {
     return self->__instance.ft->ClearElementAt(

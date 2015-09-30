@@ -42,7 +42,7 @@ def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents,
     if Ensure is None or Ensure == '':
         Ensure = 'present'
     if Type is None :
-        Type = ''
+        Type = 'file'
     if Force is None :
         Force = False
     if Contents is None :
@@ -92,7 +92,7 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     Ensure = protocol.MI_String(Ensure)
     Type = protocol.MI_String(Type)
     Force = protocol.MI_Boolean(Force)
-    Contents = protocol.MI_String(Contents.decode('ascii', 'ignore'))
+    Contents = protocol.MI_String(Contents)
     Checksum = protocol.MI_String(Checksum)
     Recurse = protocol.MI_Boolean(Recurse)
     Links = protocol.MI_String(Links)
@@ -162,7 +162,7 @@ def ReadFile1k(path):
             LG().Log('ERROR', "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
         else:
             d = F.read(1024)
-    return d.decode('utf-8','ignore').encode('ascii','ignore'), error
+    return d, error
 
 
 def ReadFile(path):
@@ -921,7 +921,7 @@ def TestFile(DestinationPath, SourcePath, fc):
 
     elif fc.Contents:
         dest_file, error = ReadFile(DestinationPath)
-        if fc.Contents != dest_file:
+        if fc.Contents.encode('utf8') != dest_file:
             return False
 
     return True
@@ -996,11 +996,6 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         Ensure = "absent"
         ModifiedDate = 0
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
-
-    Contents = ""
-    Checksum = ""
-    Force = False
-    Recurse = False
 
     stat_info = os.lstat(DestinationPath)
 

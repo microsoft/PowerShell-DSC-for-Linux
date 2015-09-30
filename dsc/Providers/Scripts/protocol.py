@@ -46,7 +46,7 @@ DO_VERBOSE_TRACE = False
 
 def trace(text):
     if DO_TRACE:
-        sys.stdout.write(text + '\n')
+        sys.stdout.write(repr(text) + '\n')
 
 
 def verbose_trace(text):
@@ -124,7 +124,7 @@ def write_values(fd, d):
     else:
         for key, value in d.iteritems():
             trace('  key: ' + key)
-            verbose_trace('  value: ' + str(value.value))
+            verbose_trace('  value: ' + repr(value.value))
             if value is not None:
                 verbose_trace('  writing value')
                 write_string(fd, key)
@@ -144,6 +144,9 @@ class MI_Value:
 
     def __init__(self, type):
         self.type = type
+
+    def __repr__(self):
+        return repr(self.value)
 
     def write(self, fd):
         verbose_trace('  <MI_Value::write>')
@@ -837,22 +840,32 @@ class MI_String(MI_Value):
     def __init__(self, val):
         MI_Value.__init__(self, MI_STRING)
         if val is not None:
-            if type(val) is not str:
-                self.value = str(val)
-            else:
-                self.value = val
+            self.value = val
 
     def write(self, fd):
         verbose_trace('<MI_String.write>')
         MI_Value.write(self, fd)
         if self.value is not None:
-            verbose_trace('  len: ' + str(len(self.value)) + ', value: ' +
-                          self.value)
             buf = struct.pack('@i', len(self.value))
-            if type(buf) is not str:
-                buf += bytes(self.value, 'utf8')
-            else:
-                buf += self.value
+            if type(buf) is not str: # python3
+                if type(self.value) == str:
+                    buf = struct.pack('@i', len(bytes(self.value,'utf8')))
+                    buf += bytes(self.value, 'utf8')
+                    verbose_trace('  len: ' + str(len(self.value)) + ', value: ' +
+                                  self.value)
+                else:
+                    buf += self.value
+                    verbose_trace('  len: ' + str(len(self.value)) + ', value: ' +
+                                  self.value.decode('utf8'))
+            else: # python 2
+                if type(self.value) != str: # unicode
+                    buf = struct.pack('@i', len(self.value.encode('utf8')))
+                    buf+=self.value.encode('utf8')
+                else:
+                    buf += self.value
+                verbose_trace('  len: ' + str(len(self.value)) + ', value: ' +
+                                  self.value)
+
             fd.sendall(buf)
         verbose_trace('</MI_String.write>')
 
@@ -1483,7 +1496,7 @@ class MI_StringA(MI_Value):
         self.value = []
         if vals is not None:
             for val in vals:
-                self.value.append(str(val))
+                self.value.append(val)
 
     def write(self, fd):
         verbose_trace('<MI_StringA.write>')

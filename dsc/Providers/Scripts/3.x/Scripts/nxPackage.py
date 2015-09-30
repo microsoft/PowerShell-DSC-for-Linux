@@ -11,6 +11,8 @@ import sys
 import time
 import imp
 import urllib.request
+import threading
+import re
 apt = None
 rpm = None
 try:
@@ -33,7 +35,6 @@ LG = nxDSCLog.DSCLog
 #   [write] Boolean PackageGroup;
 #   [write] string Arguments;
 #   [write] uint32 ReturnCode;
-#   [write] string LogPath;
 #   [read] string PackageDescription;
 #   [read] string Publisher;
 #   [read] string InstalledOn;
@@ -231,8 +232,8 @@ class Params:
         self.cmds['apt'] = {}
         self.cmds['yum'] = {}
         self.cmds['zypper'] = {}
-        self.cmds['dpkg']['present'] = 'dpkg % -i '
-        self.cmds['dpkg']['absent'] = 'dpkg % -r '
+        self.cmds['dpkg']['present'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -i '
+        self.cmds['dpkg']['absent'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -r '
         self.cmds['dpkg'][
             'stat'] = "dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}\n' "
         self.cmds['dpkg']['stat_group'] = None
@@ -242,9 +243,9 @@ class Params:
             'stat'] = 'rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed\n" '
         self.cmds['rpm']['stat_group'] = None
         self.cmds['apt'][
-            'present'] = 'apt-get % install ^ --allow-unauthenticated --yes '
+            'present'] = 'DEBIAN_FRONTEND=noninteractive apt-get % install ^ --allow-unauthenticated --yes '
         self.cmds['apt'][
-            'absent'] = 'apt-get % remove ^ --allow-unauthenticated --yes '
+            'absent'] = 'DEBIAN_FRONTEND=noninteractive apt-get % remove ^ --allow-unauthenticated --yes '
         self.cmds['apt']['stat'] = self.cmds['dpkg']['stat']
         self.cmds['apt']['stat_group'] = None
         self.cmds['yum']['present'] = 'yum -y % install ^ '
@@ -255,7 +256,7 @@ class Params:
             'stat_group'] = 'yum grouplist '  # the group mode is implemented when using YUM only.
         self.cmds['yum']['stat'] = self.cmds['rpm']['stat']
         self.cmds['zypper']['present'] = 'zypper --non-interactive % install ^'
-        self.cmds['zypper']['absent'] = 'zypper --non-interactive  % remove ^'
+        self.cmds['zypper']['absent'] = self.cmds['rpm']['absent']
         self.cmds['zypper']['stat'] = self.cmds['rpm']['stat']
         self.cmds['zypper']['stat_group'] = None
         if self.PackageGroup is True:
@@ -335,7 +336,7 @@ def IsPackageInstalled(p):
                 'ERROR', 'ERROR.  PackageGroup is not valid for ' + p.PackageManager)
             return False, out
     else:
-        cmd = p.cmds[p.PackageManager]['stat'] + p.Name
+        cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager]['stat'] + p.Name
     code, out = RunGetOutput(cmd, False)
     if p.PackageGroup is True:  # implemented for YUM only.
         if 'Installed' in out:
@@ -411,7 +412,7 @@ def DoEnableDisable(p):
                 'ERROR', 'Error: Group mode not implemented for ' + p.PackageManager)
             return False, 'Error: Group mode not implemented for ' + p.PackageManager
     else:
-        cmd = p.cmds[p.PackageManager][p.Ensure] + ' ' + p.Name
+        cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager][p.Ensure] + ' ' + p.Name
     cmd = cmd.replace('%', p.Arguments)
     cmd = cmd.replace('^', p.CommandArguments)
     code, out = RunGetOutput(cmd, False)
@@ -582,9 +583,117 @@ def RunGetOutput(cmd, no_output, chk_err=True):
     Wrapper for subprocess.check_output.
     Execute 'cmd'.  Returns return code and STDOUT, trapping expected exceptions.
     Reports exceptions to Error if chk_err parameter is True
+    Kill inactivite subprocess and children if 6 second interval is exceeded.
     """
+    class KillInactiveSubprocesses(object):
+        """
+        Sleep for 1 second to allow subprocess to start.
+        Check the strace of the subprocess and its children for 4 seconds.
+        Sleep for 1 again.  If the tree has not performed new activity
+        in 3 consecutive samples, kill the processes created by the subprocess call.
+        Thread is joined after subprocess returns.
+        """
+        def __init__(self):
+            self.t = None
+    
+        def start(self):
+            self.shutdown = False
+            self.t = threading.Thread(target = self.monitor)
+            self.t.setDaemon(True)
+            self.pid=os.getpid()
+            self.pid_path = '/proc/'+str(self.pid)+'/task/'+str(self.pid)+'/'
+            self.status={}
+            self.t.start()
+            
+        def monitor(self):
+            time.sleep(1)
+            same_state=0
+            last_status=''
+            curr_status=''
+            while not self.shutdown:
+                if not os.path.exists(self.pid_path):
+                    return
+                children=self.get_children()
+                LG().Log('INFO', 'Children:'+str(children))
+                if children == None or len(children) == 0 :
+                    return
+                running = False
+                cmd='timeout 4s strace'
+                for c in children:
+                    cmd+=' -p '+c
+                    pargs=[cmd]
+                    kwargs={'stderr':subprocess.STDOUT,'shell':True}
+                process = subprocess.Popen(stdout=subprocess.PIPE, *pargs, **kwargs)
+                output, unused_err = process.communicate()
+                process.poll()
+                last_status=curr_status
+                curr_status=output
+                LG().Log('INFO', '\n'+cmd+' is '+output.decode('ascii', 'ignore')+'\n')
+                if last_status != curr_status:
+                    running=True
+                    same_state = -1
+                if not running and same_state > 1:
+                    self.kill_subtree(children)
+                    self.shutdown = True
+                if not self.shutdown:
+                    time.sleep(1)
+                same_state+=1
+            return
+            
+        def get_children(self):
+            """
+            If the subprocess is done, there will be nothing in list.
+            """
+            if not os.path.exists(self.pid_path):
+                return None
+            pids={}
+            pid=str(self.pid)
+            status_srch_parent=r'(?:.*?PPid:\t)([0-9]+)'
+            srch=re.compile(status_srch_parent,re.S|re.M)
+            for top, dirs, files in os.walk('/proc'):
+                for d in dirs:
+                    if d.isdigit() and int(d)>int(pid):
+                      pids[d]=None
+            for d in pids.keys():
+                path='/proc/'+d+'/status'
+                if not os.path.exists(path):
+                    continue
+                status=open(path).read()
+                pids[d]=srch.search(status).group(1)
+            children=[pid]
+            count = 0
+            while count < len(children):
+                for p in pids.keys():
+                    if pids[p] in children and p not in children:
+                        children.append(p)
+                count+=1
+            children.remove(pid)
+            children.sort(reverse=True)
+            return children
+
+        def kill_subtree(self,kill_list):
+            """
+            If the subprocess is done, there will be nothing to kill.
+            """
+            if not os.path.exists(self.pid_path):
+                return
+            for i in range(len(kill_list)):
+                try:
+                    p=kill_list.pop(0)
+                    print('ERROR: Inactivity period exceeded.  Killing '+str(p))
+                    LG().Log('ERROR', 'ERROR: Inactivity period exceeded.  Killing '+str(p))
+                    os.kill(int(p),9)
+                    print('INFO', 'Killed '+str(p))
+                    LG().Log('INFO', 'Killed '+str(p))
+                except Exception as e:
+                    print('Error killing '+str(p)+repr(e)) 
+                    LG().Log('ERROR', 'Error killing '+str(p)+repr(e)) 
+            return
+    
     def check_output(no_output, *popenargs, **kwargs):
-        r"""Backport from subprocess module from python 2.7"""
+        """
+        Backport from subprocess module from python 2.7
+        """
         if 'stdout' in kwargs:
             raise ValueError(
                 'stdout argument not allowed, it will be overridden.')
@@ -613,15 +722,31 @@ def RunGetOutput(cmd, no_output, chk_err=True):
         def __str__(self):
             return "Command '%s' returned non-zero exit status %d" % (self.cmd, self.returncode)
 
+    def noop():
+        pass
+
     subprocess.check_output = check_output
     subprocess.CalledProcessError = CalledProcessError
     output=b''
+    fn=noop
+    kin=None
+    if os.path.exists('/usr/bin/timeout') and os.path.exists('/usr/bin/strace'):
+        kin=KillInactiveSubprocesses()
+        fn=kin.start
+    else :
+        print(
+            'timeout or strace not found.  Inactiviy monitor disabled.', file=sys.stdout)
+        LG().Log(
+            'ERROR', 'timeout or strace not found.  Inactiviy monitor disabled.')
+
     try:
         output = subprocess.check_output(
-            no_output, cmd, stderr=subprocess.STDOUT, shell=True)
+            no_output, cmd, stderr=subprocess.STDOUT, shell=True, preexec_fn=fn())
         if output is None:
             output=b''
     except subprocess.CalledProcessError as e:
+        if kin and kin.t:
+            kin.t.join()
         if chk_err:
             print('CalledProcessError.  Error Code is ' +
                   str(e.returncode), file=sys.stdout)
@@ -633,7 +758,8 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             return e.returncode, None
         else:
             return e.returncode, e.output.decode('ascii', 'ignore')
-
+    if kin and kin.t:
+        kin.t.join()
     if no_output:
         return 0, None
     else:

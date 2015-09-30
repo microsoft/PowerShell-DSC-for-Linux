@@ -1,18 +1,28 @@
 /* @migen@ */
 /*
-**==============================================================================
-**
-** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
-**
-**==============================================================================
+   PowerShell Desired State Configuration for Linux
+
+   Copyright (c) Microsoft Corporation
+
+   All rights reserved. 
+
+   MIT License
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #ifndef _MSFT_DSCMetaConfiguration_h
 #define _MSFT_DSCMetaConfiguration_h
 
 #include <MI.h>
-#include "MSFT_BaseCredential.h"
+#include "MSFT_Credential.h"
 #include "MSFT_KeyValuePair.h"
 #include "OMI_ConfigurationDownloadManager.h"
+#include "OMI_ResourceModuleManager.h"
+#include "OMI_ReportManager.h"
 #include "MSFT_PartialConfiguration.h"
 
 /*
@@ -40,9 +50,19 @@ typedef struct _MSFT_DSCMetaConfiguration
     MSFT_KeyValuePair_ConstArrayRef DownloadManagerCustomData;
     MI_ConstUint32Field RefreshFrequencyMins;
     MI_ConstBooleanField AllowModuleOverwrite;
-    OMI_ConfigurationDownloadManager_ConstArrayRef ConfigurationDownloadManagers;
     MI_ConstStringField LocalConfigurationManagerState;
+    OMI_ConfigurationDownloadManager_ConstArrayRef ConfigurationDownloadManagers;
+    OMI_ResourceModuleManager_ConstArrayRef ResourceModuleManagers;
+    OMI_ReportManager_ConstArrayRef ReportManagers;
     MSFT_PartialConfiguration_ConstArrayRef PartialConfigurations;
+    MI_ConstStringField ActionAfterReboot;
+    MI_ConstStringAField DebugMode;
+    MI_ConstStringField LCMVersion;
+    MI_ConstStringAField LCMCompatibleVersions;
+    MI_ConstStringField LCMState;
+    MI_ConstStringField LCMStateDetail;
+    MI_ConstUint32Field StatusRetentionTimeInDays;
+    MI_ConstStringField AgentId;
 }
 MSFT_DSCMetaConfiguration;
 
@@ -430,6 +450,38 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_AllowModuleOverwrite
     return MI_RESULT_OK;
 }
 
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_LocalConfigurationManagerState(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        11,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_LocalConfigurationManagerState(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        11,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_LocalConfigurationManagerState(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        11);
+}
+
 MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_ConfigurationDownloadManagers(
     _Inout_ MSFT_DSCMetaConfiguration* self,
     _In_reads_opt_(size) const OMI_ConfigurationDownloadManager * const * data,
@@ -440,7 +492,7 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_ConfigurationDownloadM
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        11,
+        12,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         0);
@@ -456,7 +508,7 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_ConfigurationDownlo
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        11,
+        12,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         MI_FLAG_BORROW);
@@ -467,39 +519,87 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_ConfigurationDownloa
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        11);
+        12);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_LocalConfigurationManagerState(
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_ResourceModuleManagers(
     _Inout_ MSFT_DSCMetaConfiguration* self,
-    _In_z_ const MI_Char* str)
+    _In_reads_opt_(size) const OMI_ResourceModuleManager * const * data,
+    _In_ MI_Uint32 size)
 {
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        12,
-        (MI_Value*)&str,
-        MI_STRING,
+        13,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_LocalConfigurationManagerState(
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_ResourceModuleManagers(
     _Inout_ MSFT_DSCMetaConfiguration* self,
-    _In_z_ const MI_Char* str)
+    _In_reads_opt_(size) const OMI_ResourceModuleManager * const * data,
+    _In_ MI_Uint32 size)
 {
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        12,
-        (MI_Value*)&str,
-        MI_STRING,
+        13,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_LocalConfigurationManagerState(
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_ResourceModuleManagers(
     _Inout_ MSFT_DSCMetaConfiguration* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        12);
+        13);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_ReportManagers(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const OMI_ReportManager * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        14,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_ReportManagers(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const OMI_ReportManager * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        14,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_ReportManagers(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        14);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_PartialConfigurations(
@@ -512,7 +612,7 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_PartialConfigurations(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        13,
+        15,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         0);
@@ -528,7 +628,7 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_PartialConfiguratio
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        13,
+        15,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         MI_FLAG_BORROW);
@@ -539,28 +639,264 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_PartialConfiguration
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        13);
+        15);
 }
 
-/*
-**==============================================================================
-**
-** MSFT_DSCMetaConfiguration provider function prototypes
-**
-**==============================================================================
-*/
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_ActionAfterReboot(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        16,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
 
-/* The developer may optionally define this structure */
-typedef struct _MSFT_DSCMetaConfiguration_Self MSFT_DSCMetaConfiguration_Self;
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_ActionAfterReboot(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        16,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
 
-MI_EXTERN_C void MI_CALL MSFT_DSCMetaConfiguration_Load(
-    _Outptr_result_maybenull_ MSFT_DSCMetaConfiguration_Self** self,
-    _In_opt_ MI_Module_Self* selfModule,
-    _In_ MI_Context* context);
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_ActionAfterReboot(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        16);
+}
 
-MI_EXTERN_C void MI_CALL MSFT_DSCMetaConfiguration_Unload(
-    _In_opt_ MSFT_DSCMetaConfiguration_Self* self,
-    _In_ MI_Context* context);
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_DebugMode(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        17,
+        (MI_Value*)&arr,
+        MI_STRINGA,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_DebugMode(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        17,
+        (MI_Value*)&arr,
+        MI_STRINGA,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_DebugMode(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        17);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_LCMVersion(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        18,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_LCMVersion(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        18,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_LCMVersion(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        18);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_LCMCompatibleVersions(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        19,
+        (MI_Value*)&arr,
+        MI_STRINGA,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_LCMCompatibleVersions(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_reads_opt_(size) const MI_Char** data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        19,
+        (MI_Value*)&arr,
+        MI_STRINGA,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_LCMCompatibleVersions(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        19);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_LCMState(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        20,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_LCMState(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        20,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_LCMState(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        20);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_LCMStateDetail(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        21,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_LCMStateDetail(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        21,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_LCMStateDetail(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        21);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_StatusRetentionTimeInDays(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_ MI_Uint32 x)
+{
+    ((MI_Uint32Field*)&self->StatusRetentionTimeInDays)->value = x;
+    ((MI_Uint32Field*)&self->StatusRetentionTimeInDays)->exists = 1;
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_StatusRetentionTimeInDays(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    memset((void*)&self->StatusRetentionTimeInDays, 0, sizeof(self->StatusRetentionTimeInDays));
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_AgentId(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        23,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_SetPtr_AgentId(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        23,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_AgentId(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        23);
+}
 
 
 #endif /* _MSFT_DSCMetaConfiguration_h */

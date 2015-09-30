@@ -13,6 +13,7 @@ import sys
 import stat
 import tempfile
 import imp
+import codecs
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
@@ -30,23 +31,23 @@ show_mof = False
 
 def Set_Marshall(GetScript, SetScript, TestScript, User, Group):
     if GetScript is not None:
-        GetScript = GetScript.encode('ascii', 'ignore')
+        GetScript = GetScript.encode('utf8', 'replace')
     else:
         GetScript = ''
     if SetScript is not None:
-        SetScript = SetScript.encode('ascii', 'ignore')
+        SetScript = SetScript.encode('utf8', 'replace')
     else:
         SetScript = ''
     if TestScript is not None:
-        TestScript = TestScript.encode('ascii', 'ignore')
+        TestScript = TestScript.encode('utf8', 'replace')
     else:
         TestScript = ''
     if User is not None:
-        User = User.encode('ascii', 'ignore')
+        User = User.encode('utf8', 'replace')
     else:
         User = ''
     if Group is not None:
-        Group = Group.encode('ascii', 'ignore')
+        Group = Group.encode('utf8', 'replace')
     else:
         Group = ''
 
@@ -56,23 +57,23 @@ def Set_Marshall(GetScript, SetScript, TestScript, User, Group):
 
 def Test_Marshall(GetScript, SetScript, TestScript, User, Group):
     if GetScript is not None:
-        GetScript = GetScript.encode('ascii', 'ignore')
+        GetScript = GetScript.encode('utf8', 'replace')
     else:
         GetScript = ''
     if SetScript is not None:
-        SetScript = SetScript.encode('ascii', 'ignore')
+        SetScript = SetScript.encode('utf8', 'replace')
     else:
         SetScript = ''
     if TestScript is not None:
-        TestScript = TestScript.encode('ascii', 'ignore')
+        TestScript = TestScript.encode('utf8', 'replace')
     else:
         TestScript = ''
     if User is not None:
-        User = User.encode('ascii', 'ignore')
+        User = User.encode('utf8', 'replace')
     else:
         User = ''
     if Group is not None:
-        Group = Group.encode('ascii', 'ignore')
+        Group = Group.encode('utf8', 'replace')
     else:
         Group = ''
 
@@ -83,23 +84,23 @@ def Test_Marshall(GetScript, SetScript, TestScript, User, Group):
 def Get_Marshall(GetScript, SetScript, TestScript, User, Group):
     arg_names = list(locals().keys())
     if GetScript is not None:
-        GetScript = GetScript.encode('ascii', 'ignore')
+        GetScript = GetScript.encode('utf8', 'replace')
     else:
         GetScript = ''
     if SetScript is not None:
-        SetScript = SetScript.encode('ascii', 'ignore')
+        SetScript = SetScript.encode('utf8', 'replace')
     else:
         SetScript = ''
     if TestScript is not None:
-        TestScript = TestScript.encode('ascii', 'ignore')
+        TestScript = TestScript.encode('utf8', 'replace')
     else:
         TestScript = ''
     if User is not None:
-        User = User.encode('ascii', 'ignore')
+        User = User.encode('utf8', 'replace')
     else:
         User = ''
     if Group is not None:
-        Group = Group.encode('ascii', 'ignore')
+        Group = Group.encode('utf8', 'replace')
     else:
         Group = ''
 
@@ -149,7 +150,7 @@ def ShowMof(op, GetScript, SetScript, TestScript, User, Group):
 
 
 def Print(s, file=sys.stdout):
-    file.write(s + '\n')
+    file.write(s.decode('utf8','replace').encode('utf8') + '\n')
 
 
 def opened_w_error(filename, mode="r"):
@@ -157,7 +158,7 @@ def opened_w_error(filename, mode="r"):
     This context ensures the file is closed.
     """
     try:
-        f = open(filename, mode)
+        f = codecs.open(filename, mode, 'utf8')
     except IOError, err:
         return None, err
     return f, None
@@ -248,12 +249,12 @@ def Set(GetScript, SetScript, TestScript, User, Group):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, preexec_fn=PreExec(uid, gid, User))
     exit_code = proc.wait()
-    Print("stdout: " + proc.stdout.read().encode('ascii', 'ignore'))
+    Print("stdout: " + proc.stdout.read().decode('utf8','replace').encode('utf8','replace'))
     LG().Log('INFO', "stdout: " +
-             proc.stdout.read().encode('ascii', 'ignore'))
-    Print("stderr: " + proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stdout.read().decode('utf8','replace').encode('utf8','replace'))
+    Print("stderr: " + proc.stderr.read().decode('utf8','replace').encode('utf8','replace'))
     LG().Log('INFO', "stderr: " +
-             proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stderr.read().decode('utf8','replace').encode('utf8','replace'))
 
     os.remove(path)
     return [exit_code]
@@ -288,12 +289,12 @@ def Test(GetScript, SetScript, TestScript, User, Group):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, preexec_fn=PreExec(uid, gid, User))
     exit_code = proc.wait()
-    Print("stdout: " + proc.stdout.read().encode('ascii', 'ignore'))
+    Print("stdout: " + proc.stdout.read().decode('utf8','replace').encode('utf8','replace'))
     LG().Log('INFO', "stdout: " +
-             proc.stdout.read().encode('ascii', 'ignore'))
-    Print("stderr: " + proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stdout.read().decode('utf8','replace').encode('utf8','replace'))
+    Print("stderr: " + proc.stderr.read().decode('utf8','replace').encode('utf8','replace'))
     LG().Log('INFO', "stderr: " +
-             proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stderr.read().decode('utf8','replace').encode('utf8','replace'))
 
     os.remove(path)
     return [exit_code]
@@ -329,12 +330,12 @@ def Get(GetScript, SetScript, TestScript, User, Group):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, preexec_fn=PreExec(uid, gid, User))
     exit_code = proc.wait()
-    Result = proc.stdout.read().encode('ascii', 'ignore')
+    Result = proc.stdout.read().decode('utf8','replace').encode('utf8','replace')
     Print("stdout: " + Result)
     LG().Log('INFO', "stdout: " + Result)
-    Print("stderr: " + proc.stderr.read().encode('ascii', 'ignore'))
+    Print("stderr: " + proc.stderr.read().decode('utf8','replace').encode('utf8','replace'))
     LG().Log('INFO', "stderr: " +
-             proc.stderr.read().encode('ascii', 'ignore'))
+             proc.stderr.read().decode('utf8','replace').encode('utf8','replace'))
 
     os.remove(path)
     return [exit_code, GetScript, SetScript, TestScript, User, Group, Result]

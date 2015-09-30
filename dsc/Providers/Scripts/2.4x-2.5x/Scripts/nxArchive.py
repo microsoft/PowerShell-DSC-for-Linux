@@ -200,7 +200,7 @@ def WriteCacheInfo(SourcePath, DestinationPath):
         src_block = src_file.read(BLOCK_SIZE)
         src_hash.update(src_block)
     chksum = src_hash.hexdigest()
-    st, error = LStatFile(DestinationPath)
+    st, error = LStatFile(SourcePath)
     cache_file_path = cache_file_dir + SourcePath.replace('/', '_') + DestinationPath.replace('/', '_')
     F, error = opened_w_error(cache_file_path, 'w+')
     if error:
@@ -352,6 +352,7 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
                          DestinationPath + " Error: " + str(error))
                 return False
         arch.close()
+        os.system('touch '+DestinationPath) # existing dirs won't get an updated time, so update it.
     if WriteCacheInfo(SourcePath, DestinationPath) is False:
         return False
     return True

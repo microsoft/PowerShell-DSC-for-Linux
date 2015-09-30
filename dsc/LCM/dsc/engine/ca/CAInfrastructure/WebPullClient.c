@@ -1,3 +1,18 @@
+/*
+   PowerShell Desired State Configuration for Linux
+
+   Copyright (c) Microsoft Corporation
+
+   All rights reserved. 
+
+   MIT License
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 #include <MI.h>
 #include "DSC_Systemcalls.h"
 //#include "LocalConfigManagerHelperForCA.h"
@@ -62,6 +77,12 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
                                            ModuleTable* table,
                                            _Outptr_result_maybenull_ MI_Instance **extendedError);
 
+struct ReadChunk
+{
+    char * data;
+    size_t last_char;
+};
+
 struct Chunk 
 {
     size_t size;
@@ -105,15 +126,16 @@ static void CleanupHeaderChunk(struct HeaderChunk * chunk)
     
 }
 
-static MI_Result GetSSLOptions(struct SSLOptions * sslOptions, 
-                               _Outptr_result_maybenull_ MI_Instance **extendedError)
+struct SSLOptions g_sslOptions;
+
+static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     Conf* conf;
 
-    sslOptions->DoNotCheckCertificate = MI_FALSE;
-    sslOptions->NoSSLv3 = MI_FALSE;
-    sslOptions->cipherList[0] = '\0';
-    sslOptions->CABundle[0] = '\0';
+    g_sslOptions.DoNotCheckCertificate = MI_FALSE;
+    g_sslOptions.NoSSLv3 = MI_FALSE;
+    g_sslOptions.cipherList[0] = '\0';
+    g_sslOptions.CABundle[0] = '\0';
     
     conf = Conf_Open(OMI_CONF_FILE_PATH);
     if (!conf)
@@ -141,11 +163,11 @@ static MI_Result GetSSLOptions(struct SSLOptions * sslOptions,
         {
             if (strcasecmp(value, "true") == 0)
             {
-                sslOptions->DoNotCheckCertificate = MI_TRUE;
+                g_sslOptions.DoNotCheckCertificate = MI_TRUE;
             }
             else if (strcasecmp(value, "false") == 0)
             {
-                sslOptions->DoNotCheckCertificate = MI_FALSE;           
+                g_sslOptions.DoNotCheckCertificate = MI_FALSE;           
             }
             else
             {
@@ -157,11 +179,11 @@ static MI_Result GetSSLOptions(struct SSLOptions * sslOptions,
         {
             if (strcasecmp(value, "true") == 0)
             {
-                sslOptions->NoSSLv3 = MI_TRUE;
+                g_sslOptions.NoSSLv3 = MI_TRUE;
             }
             else if (strcasecmp(value, "false") == 0)
             {
-                sslOptions->NoSSLv3 = MI_FALSE;         
+                g_sslOptions.NoSSLv3 = MI_FALSE;         
             }
             else
             {
@@ -177,8 +199,8 @@ static MI_Result GetSSLOptions(struct SSLOptions * sslOptions,
                 Conf_Close(conf);
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_SSLCIPHERLISTTOOLONG);
             }
-            memcpy(sslOptions->cipherList, value, valueLength);
-            sslOptions->cipherList[valueLength] = '\0';
+            memcpy(g_sslOptions.cipherList, value, valueLength);
+            g_sslOptions.cipherList[valueLength] = '\0';
         }
         else if (strcasecmp(key, "CURL_CA_BUNDLE") == 0)
         {
@@ -188,8 +210,8 @@ static MI_Result GetSSLOptions(struct SSLOptions * sslOptions,
                 Conf_Close(conf);
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_CABUNDLETOOLONG);
             }
-            memcpy(sslOptions->CABundle, value, valueLength);
-            sslOptions->CABundle[valueLength] = '\0';
+            memcpy(g_sslOptions.CABundle, value, valueLength);
+            g_sslOptions.CABundle[valueLength] = '\0';
         }
         else
         {
@@ -575,8 +597,8 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
     *extendedError = NULL;
     *serverURL = '\0';
 
-    // 1. Get Configuration ID.
-    r = MI_Instance_GetElement(metaConfig, MetaConfigConfigurationId, &value, NULL, &flags, NULL);
+    // 1. Get AgentID
+    r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_AgentId, &value, NULL, &flags, NULL);
     if( r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
     {
         *getActionStatusCode = InvalidConfigurationIdInMetaConfig;
@@ -584,42 +606,25 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
         return r;
     }
 
-    /* We will use System UUID only if user has explicitly asked for.*/
-    if( Tcscasecmp(value.string, UseSystemUUIDValue) == 0 )
+    *configurationID = (MI_Char*)DSC_malloc((Tcslen(value.string)+1) * sizeof(MI_Char), NitsHere());
+    if( *configurationID == NULL)
     {
-        //Get System GUID
-        MI_Char *systemUuid = GetSystemUuid();
-        if( systemUuid == NULL || !IsValidUuid(systemUuid))
-        {
-            *getActionStatusCode = InvalidConfigurationIdInMetaConfig;
-            if( systemUuid) 
-                DSC_free(systemUuid);
-            r = GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDCONFIGURATIONIDFORMAT, systemUuid);
-            return r;            
-        }
-        *configurationID = systemUuid;
+        *getActionStatusCode = InvalidConfigurationIdInMetaConfig;
+        r = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
+        return r;              
     }
-    else
+    memcpy(*configurationID, value.string, Tcslen(value.string)* sizeof(MI_Char));
+    /* Validate the Uuid.*/
+/*
+    if( !IsValidUuid(*configurationID))
     {
-        *configurationID = (MI_Char*)DSC_malloc((Tcslen(value.string)+1) * sizeof(MI_Char), NitsHere());
-        if( *configurationID == NULL)
-        {
-            *getActionStatusCode = InvalidConfigurationIdInMetaConfig;
-            r = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-            return r;              
-        }
-        memcpy(*configurationID, value.string, Tcslen(value.string)* sizeof(MI_Char));
-        /* Validate the Uuid.*/
-        if( !IsValidUuid(*configurationID))
-        {
-            *getActionStatusCode = InvalidConfigurationIdFormat;
-            r = GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDCONFIGURATIONIDFORMAT, *configurationID);
-            DSC_free(*configurationID);             
-            return r;            
-        }
-        
+        *getActionStatusCode = InvalidConfigurationIdFormat;
+        r = GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDCONFIGURATIONIDFORMAT, *configurationID);
+        DSC_free(*configurationID);             
+        return r;            
     }
-
+*/
+    
     // 2. Get Credential.
     r = MI_Instance_GetElement(metaConfig, MetaConfig_Credential, &value, NULL, &flags, NULL);
     if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
@@ -833,6 +838,10 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
         {
             //success
             *bIsHttps = MI_TRUE;
+            if (*port == 80)
+            {
+                *port = 443;
+            }
         }
 #else
         if( sscanf(serverURL, MI_T("http://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
@@ -846,6 +855,10 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
         {
             //success
             *bIsHttps = MI_TRUE;
+            if (*port == 80)
+            {
+                *port = 443;
+            }
         }
 #endif                      
     }
@@ -867,6 +880,8 @@ MI_Char * GetGetActionBodyContent(_In_z_ const MI_Char *checksum, MI_Boolean nod
     const MI_Char *complianceName = MI_T("NodeCompliant");
     const MI_Char *algorithmName = MI_T("ChecksumAlgorithm");
     const MI_Char *statusCodeName = MI_T("StatusCode");
+    const MI_Char *clientStatusName = MI_T("ClientStatus");
+
     const MI_Char *complianceStatus;
     MI_Char statusCodeValue[MAX_STATUSCODE_SIZE];
     size_t length;
@@ -881,25 +896,19 @@ MI_Char * GetGetActionBodyContent(_In_z_ const MI_Char *checksum, MI_Boolean nod
         complianceStatus = MI_T("FALSE");
     }
     Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), statusCode);
-    // Format should be:  {"Checksum":"ABCD","NodeCompliant":"False","ChecksumAlgorithm":"SHA-256", "StatusCode":"5"}
 
-    length = sizeof( MI_T("{\"")) + Tcslen(checksumName) + sizeof(MI_T("\":\"")) + 
-        Tcslen(checksum) + sizeof(MI_T("\",\"")) +
-        Tcslen(complianceName) + sizeof(MI_T("\":\"")) +
-        Tcslen(complianceStatus) + sizeof(MI_T("\",\"")) +
-        Tcslen(algorithmName) + sizeof(MI_T("\":\"")) +
-        Tcslen(checksumAlgorithm) +  sizeof(MI_T("\":\"")) +
-        Tcslen(statusCodeName) + sizeof(MI_T("\":\"")) +
-        Tcslen(statusCodeValue) + sizeof(MI_T("\"}")) + 1;
-
+    length = 50 + Tcslen(clientStatusName) + Tcslen(checksumName) + Tcslen(algorithmName) + Tcslen(checksum) + Tcslen(checksumAlgorithm);
+    
     content = (MI_Char *)DSC_malloc(length * sizeof(MI_Char), NitsHere());
     if( content == NULL )
     {
         return NULL;
     }
 
-    Stprintf(content, length, MI_T("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}"), checksumName, checksum, 
-                            complianceName, complianceStatus, algorithmName, checksumAlgorithm, statusCodeName, statusCodeValue);
+    // Format should be: {"ClientStatus":[{"Checksum":"%s","ChecksumAlgorithm":"%s"}]}
+
+    Stprintf(content, length, MI_T("{\"%s\":[{\"%s\":\"%s\",\"%s\":\"%s\"}]}"), clientStatusName, checksumName, checksum, algorithmName, checksumAlgorithm);
+
     return content;
 }
 
@@ -1100,34 +1109,66 @@ MI_Boolean GetNextToken(_In_reads_z_(size) char *tokenValue, int startValue, int
 }
 
 
-MI_Boolean GetGetActionData( _In_reads_z_(size) char *start, int size, _Out_ char** serverResponse)
+MI_Boolean GetGetActionData( _In_reads_z_(size) char *start,
+                             int size,
+                             _Out_ char** serverResponse,
+                             _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations)
 {
     //Search for pattern "value":"<dommmm>", We don't support anything other than simple strings
     int xCount = 1; // escape first character
     int currentTokenStart = 0, currentTokenStartValue = 0;
     int currentTokenEnd = 0, currentTokenEndValue = 0;
     int nextTokenValue = -1;
+    char* configName = NULL;
+    char* ptr1;
+    char* ptr1_end;
+    char* ptr2;
+    char* ptr2_end;
+    *serverAssignedConfigurations = (OverAllGetActionResponse *) DSC_malloc(sizeof(OverAllGetActionResponse), NitsHere());
     *serverResponse = NULL;
-    while(xCount < size)
+    
+    ptr1 = strstr(start, "NodeStatus\":");
+    if (ptr1 == NULL)
     {
-        // get token Name
-        if(!GetNextToken( start, xCount, size, &currentTokenStart, &currentTokenEnd, &currentTokenStartValue, &currentTokenEndValue, &nextTokenValue))
-            return MI_FALSE;
-
-        if(Strncmp(start+currentTokenStart,"value", currentTokenEnd-currentTokenStart+1) == 0)
-        {
-              //copy value here
-              *serverResponse = (char*) DSC_malloc(currentTokenEndValue - currentTokenStartValue +2, NitsHere());
-             if(*serverResponse)
-             {
-                memcpy(*serverResponse, start+currentTokenStartValue, currentTokenEndValue-currentTokenStartValue+1);
-                return MI_TRUE;
-             }
-             return MI_FALSE;
-        }
-        xCount = nextTokenValue;
+        return MI_FALSE;
     }
-    return MI_FALSE;
+
+    ptr2 = strstr(start, "ConfigurationName\":");
+
+    ptr1 = ptr1 + 13;
+    ptr1_end = strchr(ptr1, '"');
+    if (ptr1_end == NULL)
+    {
+        return MI_FALSE;
+    }
+    *serverResponse = (char*) DSC_malloc(ptr1_end - ptr1 + 1, NitsHere());
+    memcpy(*serverResponse, ptr1, ptr1_end - ptr1);
+    (*serverResponse)[ptr1_end - ptr1] = '\0';
+    
+
+    if (ptr2 != NULL)
+    {
+        ptr2 = ptr2 + 20;
+        ptr2_end = strchr(ptr2, '"');
+        if (ptr1_end == NULL)
+        {
+            return MI_FALSE;
+        }
+        configName = (char*) DSC_malloc(ptr2_end - ptr2 + 1, NitsHere());
+        memcpy(configName, ptr2, ptr2_end - ptr2);
+        configName[ptr2_end - ptr2] = '\0';
+    }
+    else
+    {
+        configName = NULL;
+    }
+
+    (*serverAssignedConfigurations)->Details = (ConfigurationStatus*) DSC_malloc(sizeof(ConfigurationStatus), NitsHere());
+    (*serverAssignedConfigurations)->Details->ConfigurationName = configName;
+    (*serverAssignedConfigurations)->Details->Status = serverResponse;
+    (*serverAssignedConfigurations)->NumberOfConfiguration = 1;
+
+    return MI_TRUE;
 }
 
 MI_Boolean ValidateContentTypeHeader(_Inout_updates_z_(size)  MI_Char *buffer, MI_Uint32 size, _In_z_ const MI_Char *header)
@@ -1182,18 +1223,18 @@ MI_Char *GetSystemUuid()
         }        
 
 MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID, 
-                                 _In_z_ const MI_Char *certificateID,
-                                 _In_z_ const MI_Char *checkSum,
-                                  _In_z_ struct SSLOptions sslOptions,
-                                 _In_ MI_Boolean complianceStatus,
-                                _In_ MI_Uint32 lastGetActionStatusCode,
-                                _Outptr_result_maybenull_z_  MI_Char** result,
-                                _Out_ MI_Uint32* getActionStatusCode,
-                                _In_reads_z_(URL_SIZE) const MI_Char *url,
-                                _In_ MI_Uint32 port,
-                                _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
-                                MI_Boolean bIsHttps,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError)
+                                  _In_z_ const MI_Char *certificateID,
+                                  _In_z_ const MI_Char *checkSum,
+                                  _In_ MI_Boolean complianceStatus,
+                                  _In_ MI_Uint32 lastGetActionStatusCode,
+                                  _Outptr_result_maybenull_z_  MI_Char** result,
+                                  _Out_ MI_Uint32* getActionStatusCode,
+                                  _In_reads_z_(URL_SIZE) const MI_Char *url,
+                                  _In_ MI_Uint32 port,
+                                  _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
+                                  MI_Boolean bIsHttps,
+                                  _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
+                                  _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     const char *emptyString = "";
@@ -1227,47 +1268,45 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
     }    
 
-
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    
     curl = curl_easy_init();
     if (!curl)
     {
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
 
     if (bIsHttps)
     {
-        Snprintf(actionUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Action(ConfigurationId='%s')/GetAction", url, port, subUrl, configurationID);
-        curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        Snprintf(actionUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Nodes(AgentId='%s')/GetDscAction", url, port, subUrl, configurationID);
 
-        if (sslOptions.DoNotCheckCertificate == MI_TRUE)
-        {
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        }
-        else
-        {
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        }
-        if (sslOptions.CABundle[0] != '\0')
-        {
-            res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
-            if (res != CURLE_OK)
-            {
-                DSC_free(bodyContent);
-                curl_easy_cleanup(curl);
-                curl_global_cleanup();
-                return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
-            }
-        }
     }
     else
     {
-        Snprintf(actionUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Action(ConfigurationId='%s')/GetAction", url, port, subUrl, configurationID);
-        curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
+        Snprintf(actionUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/GetDscAction", url, port, subUrl, configurationID);
     }
+
+
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    
+    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    }
+    else
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    }
+    if (g_sslOptions.CABundle[0] != '\0')
+    {
+        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
+        if (res != CURLE_OK)
+        {
+            DSC_free(bodyContent);
+            curl_easy_cleanup(curl);
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+        }
+    }
+    
+    curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
 
     headerChunk.data = (char *)malloc(1);
     headerChunk.size = 0;
@@ -1277,28 +1316,31 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 
     list = curl_slist_append(list, "Accept: application/json");
     list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
+    list = curl_slist_append(list, "ProtocolVersion: 2.0");
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyContent);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
+
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
     
-    if (sslOptions.cipherList[0] != '\0')
+    if (g_sslOptions.cipherList[0] != '\0')
     {
-        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, sslOptions.cipherList);
+        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, g_sslOptions.cipherList);
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetDscActionCommandFailure;
             DSC_free(bodyContent);
             curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
     }
 
-    if (sslOptions.NoSSLv3 == MI_TRUE)
+    if (g_sslOptions.NoSSLv3 == MI_TRUE)
     {
         res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
         if (res != CURLE_OK)
@@ -1307,7 +1349,6 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
             DSC_free(bodyContent);
             curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
@@ -1323,14 +1364,12 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         free(dataChunk.data);
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
     curl_slist_free_all(list);
     curl_easy_cleanup(curl);
-    curl_global_cleanup();
 
     if (responseCode != HTTP_SUCCESS_CODE)
     {
@@ -1340,7 +1379,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         return GetCimMIError1Param(r, extendedError, ID_PULL_GETACTIONFAILED, webPulginName); 
     }    
 
-    GetGetActionData(dataChunk.data, dataChunk.size, &getActionStatus);
+    GetGetActionData(dataChunk.data, dataChunk.size, &getActionStatus, serverAssignedConfigurations);
     
     free(headerChunk.data);
     free(dataChunk.data);
@@ -1368,16 +1407,16 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 }
 
 MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
-                                _In_z_ const MI_Char *certificateID,
-                                _In_z_ const MI_Char *directoryPath, 
-                                         _In_z_ struct SSLOptions sslOptions,
-                                _Outptr_result_maybenull_z_  MI_Char** result,
-                                _Out_ MI_Uint32* getActionStatusCode,
-                                _In_reads_z_(URL_SIZE) const MI_Char *url,
-                                _In_ MI_Uint32 port,
-                                _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
-                                MI_Boolean bIsHttps,
-                                _Outptr_result_maybenull_ MI_Instance **extendedError)
+                                         _In_z_ const MI_Char *certificateID,
+                                         _In_z_ const MI_Char *directoryPath, 
+                                         _Outptr_result_maybenull_z_  MI_Char** result,
+                                         _Out_ MI_Uint32* getActionStatusCode,
+                                         _In_reads_z_(URL_SIZE) const MI_Char *url,
+                                         _In_ MI_Uint32 port,
+                                         _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
+                                         MI_Boolean bIsHttps,
+                                         _In_opt_z_ MI_Char *assignedConfiguration,
+                                         _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
@@ -1392,6 +1431,9 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     char* checksumResponse = NULL;
     char* checksumAlgorithmResponse = NULL;
 
+    struct curl_slist *list = NULL;
+
+
     *result = NULL;
     if( outputResult == NULL )
     {
@@ -1401,82 +1443,90 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);    
     Stprintf(outputResult,3, MI_T("OK"));
 
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-
     curl = curl_easy_init();
     if (!curl)
     {
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
-    
+
     if (bIsHttps)
     {
-        Snprintf(configurationUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Action(ConfigurationId='%s')/ConfigurationContent", url, port, subUrl, configurationID);
-        curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-
-        if (sslOptions.DoNotCheckCertificate == MI_TRUE)
-        {
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        }
-        else
-        {
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        }
-        if (sslOptions.CABundle[0] != '\0')
-        {
-            res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
-            if (res != CURLE_OK)
-            {
-                curl_easy_cleanup(curl);
-                curl_global_cleanup();
-                return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
-            }
-        }
-    }    
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Nodes(AgentId='%s')/Configurations(ConfigurationName='%s')/ConfigurationContent", url, port, subUrl, configurationID, assignedConfiguration);
+    }
     else
     {
-        Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Action(ConfigurationId='%s')/ConfigurationContent", url, port, subUrl, configurationID);
-        curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/Configurations(ConfigurationName='%s')/ConfigurationContent", url, port, subUrl, configurationID, assignedConfiguration);
     }
+
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    
+    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    }
+    else
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    }
+    if (g_sslOptions.CABundle[0] != '\0')
+    {
+        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
+        if (res != CURLE_OK)
+        {
+            curl_easy_cleanup(curl);
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+        }
+    }
+    
+    curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
 
     InitHeaderChunk(&headerChunk);
     dataChunk.data = (char *)malloc(1);
     dataChunk.size = 0;
 
+    list = curl_slist_append(list, "ProtocolVersion: 2.0");
+
+
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+
     
-    if (sslOptions.cipherList[0] != '\0')
+    if (g_sslOptions.cipherList[0] != '\0')
     {
-        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, sslOptions.cipherList);
+        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, g_sslOptions.cipherList);
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
+
+            curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
+
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
     }
 
-    if (sslOptions.NoSSLv3 == MI_TRUE)
+    if (g_sslOptions.NoSSLv3 == MI_TRUE)
     {
         res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
+
+            curl_slist_free_all(list);
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
 
     res = curl_easy_perform(curl);
 
+    curl_slist_free_all(list);
     if(res != CURLE_OK)
     {
         *getActionStatusCode = GetConfigurationCommandFailure;
@@ -1484,13 +1534,11 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         free(dataChunk.data);
         DSC_free(outputResult);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
     curl_easy_cleanup(curl);
-    curl_global_cleanup();
 
     if (responseCode != HTTP_SUCCESS_CODE)
     {
@@ -1712,7 +1760,6 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
                                   _In_z_ const MI_Char *moduleVersion,
                                   _In_z_ const MI_Char *certificateID,
                                   _In_z_ const MI_Char *filePath,
-                                  _In_z_ struct SSLOptions sslOptions,
                                   _Outptr_result_maybenull_z_  MI_Char** result,
                                   _Out_ MI_Uint32* getActionStatusCode,
                                   _In_reads_z_(URL_SIZE) const MI_Char *url,
@@ -1733,6 +1780,8 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     size_t i;
     char* checksumResponse = NULL;
     char* checksumAlgorithmResponse = NULL;
+    struct curl_slist *list = NULL;
+    char agentIdHeader[101];
 
     *result = NULL;
     if( outputResult == NULL )
@@ -1743,81 +1792,87 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);
     Stprintf(outputResult,3, MI_T("OK"));
     
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-
     curl = curl_easy_init();
     if (!curl)
     {
-        curl_global_cleanup();
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
 
-    InitHeaderChunk(&headerChunk);
-    dataChunk.data = (char *)malloc(1);
-    dataChunk.size = 0;
 
     if (bIsHttps)
     {
-        Snprintf(configurationUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Module(ConfigurationId='%s',ModuleName='%s',ModuleVersion='%s')/ModuleContent", url, port, subUrl, configurationID, moduleName, moduleVersion);
-        curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-
-        if (sslOptions.DoNotCheckCertificate == MI_TRUE)
-        {
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        }
-        else
-        {
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        }
-        if (sslOptions.CABundle[0] != '\0')
-        {
-            res = curl_easy_setopt(curl, CURLOPT_CAINFO, sslOptions.CABundle);
-            if (res != CURLE_OK)
-            {
-                curl_easy_cleanup(curl);
-                curl_global_cleanup();
-                return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
-            }
-        }
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Modules(ModuleName='%s',ModuleVersion='%s')/ModuleContent", url, port, subUrl, moduleName, moduleVersion);
     }
     else
     {
-        Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Module(ConfigurationId='%s',ModuleName='%s',ModuleVersion='%s')/ModuleContent", url, port, subUrl, configurationID, moduleName, moduleVersion);
-        curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
+        Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Modules(ModuleName='%s',ModuleVersion='%s')/ModuleContent", url, port, subUrl, moduleName, moduleVersion);
     }
 
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    
+    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    }
+    else
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    }
+    if (g_sslOptions.CABundle[0] != '\0')
+    {
+        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
+        if (res != CURLE_OK)
+        {
+            curl_easy_cleanup(curl);
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+        }
+    }
+    
+    InitHeaderChunk(&headerChunk);
+    dataChunk.data = (char *)malloc(1);
+    dataChunk.size = 0;
+    
+    curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
+
+    list = curl_slist_append(list, "ProtocolVersion: 2.0");
+    Snprintf(agentIdHeader, 100, "AgentId: %s", configurationID);
+    agentIdHeader[100] = '\0';
+    list = curl_slist_append(list, agentIdHeader);
+
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    if (sslOptions.cipherList[0] != '\0')
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+
+    if (g_sslOptions.cipherList[0] != '\0')
     {
-        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, sslOptions.cipherList);
+        res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, g_sslOptions.cipherList);
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETCIPHERLIST);
         }
     }
 
-    if (sslOptions.NoSSLv3 == MI_TRUE)
+    if (g_sslOptions.NoSSLv3 == MI_TRUE)
     {
         res = curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
         if (res != CURLE_OK)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
             curl_easy_cleanup(curl);
-            curl_global_cleanup();
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOSETNOSSLV3);
         }
     }
 
     res = curl_easy_perform(curl);
 
+    curl_slist_free_all(list);
     if(res != CURLE_OK)
     {
         *getActionStatusCode = GetConfigurationCommandFailure;
@@ -1825,13 +1880,11 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         free(dataChunk.data);
         DSC_free(outputResult);
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
     curl_easy_cleanup(curl);
-    curl_global_cleanup();
 
     if (responseCode != HTTP_SUCCESS_CODE)
     {
@@ -1929,7 +1982,6 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
                                   const MI_Char *certificateID,
                                   MI_Char* directoryPath,
                                   MI_Char* fileName,
-                                  _In_z_ struct SSLOptions sslOptions,
                                   MI_Char** result,                               
                                   MI_Uint32* getActionStatusCode,
                                   MI_Boolean bAllowedModuleOverride,
@@ -1964,7 +2016,6 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
                                   current->moduleVersionClassTuple->moduleVersion,
                                   certificateID,
                                   zipPath,
-                                  sslOptions,
                                   result,
                                   getActionStatusCode,
                                   url,
@@ -2020,9 +2071,10 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
 MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContext *lcmContext,
                                                           _In_ MI_Instance *metaConfig,
                                                           _In_opt_z_ MI_Char *partialConfigName,
+                                                          _In_opt_z_ MI_Char *assignedConfiguration,
                                                           _Outptr_result_maybenull_z_  MI_Char** mofFileName,
                                                           _Outptr_result_maybenull_z_  MI_Char** directoryName,
-                                                          _Out_ MI_Uint32* numModulesInstalled,
+                                                          _Out_ MI_Uint32 * numModulesInstalled,
                                                           _Outptr_result_maybenull_z_  MI_Char** result,
                                                           _Out_ MI_Uint32* getActionStatusCode,
                                                           _Outptr_result_maybenull_ MI_Instance **extendedError)
@@ -2038,7 +2090,6 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     MI_Value value;
     MI_Uint32 flags;
     MI_Boolean bAllowedModuleOverride;
-    struct SSLOptions sslOptions;
 
     if( metaConfig == NULL )
     {
@@ -2069,7 +2120,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     }
 
     // Get our supported SSL options if there are any
-    r = GetSSLOptions(&sslOptions, extendedError);
+    r = GetSSLOptions(extendedError);
     if( r != MI_RESULT_OK)
     {
         DSC_free(configurationID);
@@ -2079,8 +2130,8 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
 
     DSC_EventWriteLCMPullGetConfigAttempt( webPulginName, configurationID);    
     // Issue Get Action Request
-    r = IssueGetConfigurationRequest( configurationID,  certificateID, fileName, sslOptions, result, 
-                    getActionStatusCode, url, port, subUrl, bIsHttps, extendedError);
+    r = IssueGetConfigurationRequest( configurationID,  certificateID, fileName, result, 
+                                      getActionStatusCode, url, port, subUrl, bIsHttps, assignedConfiguration, extendedError);
       
     if( r != MI_RESULT_OK)
     {
@@ -2095,7 +2146,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         bAllowedModuleOverride = MI_TRUE;
     }
 
-    r = Pull_GetModules(numModulesInstalled, configurationID,  certificateID, *directoryName, fileName, sslOptions, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
+    r = Pull_GetModules(numModulesInstalled, configurationID,  certificateID, *directoryName, fileName, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
     if( r != MI_RESULT_OK)
     {
          DSC_free(configurationID);
@@ -2119,6 +2170,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
                                                    _In_ MI_Uint32 lastGetActionStatusCode,
                                                    _Outptr_result_maybenull_z_  MI_Char** result,
                                                    _Out_ MI_Uint32* getActionStatusCode,
+                                                   _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
                                                    _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
@@ -2129,7 +2181,6 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     MI_Uint32 port = DEFAULT_SERVERPORT;
     MI_Boolean bIsHttps = MI_FALSE;
     MI_Char *tmpChecksum = NULL;
-    struct SSLOptions sslOptions;
     
     if( metaConfig == NULL)
     {
@@ -2160,7 +2211,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     }    
 
     // Get our supported SSL options if there are any
-    r = GetSSLOptions(&sslOptions, extendedError);
+    r = GetSSLOptions(extendedError);
     if( r != MI_RESULT_OK)
     {
         DSC_free(configurationID);
@@ -2170,8 +2221,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
 
     DSC_EventWriteLCMPullGetActionAttempt( webPulginName, configurationID, tmpChecksum, complianceStatus);    
     // Issue Get Action Request
-    r = IssueGetActionRequest( configurationID, certificateID, tmpChecksum, sslOptions, complianceStatus, lastGetActionStatusCode, result, 
-                    getActionStatusCode, url, port, subUrl, bIsHttps, extendedError);
+    r = IssueGetActionRequest( configurationID, certificateID, tmpChecksum, complianceStatus, lastGetActionStatusCode, result, getActionStatusCode, url, port, subUrl, bIsHttps, serverAssignedConfigurations, extendedError);
 
     DSC_free(configurationID);
     DSC_free(tmpChecksum);
@@ -2236,6 +2286,12 @@ static int IsModuleInstalled(MI_Char* moduleName, MI_Char* moduleVersion)
     if (Tcscasecmp(MI_T("nx"), moduleName) == 0)
     {
         // The nx module is installed by default
+        return 1;
+    }
+
+    if (Tcscasecmp(MI_T("PSDesiredStateConfiguration"), moduleName) == 0)
+    {
+        // The PSDesiredStateConfiguration module is installed by default
         return 1;
     }
 
@@ -2340,6 +2396,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = DSC_MI_Application_NewOperationOptions(miApp, MI_FALSE, &options);
     if (r != MI_RESULT_OK)
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INITIALIZEMODULETABLEFAILED, "Setting NewOperationOptions failed");
     }
@@ -2347,6 +2404,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = DSC_MI_OperationOptions_SetString(&options, MOFCODEC_SCHEMA_VALIDATION_OPTION_NAME, MOFCODEC_SCHEMA_VALIDATION_IGNORE, 0);
     if (r!=MI_RESULT_OK )
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INITIALIZEMODULETABLEFAILED, "Setting OperationOptions string Failed");
     }
@@ -2354,6 +2412,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = DSC_MI_Application_NewDeserializer_Mof(miApp, 0, MOFCODEC_FORMAT, &deserializer);
     if (r!=MI_RESULT_OK )
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INITIALIZEMODULETABLEFAILED, "Creating New Deserializer Failed");
     }
@@ -2361,6 +2420,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = ReadFileContent(mofFileLocation, &pbuffer, &contentSize, extendedError);
     if(r != MI_RESULT_OK)
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return r;
     }   
@@ -2370,6 +2430,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     r = MI_Deserializer_DeserializeInstanceArray(&deserializer, 0, &options, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miInstanceArray, extendedError);
     if (r != MI_RESULT_OK)
     {
+        MI_Application_Close(miApp);
         DSC_free(miApp);
         return r;
     }
@@ -2457,6 +2518,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
                 MI_Deserializer_Close(&deserializer);
                 MI_OperationOptions_Delete(&options);
                 CleanUpDeserializerInstanceCache(miInstanceArray);
+                MI_Application_Close(miApp);
                 DSC_free(miApp);
                 return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDMODULEVERSION, moduleVersion.string, moduleName.string);
             }
@@ -2469,9 +2531,325 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     MI_OperationOptions_Delete(&options);
 
     CleanUpDeserializerInstanceCache(miInstanceArray);
+    MI_Application_Close(miApp);
     DSC_free(miApp);
 
     return MI_RESULT_OK;
 }
 
+size_t read_callback(char *buffer, size_t size, size_t nitems, void *instream)
+{
+    struct ReadChunk * readChunk = (struct ReadChunk *) instream;
+    size_t len;
 
+    if (readChunk == NULL)
+    {
+        return 0;
+    }
+    
+    len = strlen(&readChunk->data[readChunk->last_char]);
+
+    if (len <= (size * nitems))
+    {
+        memcpy(buffer, &readChunk->data[readChunk->last_char], len);
+        readChunk->last_char += len;
+        return len;
+    }
+    else
+    {
+        memcpy(buffer, &readChunk->data[readChunk->last_char], size * nitems);
+        readChunk->last_char += size * nitems;
+        return size * nitems;
+    }
+}
+
+MI_Result Pull_Register(MI_Char* serverURL,
+                        MI_Char* agentId,
+                        MI_Char* x_ms_header,
+                        MI_Char* auth_header,
+                        MI_Char* requestBody,
+                        _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r = MI_RESULT_OK;
+    const char *emptyString = "";
+    MI_Char actionUrl[MAX_URL_LENGTH];
+    char * getActionStatus = NULL;
+    long responseCode;
+
+    CURL *curl;
+    CURLcode res;
+    struct Chunk headerChunk;
+    struct Chunk dataChunk;
+    struct ReadChunk readChunk;
+    struct curl_slist *list = NULL;
+
+    r = GetSSLOptions(extendedError);
+    if( r != MI_RESULT_OK)
+    {
+        return r;
+    }
+    
+    curl = curl_easy_init();
+    
+    Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')", serverURL, agentId);
+    curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
+
+    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    }
+    else
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    }
+    if (g_sslOptions.CABundle[0] != '\0')
+    {
+        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
+        if (res != CURLE_OK)
+        {
+            curl_easy_cleanup(curl);
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+        }
+    }
+    
+    headerChunk.data = (char *)malloc(1);
+    headerChunk.size = 0;
+    dataChunk.data = (char *)malloc(1);
+    dataChunk.size = 0;
+    readChunk.data = requestBody;
+    readChunk.last_char = 0;
+    
+    list = curl_slist_append(list, x_ms_header);
+    list = curl_slist_append(list, auth_header);
+    list = curl_slist_append(list, "Accept: application/json");
+    list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
+    list = curl_slist_append(list, "ProtocolVersion: 2.0");
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
+    curl_easy_setopt(curl, CURLOPT_PUT, 1);
+    curl_easy_setopt(curl, CURLOPT_READDATA, &readChunk);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)strlen(requestBody));
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+    if (res != CURLE_OK)
+      {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+      }
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
+    if (res != CURLE_OK)
+      {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+      };
+    res = curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+    if (res != CURLE_OK)
+      {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+      }
+
+
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    res = curl_easy_perform(curl);
+
+    if (res != CURLE_OK)
+    {
+      // Error on communication
+      
+      curl_slist_free_all(list);
+      curl_easy_cleanup(curl);
+      
+      free(headerChunk.data);
+      free(dataChunk.data);
+      return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, actionUrl, curl_easy_strerror(res));
+    }
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+
+    if (responseCode != 200 && responseCode != 201 && responseCode != 204)
+    {
+        MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};
+        // Error on register
+        
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        
+        free(headerChunk.data);
+        free(dataChunk.data);
+        Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), responseCode);
+        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_SERVERHTTPERRORCODEREGISTER, actionUrl, statusCodeValue);
+    }
+
+    curl_slist_free_all(list);
+    curl_easy_cleanup(curl);
+
+    free(headerChunk.data);
+    free(dataChunk.data);
+
+    return MI_RESULT_OK;
+}
+
+extern MI_Char* RunCommand(const MI_Char* command);
+
+MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext, 
+                                                      _In_ MI_Instance *metaConfig,
+                                                      _In_ MI_Instance *statusReport,
+                                                      _In_ MI_Uint32 isStatusReport,
+                                                      _Out_ MI_Uint32* getActionStatusCode,
+                                                      _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    
+    MI_Result r = MI_RESULT_OK;
+    const char *emptyString = "";
+    MI_Char actionUrl[MAX_URL_LENGTH];
+    char dataBuffer[10000];
+
+    char * getActionStatus = NULL;
+    long responseCode;
+    
+    CURL *curl;
+    CURLcode res;
+    struct Chunk headerChunk;
+    struct Chunk dataChunk;
+    struct curl_slist *list = NULL;
+    MI_Value managerInstances;
+    MI_Value currentReportServer;
+    MI_Value agentId;
+    MI_Value serverURL;
+    MI_Value endTime;
+    MI_Uint32 flags;
+    int i;
+    const char* commandFormat;
+    const char* reportText;
+    int bAtLeastOneReportSuccess = 0;
+
+    r = DSC_MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_ReportManagers, &managerInstances, NULL, &flags, NULL);
+    if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
+    {
+        // Unable to find report managers, don't report
+        return MI_RESULT_OK;
+    }
+
+    r = DSC_MI_Instance_GetElement(metaConfig, "AgentId", &agentId, NULL, NULL, NULL);
+
+    list = curl_slist_append(list, "Accept: application/json");
+    list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
+    list = curl_slist_append(list, "ProtocolVersion: 2.0");
+
+    for (i = 0; i < managerInstances.stringa.size; ++i)
+    {
+        r = MI_Instance_GetElement((MI_Instance*)managerInstances.stringa.data[i], MSFT_ServerURL_Name, &serverURL, NULL, NULL, NULL);
+
+        r = MI_Instance_GetElement(statusReport, REPORTING_ENDTIME, &endTime, NULL, &flags, 0);
+        if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL) || (endTime.datetime.u.timestamp.year == 0))
+        {
+            // not the End report
+            commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s StartTime";
+            snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString);
+        }
+        else
+        {
+            if (g_currentError[0] == '\0')
+            {
+                commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime";
+                snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString);
+            }
+            else
+            {
+                if (g_rnids == NULL)
+                {
+                    commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime \"%s\"";
+                    snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError);
+                }
+                else
+                {
+                    commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ";
+                    snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError, g_rnids->SourceInfo,
+                             g_rnids->ModuleName, g_rnids->DurationInSeconds, g_rnids->InstanceName, g_rnids->StartDate, g_rnids->ResourceName,
+                             g_rnids->ModuleVersion, g_rnids->RebootRequested, g_rnids->ResourceId, g_rnids->ConfigurationName, g_rnids->InDesiredState);
+                    Destroy_StatusReport_RNIDS(g_rnids);
+                    g_rnids = NULL;
+                    
+                }
+            }
+        }
+
+        reportText = RunCommand(dataBuffer);
+        
+        curl = curl_easy_init();
+        
+        Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')/SendReport", serverURL.string, agentId.string);
+        curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
+        
+        headerChunk.data = (char *)malloc(1);
+        headerChunk.size = 0;
+        dataChunk.data = (char *)malloc(1);
+        dataChunk.size = 0;
+        
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, reportText);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
+
+        curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
+        curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+        
+        res = curl_easy_perform(curl);
+
+        if (res != CURLE_OK)
+        {
+            // Error on communication.  Go to next report.
+            curl_easy_cleanup(curl);
+            
+            DSC_free(reportText);
+            free(headerChunk.data);
+            free(dataChunk.data);
+            continue;
+        }
+        
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+        
+        if (responseCode != 200 && responseCode != 201 && responseCode != 204)
+        {
+            // Error on register
+            curl_easy_cleanup(curl);
+            
+            DSC_free(reportText);
+            free(headerChunk.data);
+            free(dataChunk.data);
+            continue;
+        }
+
+        bAtLeastOneReportSuccess = 1;
+
+        curl_easy_cleanup(curl);
+        
+        DSC_free(reportText);
+        free(headerChunk.data);
+        free(dataChunk.data);
+        
+    }
+
+    curl_slist_free_all(list);
+    
+    if (bAtLeastOneReportSuccess == 1)
+    {
+        return MI_RESULT_OK;
+    }
+    else
+    {
+      MI_Char statusCodeValue[MAX_STATUSCODE_SIZE] = {0};
+      Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), responseCode);
+      return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_REPORTINGFAILED, statusCodeValue);
+    }
+
+}

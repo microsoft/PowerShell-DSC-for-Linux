@@ -9,6 +9,7 @@ SOURCES = \
 	lcm.traps.c 
 
 INCLUDES = \
+	$(TOP)/../ext/curl/current_platform/include \
 	$(OMI) \
 	$(OMI)/common \
 	$(DSCTOP)/common/inc \

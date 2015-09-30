@@ -1,25 +1,17 @@
 /*
-**==============================================================================
-**
-** Open Management Infrastructure (OMI)
-**
-** Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); you may not
-** use this file except in compliance with the License. You may obtain a copy
-** of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-** KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-** WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-** MERCHANTABLITY OR NON-INFRINGEMENT.
-**
-** See the Apache 2 License for the specific language governing permissions
-** and limitations under the License.
-**
-**==============================================================================
+   PowerShell Desired State Configuration for Linux
+
+   Copyright (c) Microsoft Corporation
+
+   All rights reserved. 
+
+   MIT License
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
     INTERNAL_Intlstr_Define0( ID_ENGINEHELPER_MEMORY_ERROR, ID_ENGINEHELPER_MEMORY_ERROR, "Memory allocation failed.")
@@ -528,3 +520,18 @@ INTERNAL_Intlstr_Define1( ID_APPLYCONFIG_RESOURCEERRORLIST,
       			  _In_z_ const PAL_Char*, firstString,
                  	  "Failed to apply the configuration.  These resources produced errors: "  Intlstr_tstr(1) ". Detailed error information can be found in the log file.")
 
+INTERNAL_Intlstr_Define1( ID_PULL_REPORTINGFAILED,
+			  ID_PULL_REPORTINGFAILED,
+      			  _In_z_ const PAL_Char*, firstString,
+                 	  "Failed to report to all reporting servers.  Last server failed with HTTP response code: "  Intlstr_tstr(1) ".")
+
+INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODEREGISTER,
+			  ID_PULL_SERVERHTTPERRORCODEREGISTER,
+      			  _In_z_ const PAL_Char*, firstString,
+                          _In_z_ const PAL_Char*, secondString,
+                 	  "Failed to register with a pull server at url: " Intlstr_tstr(1) ". It responded with error code: "  Intlstr_tstr(2) " for a module.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_CERTOPTS_NOT_SUPPORTED,ID_PULL_CERTOPTS_NOT_SUPPORTED,"cURL does not support setting certificate options on this system.")
+
+
+INTERNAL_Intlstr_Define0( ID_PULL_FAILEDTOGENERATECERT, ID_PULL_FAILEDTOGENERATECERT,"Failed to generate certificate and private key for pull server communication.")  

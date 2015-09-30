@@ -7,7 +7,7 @@ import os
 import sys
 import time
 import inspect
-
+import codecs
 
 def Print(s, file=sys.stderr):
     file.write(s + '\n')
@@ -18,7 +18,7 @@ def opened_w_error(filename, mode="r"):
     This context ensures the file is closed.
     """
     try:
-        f = open(filename, mode)
+        f = codecs.open(filename, mode, 'utf8')
     except:
         return None, Exception('IOError')
     return f, None
@@ -35,7 +35,12 @@ class DSCLog(object):
         prefix = '/opt/omi'
         if 'OMI_HOME' in os.environ.keys():
             prefix = os.environ['OMI_HOME']
-        self.file_path = prefix+'/var/log/dsc.log'
+        if prefix == "/opt/omi":
+            self.file_path = "/var/opt/omi/log/dsc.log"
+        else:
+            if not os.path.exists(prefix+'/var/log'):
+                os.system('mkdir -p ' + prefix+'/var/log')
+            self.file_path = prefix+'/var/log/dsc.log'
 
     def Log(self, log_level, message):
         last_frame = inspect.currentframe().f_back
@@ -55,8 +60,6 @@ class DSCLog(object):
             return
         if log_level > self.current_level:
             return
-        if type(message) != str: # this should only happen if the type is unicode.
-            message = message.decode('utf-8').encode('ascii', 'ignore')
         t = time.localtime()
         line = "%04u/%02u/%02u %02u:%02u:%02u: %s: %s:\n%s\n" % (t.tm_year,
             t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,

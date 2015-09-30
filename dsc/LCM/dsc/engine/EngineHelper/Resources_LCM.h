@@ -1,25 +1,17 @@
 /*
-**==============================================================================
-**
-** Open Management Infrastructure (OMI)
-**
-** Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); you may not
-** use this file except in compliance with the License. You may obtain a copy
-** of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-** KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-** WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-** MERCHANTABLITY OR NON-INFRINGEMENT.
-**
-** See the Apache 2 License for the specific language governing permissions
-** and limitations under the License.
-**
-**==============================================================================
+   PowerShell Desired State Configuration for Linux
+
+   Copyright (c) Microsoft Corporation
+
+   All rights reserved. 
+
+   MIT License
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 /*EngineHelper takes ID numbers from 1001 - 1100*/
 
@@ -360,4 +352,16 @@
 #define ID_PULL_CABUNDLETOOLONG 1677
 #define ID_PULL_CABUNDLENOTSUPPORTED 1676
 #define ID_APPLYCONFIG_RESOURCEERRORLIST 1675
+
+// OaaS
+#define ID_LCM_REGISTER_NORESULTSTATUS 1810
+#define ID_LCM_REGISTER_UNEXPECTEDRESULTSTATUS 1811
+#define ID_LCM_REGISTER_NOAGENTID 1812
+#define ID_MODMAN_METACONFIG_CONFIGURATIONID_CONFIGURATIONNAMES_BOTHSPECIFIED 1813
+
+#define ID_PULL_REPORTINGFAILED 1814
+#define ID_PULL_SERVERHTTPERRORCODEREGISTER 1815
+#define ID_PULL_CERTOPTS_NOT_SUPPORTED 1816
+#define ID_PULL_FAILEDTOGENERATECERT 1817
+
 #endif //__RESOURCES_LCM_H_

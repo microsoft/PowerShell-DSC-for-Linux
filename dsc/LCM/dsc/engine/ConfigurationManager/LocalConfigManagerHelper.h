@@ -1,25 +1,17 @@
 /*
-**==============================================================================
-**
-** Open Management Infrastructure (OMI)
-**
-** Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); you may not
-** use this file except in compliance with the License. You may obtain a copy
-** of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-** KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-** WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-** MERCHANTABLITY OR NON-INFRINGEMENT.
-**
-** See the Apache 2 License for the specific language governing permissions
-** and limitations under the License.
-**
-**==============================================================================
+   PowerShell Desired State Configuration for Linux
+
+   Copyright (c) Microsoft Corporation
+
+   All rights reserved. 
+
+   MIT License
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #ifndef _LOCALCONFIGMANAGERHELPER_H_
@@ -27,11 +19,7 @@
 #include "MI.h"
 
 #include "ModuleHandler.h"
-#if defined(_MSC_VER)
 #include "MSFT_DSCMetaConfiguration.h"
-#else
-#include "omi_msft_dsclocalconfigurationmanager.h"
-#endif
 
 #include "LocalConfigManagerHelperForCA.h"
 #include "hashmap.h"
@@ -285,7 +273,8 @@ extern "C"
     MI_Result UpdateCurrentStatus(
         _In_opt_ MI_Boolean *complianceStatus,
         _In_opt_ MI_Uint32 *getActionStatusCode,
-                _In_opt_ MI_Uint32 *lcmStatusCode,
+        _In_opt_ MI_Uint32 *lcmStatusCode,
+        _In_opt_ MI_Char *registeredServerURLs,
         _Outptr_result_maybenull_ MI_Instance **extendedError);
 
     void GetLatestStatus(
@@ -314,6 +303,7 @@ extern "C"
         _In_opt_ MI_Boolean* complianceStatus,
         _In_opt_ MI_Uint32* getActionStatusCode,
                 _In_opt_ MI_Uint32* lcmStatusCode,
+        _In_opt_ MI_Char* registeredServerURLs,
         _Outptr_result_maybenull_ MI_Instance **extendedError);
 
         MI_Result UpdateLCMStatusCodeHistory(
@@ -419,6 +409,39 @@ extern "C"
         MI_Result SetLCMStatusReady();
         
         MI_Result SetLCMStatusReboot();
+
+
+    MI_Result DeleteRegistrationKeyFromManagerInstance(
+        _In_ LCMProviderContext *lcmContext,
+        _Inout_ MI_Instance **managerInstance,
+        MI_Uint32 typeOfDownloadManagerInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result RegisterWithServers(_In_ LCMProviderContext *lcmContext,
+        _In_ MI_Instance *metaConfigInstance,
+        _In_ MI_Uint32 isPull,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result RegisterWithPullServers(_In_ LCMProviderContext *lcmContext,
+        _In_ MI_Instance *metaConfigInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result RegisterWithReportingServers(_In_ LCMProviderContext *lcmContext,
+        _In_ MI_Instance *metaConfigInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result DoRegistration(
+        _In_ LCMProviderContext* lcmContext,
+        _Inout_ MI_InstanceA *managerInstances,        
+        _In_ MI_Uint32 typeOfDownloadManagerInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result SetDownloadManagerInstancesInMetaConfig(
+        _In_ LCMProviderContext* lcmContext,
+        _In_ MI_InstanceA downloadManagerInstances,
+        _In_ MI_Uint32 typeOfDownloadManagerInstance,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+        
     
     MI_Result LCM_Pull_GetConfiguration(
         _In_ LCMProviderContext *lcmContext,
@@ -426,6 +449,7 @@ extern "C"
         _In_ MI_Instance *metaConfigInstance,
         _In_opt_z_ MI_Char *partialConfigName,
         _Out_ MI_Uint32 * numModulesInstalled,
+        _In_opt_z_ MI_Char *assignedConfiguration,
         _Inout_ MI_Uint32 *resultExecutionStatus,
         _Out_ MI_Uint32 *getActionStatusCode,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
@@ -438,7 +462,20 @@ extern "C"
                                  _In_ MI_Uint32 lastGetActionStatusCode,
                                  _Outptr_result_maybenull_z_  MI_Char** resultStatus,
                                  _Out_  MI_Uint32* getActionStatusCode,
+                                 _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
                                  _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+     MI_Result LCM_Do_Register(
+         _In_ MI_Instance *metaConfigInstance,
+         _In_ MI_Instance *managerInstance,
+         _In_z_ MI_Char *agentId,
+         _In_z_ MI_Char *thumbprint,
+         _In_ MI_Instance *registrationPayload,
+         _In_ MI_StringA *configurationNames,
+         _In_ MI_Uint32 typeOfManagerInstance,
+         _Outptr_result_maybenull_z_  MI_Char** result,
+         _Out_ MI_Uint32* getActionStatusCode,
+         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
     
     MI_Result MI_CALL LCM_Pull_Execute(
         _In_ LCMProviderContext *lcmContext,

@@ -1,3 +1,18 @@
+/*
+   PowerShell Desired State Configuration for Linux
+
+   Copyright (c) Microsoft Corporation
+
+   All rights reserved. 
+
+   MIT License
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 #ifndef __WEBPULLCLIENT_H_
 #define __WEBPULLCLIENT_H_
 
@@ -128,7 +143,6 @@ MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
 MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID, 
                                   _In_z_ const MI_Char *certificateID,
                                   _In_z_ const MI_Char *checkSum,
-                                  _In_z_ struct SSLOptions sslOptions,
                                   _In_ MI_Boolean complianceStatus,
                                   _In_ MI_Uint32 lastGetActionStatusCode,
                                   _Outptr_result_maybenull_z_  MI_Char** result,
@@ -137,19 +151,20 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
                                   _In_ MI_Uint32 port,
                                   _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
                                   MI_Boolean bIsHttps,
+                                  _Outptr_result_maybenull_ OverAllGetActionResponse** serverAssignedConfigurations,
                                   _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 
 MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID, 
                                          _In_z_ const MI_Char *certificateID,
                                          _In_z_ const MI_Char *directoryPath, 
-                                         _In_z_ struct SSLOptions sslOptions,
                                          _Outptr_result_maybenull_z_  MI_Char** result,
                                          _Out_ MI_Uint32* getActionStatusCode,
                                          _In_reads_z_(URL_SIZE) const MI_Char *url,
                                          _In_ MI_Uint32 port,
                                          _In_reads_z_(SUBURL_SIZE) const MI_Char *subUrl,
                                          MI_Boolean bIsHttps,
+                                         _In_opt_z_ MI_Char *assignedConfiguration,
                                          _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 
@@ -158,7 +173,6 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
                                   const MI_Char *certificateID,
                                   MI_Char* directoryPath,
                                   MI_Char* fileName,
-                                  _In_z_ struct SSLOptions sslOptions,
                                   MI_Char** result,
                                   MI_Uint32* getActionStatusCode,
                                   MI_Boolean bAllowedModuleOverride,

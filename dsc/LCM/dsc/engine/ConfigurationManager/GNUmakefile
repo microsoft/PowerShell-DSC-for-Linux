@@ -11,6 +11,8 @@ SOURCES = \
 	LocalConfigurationManager.c \
         MSFT_DSCLocalConfigurationManager.c \
 	OMI_LocalConfigManagerHelper.c \
+	RegistrationManager.c \
+	RegistrationManagerHelper.c \
         omi_schema.c 
 
 INCLUDES = \

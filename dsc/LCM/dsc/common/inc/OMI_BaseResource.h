@@ -1,10 +1,18 @@
 /* @migen@ */
 /*
-**==============================================================================
-**
-** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
-**
-**==============================================================================
+   PowerShell Desired State Configuration for Linux
+
+   Copyright (c) Microsoft Corporation
+
+   All rights reserved. 
+
+   MIT License
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #ifndef _OMI_BaseResource_h
 #define _OMI_BaseResource_h
@@ -27,7 +35,7 @@ typedef struct _OMI_BaseResource
     /* OMI_BaseResource properties */
     MI_ConstStringField ResourceId;
     MI_ConstStringField SourceInfo;
-    MI_ConstStringAField DependsOn;
+    MI_ConstStringAField Requires;
     MI_ConstStringField ModuleName;
     MI_ConstStringField ModuleVersion;
     MI_ConstStringField ConfigurationName;
@@ -186,7 +194,7 @@ MI_INLINE MI_Result MI_CALL OMI_BaseResource_Clear_SourceInfo(
         1);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_BaseResource_Set_DependsOn(
+MI_INLINE MI_Result MI_CALL OMI_BaseResource_Set_Requires(
     _Inout_ OMI_BaseResource* self,
     _In_reads_opt_(size) const MI_Char** data,
     _In_ MI_Uint32 size)
@@ -202,7 +210,7 @@ MI_INLINE MI_Result MI_CALL OMI_BaseResource_Set_DependsOn(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_BaseResource_SetPtr_DependsOn(
+MI_INLINE MI_Result MI_CALL OMI_BaseResource_SetPtr_Requires(
     _Inout_ OMI_BaseResource* self,
     _In_reads_opt_(size) const MI_Char** data,
     _In_ MI_Uint32 size)
@@ -218,7 +226,7 @@ MI_INLINE MI_Result MI_CALL OMI_BaseResource_SetPtr_DependsOn(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL OMI_BaseResource_Clear_DependsOn(
+MI_INLINE MI_Result MI_CALL OMI_BaseResource_Clear_Requires(
     _Inout_ OMI_BaseResource* self)
 {
     return self->__instance.ft->ClearElementAt(
