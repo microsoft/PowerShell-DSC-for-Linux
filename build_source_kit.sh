@@ -41,7 +41,7 @@ if [ -h ./omi-1.0.8 ]; then
 fi
 
 # Remove unwanted base directories
-rm -rf ./bootstrap ./build ./build_source_kit.sh ./doc ./ext ./installbuilder ./Test ./Doc
+rm -rf ./bootstrap ./build ./build_source_kit.sh ./doc ./ext ./installbuilder ./Test ./Docs
 
 # Remove blue win7 win8
 rm -rf ./LCM/codec/mof/blue ./LCM/codec/mof/win7 ./LCM/codec/mof/win8
@@ -51,6 +51,28 @@ rm -rf ./LCM/dsc/tests
 
 # Remove cs files
 rm -rf ./LCM/dsc/engine/ca/psinfrastructure/PsPluginManager.cs
+
+# Remove module providers
+rm -rf ./Providers/nxMySqlDatabase ./Providers/nxMySqlGrant ./Providers/nxMySqlUser
+
+rm -rf \
+./Providers/Scripts/2.4x-2.5x/Scripts/nxMySqlDatabase.py \
+./Providers/Scripts/2.4x-2.5x/Scripts/nxMySqlGrant.py \
+./Providers/Scripts/2.4x-2.5x/Scripts/nxMySqlUser.py \
+./Providers/Scripts/2.6x-2.7x/Scripts/nxMySqlDatabase.py \
+./Providers/Scripts/2.6x-2.7x/Scripts/nxMySqlGrant.py \
+./Providers/Scripts/2.6x-2.7x/Scripts/nxMySqlUser.py \
+./Providers/Scripts/3.x/Scripts/nxMySqlDatabase.py \
+./Providers/Scripts/3.x/Scripts/nxMySqlGrant.py \
+./Providers/Scripts/3.x/Scripts/nxMySqlUser.py
+
+# sed out Makefile stuff for Providers removed
+cat ./Providers/Makefile \
+    | sed "s@PROVIDERS+=nxMySqlDatabase@#PROVIDERS+=nxMySqlDatabase@" \
+    | sed "s@PROVIDERS+=nxMySqlGrant@#PROVIDERS+=nxMySqlGrant@" \
+    | sed "s@PROVIDERS+=nxMySqlUser@#PROVIDERS+=nxMySqlUser@" \
+    > ./tmp_makefile
+mv -f ./tmp_makefile ./Providers/Makefile
 
 # Remove tests associated with above providers
 rm -rf ./Providers/Scripts/2.4x-2.5x/Scripts/Tests ./Providers/Scripts/2.6x-2.7x/Scripts/Tests ./Providers/Scripts/3.x/Scripts/Tests
