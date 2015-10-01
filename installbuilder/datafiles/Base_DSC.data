@@ -11,7 +11,7 @@ PROVIDES: 'dscpackage'
 DESCRIPTION: 'Windows Powershell Desired State Configuration for Linux'
 COPYRIGHT_FILE: 'Copyright Microsoft'
 SHLIB_EXT: 'so'
-PROVIDERS: 'File Script User Group Service Package Environment SshAuthorizedKeys Archive FileLine'
+PROVIDERS: 'File Script User Group Service Package Environment SshAuthorizedKeys Archive FileLine OMSAgent OMSSyslog'
 
 DEV_OMI_DIR: 'omi-1.0.8'
 DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateConfiguration'
@@ -77,6 +77,16 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/mof/MSFT_nxFileLineResource.schema.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.schema.mof;      755; root; root
 /opt/microsoft/dsc/mof/MSFT_nxFileLineResource.registration.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.registration.mof;      755; root; root
 
+/opt/microsoft/dsc/lib/libMSFT_nxOMSAgentResource.so;   Providers/bin/libMSFT_nxOMSAgentResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxOMSAgentResource.reg;  Providers/nxOMSAgent/MSFT_nxOMSAgentResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxOMSAgentResource.schema.mof;  Providers/nxOMSAgent/MSFT_nxOMSAgentResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxOMSAgentResource.registration.mof;  Providers/nxOMSAgent/MSFT_nxOMSAgentResource.registration.mof;      755; root; root
+
+/opt/microsoft/dsc/lib/libMSFT_nxOMSSyslogResource.so;   Providers/bin/libMSFT_nxOMSSyslogResource.so;       755; root; root
+/opt/microsoft/dsc/etc/MSFT_nxOMSSyslogResource.reg;  Providers/nxOMSSyslog/MSFT_nxOMSSyslogResource.reg;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxOMSSyslogResource.schema.mof;  Providers/nxOMSSyslog/MSFT_nxOMSSyslogResource.schema.mof;      755; root; root
+/opt/microsoft/dsc/mof/MSFT_nxOMSSyslogResource.registration.mof;  Providers/nxOMSSyslog/MSFT_nxOMSSyslogResource.registration.mof;      755; root; root
+
 /opt/microsoft/dsc/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; root; root
 
 /opt/microsoft/dsc/Scripts/client.py; Providers/Scripts/client.py; 755; root; root
@@ -118,6 +128,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; Providers/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; 755; root; root
+/opt/microsoft/dsc/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; 755; root; root
 
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxScript.py; Providers/Scripts/3.x/Scripts/nxScript.py; 755; root; root
 /opt/microsoft/dsc/Scripts/3.x/Scripts/nxFile.py; Providers/Scripts/3.x/Scripts/nxFile.py; 755; root; root
@@ -151,12 +163,8 @@ DEV_OMIREGISTER_DIR: '${{DEV_OMI}}/etc/omiregister/root-Microsoft-DesiredStateCo
 /etc/opt/omi/conf/dsc;        755; root; root
 /etc/logrotate.d;        755; root; root; sysdir
 
-
 %Links
 /etc/logrotate.d/dsc; /opt/microsoft/dsc/etc/logrotate.conf; 644; root; root
-
-
-
 
 %Dependencies
 

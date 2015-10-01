@@ -77,6 +77,8 @@ PROVIDERS+=nxArchive
 PROVIDERS+=nxMySqlDatabase
 PROVIDERS+=nxMySqlGrant
 PROVIDERS+=nxMySqlUser
+PROVIDERS+=nxOMSAgent
+PROVIDERS+=nxOMSSyslog
 
 # this is used to enable the printing of xml style tags for help in debugging
 PRINT_BOOKENDS?=0
