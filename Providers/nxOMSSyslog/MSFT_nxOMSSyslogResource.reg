@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSSyslogResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSSyslogResource:OMI_BaseResource

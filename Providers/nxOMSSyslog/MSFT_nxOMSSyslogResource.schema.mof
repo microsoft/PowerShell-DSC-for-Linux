@@ -1,0 +1,14 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSSyslogSource
+{
+                  [write,ValueMap{"kern","user","mail","daemon","auth","syslog","lpr","news","uucp","authpriv","ftp","cron","local0","local1","local2","local3","local4","local5","local6","local7"},Values{"kern","user","mail","daemon","auth","syslog","lpr","news","uucp","authpriv","ftp","cron","local0","local1","local2","local3","local4","local5","local6","local7"}] string Facility;
+                  [write,ValueMap{"emerg","alert","crit","err","warning","notice","info","debug"},Values{"emerg","alert","crit","err","warning","notice","info","debug"}] string Severities[];
+};
+ 
+[ClassVersion("2.0.0")] 
+class MSFT_nxOMSSyslogResource : OMI_BaseResource
+{
+                [key, EmbeddedInstance("MSFT_nxOMSSyslogSource") : ToSubclass ] string SyslogSource[];
+ 
+};
+ 
