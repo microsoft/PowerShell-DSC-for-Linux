@@ -1,0 +1,11 @@
+# omireg /home/johnkord/dev/imp/dsc/omi-1.0.8/output/lib/libomsconfig.so
+HOSTING=@requestor@
+LIBRARY=omsconfig
+EXTRACLASS=MSFT_Credential
+CLASS=MSFT_DSCLocalConfigurationManager
+EXTRACLASS=MSFT_DSCMetaConfiguration
+CLASS=MSFT_DSCWebPullClient
+EXTRACLASS=MSFT_KeyValuePair
+EXTRACLASS=MSFT_LogResource:OMI_BaseResource
+EXTRACLASS=MSFT_ModuleSpecification
+EXTRACLASS=OMI_Error:CIM_Error

@@ -24,7 +24,7 @@ BIN_PATH:=$(PROVIDER_PATH)/bin
 
 # included makefiles for additional definitions
 include $(OMI_PATH)/output/config.mak
-include ./config.mak
+include ../config.mak
 
 # additional include paths
 INCLUDE_PATH+=$(INCDIR)
@@ -47,6 +47,7 @@ CXXFLAGS+=-DNDEBUG
 CXXFLAGS+=-Wall
 CXXFLAGS+=-ggdb
 CXXFLAGS+=-O2
+CXXFLAGS+=-DDSC_SCRIPT_PATH=\"$(DSC_SCRIPT_PATH)\"
 
 # common source files
 COMMON_SOURCES:=debug_tags.cpp
@@ -60,6 +61,10 @@ GENERATED_SOURCES+=schema.c
 GENERATED_OBJS:=$(GENERATED_SOURCES:.c=.o)
 
 # list of providers
+ifeq ($(BUILD_OMS),BUILD_OMS)
+PROVIDERS:=nxOMSAgent
+PROVIDERS+=nxOMSSyslog
+else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript
 PROVIDERS+=nxUser
@@ -77,8 +82,7 @@ PROVIDERS+=nxArchive
 PROVIDERS+=nxMySqlDatabase
 PROVIDERS+=nxMySqlGrant
 PROVIDERS+=nxMySqlUser
-PROVIDERS+=nxOMSAgent
-PROVIDERS+=nxOMSSyslog
+endif
 
 # this is used to enable the printing of xml style tags for help in debugging
 PRINT_BOOKENDS?=0
@@ -115,14 +119,14 @@ endef
 .PHONY: reg
 reg :
 	echo ...copying scripts
-	$(MKDIR) -p $(OMI_LIB_PATH)/Scripts
+	$(MKDIR) -p $(DSC_SCRIPT_PATH)
 	$(MKDIR) -p $(CONFIG_DATADIR)/dsc/modules
-	$(COPY) -R $(PROVIDER_PATH)/Scripts/*.py $(OMI_LIB_PATH)/Scripts
-	$(COPY) -R $(PROVIDER_PATH)/Scripts/2.4x-2.5x $(OMI_LIB_PATH)/Scripts
-	$(COPY) -R $(PROVIDER_PATH)/Scripts/2.6x-2.7x $(OMI_LIB_PATH)/Scripts
-	$(COPY) -R $(PROVIDER_PATH)/Scripts/3.x $(OMI_LIB_PATH)/Scripts
-	$(COPY) -R $(TOP)/intermediate/Scripts/*.py $(TOP)/intermediate/Scripts/*.sh $(OMI_LIB_PATH)/Scripts
-	chmod a+x $(OMI_LIB_PATH)/Scripts/*.py $(OMI_LIB_PATH)/Scripts/*.sh
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/*.py $(DSC_SCRIPT_PATH)
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/2.4x-2.5x $(DSC_SCRIPT_PATH)
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/2.6x-2.7x $(DSC_SCRIPT_PATH)
+	$(COPY) -R $(PROVIDER_PATH)/Scripts/3.x $(DSC_SCRIPT_PATH)
+	$(COPY) -R $(TOP)/intermediate/Scripts/*.py $(TOP)/intermediate/Scripts/*.sh $(DSC_SCRIPT_PATH)
+	chmod a+x $(DSC_SCRIPT_PATH)/*.py $(DSC_SCRIPT_PATH)/*.sh
 	@$(foreach provider,$(PROVIDERS),$(call REGISTER-PROVIDER,$(provider)))
 
 

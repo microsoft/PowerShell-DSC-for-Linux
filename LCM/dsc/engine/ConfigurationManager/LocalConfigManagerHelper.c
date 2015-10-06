@@ -3658,6 +3658,9 @@ MI_Result RegisterConsistencyTask(
     _In_ MI_Instance *currentMetaConfigInstance,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
+#if defined(BUILD_OMS)
+  return MI_RESULT_OK;
+#else
     MI_Result result;
     MI_Value refreshMode;
     MI_Uint32 flags;
@@ -3699,6 +3702,7 @@ MI_Result RegisterConsistencyTask(
     }
 
     return result;
+#endif
 }
 
 MI_Result DoPullServerRefresh(

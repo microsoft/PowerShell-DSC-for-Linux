@@ -87,6 +87,6 @@ f = open(meta_path, "w")
 f.write(metaConfig)
 f.close()
 
-os.system("<OMI_LIB_SCRIPTS>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
+os.system("<DSC_SCRIPT_PATH>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
 shutil.rmtree(tempdir)

@@ -40,8 +40,6 @@ typedef util::unique_ptr<char[]> char_array;
 
 
 char const OMI_PYTHON_VERSION_STR[] = "OMI_PYTHON_VERSION";
-char const OMI_HOME_STR[] = "OMI_HOME";
-char const DSC_SCRIPT_STR[] = "DSC_SCRIPT";
 char const DEFAULT_PYTHON_VERSION[] = "python";
 char const DEFAULT_OMI_PATH[] = "/opt/omi/";
 char const SCRIPT_PATH_EXTENSION[] = "/lib/Scripts/";
@@ -70,23 +68,14 @@ get_python_version ()
 char_array::move_type
 get_script_path ()
 {
-    char const* pathName = getenv (OMI_HOME_STR);
-    if (NULL == pathName)
-    {
-        pathName = DEFAULT_OMI_PATH;
-    }
-    size_t len = strlen (pathName) + 1;
-    char_array fullPath (strcpy (new char[len], pathName));
-    char const* fileName = getenv (DSC_SCRIPT_STR);
-    if (NULL == fileName)
-    {
-        fileName = DEFAULT_DSC_SCRIPT;
-    }
-    len += strlen (SCRIPT_PATH_EXTENSION);
+    size_t len = strlen(DSC_SCRIPT_PATH) + 1;
+    char_array fullPath (strcpy (new char[len], DSC_SCRIPT_PATH));
+    char const* fileName = DEFAULT_DSC_SCRIPT;
+    len += strlen ("/");
     len += strlen (fileName);
     len += strlen (PY_EXTENSION);
     fullPath.reset (strcpy (new char[len], fullPath.get ()));
-    strcat (fullPath.get (), SCRIPT_PATH_EXTENSION);
+    strcat (fullPath.get (), "/");
     strcat (fullPath.get (), fileName);
     strcat (fullPath.get (), PY_EXTENSION);
     return fullPath.move ();

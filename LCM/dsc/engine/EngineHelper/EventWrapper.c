@@ -191,9 +191,15 @@ MI_Result DSCLog_Open(
 unsigned long DSC_EventRegister()
 {
     char logpath[PAL_MAX_PATH_SIZE];
+#if defined(BUILD_OMS)
+    Strlcpy(logpath, "/var/opt/microsoft/omsconfig", PAL_MAX_PATH_SIZE);
+    Strlcat(logpath, "/", PAL_MAX_PATH_SIZE);
+    Strlcat(logpath, "omsconfig.log", PAL_MAX_PATH_SIZE);
+#else
     Strlcpy(logpath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
     Strlcat(logpath, "/", PAL_MAX_PATH_SIZE);
     Strlcat(logpath, "dsc.log", PAL_MAX_PATH_SIZE);
+#endif
     DSCLog_Open(logpath, OMI_VERBOSE);
     return 0;
 }

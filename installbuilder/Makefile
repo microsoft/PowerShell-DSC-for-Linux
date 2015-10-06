@@ -16,6 +16,20 @@ else
 endif
 CONFIG_VERSION := 1.1.0
 
+ifeq ($(BUILD_OMS),BUILD_OMS)
+SHORT_NAME=omsconfig
+LONG_NAME=Operations Management Suite Agent Configuration
+PROVIDES=dscpkg
+PROVIDERS=OMSAgent OMSSyslog
+DESCRIPTION=Operations Management Suite Agent Configuration
+else
+SHORT_NAME=dsc
+LONG_NAME=Windows Powershell Desired State Configuration for Linux
+PROVIDES=dscpackage
+PROVIDERS=File Script User Group Service Package Environment SshAuthorizedKeys Archive FileLine
+DESCRIPTION=Windows Powershell Desired State Configuration for Linux
+endif
+
 all:
 ifeq ($(BUILD_RPM),1)
 	@echo "========================= Make DSC installer"
@@ -34,7 +48,13 @@ ifeq ($(BUILD_RPM),1)
 		--PFDISTRO=ULINUX \
 		--VERSION=$(CONFIG_VERSION) \
 		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
-		--OUTPUTFILE=dsc-$(CONFIG_VERSION)-$(SCX_BUILDVERSION_BUILDNR).ssl_$(SSL_VERSION).$(PF_ARCH) \
+		--BUILD_OMS=$(BUILD_OMS) \
+		--SHORT_NAME=$(SHORT_NAME) \
+		--LONG_NAME="$(LONG_NAME)" \
+		--PROVIDES=$(PROVIDES) \
+		--PROVIDERS="$(PROVIDERS)" \
+		--DESCRIPTION="$(DESCRIPTION)" \
+		--OUTPUTFILE=$(SHORT_NAME)-$(CONFIG_VERSION)-$(SCX_BUILDVERSION_BUILDNR).ssl_$(SSL_VERSION).$(PF_ARCH) \
 		--DATAFILE_PATH=$(TOP)/installbuilder/datafiles \
 		Base_DSC.data
 endif
@@ -55,7 +75,13 @@ ifeq ($(BUILD_DPKG),1)
 		--PFDISTRO=ULINUX \
 		--VERSION=$(CONFIG_VERSION) \
 		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
-		--OUTPUTFILE=dsc-$(CONFIG_VERSION)-$(SCX_BUILDVERSION_BUILDNR).ssl_$(SSL_VERSION).$(PF_ARCH) \
+		--BUILD_OMS=$(BUILD_OMS) \
+		--SHORT_NAME=$(SHORT_NAME) \
+		--LONG_NAME="$(LONG_NAME)" \
+		--PROVIDES=$(PROVIDES) \
+		--PROVIDERS="$(PROVIDERS)" \
+		--DESCRIPTION="$(DESCRIPTION)" \
+		--OUTPUTFILE=$(SHORT_NAME)-$(CONFIG_VERSION)-$(SCX_BUILDVERSION_BUILDNR).ssl_$(SSL_VERSION).$(PF_ARCH) \
 		--DPKG_LOCATION=$(IB_DIR)/tools/bin/dpkg-deb-$(PF_ARCH) \
 		--DATAFILE_PATH=$(TOP)/installbuilder/datafiles \
 		Base_DSC.data

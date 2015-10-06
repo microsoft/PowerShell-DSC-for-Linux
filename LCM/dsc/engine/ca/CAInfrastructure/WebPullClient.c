@@ -1324,8 +1324,8 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
     
     if (g_sslOptions.cipherList[0] != '\0')
     {
@@ -1493,8 +1493,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
 
     
     if (g_sslOptions.cipherList[0] != '\0')
@@ -1733,7 +1733,7 @@ MI_Result CreateTmpDirectoryPath(_Outptr_result_maybenull_z_  MI_Char** director
    
    if( path != NULL)
    { 
-       int result = MkdirT(path, 777); // 777 is standard permission on directory for Linux.
+       int result = MkdirT(path, S_IRWXU);
        if( result == 0 )
        {
             MI_Char *filePath = (MI_Char*) DSC_malloc(MAX_URL_LENGTH * sizeof(MI_Char), NitsHere());
@@ -1845,8 +1845,8 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
 
     if (g_sslOptions.cipherList[0] != '\0')
     {
@@ -2030,7 +2030,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             return r;
         }
 
-        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", OMI_LIB_SCRIPTS "/InstallModule.py", zipPath);
+        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath);
         retval = system(stringBuffer);
         
         if (retval != 0)
@@ -2042,7 +2042,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             else
             {
                 // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
-                Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", OMI_LIB_SCRIPTS "/RemoveModule.py", current->moduleName);
+                Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/RemoveModule.py", current->moduleName);
                 retval = system(stringBuffer); 
                 if ( retval == 0 || (retval == -1 && errno == ECHILD) )
                 {
@@ -2640,14 +2640,14 @@ MI_Result Pull_Register(MI_Char* serverURL,
         curl_easy_cleanup(curl);
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       }
-    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
     if (res != CURLE_OK)
       {
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       };
-    res = curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+    res = curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
     if (res != CURLE_OK)
       {
         curl_slist_free_all(list);
@@ -2752,26 +2752,26 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL) || (endTime.datetime.u.timestamp.year == 0))
         {
             // not the End report
-            commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s StartTime";
+            commandFormat =  DSC_SCRIPT_PATH "/StatusReport.sh %s StartTime";
             snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString);
         }
         else
         {
             if (g_currentError[0] == '\0')
             {
-                commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime";
+                commandFormat =  DSC_SCRIPT_PATH "/StatusReport.sh %s EndTime";
                 snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString);
             }
             else
             {
                 if (g_rnids == NULL)
                 {
-                    commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime \"%s\"";
+                    commandFormat =  DSC_SCRIPT_PATH "/StatusReport.sh %s EndTime \"%s\"";
                     snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError);
                 }
                 else
                 {
-                    commandFormat =  OMI_LIB_SCRIPTS "/StatusReport.sh %s EndTime \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ";
+                    commandFormat =  DSC_SCRIPT_PATH "/StatusReport.sh %s EndTime \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" ";
                     snprintf(dataBuffer, 10000, commandFormat, g_ConfigurationDetails.jobGuidString, g_currentError, g_rnids->SourceInfo,
                              g_rnids->ModuleName, g_rnids->DurationInSeconds, g_rnids->InstanceName, g_rnids->StartDate, g_rnids->ResourceName,
                              g_rnids->ModuleVersion, g_rnids->RebootRequested, g_rnids->ResourceId, g_rnids->ConfigurationName, g_rnids->InDesiredState);
@@ -2800,8 +2800,8 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-        curl_easy_setopt(curl, CURLOPT_SSLCERT, CONFIG_CERTSDIR "/oaas.crt");
-        curl_easy_setopt(curl, CURLOPT_SSLKEY, CONFIG_CERTSDIR "/oaas.key");
+        curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+        curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
         
         res = curl_easy_perform(curl);
 

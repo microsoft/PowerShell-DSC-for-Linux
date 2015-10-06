@@ -11,7 +11,7 @@ SOURCES = \
 
 INCLUDES = $(OMI) $(OMI)/common $(DSCTOP)/common/inc $(TOP)/codec/common $(OMI)/nits/base $(DSCTOP)/engine
 
-DEFINES = MI_CONST= HOOK_BUILD
+DEFINES = MI_CONST= HOOK_BUILD $(BUILD_OMS)
 
 include $(OMI)/mak/rules.mak
 

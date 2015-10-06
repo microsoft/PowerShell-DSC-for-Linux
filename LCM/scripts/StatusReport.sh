@@ -27,5 +27,5 @@ else
 
 fi
 
-echo $output > <CONFIG_SYSCONFDIR>/dsc/last_statusreport
+echo $output > <CONFIG_SYSCONFDIR>/<CONFIG_SYSCONFDIR_DSC>/last_statusreport
 echo $output

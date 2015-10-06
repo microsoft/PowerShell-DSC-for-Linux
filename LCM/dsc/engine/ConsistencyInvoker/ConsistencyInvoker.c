@@ -24,7 +24,11 @@
 #if defined(_MSC_VER)
 #define DSCENGINE_NAMESPACE MI_T("root\\microsoft\\windows\\desiredstateconfiguration")
 #else
+#if defined(BUILD_OMS)
+#define DSCENGINE_NAMESPACE MI_T("root/oms")
+#else
 #define DSCENGINE_NAMESPACE MI_T("root/Microsoft/Windows/DesiredStateConfiguration")
+#endif
 #endif
 
 int main(int argc, char *argv[])

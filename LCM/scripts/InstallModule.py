@@ -17,7 +17,7 @@ Instance of MSFT_CimConfigurationProviderRegistration
   className = "''' + resource + '''";
   DSCEngineCompatVersion = "1.0.0";
   DSCModuleVersion = "1.0.0";
-  Namespace = "root/Microsoft/DesiredStateConfiguration";
+  Namespace = "<DSC_NAMESPACE>";
 };
 '''
 
@@ -53,6 +53,7 @@ omi_bindir = "<CONFIG_BINDIR>"
 omi_libdir = "<CONFIG_LIBDIR>"
 omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
 baseModulePath = "<DSC_MODULES_PATH>"
+baseScriptPath = "<DSC_SCRIPT_PATH>"
 modulePath = baseModulePath + "/" + moduleName
 
 retval = subprocess.call(["unzip","-o","-d", baseModulePath, filepath])
@@ -81,18 +82,18 @@ for resource in resourcelist:
         continue
     
     # Install schema/registration files
-    if not os.path.isdir(omi_sysconfdir + "/dsc/configuration/registration/" + resource):
-        os.mkdir(omi_sysconfdir + "/dsc/configuration/registration/" + resource)
-    if not os.path.isdir(omi_sysconfdir + "/dsc/configuration/schema/" + resource):
-        os.mkdir(omi_sysconfdir + "/dsc/configuration/schema/" + resource)
+    if not os.path.isdir(omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/registration/" + resource):
+        os.mkdir(omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/registration/" + resource)
+    if not os.path.isdir(omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/schema/" + resource):
+        os.mkdir(omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/schema/" + resource)
 
     if not os.path.isfile(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof"):
         print("Error: Unable to find schema mof for resource " + resource)
         sys.exit(1)
 
-    shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof", omi_sysconfdir + "/dsc/configuration/schema/" + resource + "/")
+    shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof", omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/schema/" + resource + "/")
     shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".reg", omi_sysconfdir + "/omiregister/root-Microsoft-DesiredStateConfiguration/")
-    f = open(omi_sysconfdir + "/dsc/configuration/registration/" + resource + "/" + resource + ".registration.mof", "w")
+    f = open(omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/registration/" + resource + "/" + resource + ".registration.mof", "w")
     f.write(registration_text(resource))
     f.close()
 
@@ -111,13 +112,22 @@ for resource in resourcelist:
         sys.exit(1)
 
     os.rename(libdirPath, modulePath + "/DSCResources/" + resource + "/lib")
-    retval = subprocess.call(["cp", "-R", modulePath + "/DSCResources/" + resource + "/lib/", omi_libdir + "/.."])
-    os.rename(modulePath + "/DSCResources/" + resource + "/lib", libdirPath)
+    retval = subprocess.call(["cp " +  modulePath + "/DSCResources/" + resource + "/lib/*.* "  + omi_libdir + "/"], shell=True)
     if retval != 0:
+        os.rename(modulePath + "/DSCResources/" + resource + "/lib", libdirPath)
         print("Error: Failed to install module " + moduleName + " on resource " + resource)
         sys.exit(1)
+        
+    if os.path.isdir(modulePath + "/DSCResources/" + resource + "/lib/Scripts"):
+        retval = subprocess.call(["cp", "-R", modulePath + "/DSCResources/" + resource + "/lib/Scripts", baseScriptPath + "/.."])
+        if retval != 0:
+            os.rename(modulePath + "/DSCResources/" + resource + "/lib", libdirPath)
+            print("Error: Failed to install module " + moduleName + " on resource " + resource + " on its Scripts dir")
+            sys.exit(1)
+            
+    os.rename(modulePath + "/DSCResources/" + resource + "/lib", libdirPath)
 
-retval = subprocess.call([omi_libdir + "/Scripts/RegenerateInitFiles.py"])
+retval = subprocess.call([baseScriptPath + "/RegenerateInitFiles.py"])
 if retval != 0:
     print("Error: failed to regenerate init files.")
     sys.exit(1)

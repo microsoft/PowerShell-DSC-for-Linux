@@ -119,16 +119,16 @@ MI_Result Register(
     result = GetThumbprintForRegisteredServerURL(self, request->registrationData, &thumbprint, cimErrorDetails);
     if (thumbprint == NULL)
     {
-        system("touch "  CONFIG_CERTSDIR "/oaas.key; chmod 0600 "  CONFIG_CERTSDIR "/oaas.key");
-        system("touch "  CONFIG_CERTSDIR "/oaas.key_old; chmod 0600 "  CONFIG_CERTSDIR "/oaas.key_old");
-        systemResult = system("openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " CONFIG_CERTSDIR "/oaas.key_old -out " CONFIG_CERTSDIR "/oaas.crt && openssl rsa -in " CONFIG_CERTSDIR "/oaas.key_old -out " CONFIG_CERTSDIR "/oaas.key && rm -f " CONFIG_CERTSDIR "/oaas.key_old");
+        system("touch "  OAAS_KEYPATH "; chmod 0600 "  OAAS_KEYPATH);
+        system("touch "  OAAS_KEYPATH "_old; chmod 0600 "  OAAS_KEYPATH "_old");
+        systemResult = system("openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " OAAS_KEYPATH "_old -out " OAAS_CERTPATH " && openssl rsa -in " OAAS_KEYPATH "_old -out " OAAS_KEYPATH " && rm -f " OAAS_KEYPATH "_old");
         if (systemResult != 0 && errno != 10)
         {
             DSC_EventWriteLCMServerRegCertGenFailed(g_ConfigurationDetails.jobGuidString, self->agentId);
             return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_PULL_FAILEDTOGENERATECERT);
         }
         
-        systemResult = system("openssl x509 -noout -in " CONFIG_CERTSDIR "/oaas.crt -fingerprint | sed 's/^.*=//' > " CONFIG_CERTSDIR "/oaas.thumbprint");
+        systemResult = system("openssl x509 -noout -in " OAAS_CERTPATH " -fingerprint | sed 's/^.*=//' > " OAAS_THUMBPRINTPATH);
         if (systemResult != 0 && errno != 10)
         {
             DSC_EventWriteLCMServerRegCertGenFailed(g_ConfigurationDetails.jobGuidString, self->agentId);
@@ -137,7 +137,7 @@ MI_Result Register(
         
         {
             long length;
-            FILE * fingerprint_file = fopen (CONFIG_CERTSDIR "/oaas.thumbprint", "r");
+            FILE * fingerprint_file = fopen (OAAS_THUMBPRINTPATH, "r");
             if (fingerprint_file)
             {
                 fseek (fingerprint_file, 0, SEEK_END);
@@ -224,8 +224,6 @@ MI_Char* InhaleTextFile(MI_Char* filePath)
         return NULL;
     }
 }                       
-
-#define AGENTID_FILE_PATH CONFIG_SYSCONFDIR "/dsc/agentid"
 
 /*Function to return agentId value from registry 
 If registration has never been attempted on this machine, then this function returns an empty string and returns TRUE for shouldGenerateAgentId*/
