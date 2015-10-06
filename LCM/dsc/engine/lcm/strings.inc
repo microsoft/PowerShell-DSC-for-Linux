@@ -534,4 +534,6 @@ INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODEREGISTER,
 INTERNAL_Intlstr_Define0( ID_PULL_CERTOPTS_NOT_SUPPORTED,ID_PULL_CERTOPTS_NOT_SUPPORTED,"cURL does not support setting certificate options on this system.")
 
 
-INTERNAL_Intlstr_Define0( ID_PULL_FAILEDTOGENERATECERT, ID_PULL_FAILEDTOGENERATECERT,"Failed to generate certificate and private key for pull server communication.")  
+INTERNAL_Intlstr_Define0( ID_PULL_FAILEDTOGENERATECERT, ID_PULL_FAILEDTOGENERATECERT,"Failed to generate certificate and private key for pull server communication.")
+
+INTERNAL_Intlstr_Define0( ID_CANNOT_RUN_OMSCONFIG_AS_ROOT, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT,"Unable to run omsconfig configurations as root.  Please use omsagent credentials.")

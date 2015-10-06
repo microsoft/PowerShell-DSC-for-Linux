@@ -8,6 +8,17 @@ else
 endif
 
 current_dir := $(shell pwd)
+INSTALLBUILDER_DIR=installbuilder
+
+ifeq ($(BUILD_OMS),BUILD_OMS)
+CONFIG_SYSCONFDIR_DSC=omsconfig
+DSC_NAMESPACE=root/oms
+OAAS_CERTPATH=$$CONFIG_SYSCONFDIR/$(CONFIG_SYSCONFDIR_DSC)/oaas.crt
+else
+CONFIG_SYSCONFDIR_DSC=dsc
+DSC_NAMESPACE=root/Microsoft/DesiredStateConfiguration
+OAAS_CERTPATH=$$CONFIG_CERTSDIR/oaas.crt
+endif
 
 all:
 	mkdir -p intermediate/Scripts
@@ -25,13 +36,17 @@ else
 	make omi098
 
 	.  omi-1.0.8/output/config.mak; \
-	for f in LCM/scripts/*.py LCM/scripts/*.sh; do \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
 	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
 	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
-	  sed "s@<CONFIG_CERTSDIR>@$$$CONFIG_CERTSDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
@@ -43,13 +58,17 @@ else
 	make omi100
 
 	.  omi-1.0.8/output/config.mak; \
-	for f in LCM/scripts/*.py LCM/scripts/*.sh; do \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
 	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
 	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
-	  sed "s@<CONFIG_CERTSDIR>@$$$CONFIG_CERTSDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
@@ -64,10 +83,10 @@ else
 endif
 
 dsc098: lcm098 providers
-	make -C installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS=$(BUILD_OMS)
 
 dsc100: lcm100 providers
-	make -C installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS=$(BUILD_OMS)
 
 omi098:
 	make configureomi098
@@ -174,13 +193,18 @@ lcmreg:
 	make -C LCM deploydsc
 
 providersreg:
-	for f in LCM/scripts/*.py LCM/scripts/*.sh; do \
+	.  omi-1.0.8/output/config.mak; \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$(CONFIG_BINDIR)@" | \
 	  sed "s@<CONFIG_LIBDIR>@$(CONFIG_LIBDIR)@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
 	  sed "s@<CONFIG_SYSCONFDIR>@$(CONFIG_SYSCONFDIR)@" | \
-	  sed "s@<CONFIG_CERTSDIR>@$(CONFIG_CERTSDIR)@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$(CONFIG_LIBDIR)/Scripts@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(CONFIG_DATADIR)/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done 

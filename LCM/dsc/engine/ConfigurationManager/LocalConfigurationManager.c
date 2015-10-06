@@ -54,6 +54,18 @@ void ReloadOMI()
     system(OMI_RELOAD_COMMAND);
 }
 
+MI_Boolean RunningAsRoot()
+{
+    if (getuid() == 0)
+    {
+	return MI_TRUE;
+    }
+    else
+    {
+	return MI_FALSE;
+    }
+}
+
 void UnloadFromProvider(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context)
@@ -2381,6 +2393,17 @@ void Invoke_SendConfiguration(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     MI_Uint8 *dataValue = NULL;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
@@ -2425,6 +2448,17 @@ void Invoke_SendConfigurationApply(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     MI_Uint8 *dataValue = NULL;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
@@ -2471,6 +2505,17 @@ void Invoke_GetConfiguration(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     MI_Uint8 *dataValue = NULL;
     MI_Uint32 dataSize = 0;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -2522,6 +2567,17 @@ void Invoke_ApplyConfiguration(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -2548,6 +2604,17 @@ void Invoke_SendMetaConfigurationApply(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     MI_Uint8 *dataValue = NULL;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
@@ -2588,6 +2655,17 @@ void Invoke_GetMetaConfiguration(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -2613,6 +2691,17 @@ void Invoke_RollBack(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -2639,6 +2728,17 @@ void Invoke_TestConfiguration(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -2665,6 +2765,17 @@ void Invoke_PerformRequiredConfigurationChecks(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -2692,6 +2803,17 @@ void Invoke_StopConfiguration(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {

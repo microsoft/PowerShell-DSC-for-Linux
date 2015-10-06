@@ -41,6 +41,7 @@ omi_bindir = "<CONFIG_BINDIR>"
 omi_libdir = "<CONFIG_LIBDIR>"
 omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
 baseModulePath = "<DSC_MODULES_PATH>"
+baseScriptPath = "<DSC_SCRIPT_PATH>"
 modulePath = baseModulePath + "/" + moduleName
 
 if not os.path.isdir(modulePath):
@@ -54,8 +55,8 @@ resourcelist = os.listdir(modulePath + "/DSCResources")
 for resource in resourcelist:
     print("Removing resource " + resource)
     # Remove schema/registration for each class
-    schemadir = omi_sysconfdir + "/dsc/configuration/schema"
-    regdir = omi_sysconfdir + "/dsc/configuration/registration"
+    schemadir = omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/schema"
+    regdir = omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/registration"
     if os.path.isdir(schemadir + "/" + resource):
         shutil.rmtree(schemadir + "/" + resource)
     if os.path.isdir(regdir + "/" + resource):
@@ -78,7 +79,15 @@ for resource in resourcelist:
         print("Error: Unable to find directory in module at " + libdirPath + ", unable to remove module.")
         sys.exit(1)
 
-    RemoveMirroredDirectory(libdirPath, omi_libdir)
+    # In libdirPath, there's .so file(s) and a Script directory.  We want to remove the .so from its omi lib path, and the Scripts inside the Script directory
+    filelist = os.listdir(libdirPath)
+    for f in filelist:
+        if not os.path.isdir(libdirPath + "/" + f):
+            os.remove(omi_libdir + "/" + f)
+            os.remove(libdirPath + "/" + f)
+    
+    # Now remove the scripts from their installed location
+    RemoveMirroredDirectory(libdirPath + "/Scripts", baseScriptPath)
     if os.path.isdir(modulePath + "/DSCResources/" + resource + "/x86"):
         shutil.rmtree(modulePath + "/DSCResources/" + resource + "/x86")
     if os.path.isdir(modulePath + "/DSCResources/" + resource + "/x64"):
@@ -86,7 +95,7 @@ for resource in resourcelist:
 
 shutil.rmtree(modulePath)
 
-retval = subprocess.call([omi_libdir+ "/Scripts/RegenerateInitFiles.py"])
+retval = subprocess.call([baseScriptPath + "/RegenerateInitFiles.py"])
 if retval != 0:
     print("Error: failed to regenerate init files.")
 sys.exit(0)

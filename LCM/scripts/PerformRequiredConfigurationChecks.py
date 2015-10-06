@@ -9,7 +9,7 @@ omicli_path = omi_bindir + "/omicli"
 parameters = []
 parameters.append(omicli_path)
 parameters.append("iv")
-parameters.append("root/Microsoft/DesiredStateConfiguration")
+parameters.append("<DSC_NAMESPACE>")
 parameters.append("{")
 parameters.append("MSFT_DSCLocalConfigurationManager")
 parameters.append("}")

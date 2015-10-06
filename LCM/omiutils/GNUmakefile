@@ -7,7 +7,7 @@ SOURCES = errors.c errorswrap.c omiutils.c
 
 INCLUDES = $(OMI) $(OMI)/common
 
-DEFINES =  MI_CONST=
+DEFINES =  MI_CONST= $(BUILD_OMS)
 
 # LIBRARIES = base
 

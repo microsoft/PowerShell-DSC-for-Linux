@@ -9,6 +9,8 @@ import time
 import inspect
 import codecs
 
+VarDir = "<CONFIG_LOCALSTATEDIR>"
+
 def Print(s, file=sys.stderr):
     file.write(s + '\n')
 
@@ -32,15 +34,7 @@ class DSCLog(object):
         self.levels = ((0, 'FATAL'), (1, 'ERROR'), (2, 'WARNING'), (3, 'INFO'),
                        (4, 'DEBUG'), (5, 'VERBOSE'))
         self.current_level = self.GetCurrentLogLevel()
-        prefix = '/opt/omi'
-        if 'OMI_HOME' in os.environ.keys():
-            prefix = os.environ['OMI_HOME']
-        if prefix == "/opt/omi":
-            self.file_path = "/var/opt/omi/log/dsc.log"
-        else:
-            if not os.path.exists(prefix+'/var/log'):
-                os.system('mkdir -p ' + prefix+'/var/log')
-            self.file_path = prefix+'/var/log/dsc.log'
+        self.file_path = VarDir + "/log/dsc.log"
 
     def Log(self, log_level, message):
         last_frame = inspect.currentframe().f_back

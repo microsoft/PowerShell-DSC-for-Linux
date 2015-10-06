@@ -11,7 +11,8 @@ import ctypes
 
 DO_TRACE = True
 DO_VERBOSE_TRACE  = False
-
+ScriptsDir = "<DSC_SCRIPT_PATH>"
+VarDir = "<CONFIG_LOCALSTATEDIR>"
 
 def trace (text):
     if DO_TRACE:
@@ -150,14 +151,7 @@ try:
     try:
         trace ('socket: '+str(sys.argv[1]))
         
-        if 'OMI_HOME' in os.environ and len(os.environ['OMI_HOME']):
-            omi_home=os.environ['OMI_HOME']
-        else:
-            omi_home='/opt/omi'
-        if not os.path.isdir(omi_home):
-            sys.stderr.write("omi home not found.  Please set OMI_HOME")
-            sys.exit(1)
-        pid_path=omi_home+'/var/run/python/'+repr(os.getuid())
+        pid_path=VarDir+'/run/python/'+repr(os.getuid())
         
         if not os.path.isdir(pid_path):
             os.system('mkdir -p ' + pid_path)
@@ -172,14 +166,14 @@ try:
         trace ('using python version '+ sys.version) 
         sys.path.insert(0,'') # put the cwd in the path so we can find our module
         if sys.version < '2.6':
-            trace ('/lib/Scripts/2.4x-2.5x')
-            os.chdir(omi_home+'/lib/Scripts/2.4x-2.5x')
+            trace (ScriptsDir + '/2.4x-2.5x')
+            os.chdir(ScriptsDir + '/2.4x-2.5x')
         elif sys.version < '3':
-            trace ('/lib/Scripts/2.6x-2.7x')
-            os.chdir(omi_home+'/lib/Scripts/2.6x-2.7x')
+            trace (ScriptsDir + '/2.6x-2.7x')
+            os.chdir(ScriptsDir + '/2.6x-2.7x')
         else:
-            trace ('/lib/Scripts/3.x')
-            os.chdir (omi_home+'/lib/Scripts/3.x')
+            trace (ScriptsDir + '/3.x')
+            os.chdir (ScriptsDir + '/3.x')
         from Scripts import *
         
         if __name__ == '__main__':

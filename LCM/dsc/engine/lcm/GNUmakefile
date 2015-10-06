@@ -2,7 +2,11 @@ DSCTOP = ../..
 TOP = ../../..
 include $(TOP)/config.mak
 
+ifeq ($(BUILD_OMS),BUILD_OMS)
+CXXSHLIBRARY = omsconfig
+else
 CXXSHLIBRARY = dsccore
+endif
 
 SOURCES = \
 	module.c \
@@ -20,7 +24,7 @@ INCLUDES = \
 	$(TOP)/codec/common \
 	$(OMI)/nits/base
 
-DEFINES = MI_CONST= HOOK_BUILD
+DEFINES = MI_CONST= HOOK_BUILD $(BUILD_OMS)
 
 LIBRARIES =  ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure mi pal omi_error  micodec mofparser base pal curl
 

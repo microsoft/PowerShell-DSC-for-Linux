@@ -2,11 +2,11 @@
 import glob
 import os.path
 
-omi_libdir = "<CONFIG_LIBDIR>"
+omi_libdir = "<DSC_SCRIPT_PATH>"
 
-script_dirs=[omi_libdir + "/Scripts/2.4x-2.5x/Scripts",
-             omi_libdir + "/Scripts/2.6x-2.7x/Scripts",
-             omi_libdir + "/Scripts/3.x/Scripts"]
+script_dirs=[omi_libdir + "/2.4x-2.5x/Scripts",
+             omi_libdir + "/2.6x-2.7x/Scripts",
+             omi_libdir + "/3.x/Scripts"]
 
 for current_dir in script_dirs:
     out_init = "__all__="
