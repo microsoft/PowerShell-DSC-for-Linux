@@ -188,6 +188,7 @@ if [ -z "$LIBCURL_SO" ]; then
    PREREQ_ERROR=1
 fi
 
+#if BUILD_OMS != BUILD_OMS
 # test if able to perform an hmac sha256 hash
 hmacSHA256=`echo -n "TestPlaintext" | openssl dgst -binary -sha256 -hmac "mykey"`
 if [ $? -ne 0 ]; then
@@ -202,6 +203,7 @@ if [ "$base64hmac" != "C9eHLPTYnXyrYXLzmMsya2FWfCFNRlaq75stOI2wbLw=" ]; then
     PREREQ_ERROR=1
     exit 1
 fi
+#endif
        
 if [ $PREREQ_ERROR -eq 1 ]; then
     exit 1
