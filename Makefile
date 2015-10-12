@@ -21,6 +21,7 @@ OAAS_CERTPATH=$$CONFIG_CERTSDIR/oaas.crt
 endif
 
 all:
+	rm -rf release/*.{rpm,deb};
 	mkdir -p intermediate/Scripts
 ifeq ($(BUILD_LOCAL),1)
 	make local
@@ -34,30 +35,20 @@ else
  ifeq ($(BUILD_SSL_098),1)
 	rm -rf omi-1.0.8/output_openssl_0.9.8/lib/libdsccore.so
 	make omi098
-
-	.  omi-1.0.8/output/config.mak; \
-	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
-	  cat $$f | \
-	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
-	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
-	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
-	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
-	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
-	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
-	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
-	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
-	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
-	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
-	  chmod a+x intermediate/Scripts/`basename $$f`; \
-	done
-
 	make dsc098
  endif
  ifeq ($(BUILD_SSL_100),1)
 	rm -rf omi-1.0.8/output_openssl_1.0.0/lib/libdsccore.so
 	make omi100
+	make dsc100
+ endif
+	make nxNetworking
+	make nxComputerManagement
+endif
 
-	.  omi-1.0.8/output/config.mak; \
+dsc098: lcm098 providers
+	mkdir -p intermediate/Scripts
+	.  omi-1.0.8/output_openssl_0.9.8/config.mak; \
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
@@ -73,20 +64,32 @@ else
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
 
-	make dsc100
- endif
-	make nxNetworking
-	make nxComputerManagement
-	mkdir -p release; \
-	rm -rf release/*.{rpm,deb}; \
-	mv omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
-endif
-
-dsc098: lcm098 providers
 	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS=$(BUILD_OMS)
 
+	mkdir -p release; \
+	cp omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
+
 dsc100: lcm100 providers
+	mkdir -p intermediate/Scripts
+	.  omi-1.0.8/output_openssl_1.0.0/config.mak; \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/`basename $$f`; \
+	done
 	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS=$(BUILD_OMS)
+
+	mkdir -p release; \
+	cp omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 omi098:
 	make configureomi098
@@ -158,6 +161,11 @@ nxNetworking:
 	mv $@_$${VERSION}.zip ../../release/
 
 distclean: clean
+	make configureomi098
+	make -C omi-1.0.8 distclean
+	make configureomi100
+	make -C omi-1.0.8 distclean
+	rm -rf omi-1.0.8/output
 
 clean:
 ifeq ($(BUILD_LOCAL),1)
@@ -169,11 +177,6 @@ ifeq ($(BUILD_LOCAL),1)
 	rm -rf intermediate
 else
 	make -C Providers clean
-	make configureomi098
-	make -C omi-1.0.8 distclean
-	make configureomi100
-	make -C omi-1.0.8 distclean
-	rm -rf omi-1.0.8/output
 	rm -rf output
 	rm -rf release
 	rm -rf intermediate
