@@ -158,10 +158,10 @@ def UpdateRsyslogConf(SyslogSource):
     
 def ReadSyslogNGConf(SyslogSource):
     out = []
-    if not os.path.exists(conf_path):
-        LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
+    if not os.path.exists(syslogng_conf_path):
+        LG().Log('ERROR', 'Unable to read ' + syslogng_conf_path + '.')
         return out
-    txt = codecs.open(conf_path, 'r', 'utf8').read()
+    txt = codecs.open(syslogng_conf_path, 'r', 'utf8').read()
     count=0
     for d in SyslogSource:
         out.append({'Facility':d['Facility'],'Severities':[]})
@@ -180,10 +180,10 @@ def ReadSyslogNGConf(SyslogSource):
     return out
     
 def UpdateSyslogNGConf(SyslogSource):
-    if not os.path.exists(rsyslog_conf_path):
+    if not os.path.exists(syslogng_conf_path):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return False
-    txt = codecs.open(rsyslog_conf_path, 'r', 'utf8').read()
+    txt = codecs.open(syslogng_conf_path, 'r', 'utf8').read()
     for d in SyslogSource:
         facility_search = r'(#OMS_facility[ ]+=[ ]+'+d['Facility']+'\n'+r')?(filter f_'+d['Facility']+r'_oms.*'+d['Facility']+r'_oms.*?\n)'
         facility_re=re.compile(facility_search,re.M|re.S)
