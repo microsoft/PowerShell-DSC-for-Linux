@@ -619,7 +619,7 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             self.t.start()
             
         def monitor(self):
-            time.sleep(1)
+            time.sleep(2)
             same_state=0
             last_status=''
             curr_status=''
