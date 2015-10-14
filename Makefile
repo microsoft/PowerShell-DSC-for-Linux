@@ -13,7 +13,7 @@ INSTALLBUILDER_DIR=installbuilder
 ifeq ($(BUILD_OMS),BUILD_OMS)
 CONFIG_SYSCONFDIR_DSC=omsconfig
 DSC_NAMESPACE=root/oms
-OAAS_CERTPATH=$$CONFIG_SYSCONFDIR/$(CONFIG_SYSCONFDIR_DSC)/oaas.crt
+OAAS_CERTPATH=/etc/opt/microsoft/omsagent/certs/oaas.crt
 else
 CONFIG_SYSCONFDIR_DSC=dsc
 DSC_NAMESPACE=root/Microsoft/DesiredStateConfiguration
@@ -169,6 +169,7 @@ distclean: clean
 
 clean:
 ifeq ($(BUILD_LOCAL),1)
+	make -C LCM clean
 	make -C Providers clean
 	make -C omi-1.0.8 distclean
 	rm -rf omi-1.0.8/output
@@ -176,6 +177,7 @@ ifeq ($(BUILD_LOCAL),1)
 	rm -rf release
 	rm -rf intermediate
 else
+	make -C LCM clean
 	make -C Providers clean
 	rm -rf output
 	rm -rf release
