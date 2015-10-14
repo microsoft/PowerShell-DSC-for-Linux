@@ -1318,14 +1318,14 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
     list = curl_slist_append(list, "ProtocolVersion: 2.0");
 
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyContent);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
+    res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyContent);
+    res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    res = curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
+    res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    res = curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
     
     if (g_sslOptions.cipherList[0] != '\0')
     {

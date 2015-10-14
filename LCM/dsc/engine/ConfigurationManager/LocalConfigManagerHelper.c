@@ -2080,11 +2080,13 @@ MI_Result ApplyMetaConfig(
     miResult = ApplyConfig(lcmContext, GetMetaConfigTmpFileName(), moduleManager, flags, resultStatus, cimErrorDetails);
     EH_CheckResult(miResult);
 
+#if !defined(BUILD_OMS)
     miResult = RegisterWithPullServers(lcmContext, (MI_Instance*) g_metaConfig, cimErrorDetails);
     EH_CheckResult(miResult);
 
     miResult = RegisterWithReportingServers(lcmContext, (MI_Instance*)g_metaConfig, cimErrorDetails);
     EH_CheckResult(miResult);
+#endif
 
 EH_UNWIND:
     return miResult;
@@ -6045,12 +6047,14 @@ MI_Result MI_CALL LCM_Pull_Execute(
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);
         }
 
+#if !defined(BUILD_OMS)
         result = RegisterWithPullServers(lcmContext, metaConfigInstance, cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
             moduleManager->ft->Close(moduleManager, NULL);
             return result;
         }
+#endif
 
         GetLatestStatus(&bComplianceStatus, &getActionStatusCode, &lcmStatusCode);
 
