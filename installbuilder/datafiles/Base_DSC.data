@@ -54,7 +54,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; 755; root; root
 
-/opt/microsoft/${{SHORT_NAME}}/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; root; root
 
 #else
 
@@ -338,6 +338,11 @@ fi
 
 #if BUILD_OMS == BUILD_OMS
 
+# Set up logging directory
+mkdir -p /var/opt/microsoft/omsconfig
+chown omsagent /var/opt/microsoft/omsconfig
+chgrp omsagent /var/opt/microsoft/omsconfig
+
 # Configure the consistency invoker for OMS
 CRONTAB_LINE="*/30 * * * * omsagent /opt/omi/bin/OMSConsistencyInvoker"
 cat /etc/crontab | grep "OMSConsistencyInvoker" > /dev/null
@@ -348,6 +353,11 @@ else
     # Find line with OMSConsistencyInvoker and replace with standard
     cat /etc/crontab | sed "s;^.*OMSConsistencyInvoker.*;$CRONTAB_LINE;g" > /etc/crontab_tmp
     mv /etc/crontab_tmp /etc/crontab
+fi
+
+# If omsadmin.conf exists, let's apply the metaconfig
+if [ -f /etc/opt/microsoft/omsagent/conf/omsadmin.conf ]; then
+   su - omsagent -c "/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py"
 fi
 
 #endif
@@ -373,19 +383,20 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration
     rm -rf $CONFIG_DATADIR/${{SHORT_NAME}}/
     rm -rf $OMI_LIB/Scripts
+    rm -rf /opt/microsoft/${{SHORT_NAME}}/
 
 #if BUILD_OMS == BUILD_OMS    
     rm -rf $OMI_REGISTER_DIR/root-oms
-    rm $OMI_HOME/bin/OMSConsistencyInvoker
-    rm $OMI_LIB/libomsconfig.so    
+    rm -f $OMI_HOME/bin/OMSConsistencyInvoker
+    rm -f $OMI_LIB/libomsconfig.so    
 #else
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
-    rm $OMI_HOME/bin/ConsistencyInvoker
-    rm $OMI_LIB/libdsccore.so    
+    rm -f $OMI_HOME/bin/ConsistencyInvoker
+    rm -f $OMI_LIB/libdsccore.so    
 #endif
     for prov in ${{PROVIDERS}}; do
-        rm $OMI_LIB/libMSFT_nx${prov}Resource.so
+        rm -f $OMI_LIB/libMSFT_nx${prov}Resource.so
     done
 fi
 
