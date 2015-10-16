@@ -19,6 +19,7 @@ namespace DSCAzure
         public EnvironmentMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxEnvironment").
                     Replace("$ResourceName", "Environment");
         }

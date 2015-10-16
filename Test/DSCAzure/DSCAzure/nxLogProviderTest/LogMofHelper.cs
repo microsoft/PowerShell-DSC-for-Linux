@@ -18,6 +18,7 @@ namespace DSCAzure
         public LogMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxLog").
                     Replace("$ResourceName", "Log");
         }

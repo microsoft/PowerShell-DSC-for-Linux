@@ -27,10 +27,26 @@ namespace DSCAzure
         {
             ctx.Alw("nxServiceTest Setup Begin.");
 
+            caseID = ((IVarContext)ctx).VarID.ToString();
+            varID = "Node" + caseID;
+            isNeedCompile = ctx.Records.GetValue("isNeedCompile");
             mofHelper = new ServiceMofHelper();
             propString = ctx.Records.GetValue("propString");
             mofPath = ctx.Records.GetValue("mofPath");
+            configFilePath = ctx.Records.GetValue("configFilePath");
             configMofScriptPath = ctx.Records.GetValue("configMofScriptPath");
+
+
+            pullServerDirectory = ctx.Records.GetValue("pullServerDirectory");
+            psScripts = ctx.Records.GetValues("psScript");
+            configAzure = ctx.Records.GetValues("configAzure");
+            getNodeIdCmd = ctx.Records.GetValues("getNodeIdCmd");
+            importConfigToAzure = ctx.Records.GetValues("importConfigToAzure");
+            setAzureAutomation = ctx.Records.GetValues("setAzureAutomation");
+            removeNode = ctx.Records.GetValues("removeNode");
+            forcePullpullServerCmd = ctx.Records.GetValue("forcePullpullServerCmd");
+            azureMofFileName = ctx.Records.GetValue("azureMofFileName");
+
             psScripts = ctx.Records.GetValues("psScript");
             psErrorMsg = ctx.Records.GetValue("psErrorMsg");
             verificationCmd = ctx.Records.GetValue("verificationCmd");
@@ -41,11 +57,20 @@ namespace DSCAzure
             string nxHostName = ctx.Records.GetValue("nxHostName");
             string nxUsername = ctx.Records.GetValue("nxUsername");
             string nxpassword = ctx.Records.GetValue("nxpassword");
-            string nxDomainName = ctx.Records.GetValue("nxDomainName"); 
+            string nxDomainName = ctx.Records.GetValue("nxDomainName");       
             int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
+            string configurationName = ctx.Records.GetValue("configurationName");
+
+            metaFileName = nxHostName + "." + nxDomainName + ".meta.mof";
+            tmpMofFileFullName = configFilePath + "\\" + azureMofFileName;
+            newMofFileFullName = configFilePath + "\\" + metaFileName;
 
             // Open SSH.
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
+
+            //connect to Azure.
+            ctx.Alw(String.Format("Run PowerShell : '{0}'", configAzure));
+            psHelper.Run(configAzure);
 
             string invalidServiceName = ctx.Records.GetValue("invalidServiceName");
             string serviceName = ctx.Records.GetValue("serviceName");
@@ -87,7 +112,7 @@ namespace DSCAzure
 
             // Prepare a configuration MOF file.
             propMap = ConvertStringToPropMap(propString);
-            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath, nxDomainName);
+            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, mofPath, varID, configurationName);
             ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
                 configMofScriptPath));
 

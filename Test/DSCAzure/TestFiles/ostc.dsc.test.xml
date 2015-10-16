@@ -2,13 +2,12 @@
 <varmap xmlns="http://smxinfranet/schemas/mcf/2002/01/varmap"
         assembly="..\DSCAzure.dll"
         dsc="DSC Azure Automation Test"
-        owner="v-mifu" contact="v-mifu">
+        owner="v-litin" contact="v-litin">
 
   <!-- Variables. -->
   <snippet id="Variables">
     <!-- Linux Info. -->
-    <!--<rec key="nxHostName">DSC_HOST</rec>-->
-    <rec key="nxHostName">dsc64-ub14-01</rec>
+    <rec key="nxHostName">DSC_HOST</rec>
     <rec key="nxUsername">root</rec>
     <rec key="nxPassword">OpsMgr2007R2</rec>
     <rec key="nxPort">22</rec>
@@ -16,15 +15,21 @@
     <rec key="serverMode">https</rec>
     <rec key="pullServerDirectory">C:\Program Files\WindowsPowerShell\DscService\Configuration</rec>
     <rec key="forcePullpullServerCmd">/opt/omi/bin/ConsistencyInvoker</rec>
-    <rec key="azureMofFileName">localhost.meta.mof</rec>
-
+    
+    <!--If you want to run multiple automation, you need to set different valus for below variables.-->
+    <rec key="isNeedCompile">yes</rec>
+    <rec key="scriptLocation">C:\Temp</rec>
+    <rec key="configurationName">AzureTesting</rec>
+    <rec key="resourceGroup">OSTCRGNCUS</rec>
+    <rec key="resourceName">OSTCAATEST2</rec>
+    
     <rec key="testServiceName">atd</rec>
     <rec key="invalidServiceName">invalidService</rec>
 
     <!--
                             testManagerName    packageFromSource    packageFromPath
     Debian/Ubuntu             apt                 nano              testpackage3
-    SLES                      zypper              nano              testpackage3-1.0-1
+    SLES                      zypper              nano              testpackage3-1.0-1,testpackage3-1.0-1.noarch(sles12)
     Centos, Oracle, Rhel      yum                 nano              testpackage3-1.0-1.noarch, testpackage3-1.0-1(Centos5x86, ora5x64)
     -->
     <rec key="testManagerName">PACKAGE_MANAGER</rec>
@@ -46,19 +51,20 @@
     <rec key="PermisssionErrorMsg">Access to a CIM resource is not available to the client</rec>
 
     <!-- Script Info. -->
-    <rec key="scriptLocation">C:\Temp</rec>
     <rec key="mofPath">%scriptLocation%</rec>
     <rec key="configFilePath">%scriptLocation%\DscMetaConfigs</rec>
-    <rec key="configMofScriptPath">%scriptLocation%\dsc_AzureTest.ps1</rec>
+    <rec key="azureMofFileName">localhost.meta.mof</rec>
+    <rec key="configMofScriptPath">%scriptLocation%\%configurationName%.ps1</rec>
+    
     <rec key="configAzure">
       Import-Module azure
       Switch-AzureMode -Name AzureResourceManager
       Select-AzureSubscription -SubscriptionName "Internal Consumption"
-      $RGName = "OaaSCSVNOET5OD5VF3OJLWHSHLF7AY73M2LVIGDDRO73D4OD2YLFLYXQCA-East-US"
-      $AA = "OSTCAA"
+      $RGName = "%resourceGroup%"
+      $AA = "%resourceName%"
       $ResourceGroup = Get-AzureResourceGroup -Name:$RGName
       $Acct = $ResourceGroup | Get-AzureAutomationAccount -Name:$AA
-      $Acct | Get-AzureAutomationDscOnboardingMetaconfig -OutputFolder:"C:\temp\"  -Force
+      $Acct | Get-AzureAutomationDscOnboardingMetaconfig -OutputFolder:"%scriptLocation%"  -Force
     </rec>
 
     <rec key="dscSender">
@@ -69,36 +75,66 @@
       $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName%.%nxDomainName% -Port:5986 -Authentication:basic -SessionOption:$opt;
       Set-DSCLocalConfigurationManager -CimSession:$demo1 -Path %configFilePath% -Verbose 
      </rec>
+
+    <rec key="dscSender-nonRoot">
+      [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
+      $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force;
+      $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass;
+      $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
+      $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName%.%nxDomainName% -Port:5986 -Authentication:basic -SessionOption:$opt;
+      Set-DSCLocalConfigurationManager -CimSession:$demo1 -Path %configFilePath% -Verbose
+    </rec>
     
     <rec key="getNodeIdCmd">
       Import-Module azure
       Switch-AzureMode AzureResourceManager
-      $RGName = "OaaSCSVNOET5OD5VF3OJLWHSHLF7AY73M2LVIGDDRO73D4OD2YLFLYXQCA-East-US"
-      $AA = "OSTCAA"
+      $RGName = "%resourceGroup%"
+      $AA = "%resourceName%"
       $Acct = Get-AzureAutomationAccount -ResourceGroupName:$RGName -Name:$AA
-      ($Acct | Get-AzureAutomationDSCNode -Name:%nxHostName%).Id
+      $nodeID = ($Acct | Get-AzureAutomationDSCNode -Name:%nxHostName% | Select-Object -Last 1).Id
+      echo $nodeID
     </rec>
     
     <rec key="importConfigToAzure">
       Import-Module azure
       Switch-AzureMode AzureResourceManager
-      $RGName = "OaaSCSVNOET5OD5VF3OJLWHSHLF7AY73M2LVIGDDRO73D4OD2YLFLYXQCA-East-US"
-      $AA = "OSTCAA"
+      $RGName = "%resourceGroup%"
+      $AA = "%resourceName%"
       $Acct = Get-AzureAutomationAccount -ResourceGroupName:$RGName -Name:$AA
-      $Acct | Get-AzureAutomationDSCConfiguration  
-      $Acct | Import-AzureAutomationDscConfiguration -SourcePath '%configMofScriptPath%' -Description "Test File" -Published -force
-      $myConfig = $Acct | Get-AzureAutomationDSCConfiguration -ConfigurationName:"dsc_AzureTest"
+      $a = $Acct | Get-AzureAutomationDSCConfiguration
+      $b = $Acct | Import-AzureAutomationDscConfiguration -SourcePath '%configMofScriptPath%' -Description "Test File" -Published -force
+      $myConfig = $Acct | Get-AzureAutomationDSCConfiguration -ConfigurationName:"%configurationName%"
       $myCompileJob = $myConfig | Start-AzureAutomationDscCompilationJob
-      $myCompileJob | Get-AzureAutomationDscCompilationJob -ConfigurationName:"dsc_AzureTest"
-      Start-Sleep 60
-      $Acct | Set-AzureAutomationDscNode -NodeConfigurationName "dsc_AzureTest.%nxHostName%.%nxDomainName%" -id "$nodeID"
+      $state = ($myCompileJob | Get-AzureAutomationDscCompilationJob -ConfigurationName:"%configurationName%" |Select-Object -Last 1).status
+      for($i=0; $i -lt 20; $i++)
+      {
+      if(!($state -eq "Completed"))
+      {
+      Start-Sleep 10
+      $state = ($myCompileJob | Get-AzureAutomationDscCompilationJob -ConfigurationName:"%configurationName%" |Select-Object -Last 1).status
+      }
+      else
+      {
+      break
+      }
+      }
+      echo $state
+    </rec>
+
+    <rec key="setAzureAutomation">
+      Import-Module azure
+      Switch-AzureMode AzureResourceManager
+      $RGName = "%resourceGroup%"
+      $AA = "%resourceName%"
+      $Acct = Get-AzureAutomationAccount -ResourceGroupName:$RGName -Name:$AA
+      $Acct | Set-AzureAutomationDscNode -NodeConfigurationName "%configurationName%.$varID" -id "$nodeID" -Force
     </rec>
     
     <rec key="removeNode">
       Import-Module azure
       Switch-AzureMode AzureResourceManager
-      $RGName = "OaaSCSVNOET5OD5VF3OJLWHSHLF7AY73M2LVIGDDRO73D4OD2YLFLYXQCA-East-US"
-      $AA = "OSTCAA"
+      $RGName = "%resourceGroup%"
+      $AA = "%resourceName%"
       $Acct = Get-AzureAutomationAccount -ResourceGroupName:$RGName -Name:$AA
       $Acct | Unregister-AzureAutomationDscNode -Id $nodeID -Force
     </rec>
@@ -1151,8 +1187,52 @@
         <rec key="successfulMsg">The remote ftp path is only valid for File type.</rec>
         <rec key="failedMsg">Copied failed.</rec>
       </var>
-             
-             
+
+      <var set="1" lvl="1" vid="908493"
+         dsc="[nxFile] Verify if report status is compliant when the file doesn't exist before and enumerated Ensure property is Present"
+         cls="DSCAzure.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialCmd">rm -rf %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-'|awk '$NF=="%name%"{print $NF}' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The destination file '%name%' is created under %parentPath% successfully.</rec>
+        <rec key="failedMsg">The destination file '%path%' is not created under %parentPath%.</rec>
+      </var>
+
+      <var set="1" lvl="2" vid="908494"
+           dsc="[nxFile] Verify if report status is not compliant when the specific Group account doesn't exist on DSC server"
+           cls="DSCAzure.nxFileTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="parentPath">/tmp</rec>
+        <rec key="name">test</rec>
+        <rec key="path">%parentPath%/%name%</rec>
+        <rec key="initialType">file</rec>
+        <rec key="initialState">present</rec>
+        <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
+        <rec key="finalCmd">rm -rf %path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">DestinationPath:%path%;Ensure:Present;Type:File;Group:abcdc</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid group.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>       
     </section>
 
     <section sid="2" dsc="nxUser Provider">
@@ -1413,25 +1493,65 @@
         <rec key="successfulMsg">The group id for user '%username%' is set successfully.</rec>
       </var>
 
-      <var set="2" lvl="2" vid="666927"
+      <!--<var set="2" lvl="2" vid="666927"
            dsc="[nxUser] Verify PasswordChangeRequired property won't be updated for existing user"
            cls="DSCAzure.nxUserTest">
         <snipref id="Variables" />
-        <!-- Linux Initial State. -->
+        --><!-- Linux Initial State. --><!--
         <rec key="username">test_user</rec>
         <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
         <rec key="initialCmd">userdel -f -r %username%;groupdel %username%;useradd %username%</rec>
         <rec key="finalCmd">userdel -f -r %username%</rec>
-        <!-- MOF Info. -->
+        --><!-- MOF Info. --><!--
         <rec key="propString">UserName:%username%;Ensure:Present;PasswordChangeRequired:true;Password:%password%;</rec>
         <rec key="psScript">%dscSender%</rec>
-        <!-- Verify Linux State. -->
+        --><!-- Verify Linux State. --><!--
         <rec key="verificationCmd">cat /etc/shadow | grep -i '^%username%:' | tr ':' ' ' | awk '{print $3}' | tr -d '\n'</rec>
         <rec key="expectedValue">16547</rec>
         <rec key="expectedPasswordChangeRequired">false</rec>
         <rec key="successfulMsg">The user '%username%' is updated successfully, its password must be changed in next login</rec>
+      </var>-->
+
+      <var set="2" lvl="1" vid="908495"
+           dsc="[nxUser] Verify if report status is compliant when provide a new userName and set Ensure to Present"
+           cls="DSCAzure.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="username">test_user</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:Present;Password:%password%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/passwd | grep -i '^%username%:' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The user '%username%' is created successfully.</rec>
+        <rec key="failedMsg">The user '%username%' is not created.</rec>
       </var>
-      
+
+      <var set="2" lvl="2" vid="908498"
+           dsc="[nxUser] Verify if report status is not compliant when delate a invalid user."
+           cls="DSCAzure.nxUserTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="username">test_user</rec>
+        <rec key="password">$6$q4Fpfjgb$R0mpH1GbnJVrNy1hwehJVrMqP7FaAloBiqfRciW4nBjzuOJKdb3EXlPdejhmMBZUbrZT/r.BPXcMMqIyRSNFm0</rec>
+        <rec key="initialCmd">userdel -f -r %username%;groupdel %username%</rec>
+        <rec key="finalCmd">userdel -f -r %username%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">UserName:%username%;Ensure:absent;Password:%password%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">The user '%username%' is created successfully.</rec>
+        <rec key="failedMsg">The user '%username%' is not created.</rec>
+      </var>
     </section>
 
     <section sid="3" dsc="nxGroup Provider">
@@ -1556,6 +1676,38 @@
         <rec key="failedMsg">The member 'root,scxuser' failed to remove from '%groupname%'.</rec>
       </var>
 
+      <var set="3" lvl="1" vid="908496" dsc="[nxGroup] Verify if report status is compliant when enumerated Ensure property is Present" cls="DSCAzure.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:Present</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat /etc/group | grep -i '^%groupname%' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The group '%groupname%' is created successfully.</rec>
+        <rec key="failedMsg">The group '%groupname%' is not created.</rec>
+      </var>
+
+      <var set="3" lvl="2" vid="908497" dsc="[nxGroup] Verify if report status is not compliant when invliad members are listed" cls="DSCAzure.nxGroupTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="groupname">test_group_automation</rec>
+        <rec key="initialState">absent</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">GroupName:%groupname%;Ensure:present;Members:xxxxx</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invliad members are listed.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
     </section>
 
     <section sid="4" dsc="nxScript Provider">
@@ -1636,11 +1788,11 @@
         <rec key="failedMsg">PowerShell doesn't get a failure: 'The SendConfigurationApply function did not succeed.' when the setScript return false</rec>
       </var>
 
-      <var set="4" lvl="1" vid="661708"
+      <!--<var set="4" lvl="1" vid="661708"
       dsc="[nxScript] Verify GetScript is excuted when we send a get request from Powershell server"
       cls="DSCAzure.nxScriptTest">
         <snipref id="Variables" />
-        <!-- Linux Initial State. -->
+        --><!-- Linux Initial State. --><!--
         <rec key="parentPath">/tmp</rec>
         <rec key="s_name">set_file</rec>
         <rec key="s_path">%parentPath%/%s_name%</rec>
@@ -1651,15 +1803,15 @@
         <rec key="getScript">#!/bin/sh&#10;echo get >%g_path%&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
-        <!-- MOF Info. -->
+        --><!-- MOF Info. --><!--
         <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <!-- Verify Linux State. -->
+        --><!-- Verify Linux State. --><!--
         <rec key="verificationCmd">cat %g_path% | tr -d '\n'</rec>
         <rec key="expectedValue">get</rec>
         <rec key="successfulMsg">GetScript is excuted.</rec>
         <rec key="failedMsg">GetScript is not excuted.</rec>
-      </var>
+      </var>-->
 
       <var set="4" lvl="3" vid="661709"
           dsc="[nxScript] Verify powerShell gets a failed return value when the GetScript excute fails"
@@ -1789,6 +1941,61 @@
         <rec key="successfulMsg">Error out as invalid group.</rec>
       </var>
        
+      <var set="4" lvl="1" vid="908499"
+           dsc="[nxScript] Verify if report status is compliant when a positive configuration"
+           cls="DSCAzure.nxScriptTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="parentPath">/tmp</rec>
+        <rec key="s_name">set_file</rec>
+        <rec key="s_path">%parentPath%/%s_name%</rec>
+        <rec key="t_name">set_file</rec>
+        <rec key="t_path">%parentPath%/%t_name%</rec>
+        <rec key="testScript">#!/bin/sh&#10;touch %t_path%&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;touch %s_path%&#10;</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
+        <rec key="initialCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
+        <rec key="finalCmd">rm -rf %s_path%;rm -rf %t_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">s=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;t=`ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'`;echo $t$s | tr -d '\n'</rec>
+        <rec key="expectedValue">11</rec>
+        <rec key="successfulMsg">SetScript was executed.</rec>
+        <rec key="failedMsg">SetScript was not executed.</rec>
+      </var>
+
+      <var set="4" lvl="2" vid="908500"
+            dsc="[nxScript] Verify if report status is not compliant when the setScript return false"
+            cls="DSCAzure.nxScriptTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="parentPath">/tmp</rec>
+        <rec key="s_name">set_file</rec>
+        <rec key="s_path">%parentPath%/%s_name%</rec>
+        <rec key="g_name">get_file</rec>
+        <rec key="g_path">%parentPath%/%g_name%</rec>
+        <rec key="testScript">#!/bin/sh&#10;echo Testing quotes...&#10;exit 1</rec>
+        <rec key="setScript">#!/bin/sh&#10;echo set> %s_path%&#10;exit 1</rec>
+        <rec key="getScript">#!/bin/sh&#10;exit 0</rec>
+        <rec key="initialCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
+        <rec key="finalCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">ls -l %parentPath% | grep '^-' | grep -i '%s_name%$' | wc -l | tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">PowerShell gets a failure: 'The SendConfigurationApply function did not succeed.' when the setScript return false.</rec>
+        <rec key="failedMsg">PowerShell doesn't get a failure: 'The SendConfigurationApply function did not succeed.' when the setScript return false</rec>
+      </var>
+      
     </section>
 
     <section sid="5" dsc="nxService Provider">
@@ -1866,7 +2073,27 @@
         <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
       </var>
 
-
+      <var set="5" lvl="1" vid="908501"
+          dsc="[nxService] Verify if report status is compliant when service is started successfully by ‘init’ service controller"
+          cls="DSCAzure.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+      
+      
       <!-- Upstart Controller. -->
       <var set="5" lvl="1" vid="661815"
            dsc="[nxService] Verify the specific service is started successfully by ‘upstart’ service controller"
@@ -1939,6 +2166,27 @@
         <rec key="expectedValue">%expectedState%</rec>
         <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
       </var>
+
+      <var set="5" lvl="1" vid="908502"
+           dsc="[nxService] Verify if report status is compliant when service is started successfully by ‘upstart’ service controller"
+           cls="DSCAzure.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">upstart</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+      
       
       <!-- Systemd Controller. -->
       <var set="5" lvl="1" vid="661820"
@@ -2013,6 +2261,26 @@
         <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
       </var>
 
+      <var set="5" lvl="1" vid="908503"
+           dsc="[nxService] Verify if report status is compliant when service is started successfully by ‘systemd’ service controller"
+           cls="DSCAzure.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="serviceName">%testServiceName%</rec>
+        <rec key="controller">systemd</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%</rec>
+        <rec key="expectedValue">%expectedState%</rec>
+        <rec key="successfulMsg">Service is %expectedState% as expected.</rec>
+      </var>
+
       <!-- Negative -->
       <var set="5" lvl="3" vid="663816"
           dsc="[nxService] Verify if error out if the specific service does not exist in specific 'init' controller"
@@ -2055,6 +2323,66 @@
           cls="DSCAzure.nxServiceTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
+        <rec key="serviceName">%invalidServiceName%</rec>
+        <rec key="controller">systemd</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
+        <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
+      </var>
+
+      <var set="5" lvl="2" vid="908505"
+          dsc="[nxService] Verify if report status is not compliant when the specific service does not exist in specific 'init' controller"
+          cls="DSCAzure.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="serviceName">%invalidServiceName%</rec>
+        <rec key="controller">init</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
+        <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
+      </var>
+
+      <var set="5" lvl="2" vid="908506"
+          dsc="[nxService] Verify if report status is not compliant when the specific service does not exist in specific 'upstart' controller"
+          cls="DSCAzure.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="serviceName">%invalidServiceName%</rec>
+        <rec key="controller">upstart</rec>
+        <rec key="initialState">Stopped</rec>
+        <rec key="expectedState">Running</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%serviceName%;Controller:%controller%;State:%expectedState%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PS throws an error as expected due to the invalid service name.</rec>
+        <rec key="failedMsg">PS does not throw an error while starting an invalid service.</rec>
+      </var>
+
+      <var set="5" lvl="2" vid="908507"
+          dsc="[nxService] Verify if report status is not compliant when the specific service does not exist in specific 'systemd' controller"
+          cls="DSCAzure.nxServiceTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
         <rec key="serviceName">%invalidServiceName%</rec>
         <rec key="controller">systemd</rec>
         <rec key="initialState">Stopped</rec>
@@ -2245,6 +2573,53 @@
         <rec key="expectedValue">1</rec>
         <rec key="successfulMsg">The environment variable is updated successfully.</rec>
         <rec key="failedMsg">The environment variable is not updated.</rec>
+      </var>
+
+      <var set="6" lvl="1" vid="908508"
+           dsc="[nxEnvironment] Verify if report status is compliant when environment variable set successfully."
+           cls="DSCAzure.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi; if [ -f "%dscProfile%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %etcEnv%| grep "%varName%=%varValue%"| wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">The environment variable is created successfully.</rec>
+        <rec key="failedMsg">The environment variable is not created.</rec>
+      </var>
+
+      <var set="6" lvl="2" vid="908509"
+           dsc="[nxEnvironment] Verify if report status is not compliant when delete environment variable doesn't exist."
+           cls="DSCAzure.nxEnvironmentTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="varName">testEnvVar</rec>
+        <rec key="varValue">envVarValue</rec>
+        <rec key="dscProfile">/etc/profile.d/DSCEnvironment.sh</rec>
+        <rec key="etcEnv">/etc/environment</rec>
+        <rec key="cleanVar">if [ -f "%etcEnv%" ]; then sed -i '/%varName%/'d %etcEnv%; source %etcEnv%; fi; if [ -f "%dscProfile%" ]; then sed -i '/%varName%/'d %dscProfile%; source %dscProfile%; fi;</rec>
+        <rec key="initialCmd">%cleanVar%</rec>
+        <rec key="finalCmd">%cleanVar%</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%varName%;Ensure:absent;Value:%varValue%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">The environment variable is created successfully.</rec>
+        <rec key="failedMsg">The environment variable is not created.</rec>
       </var>
 
     </section>
@@ -2603,7 +2978,46 @@
         <rec key="verification">%propString%;Installed:%initialInstallState%</rec>
         <rec key="successfulMsg">The specific package is not installed as expected.</rec>
       </var>
-      
+
+      <var set="7" lvl="1" vid="908510"
+           dsc="[nxPackage] Verify if report status is compliant when specific package is installed successfully"
+           cls="DSCAzure.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="Name">%packageFromSource%</rec>
+        <rec key="manager">%testManagerName%</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">True</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;PackageManager:%manager%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">%propString%;Installed:%expectedInstallState%</rec>
+        <rec key="successfulMsg">The specific package is installed as expected.</rec>
+      </var>
+
+      <var set="7" lvl="2" vid="908511"
+         dsc="[nxPackage] Verify if report status is not compliant when specific package is invalid."
+         cls="DSCAzure.nxPackageTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="Name">ErrorTestPackage</rec>
+        <rec key="keyword">%Name%</rec>
+        <rec key="manager">%testManagerName%</rec>
+        <rec key="initialInstallState">False</rec>
+        <rec key="expectedInstallState">False</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%Name%;Ensure:Present;PackageManager:%manager%</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="successfulMsg">PowerShell error as invalid package name.</rec>
+        <rec key="failedMsg">PowerShell should error out but it succeeds!</rec>
+      </var>
     </section>
 
     <section sid="8" dsc="nxSshAuthorizedKeys Provider">
@@ -2674,7 +3088,6 @@
         <rec key="failedMsg">Authorized_keys file didn't create when .ssh directory does not exist.</rec>
       </var>
 
-      <!--Not sure if the key should be updated.-->
       <var set="8" lvl="2" vid="664656"
            dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is updated if the KeyComment exist."
            cls="DSCAzure.nxSshAuthTest">
@@ -2756,6 +3169,56 @@
         <!-- MOF Info. -->
         <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
         <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Ssh authorized key is delete when the Ensure is set to absent.</rec>
+        <rec key="failedMsg">Ssh authorized key didn't delete when the Ensure is set to absent.</rec>
+      </var>
+      
+      <var set="8" lvl="1" vid="908515"
+           dsc="[nxSshAuthorizedKeys] verify if report status is compliant when send a positive configuration"
+           cls="DSCAzure.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Ssh authorized key for user %userName% is stored into %keyFile%.</rec>
+        <rec key="failedMsg">Ssh authorized key for user %userName% didn't store into %keyFile%.</rec>
+      </var>
+
+      <var set="8" lvl="2" vid="908516"
+           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is delete if the Ensure is set to absent."
+           cls="DSCAzure.nxSshAuthTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="keyComment">KeyCommentsTest</rec>
+        <rec key="ensure">Absent</rec>
+        <rec key="userName">root</rec>
+        <rec key="key">TestKey</rec>
+        <rec key="keyFile">/root/.ssh/authorized_keys</rec>
+        <rec key="initialCmd">cp %keyFile% /tmp/key_bak;</rec>
+        <rec key="finalCmd">cp /tmp/key_bak %keyFile%;rm /tmp/key_bak</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">KeyComment:%keyComment%;Ensure:%ensure%;UserName:%userName%;Key:%key%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">cat %keyFile% |grep -i %key% |wc -l |tr -d '\n'</rec>
         <rec key="expectedValue">0</rec>
@@ -2910,26 +3373,6 @@
         <rec key="failedMsg">The line match the value of DoesNotContainPattern is not removed when the DoesNotContainPattern contains metacharacters.</rec>
       </var>
 
-      <var set="9" lvl="2" vid="816249"
-           dsc="[nxFileLine] Verify if ContainsLine can be identified when it contains metacharacters."
-           cls="DSCAzure.nxFileLineTest">
-        <snipref id="Variables" />
-        <!-- Linux Initial State. -->
-        <rec key="filePath">/tmp/test</rec>
-        <rec key="containsLine">^ContainsLineTest$</rec>
-
-        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo "Line1" > %filePath%;echo "Line2" >> %filePath%;</rec>
-        <rec key="finalCmd">rm /tmp/test</rec>
-        <!-- MOF Info. -->
-        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;</rec>
-        <rec key="psScript">%dscSender%</rec>
-        <!--Verify Linux State.-->
-        <rec key="verificationCmd">cat %filePath% |grep -i "ContainsLineTest" |wc -l | tr -d '\n'</rec>
-        <rec key="expectedValue">1</rec>
-        <rec key="successfulMsg">The ContainsLine can be identified when it contains metacharacters.</rec>
-        <rec key="failedMsg">The ContainsLine can't identified when it contains metacharacters.</rec>
-      </var>
-
       <var set="9" lvl="3" vid="814843"
            dsc="[nxFileLine] Verify if no operation is proformed when no lines match the value of DoesNotContainPattern."
            cls="DSCAzure.nxFileLineTest">
@@ -2955,6 +3398,52 @@
            cls="DSCAzure.nxFileLineTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="containsLine">ContainsLineTest</rec>
+
+        <rec key="initialCmd">rm /tmp/test</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;ContainsLine:%containsLine%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out when the FilePath doesn't exist.</rec>
+        <rec key="failedMsg">No error out when the FilePath doesn't exist.</rec>
+      </var>
+      
+      <var set="9" lvl="1" vid="908517"
+           dsc="[nxFileLine] Verify if report status is compliant when line match the value of DoesNotContainPattern are removed successfully."
+           cls="DSCAzure.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="filePath">/tmp/test</rec>
+        <rec key="doesNotContainPattern">comments</rec>
+        <rec key="keepLine">This line will be retained.</rec>
+        <rec key="initialCmd">rm /tmp/test;touch /tmp/test;echo %doesNotContainPattern% > %filePath%;echo %doesNotContainPattern% >> %filePath%;echo %keepLine% >> %filePath%;</rec>
+        <rec key="finalCmd">rm /tmp/test</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">FilePath:%filePath%;DoesNotContainPattern:%doesNotContainPattern%;ContainsLine:</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">cat %filePath% |grep -i %doesNotContainPattern% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">0</rec>
+        <rec key="successfulMsg">Lines that match the value of DoesNotContainPattern are removed from the file.</rec>
+        <rec key="failedMsg">Lines that match the value of DoesNotContainPattern didn't remove from the file.</rec>
+      </var>
+
+      <var set="9" lvl="2" vid="908518"
+           dsc="[nxFileLine] Verify if report status is not compliant when FilePath doesn't exist."
+           cls="DSCAzure.nxFileLineTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
         <rec key="filePath">/tmp/test</rec>
         <rec key="containsLine">ContainsLineTest</rec>
 
@@ -3404,6 +3893,55 @@
         <rec key="successfulMsg">IPAddress is updated accordlingly while the address exists before and Ensure property is Present.</rec>
         <rec key="failedMsg">IPAddress isn't updated accordlingly while the address exists before and Ensure property is Present.</rec>
       </var>
+
+      <var set="10" lvl="1" vid="908526"
+        dsc="[nxIPAddress] Verify if report status is compliant when IPv4 address is set on a network interface successfully"
+        cls="DSCAzure.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="ipAddress">11.10.10.10</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="prefixLength">32</rec>
+        <rec key="mask">255.255.255.255</rec>
+        <rec key="initialSet">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:absent;AddressFamily:%addressFamily%;PrefixLength:%mask%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;PrefixLength:%prefixLength%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verification">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;Ensure:%ensure%;AddressFamily:%addressFamily%;PrefixLength:%mask%;</rec>
+        <rec key="successfulMsg">IPv4 address is set on a network interface when the address doesn't exist before and Ensure property is 'Present'</rec>
+        <rec key="failedMsg">IPv4 address isn't set on a network interface when Ensure property is 'Present'</rec>
+      </var>
+
+      <var set="10" lvl="3" vid="908527"
+           dsc="[nxIPAddress] Verify if report status is not compliant when provided IP address is not a right IPv4 format."
+           cls="DSCAzure.nxIPAddressTest">
+        <snipref id="Variables" />
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="ipAddress">11.10.10.300</rec>
+        <rec key="interfaceName">eth1</rec>
+        <rec key="bootProtocol">Static</rec>
+        <rec key="addressFamily">IPv4</rec>
+        <rec key="initialSet"></rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">IPAddress:%ipAddress%;InterfaceName:%interfaceName%;BootProtocol:%bootProtocol%;AddressFamily:%addressFamily%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out if the provided IP address is not a right IPv4 format.</rec>
+        <rec key="failedMsg">No error out if the provided IP address is not a right IPv4 format.</rec>
+      </var>
       
     </section>
 
@@ -3528,6 +4066,38 @@
         <rec key="successfulMsg">Mutiple IPv6 DNS Server address are added .</rec>
       </var>
 
+      <var set="11" lvl="1" vid="908528"
+           dsc="[nxDNSServerAddress] Verify if report status is compliant when DNS Server Address is added successfully."
+           cls="DSCAzure.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="address">128.9.0.107</rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verification">Address:%address%;</rec>
+        <rec key="successfulMsg">IPV4 address is added as a DNS Server Address successfully.</rec>
+      </var>
+
+      <var set="11" lvl="2" vid="908529"
+           dsc="[nxDNSServerAddress] Verify if report status is not compliant when the provided address is not a right IPv4 format."
+           cls="DSCAzure.DNSAddressTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="address">10.320.2.6</rec>
+        <!--rec key="initialCmd">sed -i '/%address%/d' /etc/resolv.conf</rec-->
+        <!-- MOF Info. -->
+        <rec key="propString">Address:%address%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+      </var>
+      
     </section>
 
     <section sid="12" dsc="nxArchive Provider">
@@ -3906,6 +4476,57 @@
         <rec key="failedMsg">Destination file updated if Checksum is 'mtime' and the source is older than destination file.</rec>
       </var>
 
+      <var set="12" lvl="1" vid="908519"
+           dsc="[nxArchive] Verify if report status is compliant when unpack a source file successfully."
+           cls="DSCAzure.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;touch %filePath%;echo %fileContent%> %filePath%;cd /tmp/;tar -cvf %sourcePath% %fileName%;</rec>
+        <rec key="finalCmd">rm -rf /tmp/*;</rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd">ls -l %destinationPath% |grep -i %fileName% |wc -l |tr -d '\n'</rec>
+        <rec key="expectedValue">1</rec>
+        <rec key="successfulMsg">Unpack a source file which is .tar file to destination path successfully</rec>
+        <rec key="failedMsg">Fail to unpack a source file which is .tar file to destination path.</rec>
+      </var>
+
+      <var set="12" lvl="3" vid="908520"
+           dsc="[nxArchive] Verify if report status is not compliant when SourcePath doesn't exist"
+           cls="DSCAzure.nxArchiveTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="sourcePath">/tmp/source.tar</rec>
+        <rec key="destinationPath">/tmp/nxArchive</rec>
+        <rec key="filePath">/tmp/test.txt</rec>
+        <rec key="fileName">test.txt</rec>
+        <rec key="fileContent">This is a test file.</rec>
+        <rec key="newContent">ctime was changed.</rec>
+
+        <rec key="initialCmd">rm -rf /tmp/*;</rec>
+        <rec key="finalCmd"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">SourcePath:%sourcePath%;DestinationPath:%destinationPath%;Ensure:Present;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+        <!--Verify Linux State.-->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">Send error out when SourcePath doesn't exist.</rec>
+        <rec key="failedMsg">Didn't error out when SourcePath doesn't exist.</rec>
+      </var>
     </section>
 
     <section sid="13" dsc="nxFirewall Provider">
@@ -4666,7 +5287,66 @@
         <rec key="successfulMsg">firewall rule is set while FirewallType is 'ip6tables'.</rec>
         <rec key="failedMsg">fail to set firewall rule while FirewallType is 'ip6tables'.</rec>
       </var>
-      
+
+      <var set="13" lvl="1" vid="908530"
+           dsc="[nxFirewall] [Azure] Verify if report status is compliant when the firewall rule is set successfully"
+           cls="DSCAzure.nxFirewallTest" permutation="rows">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="name">Rule1_tcp</rec>
+        <recm key="type">
+          <val>iptables</val>
+        </recm>
+        <rec key="protocol">tcp</rec>
+        <rec key="direction">INPUT</rec>
+        <rec key="ensure">Present</rec>
+        <rec key="access">Allow</rec>
+        <rec key="state">new</rec>
+
+        <rec key="initialSet"></rec>
+        <!-- MOF Info. -->
+
+        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:%ensure%;Direction:%direction%;Access:%access%;FirewallType:%type%;State:%state%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verification">Name:%name%;Protocol:%protocol%;Ensure:%ensure%;Direction:%direction%;Access:%access%;FirewallType:%type%;State:%state%;</rec>
+        <rec key="verificationCmd"></rec>
+        <rec key="successfulMsg">firewall rule is set while Protocol is 'tcp' and Ensure is 'Present'.</rec>
+        <rec key="failedMsg">fail to set firewall rule while Protocol is 'tcp' and Ensure is 'Present'.</rec>
+      </var>
+
+      <var set="13" lvl="2" vid="908531"
+           dsc="[nxFirewall] [Azure] Verify if report status is not compliant when the SourceHost property is not a right address."
+           cls="DSCAzure.nxFirewallTest" permutation="rows">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="name">Rule1_tcp</rec>
+        <recm key="type">
+          <val>iptables</val>
+        </recm>
+        <rec key="ensure">Present</rec>
+        <rec key="protocol">tcp</rec>
+        <rec key="direction">INPUT</rec>
+        <rec key="access">Allow</rec>
+        <rec key="sourceHost">10.225.29.900</rec>
+
+        <rec key="initialSet"></rec>
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%name%;Protocol:%protocol%;Ensure:%ensure%;Direction:%direction%;Access:%access%;FirewallType:%type%;SourceHost:%sourceHost%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verification"></rec>
+        <rec key="verificationCmd"></rec>
+        <rec key="successfulMsg">error out while the SourceHost property is not a right address.</rec>
+        <rec key="failedMsg">No error out while the SourceHost property is not a right address.</rec>
+      </var>
     </section>
 
     <section sid="14" dsc="nxComputer Provider">
@@ -4862,7 +5542,7 @@
         <!-- Linux Initial State. -->
         <rec key="name">%nxHostName%</rec>
         <rec key="dnsDomainName">scx.com</rec>
-        <rec key="initialCmd">cp /etc/hosts /tmp/hosts_bak</rec>
+        <rec key="initialCmd">cp /etc/hosts /tmp/hosts_bak;</rec>
         <rec key="finalCmd">mv /tmp/hosts_bak /etc/hosts</rec>
 
         <!-- MOF Info. -->
@@ -4873,6 +5553,52 @@
         <rec key="expectedValue">%dnsDomainName%</rec>
         <rec key="successfulMsg">DNS domain name is unchanged while current one matches DNSDomainName property.</rec>
         <rec key="failedMsg">DNS domain name is changed while current one matches DNSDomainName property.</rec>
+      </var>
+
+      <var set="14" lvl="1" vid="908521"
+           dsc="[nxComputer] [Azure] Verify if report status is compliant when the computer name set successfully"
+           cls="DSCAzure.nxComputerTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">Compliant</rec>
+        <rec key="name">New-ComputerName</rec>
+        <rec key="initialCmd">cp /etc/hosts /tmp/hosts_bak</rec>
+        <rec key="finalCmd">mv /tmp/hosts_bak /etc/hosts;hostname %nxHostName%;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%name%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd">hostname| tr -d '\n';</rec>
+        <rec key="expectedValue">%name%</rec>
+        <rec key="successfulMsg">Computer name is changed as specified in Name property.</rec>
+        <rec key="failedMsg">Computer name isn't changed as specified in Name property.</rec>
+      </var>
+
+      <var set="14" lvl="3" vid="908522"
+            dsc="[nxComputer] [Azure] Verify if report status is compliant when both AlternateTimeZoneName and TimeZoneName are invalid."
+            cls="DSCAzure.nxComputerTest">
+        <snipref id="Variables" />
+        <!-- Linux Initial State. -->
+        <rec key="isReport">true</rec>
+        <rec key="status">NotCompliant</rec>
+        <rec key="name">%nxHostName%</rec>
+        <rec key="timeZoneName">Invalid1</rec>
+        <rec key="alternateTimeZoneName">Invalid2</rec>
+        <rec key="initialCmd">cp /etc/localtime /etc/localtime-old;</rec>
+        <rec key="finalCmd">mv /etc/localtime-old /etc/localtime;</rec>
+
+        <!-- MOF Info. -->
+        <rec key="propString">Name:%name%;TimeZoneName:%timeZoneName%;AlternateTimeZoneName:%alternateTimeZoneName%;</rec>
+        <rec key="psScript">%dscSender%</rec>
+        <rec key="psErrorMsg">%configErrorMsg%</rec>
+
+        <!-- Verify Linux State. -->
+        <rec key="verificationCmd"></rec>
+        <rec key="expectedValue"></rec>
+        <rec key="successfulMsg">error out while both AlternateTimeZoneName and TimeZoneName are invalid.</rec>
+        <rec key="failedMsg">No error out while both AlternateTimeZoneName and TimeZoneName are invalid.</rec>
       </var>
 
     </section>

@@ -15,6 +15,7 @@ namespace DSCAzure
     using System.Collections.Generic;
     using System.Linq;
     using Infra.Frmwrk;
+    using System.Threading;
 
     public class ProviderTestBase : ISetup, IRun, IVerify, ICleanup
     {
@@ -38,6 +39,7 @@ namespace DSCAzure
         protected string[] configAzure;
         protected string[] getNodeIdCmd;
         protected string[] importConfigToAzure;
+        protected string[] setAzureAutomation;
         protected string[] removeNode;
         protected string psErrorMsg;
 
@@ -47,17 +49,24 @@ namespace DSCAzure
         protected string failedMsg;
 
         protected Dictionary<string, string> propMap;
-        protected string mofFileName;
         protected string metaFileName;
         protected string pullServerDirectory;
 
         protected string tmpMofFileFullName;
         protected string newMofFileFullName;
+        protected string varID;
+        protected int setID;
+        protected string caseID;
         protected string nodeID;
+        protected string isNeedCompile;
         
 
         public virtual void Setup(IContext ctx)
         {
+            caseID = ((IVarContext)ctx).VarID.ToString();
+            setID = ((IVarContext)ctx).Set;
+           
+            isNeedCompile = ctx.Records.GetValue("isNeedCompile");
             propString = ctx.Records.GetValue("propString");
             mofPath = ctx.Records.GetValue("mofPath");
             configFilePath = ctx.Records.GetValue("configFilePath");
@@ -68,6 +77,7 @@ namespace DSCAzure
             configAzure = ctx.Records.GetValues("configAzure");
             getNodeIdCmd = ctx.Records.GetValues("getNodeIdCmd");
             importConfigToAzure = ctx.Records.GetValues("importConfigToAzure");
+            setAzureAutomation = ctx.Records.GetValues("setAzureAutomation");
             removeNode = ctx.Records.GetValues("removeNode");
             psErrorMsg = ctx.Records.GetValue("psErrorMsg");
             verificationCmd = ctx.Records.GetValue("verificationCmd");
@@ -80,16 +90,25 @@ namespace DSCAzure
             string nxHostName = ctx.Records.GetValue("nxHostName");
             string nxUsername = ctx.Records.GetValue("nxUsername");
             string nxpassword = ctx.Records.GetValue("nxpassword");
-            string nxDomainName = ctx.Records.GetValue("nxDomainName"); 
+            string nxDomainName = ctx.Records.GetValue("nxDomainName");
+            string configurationName = ctx.Records.GetValue("configurationName");
             int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
 
-            mofFileName = nxHostName + "." + nxDomainName + ".mof";
+            varID = "Node" + caseID;
+            if (setID == 14)
+            {
+                varID = nxHostName + "." + caseID;
+            }
+
             metaFileName = nxHostName + "." + nxDomainName + ".meta.mof";
+            tmpMofFileFullName = configFilePath + "\\" + azureMofFileName;
+            newMofFileFullName = configFilePath + "\\" + metaFileName;
             // Open SSH.
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
             posixCopy = new PosixCopy(nxHostName, nxUsername, nxpassword);
 
             //connect to Azure.
+            ctx.Alw(String.Format("Run PowerShell : '{0}'", configAzure));
             psHelper.Run(configAzure);
 
             ctx.Alw(String.Format("Initilize Linux state : '{0}'", initializeCmd));
@@ -104,7 +123,7 @@ namespace DSCAzure
 
             // Prepare a configuration MOF file.         
             propMap = ConvertStringToPropMap(propString);
-            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath, nxDomainName);
+            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, mofPath, varID, configurationName);
             ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
                 configMofScriptPath));
 
@@ -130,9 +149,7 @@ namespace DSCAzure
         {
             ctx.Alw("Run Begin.");
 
-            //Rename and modify the MOF file under 'c:\temp\DscMetaConfigs\'
-            tmpMofFileFullName = configFilePath + "\\" + azureMofFileName;
-            newMofFileFullName = configFilePath + "\\" + metaFileName;
+            //Rename and modify the MOF file under '..\DscMetaConfigs\'
             if (File.Exists(tmpMofFileFullName))
             {
                 string metaFileContents = File.ReadAllText(tmpMofFileFullName);
@@ -156,26 +173,44 @@ namespace DSCAzure
                     fs.Close();
                 }
             }
-            else 
+            else
             {
                 throw new VarFail("Failed fo rename and modify the MOF file");
             }
 
             //push the config to the DSC agent
+            ctx.Alw(String.Format("Run PowerShell : '{0}'", psScripts));
             psHelper.Run(psScripts);
 
             //Get Node Id
             ctx.Alw(String.Format("Get the node Id"));
+            ctx.Alw(String.Format("Run PowerShell : '{0}'", getNodeIdCmd));
             psHelper.Run(getNodeIdCmd);
             nodeID = psHelper.LastPowerShellReturnString;
-           
-            // Import the config into Azure, compile the config and assign the compiled config to the node.
-            for (int i = 0; i < importConfigToAzure.Length; i++)
+
+            if (isNeedCompile.ToLower().Equals("yes"))
             {
-                importConfigToAzure[i] = importConfigToAzure[i].Replace("$nodeID", nodeID);
+                // Import the config into Azure, compile the config and assign the compiled config to the node.
+                ctx.Alw(String.Format("Run PowerShell : '{0}'", importConfigToAzure));
+                psHelper.Run(importConfigToAzure);
+                string status = psHelper.LastPowerShellReturnString;
+                if (status.ToLower().Equals("completed"))
+                {
+                    ctx.Alw(String.Format("The status was Completed."));
+                }
+                else
+                {
+                    throw new VarFail(String.Format("The status was still {0}...", status));
+                }
             }
-            ctx.Alw(String.Format("Run PowerShell : '{0}'", importConfigToAzure));
-            psHelper.Run(importConfigToAzure);
+            //set Azure Automation
+            for (int i = 0; i < setAzureAutomation.Length; i++)
+            {
+                setAzureAutomation[i] = setAzureAutomation[i].Replace("$nodeID", nodeID);
+                setAzureAutomation[i] = setAzureAutomation[i].Replace("$varID", varID);
+            }
+            ctx.Alw(String.Format("Run PowerShell : '{0}'", setAzureAutomation));
+            psHelper.Run(setAzureAutomation);
             ctx.Alw("Run End.");
         }
 
@@ -238,8 +273,9 @@ namespace DSCAzure
             ctx.Alw(String.Format("Delete MOF generator : '{0}'", configMofScriptPath));
             mofHelper.DeleteMof(configMofScriptPath);
 
-            ctx.Alw(String.Format("Delete MOF generator : '{0}'", configFilePath));
-            mofHelper.DeleteMof(configFilePath);
+            //Delete Meta mof file.
+            ctx.Alw(String.Format("Delete MOF generator : '{0}'", configMofScriptPath));
+            mofHelper.DeleteMof(newMofFileFullName);
 
             // Dispose ps runspace.
             psHelper.Dispose();

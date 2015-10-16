@@ -18,6 +18,7 @@ namespace DSCAzure
         public FileLineMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                Replace("$ModuleName", "nx").
                 Replace("$ResourceType", "nxFileLine").
                 Replace("$ResourceName", "FileLine");
         }

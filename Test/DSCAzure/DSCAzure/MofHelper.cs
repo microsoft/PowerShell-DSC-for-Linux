@@ -18,7 +18,7 @@ namespace DSCAzure
         #region Generator
 
         protected string GeneratorFormat =
-            "Configuration dsc_AzureTest{Import-DscResource -Module nx;Node \"$agentName.$domainName\"{\n$ResourceType $ResourceName{$Properties}\n#DependdeResourceType #DependedResourceName{#DependedProperties}\n}};dsc_AzureTest -outputpath:$mofPath";
+            "Configuration $configurationName{Import-DscResource -Module $ModuleName;Node \"$nodeID\"{\n$ResourceType $ResourceName{$Properties}\n#DependdeResourceType #DependedResourceName{#DependedProperties}\n}};$configurationName -outputpath:$mofPath";
 
         protected string MofGenerator
         {
@@ -40,11 +40,11 @@ namespace DSCAzure
             }
         }
 
-        public void PrepareMofGenerator(Dictionary<string, string> propString, string generatorPath, string agentName, string mofPath, string domainName)
+        public void PrepareMofGenerator(Dictionary<string, string> propString, string generatorPath, string mofPath, string nodeID, string configurationName)
         {
             string content = this.ConvertStringToMofProperty(propString)
-                .Replace("$agentName", agentName)
-                .Replace("$domainName", domainName)
+                .Replace("$nodeID", nodeID)
+                .Replace("$configurationName", configurationName)
                 .Replace("$mofPath", mofPath);
 
             File.Delete(generatorPath);

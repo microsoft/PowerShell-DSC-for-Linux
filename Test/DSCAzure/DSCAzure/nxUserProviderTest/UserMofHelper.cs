@@ -17,6 +17,7 @@ namespace DSCAzure
         public UserMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxUser").
                     Replace("$ResourceName","User");
         }

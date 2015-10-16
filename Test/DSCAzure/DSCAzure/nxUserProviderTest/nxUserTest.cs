@@ -62,7 +62,7 @@ namespace DSCAzure
             return command.ToString();
         }
 
-        
+        /*
         public override void Verify(IContext ctx)
         {
             ctx.Alw("Verify Begin.");
@@ -132,7 +132,7 @@ namespace DSCAzure
 
             ctx.Alw("Verify End.");
         }
-
+        */
   
         #endregion 
     }

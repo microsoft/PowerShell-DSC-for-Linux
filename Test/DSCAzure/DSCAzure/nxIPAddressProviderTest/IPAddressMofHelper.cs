@@ -18,6 +18,7 @@ namespace DSCAzure
         public IPAddressMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nxNetworking").
                     Replace("$ResourceType", "nxIPAddress").
                     Replace("$ResourceName", "IPAddress");
         }

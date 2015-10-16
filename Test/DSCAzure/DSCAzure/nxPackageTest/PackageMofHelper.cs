@@ -17,6 +17,7 @@ namespace DSCAzure
         public PackageMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxPackage").
                     Replace("$ResourceName", "Package");
         }

@@ -17,6 +17,7 @@ namespace DSCAzure
         public ComputerMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nxComputermanagement").
                     Replace("$ResourceType", "nxComputer").
                     Replace("$ResourceName", "Computer");
         }

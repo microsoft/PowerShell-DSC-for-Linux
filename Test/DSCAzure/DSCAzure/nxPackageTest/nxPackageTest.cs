@@ -34,23 +34,42 @@ namespace DSCAzure
         public override void Setup(IContext ctx)
         {
             ctx.Alw("nxPackageTest Setup Begin.");
-
+            
+            //
+            caseID = ((IVarContext)ctx).VarID.ToString();
+            varID = "Node" + caseID;
+            isNeedCompile = ctx.Records.GetValue("isNeedCompile");
             propString = ctx.Records.GetValue("propString");
             mofPath = ctx.Records.GetValue("mofPath");
+            configFilePath = ctx.Records.GetValue("configFilePath");
             configMofScriptPath = ctx.Records.GetValue("configMofScriptPath");
+
+            pullServerDirectory = ctx.Records.GetValue("pullServerDirectory");
             psScripts = ctx.Records.GetValues("psScript");
+            configAzure = ctx.Records.GetValues("configAzure");
+            getNodeIdCmd = ctx.Records.GetValues("getNodeIdCmd");
+            importConfigToAzure = ctx.Records.GetValues("importConfigToAzure");
+            setAzureAutomation = ctx.Records.GetValues("setAzureAutomation");
+            removeNode = ctx.Records.GetValues("removeNode");
             psErrorMsg = ctx.Records.GetValue("psErrorMsg");
             verificationCmd = ctx.Records.GetValue("verificationCmd");
             expectedValue = ctx.Records.GetValue("expectedValue");
             successfulyMsg = ctx.Records.GetValue("successfulMsg");
             failedMsg = ctx.Records.GetValue("failedMsg");
+            forcePullpullServerCmd = ctx.Records.GetValue("forcePullpullServerCmd");
+            azureMofFileName = ctx.Records.GetValue("azureMofFileName");
 
             string nxHostName = ctx.Records.GetValue("nxHostName");
             string nxUsername = ctx.Records.GetValue("nxUsername");
             string nxpassword = ctx.Records.GetValue("nxpassword");
-            string nxDomainName = ctx.Records.GetValue("nxDomainName"); 
+            string nxDomainName = ctx.Records.GetValue("nxDomainName");
+            string configurationName = ctx.Records.GetValue("configurationName");
             int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
-            
+
+            metaFileName = nxHostName + "." + nxDomainName + ".meta.mof";
+            tmpMofFileFullName = configFilePath + "\\" + azureMofFileName;
+            newMofFileFullName = configFilePath + "\\" + metaFileName;
+
             string expectedInstallState = ctx.Records.GetValue("expectedInstallState");
             // Open SSH.
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
@@ -140,6 +159,10 @@ namespace DSCAzure
                 ctx.Alw(ex.Message);
             }
 
+            //connect to Azure.
+            ctx.Alw(String.Format("Run PowerShell : '{0}'", configAzure));
+            psHelper.Run(configAzure);
+
             // Prepare a configuration MOF file.
             mofHelper = new PackageMofHelper();
             propMap = ConvertStringToPropMap(propString);
@@ -147,7 +170,7 @@ namespace DSCAzure
             {
                 propMap["FilePath"] = propMap["FilePath"] + "." + suffix;
             }
-            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath, nxDomainName);
+            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, mofPath, varID, configurationName);
             ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
                 configMofScriptPath));
 
@@ -264,13 +287,20 @@ namespace DSCAzure
         public override void Verify(IContext ctx)
         {
             ctx.Alw("Verify Begin.");
-            
+
             if (String.IsNullOrWhiteSpace(psErrorMsg))
             {
                 // Verify if the PowerShell cmdlets were executed without error.
                 if (String.IsNullOrWhiteSpace(psHelper.ErrorMsg))
                 {
-                    ctx.Alw("PowerShell return 0.");
+                    try
+                    {
+                        sshHelper.Execute(forcePullpullServerCmd);
+                    }
+                    catch (Exception ex)
+                    {
+                        ctx.Alw(ex.Message);
+                    }
                 }
                 else
                 {
@@ -295,42 +325,43 @@ namespace DSCAzure
                     ctx.Alw("No specified property need to be verified in varmap");
                 }
 
-                //get the Test-DscConfiguration's returnvalue
-                if (psHelper.TestConfigurationReturnValue != -1)
+
+                //Get property value from Linux
+                linuxMap = GetLinuxValue(name, propMap);
+
+                foreach (string key in verificationMap.Keys)
                 {
-                    string expectedInstallState = ctx.Records.GetValue("expectedInstallState").ToLower();
-                    ctx.Alw("The expectedInstallState:" + expectedInstallState + "\n" +"the testConfigurationReturnValude:" + Convert.ToString(psHelper.TestConfigurationReturnValue) + "\n");
+                    if (!linuxMap.ContainsKey(key))
+                    { continue; }
+                    string actualDescription = linuxMap[key];
 
-                    //psHelper.TestConfigurationReturnValude:This is the returnvalue about TestConfiguration.
-                    if (psHelper.TestConfigurationReturnValue == 0)
+                    // Check property value with Get-DscConfiguration
+                    if (!String.IsNullOrEmpty(actualDescription))
                     {
-                        if (expectedInstallState != "false")
+                        // Check property value specified in varmap
+                        if (verificationMap.ContainsKey(key))
                         {
-                            throw new VarFail(string.Format(
-                    "The expectedInstallState: '{0}' \n" +
-                            "the testConfigurationReturnValude:'{1}'\n",
-                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
+                            if (!verificationMap[key].Equals(actualDescription, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                throw new VarFail(String.Format(
+                                        "'{0}' Service Enabled State : expect - '{1}', actual - '{2}'",
+                                        key, verificationMap[key], actualDescription));
+                            }
                         }
                     }
-                    else if (psHelper.TestConfigurationReturnValue == 1)
-                    {
-                        if (expectedInstallState != "true")
-                        {
-                            throw new VarFail(string.Format(
-                    "The expectedInstallState: '{0}' \n" +
-                            "the testConfigurationReturnValude:'{1}'\n",
-                    expectedInstallState, Convert.ToString(psHelper.TestConfigurationReturnValue)));
-                        }
-                    }
-                    ctx.Alw("Verify End.");
-
-                    return;
                 }
             }
             else
             {
-                psHelper.CheckErrorMessage(psErrorMsg);
-                ctx.Alw(String.Format("PowerShell return error message '{0}' as expected!", psErrorMsg));
+                try
+                {
+                    //Fail to execute force pull server command when it should send error message.
+                    sshHelper.Execute(forcePullpullServerCmd);
+                }
+                catch (Exception)
+                {
+                    ctx.Alw(String.Format("Send the error message"));
+                }
             }
 
             ctx.Alw("Verify End.");
