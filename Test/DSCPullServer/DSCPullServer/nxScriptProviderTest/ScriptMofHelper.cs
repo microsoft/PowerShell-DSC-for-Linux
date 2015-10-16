@@ -7,6 +7,7 @@
         public ScriptMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxScript").
                     Replace("$ResourceName", "Script");
         }

@@ -24,6 +24,7 @@ namespace DSCPullServer
         public GroupMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxGroup").
                     Replace("$ResourceName", "Group");
         }

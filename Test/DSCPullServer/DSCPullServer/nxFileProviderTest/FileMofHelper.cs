@@ -18,6 +18,7 @@ namespace DSCPullServer
         public FileMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                Replace("$ModuleName", "nx").
                 Replace("$ResourceType","nxFile").
                 Replace("$ResourceName","File");
         }

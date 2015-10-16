@@ -18,6 +18,7 @@ namespace DSCPullServer
         public FirewallMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nxNetworking").
                     Replace("$ResourceType", "nxFirewall").
                     Replace("$ResourceName", "Firewall");
         }

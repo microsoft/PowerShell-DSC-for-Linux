@@ -19,6 +19,7 @@ namespace DSCPullServer
         public EnvironmentMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxEnvironment").
                     Replace("$ResourceName", "Environment");
         }
@@ -27,7 +28,7 @@ namespace DSCPullServer
         {
             StringBuilder text = new StringBuilder();
 
-            List<String> booleanProp = new List<String> { "Enabled" };
+            List<String> booleanProp = new List<String> { "Enabled" , "Path" };
 
             foreach (string property in propString.Keys)
             {

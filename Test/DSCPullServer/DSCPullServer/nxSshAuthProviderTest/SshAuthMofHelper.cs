@@ -18,6 +18,7 @@ namespace DSCPullServer
         public SshAuthMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                Replace("$ModuleName", "nx").
                 Replace("$ResourceType","nxSshAuthorizedKeys").
                 Replace("$ResourceName","SshAuthorizedKeys");
         }

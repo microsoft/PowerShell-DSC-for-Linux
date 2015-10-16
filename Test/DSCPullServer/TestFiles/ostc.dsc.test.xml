@@ -2,7 +2,7 @@
 <varmap xmlns="http://smxinfranet/schemas/mcf/2002/01/varmap"
         assembly="..\DscPullServer.dll"
         dsc="DSC Automation Test"
-        owner="v-mifu" contact="v-mifu">
+        owner="v-litin" contact="v-litin">
 
   <!-- Variables. -->
   <snippet id="Variables">
@@ -14,6 +14,7 @@
     <rec key="nxDomainName">scx.com</rec>
     <rec key="serverMode">https</rec>
     <rec key="pullServerDirectory">C:\Program Files\WindowsPowerShell\DscService\Configuration</rec>
+    <rec key="registrationKeyPath">C:\Program Files\WindowsPowerShell\DscService\RegistrationKeys.txt</rec>
     <rec key="forcePullpullServerCmd">/opt/omi/bin/ConsistencyInvoker</rec>
 
     <rec key="testServiceName">atd</rec>
@@ -30,6 +31,8 @@
     <rec key="packageFilePath">/tmp/testpackage3_1.0</rec>
     <rec key="packageFromSource">nano</rec>
     
+    <rec key="nodeName">TestNode</rec>
+    <rec key="serverUrl">http://dsc-w12-12.scx.com:8080/psdscpullserver.svc</rec>
     <rec key="remoteTarFilePath">http://dsc64-apache-01.scx.com/source.tar</rec>
     
     
@@ -46,74 +49,74 @@
     <!-- Script Info. -->
     <rec key="scriptLocation">C:\Temp</rec>
     <rec key="mofPath">%scriptLocation%\%nxHostName%_MOF</rec>
-    <rec key="metaPath">C:\temp\SetPullMode</rec>
+    <rec key="metaPath">C:\temp\SampleMetaConfig</rec>
     <rec key="configMofScriptPath">%scriptLocation%\config_%nxHostName%.ps1</rec>
     <rec key="dscSender">
       $securePass = ConvertTo-SecureString -string "OpsMgr2007R2" -AsPlainText -Force
       $cred= New-Object System.Management.Automation.PSCredential "root", $SecurePass
-      $opt = New-CimSessionOption -UseSsl:$true
+      $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true
       $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName%.%nxDomainName% -Port:5986 -Authentication:basic -SessionOption:$opt
 
-      Configuration SetPullMode
+      [DscLocalConfigurationManager()]
+      Configuration SampleMetaConfig
       {
       Node "%nxHostName%.%nxDomainName%"
       {
-      # Set the DSC engine (LCM) to Pull mode
-      LocalConfigurationManager
+      Settings
       {
-      ConfigurationID = "$GUID"
-      ConfigurationMode = "ApplyAndAutoCorrect"
-      RefreshMode = "Pull"
-      DownloadManagerName = "WebDownloadManager"
-      DownloadManagerCustomData = @{
-      ServerUrl = "https://dsc-w12r2-05.scx.com:8080/PSDSCPullServer.svc" ;
-      AllowUnsecureConnection = "false";
+      RefreshFrequencyMins = 30;
+      RefreshMode = "PULL";
+      ConfigurationMode =”ApplyAndAutoCorrect“;
+      AllowModuleOverwrite  = $true;
+      RebootNodeIfNeeded = $true;
+      ConfigurationModeFrequencyMins = 60;
       }
-      }
-      }
-      }
-      SetPullMode
 
-      Set-DSCLocalConfigurationManager -CimSession:$demo1 -Path .\SetPullMode -Verbose
-
-    </rec>
-
-    <rec key="dscTester">
-      [void] (winrm set winrm/config/client '@{TrustedHosts="*"}');
-      $securePass = ConvertTo-SecureString -string "%nxPassword%" -AsPlainText -Force;
-      $cred= New-Object System.Management.Automation.PSCredential "%nxUsername%", $SecurePass;
-      $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true;
-      $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt;
-      Test-DscConfiguration -CimSession:$demo1 
+      ConfigurationRepositoryWeb ConfigurationManager
+      {
+      ServerURL = “%serverUrl%”
+      RegistrationKey = "$GUID"
+      ConfigurationNames = @(“%nodeName%”)
+      AllowUnsecureConnection = $true;
+      }
+      }
+      }
+      SampleMetaConfig -OutputPath %metaPath%
+      Set-DSCLocalConfigurationManager -CimSession:$demo1 -Path %metaPath% -Verbose
     </rec>
 
     <rec key="dscSender-nonRoot">
       $securePass = ConvertTo-SecureString -string "scxuser" -AsPlainText -Force
       $cred= New-Object System.Management.Automation.PSCredential "scxuser", $SecurePass
-      $opt = New-CimSessionOption -UseSsl:$true
-      $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName% -Port:5986 -Authentication:basic -SessionOption:$opt
+      $opt = New-CimSessionOption -UseSsl:$true -SkipCACheck:$true -SkipCNCheck:$true -SkipRevocationCheck:$true
+      $demo1=New-CimSession -Credential:$cred -ComputerName:%nxHostName%.%nxDomainName% -Port:5986 -Authentication:basic -SessionOption:$opt
 
-      Configuration SetPullMode
+      [DscLocalConfigurationManager()]
+      Configuration SampleMetaConfig
       {
-      Node %nxHostName%
+      Node "%nxHostName%.%nxDomainName%"
       {
-      # Set the DSC engine (LCM) to Pull mode
-      LocalConfigurationManager
+      Settings
       {
-      ConfigurationID = "$GUID"
-      ConfigurationMode = "ApplyAndAutoCorrect"
-      RefreshMode = "Pull"
-      DownloadManagerName = "WebDownloadManager"
-      DownloadManagerCustomData = @{
-      ServerUrl = "https://dsc-w12r2-05.scx.com:8080/PSDSCPullServer.svc" ;
-      AllowUnsecureConnection = "false";
+      RefreshFrequencyMins = 30;
+      RefreshMode = "PULL";
+      ConfigurationMode =”ApplyAndAutoCorrect“;
+      AllowModuleOverwrite  = $true;
+      RebootNodeIfNeeded = $true;
+      ConfigurationModeFrequencyMins = 60;
       }
-      }
-      }
-      }
-      SetPullMode
 
-      Set-DSCLocalConfigurationManager -CimSession:$demo1 -Path .\SetPullMode -Verbose
+      ConfigurationRepositoryWeb ConfigurationManager
+      {
+      ServerURL = “%serverUrl%”
+      RegistrationKey = "$GUID"
+      ConfigurationNames = @(“TestNode”)
+      AllowUnsecureConnection = $true;
+      }
+      }
+      }
+      SampleMetaConfig -OutputPath %metaPath%
+      Set-DSCLocalConfigurationManager -CimSession:$demo1 -Path %metaPath% -Verbose
     </rec>
     
     <!-- Ssh Commands.-->
@@ -254,7 +257,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">test_jeffrey</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialCmd">rm -rf %path%</rec>
         <rec key="finalCmd">rm -rf %path%</rec>
@@ -274,7 +277,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">test_jeffrey</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialCmd">rm -rf %path%;touch %path%;echo "Hello World" >> %path%</rec>
         <rec key="finalCmd">rm -rf %path%</rec>
@@ -294,7 +297,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">test_jeffrey</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialCmd">rm -rf %path%</rec>
         <rec key="finalCmd">rm -rf %path%</rec>
@@ -314,7 +317,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">test_jeffrey</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialCmd">rm -rf %path% ; touch %path%</rec>
         <rec key="finalCmd">rm -rf %path%</rec>
@@ -334,7 +337,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">test_jeffrey</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialCmd">rm -rf %path%</rec>
         <rec key="finalCmd">rm -rf %path%</rec>
@@ -353,7 +356,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">test_jeffrey</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialCmd">rm -rf %path%</rec>
         <rec key="finalCmd">rm -rf %path%</rec>
@@ -394,7 +397,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">test_jeffrey</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
         <rec key="finalCmd">rm -rf %path%</rec>
@@ -414,7 +417,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="parentPath">/tmp</rec>
-        <rec key="name">test_jeffrey</rec>
+        <rec key="name">test</rec>
         <rec key="path">%parentPath%/%name%</rec>
         <rec key="initialCmd">rm -rf %path%;touch %path%</rec>
         <rec key="finalCmd">rm -rf %path%</rec>
@@ -1184,7 +1187,6 @@
         <rec key="failedMsg">Copied failed.</rec>
       </var>
              
-             
     </section>
 
     <section sid="2" dsc="nxUser Provider">
@@ -1700,11 +1702,11 @@
         <rec key="failedMsg">PowerShell doesn't get a failure: 'The SendConfigurationApply function did not succeed.' when the setScript return false</rec>
       </var>
 
-      <var set="4" lvl="1" vid="661708"
+      <!--<var set="4" lvl="1" vid="661708"
       dsc="[nxScript] Verify GetScript is excuted when we send a get request from Powershell server"
       cls="DSCPullServer.nxScriptTest">
         <snipref id="Variables" />
-        <!-- Linux Initial State. -->
+        --><!-- Linux Initial State. --><!--
         <rec key="parentPath">/tmp</rec>
         <rec key="s_name">set_file</rec>
         <rec key="s_path">%parentPath%/%s_name%</rec>
@@ -1715,15 +1717,15 @@
         <rec key="getScript">#!/bin/sh&#10;echo get >%g_path%&#10;exit 0</rec>
         <rec key="initialCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
         <rec key="finalCmd">rm -rf %s_path%;rm -rf %g_path%</rec>
-        <!-- MOF Info. -->
+        --><!-- MOF Info. --><!--
         <rec key="propString">SetScript:%setScript%;TestScript:%testScript%;GetScript:%getScript%</rec>
         <rec key="psScript">%dscSender%</rec>
-        <!-- Verify Linux State. -->
+        --><!-- Verify Linux State. --><!--
         <rec key="verificationCmd">cat %g_path% | tr -d '\n'</rec>
         <rec key="expectedValue">get</rec>
         <rec key="successfulMsg">GetScript is excuted.</rec>
         <rec key="failedMsg">GetScript is not excuted.</rec>
-      </var>
+      </var>-->
 
       <var set="4" lvl="3" vid="661709"
           dsc="[nxScript] Verify powerShell gets a failed return value when the GetScript excute fails"
@@ -2215,7 +2217,7 @@
         <rec key="initialCmd">%cleanVar%; mkdir %varValue%;source %dscProfile%</rec>
         <rec key="finalCmd">%cleanVar%; rm -rf %varValue%;source %dscProfile%</rec>
         <!-- MOF Info. -->
-        <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%;Path:true</rec>
+        <rec key="propString">Name:%varName%;Ensure:Present;Value:%varValue%;Path:True</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
         <rec key="verificationCmd">source %dscProfile%;cat %dscProfile%| grep "PATH=\$PATH:\"%varValue%\""| wc -l |tr -d '\n'</rec>
@@ -2626,7 +2628,6 @@
         <rec key="verification">%propString%;Installed:%initialInstallState%</rec>
       </var>
 
-    
       <var set="7" lvl="2" vid="845801"
      dsc="[nxPackage] Verify if specific package is installed via a remote HTTP path"
      cls="DSCPullServer.nxPackageTest">
@@ -2650,7 +2651,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="Name">%packageFromPath%</rec>
-        <rec key="localSrcPath">https://dsc64-apache-01.scx.com/testpackage3_1.0</rec>
+        <rec key="localSrcPath">https://dsc64-apache-01/testpackage3_1.0</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
         <!-- MOF Info. -->
@@ -2702,7 +2703,7 @@
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="Name">%packageFromPath%</rec>
-        <rec key="localSrcPath">https://dsc64-apache-01.scx.com/testpackage4</rec>
+        <rec key="localSrcPath">https://dsc64-apache-01/testpackage4</rec>
         <rec key="initialInstallState">False</rec>
         <rec key="expectedInstallState">True</rec>
         <!-- MOF Info. -->
@@ -5001,7 +5002,7 @@
         <rec key="propString">Name:%name%;TimeZoneName:%timeZoneName%;AlternateTimeZoneName:%alternateTimeZoneName%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">date |awk '{print $5}'</rec>
+        <rec key="verificationCmd">date |awk '{print $5}' | tr -d '\n'</rec>
         <rec key="expectedValue">%alternateTimeZoneName%</rec>
         <rec key="successfulMsg">time zone name is changed as specified in AlternateTimeZoneName property whille TimeZoneName is a invalid one.</rec>
         <rec key="failedMsg">time zone name isn't changed as specified in AlternateTimeZoneName property whille TimeZoneName is a invalid one.</rec>
@@ -5124,7 +5125,7 @@
         <rec key="propString">Name:%name%;DNSDomainName:%dnsDomainName%;</rec>
         <rec key="psScript">%dscSender%</rec>
         <!-- Verify Linux State. -->
-        <rec key="verificationCmd">dnsdomainname</rec>
+        <rec key="verificationCmd">dnsdomainname | tr -d '\n'</rec>
         <rec key="expectedValue">%dnsDomainName%</rec>
         <rec key="successfulMsg">DNS domain name is unchanged while current one matches DNSDomainName property.</rec>
         <rec key="failedMsg">DNS domain name is changed while current one matches DNSDomainName property.</rec>
@@ -5152,5 +5153,6 @@
       </var>
       
     </section>
+  
   </section>
 </varmap>

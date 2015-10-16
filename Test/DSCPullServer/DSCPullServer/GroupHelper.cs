@@ -11,7 +11,7 @@ namespace DSCPullServer
     using System;
     using System.IO;
     using Infra.Frmwrk;
-    
+
     public class GroupHelper : ISetup, ICleanup
     {
         private SshHelper sshHelper;
@@ -30,14 +30,14 @@ namespace DSCPullServer
                 // regsvr32 sshcom.dll.
                 psHelper.Run(new string[] { "regsvr32 /s " + GetSshcomPath() });
             }
-            
+
             string nxHostName = ctx.Records.GetValue("nxHostName");
             string nxUsername = ctx.Records.GetValue("nxUsername");
             string nxpassword = ctx.Records.GetValue("nxpassword");
             int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
-            
+
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
-            
+
             getPidCommand = ctx.Records.GetValue("getPid");
             killCommand = ctx.Records.GetValue("kill");
             exportDSCPathCommand = ctx.Records.GetValue("exportDSCPath");
@@ -63,7 +63,7 @@ namespace DSCPullServer
         public void Cleanup(IContext ctx)
         {
             ctx.Alw("GroupHelper Cleanup Begin");
-            
+
             // Stop omiserver process of DSC.
             string pid;
             sshHelper.Execute(getPidCommand, out pid);
@@ -82,10 +82,10 @@ namespace DSCPullServer
         private string GetSshcomPath()
         {
             string sshcomPath = "";
-            
+
             string mcfLocation = Environment.CommandLine
                 .Split(' ')[0]
-                .Replace("\"", ""); 
+                .Replace("\"", "");
 
             string debugPath = Path.GetDirectoryName(
                 Path.GetDirectoryName(

@@ -43,13 +43,18 @@ namespace DSCPullServer
 
         protected Dictionary<string, string> propMap;
         protected string mofFileName;
+        protected string mofFileFullName;
         protected string metaFileName;
         protected string pullServerDirectory;
+        protected string registrationKeyPath;
 
         protected string tmpMofFileFullName;
         protected string newMofFileFullName;
         protected string checkSumPSCommand = "New-DSCChecksum '$1'";
         public const string NEW_GUID_PS_COMMAND = "[guid]::NewGuid()";
+        public const string setDSCCommand = "/opt/microsoft/dsc/Scripts/SetDscLocalConfigurationManager.py -configurationmof ";
+        protected string fullSetDSCCommand;
+        protected string nodeName;
         
 
         public virtual void Setup(IContext ctx)
@@ -59,6 +64,7 @@ namespace DSCPullServer
             configMofScriptPath = ctx.Records.GetValue("configMofScriptPath");        
             
             pullServerDirectory = ctx.Records.GetValue("pullServerDirectory");
+            registrationKeyPath = ctx.Records.GetValue("registrationKeyPath");
             psScripts = ctx.Records.GetValues("psScript");
             psErrorMsg = ctx.Records.GetValue("psErrorMsg");
             verificationCmd = ctx.Records.GetValue("verificationCmd");
@@ -67,6 +73,7 @@ namespace DSCPullServer
             failedMsg = ctx.Records.GetValue("failedMsg");
             forcePullpullServerCmd = ctx.Records.GetValue("forcePullpullServerCmd");
             metaPath = ctx.Records.GetValue("metaPath");
+            nodeName = ctx.Records.GetValue("nodeName");
 
             string nxHostName = ctx.Records.GetValue("nxHostName");
             string nxUsername = ctx.Records.GetValue("nxUsername");
@@ -74,7 +81,7 @@ namespace DSCPullServer
             string nxDomainName = ctx.Records.GetValue("nxDomainName"); 
             int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
 
-            mofFileName = nxHostName + "." + nxDomainName + ".mof";
+            mofFileName = nodeName + ".mof";
             metaFileName = nxHostName + "." + nxDomainName + ".meta.mof";
             // Open SSH.
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
@@ -95,7 +102,7 @@ namespace DSCPullServer
             // Prepare a configuration MOF file.
             
             propMap = ConvertStringToPropMap(propString);
-            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath, nxDomainName);
+            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, mofPath);
             ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
                 configMofScriptPath));
 
@@ -119,12 +126,7 @@ namespace DSCPullServer
 
         public virtual void Run(IContext ctx)
         {
-            ctx.Alw("Run Begin.");
-
-            //Generate Mof
-            ctx.Alw(String.Format("Run PowerShell : '{0}'", configMofScriptPath));
-            string[] generateMofScript = { configMofScriptPath };
-            psHelper.Run(generateMofScript);
+            ctx.Alw("Run Begin.");       
             
             //Get GUID
             ctx.Alw(String.Format("Run PowerShell : '{0}'", NEW_GUID_PS_COMMAND));
@@ -132,30 +134,62 @@ namespace DSCPullServer
             psHelper.Run(newGUIDPSCommand);
             string newGUID = psHelper.LastPowerShellReturnString;
 
-            //Rename Mof file with GUID and copy to the directory on the DSC Pull Server.
-            tmpMofFileFullName = mofPath + "\\" + mofFileName;
-            newMofFileFullName = pullServerDirectory + "\\" + newGUID + ".mof";
-            if (File.Exists(tmpMofFileFullName))
+            //Update RegistrationKey GUID
+            if (File.Exists(registrationKeyPath))
             {
-                File.Copy(tmpMofFileFullName, newMofFileFullName , true);
+                File.WriteAllText(registrationKeyPath, newGUID);
             }
-            else 
+            else
             {
-                throw new VarFail("Failed fo create MOF file");
+                File.Create(registrationKeyPath);
+                File.WriteAllText(registrationKeyPath, newGUID);
             }
 
-            //Create Checksum file for mof file
-            checkSumPSCommand = checkSumPSCommand.Replace("$1", newMofFileFullName);
-            string[] checkSumPSCommandArray = { checkSumPSCommand };
-            psHelper.Run(checkSumPSCommandArray);
-            
             // Run PowerShell script to get/send configuration MOF.
-            for (int i = 0; i < psScripts.Length;i++ )
+            for (int i = 0; i < psScripts.Length; i++)
             {
                 psScripts[i] = psScripts[i].Replace("$GUID", newGUID);
             }
             ctx.Alw(String.Format("Run PowerShell : '{0}'", psScripts));
             psHelper.Run(psScripts);
+
+            //Copy meta file to Linux machine
+            tmpMofFileFullName = metaPath + "\\" + metaFileName;
+            fullSetDSCCommand = setDSCCommand + "/tmp/" + metaFileName;
+            if (File.Exists(tmpMofFileFullName))
+            {
+                try
+                {
+                    posixCopy.CopyTo(tmpMofFileFullName, "/tmp/");
+                    ctx.Alw(String.Format("Run PowerShell : '{0}'", fullSetDSCCommand));
+                    sshHelper.Execute(fullSetDSCCommand);
+                }
+                catch (Exception ex)
+                {
+                    ctx.Alw(ex.Message);
+                }
+            }
+            else
+            {
+                throw new VarFail("Failed fo create meta file");
+            }
+
+            //Generate Mof     
+            ctx.Alw(String.Format("Run PowerShell : '{0}'", configMofScriptPath));
+            string[] generateMofScript = { configMofScriptPath };
+            psHelper.Run(generateMofScript);
+
+            //Copy and Create Checksum file for mof file
+            mofFileFullName = mofPath + "\\" + mofFileName;
+            newMofFileFullName = pullServerDirectory + "\\" + mofFileName;
+            if (File.Exists(mofFileFullName))
+            {
+                File.Copy(mofFileFullName, newMofFileFullName, true);
+            }
+            checkSumPSCommand = checkSumPSCommand.Replace("$1", newMofFileFullName);
+            string[] checkSumPSCommandArray = { checkSumPSCommand };
+            psHelper.Run(checkSumPSCommandArray);
+
             ctx.Alw("Run End.");
         }
 
@@ -214,6 +248,7 @@ namespace DSCPullServer
 
             ctx.Alw(String.Format("Delete MOF generator : '{0}'", mofPath));
             mofHelper.DeleteMof(mofPath);
+            mofHelper.DeleteMof(tmpMofFileFullName);
             mofHelper.DeleteMof(newMofFileFullName);
             mofHelper.DeleteMof(newMofFileFullName + ".checksum");
 

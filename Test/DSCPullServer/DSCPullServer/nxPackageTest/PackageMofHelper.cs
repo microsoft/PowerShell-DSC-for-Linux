@@ -17,37 +17,38 @@ namespace DSCPullServer
         public PackageMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxPackage").
                     Replace("$ResourceName", "Package");
         }
 
-        protected override string ConvertStringToMofProperty(Dictionary<string, string> propString)
-        {
-            StringBuilder text = new StringBuilder();
+        //protected override string ConvertStringToMofProperty(Dictionary<string, string> propString)
+        //{
+        //    StringBuilder text = new StringBuilder();
 
-            List<String> booleanProp = new List<String> { "Enabled" };
+        //    List<String> booleanProp = new List<String> { "Enabled" };
 
-            foreach (string property in propString.Keys)
-            {
-                if (!String.IsNullOrWhiteSpace(property))
-                {
-                    if (!booleanProp.Contains(property))
-                    {
-                        text.Append(String.Format("{0} = \"{1}\"\n",
-                            property,
-                            propString[property].Replace("$", "`$")));
-                    }
-                    else
-                    {
-                        text.Append(String.Format("{0} = ${1}\n",
-                            property,
-                            propString[property]));
-                    }
-                }
-            }
+        //    foreach (string property in propString.Keys)
+        //    {
+        //        if (!String.IsNullOrWhiteSpace(property))
+        //        {
+        //            if (!booleanProp.Contains(property))
+        //            {
+        //                text.Append(String.Format("{0} = \"{1}\"\n",
+        //                    property,
+        //                    propString[property].Replace("$", "`$")));
+        //            }
+        //            else
+        //            {
+        //                text.Append(String.Format("{0} = ${1}\n",
+        //                    property,
+        //                    propString[property]));
+        //            }
+        //        }
+        //    }
 
-            return this.MofGenerator.Replace("$Properties", text.ToString());
-        }
+        //    return this.MofGenerator.Replace("$Properties", text.ToString());
+        //}
     }
 }
 

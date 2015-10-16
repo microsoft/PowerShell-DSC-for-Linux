@@ -21,6 +21,7 @@ namespace DSCPullServer
         public ArchiveMofHelper(IContext ctx)
         {
             MofGenerator = base.GeneratorFormat.
+                Replace("$ModuleName", "nx").
                 Replace("$ResourceType", "nxArchive").
                 Replace("$ResourceName", "Archive");
             this.ctx = ctx;

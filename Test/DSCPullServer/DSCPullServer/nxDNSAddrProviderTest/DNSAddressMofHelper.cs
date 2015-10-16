@@ -17,6 +17,7 @@ namespace DSCPullServer
         public DNSAddressMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nxNetworking").
                     Replace("$ResourceType", "nxDNSServerAddress").
                     Replace("$ResourceName", "DNSServerAddress");
         }

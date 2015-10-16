@@ -18,7 +18,7 @@ namespace DSCPullServer
         #region Generator
 
         protected string GeneratorFormat =
-            "Configuration MyTestConfig{Import-DscResource -Module nx;Node \"$agentName.$domainName\"{\n$ResourceType $ResourceName{$Properties}\n#DependdeResourceType #DependedResourceName{#DependedProperties}\n}};MyTestConfig -outputpath:$mofPath";
+            "Configuration MyTestConfig{Import-DscResource -Module $ModuleName;Node TestNode{\n$ResourceType $ResourceName{$Properties}\n#DependdeResourceType #DependedResourceName{#DependedProperties}\n}};MyTestConfig -outputpath:$mofPath";
 
         protected string MofGenerator
         {
@@ -40,11 +40,9 @@ namespace DSCPullServer
             }
         }
 
-        public void PrepareMofGenerator(Dictionary<string, string> propString, string generatorPath, string agentName, string mofPath, string domainName)
+        public void PrepareMofGenerator(Dictionary<string, string> propString, string generatorPath, string mofPath)
         {
             string content = this.ConvertStringToMofProperty(propString)
-                .Replace("$agentName", agentName)
-                .Replace("$domainName", domainName)
                 .Replace("$mofPath", mofPath);
 
             File.Delete(generatorPath);
@@ -70,6 +68,7 @@ namespace DSCPullServer
                     text.Append(String.Format("{0} = \"{1}\"\n",
                         property,
                         propString[property]));
+                
                 }
             }
 

@@ -8,6 +8,7 @@ namespace DSCPullServer
         public ServiceMofHelper()
         {
             MofGenerator = base.GeneratorFormat.
+                    Replace("$ModuleName", "nx").
                     Replace("$ResourceType", "nxService").
                     Replace("$ResourceName", "Service");
         }

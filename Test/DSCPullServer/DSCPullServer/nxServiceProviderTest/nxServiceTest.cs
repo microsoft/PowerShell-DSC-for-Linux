@@ -31,6 +31,7 @@ namespace DSCPullServer
             propString = ctx.Records.GetValue("propString");
             mofPath = ctx.Records.GetValue("mofPath");
             configMofScriptPath = ctx.Records.GetValue("configMofScriptPath");
+            registrationKeyPath = ctx.Records.GetValue("registrationKeyPath");
             psScripts = ctx.Records.GetValues("psScript");
             psErrorMsg = ctx.Records.GetValue("psErrorMsg");
             verificationCmd = ctx.Records.GetValue("verificationCmd");
@@ -38,14 +39,23 @@ namespace DSCPullServer
             successfulyMsg = ctx.Records.GetValue("successfulMsg");
             failedMsg = ctx.Records.GetValue("failedMsg");
 
+            metaPath = ctx.Records.GetValue("metaPath");
+            nodeName = ctx.Records.GetValue("nodeName");
+            forcePullpullServerCmd = ctx.Records.GetValue("forcePullpullServerCmd");
+            pullServerDirectory = ctx.Records.GetValue("pullServerDirectory");
+
             string nxHostName = ctx.Records.GetValue("nxHostName");
             string nxUsername = ctx.Records.GetValue("nxUsername");
             string nxpassword = ctx.Records.GetValue("nxpassword");
             string nxDomainName = ctx.Records.GetValue("nxDomainName"); 
             int nxPort = Int32.Parse(ctx.Records.GetValue("nxPort"));
 
+            mofFileName = nodeName + ".mof";
+            metaFileName = nxHostName + "." + nxDomainName + ".meta.mof";
+
             // Open SSH.
             sshHelper = new SshHelper(nxHostName, nxUsername, nxpassword, nxPort);
+            posixCopy = new PosixCopy(nxHostName, nxUsername, nxpassword);
 
             string invalidServiceName = ctx.Records.GetValue("invalidServiceName");
             string serviceName = ctx.Records.GetValue("serviceName");
@@ -87,7 +97,7 @@ namespace DSCPullServer
 
             // Prepare a configuration MOF file.
             propMap = ConvertStringToPropMap(propString);
-            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, nxHostName, mofPath, nxDomainName);
+            mofHelper.PrepareMofGenerator(propMap, configMofScriptPath, mofPath);
             ctx.Alw(String.Format("Prepare a MOF generator '{0}'",
                 configMofScriptPath));
 
