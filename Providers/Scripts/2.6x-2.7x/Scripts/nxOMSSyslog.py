@@ -16,9 +16,11 @@ nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
 rsyslog_conf_path='/etc/rsyslog.conf'
-syslogng_conf_path='/etc/syslog-ng/syslog-ng.conf'
-oms_syslogng_conf_path = '/etc/opt/microsoft/omsagent/conf/syslog-ng-oms.conf'
+syslog_ng_conf_path='/etc/syslog-ng/syslog-ng.conf'
+sysklog_conf_path='/etc/syslog.conf'
+oms_syslog_ng_conf_path = '/etc/opt/microsoft/omsagent/conf/syslog-ng-oms.conf'
 oms_rsyslog_conf_path = '/etc/opt/microsoft/omsagent/conf/rsyslog-oms.conf'
+oms_sysklog_conf_path = '/etc/opt/microsoft/omsagent/conf/sysklog-oms.conf'
 conf_path=''
 
 def init_vars(SyslogSource):
@@ -34,8 +36,10 @@ def init_vars(SyslogSource):
         source['Facility']=source['Facility'].encode('ascii','ignore')
     if os.path.exists(rsyslog_conf_path):
         conf_path=oms_rsyslog_conf_path
-    elif os.path.exists(syslogng_conf_path):
-        conf_path=oms_syslogng_conf_path
+    elif os.path.exists(syslog_ng_conf_path):
+        conf_path=oms_syslog_ng_conf_path
+    elif os.path.exists(sysklog_conf_path):
+        conf_path=oms_sysklog_conf_path
     else:
         LG().Log('ERROR', 'Unable to find OMS config files')
         raise Exception('Unable to find OMS config files')
@@ -72,10 +76,10 @@ def Get_Marshall(SyslogSource):
 def Set(SyslogSource):
     if Test(SyslogSource) == [0]:
         return [0]
-    if conf_path==oms_rsyslog_conf_path:
-        ret=UpdateRsyslogConf(SyslogSource)
-    else:
+    if conf_path==oms_syslog_ng_conf_path:
         ret=UpdateSyslogNGConf(SyslogSource)
+    else:
+        ret=UpdateSyslogConf(SyslogSource)
     if ret:
         ret = [0]
     else:
@@ -83,10 +87,10 @@ def Set(SyslogSource):
     return ret
 
 def Test(SyslogSource):
-    if conf_path==oms_rsyslog_conf_path:
-        NewSource=ReadRsyslogConf(SyslogSource)
-    else:
+    if conf_path==oms_syslog_ng_conf_path:
         NewSource=ReadSyslogNGConf(SyslogSource)
+    else:
+        NewSource=ReadSyslogConf(SyslogSource)
     for d in SyslogSource:
         found = False
         if 'Severities' not in d.keys() or d['Severities'] is None or len(d['Severities']) is 0:
@@ -101,16 +105,16 @@ def Test(SyslogSource):
     return [0]
 
 def Get(SyslogSource):
-    if conf_path==oms_rsyslog_conf_path:
-        NewSource=ReadRsyslogConf(SyslogSource)
-    else:
+    if conf_path==oms_syslog_ng_conf_path:
         NewSource=ReadSyslogNGConf(SyslogSource)
+    else:
+        NewSource=ReadSyslogConf(SyslogSource)
     for d in NewSource:
         if d['Severities'] == ['none']:
             d['Severities'] = []
     return NewSource
 
-def ReadRsyslogConf(SyslogSource):
+def ReadSyslogConf(SyslogSource):
     out = []
     if len(SyslogSource) == 0:
         return out
@@ -132,36 +136,37 @@ def ReadRsyslogConf(SyslogSource):
         count+=1
     return out
 
-def UpdateRsyslogConf(SyslogSource):
+def UpdateSyslogConf(SyslogSource):
     if not os.path.exists(conf_path):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return False
-    txt = codecs.open(conf_path, 'r', 'utf8').read()
+    if 'rsyslog' in conf_path:
+        txt = codecs.open(conf_path, 'r', 'utf8').read()
+    else : # sysklogd
+        txt = codecs.open(sysklog_conf_path, 'r', 'utf8').read()
+    facility_search = r'(#facility.*?25224\n)'
+    facility_re=re.compile(facility_search,re.M|re.S)
+    for t in facility_re.findall(txt):
+        txt=txt.replace(t,'')
     for d in SyslogSource:
-        facility_search = r'(#facility[ ]+=[ ]+'+d['Facility']+'\n'+r')?('+d['Facility']+r'[.].*?@.*?\n)'
-        facility_re=re.compile(facility_search,re.M|re.S)
         facility_txt = '#facility = ' + d['Facility'] + '\n'
-        if 'Severities' not in d.keys() or d['Severities'] is None or len(d['Severities']) is 0:
-            facility_txt = '#facility = ' + d['Facility'] + '\n' + d['Facility'] + '.none\t@127.0.0.1:25224\n' 
-        else :
-            for s in d['Severities']:
-                facility_txt += d['Facility'] + '.=' + s + ';'
-            facility_txt=facility_txt[0:-1]+'\t@127.0.0.1:25224\n'
-        if facility_re.search(txt) is not None:
-            txt=facility_re.sub(facility_txt,txt)
-        else:
-            txt += facility_txt
+        for s in d['Severities']:
+            facility_txt += d['Facility'] + '.=' + s + ';'
+        facility_txt=facility_txt[0:-1]+'\t@127.0.0.1:25224\n'
+        txt += facility_txt
     codecs.open(conf_path, 'w', 'utf8').write(txt)
-    os.system('sudo OMSSyslog-ng.post.sh')
-#    os.system('service rsyslog restart')
+    if 'rsyslog' in conf_path:
+        os.system('sudo ./Scripts/OMSRsyslog.post.sh')
+    else: # sysklogd
+        os.system('sudo ./Scripts/OMSSysklog.post.sh')
     return True
     
 def ReadSyslogNGConf(SyslogSource):
     out = []
-    if not os.path.exists(syslogng_conf_path):
-        LG().Log('ERROR', 'Unable to read ' + syslogng_conf_path + '.')
+    if not os.path.exists(syslog_ng_conf_path):
+        LG().Log('ERROR', 'Unable to read ' + syslog_ng_conf_path + '.')
         return out
-    txt = codecs.open(syslogng_conf_path, 'r', 'utf8').read()
+    txt = codecs.open(syslog_ng_conf_path, 'r', 'utf8').read()
     count=0
     for d in SyslogSource:
         out.append({'Facility':d['Facility'],'Severities':[]})
@@ -180,10 +185,10 @@ def ReadSyslogNGConf(SyslogSource):
     return out
     
 def UpdateSyslogNGConf(SyslogSource):
-    if not os.path.exists(syslogng_conf_path):
+    if not os.path.exists(syslog_ng_conf_path):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return False
-    txt = codecs.open(syslogng_conf_path, 'r', 'utf8').read()
+    txt = codecs.open(syslog_ng_conf_path, 'r', 'utf8').read()
     for d in SyslogSource:
         facility_search = r'(#OMS_facility[ ]+=[ ]+'+d['Facility']+'\n'+r')?(filter f_'+d['Facility']+r'_oms.*'+d['Facility']+r'_oms.*?\n)'
         facility_re=re.compile(facility_search,re.M|re.S)
@@ -200,5 +205,5 @@ def UpdateSyslogNGConf(SyslogSource):
         else:
             txt += facility_txt
     codecs.open(conf_path, 'w', 'utf8').write(txt)
-    os.system('sudo OMSSyslog-ng.post.sh')
+    os.system('sudo ./Scripts/OMSSyslog-ng.post.sh')
     return True
