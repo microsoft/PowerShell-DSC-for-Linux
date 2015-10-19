@@ -114,6 +114,10 @@ MI_Result Register(
     {
         *cimErrorDetails = NULL;
     }
+    
+#if defined(BUILD_OMS)
+    return MI_RESULT_OK;
+#endif
 
     // Check the cache for a given serverUrl
     result = GetThumbprintForRegisteredServerURL(self, request->registrationData, &thumbprint, cimErrorDetails);

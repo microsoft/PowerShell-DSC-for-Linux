@@ -15,6 +15,14 @@ instance of MSFT_WebDownloadManager as $MSFT_WebDownloadManager1ref
  ServerURL = "%s";
 };
 
+instance of MSFT_WebReportManager as $MSFT_WebReportManager1ref
+{
+SourceInfo = "GeneratedLocally";
+ ServerURL = "%s";
+ ResourceID = "[ReportServerWeb]OMSConfigurationManager";
+};
+
+
 instance of MSFT_DSCMetaConfiguration as $MSFT_DSCMetaConfiguration1ref
 {
  RefreshMode = "Pull";
@@ -24,9 +32,14 @@ instance of MSFT_DSCMetaConfiguration as $MSFT_DSCMetaConfiguration1ref
  ConfigurationModeFrequencyMins = 60;
  ConfigurationMode = "ApplyAndAutoCorrect";
 
+  ReportManagers = {
+  $MSFT_WebReportManager1ref
+ };
+
   ConfigurationDownloadManagers = {
   $MSFT_WebDownloadManager1ref  
  };
+
 };
 
 instance of OMI_ConfigurationDocument
@@ -34,7 +47,7 @@ instance of OMI_ConfigurationDocument
  Version="2.0.0";
  MinimumCompatibleVersion = "2.0.0";
 };
-""" % serverurl
+""" % (serverurl, serverurl)
 
 def source_file(filename):
     retval = dict()

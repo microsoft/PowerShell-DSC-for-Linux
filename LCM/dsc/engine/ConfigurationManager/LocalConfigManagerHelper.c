@@ -4405,12 +4405,14 @@ MI_Result ReportStatusToServer(
         {
                 return r;
         }
+#if !defined(BUILD_OMS)     
     r = RegisterWithReportingServers(lcmContext, (MI_Instance*)g_metaConfig, &extendedError);
     if (r != MI_RESULT_OK)
     {
         MI_Application_Close(&miApp);
         return r;
     }
+#endif
 
         r = DSC_MI_Application_NewInstance(&miApp, REPORTING_CLASS, NULL, &statusReport);
         if (r != MI_RESULT_OK)
