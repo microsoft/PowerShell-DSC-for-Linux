@@ -2740,6 +2740,12 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         return MI_RESULT_OK;
     }
 
+    r = GetSSLOptions(extendedError);
+    if( r != MI_RESULT_OK)
+    {
+        return r;
+    }
+
     r = DSC_MI_Instance_GetElement(metaConfig, "AgentId", &agentId, NULL, NULL, NULL);
 
     list = curl_slist_append(list, "Accept: application/json");
