@@ -2146,6 +2146,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         bAllowedModuleOverride = MI_TRUE;
     }
 
+#if !defined(BUILD_OMS)
     r = Pull_GetModules(numModulesInstalled, configurationID,  certificateID, *directoryName, fileName, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -2153,6 +2154,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
          DSC_free(fileName);
          return r;
     }
+#endif
 
     DSC_free(configurationID);
     *mofFileName = fileName;
@@ -2785,6 +2787,24 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         reportText = RunCommand(dataBuffer);
         
         curl = curl_easy_init();
+
+	if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+	{
+	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	}
+	else
+	{
+	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+	}
+	if (g_sslOptions.CABundle[0] != '\0')
+	{
+	    res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
+	    if (res != CURLE_OK)
+	    {
+		curl_easy_cleanup(curl);
+		return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+	    }
+	}
         
         Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')/SendReport", serverURL.string, agentId.string);
         curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
