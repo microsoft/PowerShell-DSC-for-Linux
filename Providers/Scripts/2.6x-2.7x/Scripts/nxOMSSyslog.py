@@ -156,9 +156,9 @@ def UpdateSyslogConf(SyslogSource):
         txt += facility_txt
     codecs.open(conf_path, 'w', 'utf8').write(txt)
     if 'rsyslog' in conf_path:
-        os.system('sudo ./Scripts/OMSRsyslog.post.sh')
+        os.system('sudo ../OMSRsyslog.post.sh')
     else: # sysklogd
-        os.system('sudo ./Scripts/OMSSysklog.post.sh')
+        os.system('sudo ../OMSSysklog.post.sh')
     return True
     
 def ReadSyslogNGConf(SyslogSource):
@@ -205,5 +205,5 @@ def UpdateSyslogNGConf(SyslogSource):
         else:
             txt += facility_txt
     codecs.open(conf_path, 'w', 'utf8').write(txt)
-    os.system('sudo ./Scripts/OMSSyslog-ng.post.sh')
+    os.system('sudo ../OMSSyslog-ng.post.sh')
     return True
