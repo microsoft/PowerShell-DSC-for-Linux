@@ -92,10 +92,19 @@ f = open(metamof_path, "w")
 f.write(metaConfig)
 f.close()
 
+os.system("chown omsagent " + agentid_path + " " + metamof_path)
+
+if os.geteuid() == 0:
+    commandToRun = "su - omsagent -c '/opt/microsoft/omsconfig/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path + "'"
+else:
+    commandToRun = "/opt/microsoft/omsconfig/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
+
 # Apply the metaconfig using SetDscLocalConfiguration
-commandToRun = "/opt/microsoft/omsconfig/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
+commandToRun += " 1> /dev/null"
 retval = os.system(commandToRun)
 if (retval != 0):
     print("Error on running command: " + commandToRun)
     sys.exit(1)
+else:
+    print("Successfully configured omsconfig.")
 

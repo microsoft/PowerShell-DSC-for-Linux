@@ -1257,6 +1257,12 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 
     *result = NULL;
 
+    r = GetSSLOptions(extendedError);
+    if( r != MI_RESULT_OK)
+    {
+        return r;
+    }
+
     DSC_EventWriteWebDownloadManagerDoActionServerUrl(configurationID, url);
     
     // Get body for GetAction request
@@ -1286,6 +1292,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     
     if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
     {
@@ -1459,6 +1466,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     }
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     
     if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
     {
@@ -1809,6 +1817,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     }
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     
     if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
     {
@@ -2659,6 +2668,7 @@ MI_Result Pull_Register(MI_Char* serverURL,
 
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     res = curl_easy_perform(curl);
 
@@ -2793,7 +2803,10 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         reportText = RunCommand(dataBuffer);
         
         curl = curl_easy_init();
-
+	
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+	
 	if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
 	{
 	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
