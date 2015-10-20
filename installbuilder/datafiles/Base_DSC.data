@@ -40,6 +40,9 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; root; root
 /opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; root; root
 /opt/microsoft/omsconfig/etc/omsconfig.reg; LCM/omsconfig.reg; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; root; root
 
 /opt/microsoft/omsconfig/lib/libMSFT_nxOMSAgentResource.so;   Providers/bin/libMSFT_nxOMSAgentResource.so;       755; root; root
 /opt/microsoft/omsconfig/etc/MSFT_nxOMSAgentResource.reg;  Providers/nxOMSAgent/MSFT_nxOMSAgentResource.reg;      755; root; root

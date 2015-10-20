@@ -14,10 +14,12 @@ ifeq ($(BUILD_OMS),BUILD_OMS)
 CONFIG_SYSCONFDIR_DSC=omsconfig
 DSC_NAMESPACE=root/oms
 OAAS_CERTPATH=/etc/opt/microsoft/omsagent/certs/oaas.crt
+PYTHON_PID_DIR=/var/opt/microsoft/omsconfig
 else
 CONFIG_SYSCONFDIR_DSC=dsc
 DSC_NAMESPACE=root/Microsoft/DesiredStateConfiguration
 OAAS_CERTPATH=$$CONFIG_CERTSDIR/oaas.crt
+PYTHON_PID_DIR=/var/opt/omi
 endif
 
 all:
@@ -49,7 +51,7 @@ endif
 dsc098: lcm098 providers
 	mkdir -p intermediate/Scripts
 	.  omi-1.0.8/output_openssl_0.9.8/config.mak; \
-	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
 	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
@@ -58,6 +60,7 @@ dsc098: lcm098 providers
 	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
 	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
@@ -72,7 +75,7 @@ dsc098: lcm098 providers
 dsc100: lcm100 providers
 	mkdir -p intermediate/Scripts
 	.  omi-1.0.8/output_openssl_1.0.0/config.mak; \
-	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
 	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
@@ -81,6 +84,7 @@ dsc100: lcm100 providers
 	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
 	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
@@ -199,7 +203,7 @@ lcmreg:
 
 providersreg:
 	.  omi-1.0.8/output/config.mak; \
-	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py; do \
+	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$(CONFIG_BINDIR)@" | \
 	  sed "s@<CONFIG_LIBDIR>@$(CONFIG_LIBDIR)@" | \
@@ -208,6 +212,7 @@ providersreg:
 	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
 	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$(CONFIG_LIBDIR)/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(CONFIG_DATADIR)/dsc/modules@" > intermediate/Scripts/`basename $$f`; \

@@ -12,7 +12,7 @@ import ctypes
 DO_TRACE = True
 DO_VERBOSE_TRACE  = False
 ScriptsDir = "<DSC_SCRIPT_PATH>"
-VarDir = "<CONFIG_LOCALSTATEDIR>"
+VarDir = "<PYTHON_PID_DIR>"
 
 def trace (text):
     if DO_TRACE:
