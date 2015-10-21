@@ -18,9 +18,9 @@ LG = nxDSCLog.DSCLog
 rsyslog_conf_path='/etc/rsyslog.conf'
 syslog_ng_conf_path='/etc/syslog-ng/syslog-ng.conf'
 sysklog_conf_path='/etc/syslog.conf'
-oms_syslog_ng_conf_path = '/etc/opt/microsoft/omsagent/conf/syslog-ng-oms.conf'
-oms_rsyslog_conf_path = '/etc/opt/microsoft/omsagent/conf/rsyslog-oms.conf'
-oms_sysklog_conf_path = '/etc/opt/microsoft/omsagent/conf/sysklog-oms.conf'
+oms_syslog_ng_conf_path = '/etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf'
+oms_rsyslog_conf_path = '/etc/opt/omi/conf/omsconfig/rsyslog-oms.conf'
+oms_sysklog_conf_path = '/etc/opt/omi/conf/omsconfig/sysklog-oms.conf'
 conf_path=''
 
 def init_vars(SyslogSource):
@@ -121,7 +121,8 @@ def ReadSyslogConf(SyslogSource):
     if not os.path.exists(conf_path):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return out
-    txt = codecs.open(conf_path, 'r', 'utf8').read()
+    else:
+        txt = codecs.open(conf_path, 'r', 'utf8').read()
     count=0
     for d in SyslogSource:
         out.append({'Facility':d['Facility'],'Severities':[]})
@@ -137,12 +138,12 @@ def ReadSyslogConf(SyslogSource):
     return out
 
 def UpdateSyslogConf(SyslogSource):
-    if not os.path.exists(conf_path):
+    if 'rsyslog' in conf_path:
+        txt = ''
+    elif not os.path.exists(conf_path):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return False
-    if 'rsyslog' in conf_path:
-        txt = codecs.open(conf_path, 'r', 'utf8').read()
-    else : # sysklogd
+    else :
         txt = codecs.open(sysklog_conf_path, 'r', 'utf8').read()
     facility_search = r'(#facility.*?25224\n)'
     facility_re=re.compile(facility_search,re.M|re.S)

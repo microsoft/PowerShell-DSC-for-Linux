@@ -1,3 +1,3 @@
 #!/bin/bash
-cp /etc/opt/microsoft/omsagent/conf/sysklog-oms.conf /etc/syslog.conf
-service syslog reload
+cp --force /etc/opt/omi/conf/omsconfig/sysklog-oms.conf /etc/syslog.conf
+service syslog restart
