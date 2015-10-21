@@ -29,7 +29,7 @@
     <!--
                             testManagerName    packageFromSource    packageFromPath
     Debian/Ubuntu             apt                 nano              testpackage3
-    SLES                      zypper              nano              testpackage3-1.0-1,testpackage3-1.0-1.noarch(sles12)
+    SLES                      zypper              nano              testpackage3-1.0-1,testpackage3-1.0-1.noarch(sles12x64)
     Centos, Oracle, Rhel      yum                 nano              testpackage3-1.0-1.noarch, testpackage3-1.0-1(Centos5x86, ora5x64)
     -->
     <rec key="testManagerName">PACKAGE_MANAGER</rec>
@@ -128,6 +128,13 @@
       $AA = "%resourceName%"
       $Acct = Get-AzureAutomationAccount -ResourceGroupName:$RGName -Name:$AA
       $Acct | Set-AzureAutomationDscNode -NodeConfigurationName "%configurationName%.$varID" -id "$nodeID" -Force
+    </rec>
+    
+    <rec key="getNodeStatus">
+      $RGName = "%resourceGroup%"
+      $AA = "%resourceName%"
+      $Acct = Get-AzureAutomationAccount -ResourceGroupName:$RGName -Name:$AA
+      ($Acct | Get-azureAutomationDscNode -Id $nodeID | sort -Descending -Property:Endtime | select-object -First 1 ).Status
     </rec>
     
     <rec key="removeNode">
@@ -1189,7 +1196,7 @@
       </var>
 
       <var set="1" lvl="1" vid="908493"
-         dsc="[nxFile] Verify if report status is compliant when the file doesn't exist before and enumerated Ensure property is Present"
+         dsc="[nxFile] [Azure] Verify if report status is compliant when the file doesn't exist before and enumerated Ensure property is Present"
          cls="DSCAzure.nxFileTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -1211,7 +1218,7 @@
       </var>
 
       <var set="1" lvl="2" vid="908494"
-           dsc="[nxFile] Verify if report status is not compliant when the specific Group account doesn't exist on DSC server"
+           dsc="[nxFile] [Azure] Verify if report status is not compliant when the specific Group account doesn't exist on DSC server"
            cls="DSCAzure.nxFileTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -1513,7 +1520,7 @@
       </var>-->
 
       <var set="2" lvl="1" vid="908495"
-           dsc="[nxUser] Verify if report status is compliant when provide a new userName and set Ensure to Present"
+           dsc="[nxUser] [Azure] Verify if report status is compliant when provide a new userName and set Ensure to Present"
            cls="DSCAzure.nxUserTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -1534,7 +1541,7 @@
       </var>
 
       <var set="2" lvl="2" vid="908498"
-           dsc="[nxUser] Verify if report status is not compliant when delate a invalid user."
+           dsc="[nxUser] [Azure] Verify if report status is not compliant when delate a invalid user."
            cls="DSCAzure.nxUserTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -1676,7 +1683,8 @@
         <rec key="failedMsg">The member 'root,scxuser' failed to remove from '%groupname%'.</rec>
       </var>
 
-      <var set="3" lvl="1" vid="908496" dsc="[nxGroup] Verify if report status is compliant when enumerated Ensure property is Present" cls="DSCAzure.nxGroupTest">
+      <var set="3" lvl="1" vid="908496" 
+           dsc="[nxGroup] [Azure] Verify if report status is compliant when enumerated Ensure property is Present" cls="DSCAzure.nxGroupTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="isReport">true</rec>
@@ -1693,7 +1701,8 @@
         <rec key="failedMsg">The group '%groupname%' is not created.</rec>
       </var>
 
-      <var set="3" lvl="2" vid="908497" dsc="[nxGroup] Verify if report status is not compliant when invliad members are listed" cls="DSCAzure.nxGroupTest">
+      <var set="3" lvl="2" vid="908497" 
+           dsc="[nxGroup] [Azure] Verify if report status is not compliant when invliad members are listed" cls="DSCAzure.nxGroupTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
         <rec key="isReport">true</rec>
@@ -1942,7 +1951,7 @@
       </var>
        
       <var set="4" lvl="1" vid="908499"
-           dsc="[nxScript] Verify if report status is compliant when a positive configuration"
+           dsc="[nxScript] [Azure] Verify if report status is compliant when a positive configuration"
            cls="DSCAzure.nxScriptTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -1969,7 +1978,7 @@
       </var>
 
       <var set="4" lvl="2" vid="908500"
-            dsc="[nxScript] Verify if report status is not compliant when the setScript return false"
+            dsc="[nxScript] [Azure] Verify if report status is not compliant when the setScript return false"
             cls="DSCAzure.nxScriptTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2074,7 +2083,7 @@
       </var>
 
       <var set="5" lvl="1" vid="908501"
-          dsc="[nxService] Verify if report status is compliant when service is started successfully by ‘init’ service controller"
+          dsc="[nxService] [Azure] Verify if report status is compliant when service is started successfully by ‘init’ service controller"
           cls="DSCAzure.nxServiceTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2168,7 +2177,7 @@
       </var>
 
       <var set="5" lvl="1" vid="908502"
-           dsc="[nxService] Verify if report status is compliant when service is started successfully by ‘upstart’ service controller"
+           dsc="[nxService] [Azure] Verify if report status is compliant when service is started successfully by ‘upstart’ service controller"
            cls="DSCAzure.nxServiceTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2262,7 +2271,7 @@
       </var>
 
       <var set="5" lvl="1" vid="908503"
-           dsc="[nxService] Verify if report status is compliant when service is started successfully by ‘systemd’ service controller"
+           dsc="[nxService] [Azure] Verify if report status is compliant when service is started successfully by ‘systemd’ service controller"
            cls="DSCAzure.nxServiceTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2337,7 +2346,7 @@
       </var>
 
       <var set="5" lvl="2" vid="908505"
-          dsc="[nxService] Verify if report status is not compliant when the specific service does not exist in specific 'init' controller"
+          dsc="[nxService] [Azure] Verify if report status is not compliant when the specific service does not exist in specific 'init' controller"
           cls="DSCAzure.nxServiceTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2357,7 +2366,7 @@
       </var>
 
       <var set="5" lvl="2" vid="908506"
-          dsc="[nxService] Verify if report status is not compliant when the specific service does not exist in specific 'upstart' controller"
+          dsc="[nxService] [Azure] Verify if report status is not compliant when the specific service does not exist in specific 'upstart' controller"
           cls="DSCAzure.nxServiceTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2377,7 +2386,7 @@
       </var>
 
       <var set="5" lvl="2" vid="908507"
-          dsc="[nxService] Verify if report status is not compliant when the specific service does not exist in specific 'systemd' controller"
+          dsc="[nxService] [Azure] Verify if report status is not compliant when the specific service does not exist in specific 'systemd' controller"
           cls="DSCAzure.nxServiceTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2576,7 +2585,7 @@
       </var>
 
       <var set="6" lvl="1" vid="908508"
-           dsc="[nxEnvironment] Verify if report status is compliant when environment variable set successfully."
+           dsc="[nxEnvironment] [Azure] Verify if report status is compliant when environment variable set successfully."
            cls="DSCAzure.nxEnvironmentTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2600,7 +2609,7 @@
       </var>
 
       <var set="6" lvl="2" vid="908509"
-           dsc="[nxEnvironment] Verify if report status is not compliant when delete environment variable doesn't exist."
+           dsc="[nxEnvironment] [Azure] Verify if report status is not compliant when delete environment variable doesn't exist."
            cls="DSCAzure.nxEnvironmentTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2980,7 +2989,7 @@
       </var>
 
       <var set="7" lvl="1" vid="908510"
-           dsc="[nxPackage] Verify if report status is compliant when specific package is installed successfully"
+           dsc="[nxPackage] [Azure] Verify if report status is compliant when specific package is installed successfully"
            cls="DSCAzure.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -2999,7 +3008,7 @@
       </var>
 
       <var set="7" lvl="2" vid="908511"
-         dsc="[nxPackage] Verify if report status is not compliant when specific package is invalid."
+         dsc="[nxPackage] [Azure] Verify if report status is not compliant when specific package is invalid."
          cls="DSCAzure.nxPackageTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -3177,7 +3186,7 @@
       </var>
       
       <var set="8" lvl="1" vid="908515"
-           dsc="[nxSshAuthorizedKeys] verify if report status is compliant when send a positive configuration"
+           dsc="[nxSshAuthorizedKeys] [Azure] verify if report status is compliant when send a positive configuration"
            cls="DSCAzure.nxSshAuthTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -3202,7 +3211,7 @@
       </var>
 
       <var set="8" lvl="2" vid="908516"
-           dsc="[nxSshAuthorizedKeys] Verify if the ssh authorized key is delete if the Ensure is set to absent."
+           dsc="[nxSshAuthorizedKeys] [Azure] Verify if the ssh authorized key is delete if the Ensure is set to absent."
            cls="DSCAzure.nxSshAuthTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -3416,7 +3425,7 @@
       </var>
       
       <var set="9" lvl="1" vid="908517"
-           dsc="[nxFileLine] Verify if report status is compliant when line match the value of DoesNotContainPattern are removed successfully."
+           dsc="[nxFileLine] [Azure] Verify if report status is compliant when line match the value of DoesNotContainPattern are removed successfully."
            cls="DSCAzure.nxFileLineTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -3438,7 +3447,7 @@
       </var>
 
       <var set="9" lvl="2" vid="908518"
-           dsc="[nxFileLine] Verify if report status is not compliant when FilePath doesn't exist."
+           dsc="[nxFileLine] [Azure] Verify if report status is not compliant when FilePath doesn't exist."
            cls="DSCAzure.nxFileLineTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -3895,7 +3904,7 @@
       </var>
 
       <var set="10" lvl="1" vid="908526"
-        dsc="[nxIPAddress] Verify if report status is compliant when IPv4 address is set on a network interface successfully"
+        dsc="[nxIPAddress] [Azure] Verify if report status is compliant when IPv4 address is set on a network interface successfully"
         cls="DSCAzure.nxIPAddressTest">
         <snipref id="Variables" />
         <rec key="isReport">true</rec>
@@ -3920,7 +3929,7 @@
       </var>
 
       <var set="10" lvl="3" vid="908527"
-           dsc="[nxIPAddress] Verify if report status is not compliant when provided IP address is not a right IPv4 format."
+           dsc="[nxIPAddress] [Azure] Verify if report status is not compliant when provided IP address is not a right IPv4 format."
            cls="DSCAzure.nxIPAddressTest">
         <snipref id="Variables" />
         <rec key="isReport">true</rec>
@@ -4067,7 +4076,7 @@
       </var>
 
       <var set="11" lvl="1" vid="908528"
-           dsc="[nxDNSServerAddress] Verify if report status is compliant when DNS Server Address is added successfully."
+           dsc="[nxDNSServerAddress] [Azure] Verify if report status is compliant when DNS Server Address is added successfully."
            cls="DSCAzure.DNSAddressTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -4084,7 +4093,7 @@
       </var>
 
       <var set="11" lvl="2" vid="908529"
-           dsc="[nxDNSServerAddress] Verify if report status is not compliant when the provided address is not a right IPv4 format."
+           dsc="[nxDNSServerAddress] [Azure] Verify if report status is not compliant when the provided address is not a right IPv4 format."
            cls="DSCAzure.DNSAddressTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -4477,7 +4486,7 @@
       </var>
 
       <var set="12" lvl="1" vid="908519"
-           dsc="[nxArchive] Verify if report status is compliant when unpack a source file successfully."
+           dsc="[nxArchive] [Azure] Verify if report status is compliant when unpack a source file successfully."
            cls="DSCAzure.nxArchiveTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->
@@ -4502,7 +4511,7 @@
       </var>
 
       <var set="12" lvl="3" vid="908520"
-           dsc="[nxArchive] Verify if report status is not compliant when SourcePath doesn't exist"
+           dsc="[nxArchive] [Azure] Verify if report status is not compliant when SourcePath doesn't exist"
            cls="DSCAzure.nxArchiveTest">
         <snipref id="Variables" />
         <!-- Linux Initial State. -->

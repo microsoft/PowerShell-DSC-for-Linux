@@ -35,9 +35,12 @@ namespace DSCAzure
         {
             ctx.Alw("nxPackageTest Setup Begin.");
             
-            //
             caseID = ((IVarContext)ctx).VarID.ToString();
             varID = "Node" + caseID;
+
+            isReport = ctx.Records.GetValue("isReport");
+            status = ctx.Records.GetValue("status");
+
             isNeedCompile = ctx.Records.GetValue("isNeedCompile");
             propString = ctx.Records.GetValue("propString");
             mofPath = ctx.Records.GetValue("mofPath");
@@ -296,6 +299,16 @@ namespace DSCAzure
                     try
                     {
                         sshHelper.Execute(forcePullpullServerCmd);
+                        if (isReport.ToLower().Equals("true"))
+                        {
+                            ctx.Alw(String.Format("Run PowerShell : '{0}'", getNodeStatus));
+                            psHelper.Run(getNodeStatus);
+                            string nodeStatus = psHelper.LastPowerShellReturnString;
+                            if (!(nodeStatus.Equals(status)))
+                            {
+                                throw new VarFail(String.Format("expected Status is: {0}, but Actual is: {1}", status, nodeStatus));
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -353,6 +366,7 @@ namespace DSCAzure
             }
             else
             {
+                string errorTag = null;
                 try
                 {
                     //Fail to execute force pull server command when it should send error message.
@@ -360,8 +374,27 @@ namespace DSCAzure
                 }
                 catch (Exception)
                 {
-                    ctx.Alw(String.Format("Send the error message"));
+                    errorTag = "yes";
                 }
+                finally
+                {
+                    if (isReport.ToLower().Equals("true"))
+                    {
+                        ctx.Alw(String.Format("Run PowerShell : '{0}'", getNodeStatus));
+                        psHelper.Run(getNodeStatus);
+                        string nodeStatus = psHelper.LastPowerShellReturnString;
+                        if (!(nodeStatus.Equals(status)))
+                        {
+                            throw new VarFail(String.Format("expected Status is: {0}, but Actual is: {1}", status, nodeStatus));
+                        }
+                    }
+                }
+
+                if (!(errorTag.Equals("yes")))
+                {
+                    throw new VarFail(failedMsg);
+                }
+       
             }
 
             ctx.Alw("Verify End.");

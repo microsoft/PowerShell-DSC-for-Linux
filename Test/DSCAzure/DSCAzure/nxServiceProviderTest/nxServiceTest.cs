@@ -29,6 +29,10 @@ namespace DSCAzure
 
             caseID = ((IVarContext)ctx).VarID.ToString();
             varID = "Node" + caseID;
+
+            isReport = ctx.Records.GetValue("isReport");
+            status = ctx.Records.GetValue("status");
+
             isNeedCompile = ctx.Records.GetValue("isNeedCompile");
             mofHelper = new ServiceMofHelper();
             propString = ctx.Records.GetValue("propString");

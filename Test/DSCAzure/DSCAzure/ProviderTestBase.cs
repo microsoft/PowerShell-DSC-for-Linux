@@ -40,6 +40,7 @@ namespace DSCAzure
         protected string[] getNodeIdCmd;
         protected string[] importConfigToAzure;
         protected string[] setAzureAutomation;
+        protected string[] getNodeStatus;
         protected string[] removeNode;
         protected string psErrorMsg;
 
@@ -59,13 +60,19 @@ namespace DSCAzure
         protected string caseID;
         protected string nodeID;
         protected string isNeedCompile;
+        protected string isReport;
+        protected string status;
+       
         
 
         public virtual void Setup(IContext ctx)
         {
             caseID = ((IVarContext)ctx).VarID.ToString();
             setID = ((IVarContext)ctx).Set;
-           
+
+            isReport = ctx.Records.GetValue("isReport");
+            status = ctx.Records.GetValue("status");
+
             isNeedCompile = ctx.Records.GetValue("isNeedCompile");
             propString = ctx.Records.GetValue("propString");
             mofPath = ctx.Records.GetValue("mofPath");
@@ -78,6 +85,7 @@ namespace DSCAzure
             getNodeIdCmd = ctx.Records.GetValues("getNodeIdCmd");
             importConfigToAzure = ctx.Records.GetValues("importConfigToAzure");
             setAzureAutomation = ctx.Records.GetValues("setAzureAutomation");
+            getNodeStatus = ctx.Records.GetValues("getNodeStatus");
             removeNode = ctx.Records.GetValues("removeNode");
             psErrorMsg = ctx.Records.GetValue("psErrorMsg");
             verificationCmd = ctx.Records.GetValue("verificationCmd");
@@ -211,6 +219,12 @@ namespace DSCAzure
             }
             ctx.Alw(String.Format("Run PowerShell : '{0}'", setAzureAutomation));
             psHelper.Run(setAzureAutomation);
+
+            //Get DSC Node Status Command
+            for (int i = 0; i < getNodeStatus.Length; i++)
+            {
+                getNodeStatus[i] = getNodeStatus[i].Replace("$nodeID", nodeID);
+            }
             ctx.Alw("Run End.");
         }
 
@@ -223,6 +237,16 @@ namespace DSCAzure
                 try
                 {
                     sshHelper.Execute(forcePullpullServerCmd);
+                    if (isReport.ToLower().Equals("true"))
+                    {
+                        ctx.Alw(String.Format("Run PowerShell : '{0}'", getNodeStatus));
+                        psHelper.Run(getNodeStatus);
+                        string nodeStatus = psHelper.LastPowerShellReturnString;
+                        if (!(nodeStatus.Equals(status)))
+                        {
+                            throw new VarFail(String.Format("expected Status is: {0}, but Actual is: {1}", status, nodeStatus));
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -234,16 +258,37 @@ namespace DSCAzure
                 
             }
             else
-            {           
+            {
+                string errorTag = null;
                 try
                 {
                     //Fail to execute force pull server command when it should send error message.
                     sshHelper.Execute(forcePullpullServerCmd);
+
                 }
                 catch (Exception)
                 {
-                    ctx.Alw(String.Format("Send the error message"));
-                }           
+                    errorTag = "yes";
+                }
+                finally
+                {
+                    if (isReport.ToLower().Equals("true"))
+                    {
+                        ctx.Alw(String.Format("Run PowerShell : '{0}'", getNodeStatus));
+                        psHelper.Run(getNodeStatus);
+                        string nodeStatus = psHelper.LastPowerShellReturnString;
+                        if (!(nodeStatus.Equals(status)))
+                        {
+                            throw new VarFail(String.Format("expected Status is: {0}, but Actual is: {1}", status, nodeStatus));
+                        }
+                    }
+                }
+
+                if (!(errorTag.Equals("yes")))
+                {
+                    throw new VarFail(failedMsg);
+                }
+       
             }
             ctx.Alw("Verify End.");
         }
