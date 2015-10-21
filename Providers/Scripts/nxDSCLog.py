@@ -9,7 +9,7 @@ import time
 import inspect
 import codecs
 
-VarDir = "<CONFIG_LOCALSTATEDIR>"
+VarDir = "<PYTHON_PID_DIR>"
 
 def Print(s, file=sys.stderr):
     file.write(s + '\n')
@@ -34,6 +34,7 @@ class DSCLog(object):
         self.levels = ((0, 'FATAL'), (1, 'ERROR'), (2, 'WARNING'), (3, 'INFO'),
                        (4, 'DEBUG'), (5, 'VERBOSE'))
         self.current_level = self.GetCurrentLogLevel()
+        os.system('mkdir -p ' + VarDir + '/log')
         self.file_path = VarDir + "/log/dsc.log"
 
     def Log(self, log_level, message):
