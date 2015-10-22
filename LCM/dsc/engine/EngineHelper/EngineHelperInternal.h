@@ -358,8 +358,8 @@
 #define DEFAULT_RebootNodeIfNeeded MI_FALSE
 #define DEFAULT_AllowModuleOverwrite MI_FALSE
 #define DEFAULT_RefreshMode MI_T("PUSH")
-#define DEFAULT_MinRefreshFrequencyMins 15
-#define DEFAULT_MinRefreshFrequencyMinsString MI_T("15")
+#define DEFAULT_MinRefreshFrequencyMins 1
+#define DEFAULT_MinRefreshFrequencyMinsString MI_T("1")
 #define DEFAULT_MaxRefreshFrequencyMins 44640
 #define DEFAULT_MaxRefreshFrequencyMinsString MI_T("44640")
 #define DEFAULT_ConfigurationModeFrequencyMins 30

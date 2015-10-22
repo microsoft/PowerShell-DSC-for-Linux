@@ -69,7 +69,7 @@ dsc098: lcm098 providers
 
 	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS=$(BUILD_OMS)
 
-	mkdir -p release; \
+	-mkdir -p release; \
 	cp omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 dsc100: lcm100 providers
@@ -92,7 +92,7 @@ dsc100: lcm100 providers
 	done
 	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS=$(BUILD_OMS)
 
-	mkdir -p release; \
+	-mkdir -p release; \
 	cp omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 omi098:
