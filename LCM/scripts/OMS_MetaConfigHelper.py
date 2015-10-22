@@ -28,9 +28,9 @@ instance of MSFT_DSCMetaConfiguration as $MSFT_DSCMetaConfiguration1ref
 {
  RefreshMode = "Pull";
  AllowModuleOverwrite = True;
- RefreshFrequencyMins = 30;
- RebootNodeIfNeeded = True;
- ConfigurationModeFrequencyMins = 60;
+ RefreshFrequencyMins = 5;
+ RebootNodeIfNeeded = False;
+ ConfigurationModeFrequencyMins = 5;
  ConfigurationMode = "ApplyAndAutoCorrect";
 
   ReportManagers = {
