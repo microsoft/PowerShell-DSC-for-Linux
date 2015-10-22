@@ -73,7 +73,9 @@ instance of OMI_ConfigurationDocument
 
 def source_file(filename):
     retval = dict()
-    contents = open(filename,"r").read()
+    f = open(filename, "r")
+    contents = f.read()
+    f.close()
     lines = contents.splitlines()
     for line in lines:
         # Find first '='; everything before is key, everything after is value
