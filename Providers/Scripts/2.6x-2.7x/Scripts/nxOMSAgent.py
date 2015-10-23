@@ -15,7 +15,7 @@ nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 
 LG = nxDSCLog.DSCLog
 
-conf_path = '/etc/opt/microsoft/omsagent/sysconf/omsagent.conf'
+conf_path = '/etc/opt/microsoft/omsagent/conf/omsagent.conf'
 omi_map=None
 
 def init_vars(HeartbeatIntervalSeconds, PerfObject):
@@ -174,7 +174,7 @@ def UpdateOMSAgentConf(HeartbeatIntervalSeconds,PerfObject):
     i=m.end(0)+1
     txt=txt[:i]+new_source+txt[i:]
     codecs.open(conf_path, 'w', 'utf8').write(txt)
-    os.system('service omsagent restart')
+    os.system('sudo /opt/microsoft/omsagent/bin/service_control restart')
     
 def rm_unicode(obj):
     if isinstance(obj, dict):
