@@ -82,11 +82,10 @@ def Test(HeartbeatIntervalSeconds, PerfObject):
             new_perf['PerformanceCounter'].sort()
             for k in perf.keys():
                 if k in new_perf.keys():
-                    if perf[k] != new_perf[k]:
-                        return [-1]
-                    found = True
-    if not found:
-        return [-1]
+                    if perf[k] == new_perf[k]:
+                        found = True
+        if not found:
+            return [-1]
     return [0]
 
 def Get(HeartbeatIntervalSeconds, PerfObject):
@@ -98,12 +97,7 @@ def TranslatePerfs(perfs):
     for p in perfs:
         for cname in omi_map:
             for prop in cname['CimProperties']:
-                t= p.replace('Pct','Percent')
-                t= t.replace('%','Percent')
-                t= t.replace(' ','')
-                pr=prop['CimPropertyName'].replace(' ','')
-                pr=pr.replace('Pct','Percent') # for CPUTotalPct, MemUsedPct
-                if t  == pr or p == prop['CounterName']:
+                if p == prop['CounterName']:
                     if cname['ObjectName'] not in d.keys():
                         d[cname['ObjectName']]=[p]
                     else:
@@ -139,12 +133,13 @@ def ReadOMSAgentConf(HeartbeatIntervalSeconds,PerfObject):
                     if source[2][-1:] == 'm':
                         interval*= 60
                     inst=source[0]
-        if '.*' not in perf['InstanceName']:
-            inst=inst.replace('.*','*')
-        all_instances=False
-        if inst == '*':
-            all_instances=True
-        new_perfobj.append({'PerformanceCounter':perflist,'InstanceName':inst,'IntervalSeconds':interval,'AllInstances':all_instances})
+        if len(perflist) > 0:
+            if '.*' not in perf['InstanceName']:
+                inst=inst.replace('.*','*')
+            all_instances=False
+            if inst == '*':
+                all_instances=True
+            new_perfobj.append({'PerformanceCounter':perflist,'InstanceName':inst,'IntervalSeconds':interval,'AllInstances':all_instances})
     return new_heartbeat,new_perfobj
             
     
@@ -178,7 +173,10 @@ def UpdateOMSAgentConf(HeartbeatIntervalSeconds,PerfObject):
     
 def rm_unicode(obj):
     if isinstance(obj, dict):
-        return {rm_unicode(k): rm_unicode(v) for k, v in obj.iteritems()}
+        d={}
+        for k, v in obj.iteritems():
+            d[rm_unicode(k)] = rm_unicode(v)
+        return d
     elif isinstance(obj, list):
         return [rm_unicode(i) for i in obj]
     elif isinstance(obj, unicode):
