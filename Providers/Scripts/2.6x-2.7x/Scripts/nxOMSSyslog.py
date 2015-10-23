@@ -199,7 +199,7 @@ def UpdateSyslogNGConf(SyslogSource):
         else :
             sevs=reduce(lambda x, y: x + ',' + y,d['Severities'])
             facility_txt += 'filter f_' + d['Facility'] + '_oms { level('+ sevs +') and facility(' + d['Facility'] + '); };\n'
-        facility_txt += 'destination ' + d['Facility'] + '_oms { tcp("127.0.0.1" port(25224)); };\n'
+        facility_txt += 'destination ' + d['Facility'] + '_oms { udp("127.0.0.1" port(25224)); };\n'
         facility_txt += 'log { source(src); filter(f_' + d['Facility'] + '_oms); destination(' + d['Facility'] + '_oms); };\n'
         if facility_re.search(txt) is not None:
             txt = facility_re.sub(facility_txt,txt)
