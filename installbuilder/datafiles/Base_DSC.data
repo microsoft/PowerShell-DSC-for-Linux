@@ -347,7 +347,7 @@ chown omsagent /var/opt/microsoft/omsconfig
 chgrp omsagent /var/opt/microsoft/omsconfig
 
 # Configure the consistency invoker for OMS
-CRONTAB_LINE="*/30 * * * * omsagent /opt/omi/bin/OMSConsistencyInvoker"
+CRONTAB_LINE="*/5 * * * * omsagent /opt/omi/bin/OMSConsistencyInvoker"
 cat /etc/crontab | grep "OMSConsistencyInvoker" > /dev/null
 if [ $? -ne 0 ]; then
     # Unable to find in /etc/crontab, so just append
