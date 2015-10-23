@@ -190,20 +190,18 @@ def UpdateSyslogNGConf(SyslogSource):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return False
     txt = codecs.open(syslog_ng_conf_path, 'r', 'utf8').read()
+    facility_search = r'(\n+)?(#OMS_Destination.*?25224.*?\n)?(\n)?(#OMS_facility.*?filter.*?_oms.*?log.*destination.*?\n)'
+    facility_re = re.compile(facility_search,re.M|re.S)
+    txt = facility_re.sub('',txt)
+    txt += '\n\n#OMS_Destination\ndestination d_oms { udp("127.0.0.1" port(25224)); };\n'
     for d in SyslogSource:
-        facility_search = r'(#OMS_facility[ ]+=[ ]+'+d['Facility']+'\n'+r')?(filter f_'+d['Facility']+r'_oms.*'+d['Facility']+r'_oms.*?\n)'
-        facility_re=re.compile(facility_search,re.M|re.S)
-        facility_txt = '#OMS_facility = ' + d['Facility'] + '\n'
         if 'Severities' not in d.keys() or d['Severities'] is None or len(d['Severities']) is 0:
-            facility_txt += 'filter f_' + d['Facility'] + '_oms { level(none) and facility(' + d['Facility'] + '); };\n'
+            facility_txt = ''
         else :
+            facility_txt = '\n#OMS_facility = ' + d['Facility'] + '\n'
             sevs=reduce(lambda x, y: x + ',' + y,d['Severities'])
             facility_txt += 'filter f_' + d['Facility'] + '_oms { level('+ sevs +') and facility(' + d['Facility'] + '); };\n'
-        facility_txt += 'destination ' + d['Facility'] + '_oms { udp("127.0.0.1" port(25224)); };\n'
-        facility_txt += 'log { source(src); filter(f_' + d['Facility'] + '_oms); destination(' + d['Facility'] + '_oms); };\n'
-        if facility_re.search(txt) is not None:
-            txt = facility_re.sub(facility_txt,txt)
-        else:
+            facility_txt += 'log { source(src); filter(f_' + d['Facility'] + '_oms); destination(d_oms); };\n'
             txt += facility_txt
     codecs.open(conf_path, 'w', 'utf8').write(txt)
     os.system('sudo /opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh')
