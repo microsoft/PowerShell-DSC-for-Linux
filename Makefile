@@ -165,11 +165,9 @@ nxNetworking:
 	mv $@_$${VERSION}.zip ../../release/
 
 distclean: clean
-	make configureomi098
-	make -C omi-1.0.8 distclean
-	make configureomi100
-	make -C omi-1.0.8 distclean
 	rm -rf omi-1.0.8/output
+	rm -rf omi-1.0.8/output_openssl_0.9.8
+	rm -rf omi-1.0.8/output_openssl_1.0.0
 
 clean:
 ifeq ($(BUILD_LOCAL),1)
