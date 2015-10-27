@@ -348,14 +348,15 @@ chgrp omsagent /var/opt/microsoft/omsconfig
 
 # Configure the consistency invoker for OMS
 # Add a approximately 0-5 minute delay before we attempt to invoke the consistency engine
-CRONTAB_LINE="*/5 * * * * omsagent sleep `expr $RANDOM \% 240`; /opt/omi/bin/OMSConsistencyInvoker"
+RANDOM_NUMBER=`openssl rand 1 | od -DAn`
+CRONTAB_LINE="*/5 * * * * omsagent sleep $RANDOM_NUMBER; /opt/omi/bin/OMSConsistencyInvoker"
 cat /etc/crontab | grep "OMSConsistencyInvoker" > /dev/null
 if [ $? -ne 0 ]; then
     # Unable to find in /etc/crontab, so just append
     echo "$CRONTAB_LINE" >> /etc/crontab
 else
     # Find line with OMSConsistencyInvoker and replace with standard
-    cat /etc/crontab | sed "s;^.*OMSConsistencyInvoker.*;$CRONTAB_LINE;g" > /etc/crontab_tmp
+    cat /etc/crontab | sed "s%^.*OMSConsistencyInvoker.*%$CRONTAB_LINE%g" > /etc/crontab_tmp
     mv /etc/crontab_tmp /etc/crontab
 fi
 
