@@ -3964,7 +3964,7 @@ MI_Result DoRegistration(
         result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
         EH_CheckResult(result);
 
-        // TODO, insivara : Write events
+	// TODO, insivara : Write events
         result = UpdateMetaConfigWithAgentId(registrationManager->agentId, (MI_Instance*)g_metaConfig);
         EH_CheckResult(result);    
 
@@ -6568,6 +6568,11 @@ MI_Result SetLCMStatusBusy()
 #endif
         }
 
+        if (g_registrationManager != NULL && ((RegistrationManager*)g_registrationManager)->agentId != NULL)
+        {
+            UpdateMetaConfigWithAgentId( ((RegistrationManager*)g_registrationManager)->agentId, (MI_Instance*)g_metaConfig);
+        }
+        
         ReportStatusToServer(NULL, NULL, NULL, NULL, 0, MI_FALSE, /*isStatusReport*/ 1, (MI_Instance*)NULL);
 
         // errors in above invocation are silently ignored since failure of updating status should not block other operations
