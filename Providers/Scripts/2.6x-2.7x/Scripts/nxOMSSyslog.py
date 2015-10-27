@@ -87,6 +87,8 @@ def Set(SyslogSource):
     return ret
 
 def Test(SyslogSource):
+    if conf_path==oms_sysklog_conf_path:
+        return [0]
     if conf_path==oms_syslog_ng_conf_path:
         NewSource=ReadSyslogNGConf(SyslogSource)
     else:
@@ -105,6 +107,8 @@ def Test(SyslogSource):
     return [0]
 
 def Get(SyslogSource):
+    if conf_path==oms_sysklog_conf_path:
+        return SyslogSource
     if conf_path==oms_syslog_ng_conf_path:
         NewSource=ReadSyslogNGConf(SyslogSource)
     else:
@@ -118,10 +122,12 @@ def ReadSyslogConf(SyslogSource):
     out = []
     if len(SyslogSource) == 0:
         return out
-    if not os.path.exists(conf_path):
-        LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
-        return out
+    if not os.path.exists('/etc/rsyslog.d'):
+        txt = codecs.open(rsyslog_conf_path, 'r', 'utf8').read()
     else:
+        if not os.path.exists(conf_path):
+            LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
+            return out
         txt = codecs.open(conf_path, 'r', 'utf8').read()
     count=0
     for d in SyslogSource:
@@ -138,17 +144,25 @@ def ReadSyslogConf(SyslogSource):
     return out
 
 def UpdateSyslogConf(SyslogSource):
-    if 'rsyslog' in conf_path:
-        txt = ''
+    arg=''
+    if 'rsyslog' in conf_path :
+        if os.path.exists('/etc/rsyslog.d'):
+            txt = ''
+        elif os.path.exists(rsyslog_conf_path):    
+            txt = codecs.open(rsyslog_conf_path, 'r', 'utf8').read()
+            arg = '1'
+        else :
+            LG().Log('ERROR', 'Unable to read ' + rsyslog_conf_path + '.')
     elif not os.path.exists(conf_path):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return False
-    else :
-        txt = codecs.open(sysklog_conf_path, 'r', 'utf8').read()
-    facility_search = r'(#facility.*?25224\n)'
+#     else :
+#         txt = codecs.open(sysklog_conf_path, 'r', 'utf8').read()
+    facility_search = r'(#facility.*?\n.*?25224\n)|(^[^#].*?25224\n)'
     facility_re=re.compile(facility_search,re.M|re.S)
     for t in facility_re.findall(txt):
-        txt=txt.replace(t,'')
+        for r in t:
+            txt=txt.replace(r,'')
     for d in SyslogSource:
         facility_txt = '#facility = ' + d['Facility'] + '\n'
         for s in d['Severities']:
@@ -157,9 +171,9 @@ def UpdateSyslogConf(SyslogSource):
         txt += facility_txt
     codecs.open(conf_path, 'w', 'utf8').write(txt)
     if 'rsyslog' in conf_path:
-        os.system('sudo /opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh')
-    else: # sysklogd
-        os.system('sudo /opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh')
+        os.system('sudo /opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh '+arg)
+#     else: # sysklogd
+#         os.system('sudo /opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh')
     return True
     
 def ReadSyslogNGConf(SyslogSource):
