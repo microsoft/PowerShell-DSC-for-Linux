@@ -349,7 +349,7 @@ chgrp omsagent /var/opt/microsoft/omsconfig
 # Configure the consistency invoker for OMS
 # Add a approximately 0-5 minute delay before we attempt to invoke the consistency engine
 RANDOM_NUMBER=`openssl rand 1 | od -DAn`
-CRONTAB_LINE="*/5 * * * * omsagent sleep $RANDOM_NUMBER; /opt/omi/bin/OMSConsistencyInvoker"
+CRONTAB_LINE="*/5 * * * * omsagent echo \$\$ >  /var/opt/microsoft/omsagent/tmp/OMSConsistencyInvoker.pid; sleep $RANDOM_NUMBER; /opt/omi/bin/OMSConsistencyInvoker; rm -f  /var/opt/microsoft/omsagent/tmp/OMSConsistencyInvoker.pid"
 cat /etc/crontab | grep "OMSConsistencyInvoker" > /dev/null
 if [ $? -ne 0 ]; then
     # Unable to find in /etc/crontab, so just append
@@ -372,8 +372,21 @@ fi
 if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     # Remove all DSC specific data
     for module in `ls /opt/microsoft/${{SHORT_NAME}}/modules`; do
-	/opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py $module
+        /opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py $module
     done
+
+#if BUILD_OMS == BUILD_OMS
+    # If there's an OMSConsistencyInvoker sleep waiting to happen, kill it before we remove the package.
+    if [ -f  /var/opt/microsoft/omsagent/tmp/OMSConsistencyInvoker.pid ]; then
+        PIDVAL=`cat  /var/opt/microsoft/omsagent/tmp/OMSConsistencyInvoker.pid`
+        ps -p $PIDVAL -f | grep OMSConsistencyInvoker > /dev/null
+
+        if [ $? -eq 0 ]; then
+            kill $PIDVAL
+            rm -f /var/opt/microsoft/omsagent/tmp/OMSConsistenctInvoker.pid
+        fi
+    fi
+#endif
 fi
 
 %Postuninstall_999
