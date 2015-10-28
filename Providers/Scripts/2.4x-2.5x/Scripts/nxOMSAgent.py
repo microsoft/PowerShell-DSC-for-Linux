@@ -7,7 +7,7 @@ import os
 import imp
 import re
 import codecs
-import json
+
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 
@@ -32,7 +32,10 @@ def init_vars(HeartbeatIntervalSeconds, PerfObject):
             if perf['AllInstances'].value is None:
                 perf['AllInstances']=False
             else:
-                perf['AllInstances']=perf['AllInstances'].value.value
+                if perf['AllInstances'].value.value == 1:
+                    perf['AllInstances']=True
+                else:
+                    perf['AllInstances']=False
             perf['IntervalSeconds'] = perf['IntervalSeconds'].value.value
     
 def Set_Marshall(HeartbeatIntervalSeconds, PerfObject):
@@ -171,21 +174,8 @@ def UpdateOMSAgentConf(HeartbeatIntervalSeconds,PerfObject):
     codecs.open(conf_path, 'w', 'utf8').write(txt)
     os.system('sudo /opt/microsoft/omsagent/bin/service_control restart')
     
-def rm_unicode(obj):
-    if isinstance(obj, dict):
-        d={}
-        for k, v in obj.iteritems():
-            d[rm_unicode(k)] = rm_unicode(v)
-        return d
-    elif isinstance(obj, list):
-        return [rm_unicode(i) for i in obj]
-    elif isinstance(obj, unicode):
-        return obj.encode('utf-8')
-    else:
-        return obj
-
 def init_omi_map():
     global omi_map
     txt=codecs.open('/etc/opt/microsoft/omsagent/sysconf/omi_mapping.json', 'r', 'utf8').read()
-    omi_map=rm_unicode(json.loads(txt))
+    omi_map=eval(txt)
 
