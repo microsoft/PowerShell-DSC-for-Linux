@@ -73,21 +73,17 @@ def Set(HeartbeatIntervalSeconds, PerfObject):
     return [0]
 
 def Test(HeartbeatIntervalSeconds, PerfObject):
+    prune_perfs(PerfObject)
     NewHeartbeatIntervalSeconds, NewPerfs = ReadOMSAgentConf(HeartbeatIntervalSeconds, PerfObject)
     if NewHeartbeatIntervalSeconds != HeartbeatIntervalSeconds:
         return [-1]
+    PerfObject.sort()
     for perf in PerfObject:
         perf['PerformanceCounter'].sort()
-        found = False
-        for new_perf in NewPerfs:
-            new_perf['PerformanceCounter'].sort()
-            for k in perf.keys():
-                if k in new_perf.keys():
-                    if perf[k] == new_perf[k]:
-                        found = True
-            if found:
-                break
-        if not found:
+    NewPerfs.sort()
+    for perf in NewPerfs:
+        perf['PerformanceCounter'].sort()
+    if PerfObject != NewPerfs:
             return [-1]
     return [0]
 
@@ -129,20 +125,31 @@ def ReadOMSAgentConf(HeartbeatIntervalSeconds,PerfObject):
     for perf in PerfObject:
         perflist=[]
         for source in sources:
+            s_perf=[]
+            found = False
+            if len(source[1]):
+                s_perf = source[1].strip('(').strip(')').split('|')
             for p in perf['PerformanceCounter']:
-                if p not in perflist and p in source[1]:
-                    perflist.append(p)
-                    interval=int(source[2][:-1])
-                    if source[2][-1:] == 'm':
-                        interval*= 60
-                    inst=source[0]
+                if p in s_perf:
+                    found = True
+                    if p not in perflist:
+                        perflist.append(p)
+                        s_perf.remove(p)
+                        interval=int(source[2][:-1])
+                        if source[2][-1:] == 'm':
+                            interval*= 60
+                        inst=source[0]
+            if found:
+                for p  in s_perf:
+                    if p not in perflist:
+                        perflist.append(p)
         if len(perflist) > 0:
             if '.*' not in perf['InstanceName']:
                 inst=inst.replace('.*','*')
             all_instances=False
             if inst == '*':
                 all_instances=True
-            new_perfobj.append({'PerformanceCounter':perflist,'InstanceName':inst,'IntervalSeconds':interval,'AllInstances':all_instances})
+            new_perfobj.append({'PerformanceCounter':perflist,'InstanceName':inst,'IntervalSeconds':interval,'AllInstances':all_instances,'ObjectName':perf['ObjectName']})
     return new_heartbeat,new_perfobj
             
     
@@ -179,3 +186,13 @@ def init_omi_map():
     txt=codecs.open('/etc/opt/microsoft/omsagent/sysconf/omi_mapping.json', 'r', 'utf8').read()
     omi_map=eval(txt)
 
+def prune_perfs(PerfObject):
+    l=len(PerfObject)
+    i=0
+    while i < l :
+        if len(TranslatePerfs(PerfObject[i]['PerformanceCounter'])) == 0:
+            PerfObject.pop(i)
+            l-=1
+        else:
+            i+=1
+            
