@@ -35,9 +35,11 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/Register.py; intermediate/Scripts/Register.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/StatusReport.sh; intermediate/Scripts/StatusReport.sh; 755; root; root
 
-#if BUILD_OMS == BUILD_OMS
+#if BUILD_OMS == 1
 
 /opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; root; root
+/opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf; LCM/omsconfig.consistencyinvoker.conf; 644; root; root
+
 /opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; root; root
 /opt/microsoft/omsconfig/etc/omsconfig.reg; LCM/omsconfig.reg; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; root; root
@@ -173,12 +175,15 @@ SHLIB_EXT: 'so'
 /etc/opt/omi/conf;            755; root; root; sysdir
 /etc/opt/omi/conf/${{SHORT_NAME}};        755; root; root
 /etc/logrotate.d;        755; root; root; sysdir
+#if BUILD_OMS == 1
+/etc/opt/microsoft/omsagent/conf/omsagent.d; 755; root; root; sysdir
+#endif
 
 %Links
 /etc/logrotate.d/${{SHORT_NAME}}; /opt/microsoft/${{SHORT_NAME}}/etc/logrotate.conf; 644; root; root
 
 %Dependencies
-#if BUILD_OMS == BUILD_OMS
+#if BUILD_OMS == 1
 #if PACKAGE_TYPE == RPM
 omsagent >= 1.0.0
 #else
@@ -199,7 +204,7 @@ if [ -z "$LIBCURL_SO" ]; then
    PREREQ_ERROR=1
 fi
 
-#if BUILD_OMS != BUILD_OMS
+#if BUILD_OMS != 1
 # test if able to perform an hmac sha256 hash
 hmacSHA256=`echo -n "TestPlaintext" | openssl dgst -binary -sha256 -hmac "mykey"`
 if [ $? -ne 0 ]; then
@@ -267,7 +272,7 @@ mv $CONFIG_SYSCONFDIR/omiserver.conf_temp $CONFIG_SYSCONFDIR/omiserver.conf
 
 # Create links in omi's directories for DSC data
 
-#if BUILD_OMS == BUILD_OMS
+#if BUILD_OMS == 1
 mkdir -p $OMI_REGISTER_DIR/root-oms
 cp -f /opt/microsoft/${{SHORT_NAME}}/etc/*.reg $OMI_REGISTER_DIR/root-oms
 cp -f /opt/microsoft/${{SHORT_NAME}}/etc/omsconfig.reg $OMI_REGISTER_DIR/root-oms
@@ -288,7 +293,7 @@ cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.registration.mof  $CON
 cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.schema.mof  $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema/MSFT_LogResource
 
 for prov in ${{PROVIDERS}}; do
-#if BUILD_OMS == BUILD_OMS
+#if BUILD_OMS == 1
     cp -f /opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nx${prov}Resource.reg $OMI_REGISTER_DIR/root-oms
 #else
     cp -f /opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nx${prov}Resource.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
@@ -299,7 +304,7 @@ for prov in ${{PROVIDERS}}; do
     ln -fs /opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nx${prov}Resource.so $OMI_LIB/libMSFT_nx${prov}Resource.so
 done
 
-#if BUILD_OMS == BUILD_OMS
+#if BUILD_OMS == 1
 chown -R omsagent /etc/opt/omi/conf/${{SHORT_NAME}}
 #endif
 
@@ -345,31 +350,22 @@ else
     fi
 fi
 
-#if BUILD_OMS == BUILD_OMS
+#if BUILD_OMS == 1
 
 # Set up logging directory
 mkdir -p /var/opt/microsoft/omsconfig
 chown omsagent /var/opt/microsoft/omsconfig
 chgrp omsagent /var/opt/microsoft/omsconfig
 
-# Configure the consistency invoker for OMS
-# Add a approximately 0-5 minute delay before we attempt to invoke the consistency engine
-RANDOM_NUMBER=`openssl rand 1 | od -DAn`
-CRONTAB_LINE="*/5 * * * * omsagent echo \$\$ >  /var/opt/microsoft/omsagent/tmp/OMSConsistencyInvoker.pid; sleep $RANDOM_NUMBER; /opt/omi/bin/OMSConsistencyInvoker; rm -f  /var/opt/microsoft/omsagent/tmp/OMSConsistencyInvoker.pid"
-cat /etc/crontab | grep "OMSConsistencyInvoker" > /dev/null
-if [ $? -ne 0 ]; then
-    # Unable to find in /etc/crontab, so just append
-    echo "$CRONTAB_LINE" >> /etc/crontab
-else
-    # Find line with OMSConsistencyInvoker and replace with standard
-    cat /etc/crontab | sed "s%^.*OMSConsistencyInvoker.*%$CRONTAB_LINE%g" > /etc/crontab_tmp
-    mv /etc/crontab_tmp /etc/crontab
-fi
-
 # If omsadmin.conf exists, let's apply the metaconfig
 if [ -f /etc/opt/microsoft/omsagent/conf/omsadmin.conf ]; then
    su - omsagent -c "/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py"
 fi
+
+cp -f /opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
+chown omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
+chgrp omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
+/opt/microsoft/omsagent/bin/service_control reload
 
 #endif
 
@@ -380,19 +376,6 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     for module in `ls /opt/microsoft/${{SHORT_NAME}}/modules`; do
         /opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py $module
     done
-
-#if BUILD_OMS == BUILD_OMS
-    # If there's an OMSConsistencyInvoker sleep waiting to happen, kill it before we remove the package.
-    if [ -f  /var/opt/microsoft/omsagent/tmp/OMSConsistencyInvoker.pid ]; then
-        PIDVAL=`cat  /var/opt/microsoft/omsagent/tmp/OMSConsistencyInvoker.pid`
-        ps -p $PIDVAL -f | grep OMSConsistencyInvoker > /dev/null
-
-        if [ $? -eq 0 ]; then
-            kill $PIDVAL
-            rm -f /var/opt/microsoft/omsagent/tmp/OMSConsistenctInvoker.pid
-        fi
-    fi
-#endif
 fi
 
 %Postuninstall_999
@@ -409,7 +392,7 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $OMI_LIB/Scripts
     rm -rf /opt/microsoft/${{SHORT_NAME}}/
 
-#if BUILD_OMS == BUILD_OMS    
+#if BUILD_OMS == 1
     rm -rf $OMI_REGISTER_DIR/root-oms
     rm -f $OMI_HOME/bin/OMSConsistencyInvoker
     rm -f $OMI_LIB/libomsconfig.so    
@@ -423,6 +406,11 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
         rm -f $OMI_LIB/libMSFT_nx${prov}Resource.so
     done
 fi
+
+#if BUILD_OMS == 1
+rm -f /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
+/opt/microsoft/omsagent/bin/service_control reload
+#endif
 
 %Preinstall_0
 ${{SHELL_HEADER}}

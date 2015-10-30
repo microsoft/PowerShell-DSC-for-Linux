@@ -15,11 +15,13 @@ CONFIG_SYSCONFDIR_DSC=omsconfig
 DSC_NAMESPACE=root/oms
 OAAS_CERTPATH=/etc/opt/microsoft/omsagent/certs/oaas.crt
 PYTHON_PID_DIR=/var/opt/microsoft/omsconfig
+BUILD_OMS_VAL=1
 else
 CONFIG_SYSCONFDIR_DSC=dsc
 DSC_NAMESPACE=root/Microsoft/DesiredStateConfiguration
 OAAS_CERTPATH=$$CONFIG_CERTSDIR/oaas.crt
 PYTHON_PID_DIR=/var/opt/omi
+BUILD_OMS_VAL=0
 endif
 
 all:
@@ -67,7 +69,7 @@ dsc098: lcm098 providers
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
 
-	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS=$(BUILD_OMS)
+	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
 	-mkdir -p release; \
 	cp omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
@@ -90,7 +92,7 @@ dsc100: lcm100 providers
 	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
-	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS=$(BUILD_OMS)
+	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
 	-mkdir -p release; \
 	cp omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
