@@ -87,17 +87,17 @@ def Test(SyslogSource):
         NewSource=ReadSyslogNGConf(SyslogSource)
     else:
         NewSource=ReadSyslogConf(SyslogSource)
+    SyslogSource.sort()
     for d in SyslogSource:
         found = False
         if 'Severities' not in d.keys() or d['Severities'] is None or len(d['Severities']) is 0:
             d['Severities']=['none'] # redundant?
         d['Severities'].sort()
-        for n in NewSource:
-            n['Severities'].sort()
-            if d['Facility'] == n['Facility'] and d['Severities'] == n['Severities']:
-                found = True
-        if not found:
-            return [-1]
+    NewSource.sort()
+    for n in NewSource:
+        n['Severities'].sort()
+    if SyslogSource != NewSource:
+        return [-1]
     return [0]
 
 def Get(SyslogSource):
@@ -123,17 +123,26 @@ def ReadSyslogConf(SyslogSource):
             LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
             return out
         txt = codecs.open(conf_path, 'r', 'utf8').read()
-    count=0
+    facility_search = r'^(.*?)@.*?25224$'
+    facility_re=re.compile(facility_search,re.M)
+    for line in facility_re.findall(txt):
+        l=line.replace('=','')
+        l=l.replace('\t','').split(';')
+        sevs=[]
+        fac=l[0].split('.')[0]
+        for sev in l:
+            sevs.append(sev.split('.')[1])
+        out.append({'Facility':fac,'Severities':sevs})
+    return out
+
     for d in SyslogSource:
-        out.append({'Facility':d['Facility'],'Severities':[]})
-        facility_search = r'(?P<facility>'+d['Facility']+r')(?P<op>[.]=|[.])(?P<severity>.*?)[ ;\t]'
-        facility_re=re.compile(facility_search,re.M|re.S)
+        facility_re=re.compile(facility_search,re.M)
         s=facility_re.findall(txt)
         if 'Severities' not in d.keys() or d['Severities'] is None or len(d['Severities']) is 0:
             d['Severities']=['none']
         for m in s:
-            if m[2].encode('ascii','ignore') in d['Severities']:
-                (out[count])['Severities'].append(m[2].encode('ascii','ignore'))
+            if m[2] in d['Severities']:
+                (out[count])['Severities'].append(m[2])
         count+=1
     return out
 
@@ -150,8 +159,6 @@ def UpdateSyslogConf(SyslogSource):
     elif not os.path.exists(conf_path):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return False
-#     else :
-#         txt = codecs.open(sysklog_conf_path, 'r', 'utf8').read()
     facility_search = r'(#facility.*?\n.*?25224\n)|(^[^#].*?25224\n)'
     facility_re=re.compile(facility_search,re.M|re.S)
     for t in facility_re.findall(txt):
@@ -176,21 +183,16 @@ def ReadSyslogNGConf(SyslogSource):
         LG().Log('ERROR', 'Unable to read ' + syslog_ng_conf_path + '.')
         return out
     txt = codecs.open(syslog_ng_conf_path, 'r', 'utf8').read()
-    count=0
-    for d in SyslogSource:
-        out.append({'Facility':d['Facility'],'Severities':[]})
-        facility_search = r'filter f_'+d['Facility']+r'_oms.*?level[(](?P<severities>.*?)[)]'
-        facility_re=re.compile(facility_search,re.M|re.S)
-        s=facility_re.search(txt)
+    facility_search = r'^filter f_(?P<facility>.*?)_oms.*?level\((?P<severities>.*?)\)'
+    facility_re=re.compile(facility_search,re.M)
+    for s in facility_re.findall(txt):
         sevs=[]
-        if s is not None:
-            sevs=s.group('severities').encode('ascii','ignore').split(',')
-        if 'Severities' not in d.keys() or d['Severities'] is None or len(d['Severities']) is 0:
-            d['Severities']=['none']
-        for m in sevs:
-            if m in d['Severities']:
-                (out[count])['Severities'].append(m)
-        count+=1
+        if len(s[1]):
+            if ',' in s[1]:
+                sevs=s[1].split(',')
+            else:
+                sevs.append(s[1])
+        out.append({'Facility':s[0],'Severities':sevs})
     return out
     
 def UpdateSyslogNGConf(SyslogSource):
