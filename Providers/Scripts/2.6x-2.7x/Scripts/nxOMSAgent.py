@@ -29,6 +29,10 @@ def init_vars(HeartbeatIntervalSeconds, PerfObject):
                 perf['InstanceName']=''
             else:
                 perf['InstanceName']=perf['InstanceName'].value.encode('ascii','ignore')
+            if perf['ObjectName'].value is None:
+                perf['ObjectName']=''
+            else:
+                perf['ObjectName']=perf['ObjectName'].value.encode('ascii','ignore')
             if perf['AllInstances'].value is None:
                 perf['AllInstances']=False
             else:
@@ -52,6 +56,7 @@ def Get_Marshall(HeartbeatIntervalSeconds, PerfObject):
     for perf in NewPerf:
         if len(perf['PerformanceCounter']):
             perf['PerformanceCounter'] = protocol.MI_StringA(perf['PerformanceCounter'])
+        perf['ObjectName']=protocol.MI_String(perf['ObjectName'])
         perf['InstanceName']=protocol.MI_String(perf['InstanceName'])
         perf['AllInstances']=protocol.MI_Boolean(perf['AllInstances'])
         perf['IntervalSeconds']=protocol.MI_Uint16(perf['IntervalSeconds'])
@@ -77,6 +82,7 @@ def Test(HeartbeatIntervalSeconds, PerfObject):
     PerfObject.sort()
     for perf in PerfObject:
         perf['PerformanceCounter'].sort()
+        perf['AllInstances'] = True
     NewPerfs.sort()
     for perf in NewPerfs:
         perf['PerformanceCounter'].sort()
@@ -112,41 +118,25 @@ def ReadOMSAgentConf(HeartbeatIntervalSeconds,PerfObject):
     else :
         interval=None
     new_heartbeat = interval
-    perf_src_srch_str=r'\n<source>\n  type oms_omi.*?instance_regex "(.*?)".*?counter_name_regex "(.*?)".*?interval ([0-9]+[a-z]).*?</source>\n'
+    perf_src_srch_str=r'\n<source>\n  type oms_omi.*?object_name "(.*?)".*?instance_regex "(.*?)".*?counter_name_regex "(.*?)".*?interval ([0-9]+[a-z]).*?</source>\n'
     perf_src_srch=re.compile(perf_src_srch_str,re.M|re.S)
     new_perfobj=[]
     sources=perf_src_srch.findall(txt)
     inst=''
     interval=0
     all_instances=False
-    for perf in PerfObject:
-        perflist=[]
-        for source in sources:
-            s_perf=[]
-            found = False
-            if len(source[1]):
-                s_perf = source[1].strip('(').strip(')').split('|')
-            for p in perf['PerformanceCounter']:
-                if p in s_perf:
-                    found = True
-                    if p not in perflist:
-                        perflist.append(p)
-                        s_perf.remove(p)
-                        interval=int(source[2][:-1])
-                        if source[2][-1:] == 'm':
-                            interval*= 60
-                        inst=source[0]
-            if found:
-                for p  in s_perf:
-                    if p not in perflist:
-                        perflist.append(p)
-        if len(perflist) > 0:
-            if '.*' not in perf['InstanceName']:
-                inst=inst.replace('.*','*')
-            all_instances=False
-            if inst == '*':
-                all_instances=True
-            new_perfobj.append({'PerformanceCounter':perflist,'InstanceName':inst,'IntervalSeconds':interval,'AllInstances':all_instances,'ObjectName':perf['ObjectName']})
+    for source in sources:
+        s_perf=[]
+        found = False
+        if len(source[2]):
+            s_perf = source[2].strip('(').strip(')').split('|')
+        object_name=source[0]
+        interval=int(source[3][:-1])
+        if source[3][-1:] == 'm':
+            interval*= 60
+        inst=source[1]
+        inst=inst.replace('.*','*')
+        new_perfobj.append({'PerformanceCounter':s_perf,'InstanceName':inst,'IntervalSeconds':interval,'AllInstances':True,'ObjectName':object_name})
     return new_heartbeat,new_perfobj
             
     
@@ -187,7 +177,7 @@ def rm_unicode(obj):
     elif isinstance(obj, list):
         return [rm_unicode(i) for i in obj]
     elif isinstance(obj, unicode):
-        return obj.encode('utf-8')
+        return obj.encode('ascii','ignore')
     else:
         return obj
 
