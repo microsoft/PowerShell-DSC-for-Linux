@@ -160,7 +160,7 @@ def UpdateSyslogConf(SyslogSource):
         LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
         return False
     facility_search = r'(#facility.*?\n.*?25224\n)|(^[^#].*?25224\n)'
-    facility_re=re.compile(facility_search,re.M|re.S)
+    facility_re=re.compile(facility_search,re.M)
     for t in facility_re.findall(txt):
         for r in t:
             txt=txt.replace(r,'')
