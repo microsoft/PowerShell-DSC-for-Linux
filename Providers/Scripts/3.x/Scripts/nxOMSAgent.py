@@ -148,7 +148,7 @@ def UpdateOMSAgentConf(HeartbeatIntervalSeconds,PerfObject):
         txt=''
     heartbeat_srch_str=r'<source>.*?tag heartbeat.*?</source>\n'
     heartbeat_srch=re.compile(heartbeat_srch_str,re.M|re.S)
-    heartbeat_src='<source>\n  type exec\n  tag heartbeat.output\n  command /opt/microsoft/omsagent/bin/omsadmin.sh -b\n  format tsv\n  keys severity,message\n  run_interval ' + str(HeartbeatIntervalSeconds) + 's\n</source>\n'
+    heartbeat_src='<source>\n  type exec\n  tag heartbeat.output\n  command /opt/microsoft/omsagent/bin/omsadmin.sh -b > /dev/null\n  format tsv\n  keys severity,message\n  run_interval ' + str(HeartbeatIntervalSeconds) + 's\n</source>\n'
     txt=heartbeat_srch.sub(heartbeat_src,txt)
     d={}
     perf_src_srch_str=r'\n<source>\n  type oms_omi.*?</source>\n'
