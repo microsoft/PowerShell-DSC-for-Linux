@@ -590,111 +590,6 @@ def RunGetOutput(cmd, no_output, chk_err=True):
     Reports exceptions to Error if chk_err parameter is True
     Kill inactivite subprocess and children if 6 second interval is exceeded.
     """
-    class KillInactiveSubprocesses(object):
-        """
-        Sleep for 1 second to allow subprocess to start.
-        Check the strace of the subprocess and its children for 4 seconds.
-        Sleep for 1 again.  If the tree has not performed new activity
-        in 3 consecutive samples, kill the processes created by the subprocess call.
-        Thread is joined after subprocess returns.
-        """
-        def __init__(self):
-            self.t = None
-    
-        def start(self):
-            self.shutdown = False
-            self.t = threading.Thread(target = self.monitor)
-            self.t.setDaemon(True)
-            self.pid=os.getpid()
-            self.pid_path = '/proc/'+str(self.pid)+'/task/'+str(self.pid)+'/'
-            self.status={}
-            self.t.start()
-            
-        def monitor(self):
-            time.sleep(2)
-            same_state=0
-            last_status=''
-            curr_status=''
-            while not self.shutdown:
-                if not os.path.exists(self.pid_path):
-                    return
-                children=self.get_children()
-                LG().Log('INFO', 'Children:'+str(children))
-                if children == None or len(children) == 0 :
-                    return
-                running = False
-                cmd='timeout 4s strace'
-                for c in children:
-                    cmd+=' -p '+c
-                    pargs=[cmd]
-                    kwargs={'stderr':subprocess.STDOUT,'shell':True}
-                process = subprocess.Popen(stdout=subprocess.PIPE, *pargs, **kwargs)
-                output, unused_err = process.communicate()
-                process.poll()
-                last_status=curr_status
-                curr_status=output
-                LG().Log('INFO', '\n'+cmd+' is '+output.decode('utf8','ignore').encode('ascii', 'ignore')+'\n')
-                if last_status != curr_status:
-                    running=True
-                    same_state = -1
-                if not running and same_state > 1:
-                    self.kill_subtree(children)
-                    self.shutdown = True
-                if not self.shutdown:
-                    time.sleep(1)
-                same_state+=1
-            return
-            
-        def get_children(self):
-            """
-            If the subprocess is done, there will be nothing in list.
-            """
-            if not os.path.exists(self.pid_path):
-                return None
-            pids={}
-            pid=str(self.pid)
-            status_srch_parent=r'(?:.*?PPid:\t)([0-9]+)'
-            srch=re.compile(status_srch_parent,re.S|re.M)
-            for top, dirs, files in os.walk('/proc'):
-                for d in dirs:
-                    if d.isdigit() and int(d)>int(pid):
-                      pids[d]=None
-            for d in pids.keys():
-                path='/proc/'+d+'/status'
-                if not os.path.exists(path):
-                    continue
-                status=open(path).read()
-                pids[d]=srch.search(status).group(1)
-            children=[pid]
-            count = 0
-            while count < len(children):
-                for p in pids.keys():
-                    if pids[p] in children and p not in children:
-                        children.append(p)
-                count+=1
-            children.remove(pid)
-            children.sort(reverse=True)
-            return children
-
-        def kill_subtree(self,kill_list):
-            """
-            If the subprocess is done, there will be nothing to kill.
-            """
-            if not os.path.exists(self.pid_path):
-                return
-            for i in range(len(kill_list)):
-                try:
-                    p=kill_list.pop(0)
-                    Print('ERROR: Inactivity period exceeded.  Killing '+str(p), file=sys.stdout)
-                    LG().Log('ERROR', 'ERROR: Inactivity period exceeded.  Killing '+str(p))
-                    os.kill(int(p),9)
-                    Print('INFO', 'Killed '+str(p), file=sys.stdout)
-                    LG().Log('INFO', 'Killed '+str(p))
-                except Exception, e:
-                    Print('Error killing '+str(p)+repr(e), file=sys.stdout) 
-                    LG().Log('ERROR', 'Error killing '+str(p)+repr(e)) 
-            return
-    
     def check_output(no_output, *popenargs, **kwargs):
         """
         Backport from subprocess module from python 2.7
@@ -732,23 +627,10 @@ def RunGetOutput(cmd, no_output, chk_err=True):
 
     subprocess.check_output = check_output
     subprocess.CalledProcessError = CalledProcessError
-    fn=noop
-    kin=None
-    if os.path.exists('/usr/bin/timeout') and os.path.exists('/usr/bin/strace'):
-        kin=KillInactiveSubprocesses()
-        fn=kin.start
-    else :
-        Print(
-            'timeout or strace not found.  Inactiviy monitor disabled.', file=sys.stdout)
-        LG().Log(
-            'ERROR', 'timeout or strace not found.  Inactiviy monitor disabled.')
-
     try:
         output = subprocess.check_output(
-            no_output, cmd, stderr=subprocess.STDOUT, shell=True, preexec_fn=fn())
+            no_output, cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError, e:
-        if kin and kin.t:
-            kin.t.join()
         if chk_err:
             Print("CalledProcessError.  Error Code is " + str(e.returncode), file=sys.stdout)
             Print("CalledProcessError.  Command string was " + e.cmd, file=sys.stdout)
@@ -757,8 +639,6 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             return e.returncode, None
         else:
             return e.returncode, e.output.decode('utf8','ignore').encode('ascii', 'ignore')
-    if kin and kin.t:
-        kin.t.join()
     if no_output:
         return 0, None
     else:
