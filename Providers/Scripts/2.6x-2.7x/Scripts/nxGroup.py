@@ -10,6 +10,7 @@ import os
 import sys
 import codecs
 import imp
+import grp
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
@@ -231,7 +232,18 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
     group_entries = ReadPasswd("/etc/group")
     if group_entries is None:
         return [-1]
-
+    gid_option = ""
+    if len(PreferredGroupID):
+        addme = True
+        for k,v in group_entries.items():
+            if PreferredGroupID == v[1] and not GroupName == k:
+                Print("ERROR: PreferredGroupID <" + PreferredGroupID + "> in use by another group, PreferredGroupID will not be used.", file=sys.stderr)
+                LG().Log('ERROR', "PreferredGroupID <" + PreferredGroupID + "> in use by another group, PreferredGroupID will not be used.")
+                addme = False
+                break
+        if addme:
+            gid_option = "-g " + PreferredGroupID + " "
+        
     if Ensure == "absent":
         if GroupName in group_entries:
             # Delete group
@@ -247,15 +259,30 @@ def Set(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
         if GroupName not in group_entries:
             Print("Group does not exist. Creating it.", file=sys.stderr)
             LG().Log('INFO', "Group does not exist. Creating it.")
-            retval = os.system(groupadd_path + " " + GroupName)
+            retval = os.system(groupadd_path + " " + gid_option + GroupName)
             if retval != 0:
                 Print(
-                    groupadd_path + " " + GroupName + " failed.", file=sys.stderr)
-                LG().Log('ERROR', groupadd_path + " " + GroupName + " failed.")
+                    groupadd_path + " " + gid_option + GroupName + " failed.", file=sys.stderr)
+                LG().Log('ERROR', groupadd_path + " " + gid_option + GroupName + " failed.")
                 return [-1]
 
             # Reread /etc/group
             group_entries = ReadPasswd("/etc/group")
+        else:
+            # update the GID if needed.
+            if len(gid_option) and str(grp.getgrnam(GroupName)[2]) != PreferredGroupID:
+                Print("Group exists. Updating to PreferredGroupID <" + PreferredGroupID + ">.", file=sys.stderr)
+                LG().Log('INFO', "Group exists. Updating to PreferredGroupID <" + PreferredGroupID + ">.")
+                retval = os.system(groupmod_path + " " + gid_option + GroupName)
+                if retval != 0:
+                    Print(
+                        groupmod_path + " " + gid_option + GroupName + " failed.", file=sys.stderr)
+                    LG().Log('ERROR', groupmod_path + " " + gid_option + GroupName + " failed.")
+                    # Continue processing.
+
+            # Reread /etc/group
+            group_entries = ReadPasswd("/etc/group")
+            
         if len(Members[0]):
             if len(MembersToInclude[0]) or len(MembersToExclude[0]):
                 Print(
@@ -326,7 +353,8 @@ def Test(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferr
             Print("Group does not exist.", file=sys.stderr)
             LG().Log('ERROR', "Group does not exist.")
             return [-1]
-
+        if len(PreferredGroupID) and PreferredGroupID != group_entries[GroupName][1]:
+            return [-1]
         if len(Members[0]):
             if len(MembersToInclude[0]) or len(MembersToExclude[0]):
                 Print(
