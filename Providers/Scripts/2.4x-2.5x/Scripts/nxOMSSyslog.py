@@ -13,6 +13,7 @@ nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
 rsyslog_conf_path='/etc/rsyslog.conf'
+rsyslog_inc_conf_path='/etc/rsyslog.d/95-omsagent.conf'
 syslog_ng_conf_path='/etc/syslog-ng/syslog-ng.conf'
 sysklog_conf_path='/etc/syslog.conf'
 oms_syslog_ng_conf_path = '/etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf'
@@ -122,10 +123,13 @@ def ReadSyslogConf(SyslogSource):
     if not os.path.exists('/etc/rsyslog.d'):
         txt = codecs.open(rsyslog_conf_path, 'r', 'utf8').read()
     else:
-        if not os.path.exists(conf_path):
-            LG().Log('ERROR', 'Unable to read ' + conf_path + '.')
+        src_conf_path=conf_path
+        if os.path.exists(rsyslog_inc_conf_path):
+            src_conf_path=rsyslog_inc_conf_path
+        if not os.path.exists(src_conf_path):
+            LG().Log('ERROR', 'Unable to read ' + src_conf_path + '.')
             return out
-        txt = codecs.open(conf_path, 'r', 'utf8').read()
+        txt = codecs.open(src_conf_path, 'r', 'utf8').read()
     facility_search = r'^(.*?)@.*?25224$'
     facility_re=re.compile(facility_search,re.M)
     for line in facility_re.findall(txt):
