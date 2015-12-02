@@ -95,12 +95,12 @@ def Get(HeartbeatIntervalSeconds, PerfObject):
     NewHeartbeatIntervalSeconds, NewPerf = ReadOMSAgentConf(HeartbeatIntervalSeconds, PerfObject)
     return NewHeartbeatIntervalSeconds,NewPerf
 
-def TranslatePerfs(perfs):
+def TranslatePerfs(object_name,perfs):
     d={}
     for p in perfs:
         for cname in omi_map:
             for prop in cname['CimProperties']:
-                if p == prop['CounterName'] or p == prop['CimPropertyName'] :
+                if ( p == prop['CounterName'] or p == prop['CimPropertyName'] ) and cname['ObjectName'] == object_name:
                     if cname['ObjectName'] not in d.keys():
                         d[cname['ObjectName']]=[p]
                     else:
@@ -157,7 +157,7 @@ def UpdateOMSAgentConf(HeartbeatIntervalSeconds,PerfObject):
         txt=txt.replace(source,'')
     new_source=''
     for perf in PerfObject:
-        d=TranslatePerfs(perf['PerformanceCounter'])
+        d=TranslatePerfs(perf['ObjectName'],perf['PerformanceCounter'])
         for k in d.keys():
             names='('+functools.reduce(lambda x, y: x + '|' + y,d[k])+')'
             instances=re.sub(r'([><]|&gt|&lt)','',perf['InstanceName'])
@@ -178,7 +178,7 @@ def prune_perfs(PerfObject):
     l=len(PerfObject)
     i=0
     while i < l :
-        if len(TranslatePerfs(PerfObject[i]['PerformanceCounter'])) == 0:
+        if len(TranslatePerfs(PerfObject[i]['ObjectName'], PerfObject[i]['PerformanceCounter'])) == 0:
             PerfObject.pop(i)
             l-=1
         else:
