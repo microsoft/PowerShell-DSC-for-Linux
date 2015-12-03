@@ -1,0 +1,25 @@
+/*
+@TargetNode='10.0.2.2'
+@GeneratedBy=matt
+@GenerationDate=01/07/2015 15:32:47
+@GenerationHost=EGWIN7
+*/
+
+instance of MSFT_nxFileLineResource as $MSFT_nxFileLineResource1ref
+{
+  ResourceID = "[nxFileLine]myTestFileLine";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+  FilePath="/tmp/joe.txt";
+  DoesNotContainPattern="coolest";
+  ContainsLine="joe is cool";
+};
+
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};
+

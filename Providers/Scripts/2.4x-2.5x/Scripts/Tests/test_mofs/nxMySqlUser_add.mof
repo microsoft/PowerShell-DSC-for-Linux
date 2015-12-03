@@ -1,0 +1,18 @@
+
+instance of MSFT_nxMySqlUserResource as $MSFT_nxMySqlUserResource1ref
+{
+  ResourceID = "[nxMySqlUser]myTestSqlUser";
+  ModuleName = "nx";
+  ModuleVersion = "1.0";
+  Name="jojoma@127.0.0.1";
+  Credential = "jojoma";
+  ConnectionCredential = "root";
+  Ensure = "Present";
+};
+instance of OMI_ConfigurationDocument
+{
+ Version="1.0.0";
+ Author="matt";
+ GenerationDate="01/07/2015 15:32:47";
+ GenerationHost="EGWIN7";
+};
