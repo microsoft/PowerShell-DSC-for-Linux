@@ -499,20 +499,14 @@ MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray,
         }
     }
 
-    /*Test6*/
-    for (xCount = 0 ; xCount < miClassArray->size ; xCount++)
-    {
-        if(bResourceVisited[xCount] == MI_FALSE || NitsShouldFault(NitsHere(), NitsAutomatic))
-        {
-            DSC_free(bResourceVisited);
-            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NOTREFERRED);
-        }
-    }
-
     DSC_free(bResourceVisited);
 
     /*Test1*/
-    if (configurationResourceCount != 1  || NitsShouldFault(NitsHere(), NitsAutomatic))
+    if (configurationResourceCount < 1 || NitsShouldFault(NitsHere(), NitsAutomatic))
+    {
+        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NORES);
+    }
+    if (configurationResourceCount > 1  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_ONERES);
     }
