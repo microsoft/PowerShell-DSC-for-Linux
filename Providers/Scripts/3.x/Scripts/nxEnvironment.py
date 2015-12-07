@@ -241,7 +241,7 @@ def AddOrDelVar(p):
                 if l.startswith('PATH=$PATH:"' + p.Value):
                     # is is already there - keep it if present requested
                     # otherwise skip
-                    if p.Ensure == 'Present':
+                    if p.Ensure == 'present':
                         found = True
                         n += l
                     else:

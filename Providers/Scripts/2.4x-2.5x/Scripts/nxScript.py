@@ -315,13 +315,13 @@ def Get(GetScript, SetScript, TestScript, User, Group):
         if uid is None:
             Print('ERROR: Unknown UID for ' + User, file=sys.stderr)
             LG().Log('ERROR', 'ERROR: Unknown UID for ' + User)
-            return [-1]
+            return [-1, GetScript, SetScript, TestScript, User, Group, 1]
     if Group:
         gid = GetGID(Group)
         if gid is None:
             Print('ERROR: Unknown GID for ' + Group, file=sys.stderr)
             LG().Log('ERROR', 'ERROR: Unknown GID for ' + Group)
-            return [-1]
+            return [-1, GetScript, SetScript, TestScript, User, Group, 1]
 
     WriteFile(path, GetScript)
     os.chmod(path, stat.S_IXUSR | stat.S_IRUSR | stat.S_IXGRP | stat.S_IRGRP)
