@@ -59,6 +59,7 @@ class DSCLog(object):
         line = "%04u/%02u/%02u %02u:%02u:%02u: %s: %s:\n%s\n" % (t.tm_year,
             t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,
             self.levels[log_level][1], place, message)
+        error = None
         try:
             F, error = opened_w_error(self.file_path, 'a')
             if error:

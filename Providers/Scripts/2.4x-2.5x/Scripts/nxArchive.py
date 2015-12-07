@@ -327,14 +327,15 @@ def Set(DestinationPath, SourcePath, Ensure, Force, Checksum):
                 'ERROR: SourcePath<' + SourcePath + '> is not a valid tarfile')
             LG().Log('ERROR', 'ERROR: SourcePath<' +
                     SourcePath + '> is not a valid tarfile')
+        arch = None
         try:
             arch = tarfile.open(SourcePath, 'r')
         except Exception, error:
             if arch is not None:
                 arch.close()
-            Print("Exception opening tarfile" + SourcePath +
+            Print("Exception opening tarfile " + SourcePath +
                   " Error: " + str(error), file=sys.stderr)
-            LG().Log('ERROR', "Exception opening tarfile" + SourcePath +
+            LG().Log('ERROR', "Exception opening tarfile " + SourcePath +
                     " Error: " + str(error))
             return False
         for n in arch.getnames():

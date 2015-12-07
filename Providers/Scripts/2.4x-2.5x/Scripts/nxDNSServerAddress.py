@@ -204,10 +204,10 @@ class AbstractDistro(object):
         self.mode='single'
         
     def get_addrs(self,addrs,mode):
-        lines=FindStringInFile(self.file,'('+self.dns_srch+'.*?$)',True) # use multiline
+        line_list=FindStringInFile(self.file,'('+self.dns_srch+'.*?$)',True) # use multiline
         naddrs=[]
         if len(addrs) == 0:
-            for l in lines:
+            for l in line_list:
                 l=l.replace(self.dns_srch,'')
                 l = l.strip('"')
                 l = l.strip("'")
@@ -216,8 +216,9 @@ class AbstractDistro(object):
                     naddrs.append(a)
             return naddrs
         for a in addrs:
-            if a in lines:
-                naddrs.append(a)
+            for l in line_list:
+                if a in l:
+                    naddrs.append(a)
         return naddrs
     
     def add_addrs(self,addrs,mode):
@@ -255,11 +256,14 @@ class AbstractDistro(object):
         elif 'single' in mode:
             if 'quoted' in mode:
                 delim='"'
-            l=self.dns_srch
-            for a in new_addrs:
-                l+=a
-                l+=' '
-            l+=delim
+            if len(new_addrs):
+                l=self.dns_srch
+                for a in new_addrs:
+                    l+=a
+                    l+=' '
+                l+=delim
+            else:
+                l=''
             ReplaceStringInFile(self.file,self.dns_srch+'.*',l)
         return True
             
@@ -280,8 +284,13 @@ class AbstractDistro(object):
         return [0]
     
     def Get(self,addrs,Ensure,AddressFamily):
-        return 0,self.get_addrs(addrs,self.mode)
-            
+        new_addrs=self.get_addrs(addrs,self.mode)
+        if len(new_addrs) == 0:
+            Ensure == 'Absent'
+            new_addrs=addrs
+        else:
+            Ensure == 'Present'
+        return 0,new_addrs
 
 class SuSEDistro(AbstractDistro):
     def __init__(self):
