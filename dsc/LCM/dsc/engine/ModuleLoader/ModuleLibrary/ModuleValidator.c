@@ -315,209 +315,265 @@ MI_Result ValidateProviderRegistrationAgainstSchema(_In_ MI_ClassA *miClassArray
     return r;
 }
 
-
-MI_Result ValidateSchema(_In_ MI_ClassA *miClassArray,
+MI_Result ValidateSchema(_In_ MI_ClassA *allClasses,
                          _In_ MI_Uint32 classIndex,
-                         _Inout_updates_(resSize) MI_Boolean *bResourceVisited,
+                         _Inout_updates_(resSize) MI_Boolean *visitedClassMap,
                          _In_ MI_Uint32 resSize,
-                         _In_ MI_Boolean bConfigurationResource,
+                         _In_ MI_Boolean classIsConfigurationResource,
                          _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    MI_Result r = MI_RESULT_OK;
-    MI_Uint32 xCount = 0, yCount = 0;
+    MI_Result result = MI_RESULT_OK;
+    MI_Uint32 i = 0, j = 0;
     const MI_ClassDecl *classToCheck = NULL;
     MI_Uint32 keyPropertyCount = 0;
     MI_Uint32 propertyBitMask = 0; // 1 = Read, 2 = Write, 4 = Key, 8 = Required
-     if( extendedError )
+    
+    if (extendedError)
+    {
         *extendedError = NULL;
+    }
 
-    //PrintClass(miClassArray->data[classIndex]);
-
-    if( classIndex >= miClassArray->size || NitsShouldFault(NitsHere(), NitsAutomatic))
+    if (classIndex >= allClasses->size || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_SCHEMA_INVPARAM);
     }
 
-    classToCheck = miClassArray->data[classIndex]->classDecl;
-    DSC_EventWriteValidatingSchema(classToCheck->name,classIndex,miClassArray->size);
+    classToCheck = allClasses->data[classIndex]->classDecl;
+    DSC_EventWriteValidatingSchema(classToCheck->name, classIndex, allClasses->size);
 
-    /*Test7*/
-    if( classToCheck->numMethods != 0  || NitsShouldFault(NitsHere(), NitsAutomatic))
+    // Rule 1: 
+    // A given class must not have any defined methods.
+
+    if (classToCheck->numMethods != 0 || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_SCHEMA_NOMETHOD);
     }
 
-    /*Test 4*/
-    // validate class qualifiers
-    for( xCount = 0 ; xCount < classToCheck->numQualifiers; xCount++)
+    // Rule 2: 
+    // A given class must have the ClassVersion qualifier.
+
+    for (i = 0; i < classToCheck->numQualifiers; i++)
     {
-        if( Tcscasecmp(QUALIFIER_VERSION, classToCheck->qualifiers[xCount]->name) == 0 )
+        if (Tcscasecmp(QUALIFIER_VERSION, classToCheck->qualifiers[i]->name) == 0)
         {
             break;
         }
     }
-    if( xCount == classToCheck->numQualifiers || NitsShouldFault(NitsHere(), NitsAutomatic))
+
+    if (i == classToCheck->numQualifiers || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_NOT_FOUND, extendedError, ID_MODMAN_VALIDATE_SCHEMA_VERSIONQUAL);
     }
 
-    /*Test 2*/
-    /*Rule1: Read and (Key or Required or Write) can't coexist*/
-    /*Rule2: Write and (Read) can't coexist*/
-    /*Rule3: Key and (Read) can't coexist*/
-    /*Rule4: Required and (Read) can't coexist*/
-    for( xCount = 0 ; xCount < classToCheck->numProperties; xCount++)
+    for (i = 0; i < classToCheck->numProperties; i++)
     {
         propertyBitMask = 0;
-        /*Test5: Reference types are not supported.*/
-        if( classToCheck->properties[xCount]->type == MI_REFERENCE ||
-            classToCheck->properties[xCount]->type == MI_REFERENCEA  || NitsShouldFault(NitsHere(), NitsAutomatic))
+
+        // Rule 3:
+        // A given class property must not be a reference type.
+
+        if (classToCheck->properties[i]->type == MI_REFERENCE ||
+            classToCheck->properties[i]->type == MI_REFERENCEA || 
+            NitsShouldFault(NitsHere(), NitsAutomatic))
         {
             return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_SCHEMA_NOSUPP_REF);
         }
-        if( classToCheck->properties[xCount]->flags & MI_FLAG_READONLY )
+
+        // Rule 4:
+        // A given class property that has the Read qualifier must not also 
+        // have any of the Write, Required, or Key qualifiers.
+
+        if (classToCheck->properties[i]->flags & MI_FLAG_READONLY)
         {
             propertyBitMask |= PROPERTY_BITMASK_READ;
         }
-        if( classToCheck->properties[xCount]->flags & MI_FLAG_KEY )
+
+        if (classToCheck->properties[i]->flags & MI_FLAG_KEY)
         {
             propertyBitMask |= PROPERTY_BITMASK_KEY;
             keyPropertyCount++;
         }
-        if( classToCheck->properties[xCount]->flags & MI_FLAG_REQUIRED )
+
+        if (classToCheck->properties[i]->flags & MI_FLAG_REQUIRED)
         {
             propertyBitMask |= PROPERTY_BITMASK_REQUIRED;
         }
 
-        for( yCount = 0 ; yCount < classToCheck->properties[xCount]->numQualifiers; yCount++)
+        for (j = 0; j < classToCheck->properties[i]->numQualifiers; j++)
         {
-            const MI_Qualifier *classQual = classToCheck->properties[xCount]->qualifiers[yCount];
-            if( Tcscasecmp(classQual->name, QUALIFIER_WRITE) == 0 )
+            const MI_Qualifier *classQual = classToCheck->properties[i]->qualifiers[j];
+
+            if (Tcscasecmp(classQual->name, QUALIFIER_WRITE) == 0)
             {
                 propertyBitMask |= PROPERTY_BITMASK_WRITE;
                 break;
             }
         }
 
-        // Do actual validation
-        if( ((propertyBitMask & PROPERTY_BITMASK_READ) && ( (propertyBitMask & PROPERTY_BITMASK_ALL) & ~(PROPERTY_BITMASK_READ)))  || (NitsShouldFault(NitsHere(), NitsAutomatic)))
+        if (((propertyBitMask & PROPERTY_BITMASK_READ) && ((propertyBitMask & PROPERTY_BITMASK_ALL) & ~(PROPERTY_BITMASK_READ))) || 
+            NitsShouldFault(NitsHere(), NitsAutomatic))
         {
             return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_SCHEMA_NOMANDATORY_QUALIFIER);
         }
 
-        /*Test6: Embedded object type support*/
-        if( classToCheck->properties[xCount]->className != NULL)
+        // Recursively validate classes that are embedded in this class
+        if (classToCheck->properties[i]->className != NULL)
         {
-            // check for class in existing classes
-            for( yCount = 0 ; yCount < miClassArray->size && yCount < resSize; yCount++)
+            // Check for class in existing classes
+            for (j = 0; j < allClasses->size && j < resSize; j++)
             {
-                if( Tcscasecmp(miClassArray->data[yCount]->classDecl->name, classToCheck->properties[xCount]->className) == 0 )
+                if (Tcscasecmp(allClasses->data[j]->classDecl->name, classToCheck->properties[i]->className) == 0)
                 {
-                    if( bResourceVisited[yCount] == MI_TRUE) // Already processed
+                    if (visitedClassMap[j] == MI_FALSE)
                     {
-                        break;
-                    }
-                    else
-                    {
-                        bResourceVisited[yCount] = MI_TRUE;
-                        r = ValidateSchema(miClassArray, yCount, bResourceVisited, resSize, MI_FALSE,extendedError);
-                        if( r != MI_RESULT_OK)
+                        visitedClassMap[j] = MI_TRUE;
+                        result = ValidateSchema(allClasses, j, visitedClassMap, resSize, MI_FALSE, extendedError);
+
+                        if (result != MI_RESULT_OK)
                         {
-                            return r;
+                            return result;
                         }
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+    
+    // Recursively validate classes that derive from this class
+    if (classIsConfigurationResource == MI_FALSE)
+    {
+        for (i = 0; i < allClasses->size && i < resSize; i++)
+        {
+            if (allClasses->data[i]->classDecl->superClass &&
+                Tcscasecmp(allClasses->data[i]->classDecl->superClass, classToCheck->name) == 0)
+            {
+                if (visitedClassMap[i] == MI_FALSE)
+                {
+                    visitedClassMap[i] = MI_TRUE;
+                    result = ValidateSchema(allClasses, i, visitedClassMap, resSize, MI_FALSE, extendedError);
+
+                    if (result != MI_RESULT_OK)
+                    {
+                        return result;
                     }
                 }
             }
-
         }
     }
-    if( bConfigurationResource &&
-        Tcscasecmp(miClassArray->data[classIndex]->classDecl->name, METACONFIG_CLASSNAME) != 0 &&
-        Tcscasecmp(miClassArray->data[classIndex]->classDecl->name, MSFT_LOGRESOURCENAME) != 0)
+
+    // Rule 5:
+    // A given class that is a resource class must have at least one defined
+    // property that has the Key qualifier.
+    // NOTE: Exceptions made for some 'built-in' classes.
+
+    else if (Tcscasecmp(classToCheck->name, METACONFIG_CLASSNAME) != 0 &&
+             Tcscasecmp(classToCheck->name, MSFT_LOGRESOURCENAME) != 0)
     {
-        if( keyPropertyCount < 1  || NitsShouldFault(NitsHere(), NitsAutomatic))
+        if (keyPropertyCount < 1  || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
             return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_SCHEMA_NOKEY);
         }
     }
 
-    return r;
-
+    return result;
 }
 
-MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray,
+MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *allClasses,
                                     _Outptr_result_maybenull_ MI_Instance **extendedError )
 {
-    MI_Result r = MI_RESULT_OK;
-    MI_Uint32 xCount = 0;
+    MI_Result result = MI_RESULT_OK;
+    MI_Uint32 i = 0;
     MI_Uint32 configurationResourceCount = 0;
-    MI_Boolean *bResourceVisited = NULL;
-    // Test1: Exactly 1 resource per MOF file
-    // Test2: All properties should contain qualifiers read, write, required or write and at least 1 key property.
-    // Test3: Embedded object and its associated property validation
-    // Test4: Version qualifier should be present
-    // Test5: Only supported data type is available.
-    // Test6: No reduntant class ( all classes should refered from resource class).
-    // Test7: Class shouldn't contain any method.
+    MI_Boolean *visitedClassMap = NULL;
+    MI_ClassDecl *classToCheck = NULL;
+
+    // Rules
+    // ----------------------------------------------------------------------------
+    // 1. A given class must not have any defined methods. 
+    // 2. A given class must have the ClassVersion qualifier.
+    // 3. A given class property must not be a reference type.
+    // 4. A given class property that has the Read qualifier must not also 
+    //    have any of the Write, Required, or Key qualifiers.
+    // 5. A given class that is a resource class must have at least one defined
+    //    property that has the Key qualifier.
+    // 6. A given class must either be a resource class or a class that is
+    //    referenced by a resource class, either directly by an EmbeddedInstance
+    //    qualifier or indirectly by a combination of EmbeddedInstance qualifiers
+    //    and class inheritance.
+    // 7. There must be exactly 1 resource class per MOF file.
 
     if (extendedError == NULL)
     {
         return MI_RESULT_INVALID_PARAMETER;
     }
-    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+    
+    // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+    *extendedError = NULL;  
 
-    if (miClassArray == NULL || miClassArray->size == 0  || NitsShouldFault(NitsHere(), NitsAutomatic))
+    if (allClasses == NULL || allClasses->size == 0 || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NORES);
     }
 
-    DSC_EventWriteValidatingDSCProviderSchema(miClassArray->size);
+    DSC_EventWriteValidatingDSCProviderSchema(allClasses->size);
 
-    bResourceVisited = (MI_Boolean*)DSC_malloc(sizeof(MI_Boolean) * miClassArray->size, NitsHere());
-    if (bResourceVisited == NULL )
+    visitedClassMap = (MI_Boolean*)DSC_malloc(sizeof(MI_Boolean) * allClasses->size, NitsHere());
+
+    if (visitedClassMap == NULL)
     {
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
     }
 
-    memset(bResourceVisited, MI_FALSE, sizeof(MI_Boolean) * miClassArray->size );
+    memset(visitedClassMap, MI_FALSE, sizeof(MI_Boolean) * allClasses->size);
 
-    /*Start Test*/
-    for (xCount = 0 ; xCount < miClassArray->size ; xCount++)
+    // Loop through all declared classes. For each one that inherits from OMI_BaseResource or MSFT_DSCMetaConfiguration,
+    // increment the 'resource found' count and mark the class as having been already visited. Then, recursively
+    // validate the class and any trees of classes it references with the EmbeddedInstance qualifier.
+    for (i = 0; i < allClasses->size; i++)
     {
-        if ((miClassArray->data[xCount]->classDecl->superClass &&
-             Tcscasecmp(BASE_RESOURCE_CLASSNAME, miClassArray->data[xCount]->classDecl->superClass) == 0) ||
-             Tcscasecmp(METACONFIG_CLASSNAME, miClassArray->data[xCount]->classDecl->name) == 0)
+        classToCheck = allClasses->data[i]->classDecl;
+
+        if ((classToCheck->superClass && Tcscasecmp(BASE_RESOURCE_CLASSNAME, classToCheck->superClass) == 0) ||
+            Tcscasecmp(METACONFIG_CLASSNAME, classToCheck->name) == 0)
         {
-            bResourceVisited[xCount] = MI_TRUE;
+            visitedClassMap[i] = MI_TRUE;
             configurationResourceCount++;
-            r = ValidateSchema(miClassArray, xCount, bResourceVisited, miClassArray->size, MI_TRUE, extendedError);
-            if (r != MI_RESULT_OK)
+            result = ValidateSchema(allClasses, i, visitedClassMap, allClasses->size, MI_TRUE, extendedError);
+
+            if (result != MI_RESULT_OK)
             {
-                DSC_free(bResourceVisited);
-                return r;
+                goto end;
             }
         }
     }
 
-    /*Test6*/
-    for (xCount = 0 ; xCount < miClassArray->size ; xCount++)
+    // Rule 6: 
+    // A given class must either be a resource class or a class that is
+    // referenced by a resource class, either directly by an EmbeddedInstance
+    // qualifier or indirectly by a combination of EmbeddedInstance qualifiers
+    // and class inheritance.
+    for (i = 0; i < allClasses->size; i++)
     {
-        if(bResourceVisited[xCount] == MI_FALSE || NitsShouldFault(NitsHere(), NitsAutomatic))
+        if (visitedClassMap[i] == MI_FALSE || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
-            DSC_free(bResourceVisited);
-            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NOTREFERRED);
+            result = GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NOTREFERRED);
+            goto end;
         }
     }
 
-    DSC_free(bResourceVisited);
-
-    /*Test1*/
+    // Rule 7: 
+    // There must be exactly 1 resource class per MOF file.
     if (configurationResourceCount != 1  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
-        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_ONERES);
+        result = GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_ONERES);
+        goto end;
     }
 
-    return r;
+    end:
+    DSC_free(visitedClassMap);
+    return result;
 }
 
 MI_Result ValidateDSCDocumentInstance(_In_ MI_InstanceA *miInstanceArray,
