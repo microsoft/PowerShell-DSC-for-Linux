@@ -23,10 +23,13 @@ Prerequisites
     b. These build tools:
         i.  GNU Make
         ii. g++
-		iii. Python version 2.5 or later, the package python-devel
-	c. Open Management Infrastructure (OMI) 1.0.8. http://theopengroup.org/software/omi
-		i. pam-devel
-		ii. openssl-devel
+        iii. Python version 2.5 or later, the package python-devel
+    c. Open Management Infrastructure (OMI) 1.0.8. http://theopengroup.org/software/omi
+        i. pam-devel
+        ii. openssl-devel
+    d. Build dependencies:
+        i. (Ubuntu 14) libcurl4-openssl-dev
+        i. (Ubuntu 15) libcurl4-gnutls-dev
 
 
 Building and installing the Local Configuration Manager and Linux Resource Providers
