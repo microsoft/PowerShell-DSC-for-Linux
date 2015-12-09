@@ -28,7 +28,8 @@ Prerequisites
         i. pam-devel
         ii. openssl-devel
     d. Build dependencies:
-        i. (Ubuntu) libcurl4-openssl-dev
+        i. (Ubuntu 14) libcurl4-openssl-dev
+        i. (Ubuntu 15) libcurl4-gnutls-dev
 
 
 Building and installing the Local Configuration Manager and Linux Resource Providers
