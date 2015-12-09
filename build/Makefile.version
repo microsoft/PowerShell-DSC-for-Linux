@@ -2,19 +2,12 @@
 #--------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation.  All rights reserved.
 #--------------------------------------------------------------------------------
-# 2007-08-29
+# 2015-10-06
 #--------------------------------------------------------------------------------
 
-# Build Version Information
-
-SCX_BUILDVERSION_MAJOR=1
-SCX_BUILDVERSION_MINOR=0
-SCX_BUILDVERSION_PATCH=0
-SCX_BUILDVERSION_BUILDNR=665
-SCX_BUILDVERSION_DATE=20151130
-SCX_BUILDVERSION_STATUS=Developer_Build
-
-
-
-#-------------------------------- End of File -----------------------------------
-
+DSC_BUILDVERSION_MAJOR=1
+DSC_BUILDVERSION_MINOR=2
+DSC_BUILDVERSION_PATCH=0
+DSC_BUILDVERSION_BUILDNR=1
+DSC_BUILDVERSION_DATE=20151208
+DSC_BUILDVERSION_STATUS=Developer_Build
