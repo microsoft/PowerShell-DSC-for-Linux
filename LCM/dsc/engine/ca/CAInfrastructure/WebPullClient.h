@@ -24,6 +24,7 @@ struct SSLOptions
     MI_Boolean NoSSLv3;
     char cipherList[MAX_SSLOPTION_STRING_LENGTH + 1];
     char CABundle[MAX_SSLOPTION_STRING_LENGTH + 1];
+    char Proxy[MAX_SSLOPTION_STRING_LENGTH + 1];
 };
 
 enum GetActionStatusCodeTypes

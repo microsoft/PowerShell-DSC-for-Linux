@@ -537,3 +537,12 @@ INTERNAL_Intlstr_Define0( ID_PULL_CERTOPTS_NOT_SUPPORTED,ID_PULL_CERTOPTS_NOT_SU
 INTERNAL_Intlstr_Define0( ID_PULL_FAILEDTOGENERATECERT, ID_PULL_FAILEDTOGENERATECERT,"Failed to generate certificate and private key for pull server communication.")
 
 INTERNAL_Intlstr_Define0( ID_CANNOT_RUN_OMSCONFIG_AS_ROOT, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT,"Unable to run omsconfig configurations as root.  Please use omsagent credentials.")
+
+
+INTERNAL_Intlstr_Define0( ID_PULL_PROXYTOOLONG,
+			  ID_PULL_PROXYTOOLONG,
+                 	  "PROXY is too long in " CONFIG_SYSCONFDIR "/dsc/dsc.conf. It must be 4096 characters or less.")
+
+INTERNAL_Intlstr_Define0( ID_PULL_PROXYNOTSUPPORTED,
+			  ID_PULL_PROXYNOTSUPPORTED,
+                 	  "The PROXY option is not supported by the version of cURL installed to this system. Please either install a more recent version of libcurl, or disable the PROXY option in " CONFIG_SYSCONFDIR "/dsc/dsc.conf.")

@@ -131,11 +131,13 @@ struct SSLOptions g_sslOptions;
 static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     Conf* conf;
+    MI_Char* text;
 
     g_sslOptions.DoNotCheckCertificate = MI_FALSE;
     g_sslOptions.NoSSLv3 = MI_FALSE;
     g_sslOptions.cipherList[0] = '\0';
     g_sslOptions.CABundle[0] = '\0';
+    g_sslOptions.Proxy[0] = '\0';
     
     conf = Conf_Open(OMI_CONF_FILE_PATH);
     if (!conf)
@@ -213,6 +215,19 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
             memcpy(g_sslOptions.CABundle, value, valueLength);
             g_sslOptions.CABundle[valueLength] = '\0';
         }
+#if !defined(BUILD_OMS)
+        else if (strcasecmp(key, "PROXY") == 0)
+        {
+            size_t valueLength = strlen(value);
+            if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
+            {
+                Conf_Close(conf);
+                return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_PROXYTOOLONG);
+            }
+            memcpy(g_sslOptions.Proxy, value, valueLength);
+            g_sslOptions.Proxy[valueLength] = '\0';
+        }
+#endif
         else
         {
             continue;
@@ -220,6 +235,26 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
     }
 
     Conf_Close(conf);
+
+#if defined(BUILD_OMS)
+    // TODO: read from OMS's config file to read in the Proxy info
+    size_t valueLength;
+    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsadmin/proxy.conf";
+
+    if (File_ExistT(omsProxyFileLocation) != -1)
+    {
+	text = InhaleTextFile(omsProxyFileLocation);
+	valueLength = strlen(text);
+	if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
+	{
+	    DSC_free(text);
+	    return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_PROXYTOOLONG);
+	}
+	memcpy(g_sslOptions.Proxy, text, valueLength);
+	g_sslOptions.Proxy[valueLength] = '\0';
+	DSC_free(text);
+    }
+#endif
 
     return MI_RESULT_OK;
 
@@ -1220,7 +1255,44 @@ MI_Char *GetSystemUuid()
     fread(systemUUid , 1, JOB_UUID_LENGTH, fp);
             File_Close(fp);        
     return systemUUid;
-        }        
+        }      
+
+MI_Result SetGeneralCurlOptions(CURL* curl,
+				_Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    CURLcode res;
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    
+    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    }
+    else
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    }
+
+    if (g_sslOptions.CABundle[0] != '\0')
+    {
+        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
+        if (res != CURLE_OK)
+        {
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
+        }
+    }
+
+    if (g_sslOptions.Proxy[0] != '\0')
+    {
+	res = curl_easy_setopt(curl, CURLOPT_PROXY, g_sslOptions.Proxy);
+        if (res != CURLE_OK)
+        {
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_PROXYNOTSUPPORTED);
+        }
+    }
+
+    return MI_RESULT_OK;
+}  
 
 MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID, 
                                   _In_z_ const MI_Char *certificateID,
@@ -1290,27 +1362,12 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         Snprintf(actionUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/GetDscAction", url, port, subUrl, configurationID);
     }
 
-
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    
-    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+    r = SetGeneralCurlOptions(curl, extendedError);
+    if (r != MI_RESULT_OK)
     {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    }
-    else
-    {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-    }
-    if (g_sslOptions.CABundle[0] != '\0')
-    {
-        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
-        if (res != CURLE_OK)
-        {
-            DSC_free(bodyContent);
-            curl_easy_cleanup(curl);
-            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
-        }
+	DSC_free(bodyContent);
+	curl_easy_cleanup(curl);
+	return r;
     }
     
     curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
@@ -1465,25 +1522,11 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/Configurations(ConfigurationName='%s')/ConfigurationContent", url, port, subUrl, configurationID, assignedConfiguration);
     }
 
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    
-    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+    r = SetGeneralCurlOptions(curl, extendedError);
+    if (r != MI_RESULT_OK)
     {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    }
-    else
-    {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-    }
-    if (g_sslOptions.CABundle[0] != '\0')
-    {
-        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
-        if (res != CURLE_OK)
-        {
-            curl_easy_cleanup(curl);
-            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
-        }
+	curl_easy_cleanup(curl);
+	return r;
     }
     
     curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
@@ -1816,27 +1859,14 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Modules(ModuleName='%s',ModuleVersion='%s')/ModuleContent", url, port, subUrl, moduleName, moduleVersion);
     }
 
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    
-    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
+
+    r = SetGeneralCurlOptions(curl, extendedError);
+    if (r != MI_RESULT_OK)
     {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_cleanup(curl);
+	return r;
     }
-    else
-    {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-    }
-    if (g_sslOptions.CABundle[0] != '\0')
-    {
-        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
-        if (res != CURLE_OK)
-        {
-            curl_easy_cleanup(curl);
-            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
-        }
-    }
-    
+        
     InitHeaderChunk(&headerChunk);
     dataChunk.data = (char *)malloc(1);
     dataChunk.size = 0;
@@ -2604,24 +2634,6 @@ MI_Result Pull_Register(MI_Char* serverURL,
     
     Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')", serverURL, agentId);
     curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
-
-    if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
-    {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    }
-    else
-    {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-    }
-    if (g_sslOptions.CABundle[0] != '\0')
-    {
-        res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
-        if (res != CURLE_OK)
-        {
-            curl_easy_cleanup(curl);
-            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
-        }
-    }
     
     headerChunk.data = (char *)malloc(1);
     headerChunk.size = 0;
@@ -2666,9 +2678,12 @@ MI_Result Pull_Register(MI_Char* serverURL,
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       }
 
-
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    r = SetGeneralCurlOptions(curl, extendedError);
+    if (r != MI_RESULT_OK)
+    {
+	curl_easy_cleanup(curl);
+	return r;
+    }
 
     res = curl_easy_perform(curl);
 
@@ -2803,28 +2818,15 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         reportText = RunCommand(dataBuffer);
         
         curl = curl_easy_init();
+
+	r = SetGeneralCurlOptions(curl, extendedError);
+	if (r != MI_RESULT_OK)
+	{
+	    DSC_free(reportText);
+	    curl_easy_cleanup(curl);
+	    return r;
+	}	
 	
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-	
-	if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
-	{
-	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	}
-	else
-	{
-	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-	}
-	if (g_sslOptions.CABundle[0] != '\0')
-	{
-	    res = curl_easy_setopt(curl, CURLOPT_CAINFO, g_sslOptions.CABundle);
-	    if (res != CURLE_OK)
-	    {
-		curl_easy_cleanup(curl);
-		return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CABUNDLENOTSUPPORTED);
-	    }
-	}
-        
         Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')/SendReport", serverURL.string, agentId.string);
         curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
         
