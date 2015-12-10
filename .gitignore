@@ -1,2 +1,8 @@
-# Generated configuration
+# git ignore file for dsc project
+
 config.mak
+Providers/bin/
+intermediate/
+omi-1.0.8
+output/
+release/
