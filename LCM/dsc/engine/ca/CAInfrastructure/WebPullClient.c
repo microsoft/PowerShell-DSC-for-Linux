@@ -239,7 +239,7 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
 #if defined(BUILD_OMS)
     // TODO: read from OMS's config file to read in the Proxy info
     size_t valueLength;
-    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsadmin/proxy.conf";
+    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsagent/conf/proxy.conf";
 
     if (File_ExistT(omsProxyFileLocation) != -1)
     {
