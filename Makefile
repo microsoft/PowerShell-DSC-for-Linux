@@ -70,7 +70,7 @@ dsc098: lcm098 providers
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
 
-	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/Makefile.version; fi
+	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
 	-mkdir -p release; \
@@ -95,7 +95,7 @@ dsc100: lcm100 providers
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
 
-	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/Makefile.version; fi
+	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
 	-mkdir -p release; \
