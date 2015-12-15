@@ -14,7 +14,7 @@ ifeq ($(UNAME_P),x86_64)
 else
  PF_ARCH := x86
 endif
-CONFIG_VERSION := 1.2.0
+CONFIG_VERSION := 1.1.1
 
 ifeq ($(BUILD_OMS_VAL),1)
 SHORT_NAME=omsconfig
