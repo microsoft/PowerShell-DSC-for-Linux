@@ -1,6 +1,6 @@
 TOP := $(shell cd ..; pwd)
 
-include $(TOP)/build/Makefile.version
+include $(TOP)/build/dsc.version
 
 OUTPUT_DIR := $(TOP)/output
 STAGING_DIR := $(OUTPUT_DIR)/staging
