@@ -237,23 +237,48 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
     Conf_Close(conf);
 
 #if defined(BUILD_OMS)
-    // TODO: read from OMS's config file to read in the Proxy info
-    size_t valueLength;
-    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsagent/conf/proxy.conf";
-
-    if (File_ExistT(omsProxyFileLocation) != -1)
+    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf";
+    conf = Conf_Open(omsProxyFileLocation);
+    if (!conf)
     {
-	text = InhaleTextFile(omsProxyFileLocation);
-	valueLength = strlen(text);
-	if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
-	{
-	    DSC_free(text);
-	    return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_PROXYTOOLONG);
-	}
-	memcpy(g_sslOptions.Proxy, text, valueLength);
-	g_sslOptions.Proxy[valueLength] = '\0';
-	DSC_free(text);
+        return GetCimMIError(MI_RESULT_NOT_FOUND, extendedError, ID_PULL_DSCCONF_NOTOPENABLE);
     }
+
+    for (;;)
+    {
+        const char* key;
+        const char* value;
+        int r = Conf_Read(conf, &key, &value);
+        if (r == -1)
+        {
+            Conf_Close(conf);
+            return GetCimMIError1Param(MI_RESULT_NOT_FOUND, extendedError, ID_PULL_DSCCONF_NOTREADABLE, scs(Conf_Error(conf)));
+        }
+
+        if (r == 1)
+        {
+            break;
+        }
+
+        if (strcasecmp(key, "PROXY") == 0)
+        {
+            size_t valueLength = strlen(value);
+            if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
+            {
+                Conf_Close(conf);
+                return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_PROXYTOOLONG);
+            }
+            memcpy(g_sslOptions.Proxy, value, valueLength);
+            g_sslOptions.Proxy[valueLength] = '\0';
+	}
+	else
+        {
+            continue;
+        }
+    }
+
+    Conf_Close(conf);
+
 #endif
 
     return MI_RESULT_OK;
