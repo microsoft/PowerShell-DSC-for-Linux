@@ -386,7 +386,22 @@ fi
 
 #if BUILD_OMS == 1
 rm -f /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
+
+# Note that omsagent's service_control uses systemctl to kill agent (omsagent
+# still doesn't shut down in a controlled fashion). Two rapid 'kill -9'
+# operations can confuse systemctl, such that the second 'kill -9' operation
+# is not completed. This will happen during removal of the shell bundle. End
+# result is that the omsagent binary is kept running after the second kill
+# operation.
+#
+# Add a 'sleep' operation (ugly, I know) to try and avoid this race condition.
+
 /opt/microsoft/omsagent/bin/service_control reload
+if pidof systemd 1> /dev/null 2> /dev/null; then
+    echo "Pausing briefly for systemctl synchronization ..."
+    sleep 5
+fi
+
 #endif
 
 %Preinstall_0

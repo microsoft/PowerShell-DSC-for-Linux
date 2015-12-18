@@ -1,6 +1,7 @@
 # git ignore file for dsc project
 
 config.mak
+dsc.version
 Providers/bin/
 intermediate/
 omi-1.0.8
