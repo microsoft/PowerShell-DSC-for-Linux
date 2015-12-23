@@ -20,7 +20,7 @@ ifeq ($(BUILD_OMS_VAL),1)
 SHORT_NAME=omsconfig
 LONG_NAME=Operations Management Suite Agent Configuration
 PROVIDES=dscpkg
-PROVIDERS=OMSAgent OMSSyslog
+PROVIDERS=OMSAgent OMSSyslog OMSCustomLog
 DESCRIPTION=Operations Management Suite Agent Configuration
 else
 SHORT_NAME=dsc

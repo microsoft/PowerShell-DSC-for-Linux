@@ -1,0 +1,37 @@
+﻿/*
+@TargetNode='common'
+@GeneratedBy=OMS
+@GenerationDate=12/14/2015 14:32:38
+@GenerationHost=OMSService
+*/
+
+instance of MSFT_nxOMSCustomLogObject as $MSFT_nxOMSCustomLogObject1ref
+{
+  LogName = "LinuxSampleCustomLog_ef8ef434-4481-b53e-1853-6fc4a64719e9";
+  FilePath = {
+    "/tmp/testcustomlog_fakeconfig.log",
+    "/tmp/testcustomlog2_fakeconfig.log"
+  };
+};
+
+instance of MSFT_nxOMSCustomLogResource as $MSFT_nxOMSCustomLog1ref
+{
+  ResourceID = "[nxOMSCustomLogResource]nodecustomlogconf";
+  SourceInfo = "C:\\temp\\MicrosoftOperationsManagementLinuxConfiguration.ps1::30::1::nxOMSCustomLogResource";
+  ModuleName = "nxOMSAgent";
+  ModuleVersion = "1.0";
+  Name = "SimpleCustomLogConfiguration";
+  EnableCustomLogConfiguration = true;
+  CustomLogObjects = {
+    $MSFT_nxOMSCustomLogObject1ref
+  };
+};
+
+instance of OMI_ConfigurationDocument
+{
+  Version="1.0.0";
+  Author="OMS";
+  GenerationDate="12/14/2015 14:32:38";
+  GenerationHost="OMSService";
+};
+
