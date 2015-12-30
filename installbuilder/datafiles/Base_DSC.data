@@ -198,9 +198,9 @@ omi (>= 1.0.8-3)
 
 %Preinstall_10
 PREREQ_ERROR=0
-LIBCURL_SO=`ldconfig -p | grep "libcurl.so" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
+LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
-   echo "Error: Unable to find libcurl.so in ldconfig.  Please install curl."
+   echo "Error: Unable to find libcurl in ldconfig.  Please install curl."
    PREREQ_ERROR=1
 fi
 
@@ -314,9 +314,9 @@ fi
 cp -R /opt/microsoft/${{SHORT_NAME}}/Scripts $OMI_LIB/Scripts
 
 # create symlink from /opt/omi/lib/libcurl.so.4 to wherever libcurl.so is on the system
-LIBCURL_SO=`ldconfig -p | grep "libcurl.so" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
+LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
-   echo "Error: Unable to find libcurl.so in ldconfig.  Please install curl."
+   echo "Error: Unable to find libcurl in ldconfig.  Please install curl."
    exit 1
 fi
 
