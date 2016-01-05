@@ -200,8 +200,8 @@ def ReadPasswd(filename):
 
 
 def PasswordExpired(shadow_entry):
-    # No entries for the "last" or "must" fields means Password is Expired
-    if shadow_entry[1] == "" or shadow_entry[3] == "":
+    # No entries for the "last" field means Password is Expired.
+    if shadow_entry[1] == "":
         return True
 
     # Passwords must be changed if their "last" day is 0
@@ -209,7 +209,7 @@ def PasswordExpired(shadow_entry):
         return True
 
     # "99999" means "never expire"
-    if shadow_entry[3] == "99999":
+    if shadow_entry[3] == "99999" or shadow_entry[3] == "" :
         return False
 
     day_0 = datetime.datetime.utcfromtimestamp(0)
