@@ -127,6 +127,7 @@ static void CleanupHeaderChunk(struct HeaderChunk * chunk)
 }
 
 struct SSLOptions g_sslOptions;
+MI_Char* InhaleTextFile(MI_Char* filePath);
 
 static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedError)
 {
