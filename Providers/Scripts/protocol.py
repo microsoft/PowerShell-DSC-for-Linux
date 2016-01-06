@@ -39,6 +39,41 @@ MI_INSTANCEA = 31
 
 MI_NULL_FLAG = 64
 
+MI_TYPE_NAMES={
+0:'MI_BOOLEAN',
+1:'MI_UINT8',
+2:'MI_SINT8',
+3:'MI_UINT16',
+4:'MI_SINT16',
+5:'MI_UINT32',
+6:'MI_SINT32',
+7:'MI_UINT64',
+8:'MI_SINT64',
+9:'MI_REAL32',
+10:'MI_REAL64',
+11:'MI_CHAR16',
+12:'MI_DATETIME',
+13:'MI_STRING',
+14:'MI_REFERENCE',
+15:'MI_INSTANCE',
+16:'MI_BOOLEANA',
+17:'MI_UINT8A',
+18:'MI_SINT8A',
+19:'MI_UINT16A',
+20:'MI_SINT16A',
+21:'MI_UINT32A',
+22:'MI_SINT32A',
+23:'MI_UINT64A',
+24:'MI_SINT64A',
+25:'MI_REAL32A',
+26:'MI_REAL64A',
+27:'MI_CHAR16A',
+28:'MI_DATETIMEA',
+29:'MI_STRINGA',
+30:'MI_REFERENCEA',
+31:'MI_INSTANCEA',
+64:'MI_NULL_FLAG',
+}
 
 DO_TRACE = True
 DO_VERBOSE_TRACE = False
@@ -146,7 +181,29 @@ class MI_Value:
         self.type = type
 
     def __repr__(self):
-        return repr(self.value)
+        return MI_TYPE_NAMES[self.type]+': '+repr(self.value)
+
+    def __eq__(self, other):
+        if not isinstance(other,MI_Value):
+            return False
+        if self.type != other.type:
+            return False
+        if type(self.value) != list :
+            if hasattr(self.value,'value'):
+                return self.value.value == other.value.value
+            return self.value == other.value
+        else:
+            if len(self.value) != len(other.value):
+                return False
+            for index in range(len(self.value)):
+                if self.value[index] != other.value[index]:
+                    return False
+            return True
+
+    def __ne__(self, other):
+        if self.__eq__(self,other):
+            return False
+        return True
 
     def write(self, fd):
         verbose_trace('  <MI_Value::write>')
@@ -1494,7 +1551,7 @@ class MI_StringA(MI_Value):
     def __init__(self, vals):
         MI_Value.__init__(self, MI_STRINGA)
         self.value = []
-        if vals is not None:
+        if vals is not None and len(vals) > 0:
             for val in vals:
                 self.value.append(val)
 
