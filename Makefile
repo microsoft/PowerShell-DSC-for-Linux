@@ -28,7 +28,7 @@ all:
 	rm -rf release/*.{rpm,deb};
 	mkdir -p intermediate/Scripts
 ifeq ($(BUILD_LOCAL),1)
-	make local
+	$(MAKE) local
 else
  ifeq ($(PF_ARCH),x64)
 	ln -fs $(current_dir)/ext/curl/x64 $(current_dir)/ext/curl/current_platform
@@ -38,17 +38,17 @@ else
 	cd ../pal/build; ./configure --enable-ulinux
  ifeq ($(BUILD_SSL_098),1)
 	rm -rf omi-1.0.8/output_openssl_0.9.8/lib/libdsccore.so
-	make omi098
-	make dsc098
+	$(MAKE) omi098
+	$(MAKE) dsc098
  endif
  ifeq ($(BUILD_SSL_100),1)
 	rm -rf omi-1.0.8/output_openssl_1.0.0/lib/libdsccore.so
-	make omi100
-	make dsc100
+	$(MAKE) omi100
+	$(MAKE) dsc100
  endif
-	make nxNetworking
-	make nxComputerManagement
-	make nxMySQL
+	$(MAKE) nxNetworking
+	$(MAKE) nxComputerManagement
+	$(MAKE) nxMySQL
 endif
 
 dsc098: lcm098 providers
@@ -71,7 +71,7 @@ dsc098: lcm098 providers
 	done
 
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
-	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
+	$(MAKE) -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
 	-mkdir -p release; \
 	cp omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
@@ -96,24 +96,24 @@ dsc100: lcm100 providers
 	done
 
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
-	make -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
+	$(MAKE) -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
 	-mkdir -p release; \
 	cp omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 omi098:
-	make configureomi098
+	$(MAKE) configureomi098
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_0.9.8 omi-1.0.8/output
-	make -C omi-1.0.8
-	make -C omi-1.0.8/installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C omi-1.0.8
+	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 omi100:
-	make configureomi100
+	$(MAKE) configureomi100
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_1.0.0 omi-1.0.8/output
-	make -C omi-1.0.8
-	make -C omi-1.0.8/installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C omi-1.0.8
+	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 configureomi098:
 	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_0.9.8 --localstatedir=/var/opt/omi --sysconfdir=/etc/opt/omi/conf --certsdir=/etc/opt/omi/ssl --opensslcflags="$(openssl098_cflags)" --openssllibs="-L$(current_dir)/ext/curl/current_platform/lib $(openssl098_libs)" --openssllibdir="$(openssl098_libdir)")
@@ -122,13 +122,13 @@ configureomi100:
 	(cd omi-1.0.8; chmod +x ./scripts/fixdist; ./scripts/fixdist; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_1.0.0 --localstatedir=/var/opt/omi --sysconfdir=/etc/opt/omi/conf --certsdir=/etc/opt/omi/ssl --opensslcflags="$(openssl100_cflags)" --openssllibs="-L$(current_dir)/ext/curl/current_platform/lib $(openssl100_libs)" --openssllibdir="$(openssl100_libdir)")
 
 lcm098:
-	make -C LCM
+	$(MAKE) -C LCM
 
 lcm100:
-	make -C LCM
+	$(MAKE) -C LCM
 
 providers:
-	make -C Providers
+	$(MAKE) -C Providers
 
 nxComputerManagement:
 	rm -rf output/staging; \
@@ -197,16 +197,16 @@ distclean: clean
 
 clean:
 ifeq ($(BUILD_LOCAL),1)
-	make -C LCM clean
-	make -C Providers clean
-	make -C omi-1.0.8 distclean
+	$(MAKE) -C LCM clean
+	$(MAKE) -C Providers clean
+	$(MAKE) -C omi-1.0.8 distclean
 	rm -rf omi-1.0.8/output
 	rm -rf output
 	rm -rf release
 	rm -rf intermediate
 else
-	make -C LCM clean
-	make -C Providers clean
+	$(MAKE) -C LCM clean
+	$(MAKE) -C Providers clean
 	rm -rf output
 	rm -rf release
 	rm -rf intermediate
@@ -217,13 +217,13 @@ endif
 local: lcm providers
 
 lcm:
-	make -C omi-1.0.8
-	make -C LCM
+	$(MAKE) -C omi-1.0.8
+	$(MAKE) -C LCM
 
 reg: lcmreg providersreg
 
 lcmreg:
-	make -C LCM deploydsc
+	$(MAKE) -C LCM deploydsc
 
 providersreg:
 	.  omi-1.0.8/output/config.mak; \
@@ -242,4 +242,4 @@ providersreg:
 	  sed "s@<DSC_MODULES_PATH>@$(CONFIG_DATADIR)/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done 
-	make -C Providers reg
+	$(MAKE) -C Providers reg
