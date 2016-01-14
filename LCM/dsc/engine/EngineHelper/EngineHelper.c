@@ -966,6 +966,9 @@ MI_Boolean InstanceContainsProperty(_In_ MI_Instance* instance,
     return MI_TRUE;
 }
 
+MI_Result ExpandPath(_In_z_ const MI_Char * pathIn,
+    _Outptr_result_maybenull_z_ MI_Char **expandedPath,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
 /*Function to validate if a directory has files.*/
 MI_Result ValidateDirectoryHasFiles(_In_z_ const MI_Char* directoryName)
@@ -1122,7 +1125,7 @@ MI_Result ShouldUseV1Protocol(
     MI_Value value;
     MI_Uint32 flags;
 
-    result = result = DSC_MI_Instance_GetElement((MI_Instance*)g_metaConfig, MSFT_DSCMetaConfiguration_ConfigurationID, &value, NULL, &flags, NULL);    
+    result = DSC_MI_Instance_GetElement((MI_Instance*)g_metaConfig, MSFT_DSCMetaConfiguration_ConfigurationID, &value, NULL, &flags, NULL);
     if (result == MI_RESULT_OK && !(flags & MI_FLAG_NULL) && (Tcscasecmp(MI_T(""), value.string) != 0))
     {
         *isV1MetaConfig = MI_TRUE;
@@ -1136,12 +1139,14 @@ MI_Result GetAgentInformation(
     _Inout_ MI_Instance** registrationPayload)
 {
     MI_Application miApp = MI_APPLICATION_NULL;
-    MI_Boolean applicationInitialized = MI_FALSE;
 //    NetworkInformation networkInformation = { 0 };
     MI_Result result = MI_RESULT_OK;
+    /* TODO: used in below implementation
+    MI_Boolean applicationInitialized = MI_FALSE;
     MI_Value value;
     MI_Char *ipAddress = NULL;
     MI_Uint32 count = 0;
+    */
     if (g_metaConfig == NULL)
     {
         assert(1);
@@ -1152,9 +1157,9 @@ MI_Result GetAgentInformation(
 
     result = DSC_MI_Application_NewInstance(&miApp, AGENT_REGISTRATION_CLASS, NULL, registrationPayload);
     EH_CheckResult(result);
+/* TODO: implement these
     applicationInitialized = MI_TRUE;
 
-/* TODO: implement these
     // Set IPAddress 
     result = GetIPAndMacAddresses(lcmContext, &networkInformation);
     // TODO : TO be uncommented afer Jane's fix for MSFT:2004179 FIs to REL
@@ -1207,7 +1212,7 @@ MI_Result GetAgentInformation(
 */
 EH_UNWIND:
     MI_Application_Close(&miApp);
-    applicationInitialized = MI_FALSE;
+    /* applicationInitialized = MI_FALSE; */
     return result;
 }
 
