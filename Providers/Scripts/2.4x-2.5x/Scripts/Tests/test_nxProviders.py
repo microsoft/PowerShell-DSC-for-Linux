@@ -30,8 +30,8 @@ def opened_w_error(filename, mode="r"):
 try:
     import unittest2
 except:
-    os.system('tar -zxvf ./unittest2-0.5.1.tar.gz ')
-    os.system('cd ./unittest2-0.5.1 && python' + sys.version.split()[0][:3]  + ' ./setup.py install --prefix=/usr/local')
+    os.system('tar -zxvf ./unittest2-0.5.1.tar.gz')
+    sys.path.append(os.path.realpath('./unittest2-0.5.1'))
     import unittest2
 
 def ParseMOF(mof_file):
@@ -109,56 +109,41 @@ def check_values(s,d):
                 print k+': '+str(sd[k].value.value)+' != '+str(dd[k].value.value)+'\n'
                 return False
             continue
-        sd[k].value = decode_unicode(sd[k].value)  
-        dd[k].value = decode_unicode(dd[k].value)  
         if not deep_compare(sd[k].value, dd[k].value):  
             print k+': '+str(sd[k].value)+' != '+str(dd[k].value)+'\n'
             return False
     return True
 
-def deep_compare(obj1, obj2):  
-    t1 = type(obj1)  
-    t2 = type(obj2)  
-    if t1 != t2:  
-        return False  
+def deep_compare(obj1, obj2):
+    t1 = type(obj1)
+    t2 = type(obj2)
+    if t1 != t2:
+        return False
+    
+    if t1 == list and len(obj1) == len(obj2):
+        for i in range(len(obj1)):
+            if not deep_compare(obj1[i], obj2[i]):
+                return False
+        return True
 
-    if t1 == list and len(obj1) == len(obj2):  
-        for i in range(len(obj1)):  
-            if not deep_compare(obj1[i], obj2[i]):  
-                return False  
-        return True  
+    if t1 == dict and len(obj1) == len(obj2):
+        for k in obj1.keys():
+            if not deep_compare(obj1[k], obj2[k]):
+                return False
+        return True
 
-    if t1 == dict and len(obj1) == len(obj2):  
-        for k in obj1.keys():  
-            if not deep_compare(obj1[k], obj2[k]):  
-                return False  
-        return True  
+    try:
+        if obj1 == obj2:
+            return True
+        if obj1.value == obj2.value:
+            return True
+    except:
+        return False
 
-    try:  
-        if obj1 == obj2:  
-            return True  
-        if obj1.value == obj2.value:  
-            return True  
-    except:  
-        return False  
-  
-    return False  
+    return False
 
-def decode_unicode(obj):  
-    if isinstance(obj, dict):  
-        d = {}  
-        for k, v in obj.iteritems():  
-            d[decode_unicode(k)] = decode_unicode(v)  
-        return d  
-    elif isinstance(obj, list):  
-        return [decode_unicode(i) for i in obj]  
-    elif isinstance(obj, unicode):  
-        return obj.decode('ascii', 'ignore')  
-    else:  
-        return obj  
-
-
-sys.path.append('.:'+os.path.realpath('./Scripts'))
+sys.path.append('.')
+sys.path.append(os.path.realpath('./Scripts'))
 os.chdir('../..')
 nxUser=imp.load_source('nxUser','./Scripts/nxUser.py') 
 nxGroup=imp.load_source('nxGroup','./Scripts/nxGroup.py') 
@@ -181,6 +166,7 @@ nxOMSSyslog=imp.load_source('nxOMSSyslog','./Scripts/nxOMSSyslog.py')
 nxOMSAgent=imp.load_source('nxOMSAgent','./Scripts/nxOMSAgent.py')
 ##nxOMSCustomLog=imp.load_source('nxOMSCustomLog','./Scripts/nxOMSCustomLog.py')
                             
+
 class nxUserTestCases(unittest2.TestCase):
     """
     Test cases for nxUser.py
@@ -200,13 +186,6 @@ class nxUserTestCases(unittest2.TestCase):
         """
         os.system('userdel -r jojoma ')
         time.sleep(1)
-
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
 
     def pswd_hash(self,pswd):
         salt=(subprocess.Popen("openssl rand -base64 3", shell=True, bufsize=100, stdout=subprocess.PIPE).stdout).readline().rstrip()
@@ -391,7 +370,6 @@ class nxUserTestCases(unittest2.TestCase):
         self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" )==
                         [0],'Test("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, True, "/home/jojoma", "" ) should return ==[0]')
 
-
     def testSetUserExpiredError(self):
         pswd=self.pswd_hash('jojoma')
         self.assertTrue(nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
@@ -405,6 +383,7 @@ class nxUserTestCases(unittest2.TestCase):
  [0],'Set("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, True, "/home/jojoma", "" ) should return == [0]')
         self.assertTrue(nxUser.Test_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", pswd, False, False, "/home/jojoma", "" )==
  [-1],'Test("jojoma", "Present", "JO JO MA", "JOJOMA", '+pswd+', False, False, "/home/jojoma", "" ) should return == [-1]')
+
 
 class nxGroupTestCases(unittest2.TestCase):
     """
@@ -427,12 +406,6 @@ class nxGroupTestCases(unittest2.TestCase):
         os.system('userdel -r jojoma &> /dev/null')
         os.system('groupdel jojomamas &> /dev/null')
         time.sleep(1)
-
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
 
     def pswd_hash(self,pswd):
         import subprocess,md5const,base64
@@ -535,26 +508,6 @@ class nxGroupTestCases(unittest2.TestCase):
         self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", ["root"], "", "", "1101")==
                         [0],'Test("jojomamas", "Present", "root", "", "", "1101") should return ==[0]')
 
-    def testSetGroupPresentMembersIncludeError(self):
-        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", "", "", "1101" ) ==
-                        [0],'Set("jojomamas", "Present", "", "", "", "1101" ) should return == [0]')
-        time.sleep(1)
-        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", ["ojoma"], "", "1101" ) ==
-                        [-1],'Set("jojomamas", "Present", "", "ojoma", "", "1101" ) should return == [-1]')
-        time.sleep(1)
-        print "TEST="+repr(nxGroup.Test_Marshall("jojomamas", "Present", ["ojoma"], "", "", "1101"))
-        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", ["ojoma"], "", "", "1101")==
-                        [-1],'Test("jojomamas", "Present", ["ojoma"], "", "", "1101") should return ==[-1]')
-
-    def testSetGroupPresentMembersExcludeError(self):
-        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", ["root"], "", "", "1101" ) ==
-                        [0],'Set("jojomamas", "Present", ["root"], "", "", "1101" ) should return == [0]')
-        self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", "", ["jojoma"], "1101" ) ==
-                        [0],'Set("jojomamas", "Present", "", "", ["jojoma"], "1101" ) should return == [0]')
-        print "TEST="+repr(nxGroup.Test_Marshall("jojomamas", "Present", ["jojoma"], "", "", "1101"))
-        self.assertTrue(nxGroup.Test_Marshall("jojomamas", "Present", ["jojoma"], "", "", "")==
-                        [-1],'Test("jojomamas", "Present", "root", "", "", "1101") should return ==[-1]')
-
     def testSetGroupPresentPreferredGroupIDInUseError(self):
         self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", "", "", "0" ) ==
                         [0],'Set("jojomamas", "Present", "", "", "", "0" ) should return == [0]')
@@ -584,12 +537,6 @@ class nxScriptTestCases(unittest2.TestCase):
         os.system('rm /tmp/testfile')
         time.sleep(1)
     
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
     def make_MI(self,retval,GetScript, SetScript, TestScript, User, Group, Result):
         d=dict();
         if GetScript == None :
@@ -652,7 +599,6 @@ class nxScriptTestCases(unittest2.TestCase):
         print 'SET='+repr(r)
         self.assertTrue(r[0] == 0,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
-
     def testGetScriptUserError(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
         r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )
@@ -687,6 +633,7 @@ class nxScriptTestCases(unittest2.TestCase):
         print 'SET='+repr(r)
         self.assertTrue(r[0] == -1,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
+
 class nxPackageTestCases(unittest2.TestCase):
     """
     Test cases for nxPackage
@@ -696,19 +643,20 @@ class nxPackageTestCases(unittest2.TestCase):
         Setup test resources
         """
         time.sleep(4)
+        self.pkg = 'nano'
+        if platform.dist()[0].lower() == 'suse':
+            self.pkg = 'gvim'
         if os.system('which dpkg ') == 0 :
-            os.system('dpkg -r nano &> /dev/null')
+            os.system('dpkg -r ' + self.pkg + ' &> /dev/null')
+            if os.path.exists('/usr/bin/dummy.sh'):
+                os.system('dpkg -r dummy &> /dev/null')
+            self.package_path='./Scripts/Tests/dummy-1.0.deb'
         else :
-            os.system('rpm -e nano &> /dev/null')
+            os.system('rpm -e ' + self.pkg + ' &> /dev/null')
+            if os.path.exists('/usr/bin/dummy.sh'):
+                os.system('rpm -e dummy &> /dev/null')
+            self.package_path='./Scripts/Tests/dummy-1.0-1.x86_64.rpm'
         time.sleep(3)
-        d=platform.dist()[0].lower()
-        if 'cent' in d:
-            self.package_path='./Scripts/Tests/nano-2.0.9-7.el6.x86_64.rpm'
-        elif 'suse' in d:
-            self.package_path='./Scripts/Tests/nano-2.3.2-2.1.2.x86_64.rpm'
-        elif 'mint' in d or 'ubuntu' in d or 'debian' in d:
-            self.package_path='./Scripts/Tests/nano_2.2.6-1ubuntu1_amd64.deb'
-        nxPackage.SetShowMof(True)
         print self.id() + '\n'
         
     def tearDown(self):
@@ -717,16 +665,14 @@ class nxPackageTestCases(unittest2.TestCase):
         """
         time.sleep(4)
         if os.system('which dpkg ') == 0 :
-            os.system('dpkg -r nano &> /dev/null')
+            os.system('dpkg -r ' + self.pkg + ' &> /dev/null')
+            if os.path.exists('/usr/bin/dummy.sh'):
+                os.system('dpkg -r dummy &> /dev/null')
         else :
-            os.system('rpm -e nano &> /dev/null')
+            os.system('rpm -e ' + self.pkg + ' &> /dev/null')
+            if os.path.exists('/usr/bin/dummy.sh'):
+                os.system('rpm -e dummy &> /dev/null')
         time.sleep(3)
-    
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
     
     def make_MI(self, retval, Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments,
                 ReturnCode,PackageDescription,Publisher,InstalledOn,Size,Version,Installed):
@@ -800,117 +746,119 @@ class nxPackageTestCases(unittest2.TestCase):
         args=dryrun[pm]
         if pm == 'zypper':
             args='|'+args
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,args,0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',True,0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,args,0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',True,0) should return ==[0]")
         
     def testSetEnablePathAndNameDefaultProvider(self):
         """
         Test that when Path and Name are set, Path is used.
         """
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano',self.package_path,False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','nano','','"+ self.package_path +"',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,self.package_path,False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','dummy','','"+ self.package_path +"',False,'',0) should return ==[0]")
 
     def testSetEnableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
 
     def testSetEnableNameExplicitProvider(self):
         pm=nxPackage.GetPackageManager()
-        self.assertTrue(nxPackage.Set_Marshall('Present',pm,'nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','"+pm+"','nano','',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present',pm,self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','"+pm+"','" + self.pkg + "','',False,'',0) should return ==[0]")
  
     def testSetEnableNameBadExplicitProviderError(self):
         pm=nxPackage.GetPackageManager()
         for b in ('zypper','yum','apt-get'):
             if b != pm:
                 break
-        self.assertTrue(nxPackage.Set_Marshall('Present',b,'nano','',False,'',0)==
-                        [-1],"nxPackage.Set_Marshall('Present','"+b+"','nano','',False,'',0) should return ==[-1]")
+        self.assertTrue(nxPackage.Set_Marshall('Present',b,self.pkg,'',False,'',0)==
+                        [-1],"nxPackage.Set_Marshall('Present','"+b+"','" + self.pkg + "','',False,'',0) should return ==[-1]")
 
     def testSetEnableNameDefaultProviderBadReturnCodeError(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',6)==
-                        [-1],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[-1]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',6)==
+                        [-1],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[-1]")
 
     def testGetEnableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
-        r=nxPackage.Get_Marshall('Present','','nano','',False,'',0)
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
+        r=nxPackage.Get_Marshall('Present','',self.pkg,'',False,'',0)
         print 'GET:'+repr(r)
 
-        self.assertTrue(check_values(r,self.make_MI(0,'present', None,'nano','',False,'',0, None, None, None, None, None, None )) == True
-                        ,"nxPackage.Get_Marshall('Present','','nano','',False,'',0)[0] should return == 0")
+        self.assertTrue(check_values(r,self.make_MI(0,'present', None,self.pkg,'',False,'',0, None, None, None, None, None, None )) == True
+                        ,"nxPackage.Get_Marshall('Present','','" + self.pkg + "','',False,'',0)[0] should return == 0")
 
     def testTestEnableNameDefaultProviderBadReturnCodeError(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
-        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','','nano','',False,'',6))
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
+        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','',self.pkg,'',False,'',6))
 
-        self.assertTrue(nxPackage.Test_Marshall('Present','','nano','',False,'',6)==
-                        [-1],"nxPackage.Test_Marshall('Present','','nano','',False,'',True,6) should return == [-1]")
+        self.assertTrue(nxPackage.Test_Marshall('Present','',self.pkg,'',False,'',6)==
+                        [-1],"nxPackage.Test_Marshall('Present','','" + self.pkg + "','',False,'',True,6) should return == [-1]")
 
     def testGetEnableNameDefaultProviderBadReturnCodeError(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
-        r=nxPackage.Get_Marshall('Present','','nano','',False,'',6)
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
+        r=nxPackage.Get_Marshall('Present','',self.pkg,'',False,'',6)
         print 'GET:'+repr(r)
-        self.assertTrue(check_values(r,self.make_MI(0,'present', None,'nano','',False,'',6, None, None, None, None, None, None )) == True
-                        ,"nxPackage.Get_Marshall('Present','','nano','',False,'',True,6)[0] should return == 0")
+        self.assertTrue(check_values(r,self.make_MI(0,'present', None,self.pkg,'',False,'',6, None, None, None, None, None, None )) == True
+                        ,"nxPackage.Get_Marshall('Present','','" + self.pkg + "','',False,'',True,6)[0] should return == 0")
 
     def testTestEnableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
-        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','','nano','',False,'',0))
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
+        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','',self.pkg,'',False,'',0))
 
-        self.assertTrue(nxPackage.Test_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Test_Marshall('Present','','nano','',False,'',0) should return == [0]")
+        self.assertTrue(nxPackage.Test_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Test_Marshall('Present','','" + self.pkg + "','',False,'',0) should return == [0]")
 
+    @unittest2.skipUnless(os.system('which yum ') ==
+                          0,'groupmode is not implemented.')
     def testSetEnableGroupDefaultProvider(self):
-        if nxPackage.GetPackageManager() == 'yum':
-            self.assertTrue(nxPackage.Set_Marshall('Present','','Remote Desktop Clients','',True,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',True,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','Remote Desktop Clients','',True,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',True,'',0) should return ==[0]")
             
     def testSetEnablePathDefaultProvider(self):
         self.assertTrue(nxPackage.Set_Marshall('Present','','',self.package_path,False,'',0)==
         [0],"nxPackage.Set_Marshall('Present','','','"+ self.package_path +"',False,'',0) should return ==[0]")
 
     def testSetDisableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
         time.sleep(4)
-        self.assertTrue(nxPackage.Set_Marshall('Absent','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Absent','','nano','',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','" + self.pkg + "','',False,'',0) should return ==[0]")
 
     def testGetDisableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
         time.sleep(4)
-        self.assertTrue(nxPackage.Set_Marshall('Absent','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Absent','','nano','',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','" + self.pkg + "','',False,'',0) should return ==[0]")
         time.sleep(4)
-        r=nxPackage.Get_Marshall('Absent','','nano','',False,'',0)
+        r=nxPackage.Get_Marshall('Absent','',self.pkg,'',False,'',0)
         print 'GET:'+repr(r)
-        self.assertTrue(check_values(r,self.make_MI(0,'absent', None,'nano','',False,'',0, None, None, None, None, None, None )) == True
-                        ,"nxPackage.Get_Marshall('Absent','','nano','',False,'',0)[0] should return == 0")
+        self.assertTrue(check_values(r,self.make_MI(0,'absent', None,self.pkg,'',False,'',0, None, None, None, None, None, None )) == True
+                        ,"nxPackage.Get_Marshall('Absent','','" + self.pkg + "','',False,'',0)[0] should return == 0")
 
     def testTestDisableNameDefaultProvider(self):
-        self.assertTrue(nxPackage.Set_Marshall('Present','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
         time.sleep(4)
-        self.assertTrue(nxPackage.Set_Marshall('Absent','','nano','',False,'',0)==
-                        [0],"nxPackage.Set_Marshall('Absent','','nano','',False,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Absent','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','" + self.pkg + "','',False,'',0) should return ==[0]")
         time.sleep(4)
-        print 'TEST:'+repr(nxPackage.Test_Marshall('Absent','','nano','',False,'',0))
+        print 'TEST:'+repr(nxPackage.Test_Marshall('Absent','',self.pkg,'',False,'',0))
 
-        self.assertTrue(nxPackage.Test_Marshall('Absent','','nano','',False,'',0)==
-                        [0],"nxPackage.Test_Marshall('Absent','','nano','',False,'',0) should return == [0]")
+        self.assertTrue(nxPackage.Test_Marshall('Absent','',self.pkg,'',False,'',0)==
+                        [0],"nxPackage.Test_Marshall('Absent','','" + self.pkg + "','',False,'',0) should return == [0]")
 
+    @unittest2.skipUnless(os.system('which yum ') ==
+                          0,'groupmode is not implemented.')
     def testSetDisableGroupDefaultProvider(self):
-        if nxPackage.GetPackageManager() == 'yum':
-            self.assertTrue(nxPackage.Set_Marshall('Present','','Remote Desktop Clients','',True,'',0)==
-                        [0],"nxPackage.Set_Marshall('Present','','nano','',True,'',0) should return ==[0]")
-            time.sleep(4)
-            self.assertTrue(nxPackage.Set_Marshall('Absent','','Remote Desktop Clients','',True,'',0)==
-                        [0],"nxPackage.Set_Marshall('Absent','','nano','',True,'',0) should return ==[0]")
+        self.assertTrue(nxPackage.Set_Marshall('Present','','Remote Desktop Clients','',True,'',0)==
+                        [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',True,'',0) should return ==[0]")
+        time.sleep(4)
+        self.assertTrue(nxPackage.Set_Marshall('Absent','','Remote Desktop Clients','',True,'',0)==
+                        [0],"nxPackage.Set_Marshall('Absent','','" + self.pkg + "','',True,'',0) should return ==[0]")
             
     def testSetDisablePathDefaultProvider(self):
         self.assertTrue(nxPackage.Set_Marshall('Absent','','',self.package_path,False,'',0)==
@@ -956,6 +904,7 @@ class nxPackageTestCases(unittest2.TestCase):
         self.assertTrue(nxPackage.Set_Marshall('Absent','','', 'BADPATH'+ self.package_path,False,'',0)==
                         [0],"nxPackage.Set_Marshall('Absent','','','"+  'BADPATH'+ self.package_path +"',False,'',0) should return ==[0]")
 
+
 class nxFileTestCases(unittest2.TestCase):
     """
     Test cases for nxFile
@@ -973,12 +922,6 @@ class nxFileTestCases(unittest2.TestCase):
         Remove test resources.
         """
         os.system('rm -rf /tmp/*pp*')
-
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
 
     def make_MI(self,retval,DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate):
         d=dict();
@@ -1563,7 +1506,6 @@ rc_reset
 # with force-reload (in case signalling is not supported) are
 # considered a success.
 
-
 case "$1" in
     start)
         echo -n "Starting dummy_service"
@@ -1687,7 +1629,6 @@ WantedBy=multi-user.target
 """
 
 
-
 class nxServiceTestCases(unittest2.TestCase):
     """
     Test cases for nxService
@@ -1700,6 +1641,8 @@ class nxServiceTestCases(unittest2.TestCase):
         nxService.SetShowMof(True)
         print self.id() + '\n'
         dist=platform.dist()[0].lower()
+        if os.path.exists('/etc/centos-release'):
+            dist = 'centos'
         init_file=''
         if 'suse' in dist:
             init_file=suse_init_file
@@ -1710,16 +1653,16 @@ class nxServiceTestCases(unittest2.TestCase):
             init_file=redhat_init_file
         elif 'cent' in dist:
             init_file=redhat_init_file
+            if nxService.SystemdExists():
+                init_file=ubuntu_systemd_init_file
         elif 'debian' in dist:
             init_file=debian_init_file
         if nxService.SystemdExists():
             self.provider='systemd'
             try:
-                if 'ubuntu' in dist or 'debian' in dist:
+                if 'ubuntu' in dist or 'debian' in dist or 'cent' in dist:
                     nxService.WriteFile('/lib/systemd/system/dummy_service.service',init_file)
                     os.chmod('/lib/systemd/system/dummy_service.service',0744)
-                    os.system('ln -s /lib/systemd/system/dummy_service.service /etc/systemd/system/' + \
-                              'multi-user.target.wants/dummy_service.service')
                 else:
                     nxService.WriteFile('/etc/rc.d/dummy_service',init_file)
                     os.chmod('/etc/rc.d/dummy_service',0744)
@@ -1756,9 +1699,10 @@ class nxServiceTestCases(unittest2.TestCase):
         """
         Remove test resources.
         """
+        dist=platform.dist()[0].lower()
         if nxService.SystemdExists():
             os.system('systemctl disable dummy_service &> /dev/null')
-            if 'ubuntu' in platform.dist()[0].lower() or 'debian' in platform.dist()[0].lower():
+            if 'ubuntu' in dist or 'debian' in dist  or 'cent' in dist:
                 os.system('rm /usr/sbin/dummy_service.py /lib/systemd/system/dummy_service.' + \
                           'service /etc/systemd/system/multi-user.target.wants/dummy_service.service &> /dev/null')
             else:
@@ -1774,12 +1718,6 @@ class nxServiceTestCases(unittest2.TestCase):
         time.sleep(1)
         os.system("ps -ef | grep -v grep | grep dummy_service | awk '{print $2}' | xargs -L1 kill &> /dev/null")
         
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-    
     def make_MI(self,retval, Name, Controller, Enabled, State, Path):
         d=dict();
         if Name == None :
@@ -1927,13 +1865,6 @@ class nxSshAuthorizedKeysTestCases(unittest2.TestCase):
         path='/home/jojoma/.ssh/authorized_keys'
         os.system('rm -rf ' + path)
 
-
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
     def make_MI(self,retval, KeyComment, Ensure, UserName, Key):
         d=dict();
         if KeyComment == None :
@@ -2007,7 +1938,6 @@ class nxSshAuthorizedKeysTestCases(unittest2.TestCase):
                         [0],"assert nxSshAuthorizedKeys.Set_Marshall('MyKey','Present','jojoma','') should be == [0]")
 
 
-
 class nxEnvironmentTestCases(unittest2.TestCase):
     """
     Test cases for nxEnvironment.py
@@ -2044,13 +1974,6 @@ class nxEnvironmentTestCases(unittest2.TestCase):
         if os.path.isfile('/tmp/DSCEnvironment.sh') :
             os.system('mv ' + ' /tmp/DSCEnvironment.sh ' + path)
             
-
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
     def make_MI(self, retval, Name, Value, Ensure, Path):
         d=dict();
         if Name == None :
@@ -2091,7 +2014,6 @@ class nxEnvironmentTestCases(unittest2.TestCase):
         self.assertTrue(check_values(r,self.make_MI(0,'MYVAR2','/tmp','present',False)) == True
                         ,"assert nxEnvironment.Get_Marshall('MYVAR2','/tmp','Present',False)[0] should == [0]")
 
-
     def testSetVarAbsentTwice(self):
         self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) ==
                         [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
@@ -2124,7 +2046,6 @@ class nxEnvironmentTestCases(unittest2.TestCase):
         # do this twice to prove there is no error if the same path already exists
         self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
                         [0],"assert nxEnvironment.Set_Marshall('','/tmp','Present',True) should == [0]")
-
 
     def testSetPathAbsentTwice(self):
         self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
@@ -2182,6 +2103,7 @@ class nxEnvironmentTestCases(unittest2.TestCase):
         self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','','Present',False) ==
                         [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [-1]")
 
+
 class tBag(object):
     def __init__(self,Name, FirewallType, Protocol, Ensure,
     AddressFamily, Access, State,  Direction, Position, SourceHost,
@@ -2201,14 +2123,19 @@ class tBag(object):
         self.DestinationPort = DestinationPort
  
 def FirewallTypeIs():
-    t=['ufw','SuSEfirewall2','firewall-cmd','iptables']
+    t=['ufw','SuSEfirewall2','firewalld','iptables']
     for f in t:
         if os.system('which ' + f) == 0:
-            return f.lower()
-    return 'iptables'
+            return f
+    return 'nothing'
 
 def IsFirewallRunning():
-    return os.system('ps -ef | grep -v grep | grep ' + FirewallTypeIs())
+    if FirewallTypeIs() == 'iptables':
+        return True
+    cmd='ps -ef | grep -v grep | grep ' + FirewallTypeIs()
+    if FirewallTypeIs() == 'SuSEfirewall2':
+        cmd='rcSuSEfirewall2 status | grep running'
+    return os.system(cmd)
 
 def StartFirewall(firewall):
     if firewall == 'iptables':
@@ -2216,7 +2143,7 @@ def StartFirewall(firewall):
     t={}
     t['ufw']='yes | ufw enable '
     t['SuSEfirewall2']='SuSEfirewall2 start'
-    t['firewall-cmd']='service firewalld start'
+    t['firewalld']='service firewalld start'
     os.system(t[firewall])
 
 def StopFirewall(firewall):
@@ -2225,8 +2152,9 @@ def StopFirewall(firewall):
     t={}
     t['ufw']='ufw disable'
     t['SuSEfirewall2']='SuSEfirewall2 stop'
-    t['firewall-cmd']='service firewalld stop'
+    t['firewalld']='service firewalld stop'
     os.system(t[firewall])
+
 
 class nxFirewallTestCases(unittest2.TestCase):
     """
@@ -2287,12 +2215,6 @@ class nxFirewallTestCases(unittest2.TestCase):
         self.min_rule['Ensure'] = "Absent"
         nxFirewall.Set_Marshall(**self.min_rule)
         
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
     def make_MI(self,retval,Name, InterfaceName, FirewallType, Protocol, Ensure, AddressFamily,
                 Access, State,  Direction, Position, SourceHost, SourcePort,
                 DestinationHost, DestinationPort):
@@ -2379,10 +2301,10 @@ class nxFirewallTestCases(unittest2.TestCase):
         self.bag['Direction'] = 'output'
         self.assertTrue(nxFirewall.Test_Marshall(**self.bag) ==
                         [-1],"self.assertTrue(nxFirewall.Test_Marshall(" + repr(self.bag) + ") should == [-1]")
-        
-nxFirewallTestCases = unittest2.skipUnless(IsFirewallRunning() ==
-                                           0,'Skipping nxFirewallTestCases.   ' + FirewallTypeIs() \
-                                           +  ' is not running.')(nxFirewallTestCases)
+nxFirewallTestCases = unittest2.skipUnless(FirewallTypeIs() !=
+                                           'nothing','Skipping nxFirewallTestCases.   ' \
+                                           +  'No supported firewall installed.')(nxFirewallTestCases)
+
 
 class nxIPAddressTestCases(unittest2.TestCase):
     """
@@ -2400,12 +2322,6 @@ class nxIPAddressTestCases(unittest2.TestCase):
         """
         pass
     
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
     def make_MI(self,retval,IPAddress,InterfaceName,BootProtocol,DefaultGateway,Ensure,PrefixLength,AddressFamily):
         d=dict()
         d.clear()
@@ -2484,7 +2400,6 @@ class nxIPAddressTestCases(unittest2.TestCase):
         'Get('+repr(d)+' should return ==['+repr(d)+']')
 
 
-
 class nxComputerTestCases(unittest2.TestCase):
     """
     Test cases for nxComputer.py
@@ -2510,12 +2425,6 @@ class nxComputerTestCases(unittest2.TestCase):
         os.system('cat /etc/hostname | xargs hostname')
         time.sleep(1)
         
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
     def make_MI(self,retval,Name, DNSDomainName, TimeZoneName, AlternateTimeZoneName):
         d=dict()
         d.clear()
@@ -2559,19 +2468,15 @@ class nxDNSServerAddressTestCases(unittest2.TestCase):
         Setup test resources
         """
         print self.id() + '\n'
-        
+        dist=nxDNSServerAddress.GetMyDistro()
+        os.system('cp ' + dist.file + ' ' + dist.file + '.bak')
+
     def tearDown(self):
         """
         Remove test resources.
         """
-        pass
-
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
+        dist=nxDNSServerAddress.GetMyDistro()
+        os.system('mv ' + dist.file + '.bak' + ' ' + dist.file)
 
     def make_MI(self,retval,Address,Ensure,AddressFamily):
         d=dict();
@@ -2629,13 +2534,6 @@ class nxFileLineTestCases(unittest2.TestCase):
         """
         pass
 
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
-
     def make_MI(self,retval,FilePath, DoesNotContainPattern, ContainsLine):
         d=dict()
         d.clear()
@@ -2683,13 +2581,6 @@ class nxArchiveTestCases(unittest2.TestCase):
         """
         pass
 
-    def noop(self,arg2):
-        """
-        Set a method to noop() to prevent its operation.
-        """
-        pass
-
-
     def make_MI(self,retval,DestinationPath, SourcePath, Ensure, Force, Checksum):
         d=dict();
         
@@ -2735,7 +2626,6 @@ class nxMySqlUserTestCases(unittest2.TestCase):
         os.environ['MYSQL_PWD'] = 'root'
         os.system(cmd)
         os.environ['MYSQL_PWD'] = ''
-
 
     def setUp(self):
         """
@@ -2821,7 +2711,6 @@ class nxMySqlDatabaseTestCases(unittest2.TestCase):
         os.environ['MYSQL_PWD'] = 'root'
         os.system(cmd)
         os.environ['MYSQL_PWD'] = ''
-
 
     def setUp(self):
         """
@@ -3003,7 +2892,6 @@ class nxOMSSyslogTestCases(unittest2.TestCase):
         elif os.path.exists('/etc/syslog-ng/syslog-ng.conf'):
             os.system('mv /etc/syslog-ng/syslog-ng.conf.bak /etc/syslog-ng/syslog-ng.conf')
             os.system('mv /etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf.bak /etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf')            
-
         
     def make_MI(self,retval,SyslogSource):
         d=dict()
@@ -3021,6 +2909,11 @@ class nxOMSSyslogTestCases(unittest2.TestCase):
     def testSetOMSSyslog_add(self):
         d={'SyslogSource': [{'Facility': 'kern','Severities': ['emerg','crit','warning']},{'Facility': 'auth','Severities': ['emerg','crit','warning']}] }
         self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testTestSetOMSSyslog_add(self):
+        d={'SyslogSource': [{'Facility': 'kern','Severities': ['emerg','crit','warning']},{'Facility': 'auth','Severities': ['emerg','crit','warning']}] }
+        self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set_Marshall('+repr(d)+') should return == [0]') 
+        self.assertTrue(nxOMSSyslog.Test_Marshall(**d) == [0],'Test_Marshall('+repr(d)+') should return == [0]') 
 
     def testGetOMSSyslog_add(self):
         d={'SyslogSource': [{'Facility': 'auth','Severities': ['emerg','crit','warning']},{'Facility': 'kern','Severities': ['emerg','crit','warning']}] }
@@ -3150,10 +3043,100 @@ class nxOMSAgentTestCases(unittest2.TestCase):
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get('+repr(g)+' should return ==['+repr(m)+']')
 
+    def testSetOMSAgent_add_missing_conf_file(self):
+        os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
+        d={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
+            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
+            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
+            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
+            'ObjectName':'Processor'}]}
+        for perf in d['PerfObject']:
+            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
+        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testSetGetOMSAgent_add_missing_conf_file(self):
+        os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
+        d={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
+            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
+            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
+            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
+            'ObjectName':'Processor'}]}
+        for perf in d['PerfObject']:
+            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
+        e=copy.deepcopy(d)
+        t={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
+            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
+            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
+            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
+            'ObjectName':'Processor'}]}
+        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        m=self.make_MI(0,**t)
+        g=nxOMSAgent.Get_Marshall(**e)
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get '+repr(g)+' should return == '+repr(m)+'')
+
+    def testGetOMSAgent_add_missing_conf_file(self):
+        os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
+        d={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
+            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
+            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
+            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
+            'ObjectName':'Processor'}]}
+        for perf in d['PerfObject']:
+            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
+        t={'HeartbeatIntervalSeconds':None,'PerfObject':[]}
+        m=self.make_MI(0,**t)
+        g=nxOMSAgent.Get_Marshall(**d)
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get '+repr(g)+' should return == '+repr(m)+'')
+
+    def testTestOMSAgent_add_missing_conf_file(self):
+        os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
+        d={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
+            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
+            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
+            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
+            'ObjectName':'Processor'}]}
+        for perf in d['PerfObject']:
+            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
+        e=copy.deepcopy(d)
+        t={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
+            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
+            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
+            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
+            'ObjectName':'Processor'}]}
+        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        m=self.make_MI(0,**t)
+        g=nxOMSAgent.Get_Marshall(**e)
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get '+repr(g)+' should return == '+repr(m)+'')
+
 nxOMSAgentTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
-                                           0,'Skipping nxOMSAgentTestCases.   omsagent is not running.' \
-                                           )(nxOMSAgentTestCases)
-    
+                                            0,'Skipping nxOMSAgentTestCases.   omsagent is not running.' \
+                                            )(nxOMSAgentTestCases)
+
 
 ##class nxOMSCustomLogTestCases(unittest2.TestCase):
 ##    """
@@ -3237,6 +3220,10 @@ nxOMSAgentTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | gr
 ##        print 'GET '+ repr(g)
 ##        self.assertTrue(check_values(g, m)  ==  True, \
 ##        'Get('+repr(g)+' should return ==['+repr(m)+']')
+##nxOMSCustomLogTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
+##                                            0,'Skipping nxOMSCustomLogTestCases.   omsagent is not running.' \
+##                                            )(nxOMSCustomLogTestCases)
+    
 
 ######################################
 if __name__ == '__main__':
@@ -3260,7 +3247,7 @@ if __name__ == '__main__':
     s18=unittest2.TestLoader().loadTestsFromTestCase(nxOMSSyslogTestCases)
     s19=unittest2.TestLoader().loadTestsFromTestCase(nxOMSAgentTestCases)
 ##    s20=unittest2.TestLoader().loadTestsFromTestCase(nxOMSCustomLogTestCases)
-##    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s19,s20])
-    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s19])
+##    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20])
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19])
     unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)
 
