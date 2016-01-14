@@ -130,6 +130,8 @@ DSC_SCRIPT_PATH=$DSC_SCRIPT_PATH
 
 BUILD_DEBUG=$BUILD_DEBUG
 DEBUG_FLAGS=$DEBUG_FLAGS
+# DSC cannot build with -Werror
+ENABLE_WERROR=0
 
 openssl098_cflags=$openssl098_cflags
 openssl098_libs=$openssl098_libs
