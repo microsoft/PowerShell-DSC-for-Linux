@@ -1,4 +1,4 @@
-#PowerShell Desired State Configuration for Linux
+# PowerShell Desired State Configuration for Linux
 *Copyright (c) Microsoft Corporation ver. 1.1.0*
 *All rights reserved.* 
 
@@ -7,13 +7,13 @@ MIT License
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
+THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#PowerShell Desired State Configuration for Linux - v1.1.0
+# PowerShell Desired State Configuration for Linux - v1.1.0
 
-##Building the Desired State Configuration (DSC) Local Configuration Manager and Linux Resource Providers
+## Building the Desired State Configuration (DSC) Local Configuration Manager and Linux Resource Providers
 
-###Prerequisites
+### Prerequisites
 
 ----------
 
@@ -28,7 +28,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		* openssl-devel
 
 
-###Building and installing the Local Configuration Manager and Linux Resource Providers
+### Building and installing the Local Configuration Manager and Linux Resource Providers
 
 ----------
 1. Extract PSDSC.tar into a directory that you will build it from.
@@ -60,9 +60,36 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             `OMI_HOME=/opt/omi-1.0.8 /opt/omi-1.0.8/bin/omiserver`
    		* Note: In order to run following reboots, it is recommended to configure OMI as a System-V, Upstart, or SystemD daemon 
 
+## Building and using DSC and OMI from source
 
+DSC and OMI can also be built together entirely from source in a self-contained directory. This is useful primarily for developers.
 
-##To author DSC MOF configuration for Linux on a Windows computer:
+```sh
+# Clone DSC source
+git clone https://github.com/Microsoft/PowerShell-DSC-for-Linux.git
+cd PowerShell-DSC-for-Linux
+
+# Place the OMI source where DSC expects it
+# Alternatively clone from Git and symlink to omi/Unix
+wget https://collaboration.opengroup.org/omi/documents/33715/omi-1.0.8.tar.gz
+tar xf omi-1.0.8.tar.gz
+
+# Build OMI in developer mode
+cd omi-1.0.8
+./configure --dev
+make -j
+cd ..
+
+# Build DSC in developer mode
+./configure --no-rpm --no-dpkg --local
+make -j
+make reg
+
+# Start the OMI server
+./omi-1.0.8/output/bin/omiserver
+```
+
+## To author DSC MOF configuration for Linux on a Windows computer:
 
 ----------
 
