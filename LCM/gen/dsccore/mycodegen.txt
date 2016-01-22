@@ -1,0 +1,19 @@
+\\winbuilds\release\WIN8_RTM\9200.16384.120725-1247\amd64chk\bin\Convert-MofToProvider ^
+    -MofFile ^
+qualifiers.mof ^
+MSFT_Credential.mof ^
+OMI_BaseResource.mof ^
+MSFT_KeyValuePair.mof ^
+OMI_MetaConfigurationResource.mof ^
+OMI_ResourceModuleManager.mof ^
+OMI_ReportManager.mof ^
+MSFT_PartialConfiguration.mof ^
+MSFT_DSCResource.mof ^
+OMI_ConfigurationDownloadManager.mof ^
+MSFT_DSCMetaConfiguration.mof ^
+MSFT_DSCLocalConfigManager.mof ^
+   -ClassList MSFT_DSCLocalConfigurationManager ^
+   -ExtraClass MSFT_DSCMetaConfiguration ^
+   -IncludePath .\CIM-2.26.0 ^
+   -OldRcPath .\strings.rc ^
+   -OutPath temp

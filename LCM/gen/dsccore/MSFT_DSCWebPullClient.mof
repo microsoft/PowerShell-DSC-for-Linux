@@ -1,0 +1,44 @@
+[Abstract, ClassVersion("1.0.0"),Description("Module version table.")] 
+class MSFT_ModuleSpecification
+{
+    string ModuleName;
+    string ModuleVersion;
+};
+
+
+[ClassVersion("1.0.0"),Description("Http based pull client for DSC.")] 
+class MSFT_DSCWebPullClient
+{
+    [static,
+    Description("Get the action from the server.")]
+    uint32 GetDSCAction(
+	[in] string FileHash, 
+	[in] string ConfigurationID, 
+	[in] boolean NotCompliant, 
+	[in] uint32 StatusCode,
+	[in, EmbeddedInstance("MSFT_Credential")] string Credential,
+	[in, EmbeddedInstance("MSFT_KeyValuePair")] string CustomData[],
+ 	[out] string Result
+    );
+
+    [static,
+    Description("Get the document from the server.")]
+    uint32 GetDSCDocument(
+	[in] string ConfigurationID, 
+	[in] string DestinationPath,
+	[in, EmbeddedInstance("MSFT_Credential")] string Credential,
+	[in, EmbeddedInstance("MSFT_KeyValuePair")] string CustomData[],
+ 	[out] string Result
+    );
+
+    [static,
+    Description("Get the modules from the server.")]
+    uint32 GetDSCModule(
+	[in] string ConfigurationID, 
+	[in] string DestinationPath,
+	[in, EmbeddedInstance("MSFT_Credential")] string Credential,
+	[in, EmbeddedInstance("MSFT_KeyValuePair")] string CustomData[],
+ 	[in, EmbeddedInstance("MSFT_ModuleSpecification")] string Module,
+	[out] string Result);
+
+};

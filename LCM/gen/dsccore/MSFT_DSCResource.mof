@@ -1,0 +1,61 @@
+// ===============================================================
+//  Class for holding a DSC resource object
+// ===============================================================
+[ClassVersion("1.0.0"), Description("Class for holding properties of a resource object.")] 
+class MSFT_DSCResource : OMI_BaseResource
+{
+	[Override("ResourceId"), Description("Unique Id for a resource instance.") , required]
+	string ResourceId;
+
+	[Override("SourceInfo"), Description("Source Info to correlate it back to powershell configuration script.") , write] 
+	string SourceInfo;
+
+	[Override("DependsOn"), Description("List of resources this resource depends on."), write] 
+	string DependsOn[];
+
+	[Override("ModuleName"), Description("Name of the module that supports this resource."), required] 
+	string ModuleName;
+
+	[Override("ModuleVersion"), Description("Version  of the module that supports this resource."), required] 
+	string ModuleVersion;
+
+	[Override("ConfigurationName"), Description("Name of the configuration this is a part of"), write]
+	string ConfigurationName;
+
+	[Read, Description ("The resource name like File.")]
+	string ResourceName;
+
+	[Read, Description ("The instance name like file1.")]
+	string InstanceName;
+
+	[Read, Description ("Field to display whether the resource is in desired state.")]
+	boolean InDesiredState;
+
+	[Read, Description ("Date and time when the resource was started.")]
+	datetime StartDate;
+
+	[Read, Description ("Time taken to process resource.")]
+	real64 DurationInSeconds;
+
+	[Read, Description ("Reboot was requested for resource.")]
+	boolean RebootRequested;
+
+	[Read, Description ("Initial property values of the resource before it is enacted.")]
+	string InitialState;
+
+	[Read, Description ("Final property values of the resource after it is enacted.")]
+	string FinalState;
+
+	[Read, Description ("Error returned by the provider.")]
+	string Error;
+};
+
+[ClassVersion("1.0.0"), Description("Class for holding properties of a resource object in desired state.")]
+class MSFT_ResourceInDesiredState : MSFT_DSCResource
+{
+};
+
+[ClassVersion("1.0.0"), Description("Class for holding properties of a resource object not in desired state.")]
+class MSFT_ResourceNotInDesiredState : MSFT_DSCResource
+{
+};
