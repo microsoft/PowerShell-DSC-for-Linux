@@ -1,0 +1,43 @@
+
+// ===============================================================
+//  Configuration Download Manager
+// ===============================================================
+[Abstract, ClassVersion("1.0.0"), 
+ Description("Class defining the configuration download manager" ) ] 
+class OMI_ConfigurationDownloadManager  : OMI_MetaConfigurationResource 
+{
+};
+
+[ClassVersion("1.0.0"), 
+ Description("Web download manager class inheriting from OMI_ConfigurationDownloadManager" )] 
+class MSFT_WebDownloadManager : OMI_ConfigurationDownloadManager
+{
+   [Description ("String URL of the download manager location" )  , Key]
+   string  ServerURL;    
+
+   
+   [Description ("The certificate ID used to locate the certificate." )  ]
+   string  CertificateID;
+   
+
+   [Description ("Boolean variable to allow unsecure connections" )  ]
+   boolean AllowUnsecureConnection;
+
+   [Description ("Registration Key with which to register with the Pull Server" )  ]
+   string RegistrationKey;
+
+   [Description ("The set of configuration names with which to register with the Pull Server.")]
+   string ConfigurationNames[];
+};
+
+[ClassVersion("1.0.0"), 
+ Description("File configuration download manager class inheriting from OMI_ConfigurationDownloadManager" )] 
+class MSFT_FileDownloadManager : OMI_ConfigurationDownloadManager
+{
+   [Description ("String UNC source path of the download manager location" )  , Key]
+   string  SourcePath;    
+
+   [EmbeddedInstance("MSFT_Credential"),
+   Description ("Default credential to access the file location" )  ]
+   string Credential; 
+};

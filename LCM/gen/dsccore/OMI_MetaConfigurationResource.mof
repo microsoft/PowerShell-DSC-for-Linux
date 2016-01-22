@@ -1,0 +1,17 @@
+// ===============================================================
+//  OMI_MetaConfigurationResource
+// ===============================================================
+[Abstract, 
+ ClassVersion("1.0.0"), 
+ Description (
+    "Base schema for all Metaconfiguration resources." )]
+class OMI_MetaConfigurationResource 
+{
+	
+	[required] 
+	string ResourceId;
+
+  	[write] 
+	string SourceInfo;
+};
+
