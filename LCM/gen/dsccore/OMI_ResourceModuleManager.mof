@@ -1,0 +1,43 @@
+
+// ===============================================================
+//  ResourceModule Managers
+// ===============================================================
+
+
+[Abstract, ClassVersion("1.0.0"), Description("Class defining the structure of resource module managers") ] 
+class OMI_ResourceModuleManager  : OMI_MetaConfigurationResource 
+{
+};
+
+
+[ClassVersion("1.0.0"), 
+ Description("Web resource module manager class inheriting from OMI_ResourceModuleManager") ] 
+class MSFT_WebResourceManager : OMI_ResourceModuleManager
+{
+   [Description ("String URL of the resource module manager location" )  , Key]
+   string  ServerURL;    
+
+   [Description ("The certificate ID used to locate the certificate." ) ]
+   string  CertificateID;   
+
+
+   [Description ("Boolean variable to allow unsecure connections" )  ]
+   boolean AllowUnsecureConnection;
+
+   [Description ("Registration Key with which to register with the Resource Repository Web" )  ]
+   string RegistrationKey;
+   
+};
+
+[ClassVersion("1.0.0"), 
+ Description("File resource module manager class inheriting from OMI_ResourceModuleManager class") ] 
+class MSFT_FileResourceManager : OMI_ResourceModuleManager
+{
+   [Description ("String UNC path of the File resource manager" ) , Key]
+   string  SourcePath;    
+
+   [EmbeddedInstance("MSFT_Credential"),
+   Description ("Default credential to access resources." ) ]
+   string Credential; 
+  
+};
