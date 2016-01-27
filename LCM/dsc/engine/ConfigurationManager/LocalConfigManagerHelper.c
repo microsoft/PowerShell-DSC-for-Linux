@@ -6727,3 +6727,137 @@ MI_Result GetLCMStatusCodeHistory(
         UpdateCurrentStatus(NULL, NULL, &lcmStatus, NULL, cimErrorDetails);
         return MI_RESULT_OK;
 }
+
+
+// TODO: implement this function
+
+/* caller release outinstances */
+MI_Result CallGetInventory(
+    _Inout_ MI_InstanceA *outInstances,
+    _In_ MI_Context* context,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_InstanceA getInstances = {0};
+    MI_Instance *documentIns = NULL;
+    MI_InstanceA getResultInstances = {0};
+    LCMProviderContext lcmContext = {0};
+    BOOL fResult;
+    ModuleManager *moduleManager = NULL;
+
+    //Debug Log 
+    DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,0,lcmContext.executionMode);
+
+    if (cimErrorDetails == NULL)
+    {        
+        return MI_RESULT_INVALID_PARAMETER; 
+    }
+    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
+
+    lcmContext.executionMode = (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE);
+    lcmContext.context = (void*)context;    
+    result = ValidateConfigurationDirectory(cimErrorDetails);
+    if (result != MI_RESULT_OK)
+    {
+        SetLCMStatusReady();
+        if (cimErrorDetails && *cimErrorDetails)
+            return result;
+
+        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_VALIDATE_CONFGDIR_FAILED);
+    }
+
+    if (File_ExistT(GetGetConfigFileName()) != -1)
+    {
+        fResult = File_RemoveT(GetGetConfigFileName());
+        if (fResult || NitsShouldFault(NitsHere(), NitsAutomatic))
+        {
+            SetLCMStatusReady();
+            return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_GETFILEBEFORE_FAILED);
+        } 
+    }
+
+    result = SaveFile(GetGetConfigFileName(), ConfigData, dataSize, cimErrorDetails);
+
+    if (result != MI_RESULT_OK )
+    {
+        SetLCMStatusReady();
+        if (cimErrorDetails && *cimErrorDetails)
+            return result;
+
+        return GetCimMIError(MI_RESULT_ALREADY_EXISTS, cimErrorDetails, ID_LCMHELPER_SAVE_GETCONF_FAILED);
+    }
+
+    result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
+    if (result != MI_RESULT_OK)
+    {
+        SetLCMStatusReady();
+        return result;
+    }
+
+    result =  moduleManager->ft->LoadInstanceDocumentFromLocation(moduleManager, 0, GetGetConfigFileName(), cimErrorDetails, &getInstances, &documentIns);
+    if (result != MI_RESULT_OK)
+    {
+        moduleManager->ft->Close(moduleManager, NULL);
+        SetLCMStatusReady();
+        if (cimErrorDetails && *cimErrorDetails)
+            return result;
+        
+        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_LOAD_GETFILE_FAILED);
+    }
+
+    if (documentIns != NULL )
+    {
+        result = ValidateDocumentInstance(documentIns, cimErrorDetails);
+        if (result != MI_RESULT_OK)
+        {
+            CleanUpInstanceCache(&getInstances);
+            moduleManager->ft->Close(moduleManager, NULL);
+            SetLCMStatusReady();
+            MI_Instance_Delete(documentIns);
+            return result;
+        }
+    }
+
+    // Check if at least 1 resource was specified in the instance document
+    if (getInstances.size == 0 )
+    {
+        MI_Instance_Delete(documentIns);
+        moduleManager->ft->Close(moduleManager, NULL);
+        SetLCMStatusReady();
+        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_LCMHELPER_NORESOURCESPECIFIED);
+    }
+
+    SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_GET,&lcmContext);
+    LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+
+    result = GetConfiguration(&lcmContext, 0, &getInstances, moduleManager, documentIns, &getResultInstances, cimErrorDetails);
+    
+    MI_Instance_Delete(documentIns);
+
+    moduleManager->ft->Close(moduleManager, NULL);
+
+    CleanUpInstanceCache(&getInstances);
+    if (result != MI_RESULT_OK)
+    {
+                SetLCMStatusReady();
+                if (cimErrorDetails && *cimErrorDetails)
+            return result;
+
+        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_GET_CONF_FAILED);
+    }
+
+    fResult = File_RemoveT(GetGetConfigFileName());
+    if (fResult || NitsShouldFault(NitsHere(), NitsAutomatic))
+    {
+                SetLCMStatusReady();
+        return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_GETFILEAFTER_FAILED);
+    } 
+
+    outInstances->data = getResultInstances.data;
+    outInstances->size = getResultInstances.size;
+
+    //Debug Log 
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+    return MI_RESULT_OK;
+}
