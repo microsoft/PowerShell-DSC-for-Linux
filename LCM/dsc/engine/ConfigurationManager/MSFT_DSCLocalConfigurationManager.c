@@ -257,3 +257,19 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_StopConfiguration(
     Invoke_StopConfiguration(self, context, nameSpace, className, methodName, instanceName, in);
 }
 
+
+void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_GetInventory(
+    _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
+    _In_opt_ const MSFT_DSCLocalConfigurationManager_GetInventory* in)
+{
+    SetJobId();
+
+    // Debug Log
+    DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
+    Invoke_GetInventory(self, context, nameSpace, className, methodName, instanceName, in);
+}

@@ -2912,5 +2912,168 @@ void Invoke_StopConfiguration(
 }
 
 
+MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetInventory_Internal(void *param)
+{
+    MI_Result miResult = MI_RESULT_OK;
+    MI_Instance *cimErrorDetails = NULL;
+    MI_InstanceA outInstances = {0};
+    MI_Value val;
+    MI_Uint32 bufferIndex = 0;    
+    MSFT_DSCLocalConfigurationManager_GetInventory outputObject;
+    MI_Uint8A dataValue = {0};
+    MI_Real64 duration;
+    ptrdiff_t start, finish;   
+
+    Context_Invoke_Basic *args = (Context_Invoke_Basic*)param;
+
+    if( args == NULL )
+    {
+        return 0;
+    }
+    if( args->methodName == NULL)
+    {
+        MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
+        return 0;
+    }    
+
+    miResult = InitHandler(args->methodName, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
+    {
+        MI_PostCimError(args->context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        ResetJobId();
+
+        PAL_Free(args);        
+        return 0;
+    }
+
+    miResult = TryBeginLcmOperation(args->methodName, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
+    {
+        MI_PostCimError(args->context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        ResetJobId();
+        PAL_Free(args);        
+        return 0;
+    }
+
+    miResult = MSFT_DSCLocalConfigurationManager_GetInventory_Construct(&outputObject, args->context);
+    if (miResult != MI_RESULT_OK)
+    {
+        GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTGET_FAILED);
+        goto ExitWithError;
+    }   
+
+    start=CPU_GetTimeStamp();
+    SetLCMStatusBusy();
+    miResult = CallGetInventory(&outInstances, 
+        args->context, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
+    {
+        MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(&outputObject);
+        goto ExitWithError;
+    }
+
+    val.instancea.data = outInstances.data;
+    val.instancea.size = outInstances.size;
+    miResult = MI_Instance_SetElement(&outputObject.__instance, MI_T("inventory"), &val, MI_INSTANCEA, 0);
+    CleanUpInstanceCache(&outInstances);    
+    if (miResult != MI_RESULT_OK)
+    {
+        GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_INVENTORY_FAILED);
+        MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(&outputObject);
+        goto ExitWithError;
+    }
+    miResult = MSFT_DSCLocalConfigurationManager_GetInventory_Set_MIReturn(&outputObject, 0);
+    if (miResult != MI_RESULT_OK)
+    {
+        GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_INVENTORY_FAILED);
+        MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(&outputObject);
+        goto ExitWithError;
+    }    
+
+    miResult = MSFT_DSCLocalConfigurationManager_GetInventory_Post(&outputObject, args->context);
+    MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(&outputObject);
+    if (miResult != MI_RESULT_OK)
+    {
+        GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_POSTINVENTORY_FAILED);
+        goto ExitWithError;
+    }
+    // Stop the clock and measure time taken for this operation
+    finish=CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+    LCM_WriteMessage_Internal_TimeTaken(args->context,EMPTY_STRING, ID_LCM_TIMEMESSAGE,  ID_OUTPUT_ITEM_INVENTORY,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+
+    EndLcmOperation();
+    SetLCMStatusReady();
+    MI_Context_PostResult(args->context, MI_RESULT_OK);
+
+    //Debug Log 
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+
+    ResetJobId();
+    PAL_Free(args);    
+
+    return 0;
+
+ExitWithError:
+    ResetJobId();
+    EndLcmOperation();
+    SetLCMStatusReady();
+    MI_PostCimError(args->context, cimErrorDetails);
+    MI_Instance_Delete(cimErrorDetails);
+    PAL_Free(args);    
+    return 0;
+}
+
+
+void Invoke_GetInventory(
+    _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
+    _In_opt_ const MSFT_DSCLocalConfigurationManager_GetInventory* in)
+{
+    MI_Instance *cimErrorDetails = NULL;
+    MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
+    MI_Uint8 *dataValue = NULL;
+    MI_Uint32 dataSize = 0;
+    Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
+    if( args == NULL)
+    {
+        miResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
+        MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        return;
+    }
+    args->dataExist = MI_FALSE;
+    args->context = context;
+    args->methodName = methodName;
+    Thread_CreateDetached(Invoke_GetInventory_Internal, NULL, args);
+
+}
+
 #endif
 

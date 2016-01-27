@@ -68,5 +68,12 @@ class MSFT_DSCLocalConfigurationManager
   uint32 StopConfiguration(
 	[in] boolean force
   );
+  
+    
+  [static,
+  Description("Returns an array of homogenous objects that match the schema definitions of each class being inventoried.")] 
+  uint32 GetInventory(
+	[EmbeddedInstance("OMI_BaseResource"),out] string inventory[]
+  );
 };
 
