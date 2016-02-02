@@ -260,6 +260,7 @@ MI_Result InitHandler(
     g_CurrentConfigFileName = NULL;
     g_PreviousConfigFileName = NULL;
     g_GetConfigFileName = NULL;
+    g_InventoryFileName = NULL;
     g_MetaConfigFileName = NULL;
     g_MetaConfigTmpFileName = NULL;
     g_ConfigChecksumFileName = NULL;
@@ -277,6 +278,7 @@ MI_Result InitHandler(
         DSC_free(g_CurrentConfigFileName);
         DSC_free(g_PreviousConfigFileName);
         DSC_free(g_GetConfigFileName);
+        DSC_free(g_InventoryFileName);
         DSC_free(g_MetaConfigFileName);
         DSC_free(g_MetaConfigTmpFileName);
         DSC_free(g_ConfigChecksumFileName);
@@ -287,6 +289,7 @@ MI_Result InitHandler(
         g_CurrentConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
+        g_InventoryFileName = NULL;
         g_MetaConfigFileName = NULL;
         g_MetaConfigTmpFileName = NULL;
         g_ConfigChecksumFileName = NULL;
@@ -318,6 +321,7 @@ MI_Result InitHandler(
         DSC_free(g_CurrentConfigFileName);
         DSC_free(g_PreviousConfigFileName);
         DSC_free(g_GetConfigFileName);
+        DSC_free(g_InventoryFileName);
         DSC_free(g_MetaConfigFileName);
         DSC_free(g_MetaConfigTmpFileName);
         DSC_free(g_ConfigChecksumFileName);
@@ -328,6 +332,7 @@ MI_Result InitHandler(
         g_CurrentConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
+	g_InventoryFileName = NULL;
         g_MetaConfigFileName = NULL;
         g_MetaConfigTmpFileName = NULL;
         g_ConfigChecksumFileName = NULL;
@@ -394,6 +399,11 @@ MI_Result InitPath(
         else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_GET) == 0)
         {
             g_ExpandedSystemPath[count].expandedPath = &g_GetConfigFileName;
+            initCount++;
+        }
+        else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_INVENTORY) == 0)
+        {
+            g_ExpandedSystemPath[count].expandedPath = &g_InventoryFileName;
             initCount++;
         }
         else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_METACONFIG) == 0)
@@ -505,6 +515,12 @@ MI_Result UnInitHandler(
     {
         DSC_free(g_GetConfigFileName);
         g_GetConfigFileName = NULL;
+    }
+
+   if( g_InventoryFileName != NULL)
+    {
+        DSC_free(g_InventoryFileName);
+        g_InventoryFileName = NULL;
     }
 
     if (g_MetaConfigFileName != NULL)
@@ -2698,6 +2714,11 @@ const MI_Char * GetConfigChecksumFileName()
 const MI_Char * GetGetConfigFileName()
 {
     return g_GetConfigFileName;
+}
+
+const MI_Char * GetInventoryFileName()
+{
+    return g_InventoryFileName;
 }
 
 const MI_Char *GetCurrentConfigFileName()
@@ -6738,9 +6759,9 @@ MI_Result CallGetInventory(
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result result = MI_RESULT_OK;
-    MI_InstanceA getInstances = {0};
+    MI_InstanceA inventoryInstances = {0};
     MI_Instance *documentIns = NULL;
-    MI_InstanceA getResultInstances = {0};
+    MI_InstanceA inventoryResultInstances = {0};
     LCMProviderContext lcmContext = {0};
     BOOL fResult;
     ModuleManager *moduleManager = NULL;
@@ -6766,25 +6787,10 @@ MI_Result CallGetInventory(
         return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_VALIDATE_CONFGDIR_FAILED);
     }
 
-    if (File_ExistT(GetGetConfigFileName()) != -1)
+    if (File_ExistT(GetInventoryFileName()) != 0)
     {
-        fResult = File_RemoveT(GetGetConfigFileName());
-        if (fResult || NitsShouldFault(NitsHere(), NitsAutomatic))
-        {
-            SetLCMStatusReady();
-            return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_GETFILEBEFORE_FAILED);
-        } 
-    }
-
-    result = SaveFile(GetGetConfigFileName(), ConfigData, dataSize, cimErrorDetails);
-
-    if (result != MI_RESULT_OK )
-    {
-        SetLCMStatusReady();
-        if (cimErrorDetails && *cimErrorDetails)
-            return result;
-
-        return GetCimMIError(MI_RESULT_ALREADY_EXISTS, cimErrorDetails, ID_LCMHELPER_SAVE_GETCONF_FAILED);
+	SetLCMStatusReady();
+	return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);
     }
 
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
@@ -6794,7 +6800,7 @@ MI_Result CallGetInventory(
         return result;
     }
 
-    result =  moduleManager->ft->LoadInstanceDocumentFromLocation(moduleManager, 0, GetGetConfigFileName(), cimErrorDetails, &getInstances, &documentIns);
+    result =  moduleManager->ft->LoadInstanceDocumentFromLocation(moduleManager, 0, GetInventoryFileName(), cimErrorDetails, &inventoryInstances, &documentIns);
     if (result != MI_RESULT_OK)
     {
         moduleManager->ft->Close(moduleManager, NULL);
@@ -6802,15 +6808,17 @@ MI_Result CallGetInventory(
         if (cimErrorDetails && *cimErrorDetails)
             return result;
         
-        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_LOAD_GETFILE_FAILED);
+        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_LOAD_INVENTORY_FAILED);
     }
 
+
+    // TODO: make sure its an inventory document by verifying the DocumentType="Inventory"
     if (documentIns != NULL )
     {
         result = ValidateDocumentInstance(documentIns, cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
-            CleanUpInstanceCache(&getInstances);
+            CleanUpInstanceCache(&inventoryInstances);
             moduleManager->ft->Close(moduleManager, NULL);
             SetLCMStatusReady();
             MI_Instance_Delete(documentIns);
@@ -6818,8 +6826,9 @@ MI_Result CallGetInventory(
         }
     }
 
+    // TODO: is it ok for the document to have no instances? or not exist?
     // Check if at least 1 resource was specified in the instance document
-    if (getInstances.size == 0 )
+    if (inventoryInstances.size == 0 )
     {
         MI_Instance_Delete(documentIns);
         moduleManager->ft->Close(moduleManager, NULL);
@@ -6827,34 +6836,27 @@ MI_Result CallGetInventory(
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, cimErrorDetails, ID_LCMHELPER_NORESOURCESPECIFIED);
     }
 
-    SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_GET,&lcmContext);
+    SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_INVENTORY,&lcmContext);
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
-    result = GetConfiguration(&lcmContext, 0, &getInstances, moduleManager, documentIns, &getResultInstances, cimErrorDetails);
+    result = GetInventory(&lcmContext, 0, &inventoryInstances, moduleManager, documentIns, &inventoryResultInstances, cimErrorDetails);
     
     MI_Instance_Delete(documentIns);
 
     moduleManager->ft->Close(moduleManager, NULL);
 
-    CleanUpInstanceCache(&getInstances);
+    CleanUpInstanceCache(&inventoryInstances);
     if (result != MI_RESULT_OK)
     {
-                SetLCMStatusReady();
-                if (cimErrorDetails && *cimErrorDetails)
+	SetLCMStatusReady();
+	if (cimErrorDetails && *cimErrorDetails)
             return result;
-
-        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_GET_CONF_FAILED);
+	
+        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_INVENTORY_CONF_FAILED);
     }
 
-    fResult = File_RemoveT(GetGetConfigFileName());
-    if (fResult || NitsShouldFault(NitsHere(), NitsAutomatic))
-    {
-                SetLCMStatusReady();
-        return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_GETFILEAFTER_FAILED);
-    } 
-
-    outInstances->data = getResultInstances.data;
-    outInstances->size = getResultInstances.size;
+    outInstances->data = inventoryResultInstances.data;
+    outInstances->size = inventoryResultInstances.size;
 
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
