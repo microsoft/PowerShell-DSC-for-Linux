@@ -92,6 +92,7 @@ BaseResourceConfiguration g_ConfigurationDocumentProperties[] =
     { OMI_ConfigurationDocument_Name,           MI_STRING },
     { OMI_ConfigurationDocument_MinimumCompatibleVersion,                          MI_STRING },
     { OMI_ConfigurationDocument_CompatibleVersionAdditionalProperties, MI_STRINGA },
+    { OMI_ConfigurationDocument_DocumentType, MI_STRING },
 
     {NULL,                                      0}
 };

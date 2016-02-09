@@ -53,6 +53,7 @@ class OMI_ConfigurationDocument
   String Name;
   String MinimumCompatibleVersion;
   String CompatibleVersionAdditionalProperties[];
+  String DocumentType;
 };
 
 [ClassVersion("1.0.0")]
