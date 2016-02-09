@@ -405,6 +405,82 @@ PythonProvider::get (
 }
 
 
+MI_Result
+PythonProvider::inventory (
+    MI_Instance const& instance,
+    MI_Context* const pContext,
+    MI_Instance* const pInstanceOut)
+{
+    std::ostringstream strm;
+#if PRINT_BOOKENDS
+    strm << "name: \"" << m_Name << '\"';
+    SCX_BOOKEND_EX ("PythonProvider::inventory", strm.str ());
+    strm.str ("");
+    strm.clear ();
+#endif
+    // 1: send the request
+    // 2: read (int) RESULT
+    //     A: RESULT is affirmative (0)
+    //         i: read (int) ARG_COUNT
+    //         ii: read ARG
+    //         iii: read ARG_TYPE
+    //         iv: read ARG_VALUE
+    //         v: add ARG to new instance
+    //         iv: goto ii
+    //     B: RESULT is negative (non-0)
+    //         i: read (string) error msg
+    //         ii: output error msg
+    MI_Result rval = MI_RESULT_FAILED;
+    int inventoryResult = -1;
+    int result = sendRequest (INVENTORY, instance);
+    if (EXIT_SUCCESS == result)
+    {
+        SCX_BOOKEND_PRINT ("send succeeded");
+        result = recv (&inventoryResult);
+        if (EXIT_SUCCESS == result)
+        {
+            if (0 == inventoryResult)
+            {
+                SCX_BOOKEND_PRINT ("recv'd POSITIVE");
+                result = recv (pContext, pInstanceOut);
+                rval = EXIT_SUCCESS == result ? MI_RESULT_OK : MI_RESULT_FAILED;
+            }
+            else
+            {
+                SCX_BOOKEND_PRINT ("recv'd NEGATIVE");
+                std::string errorMsg;
+                result = recv (&errorMsg);
+                if (EXIT_SUCCESS == result)
+                {
+                    if (0 != errorMsg.length ())
+                    {
+                        strm << ": error msg: \"" << errorMsg << '\"';
+                        SCX_BOOKEND_PRINT (strm.str ());
+                        std::cerr << strm.str () << std::endl;
+                        strm.str ("");
+                        strm.clear ();
+                    }
+                    else
+                    {
+                        SCX_BOOKEND_PRINT ("no error msg");
+                    }
+                }
+                else 
+                {
+                    SCX_BOOKEND_PRINT ("failed to receive error msg");
+                }
+            }
+        }
+    }
+    else
+    {
+        SCX_BOOKEND_PRINT ("send failed");
+    }
+    return rval;
+}
+
+
+
 int
 PythonProvider::forkExec ()
 {
