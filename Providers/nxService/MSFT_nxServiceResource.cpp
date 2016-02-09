@@ -186,6 +186,49 @@ void MI_CALL MSFT_nxServiceResource_Invoke_GetTargetResource(
     MI_Context_PostResult (context, result);
 }
 
+void MI_CALL MSFT_nxServiceResource_Invoke_InventoryTargetResource(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_nxServiceResource* instanceName,
+    _In_opt_ const MSFT_nxServiceResource_InventoryTargetResource* in)
+{
+    SCX_BOOKEND_EX ("Inventory", " name=\"nxService\"");
+    MI_Result result = MI_RESULT_FAILED;
+    if (self)
+    {
+        MI_Instance* retInstance;
+        MI_Instance_Clone (&in->InputResource.value->__instance, &retInstance);
+        result = self->inventory (in->InputResource.value->__instance, context,
+                            retInstance);
+        if (MI_RESULT_OK == result)
+        {
+            SCX_BOOKEND_PRINT ("packing succeeded!");
+            MSFT_nxServiceResource_InventoryTargetResource out;
+            MSFT_nxServiceResource_InventoryTargetResource_Construct (&out, context);
+            MSFT_nxServiceResource_InventoryTargetResource_Set_MIReturn (&out, 0);
+            MI_Value value;
+            value.instance = retInstance;
+            MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
+                                    MI_INSTANCE, 0);
+            result = MSFT_nxServiceResource_InventoryTargetResource_Post (&out, context);
+            if (MI_RESULT_OK != result)
+            {
+                SCX_BOOKEND_PRINT ("post Failed");
+            }
+            MSFT_nxServiceResource_InventoryTargetResource_Destruct (&out);
+        }
+        else
+        {
+            SCX_BOOKEND_PRINT ("inventory FAILED");
+        }
+        MI_Instance_Delete (retInstance);
+    }
+    MI_Context_PostResult (context, result);
+}
+
 void MI_CALL MSFT_nxServiceResource_Invoke_TestTargetResource(
     _In_opt_ MSFT_nxServiceResource_Self* self,
     _In_ MI_Context* context,

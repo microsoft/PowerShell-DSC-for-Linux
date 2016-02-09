@@ -138,6 +138,7 @@ private:
     static unsigned char const TEST = 0;
     static unsigned char const SET = 1;
     static unsigned char const GET = 2;
+    static unsigned char const INVENTORY = 3;
 
     std::string const m_Name;
     int m_FD;

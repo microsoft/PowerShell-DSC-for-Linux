@@ -1,18 +1,3 @@
-/*
-   PowerShell Desired State Configuration for Linux
-
-   Copyright (c) Microsoft Corporation
-
-   All rights reserved. 
-
-   MIT License
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
 /* @migen@ */
 /*
 **==============================================================================
@@ -49,6 +34,8 @@ typedef struct _MSFT_nxServiceResource /* extends OMI_BaseResource */
     MI_ConstBooleanField Enabled;
     MI_ConstStringField State;
     MI_ConstStringField Path;
+    MI_ConstStringField Description;
+    MI_ConstStringField Runlevels;
 }
 MSFT_nxServiceResource;
 
@@ -282,6 +269,212 @@ MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Clear_Path(
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         4);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Set_Description(
+    _Inout_ MSFT_nxServiceResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        5,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_SetPtr_Description(
+    _Inout_ MSFT_nxServiceResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        5,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Clear_Description(
+    _Inout_ MSFT_nxServiceResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        5);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Set_Runlevels(
+    _Inout_ MSFT_nxServiceResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        6,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_SetPtr_Runlevels(
+    _Inout_ MSFT_nxServiceResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        6,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_Clear_Runlevels(
+    _Inout_ MSFT_nxServiceResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        6);
+}
+
+/*
+**==============================================================================
+**
+** MSFT_nxServiceResource.InventoryTargetResource()
+**
+**==============================================================================
+*/
+
+typedef struct _MSFT_nxServiceResource_InventoryTargetResource
+{
+    MI_Instance __instance;
+    /*OUT*/ MI_ConstUint32Field MIReturn;
+    /*IN*/ MSFT_nxServiceResource_ConstRef InputResource;
+    /*OUT*/ MSFT_nxServiceResource_ConstArrayRef inventory;
+}
+MSFT_nxServiceResource_InventoryTargetResource;
+
+MI_EXTERN_C MI_CONST MI_MethodDecl MSFT_nxServiceResource_InventoryTargetResource_rtti;
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Construct(
+    _Out_ MSFT_nxServiceResource_InventoryTargetResource* self,
+    _In_ MI_Context* context)
+{
+    return MI_Context_ConstructParameters(context, &MSFT_nxServiceResource_InventoryTargetResource_rtti,
+        (MI_Instance*)&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Clone(
+    _In_ const MSFT_nxServiceResource_InventoryTargetResource* self,
+    _Outptr_ MSFT_nxServiceResource_InventoryTargetResource** newInstance)
+{
+    return MI_Instance_Clone(
+        &self->__instance, (MI_Instance**)newInstance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Destruct(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self)
+{
+    return MI_Instance_Destruct(&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Delete(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self)
+{
+    return MI_Instance_Delete(&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Post(
+    _In_ const MSFT_nxServiceResource_InventoryTargetResource* self,
+    _In_ MI_Context* context)
+{
+    return MI_Context_PostInstance(context, &self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Set_MIReturn(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self,
+    _In_ MI_Uint32 x)
+{
+    ((MI_Uint32Field*)&self->MIReturn)->value = x;
+    ((MI_Uint32Field*)&self->MIReturn)->exists = 1;
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Clear_MIReturn(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self)
+{
+    memset((void*)&self->MIReturn, 0, sizeof(self->MIReturn));
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Set_InputResource(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self,
+    _In_ const MSFT_nxServiceResource* x)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&x,
+        MI_INSTANCE,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_SetPtr_InputResource(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self,
+    _In_ const MSFT_nxServiceResource* x)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&x,
+        MI_INSTANCE,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Clear_InputResource(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        1);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Set_inventory(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self,
+    _In_reads_opt_(size) const MSFT_nxServiceResource * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        2,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_SetPtr_inventory(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self,
+    _In_reads_opt_(size) const MSFT_nxServiceResource * const * data,
+    _In_ MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        2,
+        (MI_Value*)&arr,
+        MI_INSTANCEA,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxServiceResource_InventoryTargetResource_Clear_inventory(
+    _Inout_ MSFT_nxServiceResource_InventoryTargetResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        2);
 }
 
 /*
@@ -780,6 +973,15 @@ MI_EXTERN_C void MI_CALL MSFT_nxServiceResource_DeleteInstance(
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_ const MSFT_nxServiceResource* instanceName);
+
+MI_EXTERN_C void MI_CALL MSFT_nxServiceResource_Invoke_InventoryTargetResource(
+    _In_opt_ MSFT_nxServiceResource_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_nxServiceResource* instanceName,
+    _In_opt_ const MSFT_nxServiceResource_InventoryTargetResource* in);
 
 MI_EXTERN_C void MI_CALL MSFT_nxServiceResource_Invoke_GetTargetResource(
     _In_opt_ MSFT_nxServiceResource_Self* self,
