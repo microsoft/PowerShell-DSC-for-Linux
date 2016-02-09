@@ -1,5 +1,5 @@
 # PowerShell Desired State Configuration for Linux
-*Copyright (c) Microsoft Corporation ver. 1.1.0*
+*Copyright (c) Microsoft Corporation ver. 1.1.1*
 *All rights reserved.* 
 
 MIT License
@@ -9,7 +9,72 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# PowerShell Desired State Configuration for Linux - v1.1.0
+#Getting Started#
+
+**Supported Linux operation system versions **
+The following Linux operating system versions are supported for DSC for Linux. 
+- CentOS 5, 6, and 7 (x86/x64)
+- Debian GNU/Linux 6, 7 and 8 (x86/x64) 
+- Oracle Linux 5, 6 and 7 (x86/x64) 
+- Red Hat Enterprise Linux Server 5, 6 and 7 (x86/x64) 
+- SUSE Linux Enterprise Server 10, 11 and 12 (x86/x64) 
+- Ubuntu Server 12.04 LTS and 14.04 LTS (x86/x64) 
+
+## Requirements ##
+The following table describes the required package dependencies for DSC for Linux.
+
+ **Required package** 	| **Description** 	| **Minimum version**
+--------------------- | --------------------- | -------------------
+Glibc |	GNU C Library	| 2.4 - 31.30
+python | Python | 2.4 - 3.4
+omi | Open Management Infrastructure | 1.0.8-4
+openssl| OpenSSL Libraries | 0.9.8e or 1.0
+python-ctypes|Python CTypes library | Must match Python version
+libcurl | cURL http client library | 7.15.1
+
+OMI Packages can be found at: [https://collaboration.opengroup.org/](omi/documents.php?action=view&gdid=34607)
+
+##Installing DSC Packages##
+
+```
+wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-70/dsc-1.1.1.packages.tar.gz
+tar -xvf dsc-1.1.1.packages.tar.gz
+
+#Install the appropriate package for your architecture (x86 or x64) and OpenSSL version (1.0.x or 0.9.8):
+#dpkg -i dsc-1.1.1-70.ssl_100.x64.deb
+#rpm -Uvh dsc-1.1.1-70.ssl_100.x64.rpm
+
+```
+
+**For more information, review the latest [release notes](https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/tag/v1.1.1-70) and [product documentation](https://msdn.microsoft.com/en-us/powershell/dsc/lnxgettingstarted).**
+
+## To author DSC MOF configuration for Linux on a Windows computer:
+
+----------
+
+
+**Prerequisites**
+
+* A Windows computer with:
+  * Adminstrative privileges
+  * Windows PowerShell (>=4.0)
+
+
+* Install the Linux Resource Provider MOF module:
+  * The "nx" module can be installed from the PowerShell Gallery with:
+	`install-module nx`
+   * In order to compile a Configuration MOF that uses the DSC for Linux resources, use `Import-DscResource -Module nx` inside a DSC Configuration block.
+  
+* Managing a Linux system with DSC
+   * You need a compiled configuration MOF to apply a new configuration to a system.  Please refer to part 1 of this section, as well as the DSC for Windows documentation, for instructions on how to generate a configuration MOF.
+   * Once you have a MOF, you can apply it by running:
+        `Start-DscConfiguration -CimSession:$myCimSession -Path:"C:\path_to_compiled_mof_directory\" -Wait -Verbose`
+   * You can get the current configuration of the system by running:
+        `Get-DscConfiguration -CimSession:$myCimSession`
+   * You can test the current configuration of the system by running:
+       `Test-DscConfiguration -CimSession:$myCimSession`
+   * For more information on creating a CimSession for use with the -CimSession parameter, see: http://technet.microsoft.com/en-us/library/jj590760.aspx
+
 
 ## Building the Desired State Configuration (DSC) Local Configuration Manager and Linux Resource Providers
 
@@ -88,36 +153,5 @@ make reg
 # Start the OMI server
 ./omi-1.0.8/output/bin/omiserver
 ```
-
-## To author DSC MOF configuration for Linux on a Windows computer:
-
-----------
-
-
-**Prerequisites**
-
-* A Windows computer with:
-  * Adminstrative privileges
-  * Windows PowerShell (>=4.0)
-
-
-* Install the Linux Resource Provider MOF module:
-  * The "nx" module can be installed from the PowerShell Gallery with:
-	`install-module nx`
-   * In order to compile a Configuration MOF that uses the DSC for Linux resources, use `Import-DscResource -Module nx` inside a DSC Configuration block.
-  
-* Managing a Linux system with DSC
-   * You need a compiled configuration MOF to apply a new configuration to a system.  Please refer to part 1 of this section, as well as the DSC for Windows documentation, for instructions on how to generate a configuration MOF.
-   * Once you have a MOF, you can apply it by running:
-        `Start-DscConfiguration -CimSession:$myCimSession -Path:"C:\path_to_compiled_mof_directory\" -Wait -Verbose`
-   * You can get the current configuration of the system by running:
-        `Get-DscConfiguration -CimSession:$myCimSession`
-   * You can test the current configuration of the system by running:
-       `Test-DscConfiguration -CimSession:$myCimSession`
-   * For more information on creating a CimSession for use with the -CimSession parameter, see: http://technet.microsoft.com/en-us/library/jj590760.aspx
-
-* Notes
-  * The DSC Local Configuration Manager log can be found at `$OMI_HOME/var/log/dsc.log`
-
 
 
