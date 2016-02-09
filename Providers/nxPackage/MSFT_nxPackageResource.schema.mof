@@ -14,5 +14,6 @@ class MSFT_nxPackageResource : OMI_BaseResource
   [read] uint32 Size;
   [read] string Version;
   [read] boolean Installed;
+  [read] string Architecture;
   
 };

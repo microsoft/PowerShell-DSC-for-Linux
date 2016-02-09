@@ -2224,10 +2224,10 @@ MI_Result Inventory_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
             return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_SETCUSTOMOPTION_FAILED);
         }
         
-        /* Perform Get*/
+        /* Perform Inventory*/
         
         MI_Session_Invoke(miSession, 0, &sessionOptions, provNamespace, 
-                             instance->classDecl->name, OMI_BaseResource_GetMethodName,
+                             instance->classDecl->name, OMI_BaseResource_InventoryMethodName,
                              NULL, params, &callbacks,&operation);  
 
         r = GetInventoryMethodResult(&operation, outputInstance , extendedError);
