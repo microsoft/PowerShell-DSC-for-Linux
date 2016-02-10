@@ -190,6 +190,10 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
                               _Outptr_result_maybenull_ MI_Instance **outputInstance,
                               _Outptr_result_maybenull_ MI_Instance **extendedError);
 
+MI_Result GetInventoryMethodResult(_In_ MI_Operation *operation,
+                              _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                              _Outptr_result_maybenull_ MI_Instance **extendedError);
+
 void LogCAMessage(_In_ LCMProviderContext *lcmContext,
                   _In_ MI_Uint32 messageIndex,
                   _In_z_ const MI_Char *resourceId

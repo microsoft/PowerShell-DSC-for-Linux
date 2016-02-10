@@ -1826,6 +1826,63 @@ MI_Result Get_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
     return r;   
 }
 
+MI_Result GetInventoryMethodResult(_In_ MI_Operation *operation,
+                              _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                              _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_Result innerR = MI_RESULT_OK;
+    const MI_Instance* outInstance;
+    MI_Boolean moreResults;
+    MI_Result result;
+    const MI_Char *errorMessage;
+    const MI_Instance *completionDetails = NULL;  
+    MI_Value value;
+
+    if (extendedError == NULL)
+    {        
+        return MI_RESULT_INVALID_PARAMETER; 
+    }
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
+    
+    *outputInstance = NULL;
+    
+    /*Get the operation result*/
+    r = MI_Operation_GetInstance(operation, &outInstance, &moreResults, &result, &errorMessage, &completionDetails);
+    if( result != MI_RESULT_OK)
+    {
+        r = result;
+    }    
+    if( r != MI_RESULT_OK)
+    {
+        if( completionDetails != NULL)
+        {
+            innerR = DSC_MI_Instance_Clone( completionDetails, extendedError);
+        }
+        if( innerR != MI_RESULT_OK || completionDetails == NULL)
+        {
+            r = GetCimMIError(r, extendedError,ID_CAINFRA_GETINSTANCE_FAILED);
+        }
+        return r;
+    }
+
+    /*Get configurations  property*/
+    r = DSC_MI_Instance_GetElement(outInstance, OMI_BaseResource_Method_OutputResource, &value, NULL, NULL, NULL);
+    if( r != MI_RESULT_OK )
+    {
+        return GetCimMIError(r, extendedError,ID_CAINFRA_GET_OUTPUTRES_FAILED);
+    }
+    /*Clone the object*/
+
+    r = DSC_MI_Instance_Clone(value.instance, outputInstance);
+    if( r != MI_RESULT_OK )
+    {
+        return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
+    }    
+    return r;
+                                
+}
+
 const MI_Char * GetResourceId( _In_ MI_Instance *inst)
 {
     MI_Result r = MI_RESULT_OK;
