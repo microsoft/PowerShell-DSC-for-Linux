@@ -6766,9 +6766,6 @@ MI_Result CallGetInventory(
     BOOL fResult;
     ModuleManager *moduleManager = NULL;
 
-    //Debug Log 
-    DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,0,lcmContext.executionMode);
-
     if (cimErrorDetails == NULL)
     {        
         return MI_RESULT_INVALID_PARAMETER; 
