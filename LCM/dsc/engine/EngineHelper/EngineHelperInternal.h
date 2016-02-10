@@ -118,6 +118,8 @@
 #define OMI_BaseResource_GetMethodName                        MI_T("GetTargetResource")
 #define OMI_BaseResource_TestMethodName                       MI_T("TestTargetResource")
 #define OMI_BaseResource_SetMethodName                        MI_T("SetTargetResource")
+#define OMI_BaseResource_InventoryMethodName                  MI_T("InventoryTargetResource")
+
 
 #define OMI_BaseResource_Method_InputResource                 MI_T("InputResource")
 #define OMI_BaseResource_Method_Result                        MI_T("Result")
@@ -161,6 +163,7 @@
 #define OMI_ConfigurationDocument_GenerationDate           MI_T("GenerationDate")
 #define OMI_ConfigurationDocument_GenerationHost           MI_T("GenerationHost")
 #define OMI_ConfigurationDocument_Name                     MI_T("Name")
+#define OMI_ConfigurationDocument_DocumentType             MI_T("DocumentType")
 #define OMI_ConfigurationDocument_MinimumCompatibleVersion               MI_T("MinimumCompatibleVersion")
 #define OMI_ConfigurationDocument_CompatibleVersionAdditionalProperties  MI_T("CompatibleVersionAdditionalProperties")
 
@@ -508,6 +511,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define CONFIGURATION_LOCATION_PARTIALBASEDOCUMENTTMP MI_T("PartialConfigBaseDocumentInstances.mof.tmp")
 #define CONFIGURATION_LOCATION_PARTIALCONFIGURATIONS_STORE MI_T("PartialConfigurations")
 #define CONFIGURATION_LOCATION_GET MI_T("Get.mof")
+#define CONFIGURATION_LOCATION_INVENTORY MI_T("Inventory.mof")
 #define CONFIGURATION_LOCATION_CURRENT MI_T("Current.mof")
 #define CONFIGURATION_LOCATION_CURRENTCHECKSUM MI_T("Current.mof.checksum")
 #define CONFIGURATION_LOCATION_PREVIOUS MI_T("Previous.mof")
