@@ -62,6 +62,11 @@ public:
         MI_Context* const pContext,
         MI_Instance* const pInstanceOut);
 
+    MI_Result inventory (
+        MI_Instance const& instance,
+        MI_Context* const pContext,
+        MI_Instance* const pInstanceOut);
+
 private:
     /*ctor*/ PythonProvider (PythonProvider const&); // = delete
     PythonProvider& operator = (PythonProvider const&); // = delete
