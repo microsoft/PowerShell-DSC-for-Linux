@@ -41,8 +41,8 @@ wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.
 tar -xvf dsc-1.1.1.packages.tar.gz
 
 #Install the appropriate package for your architecture (x86 or x64) and OpenSSL version (1.0.x or 0.9.8):
-#dpkg -i dsc-1.1.1-70.ssl_100.x64.deb
-#rpm -Uvh dsc-1.1.1-70.ssl_100.x64.rpm
+#sudo dpkg -i dsc-1.1.1-70.ssl_100.x64.deb
+#sudo rpm -Uvh dsc-1.1.1-70.ssl_100.x64.rpm
 
 ```
 
