@@ -1,0 +1,12 @@
+// ===============================================================
+//  OMI_BaseResource
+// ===============================================================
+[Abstract, 
+ ClassVersion("1.0.0"), 
+ Description (
+    "Base schema for all native configuration providers." )]
+class OMI_BaseResource 
+{
+
+};
+
