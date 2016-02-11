@@ -6787,7 +6787,7 @@ MI_Result CallGetInventory(
     if (File_ExistT(GetInventoryFileName()) != 0)
     {
 	SetLCMStatusReady();
-	return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);
+	return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);
     }
 
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);

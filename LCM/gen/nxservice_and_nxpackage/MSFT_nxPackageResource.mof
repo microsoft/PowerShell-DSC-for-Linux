@@ -1,0 +1,90 @@
+[ClassVersion("1.0.0"), FriendlyName("nxPackage"), SupportsInventory] 
+class MSFT_nxPackageResource : OMI_BaseResource
+{
+  [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+  [write,ValueMap{"Yum", "Apt", "Zypper"},Values{"Yum", "Apt", "Zypper"}] string PackageManager;
+  [Key,InventoryFilter] string Name;
+  [write] string FilePath;
+  [write] Boolean PackageGroup;
+  [write] string Arguments;
+  [write] uint32 ReturnCode;
+  [read] string PackageDescription;
+  [read] string Publisher;
+  [read] string InstalledOn;
+  [read] uint32 Size;
+  [read] string Version;
+  [read] boolean Installed;
+  [read] string Architecture;
+  
+  
+ 		[static] uint32 InventoryTargetResource(
+								[in, EmbeddedInstance ("MSFT_nxPackageResource")] string InputResource,
+								[out, EmbeddedInstance ("MSFT_nxPackageResource")] string inventory[]
+							);
+
+ 		[static,
+         Description (
+             "Get resource states based on input configuration file." )]
+    uint32 GetTargetResource(
+            [in,
+             EmbeddedInstance ("MSFT_nxPackageResource"),
+             Description (
+                "Configuration document that is to be applied." )]
+        string InputResource,
+
+            [in,
+             Description (
+                "Flags passed to the providers. Reserved for future use." )]
+        uint32 Flags,
+            [out,
+             EmbeddedInstance ("MSFT_nxPackageResource"),
+             Description (
+                "The current state of the specified configuration resources." )]
+        string OutputResource
+        );
+		
+
+        [static,
+         Description (
+             "Test resource states based on input configuration file." )]
+    uint32 TestTargetResource(
+            [in,
+             EmbeddedInstance("MSFT_nxPackageResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in, 
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,   
+            [out,
+             Description (
+                "True if identical. False otherwise." )]
+        boolean Result,     
+            [out,
+             Description (
+                "Context information that the provider can use to optimize the set, This is optional." )]
+        uint64 ProviderContext
+        );
+
+        [static,
+         Description (
+            "Set resource states based on input configuration file." )]
+    uint32 SetTargetResource(
+            [in,
+             EmbeddedInstance ("MSFT_nxPackageResource"),
+             Description (
+                "Configuration document that to be applied." )]
+        string InputResource,    
+            [in,
+             Description (
+                "Context information that the provider can use to optimize the set from TestTargetResource, This is optional." )]
+        uint64 ProviderContext,
+            [in,
+             Description (
+                "Flags passed to the providers. reserved for future use." )]
+        uint32 Flags
+		);
+		
+  
+};
