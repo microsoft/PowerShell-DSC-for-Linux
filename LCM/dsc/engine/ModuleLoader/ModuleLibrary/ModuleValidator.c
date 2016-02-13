@@ -1065,6 +1065,56 @@ MI_Result ValidateDocumentInstance(_In_ MI_Instance *docInstance,
         {
             return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_DOCINS_VERSION);
         }
+
+	r = DSC_MI_Instance_GetElement(docInstance, OMI_ConfigurationDocument_DocumentType, &value, NULL, &Flags, NULL);
+	if( r == MI_RESULT_OK && (Flags & MI_FLAG_NULL) == 0 && Tcscasecmp(value.string, "inventory") == 0 )
+        {
+	    r = MI_RESULT_INVALID_PARAMETER;
+	    return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_NOT_BE_INVENTORY);
+        }
+    }
+    return r;
+}
+
+
+MI_Result ValidateInventoryDocumentInstance(_In_ MI_Instance *docInstance,
+                                    _Outptr_result_maybenull_ MI_Instance **extendedError )
+{
+
+    MI_Result r = MI_RESULT_OK;
+    MI_Uint32 yCount = 0;
+    MI_Uint32 Flags;
+    MI_Value value;
+    DSC_EventWriteValidatingDocInstance();
+
+    // Test1 : should have 'Version' property with correct format.
+    if( extendedError )
+        *extendedError = NULL;
+
+    for( yCount = 0; yCount < docInstance->classDecl->numProperties ; yCount++)
+    {
+        r = DSC_MI_Instance_GetElement(docInstance, OMI_ConfigurationDocument_Version, &value, NULL, &Flags, NULL);
+        if( r != MI_RESULT_OK || (Flags & MI_FLAG_NULL) != 0 )
+        {
+            r = MI_RESULT_NOT_FOUND;
+            return GetCimMIError1Param(r, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NOMANDATORY, OMI_ConfigurationDocument_Version);
+        }
+        if( !ValidateABCFormatVersion(value.string))
+        {
+            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_DOCINS_VERSION);
+        }
+
+	r = DSC_MI_Instance_GetElement(docInstance, OMI_ConfigurationDocument_DocumentType, &value, NULL, &Flags, NULL);
+	if( !(r == MI_RESULT_OK && (Flags & MI_FLAG_NULL) == 0) )
+        {
+	    r = MI_RESULT_INVALID_PARAMETER;
+	    return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1);
+        }
+	if ( Tcscasecmp(value.string, "inventory") != 0 )
+	{
+	    r = MI_RESULT_INVALID_PARAMETER;
+	    return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_2);
+	}
     }
     return r;
 }

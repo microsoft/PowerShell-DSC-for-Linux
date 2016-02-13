@@ -563,4 +563,9 @@ INTERNAL_Intlstr_Define0( ID_LCMHELPER_INVENTORY_CONF_FAILED , ID_LCMHELPER_INVE
 INTERNAL_Intlstr_Define0( ID_CANNOT_RUN_DSC_AS_NONROOT, ID_CANNOT_RUN_DSC_AS_NONROOT,"Unable to run dsc configurations as non-root.  Please use root credentials.")
 INTERNAL_Intlstr_Define0( ID_LCMHELPER_INVENTORY_FAILED , ID_LCMHELPER_INVENTORY_FAILED ,"Posting output for GetInventory did not succeed.")
 INTERNAL_Intlstr_Define0( ID_LCMHELPER_POSTINVENTORY_FAILED , ID_LCMHELPER_POSTINVENTORY_FAILED ,"GetInventory could not get the current Local Configuration Manager settings for the system.")
+
+INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_NOT_BE_INVENTORY, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_NOT_BE_INVENTORY, "Configuration mof contains the DocumentType = 'inventory' in the OMI_ConfigurationDocument instance, which is not allowed for configuration mofs.")
+INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, "Inventory mof does not contain the DocumentType field in the OMI_ConfigurationDocument instance.")
+INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, "Inventory mof contains the DocumentType field in the OMI_ConfigurationDocument instance, but it is not equal to 'inventory'.")
+
  
