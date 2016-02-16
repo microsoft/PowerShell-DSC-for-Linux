@@ -12,6 +12,9 @@ import glob
 import codecs
 import imp
 import time
+import copy
+import re
+from functools import reduce
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
@@ -23,6 +26,8 @@ LG = nxDSCLog.DSCLog
 # [write,ValueMap{"Running", "Stopped"},Values{"Running",
 # "Stopped"}] string State;
 # [read] string Path;
+# [read] string Description;
+# [read] string Runlevels; 
 
 global show_mof
 show_mof = False
@@ -30,6 +35,8 @@ show_mof = False
 
 def init_vars(Name, Controller, Enabled, State):
     if Name is None:
+        Name = ''
+    if Name == '*':
         Name = ''
     if Controller is None:
         Controller = ''
@@ -58,10 +65,12 @@ def Test_Marshall(Name, Controller, Enabled, State):
 def Get_Marshall(Name, Controller, Enabled, State):
     arg_names = list(locals().keys())
     arg_names.append('Path')
+    arg_names.append('Runlevels')
+    arg_names.append('Description')
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
     retval = 0
-    (retval, Name, Controller, Enabled, State, Path) = Get(
+    (retval, Name, Controller, Enabled, State, Path, Description, Runlevels) = Get(
         Name, Controller, Enabled, State)
 
     Name = protocol.MI_String(Name)
@@ -69,12 +78,30 @@ def Get_Marshall(Name, Controller, Enabled, State):
     Enabled = protocol.MI_Boolean(Enabled)
     State = protocol.MI_String(State)
     Path = protocol.MI_String(Path)
+    Description = protocol.MI_String(Description)
+    Runlevels = protocol.MI_String(Runlevels)
 
     retd = {}
     ld = locals()
     for k in arg_names:
         retd[k] = ld[k]
     return retval, retd
+
+def Inventory_Marshall(Name, Controller, Enabled, State):
+    (Name, Controller, Enabled, State) = init_vars(
+        Name, Controller, Enabled, State)
+    sc = ServiceContext(Name, Controller, Enabled, State)
+    GetAll(sc)
+    for srv in sc.services_list:
+        srv['Name'] = protocol.MI_String(srv['Name'])
+        srv['Controller'] = protocol.MI_String(srv['Controller'])
+        srv['Enabled'] = protocol.MI_Boolean(srv['Enabled'])
+        srv['State'] = protocol.MI_String(srv['State'])
+        srv['Path'] = protocol.MI_String(srv['Path'])
+        srv['Description'] = protocol.MI_String(srv['Description'])
+        srv['Runlevels'] = protocol.MI_String(srv['Runlevels'])
+    Inventory=protocol.MI_InstanceA(sc.services_list)
+    return 0, Inventory
 
 # ##########################
 # Begin user defined DSC functions
@@ -1272,21 +1299,130 @@ def Get(Name, Controller, Enabled, State):
             Enabled = GetInitEnabled(sc)
             State = GetInitState(sc)
             Path = "/etc/init.d/" + sc.Name
+        GetOne(sc)
+    return [exit_code, Name, Controller, Enabled, State, Path, sc.Description, sc.Runlevels]
 
-    return [exit_code, Name, Controller, Enabled, State, Path]
+def GetOne(sc):
+    GetAll(sc)
+    sc.Description=sc.services_list[0]['Description']
+    sc.Runlevels=sc.services_list[0]['Runlevels']
+
+def GetAll(sc):
+    if sc.Controller == 'init':
+        InitdGetAll(sc)
+    if sc.Controller == 'systemd':
+        SystemdGetAll(sc)
+    if sc.Controller == 'upstart':
+        UpstartGetAll(sc)
+
+def GetRunlevels(sc):
+    if sc.runlevels_d == None:
+        sc.runlevels_d = {}
+        cmd="file /etc/rc*.d/* | grep link | awk '{print $5,$1}' | sort"
+        code, out = RunGetOutput(cmd, False, False)
+        for line in out.splitlines():
+            srv = line.split(' ')[0]
+            rl = line.split(' ')[1]
+            n = os.path.basename(srv)
+            if n not in sc.runlevels_d.keys():
+                sc.runlevels_d[n]={}
+            if 'path' not in sc.runlevels_d[n].keys():
+                sc.runlevels_d[n]['path']=srv.replace('..','/etc')
+            if 'runlevels' not in sc.runlevels_d[n].keys():
+                sc.runlevels_d[n]['runlevels']=''
+            s='off'
+            if rl[11] == 's':
+                s='on'
+            sc.runlevels_d[n]['runlevels'] += rl[7]+':'+s+ ' '
+    if sc.Name in sc.runlevels_d.keys():
+        return sc.runlevels_d[sc.Name]
+    return None
+
+def SystemdGetAll(sc):
+    d = {}
+    Name=sc.Name
+    if '*' not in Name and len(Name) > 0:
+        Name = Name.replace('.service','')
+        Name += '.service'
+    cmd='systemctl -a list-unit-files ' + Name +  '| grep \.service | grep -v "@" | awk \'{print $1}\' | xargs systemctl -a --no-pager --no-legend -p "Names,WantedBy,Description,SubState,FragmentPath,UnitFilePreset" show'
+    code, txt = RunGetOutput(cmd, False, False)
+    txt=txt.replace('\n\n','@@')
+    txt=txt.replace('\n','|')
+    services=txt.split('@@')
+    subs=re.compile(r'(.*?=)')
+    for srv in services:
+        s=srv.split('|')
+        d['Name'] = subs.sub('',s[0].replace('.service',''))
+        d['Controller'] =  sc.Controller
+        d['Description'] =subs.sub('',s[2])
+        d['State'] = subs.sub('',s[3])
+        d['Path'] = subs.sub('',s[4])
+        d['Enabled'] = 'enabled' in subs.sub('',s[5])
+        rld=GetRunlevels(sc)
+        if rld != None and 'Runlevels' in rld.keys():
+            d['Runlevels'] = rld['Runlevels']
+        else:
+            d['Runlevels'] = subs.sub('',s[1])
+        sc.services_list.append(copy.deepcopy(d))
+
+def UpstartGetAll(sc):
+    d={}
+    cmd = "initctl list " + sc.Name +  " | sed 's/[(].*[)] //g' | tr ', ' ' ' | awk '{print $1,$2}'"
+    code, txt = RunGetOutput(cmd, False, False)
+    services=txt.splitlines()
+    for srv in services:
+        s=srv.split()
+        d['Name'] = s[0]
+        d['Controller'] =  sc.Controller
+        d['Description'] = ''
+        d['State'] = 'stopped'
+        if 'running' in s[1]:
+            d['State'] = 'running'
+        d['Path'] = ''
+        if os.path.exists('/etc/init.d/' + s[0]):
+            d['Path'] = '/etc/init.d/' + s[0]
+        elif os.path.exists('/etc/init/' + s[0] + '.conf'):
+            d['Path'] = '/etc/init/' + s[0] + '.conf'
+        # 'initclt list' won't show disabled services
+        d['Enabled'] = True
+        cmd = 'initctl show-config ' + d['Name'] + ' | grep -E "start |stop " | tr "\n" " " | tr -s " " '
+        code, out = RunGetOutput(cmd, False, False) 
+        d['Runlevels'] = out[1:]
+        sc.services_list.append(copy.deepcopy(d))
+
+def InitdGetAll(sc):
+    d={}
+    cmd = 'chkconfig -A -l ' + sc.Name + '| grep -vE "based| off"'
+    code, txt = RunGetOutput(cmd, False, False)
+    services=txt.splitlines()
+    for srv in services:
+        s=srv.split()
+        d['Name'] = s[0]
+        d['Controller'] =  sc.Controller
+        d['Description'] = ''
+        d['State'] = 'stopped'
+        cmd = 'service ' + s[0] + ' status'
+        code, txt = RunGetOutput(cmd, False, False)
+        if 'running' in txt:
+            d['State'] = 'running'
+        d['Path'] = ''
+        if os.path.exists('/etc/init.d/' + s[0]):
+            d['Path'] = '/etc/init.d/' + s[0]
+        d['Enabled'] = ':on' in srv
+        d['Runlevels'] = reduce(lambda x, y: x + ' ' + y, s[1:])
+        sc.services_list.append(copy.deepcopy(d))
 
 
 class ServiceContext:
 
     def __init__(self, Name, Controller, Enabled, State):
-        if not Name:
-            raise Exception("Error: Service has no name.")
-
-        if not Controller:
-            raise Exception("Error: Controller not specified.")
-
+        self.services_list=[]
+        self.runlevels_d=None
         self.Name = Name
         self.Controller = Controller
         self.Enabled = Enabled
         self.State = State
         self.Path = ''
+        self.Description = ''
+        self.Runlevels = ''
+
