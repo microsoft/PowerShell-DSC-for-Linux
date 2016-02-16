@@ -6812,7 +6812,7 @@ MI_Result CallGetInventory(
     // TODO: make sure its an inventory document by verifying the DocumentType="Inventory"
     if (documentIns != NULL)
     {
-        result = ValidateDocumentInstance(documentIns, cimErrorDetails);
+        result = ValidateInventoryDocumentInstance(documentIns, cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
             CleanUpInstanceCache(&inventoryInstances);
