@@ -566,6 +566,6 @@ INTERNAL_Intlstr_Define0( ID_LCMHELPER_POSTINVENTORY_FAILED , ID_LCMHELPER_POSTI
 
 INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_NOT_BE_INVENTORY, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_NOT_BE_INVENTORY, "Configuration mof contains the DocumentType = 'inventory' in the OMI_ConfigurationDocument instance, which is not allowed for configuration mofs.")
 INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, "Inventory mof does not contain the DocumentType field in the OMI_ConfigurationDocument instance.")
-INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, "Inventory mof contains the DocumentType field in the OMI_ConfigurationDocument instance, but it is not equal to 'inventory'.")
+INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_2, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_2, "Inventory mof contains the DocumentType field in the OMI_ConfigurationDocument instance, but it is not equal to 'inventory'.")
 
  
