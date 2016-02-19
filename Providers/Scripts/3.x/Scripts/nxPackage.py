@@ -149,6 +149,8 @@ def Inventory_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arg
         p['Version'] = protocol.MI_String(p['Version'])
         p['Installed'] = protocol.MI_Boolean(True)
     Inventory=protocol.MI_InstanceA(pkgs)
+    retd = {}
+    retd["__Inventory"] = Inventory
     return retval, Inventory
 
 #
