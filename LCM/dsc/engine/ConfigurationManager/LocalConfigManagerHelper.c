@@ -6751,8 +6751,6 @@ MI_Result GetLCMStatusCodeHistory(
 }
 
 
-// TODO: implement this function
-
 /* caller release outinstances */
 MI_Result CallGetInventory(
     _Inout_ MI_InstanceA *outInstances,
@@ -6809,8 +6807,6 @@ MI_Result CallGetInventory(
         return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_LOAD_INVENTORY_FAILED);
     }
 
-
-    // TODO: make sure its an inventory document by verifying the DocumentType="Inventory"
     if (documentIns != NULL)
     {
         result = ValidateInventoryDocumentInstance(documentIns, cimErrorDetails);
