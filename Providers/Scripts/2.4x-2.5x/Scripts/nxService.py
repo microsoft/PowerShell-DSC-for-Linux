@@ -103,7 +103,9 @@ def Inventory_Marshall(Name, Controller, Enabled, State):
         srv['Description'] = protocol.MI_String(srv['Description'])
         srv['Runlevels'] = protocol.MI_String(srv['Runlevels'])
     Inventory=protocol.MI_InstanceA(sc.services_list)
-    return 0, Inventory
+    retd = {}
+    retd["__Inventory"] = Inventory
+    return 0, retd
 
 # ##########################
 # Begin user defined DSC functions
