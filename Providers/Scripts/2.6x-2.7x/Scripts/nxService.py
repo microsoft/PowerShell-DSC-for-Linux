@@ -109,7 +109,7 @@ def Inventory_Marshall(Name, Controller, Enabled, State):
     Inventory=protocol.MI_InstanceA(sc.services_list)
     retd = {}
     retd["__Inventory"] = Inventory
-    return 0, Inventory
+    return 0, retd
 
 # ##########################
 # Begin user defined DSC functions
