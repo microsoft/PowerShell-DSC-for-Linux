@@ -126,7 +126,7 @@ MI_Result GetInventoryState(_In_ ProviderCallbackContext *provContext,
                            _In_ MI_Session *miSession,
                            _In_ MI_Instance *instance,
                            _In_ const MI_Instance *regInstance,
-                           _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                           _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                            _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,   
@@ -162,7 +162,7 @@ MI_Result Inventory_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
                                _In_ MI_Session *miSession,
                                _In_ MI_Instance *instance,
                                _In_ const MI_Instance *regInstance,
-                               _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                               _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                                 _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result Get_PSProvider(_In_ ProviderCallbackContext *provContext, 
@@ -191,7 +191,7 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
                               _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result GetInventoryMethodResult(_In_ MI_Operation *operation,
-                              _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                              _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                               _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 void LogCAMessage(_In_ LCMProviderContext *lcmContext,

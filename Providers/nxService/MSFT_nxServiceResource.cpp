@@ -200,7 +200,9 @@ void MI_CALL MSFT_nxServiceResource_Invoke_InventoryTargetResource(
     if (self)
     {
         MI_Instance* retInstance;
-        MI_Instance_Clone (&in->InputResource.value->__instance, &retInstance);
+	MI_NewDynamicInstance (
+                context, className,
+                NULL, &retInstance);
         result = self->inventory (in->InputResource.value->__instance, context,
                             retInstance);
         if (MI_RESULT_OK == result)
@@ -209,10 +211,26 @@ void MI_CALL MSFT_nxServiceResource_Invoke_InventoryTargetResource(
             MSFT_nxServiceResource_InventoryTargetResource out;
             MSFT_nxServiceResource_InventoryTargetResource_Construct (&out, context);
             MSFT_nxServiceResource_InventoryTargetResource_Set_MIReturn (&out, 0);
-            MI_Value value;
-            value.instance = retInstance;
-            MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
-                                    MI_INSTANCE, 0);
+
+            MI_Value value, value_inventory;
+	    result = MI_Instance_GetElement(retInstance, "__Inventory", &value_inventory, NULL, NULL, NULL);
+	    if (MI_RESULT_OK != result)
+	    {
+		SCX_BOOKEND_PRINT ("unable to find __Inventory instance");
+		MSFT_nxServiceResource_InventoryTargetResource_Destruct (&out);
+		MI_Context_PostResult(context, MI_RESULT_NOT_FOUND);
+	    }
+
+            value.instancea = value_inventory.instancea;
+            result = MI_Instance_SetElement (&out.__instance, "inventory", &value,
+                                    MI_INSTANCEA, 0);
+	    if (MI_RESULT_OK != result)
+	    {
+		SCX_BOOKEND_PRINT ("unable to set 'inventory' in out instance");
+		MSFT_nxServiceResource_InventoryTargetResource_Destruct (&out);
+		MI_Context_PostResult(context, MI_RESULT_FAILED);
+	    }
+
             result = MSFT_nxServiceResource_InventoryTargetResource_Post (&out, context);
             if (MI_RESULT_OK != result)
             {

@@ -125,6 +125,8 @@ allocate_MI_Instance (
     std::string const name,
     MI_InstancePtr* ppInstanceOut)
 {
+
+
     //SCX_BOOKEND ("allocate_MI_Instance");
     int rval = EXIT_FAILURE;
     // find the property by name
@@ -134,6 +136,28 @@ allocate_MI_Instance (
         ppBegin + pInstance->classDecl->numProperties;
     MI_PropertyDecl const* const* const ppProperty =
         std::find_if (ppBegin, ppEnd, PropertyFinder (name));
+
+    if (name.compare("__Inventory") == 0)
+    {
+        MI_Instance* pNewInstance = 0;
+        if (MI_RESULT_OK == MI_NewDynamicInstance (
+                pContext, pInstance->classDecl->name,
+                NULL, &pNewInstance))
+        {
+            ppInstanceOut->reset (pNewInstance);
+            rval = EXIT_SUCCESS;
+        }
+        else
+        {
+            std::ostringstream strm;
+            strm << __FILE__ << '[' << __LINE__ << ']'
+                 << "MI_NewDynamicInstance failed";
+            SCX_BOOKEND_PRINT (strm.str ());
+            std::cerr << strm.str () << std::endl;
+        }
+	return rval;
+    }
+
     if (ppEnd != ppProperty)
     {
         MI_Instance* pNewInstance = 0;
@@ -1142,7 +1166,7 @@ PythonProvider::recv_MI_Value (
     MI_Context* const pContext,
     MI_Instance* const pInstanceOut)
 {
-    //SCX_BOOKEND ("PythonProvider::recv_MI_Value");
+    SCX_BOOKEND ("PythonProvider::recv_MI_Value");
     std::string name;
     int rval = recv (&name);
     if (EXIT_SUCCESS == rval)
@@ -1214,7 +1238,7 @@ PythonProvider::recv_MI_Value (
                     break;
                 case MI_INSTANCE:
                     {
-                        //SCX_BOOKEND ("recv_MI_Value (MI_INSTANCE)");
+                        SCX_BOOKEND ("recv_MI_Value (MI_INSTANCE)");
                         ppInstanceArray.reset (new MI_InstancePtr[1]);
                         if (EXIT_SUCCESS == (rval = allocate_MI_Instance (
                                                  pContext, pInstanceOut, name,
@@ -1351,7 +1375,7 @@ PythonProvider::recv_MI_Value (
                     // set the array
                     // cleanup the memory
                     {
-                        //SCX_BOOKEND ("recv_MI_Value (INSTANCEA)");
+                        SCX_BOOKEND ("recv_MI_Value (INSTANCEA)");
                         int length;
                         int rval = recv (&length);
                         if (EXIT_SUCCESS == rval)
