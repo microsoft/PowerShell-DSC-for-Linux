@@ -283,7 +283,7 @@ class Params:
         self.cmds['rpm'][
             'stat'] = 'rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed|%{ARCH}\n" '
         self.cmds['rpm'][
-            'stat_all'] = 'rpm -q --queryformat "%{NAME}|%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed|%{ARCH}\n@@" '
+            'stat_all'] = 'rpm -qa --queryformat "%{NAME}|%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed|%{ARCH}\n@@" '
         self.cmds['rpm']['stat_group'] = None
         self.cmds['apt'][
             'present'] = 'DEBIAN_FRONTEND=noninteractive apt-get % install ^ --allow-unauthenticated --yes '
