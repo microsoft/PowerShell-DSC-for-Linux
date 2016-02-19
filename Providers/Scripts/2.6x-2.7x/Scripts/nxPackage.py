@@ -163,7 +163,7 @@ def Inventory_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arg
     Inventory=protocol.MI_InstanceA(pkgs)
     retd = {}
     retd["__Inventory"] = Inventory
-    return retval, Inventory
+    return retval, retd
 
 #
 # Begin user defined DSC functions
