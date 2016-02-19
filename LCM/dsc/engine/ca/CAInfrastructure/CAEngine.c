@@ -2189,8 +2189,6 @@ MI_Result MI_CALL Do_Register(
     return MI_RESULT_OK;
 }
 
-// TODO: finish this function
-
 MI_Result Inventory_WMIv2Provider(_In_ ProviderCallbackContext *provContext,   
                                _In_ MI_Application *miApp,
                                _In_ MI_Session *miSession,
@@ -2301,8 +2299,6 @@ MI_Result Inventory_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
     return r;   
 }
 
-// TODO: finish this function
-
 /*Get the current configuration for the desired state objects*/
 MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,   
                                     _In_ MI_Uint32 flags,
@@ -2399,8 +2395,6 @@ MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,
         MI_Instance_Delete(filteredInstance);
         filteredInstance = NULL;
         
-	// TODO: gather all instances, not just 1
-
         if( r != MI_RESULT_OK)
         {
             Intlstr intlstr = Intlstr_Null;
