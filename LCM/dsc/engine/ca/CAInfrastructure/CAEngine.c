@@ -1144,15 +1144,13 @@ MI_Result GetInventoryState(_In_ ProviderCallbackContext *provContext,
                            _In_ MI_Session *miSession,
                            _In_ MI_Instance *instance,
                            _In_ const MI_Instance *regInstance,
-                           _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                           _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                            _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    *outputInstance = NULL;
-
     if( Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
     {
-        return Inventory_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstance, extendedError);
+        return Inventory_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstances, extendedError);
     }    
 #if defined(_MSC_VER)
 #ifndef BUILD_FOR_CORESYSTEM
@@ -1827,25 +1825,26 @@ MI_Result Get_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
 }
 
 MI_Result GetInventoryMethodResult(_In_ MI_Operation *operation,
-                              _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                              _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                               _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;
     MI_Result innerR = MI_RESULT_OK;
     const MI_Instance* outInstance;
+    MI_Instance * tempInstance;
+    MI_Instance ** outInstanceArray;
     MI_Boolean moreResults;
     MI_Result result;
     const MI_Char *errorMessage;
     const MI_Instance *completionDetails = NULL;  
     MI_Value value;
+    int i;
 
     if (extendedError == NULL)
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
-    
-    *outputInstance = NULL;
     
     /*Get the operation result*/
     r = MI_Operation_GetInstance(operation, &outInstance, &moreResults, &result, &errorMessage, &completionDetails);
@@ -1867,18 +1866,25 @@ MI_Result GetInventoryMethodResult(_In_ MI_Operation *operation,
     }
 
     /*Get configurations  property*/
-    r = DSC_MI_Instance_GetElement(outInstance, OMI_BaseResource_Method_OutputResource, &value, NULL, NULL, NULL);
+    r = DSC_MI_Instance_GetElement(outInstance, "inventory", &value, NULL, NULL, NULL);
     if( r != MI_RESULT_OK )
     {
         return GetCimMIError(r, extendedError,ID_CAINFRA_GET_OUTPUTRES_FAILED);
     }
-    /*Clone the object*/
+    /*Clone the instances*/
 
-    r = DSC_MI_Instance_Clone(value.instance, outputInstance);
-    if( r != MI_RESULT_OK )
+    outputInstances->data = (MI_Instance**)DSC_malloc(value.instancea.size * sizeof(MI_Instance*), NitsHere());
+    outputInstances->size = value.instancea.size;
+    for (i = 0; i < value.instancea.size; ++i)
     {
-        return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
-    }    
+	r = DSC_MI_Instance_Clone(value.instancea.data[i], &tempInstance);
+	if( r != MI_RESULT_OK )
+	{
+	    return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
+	}    
+	outputInstances->data[i] = tempInstance;
+    }
+
     return r;
                                 
 }
@@ -2190,7 +2196,7 @@ MI_Result Inventory_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
                                _In_ MI_Session *miSession,
                                _In_ MI_Instance *instance,
                                _In_ const MI_Instance *regInstance,
-                               _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                               _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                                 _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     MI_Result r = MI_RESULT_OK;  
@@ -2228,74 +2234,63 @@ MI_Result Inventory_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.      
 
-    *outputInstance = NULL;
+    outputInstances->data = NULL;
+    outputInstances->size = 0;
 
     start=CPU_GetTimeStamp();
     SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_INVENTORY,provContext->lcmProviderContext);
     LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
     DSC_EventWriteMessageInvokingSession(provNamespace,instance->classDecl->name,OMI_BaseResource_InventoryMethodName);
 
-    if( Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0 )
+    /*Get target namespace*/
+    r = DSC_MI_Instance_GetElement(regInstance, MSFT_CimConfigurationProviderRegistration_Namespace, &value, NULL, NULL, NULL);
+    if( r != MI_RESULT_OK )
     {
-        r = DSC_MI_Instance_Clone(instance, outputInstance);
-        if( r != MI_RESULT_OK)
-        {
-            return GetCimMIError(r, extendedError, ID_CAINFRA_CLONE_FAILED);
-        }
+	return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_NAMESPACE_FAILED);
     }
-    else
-    {
+    provNamespace = value.string;
     
-
-        /*Get target namespace*/
-        r = DSC_MI_Instance_GetElement(regInstance, MSFT_CimConfigurationProviderRegistration_Namespace, &value, NULL, NULL, NULL);
-        if( r != MI_RESULT_OK )
-        {
-            return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_NAMESPACE_FAILED);
-        }
-        provNamespace = value.string;
-
-        /*Set input parameters*/
-        r = DSC_MI_Application_NewInstance(miApp, MI_T("__Parameters"), NULL, &params);
-        if( r != MI_RESULT_OK )
-        {
-            return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_NEWAPPLICATIONINSTANCE_FAILED);
-        }
-        value.instance = instance;
-        r = DSC_MI_Instance_AddElement(params, OMI_BaseResource_Method_InputResource, &value, MI_INSTANCE, 0 );
-        if( r != MI_RESULT_OK)
-        {
-            MI_Instance_Delete(params);        
-            return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_ADDELEM_FAILED);
-        }
-        r = MI_Application_NewOperationOptions(miApp, MI_FALSE, &sessionOptions);
-        if( r != MI_RESULT_OK )
-        {
-            return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_NEWOPERATIONOPTIONS_FAILED);
-        }
-        valueOperationOptions.string=g_ConfigurationDetails.jobGuidString;
-        r =MI_OperationOptions_SetCustomOption(&sessionOptions,DSC_JOBIDSTRING,MI_STRING,&valueOperationOptions,MI_FALSE);
-        if( r != MI_RESULT_OK)
-        {
-            MI_OperationOptions_Delete(&sessionOptions);
-            return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_SETCUSTOMOPTION_FAILED);
-        }
-        
-        /* Perform Inventory*/
-        
-        MI_Session_Invoke(miSession, 0, &sessionOptions, provNamespace, 
-                             instance->classDecl->name, OMI_BaseResource_InventoryMethodName,
-                             NULL, params, &callbacks,&operation);  
-
-        r = GetInventoryMethodResult(&operation, outputInstance , extendedError);
-        MI_Instance_Delete(params);
-        MI_OperationOptions_Delete(&sessionOptions);
-        MI_Operation_Close(&operation);
-        if( r != MI_RESULT_OK)
-        {           
-            return r;
-        }
+    /*Set input parameters*/
+    r = DSC_MI_Application_NewInstance(miApp, MI_T("__Parameters"), NULL, &params);
+    if( r != MI_RESULT_OK )
+    {
+	return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_NEWAPPLICATIONINSTANCE_FAILED);
     }
+    value.instance = instance;
+    r = DSC_MI_Instance_AddElement(params, OMI_BaseResource_Method_InputResource, &value, MI_INSTANCE, 0 );
+    if( r != MI_RESULT_OK)
+    {
+	MI_Instance_Delete(params);        
+	return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_ADDELEM_FAILED);
+    }
+    r = MI_Application_NewOperationOptions(miApp, MI_FALSE, &sessionOptions);
+    if( r != MI_RESULT_OK )
+    {
+	return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_NEWOPERATIONOPTIONS_FAILED);
+    }
+    valueOperationOptions.string=g_ConfigurationDetails.jobGuidString;
+    r =MI_OperationOptions_SetCustomOption(&sessionOptions,DSC_JOBIDSTRING,MI_STRING,&valueOperationOptions,MI_FALSE);
+    if( r != MI_RESULT_OK)
+    {
+	MI_OperationOptions_Delete(&sessionOptions);
+	return GetCimMIError(r, extendedError,ID_CAINFRA_INVENTORY_SETCUSTOMOPTION_FAILED);
+    }
+    
+    /* Perform Inventory*/
+    
+    MI_Session_Invoke(miSession, 0, &sessionOptions, provNamespace, 
+		      instance->classDecl->name, OMI_BaseResource_InventoryMethodName,
+		      NULL, params, &callbacks,&operation);  
+    
+    r = GetInventoryMethodResult(&operation, outputInstances, extendedError);
+    MI_Instance_Delete(params);
+    MI_OperationOptions_Delete(&sessionOptions);
+    MI_Operation_Close(&operation);
+    if( r != MI_RESULT_OK)
+    {           
+	return r;
+    }
+    
     //Stop timer for get
     finish=CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
@@ -2321,14 +2316,20 @@ MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,
     MI_Instance *filteredInstance = NULL;
     MI_Instance *regInstance = NULL;
     ModuleLoaderObject *moduleLoader = NULL;
-    MI_Instance *inventoryInstanceResult = NULL;
+    MI_InstanceA inventoryInstancesResult;
     MI_Session miSession = MI_SESSION_NULL;
     ProviderCallbackContext providerContext = {0};
+    MI_InstanceA * inventoryInstancesResultArray = NULL;
 
     MI_Char *certificateid = NULL;
     MI_Boolean bEncryptionEnabled = MI_FALSE;
     MI_Uint32 xCount = 0;
     MI_Uint32 index = 0;
+    MI_Instance * tempInstance;
+    MI_Instance ** tempInstanceArray;
+    MI_Uint32 i = 0;
+    MI_Uint32 j = 0;
+    MI_Uint32 totalInstanceCount = 0;
    
     if( outInstances == NULL  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -2355,14 +2356,12 @@ MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,
         return r;
     }
 
-    outInstances->data = (MI_Instance **)DSC_malloc( instanceA->size * sizeof(MI_Instance*), NitsHere());
+    outInstances->data = NULL;
     outInstances->size = 0;    
+    inventoryInstancesResult.data = NULL;
+    inventoryInstancesResult.size = 0;
 
-    if( outInstances->data == NULL)
-    {
-        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);        
-                    
-    }
+    inventoryInstancesResultArray = (MI_InstanceA*)DSC_malloc(sizeof(MI_InstanceA) * instanceA->size, NitsHere());
 
     moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
 
@@ -2370,9 +2369,6 @@ MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,
     r = DSC_MI_Application_NewSession(moduleLoader->application, NULL, NULL, NULL, NULL, NULL, &miSession);
     if( r != MI_RESULT_OK)
     {
-        CleanUpGetCache(outInstances);
-        DSC_free(outInstances->data);
-        outInstances->size = 0;
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
@@ -2385,9 +2381,6 @@ MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,
         r = moduleManager->ft->GetRegistrationInstance(moduleManager, instanceA->data[xCount]->classDecl->name, (const MI_Instance **)&regInstance, extendedError);
         if( r != MI_RESULT_OK)
         {
-            CleanUpGetCache(outInstances);
-            DSC_free(outInstances->data);
-            outInstances->size = 0;
             MI_Session_Close(&miSession, NULL, NULL);
             return r;
         }        
@@ -2396,16 +2389,13 @@ MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,
         r = moduleManager->ft->GetProviderCompatibleInstance(moduleManager, instanceA->data[xCount], &filteredInstance, extendedError);
         if( r != MI_RESULT_OK)
         {
-            CleanUpGetCache(outInstances);     
-            DSC_free(outInstances->data);
-            outInstances->size = 0;      
             MI_Session_Close(&miSession, NULL, NULL);            
             return r;
         }
         providerContext.resourceId = GetResourceId(instanceA->data[xCount]);    
         
         /* Get the inventory.*/
-        r = GetInventoryState(&providerContext, moduleLoader->application, &miSession, filteredInstance, regInstance, &inventoryInstanceResult, extendedError);
+        r = GetInventoryState(&providerContext, moduleLoader->application, &miSession, filteredInstance, regInstance, &inventoryInstancesResult, extendedError);
         MI_Instance_Delete(filteredInstance);
         filteredInstance = NULL;
         
@@ -2426,14 +2416,26 @@ MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,
             if( intlstr.str)
                 Intlstr_Free(intlstr);   
 
-            CleanUpGetCache(outInstances);     
-            DSC_free(outInstances->data);
-            outInstances->size = 0;      
             MI_Session_Close(&miSession, NULL, NULL);            
             return r;
         }
-        outInstances->data[xCount] = inventoryInstanceResult;
-        outInstances->size += 1;
+
+        inventoryInstancesResultArray[xCount].data = inventoryInstancesResult.data;
+        inventoryInstancesResultArray[xCount].size = inventoryInstancesResult.size;
+	totalInstanceCount += inventoryInstancesResult.size;
+    }
+
+    outInstances->data = (MI_Instance**)DSC_malloc(sizeof(MI_Instance*) * totalInstanceCount, NitsHere());
+    outInstances->size = totalInstanceCount;
+
+    xCount = 0;
+    for (i = 0; i < instanceA->size; ++i)
+    {
+	for (j = 0; j < inventoryInstancesResultArray[i].size; ++j)
+	{
+	    outInstances->data[xCount] = inventoryInstancesResultArray[i].data[j];
+	    xCount += 1;
+	}
     }
 
     MI_Session_Close(&miSession, NULL, NULL);    

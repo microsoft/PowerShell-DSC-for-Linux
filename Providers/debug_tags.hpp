@@ -21,25 +21,9 @@
 #include <string>
 
 
-#ifndef PRINT_BOOKENDS
-#define PRINT_BOOKENDS (0)
-#endif
-
-
-#if (PRINT_BOOKENDS)
-
 #define SCX_BOOKEND(title) scx::BookEnd be (title)
 #define SCX_BOOKEND_EX(title,sub_title) scx::BookEnd be (title, sub_title)
 #define SCX_BOOKEND_PRINT(text) scx::BookEnd::print (text)
-
-#else
-
-#define SCX_BOOKEND(title)
-#define SCX_BOOKEND_EX(title,sub_title)
-#define SCX_BOOKEND_PRINT(text)
-
-#endif
-
 
 namespace scx
 {
@@ -79,13 +63,11 @@ template<typename T>
 BookEnd::print (
     T const& text)
 {
-#if (PRINT_BOOKENDS)
     for (unsigned int i = 0; i < s_nIndent; ++i)
     {
         std::cout << INDENT;
     }
     std::cout << text << std::endl;
-#endif
 }
 
 
