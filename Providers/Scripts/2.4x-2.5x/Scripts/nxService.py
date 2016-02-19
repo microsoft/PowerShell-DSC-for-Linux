@@ -1380,7 +1380,7 @@ def UpstartGetAll(sc):
 
 def InitdGetAll(sc):
     d={}
-    cmd = 'chkconfig -A -l ' + sc.Name + '| grep -vE "based| off"'
+    cmd = 'chkconfig --list ' + sc.Name + '| grep -vE "based| off"'
     code, txt = RunGetOutput(cmd, False, False)
     services=txt.splitlines()
     for srv in services:
