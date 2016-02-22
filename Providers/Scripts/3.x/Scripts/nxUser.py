@@ -9,20 +9,25 @@ import os
 import sys
 import datetime
 import imp
+import copy
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
-# 	[Key] string UserName;
-# 	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
-# 	[write] string FullName;
-# 	[write] string Description;
-# 	[write] string Password;
-# 	[write] boolean Disabled;
-# 	[write] boolean PasswordChangeRequired;
-# 	[write] string HomeDirectory;
-# 	[write] string GroupID;
-
+# [ClassVersion("1.0.0"), FriendlyName("nxUser"),SupportsInventory()]
+# class MSFT_nxUserResource : OMI_BaseResource
+# {
+#        [Key, InventoryFilter] string UserName;
+#        [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+#        [write, InventoryFilter] string FullName;
+#        [write, InventoryFilter] string Description;
+#        [write] string Password;
+#        [write] boolean Disabled;
+#        [write] boolean PasswordChangeRequired;
+#        [write] string HomeDirectory;
+#        [write] string GroupID;
+#        [read] string UserID;
+# };
 global show_mof
 show_mof = False
 
@@ -76,7 +81,7 @@ def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
         init_vars(UserName, Ensure, FullName, Description, Password,
                   Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     retval = 0
-    (retval, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = Get(
+    (retval, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID, UserID) = Get(
         UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
     UserName = protocol.MI_String(UserName)
     Ensure = protocol.MI_String(Ensure)
@@ -87,30 +92,41 @@ def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
     Password = protocol.MI_String(Password)
     HomeDirectory = protocol.MI_String(HomeDirectory)
     GroupID = protocol.MI_String(GroupID)
+    UserID = protocol.MI_String(UserID)
+    arg_names.append('UserID')
     retd = {}
     ld = locals()
     for k in arg_names:
         retd[k] = ld[k]
     return retval, retd
 
+def Inventory_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
+        init_vars(UserName, Ensure, FullName, Description, Password,
+                  Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
+    (retval, Inventory) = GetInventory(
+        UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
+    for d in Inventory:
+        d['UserName'] = protocol.MI_String(d['UserName'])
+        d['Ensure'] = protocol.MI_String('Present')
+        d['FullName'] = protocol.MI_String(d['FullName'])
+        d['PasswordChangeRequired'] = protocol.MI_Boolean(d['PasswordChangeRequired'])
+        d['Disabled'] = protocol.MI_Boolean(d['Disabled'])
+        d['Description'] = protocol.MI_String(d['Description'])
+        d['Password'] = protocol.MI_String(d['Password'])
+        d['HomeDirectory'] = protocol.MI_String(d['HomeDirectory'])
+        d['GroupID'] = protocol.MI_String(d['GroupID'])
+        d['UserID'] = protocol.MI_String(d['UserID'])
+        d = protocol.MI_Instance(d)
+    Inventory = protocol.MI_InstanceA(Inventory)
+    retd = {}
+    retd["__Inventory"] = Inventory
+    return retval, retd
+
 
 ############################################################
 # Begin user defined DSC functions
 ############################################################
-
-class Params:
-
-    def __init__(self, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
-        self.UserName = UserName
-        self.Ensure = Ensure
-        self.FullName = FullName
-        self.Description = Description
-        self.Password = Password
-        self.Disabled = Disabled
-        self.PasswordChangeRequired = PasswordChangeRequired
-        self.HomeDirectory = HomeDirectory
-        self.GroupID = GroupID
-
 
 def SetShowMof(a):
     global show_mof
@@ -424,23 +440,21 @@ def Test(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCh
 def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
     ShowMof('GET', UserName, Ensure, FullName, Description, Password,
             Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
-
+    UserID = ''
     passwd_entries = None
     shadow_entries = None
     passwd_entries = ReadPasswd("/etc/passwd")
     if passwd_entries is None:
-        return [-1, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
+        return [-1, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID, UserID]
     shadow_entries = ReadPasswd("/etc/shadow")
     if shadow_entries is None:
-        return [-1, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
+        return [-1, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID, UserID]
 
     exit_code = 0
 
     if UserName not in passwd_entries:
         FullName = Description = Password = HomeDirectory = GroupID = ""
-        if Ensure != "absent":
-            exit_code = -1
-        return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
+        return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID, UserID]
 
     extra_fields = passwd_entries[UserName][3].split(",")
     FullName = extra_fields[0]
@@ -448,17 +462,58 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
         Description = extra_fields[1]
 
     HomeDirectory = passwd_entries[UserName][4]
+    UserID = passwd_entries[UserName][1]
     GroupID = passwd_entries[UserName][2]
-
     Password = shadow_entries[UserName][0]
     Disabled = False
     if len(Password) > 0:
         if Password[0] == "!":
             Disabled = True
-            Password = Password[1:]
+    Password = '' # not showing the password.
     if PasswordExpired(shadow_entries[UserName]):
         PasswordChangeRequired = True
     else:
         PasswordChangeRequired = False
 
-    return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID]
+    return [exit_code, UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID, UserID]
+
+def GetInventory(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    Inventory=[]
+    passwd_entries = None
+    shadow_entries = None
+    passwd_entries = ReadPasswd("/etc/passwd")
+    if passwd_entries is None:
+        return [-1, Inventory]
+    shadow_entries = ReadPasswd("/etc/shadow")
+    if shadow_entries is None:
+        return [-1, Inventory]
+    exit_code = 0
+    d={}
+    for Uname in passwd_entries.keys():
+        if len(UserName) and not fnmatch.fnmatch(Uname,UserName):
+            continue
+        d['UserName'] = Uname
+        extra_fields = passwd_entries[Uname][3].split(",")
+        d['FullName'] = extra_fields[0]
+        if len(FullName) and not fnmatch.fnmatch(Uname,FullName):
+            continue
+        d['Description'] = ''
+        if len(extra_fields) > 1:
+            d['Description'] = extra_fields[1]
+        if len(Description) and not fnmatch.fnmatch(Uname,Description):
+            continue
+        d['HomeDirectory'] = passwd_entries[Uname][4]
+        d['UserID'] = passwd_entries[Uname][1]
+        d['GroupID'] = passwd_entries[Uname][2]
+        d['Password'] = shadow_entries[Uname][0]
+        d['Disabled'] = False
+        if len(d['Password']) > 0:
+            if d['Password'][0] == "!":
+                d['Disabled'] = True
+        d['Password'] = '' # not showing the password.
+        if PasswordExpired(shadow_entries[Uname]):
+            d['PasswordChangeRequired'] = True
+        else:
+            d['PasswordChangeRequired'] = False
+        Inventory.append(copy.deepcopy(d))
+    return [exit_code, Inventory]

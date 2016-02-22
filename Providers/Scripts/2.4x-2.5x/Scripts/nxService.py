@@ -15,15 +15,17 @@ protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
-# [key] string Name;
-# [write,required,ValueMap{"init", "upstart", "systemd"},
-# Values{"init","upstart","systemd"}] string Controller;
-# [write] boolean Enabled;
-# [write,ValueMap{"Running", "Stopped"},Values{"Running",
-# "Stopped"}] string State;
-# [read] string Path;
-# [read] string Description;
-# [read] string Runlevels; 
+# [ClassVersion("1.0.0"),FriendlyName("nxService"), SupportsInventory()]
+# class MSFT_nxServiceResource : OMI_BaseResource
+# {
+#        [key, InventoryFilter] string Name;
+#        [write,required,ValueMap{"init", "upstart", "systemd"},Values{"init","upstart","systemd"}, InventoryFilter] string Controller;
+#        [write, InventoryFilter] boolean Enabled;
+#        [write,ValueMap{"Running", "Stopped"},Values{"Running", "Stopped"}, InventoryFilter] string State;
+#        [read] string Path;
+#        [read] string Description;
+#        [read] string Runlevels;
+# };
 
 global show_mof
 show_mof = False
@@ -90,9 +92,11 @@ def Get_Marshall(Name, Controller, Enabled, State):
     return retval, retd
 
 def Inventory_Marshall(Name, Controller, Enabled, State):
+    FilterEnabled = ( Enabled == None )
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
     sc = ServiceContext(Name, Controller, Enabled, State)
+    sc.FilterEnabled = FilterEnabled
     GetAll(sc)
     for srv in sc.services_list:
         srv['Name'] = protocol.MI_String(srv['Name'])
@@ -1344,8 +1348,12 @@ def SystemdGetAll(sc):
         d['Controller'] =  sc.Controller
         d['Description'] =subs.sub('',s[2])
         d['State'] = subs.sub('',s[3])
+        if len(sc.State) and sc.State != d['State'].lower():
+            continue
         d['Path'] = subs.sub('',s[4])
         d['Enabled'] = 'enabled' in subs.sub('',s[5])
+        if sc.FilterEnabled and sc.Enabled != d['Enabled']:
+            continue
         rld=GetRunlevels(sc)
         if rld != None and 'Runlevels' in rld.keys():
             d['Runlevels'] = rld['Runlevels']
@@ -1366,6 +1374,8 @@ def UpstartGetAll(sc):
         d['State'] = 'stopped'
         if 'running' in s[1]:
             d['State'] = 'running'
+        if len(sc.State) and sc.State != d['State'].lower():
+            continue
         d['Path'] = ''
         if os.path.exists('/etc/init.d/' + s[0]):
             d['Path'] = '/etc/init.d/' + s[0]
@@ -1373,6 +1383,8 @@ def UpstartGetAll(sc):
             d['Path'] = '/etc/init/' + s[0] + '.conf'
         # 'initclt list' won't show disabled services
         d['Enabled'] = True
+        if sc.FilterEnabled and sc.Enabled != d['Enabled']:
+            continue
         cmd = 'initctl show-config ' + d['Name'] + ' | grep -E "start |stop " | tr "\n" " " | tr -s " " '
         code, out = RunGetOutput(cmd, False, False) 
         d['Runlevels'] = out[1:]
@@ -1380,7 +1392,7 @@ def UpstartGetAll(sc):
 
 def InitdGetAll(sc):
     d={}
-    cmd = 'chkconfig --list ' + sc.Name + '| grep -vE "based| off"'
+    cmd = 'chkconfig -l ' + sc.Name + '| grep -vE "based| off"'
     code, txt = RunGetOutput(cmd, False, False)
     services=txt.splitlines()
     for srv in services:
@@ -1393,10 +1405,14 @@ def InitdGetAll(sc):
         code, txt = RunGetOutput(cmd, False, False)
         if 'running' in txt:
             d['State'] = 'running'
+        if len(sc.State) and sc.State != d['State'].lower():
+            continue
         d['Path'] = ''
         if os.path.exists('/etc/init.d/' + s[0]):
             d['Path'] = '/etc/init.d/' + s[0]
         d['Enabled'] = ':on' in srv
+        if sc.FilterEnabled and sc.Enabled != d['Enabled']:
+            continue
         d['Runlevels'] = reduce(lambda x, y: x + ' ' + y, s[1:])
         sc.services_list.append(copy.deepcopy(d))
 
@@ -1413,4 +1429,4 @@ class ServiceContext:
         self.Path = ''
         self.Description = ''
         self.Runlevels = ''
-
+        self.FilterEnabled = False
