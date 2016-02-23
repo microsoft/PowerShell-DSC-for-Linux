@@ -1314,8 +1314,9 @@ def Get(Name, Controller, Enabled, State):
 
 def GetOne(sc):
     GetAll(sc)
-    sc.Description=sc.services_list[0]['Description']
-    sc.Runlevels=sc.services_list[0]['Runlevels']
+    if len(sc.services_list):
+        sc.Description=sc.services_list[0]['Description']
+        sc.Runlevels=sc.services_list[0]['Runlevels']
 
 def GetAll(sc):
     if sc.Controller == 'init':
