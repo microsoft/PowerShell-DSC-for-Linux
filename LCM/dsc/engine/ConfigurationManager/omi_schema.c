@@ -4716,134 +4716,93 @@ MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_StopConfiguration_rtti 
     (MI_ProviderFT_Invoke)MSFT_DSCLocalConfigurationManager_Invoke_StopConfiguration, /* method */
 };
 
-static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_GetInventory_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_PerformInventory_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetInventory_Static_qual =
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventory_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_Static_qual_value
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_GetInventory_Description_qual_value = MI_T("74");
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformInventory_Description_qual_value = MI_T("74");
 
-static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetInventory_Description_qual =
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventory_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_Description_qual_value
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_GetInventory_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventory_quals[] =
 {
-    &MSFT_DSCLocalConfigurationManager_GetInventory_Static_qual,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_Description_qual,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_Static_qual,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_Description_qual,
 };
 
-static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_GetInventory_inventory_EmbeddedInstance_qual_value = MI_T("OMI_BaseResource");
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetInventory_inventory_EmbeddedInstance_qual =
-{
-    MI_T("EmbeddedInstance"),
-    MI_STRING,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_inventory_EmbeddedInstance_qual_value
-};
-
-static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_GetInventory_inventory_Out_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetInventory_inventory_Out_qual =
-{
-    MI_T("Out"),
-    MI_BOOLEAN,
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_inventory_Out_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_GetInventory_inventory_quals[] =
-{
-    &MSFT_DSCLocalConfigurationManager_GetInventory_inventory_EmbeddedInstance_qual,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_inventory_Out_qual,
-};
-
-/* parameter MSFT_DSCLocalConfigurationManager.GetInventory(): inventory */
-static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_GetInventory_inventory_param =
-{
-    MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
-    0x00697909, /* code */
-    MI_T("inventory"), /* name */
-    MSFT_DSCLocalConfigurationManager_GetInventory_inventory_quals, /* qualifiers */
-    MI_COUNT(MSFT_DSCLocalConfigurationManager_GetInventory_inventory_quals), /* numQualifiers */
-    MI_INSTANCEA, /* type */
-    MI_T("OMI_BaseResource"), /* className */
-    0, /* subscript */
-    offsetof(MSFT_DSCLocalConfigurationManager_GetInventory, inventory), /* offset */
-};
-
-static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_Static_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_Static_qual_value
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_Description_qual_value = MI_T("74");
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Description_qual_value = MI_T("74");
 
-static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_Description_qual_value
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_quals[] =
 {
-    &MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_Static_qual,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_Description_qual,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Static_qual,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Description_qual,
 };
 
-/* parameter MSFT_DSCLocalConfigurationManager.GetInventory(): MIReturn */
-static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_param =
+/* parameter MSFT_DSCLocalConfigurationManager.PerformInventory(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_quals, /* qualifiers */
-    MI_COUNT(MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_quals), /* numQualifiers */
+    MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_DSCLocalConfigurationManager_GetInventory, MIReturn), /* offset */
+    offsetof(MSFT_DSCLocalConfigurationManager_PerformInventory, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_GetInventory_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventory_params[] =
 {
-    &MSFT_DSCLocalConfigurationManager_GetInventory_MIReturn_param,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_inventory_param,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_param,
 };
 
-/* method MSFT_DSCLocalConfigurationManager.GetInventory() */
-MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_GetInventory_rtti =
+/* method MSFT_DSCLocalConfigurationManager.PerformInventory() */
+MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_PerformInventory_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
-    0x0067790C, /* code */
-    MI_T("GetInventory"), /* name */
-    MSFT_DSCLocalConfigurationManager_GetInventory_quals, /* qualifiers */
-    MI_COUNT(MSFT_DSCLocalConfigurationManager_GetInventory_quals), /* numQualifiers */
-    MSFT_DSCLocalConfigurationManager_GetInventory_params, /* parameters */
-    MI_COUNT(MSFT_DSCLocalConfigurationManager_GetInventory_params), /* numParameters */
-    sizeof(MSFT_DSCLocalConfigurationManager_GetInventory), /* size */
+    0x00707910, /* code */
+    MI_T("PerformInventory"), /* name */
+    MSFT_DSCLocalConfigurationManager_PerformInventory_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventory_quals), /* numQualifiers */
+    MSFT_DSCLocalConfigurationManager_PerformInventory_params, /* parameters */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventory_params), /* numParameters */
+    sizeof(MSFT_DSCLocalConfigurationManager_PerformInventory), /* size */
     MI_UINT32, /* returnType */
     MI_T("MSFT_DSCLocalConfigurationManager"), /* origin */
     MI_T("MSFT_DSCLocalConfigurationManager"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)MSFT_DSCLocalConfigurationManager_Invoke_GetInventory, /* method */
+    (MI_ProviderFT_Invoke)MSFT_DSCLocalConfigurationManager_Invoke_PerformInventory, /* method */
 };
 
 static MI_MethodDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_meths[] =
@@ -4858,7 +4817,7 @@ static MI_MethodDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_meths[
     &MSFT_DSCLocalConfigurationManager_RollBack_rtti,
     &MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_rtti,
     &MSFT_DSCLocalConfigurationManager_StopConfiguration_rtti,
-    &MSFT_DSCLocalConfigurationManager_GetInventory_rtti,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_rtti,
 };
 
 static MI_CONST MI_ProviderFT MSFT_DSCLocalConfigurationManager_funcs =

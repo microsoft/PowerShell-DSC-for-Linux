@@ -6752,7 +6752,7 @@ MI_Result GetLCMStatusCodeHistory(
 
 
 /* caller release outinstances */
-MI_Result CallGetInventory(
+MI_Result CallPerformInventory(
     _Inout_ MI_InstanceA *outInstances,
     _In_ MI_Context* context,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
@@ -6833,7 +6833,7 @@ MI_Result CallGetInventory(
     SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_INVENTORY,&lcmContext);
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
-    result = GetInventory(&lcmContext, 0, &inventoryInstances, moduleManager, documentIns, &inventoryResultInstances, cimErrorDetails);
+    result = PerformInventory(&lcmContext, 0, &inventoryInstances, moduleManager, documentIns, &inventoryResultInstances, cimErrorDetails);
     
     MI_Instance_Delete(documentIns);
 

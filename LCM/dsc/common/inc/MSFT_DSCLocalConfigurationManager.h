@@ -1240,58 +1240,57 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_StopConfiguration_
 /*
 **==============================================================================
 **
-** MSFT_DSCLocalConfigurationManager.GetInventory()
+** MSFT_DSCLocalConfigurationManager.PerformInventory()
 **
 **==============================================================================
 */
 
-typedef struct _MSFT_DSCLocalConfigurationManager_GetInventory
+typedef struct _MSFT_DSCLocalConfigurationManager_PerformInventory
 {
     MI_Instance __instance;
     /*OUT*/ MI_ConstUint32Field MIReturn;
-    /*OUT*/ OMI_BaseResource_ConstArrayRef inventory;
 }
-MSFT_DSCLocalConfigurationManager_GetInventory;
+MSFT_DSCLocalConfigurationManager_PerformInventory;
 
-MI_EXTERN_C MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_GetInventory_rtti;
+MI_EXTERN_C MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_PerformInventory_rtti;
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Construct(
-    _Out_ MSFT_DSCLocalConfigurationManager_GetInventory* self,
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Construct(
+    _Out_ MSFT_DSCLocalConfigurationManager_PerformInventory* self,
     _In_ MI_Context* context)
 {
-    return MI_Context_ConstructParameters(context, &MSFT_DSCLocalConfigurationManager_GetInventory_rtti,
+    return MI_Context_ConstructParameters(context, &MSFT_DSCLocalConfigurationManager_PerformInventory_rtti,
         (MI_Instance*)&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Clone(
-    _In_ const MSFT_DSCLocalConfigurationManager_GetInventory* self,
-    _Outptr_ MSFT_DSCLocalConfigurationManager_GetInventory** newInstance)
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Clone(
+    _In_ const MSFT_DSCLocalConfigurationManager_PerformInventory* self,
+    _Outptr_ MSFT_DSCLocalConfigurationManager_PerformInventory** newInstance)
 {
     return MI_Instance_Clone(
         &self->__instance, (MI_Instance**)newInstance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(
-    _Inout_ MSFT_DSCLocalConfigurationManager_GetInventory* self)
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventory* self)
 {
     return MI_Instance_Destruct(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Delete(
-    _Inout_ MSFT_DSCLocalConfigurationManager_GetInventory* self)
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Delete(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventory* self)
 {
     return MI_Instance_Delete(&self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Post(
-    _In_ const MSFT_DSCLocalConfigurationManager_GetInventory* self,
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Post(
+    _In_ const MSFT_DSCLocalConfigurationManager_PerformInventory* self,
     _In_ MI_Context* context)
 {
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Set_MIReturn(
-    _Inout_ MSFT_DSCLocalConfigurationManager_GetInventory* self,
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Set_MIReturn(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventory* self,
     _In_ MI_Uint32 x)
 {
     ((MI_Uint32Field*)&self->MIReturn)->value = x;
@@ -1299,51 +1298,11 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Set_M
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Clear_MIReturn(
-    _Inout_ MSFT_DSCLocalConfigurationManager_GetInventory* self)
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Clear_MIReturn(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventory* self)
 {
     memset((void*)&self->MIReturn, 0, sizeof(self->MIReturn));
     return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Set_inventory(
-    _Inout_ MSFT_DSCLocalConfigurationManager_GetInventory* self,
-    _In_reads_opt_(size) const OMI_BaseResource * const * data,
-    _In_ MI_Uint32 size)
-{
-    MI_Array arr;
-    arr.data = (void*)data;
-    arr.size = size;
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&arr,
-        MI_INSTANCEA,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_SetPtr_inventory(
-    _Inout_ MSFT_DSCLocalConfigurationManager_GetInventory* self,
-    _In_reads_opt_(size) const OMI_BaseResource * const * data,
-    _In_ MI_Uint32 size)
-{
-    MI_Array arr;
-    arr.data = (void*)data;
-    arr.size = size;
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&arr,
-        MI_INSTANCEA,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_GetInventory_Clear_inventory(
-    _Inout_ MSFT_DSCLocalConfigurationManager_GetInventory* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        1);
 }
 
 /*
@@ -1456,14 +1415,14 @@ MI_EXTERN_C void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_StopConfigurat
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
     _In_opt_ const MSFT_DSCLocalConfigurationManager_StopConfiguration* in);
 
-MI_EXTERN_C void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_GetInventory(
+MI_EXTERN_C void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_PerformInventory(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
-    _In_opt_ const MSFT_DSCLocalConfigurationManager_GetInventory* in);
+    _In_opt_ const MSFT_DSCLocalConfigurationManager_PerformInventory* in);
 
 
 #endif /* _MSFT_DSCLocalConfigurationManager_h */
