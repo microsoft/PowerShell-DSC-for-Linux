@@ -24,7 +24,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/StartDscConfiguration.py; intermediate/Scripts/StartDscConfiguration.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/TestDscConfiguration.py; intermediate/Scripts/TestDscConfiguration.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscConfiguration.py; intermediate/Scripts/GetDscConfiguration.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/GetInventory.py; intermediate/Scripts/GetInventory.py; 755; root; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/PerformInventory.py; intermediate/Scripts/PerformInventory.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/SetDscLocalConfigurationManager.py; intermediate/Scripts/SetDscLocalConfigurationManager.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscLocalConfigurationManager.py; intermediate/Scripts/GetDscLocalConfigurationManager.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/PerformRequiredConfigurationChecks.py; intermediate/Scripts/PerformRequiredConfigurationChecks.py; 755; root; root
