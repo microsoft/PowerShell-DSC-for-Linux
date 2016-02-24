@@ -1139,7 +1139,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
     
 }
 
-MI_Result GetInventoryState(_In_ ProviderCallbackContext *provContext,  
+MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,  
                            _In_ MI_Application *miApp,
                            _In_ MI_Session *miSession,
                            _In_ MI_Instance *instance,
@@ -1824,7 +1824,7 @@ MI_Result Get_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
     return r;   
 }
 
-MI_Result GetInventoryMethodResult(_In_ MI_Operation *operation,
+MI_Result PerformInventoryMethodResult(_In_ MI_Operation *operation,
                               _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                               _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
@@ -2280,7 +2280,7 @@ MI_Result Inventory_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
 		      instance->classDecl->name, OMI_BaseResource_InventoryMethodName,
 		      NULL, params, &callbacks,&operation);  
     
-    r = GetInventoryMethodResult(&operation, outputInstances, extendedError);
+    r = PerformInventoryMethodResult(&operation, outputInstances, extendedError);
     MI_Instance_Delete(params);
     MI_OperationOptions_Delete(&sessionOptions);
     MI_Operation_Close(&operation);
@@ -2300,7 +2300,7 @@ MI_Result Inventory_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
 }
 
 /*Get the current configuration for the desired state objects*/
-MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,   
+MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,   
                                     _In_ MI_Uint32 flags,
                                     _In_ MI_InstanceA *instanceA,
                                     _In_ ModuleManager *moduleManager,
@@ -2391,7 +2391,7 @@ MI_Result MI_CALL GetInventory( _In_ LCMProviderContext *lcmContext,
         providerContext.resourceId = GetResourceId(instanceA->data[xCount]);    
         
         /* Get the inventory.*/
-        r = GetInventoryState(&providerContext, moduleLoader->application, &miSession, filteredInstance, regInstance, &inventoryInstancesResult, extendedError);
+        r = PerformInventoryState(&providerContext, moduleLoader->application, &miSession, filteredInstance, regInstance, &inventoryInstancesResult, extendedError);
         MI_Instance_Delete(filteredInstance);
         filteredInstance = NULL;
         

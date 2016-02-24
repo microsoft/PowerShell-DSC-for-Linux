@@ -2912,14 +2912,14 @@ void Invoke_StopConfiguration(
 }
 
 
-MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetInventory_Internal(void *param)
+MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
 {
     MI_Result miResult = MI_RESULT_OK;
     MI_Instance *cimErrorDetails = NULL;
     MI_InstanceA outInstances = {0};
     MI_Value val;
     MI_Uint32 bufferIndex = 0;    
-    MSFT_DSCLocalConfigurationManager_GetInventory outputObject;
+    MSFT_DSCLocalConfigurationManager_PerformInventory outputObject;
     MI_Uint8A dataValue = {0};
     MI_Real64 duration;
     ptrdiff_t start, finish;   
@@ -2957,7 +2957,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetInventory_Internal(void *param)
         return 0;
     }
 
-    miResult = MSFT_DSCLocalConfigurationManager_GetInventory_Construct(&outputObject, args->context);
+    miResult = MSFT_DSCLocalConfigurationManager_PerformInventory_Construct(&outputObject, args->context);
     if (miResult != MI_RESULT_OK)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTGET_FAILED);
@@ -2966,34 +2966,36 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetInventory_Internal(void *param)
 
     start=CPU_GetTimeStamp();
     SetLCMStatusBusy();
-    miResult = CallGetInventory(&outInstances, 
+    miResult = CallPerformInventory(&outInstances, 
         args->context, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
     {
-        MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(&outputObject);
+        MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
         goto ExitWithError;
     }
 
+/*
     val.instancea.data = outInstances.data;
     val.instancea.size = outInstances.size;
     miResult = MI_Instance_SetElement(&outputObject.__instance, MI_T("inventory"), &val, MI_INSTANCEA, 0);
+*/
     CleanUpInstanceCache(&outInstances);    
     if (miResult != MI_RESULT_OK)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_INVENTORY_FAILED);
-        MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(&outputObject);
+        MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
         goto ExitWithError;
     }
-    miResult = MSFT_DSCLocalConfigurationManager_GetInventory_Set_MIReturn(&outputObject, 0);
+    miResult = MSFT_DSCLocalConfigurationManager_PerformInventory_Set_MIReturn(&outputObject, 0);
     if (miResult != MI_RESULT_OK)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_INVENTORY_FAILED);
-        MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(&outputObject);
+        MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
         goto ExitWithError;
     }    
 
-    miResult = MSFT_DSCLocalConfigurationManager_GetInventory_Post(&outputObject, args->context);
-    MSFT_DSCLocalConfigurationManager_GetInventory_Destruct(&outputObject);
+    miResult = MSFT_DSCLocalConfigurationManager_PerformInventory_Post(&outputObject, args->context);
+    MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
     if (miResult != MI_RESULT_OK)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_POSTINVENTORY_FAILED);
@@ -3028,14 +3030,14 @@ ExitWithError:
 }
 
 
-void Invoke_GetInventory(
+void Invoke_PerformInventory(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
-    _In_opt_ const MSFT_DSCLocalConfigurationManager_GetInventory* in)
+    _In_opt_ const MSFT_DSCLocalConfigurationManager_PerformInventory* in)
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
@@ -3071,7 +3073,7 @@ void Invoke_GetInventory(
     args->dataExist = MI_FALSE;
     args->context = context;
     args->methodName = methodName;
-    Thread_CreateDetached(Invoke_GetInventory_Internal, NULL, args);
+    Thread_CreateDetached(Invoke_PerformInventory_Internal, NULL, args);
 
 }
 

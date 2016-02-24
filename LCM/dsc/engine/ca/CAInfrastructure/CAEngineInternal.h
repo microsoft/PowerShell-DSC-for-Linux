@@ -121,7 +121,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
                            _Outptr_result_maybenull_ MI_Instance **outputInstance,
                            _Outptr_result_maybenull_ MI_Instance **extendedError);
 
-MI_Result GetInventoryState(_In_ ProviderCallbackContext *provContext,  
+MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,  
                            _In_ MI_Application *miApp,
                            _In_ MI_Session *miSession,
                            _In_ MI_Instance *instance,
@@ -190,7 +190,7 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
                               _Outptr_result_maybenull_ MI_Instance **outputInstance,
                               _Outptr_result_maybenull_ MI_Instance **extendedError);
 
-MI_Result GetInventoryMethodResult(_In_ MI_Operation *operation,
+MI_Result PerformInventoryMethodResult(_In_ MI_Operation *operation,
                               _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                               _Outptr_result_maybenull_ MI_Instance **extendedError);
 
