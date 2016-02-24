@@ -10,16 +10,24 @@ import sys
 import codecs
 import imp
 import grp
+import copy
+import fnmatch
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
-# 	[Key] string GroupName;
-# 	[write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
-# 	[write] string Members[];
-# 	[write] string MembersToInclude[];
-# 	[write] string MembersToExclude[];
-# 	[write] string PreferredGroupID;
+# [ClassVersion("1.0.0"), FriendlyName("nxGroup"),SupportsInventory()]
+# class MSFT_nxGroupResource:OMI_BaseResource
+# {
+#        [Key, InventoryFilter] string GroupName;
+#        [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+#        [write] string Members[];
+#        [write] string MembersToInclude[];
+#        [write] string MembersToExclude[];
+#        [write] string PreferredGroupID;
+#        [read] string GroupID;
+ 
+# };
 
 global show_mof
 show_mof = False
@@ -65,7 +73,7 @@ def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
         init_vars(GroupName, Ensure, Members, MembersToInclude,
                   MembersToExclude, PreferredGroupID)
     retval = 0
-    (retval, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = \
+    (retval, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID, GroupID) = \
         Get(GroupName, Ensure, Members, MembersToInclude,
             MembersToExclude, PreferredGroupID)
 
@@ -75,11 +83,33 @@ def Get_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
     MembersToInclude = protocol.MI_StringA(MembersToInclude)
     MembersToExclude = protocol.MI_StringA(MembersToExclude)
     PreferredGroupID = protocol.MI_String(PreferredGroupID)
-
+    GroupID = protocol.MI_String(GroupID)
+    arg_names.append('GroupID')
     retd = {}
     ld = locals()
     for k in arg_names:
         retd[k] = ld[k]
+    return retval, retd
+
+def Inventory_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
+    arg_names = list(locals().keys())
+    (GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = \
+        init_vars(GroupName, Ensure, Members, MembersToInclude,
+                  MembersToExclude, PreferredGroupID)
+    retval = 0
+    (retval, Inventory) = GetInventory(GroupName, Ensure, Members, MembersToInclude,
+            MembersToExclude, PreferredGroupID)
+    for d in Inventory:
+        d['GroupName'] = protocol.MI_String(d['GroupName'])
+        d['Ensure'] = protocol.MI_String(d['Ensure'])
+        d['Members'] = protocol.MI_StringA(d['Members'])
+        d['MembersToInclude'] = protocol.MI_StringA(d['MembersToInclude'])
+        d['MembersToExclude'] = protocol.MI_StringA(d['MembersToExclude'])
+        d['PreferredGroupID'] = protocol.MI_String(d['PreferredGroupID'])
+        d['GroupID'] = protocol.MI_String(d['GroupID'])
+    Inventory = protocol.MI_InstanceA(Inventory)
+    retd = {}
+    retd["__Inventory"] = Inventory
     return retval, retd
 
 
@@ -402,13 +432,32 @@ def Get(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Preferre
     Members = ['']
     MembersToInclude = ['']
     MembersToExclude = ['']
-
+    GroupID = ''
     if GroupName not in group_entries:
         Ensure = "absent"
         PreferredGroupID = ""
     else:
         Ensure = "present"
-        PreferredGroupID = group_entries[GroupName][1]
+        GroupID = group_entries[GroupName][1]
         Members = GetGroupMembers(GroupName, group_entries)
 
-    return [0, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID]
+    return [0, GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID, GroupID]
+
+def GetInventory(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
+    ShowMof('GET', GroupName, Ensure, Members, MembersToInclude,
+            MembersToExclude, PreferredGroupID)
+    group_entries = ReadPasswd("/etc/group")
+    d={}
+    Inventory = []
+    for Gname in group_entries.keys():
+        if len(GroupName) and not fnmatch.fnmatch(Gname,GroupName):
+            continue
+        d['GroupName'] = Gname
+        d['Ensure'] = "present"
+        d['GroupID'] = group_entries[Gname][1]
+        d['PreferredGroupID'] = ''
+        d['Members'] = GetGroupMembers(Gname, group_entries)
+        d['MembersToInclude'] = ['']
+        d['MembersToExclude'] = ['']
+        Inventory.append(copy.deepcopy(d))
+    return [0, Inventory]

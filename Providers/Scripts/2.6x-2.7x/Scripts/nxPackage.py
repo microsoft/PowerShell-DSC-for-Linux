@@ -29,9 +29,12 @@ protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
+# [ClassVersion("1.0.0"),FriendlyName("nxPackage"),SupportsInventory()]
+# class MSFT_nxPackageResource : OMI_BaseResource
+# {
 #   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
 #   [write,ValueMap{"Yum", "Apt", "Zypper"},Values{"Yum", "Apt", "Zypper"}] string PackageManager;
-#   [Key] string Name;
+#   [Key,InventoryFilter] string Name;
 #   [write] string FilePath;
 #   [write] Boolean PackageGroup;
 #   [write] string Arguments;
@@ -43,6 +46,8 @@ LG = nxDSCLog.DSCLog
 #   [read] string Version;
 #   [read] boolean Installed;
 #   [read] string Architecture;
+ 
+# };
 
 cache_file_dir = '/var/opt/microsoft/dsc/cache/nxPackage'
 global show_mof
@@ -279,7 +284,7 @@ class Params:
         self.cmds['dpkg'][
             'stat'] = "dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n' "
         self.cmds['dpkg'][
-            'stat_all'] = "dpkg-query -W -f='$(Name)|${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n@@' "
+            'stat_all'] = "dpkg-query -W -f='${Name}|${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n@@' "
         self.cmds['dpkg']['stat_group'] = None
         self.cmds['rpm']['present'] = 'rpm % -i '
         self.cmds['rpm']['absent'] = 'rpm % -e '
@@ -657,7 +662,7 @@ def GetAll(Ensure, PackageManager, Name,
         LG().Log(
             'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.message)
         return [-1, ]
-    if len(p.Name) < 2:  #if its just '*' - remove it.
+    if len(p.Name) < 2:  #if its a single char like '*' remove it.
         p.Name = ''
     cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager]['stat_all'] + p.Name
     code, out = RunGetOutput(cmd, False)
