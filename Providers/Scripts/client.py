@@ -131,6 +131,8 @@ def handle_request (fd, req):
 
 
 def main (argv):
+    default_timeout_sec = 85
+    socket.setdefaulttimeout(default_timeout_sec)
     fd = socket.fromfd (int (argv[1]), socket.AF_UNIX, socket.SOCK_STREAM)
     read = 1
     out = ''

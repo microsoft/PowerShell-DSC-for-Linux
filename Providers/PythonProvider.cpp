@@ -30,6 +30,7 @@
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 
 namespace
@@ -235,6 +236,10 @@ PythonProvider::~PythonProvider ()
     {
         close (m_FD);
     }
+    if (m_pid != -2)
+    {
+	waitpid(m_pid, NULL, 0);
+    }
 }
 
 
@@ -419,8 +424,8 @@ PythonProvider::forkExec ()
         {
             // socketpair succeeded
             SCX_BOOKEND_PRINT ("socketpair - succeeded");
-            int pid = fork ();
-            if (0 == pid)
+            int m_pid = fork ();
+            if (0 == m_pid)
             {
                 // fork succeded, this is the child process
                 SCX_BOOKEND_PRINT ("fork - succeeded: this is the child");
@@ -447,7 +452,7 @@ PythonProvider::forkExec ()
                 strm.clear ();
                 rval = EXIT_FAILURE;
             }
-            else if (-1 != pid)
+            else if (-1 != m_pid)
             {
                 // fork succeeded, this is the parent process
                 SCX_BOOKEND_PRINT ("fork - succeeded: this is the parent");
