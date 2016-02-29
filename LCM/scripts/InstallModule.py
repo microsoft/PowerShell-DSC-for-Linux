@@ -4,11 +4,15 @@ import os
 import subprocess
 import shutil
 import platform
+import 
 
 def usage():
     print("Usage:")
     print("  InstallModule.py NAME_VERSION.zip")
     sys.exit(1)
+
+def Need_To_GPG_Verify():
+    return True
 
 def registration_text(resource):
     return '''
@@ -68,6 +72,36 @@ if not os.path.isdir(modulePath):
 if not os.path.isdir(modulePath + "/DSCResources"):
     print("Error: After extracting module, unable to find DSCResources directory in " + modulePath)
     sys.exit(1)
+
+
+keyring_path = omi_sysconfdir + "/keyring.gpg"
+asc_path = modulePath + "/" + moduleName + ".asc"
+sha256sums_path = modulePath + "/" + moduleName + ".sha256sums"
+
+# check if we must perform verify
+if Need_To_GPG_Verify():
+    if not os.path.isfile(keyring_path):
+        print("Error: Cannot find keyring")
+        sys.exit(1)
+    if not os.path.isfile(asc_path):
+        print("Error: Cannot find keyring")
+        sys.exit(1)
+    if not os.path.isfile(sha256sums_path):
+        print("Error: Cannot find sha256sums file")
+        sys.exit(1)
+        
+    # Perform verify on the sha256sums file
+    retval = subprocess.call(["gpg", "--no-default-keyring", "--keyring", keyring_path, "--verify", asc_path, sha256sums_path])
+    if retval != 0:
+        print("Error: Failed to verify " + sha256sums_path + " using signature in module.")
+        sys.exit(2)
+
+    # Perform sha256sum
+    retval = subprocess.call("cd " + modulePath + "; sha256sum -c " + moduleName + ".sha256sums", shell=True)
+    if retval != 0:
+        print("Error: sha256sum failed using " + sha256sums_path + ".")
+        sys.exit(2)
+
 
 f = open(modulePath+ "/VERSION", "w")
 f.write(moduleVersion)
