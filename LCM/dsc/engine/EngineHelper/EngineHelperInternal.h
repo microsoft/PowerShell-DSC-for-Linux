@@ -218,6 +218,9 @@
 #define MSFT_DSCMetaConfiguration_ActionAfterReboot                                             MI_T("ActionAfterReboot")
 #define MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays                                     MI_T("StatusRetentionTimeInDays")
 
+#define MSFT_DSCMetaConfiguration_EnableSignatureValidation                                     MI_T("EnableSignatureValidation")
+#define MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation                              MI_T("DisableModuleSignatureValidation")
+
 #define MSFT_DSCMetaConfiguration_BaseProperty_Count    0
 
 

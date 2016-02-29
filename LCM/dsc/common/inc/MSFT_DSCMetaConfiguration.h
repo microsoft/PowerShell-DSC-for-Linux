@@ -1,18 +1,10 @@
 /* @migen@ */
 /*
-   PowerShell Desired State Configuration for Linux
-
-   Copyright (c) Microsoft Corporation
-
-   All rights reserved. 
-
-   MIT License
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+**
+**==============================================================================
 */
 #ifndef _MSFT_DSCMetaConfiguration_h
 #define _MSFT_DSCMetaConfiguration_h
@@ -63,6 +55,8 @@ typedef struct _MSFT_DSCMetaConfiguration
     MI_ConstStringField LCMStateDetail;
     MI_ConstUint32Field StatusRetentionTimeInDays;
     MI_ConstStringField AgentId;
+    MI_ConstBooleanField EnableSignatureValidation;
+    MI_ConstBooleanField DisableModuleSignatureValidation;
 }
 MSFT_DSCMetaConfiguration;
 
@@ -896,6 +890,38 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_AgentId(
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         23);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_EnableSignatureValidation(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_ MI_Boolean x)
+{
+    ((MI_BooleanField*)&self->EnableSignatureValidation)->value = x;
+    ((MI_BooleanField*)&self->EnableSignatureValidation)->exists = 1;
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_EnableSignatureValidation(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    memset((void*)&self->EnableSignatureValidation, 0, sizeof(self->EnableSignatureValidation));
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Set_DisableModuleSignatureValidation(
+    _Inout_ MSFT_DSCMetaConfiguration* self,
+    _In_ MI_Boolean x)
+{
+    ((MI_BooleanField*)&self->DisableModuleSignatureValidation)->value = x;
+    ((MI_BooleanField*)&self->DisableModuleSignatureValidation)->exists = 1;
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCMetaConfiguration_Clear_DisableModuleSignatureValidation(
+    _Inout_ MSFT_DSCMetaConfiguration* self)
+{
+    memset((void*)&self->DisableModuleSignatureValidation, 0, sizeof(self->DisableModuleSignatureValidation));
+    return MI_RESULT_OK;
 }
 
 

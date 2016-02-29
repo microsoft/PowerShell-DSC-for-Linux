@@ -169,6 +169,8 @@ BaseResourceConfiguration g_MetaConfigProperties[] =
     { MSFT_DSCMetaConfiguration_LCMStateDetail,                             MI_STRING},
     { MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays,                  MI_UINT32 },
     { MSFT_DSCMetaConfiguration_ActionAfterReboot,                          MI_STRING },
+    { MSFT_DSCMetaConfiguration_EnableSignatureValidation,                  MI_BOOLEAN},
+    { MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation,           MI_BOOLEAN},
     {NULL,                                                                  0}
 };
 
