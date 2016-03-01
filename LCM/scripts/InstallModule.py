@@ -8,11 +8,8 @@ import
 
 def usage():
     print("Usage:")
-    print("  InstallModule.py NAME_VERSION.zip")
+    print("  InstallModule.py NAME_VERSION.zip [VERIFY_FLAG]")
     sys.exit(1)
-
-def Need_To_GPG_Verify():
-    return True
 
 def registration_text(resource):
     return '''
@@ -25,7 +22,7 @@ Instance of MSFT_CimConfigurationProviderRegistration
 };
 '''
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 2 or len(sys.argv) != 3:
     usage()
 
 filepath = sys.argv[1]
@@ -33,6 +30,8 @@ filepath = sys.argv[1]
 if not os.path.isfile(filepath):
     print("Error: " + filepath + " is not a file.")
     sys.exit(1)
+
+verifyFlag = sys.argv[2]
 
 basename = os.path.basename(filepath)
 last_underscore = basename.rfind("_")
@@ -79,15 +78,15 @@ asc_path = modulePath + "/" + moduleName + ".asc"
 sha256sums_path = modulePath + "/" + moduleName + ".sha256sums"
 
 # check if we must perform verify
-if Need_To_GPG_Verify():
+if verifyFlag == "1":
     if not os.path.isfile(keyring_path):
         print("Error: Cannot find keyring")
         sys.exit(1)
     if not os.path.isfile(asc_path):
-        print("Error: Cannot find keyring")
+        print("Error: Cannot find asc file as part of module")
         sys.exit(1)
     if not os.path.isfile(sha256sums_path):
-        print("Error: Cannot find sha256sums file")
+        print("Error: Cannot find sha256sums file as part of module")
         sys.exit(1)
         
     # Perform verify on the sha256sums file

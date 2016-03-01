@@ -23,6 +23,7 @@
 #include <common/linux/sal.h>
 #endif
 #include <micodec.h>
+#include "MSFT_DSCMetaConfiguration.h"
 
 /*Macro functions to return on an error*/
 #define RETURN_RESULT_IF_FAILED(resultCode)                                                             if(resultCode!=MI_RESULT_OK) return resultCode;
@@ -899,15 +900,17 @@ MI_Datetime PalDatetimeToMiDatetime(_In_ PAL_Datetime inDatetime);
 
 extern char g_currentError[5001];
 extern StatusReport_ResourceNotInDesiredState * g_rnids;
+extern MSFT_DSCMetaConfiguration *g_metaConfig;
+
 
 #ifndef g_ConfigurationDetails
 
 #define JOB_UUID_LENGTH 41*sizeof(MI_Char)
     typedef struct _ConfigurationDetails
-        { 
-            MI_Char jobGuidString[JOB_UUID_LENGTH]; 
-            MI_Boolean hasSetDetail;
-        } ConfigurationDetails;
+    {
+	MI_Char jobGuidString[JOB_UUID_LENGTH];
+	MI_Boolean hasSetDetail;
+    } ConfigurationDetails;
 
     extern ConfigurationDetails g_ConfigurationDetails;
 #endif

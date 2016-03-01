@@ -2034,9 +2034,11 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
     ModuleTable moduleTable;
     ModuleTableEntry* current;
     MI_Result r;
+    MI_Value value;
     int retval;
     char zipPath[MAX_URL_LENGTH];
     char stringBuffer[MAX_URL_LENGTH];
+    char * verifyFlag = "1";
 
     moduleTable.first = NULL;
     r = GetModuleNameVersionTable(fileName, &moduleTable, extendedError);
@@ -2045,6 +2047,18 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
         CleanupModuleTable(moduleTable);
         return r;
     }
+
+#if !defined(BUILD_OMS)
+    r = MI_Instance_GetElement(g_metaConfig, MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation, &value, NULL, NULL, NULL);
+    if (r != MI_RESULT_OK)
+    {
+	return r;
+    }
+    if (value.boolean == MI_TRUE)
+    {
+	verifyFlag = "0";
+    }
+#endif
 
     // moduleTable now has the modules we need to pull
     current = moduleTable.first;
@@ -2070,7 +2084,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             return r;
         }
 
-        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath);
+        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
         retval = system(stringBuffer);
         
         if (retval != 0)
@@ -2186,7 +2200,6 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         bAllowedModuleOverride = MI_TRUE;
     }
 
-#if !defined(BUILD_OMS)
     r = Pull_GetModules(numModulesInstalled, configurationID,  certificateID, *directoryName, fileName, result, getActionStatusCode, bAllowedModuleOverride, url, port, subUrl, bIsHttps, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -2194,7 +2207,6 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
          DSC_free(fileName);
          return r;
     }
-#endif
 
     DSC_free(configurationID);
     *mofFileName = fileName;
