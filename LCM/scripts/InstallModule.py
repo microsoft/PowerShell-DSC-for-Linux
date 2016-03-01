@@ -31,7 +31,10 @@ if not os.path.isfile(filepath):
     print("Error: " + filepath + " is not a file.")
     sys.exit(1)
 
-verifyFlag = sys.argv[2]
+if len(sys.argv) == 3:
+    verifyFlag = sys.argv[2]
+else:
+    verifyFlag = "0"
 
 basename = os.path.basename(filepath)
 last_underscore = basename.rfind("_")
