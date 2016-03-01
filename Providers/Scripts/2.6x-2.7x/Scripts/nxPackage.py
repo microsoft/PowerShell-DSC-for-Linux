@@ -14,6 +14,7 @@ import time
 import imp
 import urllib2
 import copy
+import fnmatch
 apt = None
 rpm = None
 try:
@@ -284,14 +285,14 @@ class Params:
         self.cmds['dpkg'][
             'stat'] = "dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n' "
         self.cmds['dpkg'][
-            'stat_all'] = "dpkg-query -W -f='${Name}|${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n@@' "
+            'stat_all'] = "dpkg-query -W -f='${Package}|${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n@@' "
         self.cmds['dpkg']['stat_group'] = None
         self.cmds['rpm']['present'] = 'rpm % -i '
         self.cmds['rpm']['absent'] = 'rpm % -e '
         self.cmds['rpm'][
             'stat'] = 'rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed|%{ARCH}\n" '
         self.cmds['rpm'][
-            'stat_all'] = 'rpm -q --queryformat "%{NAME}|%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed|%{ARCH}\n@@" '
+            'stat_all'] = 'rpm -qa --queryformat "%{NAME}|%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed|%{ARCH}\n@@" '
         self.cmds['rpm']['stat_group'] = None
         self.cmds['apt'][
             'present'] = 'DEBIAN_FRONTEND=noninteractive apt-get % install ^ --allow-unauthenticated --yes '
@@ -435,7 +436,7 @@ def ParseInfo(p, info):
             LG().Log('ERROR', 'ERROR.   ' + p.PackageManager)
 
 
-def ParseAllInfo(info):
+def ParseAllInfo(info,p):
     pkg_list=[]
     d={}
     if len(info) < 1 or  '@@' not in info:
@@ -452,6 +453,8 @@ def ParseAllInfo(info):
                 f = pkg.split('|')
                 if len(f) is 8:
                     d['Name'] = f[0]
+                    if len(p.Name) and not fnmatch.fnmatch(d['Name'],p.Name):
+                        continue
                     d['PackageDescription'] = f[1]
                     d['Publisher'] = f[2]
                     d['InstalledOn'] = f[3]
@@ -662,11 +665,9 @@ def GetAll(Ensure, PackageManager, Name,
         LG().Log(
             'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.message)
         return [-1, ]
-    if len(p.Name) < 2:  #if its a single char like '*' remove it.
-        p.Name = ''
-    cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager]['stat_all'] + p.Name
+    cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager]['stat_all']
     code, out = RunGetOutput(cmd, False)
-    pkgs=ParseAllInfo(out)
+    pkgs=ParseAllInfo(out,p)
     return [0, pkgs]
 
 

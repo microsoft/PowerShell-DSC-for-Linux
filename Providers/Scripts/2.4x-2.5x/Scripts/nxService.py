@@ -11,6 +11,7 @@ import imp
 import time
 import copy
 import re
+import fnmatch
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
@@ -92,7 +93,7 @@ def Get_Marshall(Name, Controller, Enabled, State):
     return retval, retd
 
 def Inventory_Marshall(Name, Controller, Enabled, State):
-    FilterEnabled = ( Enabled == None )
+    FilterEnabled = ( Enabled != None )
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
     sc = ServiceContext(Name, Controller, Enabled, State)
@@ -1337,13 +1338,15 @@ def SystemdGetAll(sc):
     if '*' not in Name and len(Name) > 0:
         Name = Name.replace('.service','')
         Name += '.service'
-    cmd='systemctl -a list-unit-files ' + Name +  '| grep \.service | grep -v "@" | awk \'{print $1}\' | xargs systemctl -a --no-pager --no-legend -p "Names,WantedBy,Description,SubState,FragmentPath,UnitFilePreset" show'
+    cmd='systemctl -a list-unit-files ' + Name +  '| grep \.service | grep -v "@" | awk \'{print $1}\' | xargs systemctl -a --no-pager --no-legend -p "Names,WantedBy,Description,SubState,FragmentPath,UnitFileState" show'
     code, txt = RunGetOutput(cmd, False, False)
     txt=txt.replace('\n\n','@@')
     txt=txt.replace('\n','|')
     services=txt.split('@@')
     subs=re.compile(r'(.*?=)')
     for srv in services:
+        if len(srv) == 0:
+            continue
         s=srv.split('|')
         d['Name'] = subs.sub('',s[0].replace('.service',''))
         d['Controller'] =  sc.Controller
@@ -1364,12 +1367,16 @@ def SystemdGetAll(sc):
 
 def UpstartGetAll(sc):
     d={}
-    cmd = "initctl list " + sc.Name +  " | sed 's/[(].*[)] //g' | tr ', ' ' ' | awk '{print $1,$2}'"
+    cmd = "initctl list  | sed 's/[(].*[)] //g' | tr ', ' ' ' | awk '{print $1,$2}'"
     code, txt = RunGetOutput(cmd, False, False)
     services=txt.splitlines()
     for srv in services:
+        if len(srv) == 0:
+            continue
         s=srv.split()
         d['Name'] = s[0]
+        if len(sc.Name) and not fnmatch.fnmatch(d['Name'],sc.Name):
+            continue
         d['Controller'] =  sc.Controller
         d['Description'] = ''
         d['State'] = 'stopped'
@@ -1393,12 +1400,16 @@ def UpstartGetAll(sc):
 
 def InitdGetAll(sc):
     d={}
-    cmd = 'chkconfig -l ' + sc.Name + '| grep -vE "based| off"'
+    cmd = 'chkconfig -l | grep -vE "based| off"'
     code, txt = RunGetOutput(cmd, False, False)
     services=txt.splitlines()
     for srv in services:
+        if len(srv) == 0:
+            continue
         s=srv.split()
         d['Name'] = s[0]
+        if len(sc.Name) and not fnmatch.fnmatch(d['Name'],sc.Name):
+            continue
         d['Controller'] =  sc.Controller
         d['Description'] = ''
         d['State'] = 'stopped'
