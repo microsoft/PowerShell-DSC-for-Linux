@@ -5,6 +5,7 @@ include $(TOP)/config.mak
 LIBRARY = EngineHelper
 
 SOURCES = \
+	cJSON.c \
 	EngineHelper.c \
 	EventWrapper.c \
 	PAL_Extension.c

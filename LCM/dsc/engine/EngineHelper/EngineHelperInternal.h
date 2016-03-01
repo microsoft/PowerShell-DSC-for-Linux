@@ -23,6 +23,7 @@
 #include <common/linux/sal.h>
 #endif
 #include <micodec.h>
+#include "cJSON.h"
 
 /*Macro functions to return on an error*/
 #define RETURN_RESULT_IF_FAILED(resultCode)                                                             if(resultCode!=MI_RESULT_OK) return resultCode;
