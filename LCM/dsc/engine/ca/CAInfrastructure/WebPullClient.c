@@ -2052,11 +2052,15 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
     r = MI_Instance_GetElement(g_metaConfig, MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation, &value, NULL, NULL, NULL);
     if (r != MI_RESULT_OK)
     {
-	return r;
-    }
-    if (value.boolean == MI_TRUE)
-    {
+	// default is to not verify
 	verifyFlag = "0";
+    }
+    else
+    {
+	if (value.boolean == MI_TRUE)
+	{
+	    verifyFlag = "0";
+	}
     }
 #endif
 
