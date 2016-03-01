@@ -228,6 +228,13 @@ if [ "$base64hmac" != "C9eHLPTYnXyrYXLzmMsya2FWfCFNRlaq75stOI2wbLw=" ]; then
     exit 1
 fi
 #endif
+
+# test for availablity of gpg
+which gpg 1> /dev/null 2> /dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: gpg needs to be installed and available in PATH"
+    PREREQ_ERROR=1
+fi
        
 if [ $PREREQ_ERROR -eq 1 ]; then
     exit 1
