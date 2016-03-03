@@ -3216,7 +3216,6 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_AgentId_prop =
     NULL,
 };
 
-
 /* property MSFT_DSCMetaConfiguration.EnableSignatureValidation */
 static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_EnableSignatureValidation_prop =
 {
