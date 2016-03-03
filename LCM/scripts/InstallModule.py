@@ -4,7 +4,6 @@ import os
 import subprocess
 import shutil
 import platform
-import 
 
 def usage():
     print("Usage:")
