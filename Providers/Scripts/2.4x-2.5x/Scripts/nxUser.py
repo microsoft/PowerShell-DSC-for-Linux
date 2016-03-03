@@ -8,6 +8,7 @@ import sys
 import datetime
 import imp
 import copy
+import fnmatch
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
@@ -500,12 +501,12 @@ def GetInventory(UserName, Ensure, FullName, Description, Password, Disabled, Pa
         d['UserName'] = Uname
         extra_fields = passwd_entries[Uname][3].split(",")
         d['FullName'] = extra_fields[0]
-        if len(FullName) and not fnmatch.fnmatch(Uname,FullName):
+        if len(FullName) and not fnmatch.fnmatch(d['FullName'],FullName):
             continue
         d['Description'] = ''
         if len(extra_fields) > 1:
             d['Description'] = extra_fields[1]
-        if len(Description) and not fnmatch.fnmatch(Uname,Description):
+        if len(Description) and not fnmatch.fnmatch(d['Description'],Description):
             continue
         d['HomeDirectory'] = passwd_entries[Uname][4]
         d['UserID'] = passwd_entries[Uname][1]

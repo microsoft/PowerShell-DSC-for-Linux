@@ -3216,40 +3216,6 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_AgentId_prop =
     NULL,
 };
 
-/* property MSFT_DSCMetaConfiguration.EnableSignatureValidation */
-static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_EnableSignatureValidation_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
-    0x00656E19, /* code */
-    MI_T("EnableSignatureValidation"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_BOOLEAN, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_DSCMetaConfiguration, EnableSignatureValidation), /* offset */
-    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
-    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
-    NULL,
-};
-
-/* property MSFT_DSCMetaConfiguration.DisableModuleSignatureValidation */
-static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
-    0x00646E20, /* code */
-    MI_T("DisableModuleSignatureValidation"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_BOOLEAN, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_DSCMetaConfiguration, DisableModuleSignatureValidation), /* offset */
-    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
-    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
-    NULL,
-};
-
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_props[] =
 {
     &MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_prop,
@@ -3276,8 +3242,6 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_props[] =
     &MSFT_DSCMetaConfiguration_LCMStateDetail_prop,
     &MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_prop,
     &MSFT_DSCMetaConfiguration_AgentId_prop,
-    &MSFT_DSCMetaConfiguration_EnableSignatureValidation_prop,
-    &MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation_prop,
 };
 
 static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ClassVersion_qual_value = MI_T("1.0.0");
