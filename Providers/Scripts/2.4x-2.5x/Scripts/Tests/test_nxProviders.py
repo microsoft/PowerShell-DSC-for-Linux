@@ -163,7 +163,7 @@ nxMySqlGrant=imp.load_source('nxMySqlGrant', './Scripts/nxMySqlGrant.py')
 nxMySqlDatabase=imp.load_source('nxMySqlDatabase', './Scripts/nxMySqlDatabase.py')
 nxOMSSyslog=imp.load_source('nxOMSSyslog','./Scripts/nxOMSSyslog.py')
 nxOMSAgent=imp.load_source('nxOMSAgent','./Scripts/nxOMSAgent.py')
-##nxOMSCustomLog=imp.load_source('nxOMSCustomLog','./Scripts/nxOMSCustomLog.py')
+nxOMSCustomLog=imp.load_source('nxOMSCustomLog','./Scripts/nxOMSCustomLog.py')
                             
 
 class nxUserTestCases(unittest2.TestCase):
@@ -3353,92 +3353,89 @@ nxOMSAgentTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | gr
                                             )(nxOMSAgentTestCases)
 
 
-##class nxOMSCustomLogTestCases(unittest2.TestCase):
-##    """
-##    Test Case for nxOMSCustomLog.py
-##    """
-##
-##    original_conf_path = None
-##    mock_conf_path = './ut_customlog.conf'
-##
-##    def setUp(self):
-##        """
-##        Setup test resources
-##        """
-##        self.original_conf_path = nxOMSCustomLog.conf_path
-##        nxOMSCustomLog.conf_path = self.mock_conf_path
-##        os.system('rm -rf {0}'.format(self.mock_conf_path))
-##
-##    def tearDown(self):
-##        """
-##        Remove test resources
-##        """
-##        nxOMSCustomLog.conf_path = self.original_conf_path
-##
-##    def make_MI(self, retval, Name, EnableCustomLogConfiguration, CustomLogObjects):
-##        d = dict()
-##        d['Name'] = nxOMSCustomLog.protocol.MI_String(Name)
-##        d['EnableCustomLogConfiguration'] = nxOMSCustomLog.protocol.MI_Boolean(EnableCustomLogConfiguration)
-##        if CustomLogObjects is None:
-##            CustomLogObjects = []
-##        for customlog in CustomLogObjects:
-##            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
-##            if customlog['FilePath'] is not None and len(customlog['FilePath']):
-##                customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
-##        d['CustomLogObjects'] = nxOMSCustomLog.protocol.MI_InstanceA(CustomLogObjects)
-##        return retval, d
-##    
-##    def testSetOMSCustomLog_add(self):
-##        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
-##        for customlog in d['CustomLogObjects']:
-##            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
-##            customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
-##
-##        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-##
-##    def testGetOMSCustomLog_add(self):
-##        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
-##        for customlog in d['CustomLogObjects']:
-##            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
-##            customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
-##
-##        e = copy.deepcopy(d)
-##        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/logs/*.log', '/tmp/test1.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
-##
-##        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-##         
-##        m = self.make_MI(0,**t)
-##        g = nxOMSCustomLog.Get_Marshall(**e)
-##        self.assertTrue(check_values(g, m)  ==  True, 'Get('+repr(g)+' should return ==['+repr(m)+']')
-##
-##    def testSetOMSCustomLog_del(self):
-##        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
-##        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
-##
-##    def testGetOMSCustomLog_default(self):
-##        d = { 'Name': 'SimpleCustomLog' }
-##        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-##
-##        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': False, 'CustomLogObjects': None }
-##        m=self.make_MI(0,**t)
-##        g=nxOMSCustomLog.Get_Marshall(**d)
-##        print 'GET '+ repr(g)
-##        self.assertTrue(check_values(g, m)  ==  True, \
-##        'Get('+repr(g)+' should return ==['+repr(m)+']')
-##
-##    def testGetOMSCustomLog_del(self):
-##        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
-##        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-##        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
-##        m=self.make_MI(0,**t)
-##        g=nxOMSCustomLog.Get_Marshall(**d)
-##        print 'GET '+ repr(g)
-##        self.assertTrue(check_values(g, m)  ==  True, \
-##        'Get('+repr(g)+' should return ==['+repr(m)+']')
-##nxOMSCustomLogTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
-##                                            0,'Skipping nxOMSCustomLogTestCases.   omsagent is not running.' \
-##                                            )(nxOMSCustomLogTestCases)
+class nxOMSCustomLogTestCases(unittest2.TestCase):
+    """
+    Test Case for nxOMSCustomLog.py
+    """
+
+    original_conf_path = None
+    mock_conf_path = './ut_customlog.conf'
+
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        self.original_conf_path = nxOMSCustomLog.conf_path
+        nxOMSCustomLog.conf_path = self.mock_conf_path
+        os.system('rm -rf %s' % self.mock_conf_path)
+
+    def tearDown(self):
+        """
+        Remove test resources
+        """
+        nxOMSCustomLog.conf_path = self.original_conf_path
+
+    def make_MI(self, retval, Name, EnableCustomLogConfiguration, CustomLogObjects):
+        d = dict()
+        d['Name'] = nxOMSCustomLog.protocol.MI_String(Name)
+        d['EnableCustomLogConfiguration'] = nxOMSCustomLog.protocol.MI_Boolean(EnableCustomLogConfiguration)
+        if CustomLogObjects is None:
+            CustomLogObjects = []
+        for customlog in CustomLogObjects:
+            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
+            if customlog['FilePath'] is not None and len(customlog['FilePath']):
+                customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
+        d['CustomLogObjects'] = nxOMSCustomLog.protocol.MI_InstanceA(CustomLogObjects)
+        return retval, d
     
+    def testSetOMSCustomLog_add(self):
+        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'CUSTOM_LOG_BLOB.LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'CUSTOM_LOG_BLOB.LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+        for customlog in d['CustomLogObjects']:
+            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
+            customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
+
+        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+
+    def testGetOMSCustomLog_add(self):
+        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+        for customlog in d['CustomLogObjects']:
+            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
+            customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
+
+        e = copy.deepcopy(d)
+        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/logs/*.log', '/tmp/test1.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+
+        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+         
+        m = self.make_MI(0,**t)
+        g = nxOMSCustomLog.Get_Marshall(**e)
+        self.assertTrue(check_values(g, m)  ==  True, 'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+    def testSetOMSCustomLog_del(self):
+        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetOMSCustomLog_default(self):
+        d = { 'Name': 'SimpleCustomLog' }
+        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+
+        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': False, 'CustomLogObjects': None }
+        m=self.make_MI(0,**t)
+        g=nxOMSCustomLog.Get_Marshall(**d)
+        print 'GET '+ repr(g)
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+    def testGetOMSCustomLog_del(self):
+        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        m=self.make_MI(0,**t)
+        g=nxOMSCustomLog.Get_Marshall(**d)
+        print 'GET '+ repr(g)
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get('+repr(g)+' should return ==['+repr(m)+']')
+
 
 ######################################
 if __name__ == '__main__':
@@ -3461,7 +3458,6 @@ if __name__ == '__main__':
     s17=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlGrantTestCases)
     s18=unittest2.TestLoader().loadTestsFromTestCase(nxOMSSyslogTestCases)
     s19=unittest2.TestLoader().loadTestsFromTestCase(nxOMSAgentTestCases)
-##    s20=unittest2.TestLoader().loadTestsFromTestCase(nxOMSCustomLogTestCases)
-##    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20])
-    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19])
+    s20=unittest2.TestLoader().loadTestsFromTestCase(nxOMSCustomLogTestCases)
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20])
     unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)

@@ -1,4 +1,4 @@
-﻿/*
+/*
 @TargetNode='common'
 @GeneratedBy=OMS
 @GenerationDate=12/14/2015 14:32:38
@@ -7,7 +7,7 @@
 
 instance of MSFT_nxOMSCustomLogObject as $MSFT_nxOMSCustomLogObject1ref
 {
-  LogName = "LinuxSampleCustomLog_ef8ef434-4481-b53e-1853-6fc4a64719e9";
+  LogName = "CUSTOM_LOG_BLOB.LinuxSampleCustomLog_ef8ef434-4481-b53e-1853-6fc4a64719e9";
   FilePath = {
     "/tmp/testcustomlog_fakeconfig.log",
     "/tmp/testcustomlog2_fakeconfig.log"
