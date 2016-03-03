@@ -99,7 +99,7 @@ def ReadConf():
     if not os.path.isfile(conf_path):
         return [];
     txt = codecs.open(conf_path, 'r', 'utf8').read().encode('ascii','ignore')
-    customlog_src_srch_str=r'\n<source>\n  type tail.*?path (.*?)\n.*?pos_file /var/opt/microsoft/omsagent/state/(.*?)\.pos.*?tag oms\.blob\.CustomLog\.CUSTOM_LOG_BLOB\.(.*?)\.\*.*?format none.*?</source>\n'
+    customlog_src_srch_str=r'\n<source>\n  type tail.*?path (.*?)\n.*?pos_file /var/opt/microsoft/omsagent/state/(.*?)\.pos.*?tag oms\.blob\.CustomLog\.(.*?)\.\*.*?format none.*?</source>\n'
     customlog_src_srch=re.compile(customlog_src_srch_str,re.M|re.S)
     new_customlogs=[]
     sources=customlog_src_srch.findall(txt)
@@ -119,7 +119,7 @@ def UpdateConf(CustomLogObjects):
         for customlog in CustomLogObjects:
             logname = customlog['LogName']
             filepaths = ','.join(customlog['FilePath'])
-            new_source+='\n<source>\n  type tail\n  path ' + filepaths + '\n  pos_file /var/opt/microsoft/omsagent/state/' + logname + '.pos\n  tag oms.blob.CustomLog.CUSTOM_LOG_BLOB.' + logname + '.*\n  format none\n</source>\n'
+            new_source+='\n<source>\n  type tail\n  path ' + filepaths + '\n  pos_file /var/opt/microsoft/omsagent/state/' + logname + '.pos\n  tag oms.blob.CustomLog.' + logname + '.*\n  format none\n</source>\n'
     txt = header + new_source
     if os.path.isfile(conf_path): 
         shutil.copy2(conf_path, conf_path + '.bak')
