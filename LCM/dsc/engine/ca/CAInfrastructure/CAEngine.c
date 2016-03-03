@@ -211,7 +211,7 @@ MI_Result GetDocumentEncryptionSetting( _In_ MI_Instance *documentIns,
 
 MI_Result InitCAHandler(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
-    g_rnids = NULL;
+    g_report = NULL;
 
     if (cimErrorDetails == NULL)
     {        
@@ -231,8 +231,11 @@ MI_Result InitCAHandler(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 
 MI_Result UnInitCAHandler(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
-    Destroy_StatusReport_RNIDS(g_rnids);
-    g_rnids = NULL;
+    if (g_report != NULL)
+    {
+	cJSON_Delete(g_report);
+	g_report = NULL;
+    }
 
     if (cimErrorDetails == NULL)
     {        
@@ -804,8 +807,11 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
 
         if (resultStatus != NULL && *resultStatus == MI_TRUE)
         {
-            Destroy_StatusReport_RNIDS(g_rnids);
-            g_rnids = NULL;
+	    if (g_report != NULL)
+	    {
+		cJSON_Delete(g_report);
+		g_report = NULL;
+	    }
         }
 
         executionOrder->ExecutionList[xCount].resourceStatus = ResourceProcessedAndSucceeded;
@@ -1386,7 +1392,11 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
             MI_Instance_Delete(params);            
             MI_OperationOptions_Delete(&sessionOptions);
             AddToResourceErrorList(resourceErrorList, provContext->resourceId);
-            Destroy_StatusReport_RNIDS(g_rnids);
+	    if (g_report != NULL)
+	    {
+		cJSON_Delete(g_report);
+		g_report = NULL;
+	    }
             g_rnids = Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, "0", instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
             return r;
         }
@@ -1407,7 +1417,11 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
             else
             {
                 *resultStatus = 0;
-                Destroy_StatusReport_RNIDS(g_rnids);
+		if (g_report != NULL)
+		{
+		    cJSON_Delete(g_report);
+		    g_report = NULL;
+		}
                 g_rnids = Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, "0", instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
             }
 
@@ -1472,7 +1486,12 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         {
             MI_OperationOptions_Delete(&sessionOptions);
             AddToResourceErrorList(resourceErrorList, provContext->resourceId);
-            Destroy_StatusReport_RNIDS(g_rnids);
+
+	    if (g_report != NULL)
+	    {
+		cJSON_Delete(g_report);
+		g_report = NULL;
+	    }
             g_rnids = Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, NULL, instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
             return r;
         }
@@ -1480,7 +1499,11 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         *resultStatus = returnValue;
         if (returnValue != MI_TRUE)
         {
-            Destroy_StatusReport_RNIDS(g_rnids);
+	    if (g_report != NULL)
+	    {
+		cJSON_Delete(g_report);
+		g_report = NULL;
+	    }
             g_rnids = Construct_StatusReport_RNIDS(GetSourceInfo(instance), GetModuleName(instance), "0", provContext->resourceId, NULL, instance->classDecl->name, GetModuleVersion(instance), "False", provContext->resourceId, "", "False");
         }
         //Stop the timer for set
