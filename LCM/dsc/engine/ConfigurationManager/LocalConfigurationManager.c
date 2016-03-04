@@ -2918,7 +2918,11 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
 {
     MI_Result miResult = MI_RESULT_OK;
     MI_Instance *cimErrorDetails = NULL;
+<<<<<<< HEAD
     MI_InstanceA outInstances;
+=======
+    MI_InstanceA outInstances = {0};
+>>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
     MI_Value val;
     MI_Uint32 bufferIndex = 0;    
     MSFT_DSCLocalConfigurationManager_PerformInventory outputObject;
@@ -2976,6 +2980,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
         goto ExitWithError;
     }
 
+<<<<<<< HEAD
     {
 	const MI_Uint32 c_initBufferLength = 10000;
 	MI_Application application;
@@ -3046,6 +3051,8 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
 	free(clientBuffer);
     }
 
+=======
+>>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
 /*
     val.instancea.data = outInstances.data;
     val.instancea.size = outInstances.size;
