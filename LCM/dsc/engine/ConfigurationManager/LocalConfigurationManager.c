@@ -27,6 +27,8 @@
 #include "EventWrapper.h"
 #include "CAEngine.h"
 
+#include <xmlserializer/xmlserializer.h>
+
 #if defined(_MSC_VER)
 
 #include <io.h>
@@ -2916,7 +2918,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
 {
     MI_Result miResult = MI_RESULT_OK;
     MI_Instance *cimErrorDetails = NULL;
-    MI_InstanceA outInstances = {0};
+    MI_InstanceA outInstances;
     MI_Value val;
     MI_Uint32 bufferIndex = 0;    
     MSFT_DSCLocalConfigurationManager_PerformInventory outputObject;
@@ -2972,6 +2974,76 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
     {
         MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
         goto ExitWithError;
+    }
+
+    {
+	const MI_Uint32 c_initBufferLength = 10000;
+	MI_Application application;
+	MI_Serializer serializer;
+	MI_Uint8 *clientBuffer;
+	MI_Uint32 clientBufferLength = c_initBufferLength;
+	MI_Uint32 clientBufferNeeded = 0;
+	MI_Instance * serializedInstance;
+	FILE *fp = NULL;
+
+	miResult = MI_NewDynamicInstance(args->context, "Inventory", NULL, &serializedInstance);
+	if (miResult != MI_RESULT_OK)
+	{
+	    GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY);
+	    goto ExitWithError;
+	}
+
+	miResult = MI_Instance_AddElement(serializedInstance, "Instances", &outInstances, MI_INSTANCEA, 0);
+	if (miResult != MI_RESULT_OK)
+	{
+	    GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY);
+	    goto ExitWithError;
+	}
+
+	clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+	MI_Application_Initialize(0,NULL,NULL, &application);
+	miResult = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
+	if (miResult != MI_RESULT_OK)
+	{
+	    MI_Application_Close(&application);
+	    return miResult;
+	}
+	
+	miResult = XmlSerializer_SerializeInstance( &serializer, 0, serializedInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
+	if (miResult != MI_RESULT_OK)
+	{
+	    free(clientBuffer);
+	    if (clientBufferNeeded > 0)
+	    {
+		// Try again with a buffer given to us by the clientBufferNeeded field
+		clientBufferLength = clientBufferNeeded;
+		clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+		miResult = XmlSerializer_SerializeInstance( &serializer, 0, serializedInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
+	    }
+	    else
+	    {
+		XmlSerializer_Close(&serializer);
+		MI_Application_Close(&application);
+		return miResult;
+	    }
+	}
+        
+	XmlSerializer_Close(&serializer);
+	MI_Application_Close(&application);
+	if (miResult == MI_RESULT_OK)
+	{
+	    clientBuffer[clientBufferNeeded] = '\0';
+	    printf((char*)clientBuffer);
+	}
+
+        fp = File_OpenT(GetInventoryReportFileName(), MI_T("w"));
+        if( fp != NULL )
+        {
+            fwrite(clientBuffer, 1, clientBufferNeeded, fp);
+            File_Close(fp);
+        }
+
+	free(clientBuffer);
     }
 
 /*

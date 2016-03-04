@@ -568,4 +568,8 @@ INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_NOT_BE_INVENTORY,
 INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, "Inventory mof does not contain the DocumentType field in the OMI_ConfigurationDocument instance.")
 INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_2, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_2, "Inventory mof contains the DocumentType field in the OMI_ConfigurationDocument instance, but it is not equal to 'inventory'.")
 
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY, ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY , "Error creating serializedInstance using MI_NewDynamicInstance")
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , "Error adding instance array to serializedInstance")
+
+
  
