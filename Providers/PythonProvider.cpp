@@ -524,7 +524,7 @@ PythonProvider::forkExec ()
         {
             // socketpair succeeded
             SCX_BOOKEND_PRINT ("socketpair - succeeded");
-            int m_pid = fork ();
+            m_pid = fork ();
             if (0 == m_pid)
             {
                 // fork succeded, this is the child process
