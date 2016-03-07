@@ -21,7 +21,7 @@ Instance of MSFT_CimConfigurationProviderRegistration
 };
 '''
 
-if len(sys.argv) != 2 or len(sys.argv) != 3:
+if len(sys.argv) != 2 and len(sys.argv) != 3:
     usage()
 
 filepath = sys.argv[1]
@@ -75,7 +75,7 @@ if not os.path.isdir(modulePath + "/DSCResources"):
     sys.exit(1)
 
 
-keyring_path = omi_sysconfdir + "/keyring.gpg"
+keyring_path = omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/keyring.gpg"
 asc_path = modulePath + "/" + moduleName + ".asc"
 sha256sums_path = modulePath + "/" + moduleName + ".sha256sums"
 
