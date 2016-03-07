@@ -26,6 +26,7 @@ if apt is None:
         pass
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
+helperlib = imp.load_source('nxDSCLog', '../helperlib.py')
 LG = nxDSCLog.DSCLog
 
 # [ClassVersion("1.0.0"),FriendlyName("nxPackage"),SupportsInventory()]
@@ -72,6 +73,8 @@ def init_vars(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, R
 
 
 def Set_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
+    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
     retval = Set(Ensure, PackageManager, Name,
@@ -83,6 +86,8 @@ def Set_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments
 
 
 def Test_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
+    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
     retval = Test(Ensure, PackageManager, Name,
