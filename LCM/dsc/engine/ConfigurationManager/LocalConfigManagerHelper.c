@@ -82,10 +82,7 @@ ExpandedSystemPath g_ExpandedSystemPath[] =
     { CONFIGURATION_LOCATION_PARTIALBASEDOCUMENTTMP, NULL },
     { CONFIGURATION_LOCATION_PARTIALCONFIGURATIONS_STORE, NULL },
     { CONFIGURATION_LOCATION_INVENTORY, NULL },
-<<<<<<< HEAD
     { CONFIGURATION_LOCATION_INVENTORY_REPORT, NULL },
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
     {NULL, NULL}
 };
 MI_Result RetryDeleteFile(
@@ -266,10 +263,7 @@ MI_Result InitHandler(
     g_PreviousConfigFileName = NULL;
     g_GetConfigFileName = NULL;
     g_InventoryFileName = NULL;
-<<<<<<< HEAD
     g_InventoryReportFileName = NULL;
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
     g_MetaConfigFileName = NULL;
     g_MetaConfigTmpFileName = NULL;
     g_ConfigChecksumFileName = NULL;
@@ -288,10 +282,7 @@ MI_Result InitHandler(
         DSC_free(g_PreviousConfigFileName);
         DSC_free(g_GetConfigFileName);
         DSC_free(g_InventoryFileName);
-<<<<<<< HEAD
         DSC_free(g_InventoryReportFileName);
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
         DSC_free(g_MetaConfigFileName);
         DSC_free(g_MetaConfigTmpFileName);
         DSC_free(g_ConfigChecksumFileName);
@@ -303,10 +294,7 @@ MI_Result InitHandler(
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
         g_InventoryFileName = NULL;
-<<<<<<< HEAD
         g_InventoryReportFileName = NULL;
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
         g_MetaConfigFileName = NULL;
         g_MetaConfigTmpFileName = NULL;
         g_ConfigChecksumFileName = NULL;
@@ -339,10 +327,7 @@ MI_Result InitHandler(
         DSC_free(g_PreviousConfigFileName);
         DSC_free(g_GetConfigFileName);
         DSC_free(g_InventoryFileName);
-<<<<<<< HEAD
         DSC_free(g_InventoryReportFileName);
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
         DSC_free(g_MetaConfigFileName);
         DSC_free(g_MetaConfigTmpFileName);
         DSC_free(g_ConfigChecksumFileName);
@@ -354,10 +339,7 @@ MI_Result InitHandler(
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
 	g_InventoryFileName = NULL;
-<<<<<<< HEAD
 	g_InventoryReportFileName = NULL;
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
         g_MetaConfigFileName = NULL;
         g_MetaConfigTmpFileName = NULL;
         g_ConfigChecksumFileName = NULL;
@@ -431,14 +413,11 @@ MI_Result InitPath(
             g_ExpandedSystemPath[count].expandedPath = &g_InventoryFileName;
             initCount++;
         }
-<<<<<<< HEAD
         else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_INVENTORY_REPORT) == 0)
         {
             g_ExpandedSystemPath[count].expandedPath = &g_InventoryReportFileName;
             initCount++;
         }
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
         else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_METACONFIG) == 0)
         {
             g_ExpandedSystemPath[count].expandedPath = &g_MetaConfigFileName;
@@ -556,15 +535,12 @@ MI_Result UnInitHandler(
         g_InventoryFileName = NULL;
     }
 
-<<<<<<< HEAD
    if( g_InventoryReportFileName != NULL)
     {
         DSC_free(g_InventoryReportFileName);
         g_InventoryReportFileName = NULL;
     }
 
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
     if (g_MetaConfigFileName != NULL)
     {
         DSC_free(g_MetaConfigFileName);
@@ -2763,14 +2739,11 @@ const MI_Char * GetInventoryFileName()
     return g_InventoryFileName;
 }
 
-<<<<<<< HEAD
 const MI_Char * GetInventoryReportFileName()
 {
     return g_InventoryReportFileName;
 }
 
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
 const MI_Char *GetCurrentConfigFileName()
 {
     return g_CurrentConfigFileName;

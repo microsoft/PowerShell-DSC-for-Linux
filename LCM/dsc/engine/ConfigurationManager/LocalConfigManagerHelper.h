@@ -45,10 +45,7 @@ MI_Char *g_PendingConfigFileName;
 MI_Char *g_PendingConfigTmpFileName;
 MI_Char *g_GetConfigFileName;
 MI_Char *g_InventoryFileName;
-<<<<<<< HEAD
 MI_Char *g_InventoryReportFileName;
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
 MI_Char *g_CurrentConfigFileName;
 MI_Char *g_PreviousConfigFileName;
 MI_Char *g_MetaConfigFileName;
@@ -344,11 +341,8 @@ extern "C"
 
     const MI_Char * GetInventoryFileName();
 
-<<<<<<< HEAD
     const MI_Char * GetInventoryReportFileName();
 
-=======
->>>>>>> 5f37985017ed6f53bba659fafc944745990ad9cb
     const MI_Char * GetConfigChecksumFileName();
 
     const MI_Char *GetCurrentConfigFileName();
