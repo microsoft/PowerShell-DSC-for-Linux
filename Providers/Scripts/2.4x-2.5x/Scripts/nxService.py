@@ -14,6 +14,7 @@ import re
 import fnmatch
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
+helperlib = imp.load_source('nxDSCLog', '../helperlib.py')
 LG = nxDSCLog.DSCLog
 
 # [ClassVersion("1.0.0"),FriendlyName("nxService"), SupportsInventory()]
@@ -54,6 +55,8 @@ def init_vars(Name, Controller, Enabled, State):
 
 
 def Set_Marshall(Name, Controller, Enabled, State):
+    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
     retval = Set(Name, Controller, Enabled, State)
@@ -61,6 +64,8 @@ def Set_Marshall(Name, Controller, Enabled, State):
 
 
 def Test_Marshall(Name, Controller, Enabled, State):
+    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
     retval = Test(Name, Controller, Enabled, State)
