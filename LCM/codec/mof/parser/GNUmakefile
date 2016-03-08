@@ -15,7 +15,12 @@ SOURCES = \
 
 INCLUDES = $(OMI)/common  $(OMI) $(TOP) $(TOP)/codec/common $(OMI)/nits/base 
 
-DEFINES = MI_CONST= 
+ifeq ($(ENABLE_DEBUG),1)
+ENABLE_DEBUG_DEFINE = ENABLE_DEBUG
+endif
+
+DEFINES = MI_CONST= $(ENABLE_DEBUG_DEFINE)
 
 include $(OMI)/mak/rules.mak
+
 
