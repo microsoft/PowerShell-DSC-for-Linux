@@ -65,6 +65,8 @@ ifeq ($(BUILD_OMS),BUILD_OMS)
 PROVIDERS:=nxOMSAgent
 PROVIDERS+=nxOMSSyslog
 PROVIDERS+=nxOMSCustomLog
+PROVIDERS+=nxService
+PROVIDERS+=nxPackage
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript
