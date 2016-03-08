@@ -126,6 +126,8 @@ allocate_MI_Instance (
     std::string const name,
     MI_InstancePtr* ppInstanceOut)
 {
+
+
     //SCX_BOOKEND ("allocate_MI_Instance");
     int rval = EXIT_FAILURE;
     // find the property by name
@@ -135,6 +137,28 @@ allocate_MI_Instance (
         ppBegin + pInstance->classDecl->numProperties;
     MI_PropertyDecl const* const* const ppProperty =
         std::find_if (ppBegin, ppEnd, PropertyFinder (name));
+
+    if (name.compare("__Inventory") == 0)
+    {
+        MI_Instance* pNewInstance = 0;
+        if (MI_RESULT_OK == MI_NewDynamicInstance (
+                pContext, pInstance->classDecl->name,
+                NULL, &pNewInstance))
+        {
+            ppInstanceOut->reset (pNewInstance);
+            rval = EXIT_SUCCESS;
+        }
+        else
+        {
+            std::ostringstream strm;
+            strm << __FILE__ << '[' << __LINE__ << ']'
+                 << "MI_NewDynamicInstance failed";
+            SCX_BOOKEND_PRINT (strm.str ());
+            std::cerr << strm.str () << std::endl;
+        }
+	return rval;
+    }
+
     if (ppEnd != ppProperty)
     {
         MI_Instance* pNewInstance = 0;
@@ -405,6 +429,82 @@ PythonProvider::get (
 }
 
 
+MI_Result
+PythonProvider::inventory (
+    MI_Instance const& instance,
+    MI_Context* const pContext,
+    MI_Instance* const pInstanceOut)
+{
+    std::ostringstream strm;
+#if PRINT_BOOKENDS
+    strm << "name: \"" << m_Name << '\"';
+    SCX_BOOKEND_EX ("PythonProvider::inventory", strm.str ());
+    strm.str ("");
+    strm.clear ();
+#endif
+    // 1: send the request
+    // 2: read (int) RESULT
+    //     A: RESULT is affirmative (0)
+    //         i: read (int) ARG_COUNT
+    //         ii: read ARG
+    //         iii: read ARG_TYPE
+    //         iv: read ARG_VALUE
+    //         v: add ARG to new instance
+    //         iv: goto ii
+    //     B: RESULT is negative (non-0)
+    //         i: read (string) error msg
+    //         ii: output error msg
+    MI_Result rval = MI_RESULT_FAILED;
+    int inventoryResult = -1;
+    int result = sendRequest (INVENTORY, instance);
+    if (EXIT_SUCCESS == result)
+    {
+        SCX_BOOKEND_PRINT ("send succeeded");
+        result = recv (&inventoryResult);
+        if (EXIT_SUCCESS == result)
+        {
+            if (0 == inventoryResult)
+            {
+                SCX_BOOKEND_PRINT ("recv'd POSITIVE");
+                result = recv (pContext, pInstanceOut);
+                rval = EXIT_SUCCESS == result ? MI_RESULT_OK : MI_RESULT_FAILED;
+            }
+            else
+            {
+                SCX_BOOKEND_PRINT ("recv'd NEGATIVE");
+                std::string errorMsg;
+                result = recv (&errorMsg);
+                if (EXIT_SUCCESS == result)
+                {
+                    if (0 != errorMsg.length ())
+                    {
+                        strm << ": error msg: \"" << errorMsg << '\"';
+                        SCX_BOOKEND_PRINT (strm.str ());
+                        std::cerr << strm.str () << std::endl;
+                        strm.str ("");
+                        strm.clear ();
+                    }
+                    else
+                    {
+                        SCX_BOOKEND_PRINT ("no error msg");
+                    }
+                }
+                else 
+                {
+                    SCX_BOOKEND_PRINT ("failed to receive error msg");
+                }
+            }
+        }
+    }
+    else
+    {
+        SCX_BOOKEND_PRINT ("send failed");
+    }
+    return rval;
+}
+
+
+
 int
 PythonProvider::forkExec ()
 {
@@ -424,7 +524,7 @@ PythonProvider::forkExec ()
         {
             // socketpair succeeded
             SCX_BOOKEND_PRINT ("socketpair - succeeded");
-            int m_pid = fork ();
+            m_pid = fork ();
             if (0 == m_pid)
             {
                 // fork succeded, this is the child process
@@ -1071,7 +1171,7 @@ PythonProvider::recv_MI_Value (
     MI_Context* const pContext,
     MI_Instance* const pInstanceOut)
 {
-    //SCX_BOOKEND ("PythonProvider::recv_MI_Value");
+    SCX_BOOKEND ("PythonProvider::recv_MI_Value");
     std::string name;
     int rval = recv (&name);
     if (EXIT_SUCCESS == rval)
@@ -1143,7 +1243,7 @@ PythonProvider::recv_MI_Value (
                     break;
                 case MI_INSTANCE:
                     {
-                        //SCX_BOOKEND ("recv_MI_Value (MI_INSTANCE)");
+                        SCX_BOOKEND ("recv_MI_Value (MI_INSTANCE)");
                         ppInstanceArray.reset (new MI_InstancePtr[1]);
                         if (EXIT_SUCCESS == (rval = allocate_MI_Instance (
                                                  pContext, pInstanceOut, name,
@@ -1280,7 +1380,7 @@ PythonProvider::recv_MI_Value (
                     // set the array
                     // cleanup the memory
                     {
-                        //SCX_BOOKEND ("recv_MI_Value (INSTANCEA)");
+                        SCX_BOOKEND ("recv_MI_Value (INSTANCEA)");
                         int length;
                         int rval = recv (&length);
                         if (EXIT_SUCCESS == rval)

@@ -7,7 +7,7 @@ import platform
 
 def usage():
     print("Usage:")
-    print("  InstallModule.py NAME_VERSION.zip")
+    print("  InstallModule.py NAME_VERSION.zip [VERIFY_FLAG]")
     sys.exit(1)
 
 def registration_text(resource):
@@ -21,7 +21,7 @@ Instance of MSFT_CimConfigurationProviderRegistration
 };
 '''
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 2 and len(sys.argv) != 3:
     usage()
 
 filepath = sys.argv[1]
@@ -29,6 +29,11 @@ filepath = sys.argv[1]
 if not os.path.isfile(filepath):
     print("Error: " + filepath + " is not a file.")
     sys.exit(1)
+
+if len(sys.argv) == 3:
+    verifyFlag = sys.argv[2]
+else:
+    verifyFlag = "0"
 
 basename = os.path.basename(filepath)
 last_underscore = basename.rfind("_")
@@ -68,6 +73,36 @@ if not os.path.isdir(modulePath):
 if not os.path.isdir(modulePath + "/DSCResources"):
     print("Error: After extracting module, unable to find DSCResources directory in " + modulePath)
     sys.exit(1)
+
+
+keyring_path = omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/keyring.gpg"
+asc_path = modulePath + "/" + moduleName + ".asc"
+sha256sums_path = modulePath + "/" + moduleName + ".sha256sums"
+
+# check if we must perform verify
+if verifyFlag == "1":
+    if not os.path.isfile(keyring_path):
+        print("Error: Cannot find keyring")
+        sys.exit(1)
+    if not os.path.isfile(asc_path):
+        print("Error: Cannot find asc file as part of module")
+        sys.exit(1)
+    if not os.path.isfile(sha256sums_path):
+        print("Error: Cannot find sha256sums file as part of module")
+        sys.exit(1)
+        
+    # Perform verify on the sha256sums file
+    retval = subprocess.call(["gpg", "--no-default-keyring", "--keyring", keyring_path, "--verify", asc_path, sha256sums_path])
+    if retval != 0:
+        print("Error: Failed to verify " + sha256sums_path + " using signature in module.")
+        sys.exit(2)
+
+    # Perform sha256sum
+    retval = subprocess.call("cd " + modulePath + "; sha256sum -c " + moduleName + ".sha256sums", shell=True)
+    if retval != 0:
+        print("Error: sha256sum failed using " + sha256sums_path + ".")
+        sys.exit(2)
+
 
 f = open(modulePath+ "/VERSION", "w")
 f.write(moduleVersion)

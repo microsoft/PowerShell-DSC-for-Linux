@@ -1,18 +1,10 @@
 /* @migen@ */
 /*
-   PowerShell Desired State Configuration for Linux
-
-   Copyright (c) Microsoft Corporation
-
-   All rights reserved. 
-
-   MIT License
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+**
+**==============================================================================
 */
 #ifndef _MSFT_DSCLocalConfigurationManager_h
 #define _MSFT_DSCLocalConfigurationManager_h
@@ -1248,6 +1240,74 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_StopConfiguration_
 /*
 **==============================================================================
 **
+** MSFT_DSCLocalConfigurationManager.PerformInventory()
+**
+**==============================================================================
+*/
+
+typedef struct _MSFT_DSCLocalConfigurationManager_PerformInventory
+{
+    MI_Instance __instance;
+    /*OUT*/ MI_ConstUint32Field MIReturn;
+}
+MSFT_DSCLocalConfigurationManager_PerformInventory;
+
+MI_EXTERN_C MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_PerformInventory_rtti;
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Construct(
+    _Out_ MSFT_DSCLocalConfigurationManager_PerformInventory* self,
+    _In_ MI_Context* context)
+{
+    return MI_Context_ConstructParameters(context, &MSFT_DSCLocalConfigurationManager_PerformInventory_rtti,
+        (MI_Instance*)&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Clone(
+    _In_ const MSFT_DSCLocalConfigurationManager_PerformInventory* self,
+    _Outptr_ MSFT_DSCLocalConfigurationManager_PerformInventory** newInstance)
+{
+    return MI_Instance_Clone(
+        &self->__instance, (MI_Instance**)newInstance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventory* self)
+{
+    return MI_Instance_Destruct(&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Delete(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventory* self)
+{
+    return MI_Instance_Delete(&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Post(
+    _In_ const MSFT_DSCLocalConfigurationManager_PerformInventory* self,
+    _In_ MI_Context* context)
+{
+    return MI_Context_PostInstance(context, &self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Set_MIReturn(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventory* self,
+    _In_ MI_Uint32 x)
+{
+    ((MI_Uint32Field*)&self->MIReturn)->value = x;
+    ((MI_Uint32Field*)&self->MIReturn)->exists = 1;
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_Clear_MIReturn(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventory* self)
+{
+    memset((void*)&self->MIReturn, 0, sizeof(self->MIReturn));
+    return MI_RESULT_OK;
+}
+
+/*
+**==============================================================================
+**
 ** MSFT_DSCLocalConfigurationManager provider function prototypes
 **
 **==============================================================================
@@ -1354,6 +1414,15 @@ MI_EXTERN_C void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_StopConfigurat
     _In_opt_z_ const MI_Char* methodName,
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
     _In_opt_ const MSFT_DSCLocalConfigurationManager_StopConfiguration* in);
+
+MI_EXTERN_C void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_PerformInventory(
+    _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
+    _In_opt_ const MSFT_DSCLocalConfigurationManager_PerformInventory* in);
 
 
 #endif /* _MSFT_DSCLocalConfigurationManager_h */

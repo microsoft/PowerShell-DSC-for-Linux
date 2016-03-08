@@ -1,0 +1,25 @@
+//============================================================================
+// Copyright (C) Microsoft Corporation, All rights reserved. 
+//============================================================================
+//
+
+Qualifier Stream : boolean = false, 
+    Scope( method, parameter), 
+    Flavor(DisableOverride, ToSubclass);
+
+Qualifier ClassVersion : string = null, 
+    Scope(class, association, indication), 
+    Flavor(EnableOverride, Restricted);
+
+Qualifier FriendlyName : string = null,
+	Scope(class),
+	Flavor(EnableOverride);
+	
+Qualifier SupportsInventory : boolean = true,
+	Scope(class),
+	Flavor(EnableOverride);
+	
+Qualifier InventoryFilter : boolean = true,
+	Scope(property),
+	Flavor(EnableOverride);
+	

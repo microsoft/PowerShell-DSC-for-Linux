@@ -27,6 +27,8 @@
 #include "EventWrapper.h"
 #include "CAEngine.h"
 
+#include <xmlserializer/xmlserializer.h>
+
 #if defined(_MSC_VER)
 
 #include <io.h>
@@ -2402,7 +2404,16 @@ void Invoke_SendConfiguration(
         MI_Instance_Delete(cimErrorDetails);
 	return;
     }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
 #endif
+
     
     MI_Uint8 *dataValue = NULL;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -2453,6 +2464,14 @@ void Invoke_SendConfigurationApply(
     if (RunningAsRoot() == MI_TRUE)
     {
 	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
 	MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
 	return;
@@ -2510,6 +2529,14 @@ void Invoke_GetConfiguration(
     if (RunningAsRoot() == MI_TRUE)
     {
 	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
 	MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
 	return;
@@ -2576,6 +2603,14 @@ void Invoke_ApplyConfiguration(
         MI_Instance_Delete(cimErrorDetails);
 	return;
     }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
 #endif
     
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -2609,6 +2644,14 @@ void Invoke_SendMetaConfigurationApply(
     if (RunningAsRoot() == MI_TRUE)
     {
 	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
 	MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
 	return;
@@ -2664,6 +2707,14 @@ void Invoke_GetMetaConfiguration(
         MI_Instance_Delete(cimErrorDetails);
 	return;
     }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
 #endif
     
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -2696,6 +2747,14 @@ void Invoke_RollBack(
     if (RunningAsRoot() == MI_TRUE)
     {
 	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
 	MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
 	return;
@@ -2737,6 +2796,14 @@ void Invoke_TestConfiguration(
         MI_Instance_Delete(cimErrorDetails);
 	return;
     }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
 #endif
     
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -2770,6 +2837,14 @@ void Invoke_PerformRequiredConfigurationChecks(
     if (RunningAsRoot() == MI_TRUE)
     {
 	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
 	MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
 	return;
@@ -2812,6 +2887,14 @@ void Invoke_StopConfiguration(
         MI_Instance_Delete(cimErrorDetails);
 	return;
     }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
 #endif
     
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -2830,6 +2913,241 @@ void Invoke_StopConfiguration(
     Thread_CreateDetached(Invoke_StopConfiguration_Internal, NULL, args);  
 }
 
+
+MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
+{
+    MI_Result miResult = MI_RESULT_OK;
+    MI_Instance *cimErrorDetails = NULL;
+    MI_InstanceA outInstances;
+    MI_Value val;
+    MI_Uint32 bufferIndex = 0;    
+    MSFT_DSCLocalConfigurationManager_PerformInventory outputObject;
+    MI_Uint8A dataValue = {0};
+    MI_Real64 duration;
+    ptrdiff_t start, finish;   
+
+    Context_Invoke_Basic *args = (Context_Invoke_Basic*)param;
+
+    if( args == NULL )
+    {
+        return 0;
+    }
+    if( args->methodName == NULL)
+    {
+        MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
+        return 0;
+    }    
+
+    miResult = InitHandler(args->methodName, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
+    {
+        MI_PostCimError(args->context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        ResetJobId();
+
+        PAL_Free(args);        
+        return 0;
+    }
+
+    miResult = TryBeginLcmOperation(args->methodName, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
+    {
+        MI_PostCimError(args->context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        ResetJobId();
+        PAL_Free(args);        
+        return 0;
+    }
+
+    miResult = MSFT_DSCLocalConfigurationManager_PerformInventory_Construct(&outputObject, args->context);
+    if (miResult != MI_RESULT_OK)
+    {
+        GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTGET_FAILED);
+        goto ExitWithError;
+    }   
+
+    start=CPU_GetTimeStamp();
+    SetLCMStatusBusy();
+    miResult = CallPerformInventory(&outInstances, 
+        args->context, &cimErrorDetails);
+    if (miResult != MI_RESULT_OK)
+    {
+        MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
+        goto ExitWithError;
+    }
+
+    {
+	const MI_Uint32 c_initBufferLength = 10000;
+	MI_Application application;
+	MI_Serializer serializer;
+	MI_Uint8 *clientBuffer;
+	MI_Uint32 clientBufferLength = c_initBufferLength;
+	MI_Uint32 clientBufferNeeded = 0;
+	MI_Instance * serializedInstance;
+	FILE *fp = NULL;
+
+	miResult = MI_NewDynamicInstance(args->context, "Inventory", NULL, &serializedInstance);
+	if (miResult != MI_RESULT_OK)
+	{
+	    GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY);
+	    goto ExitWithError;
+	}
+
+	miResult = MI_Instance_AddElement(serializedInstance, "Instances", &outInstances, MI_INSTANCEA, 0);
+	if (miResult != MI_RESULT_OK)
+	{
+	    GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY);
+	    goto ExitWithError;
+	}
+
+	clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+	MI_Application_Initialize(0,NULL,NULL, &application);
+	miResult = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
+	if (miResult != MI_RESULT_OK)
+	{
+	    MI_Application_Close(&application);
+	    return miResult;
+	}
+	
+	miResult = XmlSerializer_SerializeInstance( &serializer, 0, serializedInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
+	if (miResult != MI_RESULT_OK)
+	{
+	    free(clientBuffer);
+	    if (clientBufferNeeded > 0)
+	    {
+		// Try again with a buffer given to us by the clientBufferNeeded field
+		clientBufferLength = clientBufferNeeded;
+		clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+		miResult = XmlSerializer_SerializeInstance( &serializer, 0, serializedInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
+	    }
+	    else
+	    {
+		XmlSerializer_Close(&serializer);
+		MI_Application_Close(&application);
+		return miResult;
+	    }
+	}
+        
+	XmlSerializer_Close(&serializer);
+	MI_Application_Close(&application);
+	if (miResult == MI_RESULT_OK)
+	{
+	    clientBuffer[clientBufferNeeded] = '\0';
+	    printf((char*)clientBuffer);
+	}
+
+        fp = File_OpenT(GetInventoryReportFileName(), MI_T("w"));
+        if( fp != NULL )
+        {
+            fwrite(clientBuffer, 1, clientBufferNeeded, fp);
+            File_Close(fp);
+        }
+
+	free(clientBuffer);
+    }
+
+/*
+    val.instancea.data = outInstances.data;
+    val.instancea.size = outInstances.size;
+    miResult = MI_Instance_SetElement(&outputObject.__instance, MI_T("inventory"), &val, MI_INSTANCEA, 0);
+*/
+    CleanUpInstanceCache(&outInstances);    
+    if (miResult != MI_RESULT_OK)
+    {
+        GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_INVENTORY_FAILED);
+        MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
+        goto ExitWithError;
+    }
+    miResult = MSFT_DSCLocalConfigurationManager_PerformInventory_Set_MIReturn(&outputObject, 0);
+    if (miResult != MI_RESULT_OK)
+    {
+        GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_INVENTORY_FAILED);
+        MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
+        goto ExitWithError;
+    }    
+
+    miResult = MSFT_DSCLocalConfigurationManager_PerformInventory_Post(&outputObject, args->context);
+    MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
+    if (miResult != MI_RESULT_OK)
+    {
+        GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_POSTINVENTORY_FAILED);
+        goto ExitWithError;
+    }
+    // Stop the clock and measure time taken for this operation
+    finish=CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+    LCM_WriteMessage_Internal_TimeTaken(args->context,EMPTY_STRING, ID_LCM_TIMEMESSAGE,  ID_OUTPUT_ITEM_INVENTORY,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+
+    EndLcmOperation();
+    SetLCMStatusReady();
+    MI_Context_PostResult(args->context, MI_RESULT_OK);
+
+    //Debug Log 
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+
+    ResetJobId();
+    PAL_Free(args);    
+
+    return 0;
+
+ExitWithError:
+    ResetJobId();
+    EndLcmOperation();
+    SetLCMStatusReady();
+    MI_PostCimError(args->context, cimErrorDetails);
+    MI_Instance_Delete(cimErrorDetails);
+    PAL_Free(args);    
+    return 0;
+}
+
+
+void Invoke_PerformInventory(
+    _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
+    _In_opt_ const MSFT_DSCLocalConfigurationManager_PerformInventory* in)
+{
+    MI_Instance *cimErrorDetails = NULL;
+    MI_Result miResult;
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
+    MI_Uint8 *dataValue = NULL;
+    MI_Uint32 dataSize = 0;
+    Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
+    if( args == NULL)
+    {
+        miResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
+        MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        return;
+    }
+    args->dataExist = MI_FALSE;
+    args->context = context;
+    args->methodName = methodName;
+    Thread_CreateDetached(Invoke_PerformInventory_Internal, NULL, args);
+
+}
 
 #endif
 

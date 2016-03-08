@@ -23,6 +23,7 @@
 #include <common/linux/sal.h>
 #endif
 #include <micodec.h>
+#include "MSFT_DSCMetaConfiguration.h"
 
 /*Macro functions to return on an error*/
 #define RETURN_RESULT_IF_FAILED(resultCode)                                                             if(resultCode!=MI_RESULT_OK) return resultCode;
@@ -117,6 +118,8 @@
 #define OMI_BaseResource_GetMethodName                        MI_T("GetTargetResource")
 #define OMI_BaseResource_TestMethodName                       MI_T("TestTargetResource")
 #define OMI_BaseResource_SetMethodName                        MI_T("SetTargetResource")
+#define OMI_BaseResource_InventoryMethodName                  MI_T("InventoryTargetResource")
+
 
 #define OMI_BaseResource_Method_InputResource                 MI_T("InputResource")
 #define OMI_BaseResource_Method_Result                        MI_T("Result")
@@ -160,6 +163,7 @@
 #define OMI_ConfigurationDocument_GenerationDate           MI_T("GenerationDate")
 #define OMI_ConfigurationDocument_GenerationHost           MI_T("GenerationHost")
 #define OMI_ConfigurationDocument_Name                     MI_T("Name")
+#define OMI_ConfigurationDocument_DocumentType             MI_T("DocumentType")
 #define OMI_ConfigurationDocument_MinimumCompatibleVersion               MI_T("MinimumCompatibleVersion")
 #define OMI_ConfigurationDocument_CompatibleVersionAdditionalProperties  MI_T("CompatibleVersionAdditionalProperties")
 
@@ -217,6 +221,9 @@
 #define MSFT_DSCMetaConfiguration_LCMStateDetail                            MI_T("LCMStateDetail")
 #define MSFT_DSCMetaConfiguration_ActionAfterReboot                                             MI_T("ActionAfterReboot")
 #define MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays                                     MI_T("StatusRetentionTimeInDays")
+
+#define MSFT_DSCMetaConfiguration_EnableSignatureValidation                                     MI_T("EnableSignatureValidation")
+#define MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation                              MI_T("DisableModuleSignatureValidation")
 
 #define MSFT_DSCMetaConfiguration_BaseProperty_Count    0
 
@@ -504,6 +511,8 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define CONFIGURATION_LOCATION_PARTIALBASEDOCUMENTTMP MI_T("PartialConfigBaseDocumentInstances.mof.tmp")
 #define CONFIGURATION_LOCATION_PARTIALCONFIGURATIONS_STORE MI_T("PartialConfigurations")
 #define CONFIGURATION_LOCATION_GET MI_T("Get.mof")
+#define CONFIGURATION_LOCATION_INVENTORY MI_T("Inventory.mof")
+#define CONFIGURATION_LOCATION_INVENTORY_REPORT MI_T("Inventory.xml")
 #define CONFIGURATION_LOCATION_CURRENT MI_T("Current.mof")
 #define CONFIGURATION_LOCATION_CURRENTCHECKSUM MI_T("Current.mof.checksum")
 #define CONFIGURATION_LOCATION_PREVIOUS MI_T("Previous.mof")
@@ -896,15 +905,17 @@ MI_Datetime PalDatetimeToMiDatetime(_In_ PAL_Datetime inDatetime);
 
 extern char g_currentError[5001];
 extern StatusReport_ResourceNotInDesiredState * g_rnids;
+extern MSFT_DSCMetaConfiguration *g_metaConfig;
+
 
 #ifndef g_ConfigurationDetails
 
 #define JOB_UUID_LENGTH 41*sizeof(MI_Char)
     typedef struct _ConfigurationDetails
-        { 
-            MI_Char jobGuidString[JOB_UUID_LENGTH]; 
-            MI_Boolean hasSetDetail;
-        } ConfigurationDetails;
+    {
+	MI_Char jobGuidString[JOB_UUID_LENGTH];
+	MI_Boolean hasSetDetail;
+    } ConfigurationDetails;
 
     extern ConfigurationDetails g_ConfigurationDetails;
 #endif

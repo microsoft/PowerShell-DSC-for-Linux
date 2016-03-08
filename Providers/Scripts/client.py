@@ -98,7 +98,7 @@ def translate_input (d):
 def callMOF (req):
     oldStyleDict = translate_input (req[2])
     trace ('MOF=' + repr ((req[0], req[1], oldStyleDict)))
-    op = ('Test','Set','Get')
+    op = ('Test','Set','Get','Inventory')
     if req[1] not in globals().keys():
         sys.stderr.write('Unable to find module: ' + req[1])
         return None

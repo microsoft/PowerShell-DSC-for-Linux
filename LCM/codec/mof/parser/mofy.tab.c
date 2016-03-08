@@ -453,7 +453,11 @@ static const short mofcheck[] = {                        41,
 };
 #define YYFINAL 7
 #ifndef YYDEBUG
-#define YYDEBUG 0
+ #ifdef ENABLE_DEBUG
+  #define YYDEBUG 1
+ #else
+  #define YYDEBUG 0
+ #endif
 #endif
 #define YYMAXTOKEN 302
 #if YYDEBUG

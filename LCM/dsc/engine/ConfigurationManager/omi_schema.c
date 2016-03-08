@@ -1,18 +1,10 @@
 /* @migen@ */
 /*
-   PowerShell Desired State Configuration for Linux
-
-   Copyright (c) Microsoft Corporation
-
-   All rights reserved. 
-
-   MIT License
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+**
+**==============================================================================
 */
 #include <ctype.h>
 #include <MI.h>
@@ -3224,6 +3216,41 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_AgentId_prop =
     NULL,
 };
 
+/* property MSFT_DSCMetaConfiguration.EnableSignatureValidation */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_EnableSignatureValidation_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x00656E19, /* code */
+    MI_T("EnableSignatureValidation"), /* name */
+    NULL, /* qualifiers */
+    0, /* numQualifiers */
+    MI_BOOLEAN, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, EnableSignatureValidation), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+/* property MSFT_DSCMetaConfiguration.DisableModuleSignatureValidation */
+static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x00646E20, /* code */
+    MI_T("DisableModuleSignatureValidation"), /* name */
+    NULL, /* qualifiers */
+    0, /* numQualifiers */
+    MI_BOOLEAN, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCMetaConfiguration, DisableModuleSignatureValidation), /* offset */
+    MI_T("MSFT_DSCMetaConfiguration"), /* origin */
+    MI_T("MSFT_DSCMetaConfiguration"), /* propagator */
+    NULL,
+};
+
+
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_props[] =
 {
     &MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_prop,
@@ -3250,6 +3277,8 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_props[] =
     &MSFT_DSCMetaConfiguration_LCMStateDetail_prop,
     &MSFT_DSCMetaConfiguration_StatusRetentionTimeInDays_prop,
     &MSFT_DSCMetaConfiguration_AgentId_prop,
+    &MSFT_DSCMetaConfiguration_EnableSignatureValidation_prop,
+    &MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation_prop,
 };
 
 static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ClassVersion_qual_value = MI_T("1.0.0");
@@ -4724,6 +4753,95 @@ MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_StopConfiguration_rtti 
     (MI_ProviderFT_Invoke)MSFT_DSCLocalConfigurationManager_Invoke_StopConfiguration, /* method */
 };
 
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_PerformInventory_Static_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventory_Static_qual =
+{
+    MI_T("Static"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_Static_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformInventory_Description_qual_value = MI_T("74");
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventory_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventory_quals[] =
+{
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_Static_qual,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_Description_qual,
+};
+
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Static_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Static_qual =
+{
+    MI_T("Static"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Static_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Description_qual_value = MI_T("74");
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_quals[] =
+{
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Static_qual,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_Description_qual,
+};
+
+/* parameter MSFT_DSCLocalConfigurationManager.PerformInventory(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_param =
+{
+    MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
+    0x006D6E08, /* code */
+    MI_T("MIReturn"), /* name */
+    MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_quals), /* numQualifiers */
+    MI_UINT32, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCLocalConfigurationManager_PerformInventory, MIReturn), /* offset */
+};
+
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventory_params[] =
+{
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_MIReturn_param,
+};
+
+/* method MSFT_DSCLocalConfigurationManager.PerformInventory() */
+MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_PerformInventory_rtti =
+{
+    MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
+    0x00707910, /* code */
+    MI_T("PerformInventory"), /* name */
+    MSFT_DSCLocalConfigurationManager_PerformInventory_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventory_quals), /* numQualifiers */
+    MSFT_DSCLocalConfigurationManager_PerformInventory_params, /* parameters */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventory_params), /* numParameters */
+    sizeof(MSFT_DSCLocalConfigurationManager_PerformInventory), /* size */
+    MI_UINT32, /* returnType */
+    MI_T("MSFT_DSCLocalConfigurationManager"), /* origin */
+    MI_T("MSFT_DSCLocalConfigurationManager"), /* propagator */
+    &schemaDecl, /* schema */
+    (MI_ProviderFT_Invoke)MSFT_DSCLocalConfigurationManager_Invoke_PerformInventory, /* method */
+};
+
 static MI_MethodDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_meths[] =
 {
     &MSFT_DSCLocalConfigurationManager_SendConfiguration_rtti,
@@ -4736,6 +4854,7 @@ static MI_MethodDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_meths[
     &MSFT_DSCLocalConfigurationManager_RollBack_rtti,
     &MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_rtti,
     &MSFT_DSCLocalConfigurationManager_StopConfiguration_rtti,
+    &MSFT_DSCLocalConfigurationManager_PerformInventory_rtti,
 };
 
 static MI_CONST MI_ProviderFT MSFT_DSCLocalConfigurationManager_funcs =

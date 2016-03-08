@@ -1,0 +1,20 @@
+\\winbuilds\release\WIN8_RTM\9200.16384.120725-1247\amd64chk\bin\Convert-MofToProvider ^
+    -MofFile ^
+qualifiers.mof ^
+OMI_BaseResource.mof ^
+MSFT_nxPackageResource.mof ^
+   -ClassList MSFT_nxPackageResource ^
+   -IncludePath .\CIM-2.26.0 ^
+   -OldRcPath .\strings.rc ^
+   -OutPath MSFT_nxPackageResource
+
+   
+\\winbuilds\release\WIN8_RTM\9200.16384.120725-1247\amd64chk\bin\Convert-MofToProvider ^
+    -MofFile ^
+qualifiers.mof ^
+OMI_BaseResource.mof ^
+MSFT_nxServiceResource.mof ^
+   -ClassList MSFT_nxServiceResource ^
+   -IncludePath .\CIM-2.26.0 ^
+   -OldRcPath .\strings.rc ^
+   -OutPath MSFT_nxServiceResource

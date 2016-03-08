@@ -13,8 +13,8 @@ import sys
 import time
 import imp
 import urllib2
-import threading
-import re
+import copy
+import fnmatch
 apt = None
 rpm = None
 try:
@@ -28,11 +28,15 @@ if apt is None:
         pass
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
+helperlib = imp.load_source('nxDSCLog', '../helperlib.py')
 LG = nxDSCLog.DSCLog
 
+# [ClassVersion("1.0.0"),FriendlyName("nxPackage"),SupportsInventory()]
+# class MSFT_nxPackageResource : OMI_BaseResource
+# {
 #   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
 #   [write,ValueMap{"Yum", "Apt", "Zypper"},Values{"Yum", "Apt", "Zypper"}] string PackageManager;
-#   [Key] string Name;
+#   [Key,InventoryFilter] string Name;
 #   [write] string FilePath;
 #   [write] Boolean PackageGroup;
 #   [write] string Arguments;
@@ -43,6 +47,9 @@ LG = nxDSCLog.DSCLog
 #   [read] uint32 Size;
 #   [read] string Version;
 #   [read] boolean Installed;
+#   [read] string Architecture;
+ 
+# };
 
 cache_file_dir = '/var/opt/microsoft/dsc/cache/nxPackage'
 global show_mof
@@ -78,6 +85,8 @@ def init_vars(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, R
 
 
 def Set_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
+    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
     retval = Set(Ensure, PackageManager, Name,
@@ -89,6 +98,8 @@ def Set_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments
 
 
 def Test_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
+    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
     retval = Test(Ensure, PackageManager, Name,
@@ -104,7 +115,7 @@ def Get_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments
     (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
     retval = 0
-    retval, PackageManager, PackageDescription, Publisher, InstalledOn, Size, Version, Installed = Get(
+    retval, PackageManager, PackageDescription, Publisher, InstalledOn, Size, Version, Installed, Architecture = Get(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
     sys.stdin.flush()
     sys.stderr.flush()
@@ -119,6 +130,7 @@ def Get_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments
     PackageDescription = protocol.MI_String(PackageDescription)
     Publisher = protocol.MI_String(Publisher)
     InstalledOn = protocol.MI_String(InstalledOn)
+    Architecture = protocol.MI_String(Architecture)
     Size = protocol.MI_Uint32(int(Size))
     Version = protocol.MI_String(Version)
     Installed = protocol.MI_Boolean(Installed)
@@ -128,17 +140,46 @@ def Get_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments
     arg_names.append('Size')
     arg_names.append('Version')
     arg_names.append('Installed')
-
+    arg_names.append('Architecture')
     retd = {}
     ld = locals()
     for k in arg_names:
         retd[k] = ld[k]
     return retval, retd
 
+def Inventory_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
+    retval = 0
+    sys.stdin.flush()
+    sys.stderr.flush()
+    sys.stdout.flush()
+    (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
+        Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
+    retval, pkgs = GetAll(Ensure, PackageManager, Name,
+                   FilePath, PackageGroup, Arguments, ReturnCode)
+    for p in pkgs:
+        p['Ensure'] = protocol.MI_String('present')
+        p['PackageManager'] = protocol.MI_String(PackageManager)
+        p['Name'] = protocol.MI_String(p['Name'])
+        p['FilePath'] = protocol.MI_String('')
+        p['PackageGroup'] = protocol.MI_Boolean(False)
+        p['Arguments'] = protocol.MI_String(Arguments)
+        p['ReturnCode'] = protocol.MI_Uint32(0)
+        p['PackageDescription'] = protocol.MI_String(p['PackageDescription'])
+        p['Publisher'] = protocol.MI_String(p['Publisher'])
+        p['InstalledOn'] = protocol.MI_String(p['InstalledOn'])
+        p['Architecture'] = protocol.MI_String(p['Architecture'])
+        p['Size'] = protocol.MI_Uint32(int(p['Size']))
+        p['Version'] = protocol.MI_String(p['Version'])
+        p['Installed'] = protocol.MI_Boolean(True)
+    Inventory=protocol.MI_InstanceA(pkgs)
+    retd = {}
+    retd["__Inventory"] = Inventory
+    return retval, retd
 
 #
 # Begin user defined DSC functions
 #
+
 def GetPackageSystem():
     ret = None
     for b in ('dpkg', 'rpm'):
@@ -223,7 +264,7 @@ class Params:
         self.Size = 0
         self.Version = ''
         self.Installed = ''
-
+        self.Architecture = ''
         self.PackageSystem = ''
 
         self.PackageSystem = GetPackageSystem()
@@ -247,18 +288,23 @@ class Params:
         self.cmds['dpkg']['present'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -i '
         self.cmds['dpkg']['absent'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -r '
         self.cmds['dpkg'][
-            'stat'] = "dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}\n' "
+            'stat'] = "dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n' "
+        self.cmds['dpkg'][
+            'stat_all'] = "dpkg-query -W -f='${Package}|${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n@@' "
         self.cmds['dpkg']['stat_group'] = None
         self.cmds['rpm']['present'] = 'rpm % -i '
         self.cmds['rpm']['absent'] = 'rpm % -e '
         self.cmds['rpm'][
-            'stat'] = 'rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed\n" '
+            'stat'] = 'rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed|%{ARCH}\n" '
+        self.cmds['rpm'][
+            'stat_all'] = 'rpm -qa --queryformat "%{NAME}|%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}|installed|%{ARCH}\n@@" '
         self.cmds['rpm']['stat_group'] = None
         self.cmds['apt'][
             'present'] = 'DEBIAN_FRONTEND=noninteractive apt-get % install ^ --allow-unauthenticated --yes '
         self.cmds['apt'][
             'absent'] = 'DEBIAN_FRONTEND=noninteractive apt-get % remove ^ --allow-unauthenticated --yes '
         self.cmds['apt']['stat'] = self.cmds['dpkg']['stat']
+        self.cmds['apt']['stat_all'] = self.cmds['dpkg']['stat_all']
         self.cmds['apt']['stat_group'] = None
         self.cmds['yum']['present'] = 'yum -y % install ^ '
         self.cmds['yum']['absent'] = 'yum -y % remove ^ '
@@ -267,9 +313,11 @@ class Params:
         self.cmds['yum'][
             'stat_group'] = 'yum grouplist '  # the group mode is implemented when using YUM only.
         self.cmds['yum']['stat'] = self.cmds['rpm']['stat']
+        self.cmds['yum']['stat_all'] = self.cmds['rpm']['stat_all']
         self.cmds['zypper']['present'] = 'zypper --non-interactive % install ^'
         self.cmds['zypper']['absent'] = self.cmds['rpm']['absent']
         self.cmds['zypper']['stat'] = self.cmds['rpm']['stat']
+        self.cmds['zypper']['stat_all'] = self.cmds['rpm']['stat_all']
         self.cmds['zypper']['stat_group'] = None
         if self.PackageGroup is True:
             if self.cmds[self.PackageManager]['stat_group'] is None:
@@ -373,7 +421,7 @@ def ParseInfo(p, info):
     p.Size = '0'
     p.Version = ''
     p.Installed = False
-
+    p.Architecture = ''
     if len(info) > 1:
         f = info.split('|')
         if len(f) is 6:
@@ -386,11 +434,47 @@ def ParseInfo(p, info):
                 p.Size = f[3]
             p.Version = f[4]
             p.Installed = ('install' in f[5])
+            p.Architecture = f[6]
 
-        if len(f) is not 5:
+        if len(f) is not 6:
             print('ERROR.   ' + p.PackageManager, file=sys.stdout)
             LG().Log('ERROR', 'ERROR.   ' + p.PackageManager)
 
+
+def ParseAllInfo(info,p):
+    pkg_list=[]
+    d={}
+    if len(info) < 1 or  '@@' not in info:
+        return pkg_list
+    for pkg in info.split('@@'):
+        d['PackageDescription'] = ''
+        d['Publisher'] = ''
+        d['InstalledOn'] = ''
+        d['Size'] = '0'
+        d['Version'] = ''
+        d['Installed'] = False
+        d['Architecture'] = ''
+        if len(pkg) > 1:
+                f = pkg.split('|')
+                if len(f) is 8:
+                    d['Name'] = f[0]
+                    if len(p.Name) and not fnmatch.fnmatch(d['Name'],p.Name):
+                        continue
+                    d['PackageDescription'] = f[1]
+                    d['Publisher'] = f[2]
+                    d['InstalledOn'] = f[3]
+                    if not d['InstalledOn'].isalnum():
+                        d['InstalledOn'] = time.gmtime(int(d['InstalledOn']))
+                    if len(f[4]) > 0:
+                        d['Size'] = f[4]
+                    d['Version'] = f[5]
+                    d['Installed'] = ('install' in f[6])
+                    d['Architecture'] = f[7]
+                if len(f) is not 8:
+                    print('ERROR in ParseAll.', file=sys.stdout)
+                    LG().Log('ERROR', 'ERROR in ParseAll.')
+                pkg_list.append(copy.deepcopy(d))
+    return pkg_list
 
 def DoEnableDisable(p):
     # if the path is set, use the path and self.PackageSystem
@@ -572,7 +656,24 @@ def Get(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnC
         return [retval, p.PackageDescription, p.Publisher, p.InstalledOn, p.Size, p.Version, installed]
     installed, out = IsPackageInstalled(p)
     ParseInfo(p, out)
-    return [0, p.PackageManager, p.PackageDescription, p.Publisher, p.InstalledOn, p.Size, p.Version, installed]
+    return [0, p.PackageManager, p.PackageDescription, p.Publisher, p.InstalledOn, p.Size, p.Version, installed, p.Architecture]
+
+def GetAll(Ensure, PackageManager, Name,
+                   FilePath, PackageGroup, Arguments, ReturnCode):
+    pkgs=None
+    try:
+        p = Params(Ensure, PackageManager, Name,
+                   FilePath, PackageGroup, Arguments, ReturnCode)
+    except Exception, e:
+        print('ERROR - Unable to initialize nxPackageProvider.  ' +
+              e.message, file=sys.stdout)
+        LG().Log(
+            'ERROR', 'ERROR - Unable to initialize nxPackageProvider. ' + e.message)
+        return [-1, ]
+    cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager]['stat_all']
+    code, out = RunGetOutput(cmd, False)
+    pkgs=ParseAllInfo(out,p)
+    return [0, pkgs]
 
 
 @contextmanager

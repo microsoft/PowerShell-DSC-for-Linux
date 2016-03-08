@@ -546,3 +546,29 @@ INTERNAL_Intlstr_Define0( ID_PULL_PROXYTOOLONG,
 INTERNAL_Intlstr_Define0( ID_PULL_PROXYNOTSUPPORTED,
 			  ID_PULL_PROXYNOTSUPPORTED,
                  	  "The PROXY option is not supported by the version of cURL installed to this system. Please either install a more recent version of libcurl, or disable the PROXY option in " CONFIG_SYSCONFDIR "/dsc/dsc.conf.")
+
+
+INTERNAL_Intlstr_Define0( ID_OUTPUT_ITEM_INVENTORY, ID_OUTPUT_ITEM_INVENTORY, "Inventory")
+INTERNAL_Intlstr_Define0( ID_CAINFRA_INVENTORY_NAMESPACE_FAILED, ID_CAINFRA_INVENTORY_NAMESPACE_FAILED, "MI_Instance_GetElement failed to get Namespace for WMIv2 DSC resource.")
+INTERNAL_Intlstr_Define0( ID_CAINFRA_INVENTORY_NEWAPPLICATIONINSTANCE_FAILED, ID_CAINFRA_INVENTORY_NEWAPPLICATIONINSTANCE_FAILED, "MI_Application_NewInstance failed.")
+INTERNAL_Intlstr_Define0( ID_CAINFRA_INVENTORY_ADDELEM_FAILED, ID_CAINFRA_INVENTORY_ADDELEM_FAILED, "MI_Instance_AddElement returned an error on the inputResource parameter.")
+INTERNAL_Intlstr_Define0( ID_CAINFRA_INVENTORY_NEWOPERATIONOPTIONS_FAILED, ID_CAINFRA_INVENTORY_NEWOPERATIONOPTIONS_FAILED, "Could not initialize a new operation option.")
+INTERNAL_Intlstr_Define0( ID_CAINFRA_INVENTORY_SETCUSTOMOPTION_FAILED, ID_CAINFRA_INVENTORY_SETCUSTOMOPTION_FAILED, "MI_OperationOptions_SetCustomOptions returned an error.")
+INTERNAL_Intlstr_Define1( ID_CA_INVENTORY_TIMEMESSAGE, ID_CA_INVENTORY_TIMEMESSAGE , _In_z_ const PAL_Char*, firstString, " in " Intlstr_tstr(1) " seconds.")   
+INTERNAL_Intlstr_Define0( ID_CAINFRA_INVENTORY_NULLPARAM, ID_CAINFRA_INVENTORY_NULLPARAM, "OutInstances cannot be null.")
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_GETINVENTORY_ERROR , ID_LCMHELPER_GETINVENTORY_ERROR ,"The Inventory function did not succeed.")
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST, "Inventory mof does not exist.")
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_LOAD_INVENTORY_FAILED , ID_LCMHELPER_LOAD_INVENTORY_FAILED, "Could not load the inventory document from the specified location. Ensure that the inventory document exists and try again.")
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_INVENTORY_CONF_FAILED , ID_LCMHELPER_INVENTORY_CONF_FAILED ,"PerformInventory did not succeed.")
+INTERNAL_Intlstr_Define0( ID_CANNOT_RUN_DSC_AS_NONROOT, ID_CANNOT_RUN_DSC_AS_NONROOT,"Unable to run dsc configurations as non-root.  Please use root credentials.")
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_INVENTORY_FAILED , ID_LCMHELPER_INVENTORY_FAILED ,"Posting output for PerformInventory did not succeed.")
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_POSTINVENTORY_FAILED , ID_LCMHELPER_POSTINVENTORY_FAILED ,"PerformInventory could not get the current Local Configuration Manager settings for the system.")
+
+INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_NOT_BE_INVENTORY, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_NOT_BE_INVENTORY, "Configuration mof contains the DocumentType = 'inventory' in the OMI_ConfigurationDocument instance, which is not allowed for configuration mofs.")
+INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_1, "Inventory mof does not contain the DocumentType field in the OMI_ConfigurationDocument instance.")
+INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_2, ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_2, "Inventory mof contains the DocumentType field in the OMI_ConfigurationDocument instance, but it is not equal to 'inventory'.")
+
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY, ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY , "Error creating serializedInstance using MI_NewDynamicInstance")
+INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , "Error adding instance array to serializedInstance")
+
+ 

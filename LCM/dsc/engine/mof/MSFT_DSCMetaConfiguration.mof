@@ -92,4 +92,9 @@ class MSFT_DSCMetaConfiguration
   
    [Read, Description("AgentId of the current Dsc Agent.")]
    string AgentId;   
+   
+   
+   boolean EnableSignatureValidation;
+   boolean DisableModuleSignatureValidation;
+
 };

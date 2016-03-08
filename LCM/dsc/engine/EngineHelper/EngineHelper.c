@@ -1116,8 +1116,6 @@ EH_UNWIND:
         return MI_RESULT_OK;
 }
 
-extern void * g_metaConfig;
-
 MI_Result ShouldUseV1Protocol(
     _Inout_ MI_Boolean* isV1MetaConfig)
 {
