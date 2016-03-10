@@ -332,6 +332,7 @@ done
 
 #if BUILD_OMS == 1
 chown -R omsagent /etc/opt/omi/conf/${{SHORT_NAME}}
+chown -R omsagent /opt/microsoft/omsagent/plugin
 #endif
 
 if [ -d  $OMI_LIB/Scripts ]; then
