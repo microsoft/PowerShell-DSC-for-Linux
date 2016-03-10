@@ -71,16 +71,17 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSAgent.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSAgent.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSSyslog.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSSyslog.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSCustomLog.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSCustomLog.py; 755; root; root
+/opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSPlugin.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSPlugin.py; 755; root; root
 
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSCustomLog.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSCustomLog.py; 755; root; root
-
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSPlugin.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSPlugin.py; 755; root; root
 
 /opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSAgent.py; Providers/Scripts/3.x/Scripts/nxOMSAgent.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSSyslog.py; Providers/Scripts/3.x/Scripts/nxOMSSyslog.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSCustomLog.py; Providers/Scripts/3.x/Scripts/nxOMSCustomLog.py; 755; root; root
+/opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSPlugin.py; Providers/Scripts/3.x/Scripts/nxOMSPlugin.py; 755; root; root
 
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; root; root
 
