@@ -1,0 +1,13 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSPlugin
+{
+    [key] string PluginName;
+    [write,ValueMap{"present", "absent"},Values{"Present", "Absent"}] string Ensure; 
+};
+ 
+[ClassVersion("1.0.0")] 
+class MSFT_nxOMSPluginResource : OMI_BaseResource
+{
+    [key] string Name;
+    [write, EmbeddedInstance("MSFT_nxOMSPlugin") : ToSubclass] string Plugins[];
+};

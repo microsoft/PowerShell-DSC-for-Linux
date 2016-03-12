@@ -1,1 +1,1 @@
-__all__=["nxEnvironment","nxFile","nxGroup","nxPackage","nxScript","nxService","nxSshAuthorizedKeys","nxUser","nxFileLine","nxArchive"]
+__all__=["nxEnvironment","nxFile","nxGroup","nxPackage","nxScript","nxService","nxSshAuthorizedKeys","nxUser","nxFileLine","nxArchive","nxOMSPlugin"]
