@@ -4,8 +4,10 @@
 
 #include "debug_tags.hpp"
 #include "MI.h"
+#include <common/common.h>
+#include <xmlserializer/xmlserializer.h>
 #include "PythonProvider.hpp"
-
+#include <dsc_config.h>
 
 #include <cstdlib>
 
@@ -202,7 +204,7 @@ void MI_CALL MSFT_nxPackageResource_Invoke_InventoryTargetResource(
         MI_Instance* retInstance;
 	MI_NewDynamicInstance (
 	    context, className,
-	    NULL, &retInstance);
+	    0, &retInstance);
 
         result = self->inventory (in->InputResource.value->__instance, context,
                             retInstance);
@@ -213,25 +215,81 @@ void MI_CALL MSFT_nxPackageResource_Invoke_InventoryTargetResource(
             MSFT_nxPackageResource_InventoryTargetResource_Construct (&out, context);
             MSFT_nxPackageResource_InventoryTargetResource_Set_MIReturn (&out, 0);
 
-            MI_Value value, value_inventory;
- 	    result = MI_Instance_GetElement(retInstance, "__Inventory", &value_inventory, NULL, NULL, NULL);
- 	    if (MI_RESULT_OK != result)
- 	    {
- 		SCX_BOOKEND_PRINT ("unable to find __Inventory instance");
- 		MSFT_nxPackageResource_InventoryTargetResource_Destruct (&out);
- 		MI_Context_PostResult(context, MI_RESULT_NOT_FOUND);
- 	    }
-	    
-	    value.instancea = value_inventory.instancea;
-	    result = MI_Instance_SetElement (&out.__instance, "inventory", &value,
-					     MI_INSTANCEA, 0);
- 	    if (MI_RESULT_OK != result)
- 	    {
- 		SCX_BOOKEND_PRINT ("unable to set 'inventory' in out instance");
- 		MSFT_nxPackageResource_InventoryTargetResource_Destruct (&out);
- 		MI_Context_PostResult(context, MI_RESULT_FAILED);
- 	    }
-	    
+
+ {
+		const MI_Uint32 c_initBufferLength = 1000000;
+		MI_Application application;
+		MI_Serializer serializer;
+		MI_Uint8 *clientBuffer;
+		MI_Uint32 clientBufferLength = c_initBufferLength;
+		MI_Uint32 clientBufferNeeded = 0;
+		const char * reportTemplateBase = DSC_ETC_PATH "/InventoryReports/nxPackage_XXXXXX";
+
+		FILE *fp = NULL;
+		
+		clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+		MI_Application_Initialize(0,NULL,NULL, &application);
+		result = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
+		if (result != MI_RESULT_OK)
+		{
+		    MI_Application_Close(&application);
+		    MI_Context_PostResult (context, result);
+		    return;
+		}
+		
+		result = XmlSerializer_SerializeInstance( &serializer, 0, retInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
+		if (result != MI_RESULT_OK)
+		{
+		    free(clientBuffer);
+		    if (clientBufferNeeded > 0)
+		    {
+			// Try again with a buffer given to us by the clientBufferNeeded field
+			clientBufferLength = clientBufferNeeded;
+			clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+			result = XmlSerializer_SerializeInstance( &serializer, 0, retInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
+		    }
+		    else
+		    {
+			XmlSerializer_Close(&serializer);
+			MI_Application_Close(&application);
+			MI_Context_PostResult (context, result);
+			return;
+		    }
+		}
+		
+		XmlSerializer_Close(&serializer);
+		MI_Application_Close(&application);
+		if (result == MI_RESULT_OK)
+		{
+		    clientBuffer[clientBufferNeeded] = '\0';
+		    printf((char*)clientBuffer);
+		}
+
+		
+		{
+		    char * reportTemplate = (char*)malloc(strlen(reportTemplateBase));
+		    strcpy(reportTemplate, reportTemplateBase);
+		    int fd = mkstemp(reportTemplate);
+		    if (fd == -1)
+		    {
+			std::cerr << std::endl << "Error running mkstemp, errno = " << errno << std::endl;
+		    }
+		    fp = fdopen(fd, "w");
+		    if( fp != NULL )
+		    {
+			fwrite(clientBuffer, 1, clientBufferNeeded, fp);
+			fclose(fp);
+		    }
+		    else
+		    {
+			std::cerr << std::endl << "Error opening file descriptor for reportTemplate, errno = " << errno << std::endl;
+		    }
+		    free(reportTemplate);
+		}
+		
+		free(clientBuffer);
+	    }
+
             result = MSFT_nxPackageResource_InventoryTargetResource_Post (&out, context);
             if (MI_RESULT_OK != result)
             {

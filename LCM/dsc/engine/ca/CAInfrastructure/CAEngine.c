@@ -1873,16 +1873,24 @@ MI_Result PerformInventoryMethodResult(_In_ MI_Operation *operation,
     }
     /*Clone the instances*/
 
-    outputInstances->data = (MI_Instance**)DSC_malloc(value.instancea.size * sizeof(MI_Instance*), NitsHere());
-    outputInstances->size = value.instancea.size;
-    for (i = 0; i < value.instancea.size; ++i)
+    if (value.instancea.size > 0)
     {
-	r = DSC_MI_Instance_Clone(value.instancea.data[i], &tempInstance);
-	if( r != MI_RESULT_OK )
+	outputInstances->data = (MI_Instance**)DSC_malloc(value.instancea.size * sizeof(MI_Instance*), NitsHere());
+	outputInstances->size = value.instancea.size;
+	for (i = 0; i < value.instancea.size; ++i)
 	{
-	    return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
-	}    
-	outputInstances->data[i] = tempInstance;
+	    r = DSC_MI_Instance_Clone(value.instancea.data[i], &tempInstance);
+	    if( r != MI_RESULT_OK )
+	    {
+		return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
+	    }    
+	    outputInstances->data[i] = tempInstance;
+	}
+    }
+    else
+    {
+	outputInstances->data = NULL;
+	outputInstances->size = 0;
     }
 
     return r;
@@ -2419,17 +2427,25 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
 	totalInstanceCount += inventoryInstancesResult.size;
     }
 
-    outInstances->data = (MI_Instance**)DSC_malloc(sizeof(MI_Instance*) * totalInstanceCount, NitsHere());
-    outInstances->size = totalInstanceCount;
-
-    xCount = 0;
-    for (i = 0; i < instanceA->size; ++i)
+    if (totalInstanceCount > 0)
     {
-	for (j = 0; j < inventoryInstancesResultArray[i].size; ++j)
+	outInstances->data = (MI_Instance**)DSC_malloc(sizeof(MI_Instance*) * totalInstanceCount, NitsHere());
+	outInstances->size = totalInstanceCount;
+
+	xCount = 0;
+	for (i = 0; i < instanceA->size; ++i)
 	{
-	    outInstances->data[xCount] = inventoryInstancesResultArray[i].data[j];
-	    xCount += 1;
+	    for (j = 0; j < inventoryInstancesResultArray[i].size; ++j)
+	    {
+		outInstances->data[xCount] = inventoryInstancesResultArray[i].data[j];
+		xCount += 1;
+	    }
 	}
+    }
+    else
+    {
+	outInstances->data = NULL;
+	outInstances->size = 0;
     }
 
     MI_Session_Close(&miSession, NULL, NULL);    
