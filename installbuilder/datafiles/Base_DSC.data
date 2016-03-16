@@ -272,6 +272,7 @@ CONFIG_DATADIR=$OMI_HOME/share
 OMI_LIB=$OMI_HOME/lib
 
 mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/InventoryReports
 mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration
 mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema
 mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema/MSFT_LogResource

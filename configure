@@ -10,6 +10,7 @@ BUILD_OMS=
 DEBUG_FLAGS=""
 DSC_MODULES_PATH="/opt/microsoft/dsc/modules"
 DSC_SCRIPT_PATH="/opt/microsoft/dsc/Scripts"
+DSC_PATH_MODIFIER="/dsc"
 
 for opt
 do
@@ -61,6 +62,7 @@ do
 	    BUILD_OMS=BUILD_OMS
 	    DSC_MODULES_PATH="/opt/microsoft/omsconfig/modules"
 	    DSC_SCRIPT_PATH="/opt/microsoft/omsconfig/Scripts"
+	    DSC_PATH_MODIFIER="/omsconfig"
 	    ;;
 	
 	*)
@@ -139,6 +141,14 @@ openssl098_libdir=$openssl098_libdir
 openssl100_cflags=$openssl100_cflags
 openssl100_libs=$openssl100_libs
 openssl100_libdir=$openssl100_libdir
+EOF
+
+cat <<EOF > dsc_config.h
+#pragma once
+#include "config.h"
+
+#define DSC_ETC_PATH CONFIG_SYSCONFDIR "$DSC_PATH_MODIFIER"
+
 EOF
 
 echo "Configured DSC"

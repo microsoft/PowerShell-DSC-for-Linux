@@ -32,6 +32,7 @@ INCLUDE_PATH+=$(SRCDIR)
 INCLUDE_PATH+=$(SRCDIR)/base
 INCLUDE_PATH+=$(SRCDIR)/common
 INCLUDE_PATH+=$(PROVIDER_PATH)
+INCLUDE_PATH+=$(TOP)
 CPPFLAGS+=$(addprefix -I,$(INCLUDE_PATH))
 
 # add the OMI lib path to the library path
@@ -186,8 +187,7 @@ $(BIN_PATH)/libMSFT_$1Resource.so : \
 	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
 	$(BIN_PATH)/MSFT_$1Resource.o
 	@echo ...linking: $(BIN_PATH)/libMSFT_$1Resource.so
-	$(CXX) -shared -o $$@ $$^ $(LIBDIR)/libpal.a
-
+	$(CXX) -shared -o $$@ $$^ -L$(LIBDIR) -lmiapi -lprotocol -lomi_error -lxmlserializer -lbase -lpal
 endef
 
 # instantiate per provider rules
