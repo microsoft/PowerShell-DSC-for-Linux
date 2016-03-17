@@ -47,44 +47,8 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; root; root
-
-/opt/microsoft/omsconfig/lib/libMSFT_nxOMSAgentResource.so;   Providers/bin/libMSFT_nxOMSAgentResource.so;       755; root; root
-/opt/microsoft/omsconfig/etc/MSFT_nxOMSAgentResource.reg;  Providers/nxOMSAgent/MSFT_nxOMSAgentResource.reg;      755; root; root
-/opt/microsoft/omsconfig/mof/MSFT_nxOMSAgentResource.schema.mof;  Providers/nxOMSAgent/MSFT_nxOMSAgentResource.schema.mof;      755; root; root
-/opt/microsoft/omsconfig/mof/MSFT_nxOMSAgentResource.registration.mof;  Providers/nxOMSAgent/MSFT_nxOMSAgentResource.registration.mof;      755; root; root
-
-/opt/microsoft/omsconfig/lib/libMSFT_nxOMSSyslogResource.so;   Providers/bin/libMSFT_nxOMSSyslogResource.so;       755; root; root
-/opt/microsoft/omsconfig/etc/MSFT_nxOMSSyslogResource.reg;  Providers/nxOMSSyslog/MSFT_nxOMSSyslogResource.reg;      755; root; root
-/opt/microsoft/omsconfig/mof/MSFT_nxOMSSyslogResource.schema.mof;  Providers/nxOMSSyslog/MSFT_nxOMSSyslogResource.schema.mof;      755; root; root
-/opt/microsoft/omsconfig/mof/MSFT_nxOMSSyslogResource.registration.mof;  Providers/nxOMSSyslog/MSFT_nxOMSSyslogResource.registration.mof;      755; root; root
-
-/opt/microsoft/omsconfig/lib/libMSFT_nxOMSCustomLogResource.so;   Providers/bin/libMSFT_nxOMSCustomLogResource.so;       755; root; root
-/opt/microsoft/omsconfig/etc/MSFT_nxOMSCustomLogResource.reg;  Providers/nxOMSCustomLog/MSFT_nxOMSCustomLogResource.reg;      755; root; root
-/opt/microsoft/omsconfig/mof/MSFT_nxOMSCustomLogResource.schema.mof;  Providers/nxOMSCustomLog/MSFT_nxOMSCustomLogResource.schema.mof;      755; root; root
-/opt/microsoft/omsconfig/mof/MSFT_nxOMSCustomLogResource.registration.mof;  Providers/nxOMSCustomLog/MSFT_nxOMSCustomLogResource.registration.mof;      755; root; root
-
-/opt/microsoft/omsconfig/lib/libMSFT_nxOMSPluginResource.so;   Providers/bin/libMSFT_nxOMSPluginResource.so;       755; root; root
-/opt/microsoft/omsconfig/etc/MSFT_nxOMSPluginResource.reg;  Providers/nxOMSPlugin/MSFT_nxOMSPluginResource.reg;      755; root; root
-/opt/microsoft/omsconfig/mof/MSFT_nxOMSPluginResource.schema.mof;  Providers/nxOMSPlugin/MSFT_nxOMSPluginResource.schema.mof;      755; root; root
-/opt/microsoft/omsconfig/mof/MSFT_nxOMSPluginResource.registration.mof;  Providers/nxOMSPlugin/MSFT_nxOMSPluginResource.registration.mof;      755; root; root
-
-/opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSAgent.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSAgent.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSSyslog.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSSyslog.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSCustomLog.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSCustomLog.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSPlugin.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSPlugin.py; 755; root; root
-
-/opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSCustomLog.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSCustomLog.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSPlugin.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSPlugin.py; 755; root; root
-
-/opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSAgent.py; Providers/Scripts/3.x/Scripts/nxOMSAgent.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSSyslog.py; Providers/Scripts/3.x/Scripts/nxOMSSyslog.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSCustomLog.py; Providers/Scripts/3.x/Scripts/nxOMSCustomLog.py; 755; root; root
-/opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSPlugin.py; Providers/Scripts/3.x/Scripts/nxOMSPlugin.py; 755; root; root
-
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; root; root
-
+/opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip; release/nxOMSAgent_1.0.zip; 755; root; root
 #else
 
 /opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg; LCM/dsccore.reg; 755; root; root
@@ -157,7 +121,6 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxEnvironment.py; Providers/Scripts/3.x/Scripts/nxEnvironment.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxFileLine.py; Providers/Scripts/3.x/Scripts/nxFileLine.py; 755; root; root
-#endif
 
 /opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxServiceResource.so;   Providers/bin/libMSFT_nxServiceResource.so;       755; root; root
 /opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxServiceResource.reg;  Providers/nxService/MSFT_nxServiceResource.reg;      755; root; root
@@ -176,6 +139,8 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxPackage.py; Providers/Scripts/3.x/Scripts/nxPackage.py; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxService.py; Providers/Scripts/3.x/Scripts/nxService.py; 755; root; root
 
+#endif
+
 
 %Directories
 /opt/microsoft;          755; root; root; sysdir
@@ -185,6 +150,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/lib;  755; root; root
 /opt/microsoft/${{SHORT_NAME}}/bin;  755; root; root
 /opt/microsoft/${{SHORT_NAME}}/modules; 755; root; root
+/opt/microsoft/${{SHORT_NAME}}/module_packages; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts; 755; root; root
@@ -334,6 +300,9 @@ done
 
 #if BUILD_OMS == 1
 chown -R omsagent /etc/opt/omi/conf/${{SHORT_NAME}}
+
+# Set up the nxOMSAgent module
+/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip 0
 #endif
 
 if [ -d  $OMI_LIB/Scripts ]; then

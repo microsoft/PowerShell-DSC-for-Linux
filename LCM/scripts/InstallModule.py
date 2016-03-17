@@ -127,7 +127,13 @@ for resource in resourcelist:
         sys.exit(1)
 
     shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".schema.mof", omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/schema/" + resource + "/")
-    shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".reg", omi_sysconfdir + "/omiregister/root-Microsoft-DesiredStateConfiguration/")
+    if "<CONFIG_SYSCONFDIR_DSC>" == "dsc":
+        shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".reg", omi_sysconfdir + "/omiregister/root-Microsoft-DesiredStateConfiguration/")
+    elif "<CONFIG_SYSCONFDIR_DSC>" == "omsconfig":
+        shutil.copy(modulePath + "/DSCResources/" + resource + "/" + resource + ".reg", omi_sysconfdir + "/omiregister/root-oms/")
+    else:
+        print("Error: unknown CONFIG_SYSCONFDIR_DSC.")
+        sys.exit(1)
     f = open(omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/registration/" + resource + "/" + resource + ".registration.mof", "w")
     f.write(registration_text(resource))
     f.close()

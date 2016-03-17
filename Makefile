@@ -40,16 +40,37 @@ else
 	rm -rf omi-1.0.8/output_openssl_0.9.8/lib/libdsccore.so
 	$(MAKE) omi098
 	$(MAKE) dsc098
+	$(MAKE) dsckit098
  endif
  ifeq ($(BUILD_SSL_100),1)
 	rm -rf omi-1.0.8/output_openssl_1.0.0/lib/libdsccore.so
 	$(MAKE) omi100
 	$(MAKE) dsc100
+	$(MAKE) dsckit100
  endif
-	$(MAKE) nxNetworking
-	$(MAKE) nxComputerManagement
-	$(MAKE) nxMySQL
+
 endif
+
+
+ifeq ($(BUILD_OMS),BUILD_OMS)
+dsckit098: nxOMSAgent
+else
+dsckit098: nxNetworking nxComputerManagement nxMySQL
+endif
+	$(MAKE) -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
+
+	-mkdir -p release; \
+	cp omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
+
+ifeq ($(BUILD_OMS),BUILD_OMS)
+dsckit100: nxOMSAgent
+else
+dsckit100: nxNetworking nxComputerManagement nxMySQL
+endif
+	$(MAKE) -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
+
+	-mkdir -p release; \
+	cp omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 dsc098: lcm098 providers
 	mkdir -p intermediate/Scripts
@@ -66,15 +87,11 @@ dsc098: lcm098 providers
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
-	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
-
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
-	$(MAKE) -C $(INSTALLBUILDER_DIR) SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
-	-mkdir -p release; \
-	cp omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 dsc100: lcm100 providers
 	mkdir -p intermediate/Scripts
@@ -91,15 +108,12 @@ dsc100: lcm100 providers
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
-	  sed "s@<DSC_MODULES_PATH>@/opt/microsoft/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
 
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
-	$(MAKE) -C $(INSTALLBUILDER_DIR) SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
-	-mkdir -p release; \
-	cp omi-1.0.8/output_openssl_1.0.0/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 omi098:
 	$(MAKE) configureomi098
@@ -174,6 +188,26 @@ nxMySQL:
 	rm -rf output/staging; \
 	VERSION="1.0"; \
 	PROVIDERS="nxMySqlDatabase nxMySqlGrant nxMySqlUser"; \
+	STAGINGDIR="output/staging/$@/DSCResources"; \
+	for current in $$PROVIDERS; do \
+		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
+		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
+		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
+		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
+		cp Providers/Scripts/2.4x-2.5x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.4x-2.5x/Scripts; \
+		cp Providers/Scripts/2.6x-2.7x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.6x-2.7x/Scripts; \
+		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
+	done;\
+	cd output/staging; \
+	zip -r $@_$${VERSION}.zip $@; \
+	mkdir -p ../../release; \
+	mv $@_$${VERSION}.zip ../../release/
+
+nxOMSAgent:
+	rm -rf output/staging; \
+	VERSION="1.0"; \
+	PROVIDERS="nxOMSAgent nxOMSCustomLog nxOMSPlugin nxOMSSyslog nxService nxPackage"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
