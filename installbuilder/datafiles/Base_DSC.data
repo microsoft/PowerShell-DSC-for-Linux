@@ -48,96 +48,17 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; root; root
+/opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; root; root
 /opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip; release/nxOMSAgent_1.0.zip; 755; root; root
+/opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; root; root
+/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_1.0.zip; release/nxOMSPlugin_1.0.zip; 755; root; root
 #else
 
 /opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg; LCM/dsccore.reg; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/bin/ConsistencyInvoker; omi-1.0.8/output/bin/ConsistencyInvoker; 755; root; root
 /opt/microsoft/${{SHORT_NAME}}/lib/libdsccore.so; omi-1.0.8/output/lib/libdsccore.so; 755; root; root
 
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxFileResource.so;   Providers/bin/libMSFT_nxFileResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxFileResource.reg;  Providers/nxFile/MSFT_nxFileResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxFileResource.schema.mof;  Providers/nxFile/MSFT_nxFileResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxFileResource.registration.mof;  Providers/nxFile/MSFT_nxFileResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxArchiveResource.so;   Providers/bin/libMSFT_nxArchiveResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxArchiveResource.reg;  Providers/nxArchive/MSFT_nxArchiveResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxArchiveResource.schema.mof;  Providers/nxArchive/MSFT_nxArchiveResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxArchiveResource.registration.mof;  Providers/nxArchive/MSFT_nxArchiveResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxScriptResource.so;   Providers/bin/libMSFT_nxScriptResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxScriptResource.reg;  Providers/nxScript/MSFT_nxScriptResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxScriptResource.schema.mof;  Providers/nxScript/MSFT_nxScriptResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxScriptResource.registration.mof;  Providers/nxScript/MSFT_nxScriptResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxUserResource.so;   Providers/bin/libMSFT_nxUserResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxUserResource.reg;  Providers/nxUser/MSFT_nxUserResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxUserResource.schema.mof;  Providers/nxUser/MSFT_nxUserResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxUserResource.registration.mof;  Providers/nxUser/MSFT_nxUserResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxGroupResource.so;   Providers/bin/libMSFT_nxGroupResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxGroupResource.reg;  Providers/nxGroup/MSFT_nxGroupResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxGroupResource.schema.mof;  Providers/nxGroup/MSFT_nxGroupResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxGroupResource.registration.mof;  Providers/nxGroup/MSFT_nxGroupResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxEnvironmentResource.so;   Providers/bin/libMSFT_nxEnvironmentResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxEnvironmentResource.reg;  Providers/nxEnvironment/MSFT_nxEnvironmentResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxEnvironmentResource.schema.mof;  Providers/nxEnvironment/MSFT_nxEnvironmentResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxEnvironmentResource.registration.mof;  Providers/nxEnvironment/MSFT_nxEnvironmentResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxSshAuthorizedKeysResource.so;   Providers/bin/libMSFT_nxSshAuthorizedKeysResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxSshAuthorizedKeysResource.reg;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxSshAuthorizedKeysResource.schema.mof;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxSshAuthorizedKeysResource.registration.mof;  Providers/nxSshAuthorizedKeys/MSFT_nxSshAuthorizedKeysResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxFileLineResource.so;   Providers/bin/libMSFT_nxFileLineResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxFileLineResource.reg;  Providers/nxFileLine/MSFT_nxFileLineResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxFileLineResource.schema.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxFileLineResource.registration.mof;  Providers/nxFileLine/MSFT_nxFileLineResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxScript.py; Providers/Scripts/2.4x-2.5x/Scripts/nxScript.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxFile.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFile.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxArchive.py; Providers/Scripts/2.4x-2.5x/Scripts/nxArchive.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxGroup.py; Providers/Scripts/2.4x-2.5x/Scripts/nxGroup.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxUser.py; Providers/Scripts/2.4x-2.5x/Scripts/nxUser.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; Providers/Scripts/2.4x-2.5x/Scripts/nxEnvironment.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.4x-2.5x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxFileLine.py; Providers/Scripts/2.4x-2.5x/Scripts/nxFileLine.py; 755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxScript.py; Providers/Scripts/2.6x-2.7x/Scripts/nxScript.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxFile.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFile.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxArchive.py; Providers/Scripts/2.6x-2.7x/Scripts/nxArchive.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxGroup.py; Providers/Scripts/2.6x-2.7x/Scripts/nxGroup.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxUser.py; Providers/Scripts/2.6x-2.7x/Scripts/nxUser.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; Providers/Scripts/2.6x-2.7x/Scripts/nxEnvironment.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/2.6x-2.7x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; Providers/Scripts/2.6x-2.7x/Scripts/nxFileLine.py; 755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxScript.py; Providers/Scripts/3.x/Scripts/nxScript.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxFile.py; Providers/Scripts/3.x/Scripts/nxFile.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxArchive.py; Providers/Scripts/3.x/Scripts/nxArchive.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxGroup.py; Providers/Scripts/3.x/Scripts/nxGroup.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxUser.py; Providers/Scripts/3.x/Scripts/nxUser.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxEnvironment.py; Providers/Scripts/3.x/Scripts/nxEnvironment.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; Providers/Scripts/3.x/Scripts/nxSshAuthorizedKeys.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxFileLine.py; Providers/Scripts/3.x/Scripts/nxFileLine.py; 755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxServiceResource.so;   Providers/bin/libMSFT_nxServiceResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxServiceResource.reg;  Providers/nxService/MSFT_nxServiceResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxServiceResource.schema.mof;  Providers/nxService/MSFT_nxServiceResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxServiceResource.registration.mof;  Providers/nxService/MSFT_nxServiceResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nxPackageResource.so;   Providers/bin/libMSFT_nxPackageResource.so;       755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nxPackageResource.reg;  Providers/nxPackage/MSFT_nxPackageResource.reg;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxPackageResource.schema.mof;  Providers/nxPackage/MSFT_nxPackageResource.schema.mof;      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nxPackageResource.registration.mof;  Providers/nxPackage/MSFT_nxPackageResource.registration.mof;      755; root; root
-
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxPackage.py; Providers/Scripts/2.4x-2.5x/Scripts/nxPackage.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts/nxService.py; Providers/Scripts/2.4x-2.5x/Scripts/nxService.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxPackage.py; Providers/Scripts/2.6x-2.7x/Scripts/nxPackage.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts/nxService.py; Providers/Scripts/2.6x-2.7x/Scripts/nxService.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxPackage.py; Providers/Scripts/3.x/Scripts/nxPackage.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts/nxService.py; Providers/Scripts/3.x/Scripts/nxService.py; 755; root; root
+/opt/microsoft/dsc/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; root; root
 
 #endif
 
@@ -184,6 +105,13 @@ omi (>= 1.0.8.3)
 
 %Preinstall_10
 PREREQ_ERROR=0
+
+UNZIP_PATH=`which unzip 2> /dev/null`
+if [ -z "$UNZIP_PATH" ]; then
+   echo "Error: Unable to find 'unzip' in path. Please install unzip."
+   PREREQ_ERROR=1
+fi
+
 LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
    echo "Error: Unable to find libcurl in ldconfig.  Please install curl."
@@ -302,7 +230,12 @@ done
 chown -R omsagent /etc/opt/omi/conf/${{SHORT_NAME}}
 
 # Set up the nxOMSAgent module
+/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0
 /opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip 0
+/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0
+/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_1.0.zip 0
+#else
+/opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
 #endif
 
 if [ -d  $OMI_LIB/Scripts ]; then

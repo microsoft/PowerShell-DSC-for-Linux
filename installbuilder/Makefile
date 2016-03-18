@@ -26,7 +26,7 @@ else
 SHORT_NAME=dsc
 LONG_NAME=Windows Powershell Desired State Configuration for Linux
 PROVIDES=dscpackage
-PROVIDERS=File Script User Group Service Package Environment SshAuthorizedKeys Archive FileLine
+PROVIDERS=
 DESCRIPTION=Windows Powershell Desired State Configuration for Linux
 endif
 
