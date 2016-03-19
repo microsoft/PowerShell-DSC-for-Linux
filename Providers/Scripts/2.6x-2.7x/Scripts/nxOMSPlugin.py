@@ -54,7 +54,7 @@ class TestOMSAgent(IOMSAgent):
         
 PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
 CONF_PATH = '/etc/opt/microsoft/omsagent/conf/omsagent.d/'
-PLUGIN_MODULE_PATH = '/var/tmp/Plugins'
+PLUGIN_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSPlugin/DSCResources/Plugins'
 OMS_ACTION = OMSAgentUtil()
 
 def init_vars(Plugins):
