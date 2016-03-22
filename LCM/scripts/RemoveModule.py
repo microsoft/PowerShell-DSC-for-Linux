@@ -17,7 +17,6 @@ def RemoveMirroredDirectory(moduleDir, omiDir):
         sys.exit(1)
 
     for curFile in os.listdir(moduleDir):
-        print("Removing " + moduleDir + "/" + curFile + " and " + omiDir + "/" + curFile)
         if os.path.islink(moduleDir + "/" + curFile):
             os.path.unlink(moduleDir + "/" + curFile)
         elif os.path.isfile(moduleDir + "/" + curFile):

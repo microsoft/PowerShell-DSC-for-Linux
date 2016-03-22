@@ -2341,18 +2341,6 @@ static int IsModuleInstalled(MI_Char* moduleName, MI_Char* moduleVersion)
     MI_Char buffer2[MAX_URL_LENGTH];
     FILE * fp;
 
-    if (Tcscasecmp(MI_T("nx"), moduleName) == 0)
-    {
-        // The nx module is installed by default
-        return 1;
-    }
-
-    if (Tcscasecmp(MI_T("PSDesiredStateConfiguration"), moduleName) == 0)
-    {
-        // The PSDesiredStateConfiguration module is installed by default
-        return 1;
-    }
-
     Snprintf(buffer, MAX_URL_LENGTH, DSC_MODULES_PATH "/%s/VERSION", moduleName);
     
     fp = File_OpenT(buffer, MI_T("r"));
