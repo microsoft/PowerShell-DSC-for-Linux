@@ -4,6 +4,8 @@ import os
 import subprocess
 import shutil
 import platform
+import imp
+zipfile = imp.load_source('zipfile', '<DSC_SCRIPT_PATH>/zipfile2.6.py')
 
 def usage():
     print("Usage:")
@@ -61,10 +63,16 @@ baseModulePath = "<DSC_MODULES_PATH>"
 baseScriptPath = "<DSC_SCRIPT_PATH>"
 modulePath = baseModulePath + "/" + moduleName
 
-retval = subprocess.call(["unzip","-o","-d", baseModulePath, filepath])
-if retval != 0:
-    print("Error: Failed to unzip " + filepath)
-    sys.exit(1)
+arch = zipfile.ZipFile(filepath)
+for n in arch.namelist():
+    if n.startswith('/') or n.startswith('..'):
+        raise Exception(
+            'Error: corrupted filename "' + n + '" in zipfile!')
+bad = arch.testzip()
+if bad is not None:
+    raise Exception('Error: First bad filename is "' + bad + '"')
+
+arch.extractall(baseModulePath)
 
 if not os.path.isdir(modulePath):
     print("Error: After extracting module, unable to find module directory in " + baseModulePath)

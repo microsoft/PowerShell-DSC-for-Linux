@@ -106,12 +106,6 @@ omi (>= 1.0.8.3)
 %Preinstall_10
 PREREQ_ERROR=0
 
-UNZIP_PATH=`which unzip 2> /dev/null`
-if [ -z "$UNZIP_PATH" ]; then
-   echo "Error: Unable to find 'unzip' in path. Please install unzip."
-   PREREQ_ERROR=1
-fi
-
 LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
    echo "Error: Unable to find libcurl in ldconfig.  Please install curl."
