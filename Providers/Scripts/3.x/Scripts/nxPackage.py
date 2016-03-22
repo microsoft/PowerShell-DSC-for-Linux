@@ -26,7 +26,7 @@ if apt is None:
         pass
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
-helperlib = imp.load_source('nxDSCLog', '../helperlib.py')
+helperlib = imp.load_source('helperlib', '../helperlib.py')
 LG = nxDSCLog.DSCLog
 
 # [ClassVersion("1.0.0"),FriendlyName("nxPackage"),SupportsInventory()]
@@ -73,7 +73,7 @@ def init_vars(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, R
 
 
 def Set_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
-    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         return [-1]
     (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
@@ -86,7 +86,7 @@ def Set_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments
 
 
 def Test_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
-    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         return [-1]
     (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
@@ -443,7 +443,7 @@ def ParseAllInfo(info,p):
         d['Installed'] = False
         d['Architecture'] = ''
         if len(pkg) > 1:
-                f = pkg.split('|')
+                f = pkg.strip().split('|')
                 if len(f) is 8:
                     d['Name'] = f[0]
                     if len(p.Name) and not fnmatch.fnmatch(d['Name'],p.Name):
