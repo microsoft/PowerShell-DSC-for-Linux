@@ -47,6 +47,7 @@ MI_Char *g_GetConfigFileName;
 MI_Char *g_InventoryFileName;
 MI_Char *g_InventoryReportFileName;
 MI_Char *g_CurrentConfigFileName;
+MI_Char *g_FailedConfigFileName;
 MI_Char *g_PreviousConfigFileName;
 MI_Char *g_MetaConfigFileName;
 MI_Char *g_MetaConfigTmpFileName;
@@ -346,6 +347,8 @@ extern "C"
     const MI_Char * GetConfigChecksumFileName();
 
     const MI_Char *GetCurrentConfigFileName();
+
+    const MI_Char *GetFailedConfigFileName();
 
     const MI_Char *GetPreviousConfigFileName();
 

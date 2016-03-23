@@ -79,7 +79,7 @@ if bad is not None:
 arch.extractall(baseModulePath)
 
 if not os.path.isdir(modulePath):
-    print("Error: After extracting module, unable to find module directory in " + baseModulePath)
+    print("Error: After extracting module, unable to find module directory " + moduleName + " in " + baseModulePath)
     sys.exit(1)
 
 if not os.path.isdir(modulePath + "/DSCResources"):
@@ -104,7 +104,7 @@ if verifyFlag == "1":
         sys.exit(1)
         
     # Perform verify on the sha256sums file
-    retval = subprocess.call(["gpg", "--no-default-keyring", "--keyring", keyring_path, "--verify", asc_path, sha256sums_path])
+    retval = subprocess.call("HOME=" + omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC> gpg --no-default-keyring --keyring " + keyring_path + " --verify " + asc_path  + " " + sha256sums_path, shell=True)
     if retval != 0:
         print("Error: Failed to verify " + sha256sums_path + " using signature in module.")
         sys.exit(2)

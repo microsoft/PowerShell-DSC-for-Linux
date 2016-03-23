@@ -9,81 +9,81 @@ COPYRIGHT_FILE: 'Copyright Microsoft'
 SHLIB_EXT: 'so'
 
 %Files
-/opt/microsoft/${{SHORT_NAME}}/mof/OMI_BaseResourceUE.mof; LCM/dsc/mof/OMI_BaseResourceUE.mof; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_DSCMetaConfiguration.mof; LCM/dsc/mof/MSFT_DSCMetaConfiguration.mof; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.registration.mof; LCM/dsc/mof/MSFT_LogResource.registration.mof; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.schema.mof; LCM/dsc/mof/MSFT_LogResource.schema.mof; 755; root; root
+/opt/microsoft/${{SHORT_NAME}}/mof/OMI_BaseResourceUE.mof; LCM/dsc/mof/OMI_BaseResourceUE.mof; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_DSCMetaConfiguration.mof; LCM/dsc/mof/MSFT_DSCMetaConfiguration.mof; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.registration.mof; LCM/dsc/mof/MSFT_LogResource.registration.mof; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.schema.mof; LCM/dsc/mof/MSFT_LogResource.schema.mof; 755; ${{RUN_AS_USER}}; root
 
-/etc/opt/omi/conf/${{SHORT_NAME}}/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; root; root
+/etc/opt/omi/conf/${{SHORT_NAME}}/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; ${{RUN_AS_USER}}; root
 
-/opt/microsoft/${{SHORT_NAME}}/Scripts/client.py; intermediate/Scripts/client.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/protocol.py; intermediate/Scripts/protocol.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/nxDSCLog.py; intermediate/Scripts/nxDSCLog.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/zipfile2.6.py; intermediate/Scripts/zipfile2.6.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/StartDscConfiguration.py; intermediate/Scripts/StartDscConfiguration.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/TestDscConfiguration.py; intermediate/Scripts/TestDscConfiguration.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscConfiguration.py; intermediate/Scripts/GetDscConfiguration.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/PerformInventory.py; intermediate/Scripts/PerformInventory.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/SetDscLocalConfigurationManager.py; intermediate/Scripts/SetDscLocalConfigurationManager.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscLocalConfigurationManager.py; intermediate/Scripts/GetDscLocalConfigurationManager.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/PerformRequiredConfigurationChecks.py; intermediate/Scripts/PerformRequiredConfigurationChecks.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/RestoreConfiguration.py; intermediate/Scripts/RestoreConfiguration.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/InstallModule.py; intermediate/Scripts/InstallModule.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py; intermediate/Scripts/RemoveModule.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py; intermediate/Scripts/RegenerateInitFiles.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/RegisterHelper.sh; intermediate/Scripts/RegisterHelper.sh; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/Register.py; intermediate/Scripts/Register.py; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/StatusReport.sh; intermediate/Scripts/StatusReport.sh; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/helperlib.py; intermediate/Scripts/helperlib.py; 755; root; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/client.py; intermediate/Scripts/client.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/nxDSCLog.py; intermediate/Scripts/nxDSCLog.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/zipfile2.6.py; intermediate/Scripts/zipfile2.6.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/StartDscConfiguration.py; intermediate/Scripts/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/TestDscConfiguration.py; intermediate/Scripts/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscConfiguration.py; intermediate/Scripts/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/PerformInventory.py; intermediate/Scripts/PerformInventory.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/SetDscLocalConfigurationManager.py; intermediate/Scripts/SetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscLocalConfigurationManager.py; intermediate/Scripts/GetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/PerformRequiredConfigurationChecks.py; intermediate/Scripts/PerformRequiredConfigurationChecks.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/RestoreConfiguration.py; intermediate/Scripts/RestoreConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/InstallModule.py; intermediate/Scripts/InstallModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py; intermediate/Scripts/RemoveModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py; intermediate/Scripts/RegenerateInitFiles.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/RegisterHelper.sh; intermediate/Scripts/RegisterHelper.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/Register.py; intermediate/Scripts/Register.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/StatusReport.sh; intermediate/Scripts/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
 
 #if BUILD_OMS == 1
 
-/opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; root; root
-/opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf; LCM/omsconfig.consistencyinvoker.conf; 644; root; root
+/opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf; LCM/omsconfig.consistencyinvoker.conf; 644; ${{RUN_AS_USER}}; root
 
-/opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; root; root
-/opt/microsoft/omsconfig/etc/omsconfig.reg; LCM/omsconfig.reg; 755; root; root
-/opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; root; root
-/opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; root; root
-/opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; root; root
-/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; root; root
-/opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; root; root
-/opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip; release/nxOMSAgent_1.0.zip; 755; root; root
-/opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; root; root
-/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_1.0.zip; release/nxOMSPlugin_1.0.zip; 755; root; root
+/opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/etc/omsconfig.reg; LCM/omsconfig.reg; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip; release/nxOMSAgent_1.0.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_1.0.zip; release/nxOMSPlugin_1.0.zip; 755; ${{RUN_AS_USER}}; root
 #else
 
-/opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg; LCM/dsccore.reg; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/bin/ConsistencyInvoker; omi-1.0.8/output/bin/ConsistencyInvoker; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/lib/libdsccore.so; omi-1.0.8/output/lib/libdsccore.so; 755; root; root
+/opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg; LCM/dsccore.reg; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/bin/ConsistencyInvoker; omi-1.0.8/output/bin/ConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/lib/libdsccore.so; omi-1.0.8/output/lib/libdsccore.so; 755; ${{RUN_AS_USER}}; root
 
-/opt/microsoft/dsc/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; root; root
+/opt/microsoft/dsc/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 
 #endif
 
 
 %Directories
-/opt/microsoft;          755; root; root; sysdir
-/opt/microsoft/${{SHORT_NAME}};      755; root; root
-/opt/microsoft/${{SHORT_NAME}}/etc;  755; root; root
-/opt/microsoft/${{SHORT_NAME}}/mof;  755; root; root
-/opt/microsoft/${{SHORT_NAME}}/lib;  755; root; root
-/opt/microsoft/${{SHORT_NAME}}/bin;  755; root; root
-/opt/microsoft/${{SHORT_NAME}}/modules; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/module_packages; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x; 755; root; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts; 755; root; root
-/etc/opt/omi/conf;            755; root; root; sysdir
-/etc/opt/omi/conf/${{SHORT_NAME}};        755; root; root
-/etc/logrotate.d;        755; root; root; sysdir
+/opt/microsoft;                                           755; root; root; sysdir
+/opt/microsoft/${{SHORT_NAME}};                           755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/etc;                       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/mof;                       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/lib;                       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/bin;                       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/modules;                   755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/module_packages;           755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts;                   755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x;         755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x;         755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x;               755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts;       755; ${{RUN_AS_USER}}; root
+/etc/opt/omi/conf;                                        755; root; root; sysdir
+/etc/opt/omi/conf/${{SHORT_NAME}};                        755; ${{RUN_AS_USER}}; root
+/etc/logrotate.d;                                         755; root; root; sysdir
 #if BUILD_OMS == 1
-/etc/opt/microsoft/omsagent/conf/omsagent.d; 755; root; root; sysdir
+/etc/opt/microsoft/omsagent/conf/omsagent.d; 755; ${{RUN_AS_USER}}; root; sysdir
 #endif
 
 %Links
@@ -98,9 +98,9 @@ omsagent (>= 1.0.0)
 #endif
 #endif
 #if PACKAGE_TYPE == RPM
-omi >= 1.0.8-3
+omi >= 1.0.8-5
 #else
-omi (>= 1.0.8.3)
+omi (>= 1.0.8.5)
 #endif
 
 %Preinstall_10
@@ -221,7 +221,8 @@ for prov in ${{PROVIDERS}}; do
 done
 
 #if BUILD_OMS == 1
-chown -R omsagent /etc/opt/omi/conf/${{SHORT_NAME}}
+chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
+/usr/sbin/usermod -g omiusers omsagent
 
 # Set up the nxOMSAgent module
 /opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0

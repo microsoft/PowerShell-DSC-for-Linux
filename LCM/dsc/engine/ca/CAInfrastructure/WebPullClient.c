@@ -2048,12 +2048,17 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
         return r;
     }
 
-#if !defined(BUILD_OMS)
     r = MI_Instance_GetElement(g_metaConfig, MSFT_DSCMetaConfiguration_DisableModuleSignatureValidation, &value, NULL, NULL, NULL);
+
     if (r != MI_RESULT_OK)
     {
+#if !defined(BUILD_OMS)
 	// default is to not verify
 	verifyFlag = "0";
+#else
+	// default is to verify for oms
+	verifyFlag = "1";
+#endif
     }
     else
     {
@@ -2062,7 +2067,6 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
 	    verifyFlag = "0";
 	}
     }
-#endif
 
     // moduleTable now has the modules we need to pull
     current = moduleTable.first;

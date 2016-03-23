@@ -72,6 +72,7 @@ ExpandedSystemPath g_ExpandedSystemPath[] =
     {CONFIGURATION_LOCATION_PENDING, NULL},
     {CONFIGURATION_LOCATION_PENDINGTMP, NULL},
     {CONFIGURATION_LOCATION_CURRENT, NULL},
+    {CONFIGURATION_LOCATION_FAILED, NULL},
     {CONFIGURATION_LOCATION_GET, NULL},
     {CONFIGURATION_LOCATION_METACONFIG, NULL},
     {CONFIGURATION_LOCATION_METACONFIG_TMP, NULL},
@@ -260,6 +261,7 @@ MI_Result InitHandler(
     g_PendingConfigFileName = NULL;
     g_PendingConfigTmpFileName = NULL;
     g_CurrentConfigFileName = NULL;
+    g_FailedConfigFileName = NULL;
     g_PreviousConfigFileName = NULL;
     g_GetConfigFileName = NULL;
     g_InventoryFileName = NULL;
@@ -279,6 +281,7 @@ MI_Result InitHandler(
         DSC_EventUnRegister();
         DSC_free(g_PendingConfigFileName);
         DSC_free(g_CurrentConfigFileName);
+        DSC_free(g_FailedConfigFileName);
         DSC_free(g_PreviousConfigFileName);
         DSC_free(g_GetConfigFileName);
         DSC_free(g_InventoryFileName);
@@ -291,6 +294,7 @@ MI_Result InitHandler(
 
         g_PendingConfigFileName = NULL;
         g_CurrentConfigFileName = NULL;
+	g_FailedConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
         g_InventoryFileName = NULL;
@@ -324,6 +328,7 @@ MI_Result InitHandler(
         DSC_EventUnRegister();
         DSC_free(g_PendingConfigFileName);
         DSC_free(g_CurrentConfigFileName);
+        DSC_free(g_FailedConfigFileName);
         DSC_free(g_PreviousConfigFileName);
         DSC_free(g_GetConfigFileName);
         DSC_free(g_InventoryFileName);
@@ -336,6 +341,7 @@ MI_Result InitHandler(
 
         g_PendingConfigFileName = NULL;
         g_CurrentConfigFileName = NULL;
+	g_FailedConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
 	g_InventoryFileName = NULL;
@@ -401,6 +407,11 @@ MI_Result InitPath(
         else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_CURRENT) == 0)
         {
             g_ExpandedSystemPath[count].expandedPath = &g_CurrentConfigFileName;
+            initCount++;
+        }
+        else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_FAILED) == 0)
+        {
+            g_ExpandedSystemPath[count].expandedPath = &g_FailedConfigFileName;
             initCount++;
         }
         else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_GET) == 0)
@@ -515,6 +526,12 @@ MI_Result UnInitHandler(
     {
         DSC_free(g_CurrentConfigFileName);
         g_CurrentConfigFileName = NULL;
+    }
+
+    if (g_FailedConfigFileName != NULL)
+    {
+        DSC_free(g_FailedConfigFileName);
+        g_FailedConfigFileName = NULL;
     }
 
     if(g_PreviousConfigFileName != NULL)
@@ -2058,6 +2075,8 @@ MI_Result ApplyPendingConfig(
 
     if (result != MI_RESULT_OK)
     {
+	// Attempt to save a Failed configuration file
+	CopyConfigurationFile(CONFIGURATION_LOCATION_PENDING, CONFIGURATION_LOCATION_FAILED, MI_TRUE, cimErrorDetails);
         RetryDeleteFile(GetPendingConfigFileName());
         File_RemoveT(GetConfigChecksumFileName());
         return result;
@@ -2747,6 +2766,11 @@ const MI_Char * GetInventoryReportFileName()
 const MI_Char *GetCurrentConfigFileName()
 {
     return g_CurrentConfigFileName;
+}
+
+const MI_Char *GetFailedConfigFileName()
+{
+    return g_FailedConfigFileName;
 }
 
 const MI_Char *GetMetaConfigTmpFileName()
