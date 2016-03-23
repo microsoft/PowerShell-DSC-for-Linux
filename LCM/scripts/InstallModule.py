@@ -5,7 +5,11 @@ import subprocess
 import shutil
 import platform
 import imp
-zipfile = imp.load_source('zipfile', '<DSC_SCRIPT_PATH>/zipfile2.6.py')
+
+try:
+    zipfile = imp.load_source('zipfile', '<DSC_SCRIPT_PATH>/zipfile2.6.py')
+except:
+    import zipfile
 
 def usage():
     print("Usage:")
