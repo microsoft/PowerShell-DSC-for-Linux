@@ -222,6 +222,7 @@ done
 
 #if BUILD_OMS == 1
 chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
+chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
 /usr/sbin/usermod -g omiusers omsagent
 
 # Set up the nxOMSAgent module
