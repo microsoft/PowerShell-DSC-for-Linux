@@ -42,6 +42,7 @@ omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
 baseModulePath = "<DSC_MODULES_PATH>"
 baseScriptPath = "<DSC_SCRIPT_PATH>"
 modulePath = baseModulePath + "/" + moduleName
+omiregister_dir = "/etc/opt/omi/conf/omiregister"
 
 if not os.path.isdir(modulePath):
     print("Error: unable to find installed module " + moduleName + " at " + modulePath)
@@ -53,6 +54,10 @@ print("Removing module " + moduleName)
 resourcelist = os.listdir(modulePath + "/DSCResources")
 for resource in resourcelist:
     print("Removing resource " + resource)
+    # Remove omi registration for each class
+    namespace_dir = "<DSC_NAMESPACE>".replace("/","-")
+    os.remove(omiregister_dir + "/" + namespace_dir + "/" + resource + ".reg")
+    
     # Remove schema/registration for each class
     schemadir = omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/schema"
     regdir = omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>/configuration/registration"

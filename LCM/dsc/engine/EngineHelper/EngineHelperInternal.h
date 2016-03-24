@@ -473,6 +473,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define OAAS_THUMBPRINTPATH CONFIG_CERTSDIR MI_T("/") OAAS_THUMBPRINT
 #endif
 
+#define OMI_RELOAD_COMMAND MI_T("touch /var/opt/omi/omiusers/reload_dispatcher; sleep 2")
 #define CONFIGURATION_SYSTEMDIR CONFIG_SYSCONFDIR PATH_SEPARATOR DSC_CONFIG_DIRNAME  MI_T("/configuration")
 #define CONFIGURATION_PROGFILES CONFIG_DATADIR PATH_SEPARATOR DSC_CONFIG_DIRNAME MI_T("/configuration")
 #define AGENTID_FILE_PATH CONFIG_SYSCONFDIR PATH_SEPARATOR DSC_CONFIG_DIRNAME "/agentid"
@@ -583,7 +584,6 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define AGENT_REGISTRATION_CLASS MI_T("MSFT_PSDSCAgentRegistration")
 
 #define OMI_SERVER_PATH CONFIG_BINDIR PATH_SEPARATOR MI_T("omiserver")
-#define OMI_RELOAD_COMMAND OMI_SERVER_PATH MI_T(" --reload-dispatcher; sleep 1")
 #endif
 #define TASK_PARAMETER_SC_DAILY MI_T("DAILY")
 #define TASK_PARAMETER_DU_DAILY MI_T("24:00")
