@@ -22,4 +22,3 @@ Qualifier SupportsInventory : boolean = true,
 Qualifier InventoryFilter : boolean = true,
 	Scope(property),
 	Flavor(EnableOverride);
-	
