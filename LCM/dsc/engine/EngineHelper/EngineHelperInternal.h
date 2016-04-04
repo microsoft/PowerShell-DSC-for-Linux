@@ -459,7 +459,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define OMI_CONSISTENCY_TASKSCHEDULE_NAME CONFIG_BINDIR PATH_SEPARATOR MI_T("OMSConsistencyInvoker")
 #define OAAS_KEYPATH MI_T("/etc/opt/microsoft/omsagent/certs/") OAAS_KEY
 #define OAAS_CERTPATH MI_T("/etc/opt/microsoft/omsagent/certs/") OAAS_CERT
-#define OAAS_THUMBPRINTPATH MI_T("/etc/opt/omi/conf/omsconfig/certs/") OAAS_THUMBPRINT
+#define OAAS_THUMBPRINTPATH MI_T("/etc/opt/microsoft/omsagent/certs/") OAAS_THUMBPRINT
 #else
 #define OAAS_KEY MI_T("oaas.key")
 #define OAAS_CERT MI_T("oaas.crt")
