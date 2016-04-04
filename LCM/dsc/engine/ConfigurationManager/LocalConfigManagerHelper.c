@@ -2133,13 +2133,11 @@ MI_Result ApplyMetaConfig(
     miResult = ApplyConfig(lcmContext, GetMetaConfigTmpFileName(), moduleManager, flags, resultStatus, cimErrorDetails);
     EH_CheckResult(miResult);
 
-#if !defined(BUILD_OMS)
     miResult = RegisterWithPullServers(lcmContext, (MI_Instance*) g_metaConfig, cimErrorDetails);
     EH_CheckResult(miResult);
 
     miResult = RegisterWithReportingServers(lcmContext, (MI_Instance*)g_metaConfig, cimErrorDetails);
     EH_CheckResult(miResult);
-#endif
 
 EH_UNWIND:
     return miResult;
@@ -4026,11 +4024,19 @@ MI_Result DoRegistration(
             }
         }
 
-        result = RegistrationManager_RunRequest(registrationManager, registrationRequest, cimErrorDetails);
-        EH_CheckResult(result);
+#if defined(BUILD_OMS)
+	// Check if RegistrationKey is specified.  If so, allow registration for OMS. Otherwise, do not attempt to register.
+	result = MI_Instance_GetElement(registrationRequest->registrationData, MSFT_RegistrationKey_Name, &value, NULL, NULL, NULL);
+	if (result == MI_RESULT_OK)
+	{
+	    result = RegistrationManager_RunRequest(registrationManager, registrationRequest, cimErrorDetails);
+	    EH_CheckResult(result);
+	    
+	    result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
+	    EH_CheckResult(result);
+	}
 
-        result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
-        EH_CheckResult(result);
+#endif
 
 	// TODO, insivara : Write events
         result = UpdateMetaConfigWithAgentId(registrationManager->agentId, (MI_Instance*)g_metaConfig);
@@ -4473,14 +4479,13 @@ MI_Result ReportStatusToServer(
         {
                 return r;
         }
-#if !defined(BUILD_OMS)     
+
     r = RegisterWithReportingServers(lcmContext, (MI_Instance*)g_metaConfig, &extendedError);
     if (r != MI_RESULT_OK)
     {
         MI_Application_Close(&miApp);
         return r;
     }
-#endif
 
         r = DSC_MI_Application_NewInstance(&miApp, REPORTING_CLASS, NULL, &statusReport);
         if (r != MI_RESULT_OK)
@@ -6117,14 +6122,12 @@ MI_Result MI_CALL LCM_Pull_Execute(
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);
         }
 
-#if !defined(BUILD_OMS)
         result = RegisterWithPullServers(lcmContext, metaConfigInstance, cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
             moduleManager->ft->Close(moduleManager, NULL);
             return result;
         }
-#endif
 
         GetLatestStatus(&bComplianceStatus, &getActionStatusCode, &lcmStatusCode);
 

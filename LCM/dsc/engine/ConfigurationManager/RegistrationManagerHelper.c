@@ -108,7 +108,6 @@ MI_Result Register(
     MI_Uint32 getActionStatusCode;
     MI_Char* resultStatus = NULL;
     MI_Char* thumbprint = NULL;
-    MI_Value value;
     int systemResult = 0;
 
     if (cimErrorDetails)
@@ -116,15 +115,6 @@ MI_Result Register(
         *cimErrorDetails = NULL;
     }
 
-#if defined(BUILD_OMS)
-    // Check if RegistrationKey is specified.  If so, allow registration for OMS. Otherwise, do not attempt to register.
-    result = MI_Instance_GetElement(request->registrationData, MSFT_RegistrationKey_Name, &value, NULL, NULL, NULL);
-    if (result != MI_RESULT_OK)
-    {
-	return MI_RESULT_OK;
-    }
-#endif
-    
     // Check the cache for a given serverUrl
     result = GetThumbprintForRegisteredServerURL(self, request->registrationData, &thumbprint, cimErrorDetails);
     if (thumbprint == NULL)
