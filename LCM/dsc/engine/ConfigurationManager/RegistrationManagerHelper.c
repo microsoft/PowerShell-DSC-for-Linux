@@ -118,7 +118,7 @@ MI_Result Register(
 
 #if defined(BUILD_OMS)
     // Check if RegistrationKey is specified.  If so, allow registration for OMS. Otherwise, do not attempt to register.
-    result = MI_Instance_GetElement(registrationData, MSFT_RegistrationKey_Name, &value, NULL, NULL, NULL);
+    result = MI_Instance_GetElement(request->registrationData, MSFT_RegistrationKey_Name, &value, NULL, NULL, NULL);
     if (result != MI_RESULT_OK)
     {
 	return MI_RESULT_OK;
