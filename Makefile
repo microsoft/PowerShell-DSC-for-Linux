@@ -26,8 +26,9 @@ BUILD_OMS_VAL=0
 endif
 
 all:
-	rm -rf release/*.{rpm,deb};
+	rm -rf release/*.rpm release/*.deb
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Modules
 ifeq ($(BUILD_LOCAL),1)
 	$(MAKE) local
 else
@@ -151,9 +152,10 @@ nx:
 	VERSION="1.0"; \
 	PROVIDERS="nxService nxPackage"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
-		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
@@ -171,9 +173,10 @@ nx:
 	VERSION="1.0"; \
 	PROVIDERS="nxFile nxScript nxUser nxGroup nxService nxPackage nxEnvironment nxSshAuthorizedKeys nxArchive nxFileLine"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
-		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
@@ -193,9 +196,10 @@ nxComputerManagement:
 	VERSION="1.0"; \
 	PROVIDERS="nxComputer"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
-		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
@@ -213,9 +217,10 @@ nxNetworking:
 	VERSION="1.0"; \
 	PROVIDERS="nxDNSServerAddress nxIPAddress nxFirewall"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
-		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
@@ -233,9 +238,10 @@ nxMySQL:
 	VERSION="1.0"; \
 	PROVIDERS="nxMySqlDatabase nxMySqlGrant nxMySqlUser"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
-		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
@@ -253,9 +259,10 @@ nxOMSAgent:
 	VERSION="1.0"; \
 	PROVIDERS="nxOMSAgent nxOMSSyslog"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
-		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
@@ -273,9 +280,10 @@ nxOMSCustomLog:
 	VERSION="1.0"; \
 	PROVIDERS="nxOMSCustomLog"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
-		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
@@ -293,9 +301,10 @@ nxOMSPlugin:
 	VERSION="1.0"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
-		cp Providers/Modules/$@.psd1 output/staging/$@/; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
                 cp -r Providers/Modules/Plugins/ $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
