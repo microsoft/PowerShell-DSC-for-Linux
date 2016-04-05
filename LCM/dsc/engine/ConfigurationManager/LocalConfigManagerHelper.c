@@ -4035,7 +4035,12 @@ MI_Result DoRegistration(
 	    result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
 	    EH_CheckResult(result);
 	}
-
+#else
+	result = RegistrationManager_RunRequest(registrationManager, registrationRequest, cimErrorDetails);
+	EH_CheckResult(result);
+	
+	result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
+	EH_CheckResult(result);
 #endif
 
 	// TODO, insivara : Write events
