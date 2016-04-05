@@ -6,13 +6,14 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-HOME=<CONFIG_SYSCONFDIR>/<CONFIG_SYSCONFDIR_DSC> gpg --no-default-keyring  --keyring <CONFIG_SYSCONFDIR>/<CONFIG_SYSCONFDIR_DSC>/keyring.gpg --import $1
+DSC_ETC_DIR=<CONFIG_SYSCONFDIR>/<CONFIG_SYSCONFDIR_DSC>
+HOME=$DSC_ETC_DIR gpg --no-default-keyring  --keyring $DSC_ETC_DIR/keyring.gpg --import $1
 RETVAL=$?
 
 if [ "<CONFIG_SYSCONFDIR_DSC>" = "omsagent" ]; then
-    chown omsagent <CONFIG_SYSCONFDIR>/<CONFIG_SYSCONFDIR_DSC>/keyring.gpg
+    chown omsagent $DSC_ETC_DIR/keyring.gpg
 else
-    chown root <CONFIG_SYSCONFDIR>/<CONFIG_SYSCONFDIR_DSC>/keyring.gpg
+    chown root $DSC_ETC_DIR/keyring.gpg
 fi
 
 exit $RETVAL
