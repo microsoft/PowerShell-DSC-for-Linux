@@ -14,7 +14,7 @@ INSTALLBUILDER_DIR=installbuilder
 ifeq ($(BUILD_OMS),BUILD_OMS)
 CONFIG_SYSCONFDIR_DSC=omsconfig
 DSC_NAMESPACE=root/oms
-OAAS_CERTPATH=/etc/opt/microsoft/omsagent/certs/oaas.crt
+OAAS_CERTPATH=/etc/opt/microsoft/omsagent/certs/oms.crt
 PYTHON_PID_DIR=/var/opt/microsoft/omsconfig
 BUILD_OMS_VAL=1
 else

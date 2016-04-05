@@ -109,6 +109,7 @@ MI_Result Register(
     MI_Char* resultStatus = NULL;
     MI_Char* thumbprint = NULL;
     MI_Value value;
+    MI_Uint32 flags;
     int systemResult = 0;
 
     if (cimErrorDetails)
@@ -116,10 +117,11 @@ MI_Result Register(
         *cimErrorDetails = NULL;
     }
 
+
 #if defined(BUILD_OMS)
     // Check if RegistrationKey is specified. If not specified, do not attempt to register.
-    result = MI_Instance_GetElement(request->registrationData, MSFT_RegistrationKey_Name, &value, NULL, NULL, NULL);
-    if (result != MI_RESULT_OK)
+    result = MI_Instance_GetElement(request->registrationData, MSFT_RegistrationKey_Name, &value, NULL, &flags, NULL);
+    if (result != MI_RESULT_OK || flags & MI_FLAG_NULL || value.string == NULL || value.string[0] == '\0')
     {
 	return MI_RESULT_OK;
     }
