@@ -36,6 +36,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/Register.py; intermediate/Scripts/Register.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/StatusReport.sh; intermediate/Scripts/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh; intermediate/Scripts/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
 
 #if BUILD_OMS == 1
 
