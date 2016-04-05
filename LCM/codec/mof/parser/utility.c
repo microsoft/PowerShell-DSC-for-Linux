@@ -183,6 +183,8 @@ MI_QualifierDecl gQualifiers[] = {
 
     /* DSC specific qualifiers */
     {MI_T("FriendlyName"), 0x0000000D, 0x00000001, 0x00000280, 0x00000000, NULL},
+    {MI_T("InventoryFilter"), 0x00000000, 0x00000004, 0x00000080, 0x00000000, NULL},
+    {MI_T("SupportsInventory"), 0x00000000, 0x00000001, 0x00000080, 0x00000000, NULL},
     {NULL, 0, 0, 0, 0, NULL},
 };
 
