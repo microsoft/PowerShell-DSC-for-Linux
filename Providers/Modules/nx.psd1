@@ -15,7 +15,7 @@ CompanyName = 'Microsoft Corporation'
 Copyright = '(c) 2015 Microsoft Corporation. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Module with DSC MySQL Resources for Linux'
+Description = 'Module with Base DSC Resources for Linux'
 
 # Minimum version of the Windows PowerShell engine required by this module
 PowerShellVersion = '4.0'
