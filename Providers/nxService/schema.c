@@ -250,6 +250,16 @@ static MI_CONST MI_QualifierDecl Experimental_qual_decl =
     &Experimental_qual_decl_value, /* value */
 };
 
+static MI_CONST MI_QualifierDecl FriendlyName_qual_decl =
+{
+    MI_T("FriendlyName"), /* name */
+    MI_STRING, /* type */
+    MI_FLAG_CLASS, /* scope */
+    MI_FLAG_ENABLEOVERRIDE, /* flavor */
+    0, /* subscript */
+    NULL, /* value */
+};
+
 static MI_CONST MI_Boolean Gauge_qual_decl_value = 0;
 
 static MI_CONST MI_QualifierDecl Gauge_qual_decl =
@@ -284,6 +294,18 @@ static MI_CONST MI_QualifierDecl Indication_qual_decl =
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Indication_qual_decl_value, /* value */
+};
+
+static MI_CONST MI_Boolean InventoryFilter_qual_decl_value = 1;
+
+static MI_CONST MI_QualifierDecl InventoryFilter_qual_decl =
+{
+    MI_T("InventoryFilter"), /* name */
+    MI_BOOLEAN, /* type */
+    MI_FLAG_PROPERTY, /* scope */
+    MI_FLAG_ENABLEOVERRIDE, /* flavor */
+    0, /* subscript */
+    &InventoryFilter_qual_decl_value, /* value */
 };
 
 static MI_CONST MI_Boolean IsPUnit_qual_decl_value = 0;
@@ -586,6 +608,18 @@ static MI_CONST MI_QualifierDecl Stream_qual_decl =
     &Stream_qual_decl_value, /* value */
 };
 
+static MI_CONST MI_Boolean SupportsInventory_qual_decl_value = 1;
+
+static MI_CONST MI_QualifierDecl SupportsInventory_qual_decl =
+{
+    MI_T("SupportsInventory"), /* name */
+    MI_BOOLEAN, /* type */
+    MI_FLAG_CLASS, /* scope */
+    MI_FLAG_ENABLEOVERRIDE, /* flavor */
+    0, /* subscript */
+    &SupportsInventory_qual_decl_value, /* value */
+};
+
 static MI_CONST MI_Boolean Terminal_qual_decl_value = 0;
 
 static MI_CONST MI_QualifierDecl Terminal_qual_decl =
@@ -694,9 +728,11 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &EmbeddedObject_qual_decl,
     &Exception_qual_decl,
     &Experimental_qual_decl,
+    &FriendlyName_qual_decl,
     &Gauge_qual_decl,
     &In_qual_decl,
     &Indication_qual_decl,
+    &InventoryFilter_qual_decl,
     &IsPUnit_qual_decl,
     &Key_qual_decl,
     &MappingStrings_qual_decl,
@@ -725,6 +761,7 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &SourceType_qual_decl,
     &Static_qual_decl,
     &Stream_qual_decl,
+    &SupportsInventory_qual_decl,
     &Terminal_qual_decl,
     &UMLPackagePath_qual_decl,
     &Units_qual_decl,
@@ -819,9 +856,20 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_Name_Key_qual =
     &MSFT_nxServiceResource_Name_Key_qual_value
 };
 
+static MI_CONST MI_Boolean MSFT_nxServiceResource_Name_InventoryFilter_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxServiceResource_Name_InventoryFilter_qual =
+{
+    MI_T("InventoryFilter"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE,
+    &MSFT_nxServiceResource_Name_InventoryFilter_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_Name_quals[] =
 {
     &MSFT_nxServiceResource_Name_Key_qual,
+    &MSFT_nxServiceResource_Name_InventoryFilter_qual,
 };
 
 /* property MSFT_nxServiceResource.Name */
@@ -866,6 +914,7 @@ static MI_CONST MI_Char* MSFT_nxServiceResource_Controller_ValueMap_qual_data_va
     MI_T("init"),
     MI_T("upstart"),
     MI_T("systemd"),
+    MI_T("*"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxServiceResource_Controller_ValueMap_qual_value =
@@ -887,6 +936,7 @@ static MI_CONST MI_Char* MSFT_nxServiceResource_Controller_Values_qual_data_valu
     MI_T("74"),
     MI_T("75"),
     MI_T("76"),
+    MI_T("77"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxServiceResource_Controller_Values_qual_value =
@@ -903,12 +953,23 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_Controller_Values_qual =
     &MSFT_nxServiceResource_Controller_Values_qual_value
 };
 
+static MI_CONST MI_Boolean MSFT_nxServiceResource_Controller_InventoryFilter_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxServiceResource_Controller_InventoryFilter_qual =
+{
+    MI_T("InventoryFilter"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE,
+    &MSFT_nxServiceResource_Controller_InventoryFilter_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_Controller_quals[] =
 {
     &MSFT_nxServiceResource_Controller_Write_qual,
     &MSFT_nxServiceResource_Controller_Required_qual,
     &MSFT_nxServiceResource_Controller_ValueMap_qual,
     &MSFT_nxServiceResource_Controller_Values_qual,
+    &MSFT_nxServiceResource_Controller_InventoryFilter_qual,
 };
 
 /* property MSFT_nxServiceResource.Controller */
@@ -938,9 +999,20 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_Enabled_Write_qual =
     &MSFT_nxServiceResource_Enabled_Write_qual_value
 };
 
+static MI_CONST MI_Boolean MSFT_nxServiceResource_Enabled_InventoryFilter_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxServiceResource_Enabled_InventoryFilter_qual =
+{
+    MI_T("InventoryFilter"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE,
+    &MSFT_nxServiceResource_Enabled_InventoryFilter_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_Enabled_quals[] =
 {
     &MSFT_nxServiceResource_Enabled_Write_qual,
+    &MSFT_nxServiceResource_Enabled_InventoryFilter_qual,
 };
 
 /* property MSFT_nxServiceResource.Enabled */
@@ -992,8 +1064,8 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_State_ValueMap_qual =
 
 static MI_CONST MI_Char* MSFT_nxServiceResource_State_Values_qual_data_value[] =
 {
-    MI_T("77"),
     MI_T("78"),
+    MI_T("79"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxServiceResource_State_Values_qual_value =
@@ -1010,11 +1082,22 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_State_Values_qual =
     &MSFT_nxServiceResource_State_Values_qual_value
 };
 
+static MI_CONST MI_Boolean MSFT_nxServiceResource_State_InventoryFilter_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxServiceResource_State_InventoryFilter_qual =
+{
+    MI_T("InventoryFilter"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE,
+    &MSFT_nxServiceResource_State_InventoryFilter_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_State_quals[] =
 {
     &MSFT_nxServiceResource_State_Write_qual,
     &MSFT_nxServiceResource_State_ValueMap_qual,
     &MSFT_nxServiceResource_State_Values_qual,
+    &MSFT_nxServiceResource_State_InventoryFilter_qual,
 };
 
 /* property MSFT_nxServiceResource.State */
@@ -1300,7 +1383,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_Static_qua
     &MSFT_nxServiceResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_Description_qual_value = MI_T("79");
+static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_Description_qual_value = MI_T("80");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_Description_qual =
 {
@@ -1336,7 +1419,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_InputResou
     &MSFT_nxServiceResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_InputResource_Description_qual_value = MI_T("80");
+static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_InputResource_Description_qual_value = MI_T("81");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_InputResource_Description_qual =
 {
@@ -1377,7 +1460,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_Flags_In_q
     &MSFT_nxServiceResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_Flags_Description_qual_value = MI_T("81");
+static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_Flags_Description_qual_value = MI_T("82");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_Flags_Description_qual =
 {
@@ -1427,7 +1510,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_OutputReso
     &MSFT_nxServiceResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("82");
+static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("83");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_OutputResource_Description_qual =
 {
@@ -1468,7 +1551,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_MIReturn_S
     &MSFT_nxServiceResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("79");
+static MI_CONST MI_Char* MSFT_nxServiceResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("80");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_GetTargetResource_MIReturn_Description_qual =
 {
@@ -1534,7 +1617,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_Static_qu
     &MSFT_nxServiceResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_Description_qual_value = MI_T("83");
+static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_Description_qual_value = MI_T("84");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_Description_qual =
 {
@@ -1570,7 +1653,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_InputReso
     &MSFT_nxServiceResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_InputResource_Description_qual_value = MI_T("84");
+static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_InputResource_Description_qual_value = MI_T("85");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_InputResource_Description_qual =
 {
@@ -1611,7 +1694,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_Flags_In_
     &MSFT_nxServiceResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_Flags_Description_qual_value = MI_T("85");
+static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_Flags_Description_qual_value = MI_T("86");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_Flags_Description_qual =
 {
@@ -1651,7 +1734,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_Result_Ou
     &MSFT_nxServiceResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_Result_Description_qual_value = MI_T("86");
+static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_Result_Description_qual_value = MI_T("87");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_Result_Description_qual =
 {
@@ -1691,7 +1774,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_ProviderC
     &MSFT_nxServiceResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("87");
+static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("88");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_ProviderContext_Description_qual =
 {
@@ -1731,7 +1814,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_MIReturn_
     &MSFT_nxServiceResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("83");
+static MI_CONST MI_Char* MSFT_nxServiceResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("84");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_TestTargetResource_MIReturn_Description_qual =
 {
@@ -1798,7 +1881,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_Static_qua
     &MSFT_nxServiceResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_Description_qual_value = MI_T("88");
+static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_Description_qual_value = MI_T("89");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_Description_qual =
 {
@@ -1834,7 +1917,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_InputResou
     &MSFT_nxServiceResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_InputResource_Description_qual_value = MI_T("84");
+static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_InputResource_Description_qual_value = MI_T("85");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_InputResource_Description_qual =
 {
@@ -1875,7 +1958,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_ProviderCo
     &MSFT_nxServiceResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("89");
+static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("90");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_ProviderContext_Description_qual =
 {
@@ -1915,7 +1998,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_Flags_In_q
     &MSFT_nxServiceResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_Flags_Description_qual_value = MI_T("85");
+static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_Flags_Description_qual_value = MI_T("86");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_Flags_Description_qual =
 {
@@ -1955,7 +2038,7 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_MIReturn_S
     &MSFT_nxServiceResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("88");
+static MI_CONST MI_Char* MSFT_nxServiceResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("89");
 
 static MI_CONST MI_Qualifier MSFT_nxServiceResource_SetTargetResource_MIReturn_Description_qual =
 {
@@ -2057,10 +2140,32 @@ static MI_CONST MI_Qualifier MSFT_nxServiceResource_ClassVersion_qual =
     &MSFT_nxServiceResource_ClassVersion_qual_value
 };
 
+static MI_CONST MI_Char* MSFT_nxServiceResource_FriendlyName_qual_value = MI_T("nxService");
+
+static MI_CONST MI_Qualifier MSFT_nxServiceResource_FriendlyName_qual =
+{
+    MI_T("FriendlyName"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE,
+    &MSFT_nxServiceResource_FriendlyName_qual_value
+};
+
+static MI_CONST MI_Boolean MSFT_nxServiceResource_SupportsInventory_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxServiceResource_SupportsInventory_qual =
+{
+    MI_T("SupportsInventory"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE,
+    &MSFT_nxServiceResource_SupportsInventory_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxServiceResource_quals[] =
 {
     &MSFT_nxServiceResource_Description_qual,
     &MSFT_nxServiceResource_ClassVersion_qual,
+    &MSFT_nxServiceResource_FriendlyName_qual,
+    &MSFT_nxServiceResource_SupportsInventory_qual,
 };
 
 /* class MSFT_nxServiceResource */

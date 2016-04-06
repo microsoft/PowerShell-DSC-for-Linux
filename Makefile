@@ -1,3 +1,4 @@
+SHELL=/bin/bash
 include config.mak
 -include omi-1.0.8/output/config.mak
 UNAME_P := $(shell uname -p)

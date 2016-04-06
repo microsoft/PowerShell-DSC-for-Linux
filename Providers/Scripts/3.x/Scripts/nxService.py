@@ -18,7 +18,7 @@ import fnmatch
 from functools import reduce
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
-helperlib = imp.load_source('nxDSCLog', '../helperlib.py')
+helperlib = imp.load_source('helperlib', '../helperlib.py')
 LG = nxDSCLog.DSCLog
 
 # [ClassVersion("1.0.0"),FriendlyName("nxService"), SupportsInventory()]
@@ -42,8 +42,8 @@ def init_vars(Name, Controller, Enabled, State):
         Name = ''
     if Name == '*':
         Name = ''
-    if Controller is None:
-        Controller = ''
+    if Controller is None or Controller == '*':
+        Controller = GetController()
     if Enabled is None:
         Enabled = False
     Enabled = (Enabled == True)
@@ -53,19 +53,23 @@ def init_vars(Name, Controller, Enabled, State):
 
 
 def Set_Marshall(Name, Controller, Enabled, State):
-    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         return [-1]
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
+    if Controller == '':
+        return [-1]
     retval = Set(Name, Controller, Enabled, State)
     return retval
 
 
 def Test_Marshall(Name, Controller, Enabled, State):
-    if helper.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         return [-1]
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
+    if Controller == '':
+        return [-1]
     retval = Test(Name, Controller, Enabled, State)
     return retval
 
@@ -77,6 +81,8 @@ def Get_Marshall(Name, Controller, Enabled, State):
     arg_names.append('Description')
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
+    if Controller == '':
+        return [-1], {}
     retval = 0
     (retval, Name, Controller, Enabled, State, Path, Description, Runlevels) = Get(
         Name, Controller, Enabled, State)
@@ -99,6 +105,8 @@ def Inventory_Marshall(Name, Controller, Enabled, State):
     FilterEnabled = ( Enabled != None )
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
+    if Controller == '':
+        return [-1], {"__Inventory":{}}
     sc = ServiceContext(Name, Controller, Enabled, State)
     sc.FilterEnabled = FilterEnabled
     GetAll(sc)
@@ -1316,7 +1324,7 @@ def Get(Name, Controller, Enabled, State):
 
 def GetOne(sc):
     GetAll(sc)
-    if len(sc.services_list):    
+    if len(sc.services_list):
         sc.Description=sc.services_list[0]['Description']
         sc.Runlevels=sc.services_list[0]['Runlevels']
 
@@ -1447,6 +1455,16 @@ def InitdGetAll(sc):
         d['Runlevels'] = reduce(lambda x, y: x + ' ' + y, s[1:])
         sc.services_list.append(copy.deepcopy(d))
 
+def GetController():
+    if UpstartExists():
+        return 'upstart'
+    if SystemdExists():
+        return 'systemd'
+    if InitExists():
+        return 'init'
+    Print('ERROR: Unable to determine Controller.')
+    LG().Log('ERROR', 'Unable to determine Controller.')
+    return ''
 
 class ServiceContext:
 

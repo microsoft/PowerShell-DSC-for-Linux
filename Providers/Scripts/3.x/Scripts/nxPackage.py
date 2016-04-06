@@ -213,12 +213,14 @@ class Params:
                 'ERROR', 'ERROR: Param Ensure must be "Present" or "Absent".')
             raise Exception('BadParameter')
         if len(PackageManager) > 0:
-            if not ("yum" in PackageManager or "apt" in PackageManager or "zypper" in PackageManager):
+            if not ("*" in PackageManager or "yum" in PackageManager or "apt" in PackageManager or "zypper" in PackageManager):
                 print(
                     'ERROR: Param PackageManager values are "Yum", "Apt", or "Zypper".', file=sys.stdout)
                 LG().Log(
                     'ERROR', 'ERROR: Param PackageManager values are "Yum", "Apt", or "Zypper".')
                 raise Exception('BadParameter')
+            if PackageManager == "*":
+                PackageManager = GetPackageManager()
         if len(Name) < 1 and len(FilePath) < 1:
             print(
                 'ERROR: Param Name or FilePath must be set.', file=sys.stdout)
