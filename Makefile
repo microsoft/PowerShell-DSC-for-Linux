@@ -150,7 +150,7 @@ ifeq ($(BUILD_OMS),BUILD_OMS)
 nx:
 	rm -rf output/staging; \
 	VERSION="1.0"; \
-	PROVIDERS="nxService nxPackage"; \
+	PROVIDERS="nxService nxPackage nxUser nxGroup"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \

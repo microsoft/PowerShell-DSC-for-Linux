@@ -68,6 +68,8 @@ PROVIDERS+=nxOMSSyslog
 PROVIDERS+=nxOMSCustomLog
 PROVIDERS+=nxService
 PROVIDERS+=nxPackage
+PROVIDERS+=nxUser
+PROVIDERS+=nxGroup
 PROVIDERS+=nxOMSPlugin
 else
 PROVIDERS:=nxFile
