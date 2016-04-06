@@ -149,7 +149,7 @@ ifeq ($(BUILD_OMS),BUILD_OMS)
 nx:
 	rm -rf output/staging; \
 	VERSION="1.0"; \
-	PROVIDERS="nxService nxPackage"; \
+	PROVIDERS="nxService nxPackage nxUser nxGroup"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
