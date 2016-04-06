@@ -1,18 +1,3 @@
-/*
-   PowerShell Desired State Configuration for Linux
-
-   Copyright (c) Microsoft Corporation
-
-   All rights reserved. 
-
-   MIT License
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
 /* @migen@ */
 /*
 **==============================================================================
@@ -77,16 +62,6 @@ static MI_CONST MI_QualifierDecl Aggregation_qual_decl =
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Aggregation_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_QualifierDecl Alias_qual_decl =
-{
-    MI_T("Alias"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_METHOD|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
 };
 
 static MI_CONST MI_Char* ArrayType_qual_decl_value = MI_T("Bag");
@@ -187,18 +162,6 @@ static MI_CONST MI_QualifierDecl Counter_qual_decl =
     &Counter_qual_decl_value, /* value */
 };
 
-static MI_CONST MI_Boolean Delete_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Delete_qual_decl =
-{
-    MI_T("Delete"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_ASSOCIATION|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Delete_qual_decl_value, /* value */
-};
-
 static MI_CONST MI_QualifierDecl Deprecated_qual_decl =
 {
     MI_T("Deprecated"), /* name */
@@ -212,16 +175,6 @@ static MI_CONST MI_QualifierDecl Deprecated_qual_decl =
 static MI_CONST MI_QualifierDecl Description_qual_decl =
 {
     MI_T("Description"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_ANY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
-static MI_CONST MI_QualifierDecl DisplayDescription_qual_decl =
-{
-    MI_T("DisplayDescription"), /* name */
     MI_STRING, /* type */
     MI_FLAG_ANY, /* scope */
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE, /* flavor */
@@ -285,18 +238,6 @@ static MI_CONST MI_QualifierDecl Exception_qual_decl =
     &Exception_qual_decl_value, /* value */
 };
 
-static MI_CONST MI_Boolean Expensive_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Expensive_qual_decl =
-{
-    MI_T("Expensive"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_ANY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Expensive_qual_decl_value, /* value */
-};
-
 static MI_CONST MI_Boolean Experimental_qual_decl_value = 0;
 
 static MI_CONST MI_QualifierDecl Experimental_qual_decl =
@@ -313,8 +254,8 @@ static MI_CONST MI_QualifierDecl FriendlyName_qual_decl =
 {
     MI_T("FriendlyName"), /* name */
     MI_STRING, /* type */
-    MI_FLAG_ANY, /* scope */
-    MI_FLAG_RESTRICTED, /* flavor */
+    MI_FLAG_CLASS, /* scope */
+    MI_FLAG_ENABLEOVERRIDE, /* flavor */
     0, /* subscript */
     NULL, /* value */
 };
@@ -329,18 +270,6 @@ static MI_CONST MI_QualifierDecl Gauge_qual_decl =
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Gauge_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_Boolean Ifdeleted_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Ifdeleted_qual_decl =
-{
-    MI_T("Ifdeleted"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_ASSOCIATION|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Ifdeleted_qual_decl_value, /* value */
 };
 
 static MI_CONST MI_Boolean In_qual_decl_value = 1;
@@ -367,16 +296,16 @@ static MI_CONST MI_QualifierDecl Indication_qual_decl =
     &Indication_qual_decl_value, /* value */
 };
 
-static MI_CONST MI_Boolean Invisible_qual_decl_value = 0;
+static MI_CONST MI_Boolean InventoryFilter_qual_decl_value = 1;
 
-static MI_CONST MI_QualifierDecl Invisible_qual_decl =
+static MI_CONST MI_QualifierDecl InventoryFilter_qual_decl =
 {
-    MI_T("Invisible"), /* name */
+    MI_T("InventoryFilter"), /* name */
     MI_BOOLEAN, /* type */
-    MI_FLAG_ASSOCIATION|MI_FLAG_CLASS|MI_FLAG_METHOD|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
+    MI_FLAG_PROPERTY, /* scope */
+    MI_FLAG_ENABLEOVERRIDE, /* flavor */
     0, /* subscript */
-    &Invisible_qual_decl_value, /* value */
+    &InventoryFilter_qual_decl_value, /* value */
 };
 
 static MI_CONST MI_Boolean IsPUnit_qual_decl_value = 0;
@@ -401,18 +330,6 @@ static MI_CONST MI_QualifierDecl Key_qual_decl =
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Key_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_Boolean Large_qual_decl_value = 0;
-
-static MI_CONST MI_QualifierDecl Large_qual_decl =
-{
-    MI_T("Large"), /* name */
-    MI_BOOLEAN, /* type */
-    MI_FLAG_CLASS|MI_FLAG_PROPERTY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &Large_qual_decl_value, /* value */
 };
 
 static MI_CONST MI_QualifierDecl MappingStrings_qual_decl =
@@ -593,28 +510,6 @@ static MI_CONST MI_QualifierDecl PropertyConstraint_qual_decl =
     NULL, /* value */
 };
 
-static MI_CONST MI_Char* PropertyUsage_qual_decl_value = MI_T("CurrentContext");
-
-static MI_CONST MI_QualifierDecl PropertyUsage_qual_decl =
-{
-    MI_T("PropertyUsage"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_PROPERTY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    &PropertyUsage_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_QualifierDecl Provider_qual_decl =
-{
-    MI_T("Provider"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_ANY, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
 static MI_CONST MI_QualifierDecl PUnit_qual_decl =
 {
     MI_T("PUnit"), /* name */
@@ -713,24 +608,16 @@ static MI_CONST MI_QualifierDecl Stream_qual_decl =
     &Stream_qual_decl_value, /* value */
 };
 
-static MI_CONST MI_QualifierDecl Syntax_qual_decl =
-{
-    MI_T("Syntax"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_METHOD|MI_FLAG_PARAMETER|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
+static MI_CONST MI_Boolean SupportsInventory_qual_decl_value = 1;
 
-static MI_CONST MI_QualifierDecl SyntaxType_qual_decl =
+static MI_CONST MI_QualifierDecl SupportsInventory_qual_decl =
 {
-    MI_T("SyntaxType"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_METHOD|MI_FLAG_PARAMETER|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
+    MI_T("SupportsInventory"), /* name */
+    MI_BOOLEAN, /* type */
+    MI_FLAG_CLASS, /* scope */
+    MI_FLAG_ENABLEOVERRIDE, /* flavor */
     0, /* subscript */
-    NULL, /* value */
+    &SupportsInventory_qual_decl_value, /* value */
 };
 
 static MI_CONST MI_Boolean Terminal_qual_decl_value = 0;
@@ -743,16 +630,6 @@ static MI_CONST MI_QualifierDecl Terminal_qual_decl =
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     &Terminal_qual_decl_value, /* value */
-};
-
-static MI_CONST MI_QualifierDecl TriggerType_qual_decl =
-{
-    MI_T("TriggerType"), /* name */
-    MI_STRING, /* type */
-    MI_FLAG_ASSOCIATION|MI_FLAG_CLASS|MI_FLAG_INDICATION|MI_FLAG_METHOD|MI_FLAG_PROPERTY|MI_FLAG_REFERENCE, /* scope */
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
 };
 
 static MI_CONST MI_QualifierDecl UMLPackagePath_qual_decl =
@@ -771,26 +648,6 @@ static MI_CONST MI_QualifierDecl Units_qual_decl =
     MI_STRING, /* type */
     MI_FLAG_METHOD|MI_FLAG_PARAMETER|MI_FLAG_PROPERTY, /* scope */
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
-static MI_CONST MI_QualifierDecl UnknownValues_qual_decl =
-{
-    MI_T("UnknownValues"), /* name */
-    MI_STRINGA, /* type */
-    MI_FLAG_PROPERTY, /* scope */
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
-    0, /* subscript */
-    NULL, /* value */
-};
-
-static MI_CONST MI_QualifierDecl UnsupportedValues_qual_decl =
-{
-    MI_T("UnsupportedValues"), /* name */
-    MI_STRINGA, /* type */
-    MI_FLAG_PROPERTY, /* scope */
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS, /* flavor */
     0, /* subscript */
     NULL, /* value */
 };
@@ -854,7 +711,6 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &Abstract_qual_decl,
     &Aggregate_qual_decl,
     &Aggregation_qual_decl,
-    &Alias_qual_decl,
     &ArrayType_qual_decl,
     &Association_qual_decl,
     &BitMap_qual_decl,
@@ -864,26 +720,21 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &Composition_qual_decl,
     &Correlatable_qual_decl,
     &Counter_qual_decl,
-    &Delete_qual_decl,
     &Deprecated_qual_decl,
     &Description_qual_decl,
-    &DisplayDescription_qual_decl,
     &DisplayName_qual_decl,
     &DN_qual_decl,
     &EmbeddedInstance_qual_decl,
     &EmbeddedObject_qual_decl,
     &Exception_qual_decl,
-    &Expensive_qual_decl,
     &Experimental_qual_decl,
     &FriendlyName_qual_decl,
     &Gauge_qual_decl,
-    &Ifdeleted_qual_decl,
     &In_qual_decl,
     &Indication_qual_decl,
-    &Invisible_qual_decl,
+    &InventoryFilter_qual_decl,
     &IsPUnit_qual_decl,
     &Key_qual_decl,
-    &Large_qual_decl,
     &MappingStrings_qual_decl,
     &Max_qual_decl,
     &MaxLen_qual_decl,
@@ -901,8 +752,6 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &Override_qual_decl,
     &Propagated_qual_decl,
     &PropertyConstraint_qual_decl,
-    &PropertyUsage_qual_decl,
-    &Provider_qual_decl,
     &PUnit_qual_decl,
     &Read_qual_decl,
     &Required_qual_decl,
@@ -912,14 +761,10 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
     &SourceType_qual_decl,
     &Static_qual_decl,
     &Stream_qual_decl,
-    &Syntax_qual_decl,
-    &SyntaxType_qual_decl,
+    &SupportsInventory_qual_decl,
     &Terminal_qual_decl,
-    &TriggerType_qual_decl,
     &UMLPackagePath_qual_decl,
     &Units_qual_decl,
-    &UnknownValues_qual_decl,
-    &UnsupportedValues_qual_decl,
     &ValueMap_qual_decl,
     &Values_qual_decl,
     &Version_qual_decl,
@@ -956,7 +801,7 @@ static MI_CONST MI_Qualifier OMI_BaseResource_ClassVersion_qual =
     &OMI_BaseResource_ClassVersion_qual_value
 };
 
-static MI_CONST MI_Char* OMI_BaseResource_Description_qual_value = MI_T("1");
+static MI_CONST MI_Char* OMI_BaseResource_Description_qual_value = MI_T("7");
 
 static MI_CONST MI_Qualifier OMI_BaseResource_Description_qual =
 {
@@ -1011,9 +856,20 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_GroupName_Key_qual =
     &MSFT_nxGroupResource_GroupName_Key_qual_value
 };
 
+static MI_CONST MI_Boolean MSFT_nxGroupResource_GroupName_InventoryFilter_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_GroupName_InventoryFilter_qual =
+{
+    MI_T("InventoryFilter"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE,
+    &MSFT_nxGroupResource_GroupName_InventoryFilter_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxGroupResource_GroupName_quals[] =
 {
     &MSFT_nxGroupResource_GroupName_Key_qual,
+    &MSFT_nxGroupResource_GroupName_InventoryFilter_qual,
 };
 
 /* property MSFT_nxGroupResource.GroupName */
@@ -1065,8 +921,8 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_Ensure_ValueMap_qual =
 
 static MI_CONST MI_Char* MSFT_nxGroupResource_Ensure_Values_qual_data_value[] =
 {
-    MI_T("2"),
-    MI_T("3"),
+    MI_T("74"),
+    MI_T("75"),
 };
 
 static MI_CONST MI_ConstStringA MSFT_nxGroupResource_Ensure_Values_qual_value =
@@ -1235,6 +1091,38 @@ static MI_CONST MI_PropertyDecl MSFT_nxGroupResource_PreferredGroupID_prop =
     NULL,
 };
 
+static MI_CONST MI_Boolean MSFT_nxGroupResource_GroupID_Read_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_GroupID_Read_qual =
+{
+    MI_T("Read"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxGroupResource_GroupID_Read_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxGroupResource_GroupID_quals[] =
+{
+    &MSFT_nxGroupResource_GroupID_Read_qual,
+};
+
+/* property MSFT_nxGroupResource.GroupID */
+static MI_CONST MI_PropertyDecl MSFT_nxGroupResource_GroupID_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_READONLY, /* flags */
+    0x00676407, /* code */
+    MI_T("GroupID"), /* name */
+    MSFT_nxGroupResource_GroupID_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxGroupResource_GroupID_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxGroupResource, GroupID), /* offset */
+    MI_T("MSFT_nxGroupResource"), /* origin */
+    MI_T("MSFT_nxGroupResource"), /* propagator */
+    NULL,
+};
+
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxGroupResource_props[] =
 {
     &MSFT_nxGroupResource_GroupName_prop,
@@ -1243,6 +1131,156 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxGroupResource_props[] =
     &MSFT_nxGroupResource_MembersToInclude_prop,
     &MSFT_nxGroupResource_MembersToExclude_prop,
     &MSFT_nxGroupResource_PreferredGroupID_prop,
+    &MSFT_nxGroupResource_GroupID_prop,
+};
+
+static MI_CONST MI_Boolean MSFT_nxGroupResource_InventoryTargetResource_Static_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_InventoryTargetResource_Static_qual =
+{
+    MI_T("Static"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxGroupResource_InventoryTargetResource_Static_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxGroupResource_InventoryTargetResource_quals[] =
+{
+    &MSFT_nxGroupResource_InventoryTargetResource_Static_qual,
+};
+
+static MI_CONST MI_Boolean MSFT_nxGroupResource_InventoryTargetResource_InputResource_In_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_InventoryTargetResource_InputResource_In_qual =
+{
+    MI_T("In"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxGroupResource_InventoryTargetResource_InputResource_In_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxGroupResource_InventoryTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxGroupResource");
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_InventoryTargetResource_InputResource_EmbeddedInstance_qual =
+{
+    MI_T("EmbeddedInstance"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxGroupResource_InventoryTargetResource_InputResource_EmbeddedInstance_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxGroupResource_InventoryTargetResource_InputResource_quals[] =
+{
+    &MSFT_nxGroupResource_InventoryTargetResource_InputResource_In_qual,
+    &MSFT_nxGroupResource_InventoryTargetResource_InputResource_EmbeddedInstance_qual,
+};
+
+/* parameter MSFT_nxGroupResource.InventoryTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxGroupResource_InventoryTargetResource_InputResource_param =
+{
+    MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
+    0x0069650D, /* code */
+    MI_T("InputResource"), /* name */
+    MSFT_nxGroupResource_InventoryTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxGroupResource_InventoryTargetResource_InputResource_quals), /* numQualifiers */
+    MI_INSTANCE, /* type */
+    MI_T("MSFT_nxGroupResource"), /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxGroupResource_InventoryTargetResource, InputResource), /* offset */
+};
+
+static MI_CONST MI_Boolean MSFT_nxGroupResource_InventoryTargetResource_inventory_Out_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_InventoryTargetResource_inventory_Out_qual =
+{
+    MI_T("Out"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxGroupResource_InventoryTargetResource_inventory_Out_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_nxGroupResource_InventoryTargetResource_inventory_EmbeddedInstance_qual_value = MI_T("MSFT_nxGroupResource");
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_InventoryTargetResource_inventory_EmbeddedInstance_qual =
+{
+    MI_T("EmbeddedInstance"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxGroupResource_InventoryTargetResource_inventory_EmbeddedInstance_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxGroupResource_InventoryTargetResource_inventory_quals[] =
+{
+    &MSFT_nxGroupResource_InventoryTargetResource_inventory_Out_qual,
+    &MSFT_nxGroupResource_InventoryTargetResource_inventory_EmbeddedInstance_qual,
+};
+
+/* parameter MSFT_nxGroupResource.InventoryTargetResource(): inventory */
+static MI_CONST MI_ParameterDecl MSFT_nxGroupResource_InventoryTargetResource_inventory_param =
+{
+    MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
+    0x00697909, /* code */
+    MI_T("inventory"), /* name */
+    MSFT_nxGroupResource_InventoryTargetResource_inventory_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxGroupResource_InventoryTargetResource_inventory_quals), /* numQualifiers */
+    MI_INSTANCEA, /* type */
+    MI_T("MSFT_nxGroupResource"), /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxGroupResource_InventoryTargetResource, inventory), /* offset */
+};
+
+static MI_CONST MI_Boolean MSFT_nxGroupResource_InventoryTargetResource_MIReturn_Static_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_InventoryTargetResource_MIReturn_Static_qual =
+{
+    MI_T("Static"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxGroupResource_InventoryTargetResource_MIReturn_Static_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxGroupResource_InventoryTargetResource_MIReturn_quals[] =
+{
+    &MSFT_nxGroupResource_InventoryTargetResource_MIReturn_Static_qual,
+};
+
+/* parameter MSFT_nxGroupResource.InventoryTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxGroupResource_InventoryTargetResource_MIReturn_param =
+{
+    MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
+    0x006D6E08, /* code */
+    MI_T("MIReturn"), /* name */
+    MSFT_nxGroupResource_InventoryTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxGroupResource_InventoryTargetResource_MIReturn_quals), /* numQualifiers */
+    MI_UINT32, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxGroupResource_InventoryTargetResource, MIReturn), /* offset */
+};
+
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxGroupResource_InventoryTargetResource_params[] =
+{
+    &MSFT_nxGroupResource_InventoryTargetResource_MIReturn_param,
+    &MSFT_nxGroupResource_InventoryTargetResource_InputResource_param,
+    &MSFT_nxGroupResource_InventoryTargetResource_inventory_param,
+};
+
+/* method MSFT_nxGroupResource.InventoryTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxGroupResource_InventoryTargetResource_rtti =
+{
+    MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
+    0x00696517, /* code */
+    MI_T("InventoryTargetResource"), /* name */
+    MSFT_nxGroupResource_InventoryTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxGroupResource_InventoryTargetResource_quals), /* numQualifiers */
+    MSFT_nxGroupResource_InventoryTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxGroupResource_InventoryTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxGroupResource_InventoryTargetResource), /* size */
+    MI_UINT32, /* returnType */
+    MI_T("MSFT_nxGroupResource"), /* origin */
+    MI_T("MSFT_nxGroupResource"), /* propagator */
+    &schemaDecl, /* schema */
+    (MI_ProviderFT_Invoke)MSFT_nxGroupResource_Invoke_InventoryTargetResource, /* method */
 };
 
 static MI_CONST MI_Boolean MSFT_nxGroupResource_GetTargetResource_Static_qual_value = 1;
@@ -1255,7 +1293,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_Static_qual 
     &MSFT_nxGroupResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_Description_qual_value = MI_T("76");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_Description_qual =
 {
@@ -1291,7 +1329,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_InputResourc
     &MSFT_nxGroupResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_InputResource_Description_qual_value = MI_T("5");
+static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_InputResource_Description_qual_value = MI_T("77");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_InputResource_Description_qual =
 {
@@ -1332,7 +1370,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_Flags_In_qua
     &MSFT_nxGroupResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_Flags_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_Flags_Description_qual_value = MI_T("78");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_Flags_Description_qual =
 {
@@ -1382,7 +1420,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_OutputResour
     &MSFT_nxGroupResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("79");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_OutputResource_Description_qual =
 {
@@ -1423,7 +1461,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_MIReturn_Sta
     &MSFT_nxGroupResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxGroupResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("76");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_GetTargetResource_MIReturn_Description_qual =
 {
@@ -1489,7 +1527,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_Static_qual
     &MSFT_nxGroupResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_Description_qual_value = MI_T("80");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_Description_qual =
 {
@@ -1525,7 +1563,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_InputResour
     &MSFT_nxGroupResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_InputResource_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_InputResource_Description_qual_value = MI_T("81");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_InputResource_Description_qual =
 {
@@ -1566,7 +1604,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_Flags_In_qu
     &MSFT_nxGroupResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_Flags_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_Flags_Description_qual_value = MI_T("82");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_Flags_Description_qual =
 {
@@ -1606,7 +1644,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_Result_Out_
     &MSFT_nxGroupResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_Result_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_Result_Description_qual_value = MI_T("83");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_Result_Description_qual =
 {
@@ -1646,7 +1684,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_ProviderCon
     &MSFT_nxGroupResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("84");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_ProviderContext_Description_qual =
 {
@@ -1686,7 +1724,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_MIReturn_St
     &MSFT_nxGroupResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxGroupResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("80");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_TestTargetResource_MIReturn_Description_qual =
 {
@@ -1753,7 +1791,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_Static_qual 
     &MSFT_nxGroupResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_Description_qual_value = MI_T("85");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_Description_qual =
 {
@@ -1789,7 +1827,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_InputResourc
     &MSFT_nxGroupResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_InputResource_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_InputResource_Description_qual_value = MI_T("81");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_InputResource_Description_qual =
 {
@@ -1830,7 +1868,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_ProviderCont
     &MSFT_nxGroupResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("14");
+static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("86");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_ProviderContext_Description_qual =
 {
@@ -1870,7 +1908,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_Flags_In_qua
     &MSFT_nxGroupResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_Flags_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_Flags_Description_qual_value = MI_T("82");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_Flags_Description_qual =
 {
@@ -1910,7 +1948,7 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_MIReturn_Sta
     &MSFT_nxGroupResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxGroupResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("85");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_SetTargetResource_MIReturn_Description_qual =
 {
@@ -1968,6 +2006,7 @@ MI_CONST MI_MethodDecl MSFT_nxGroupResource_SetTargetResource_rtti =
 
 static MI_MethodDecl MI_CONST* MI_CONST MSFT_nxGroupResource_meths[] =
 {
+    &MSFT_nxGroupResource_InventoryTargetResource_rtti,
     &MSFT_nxGroupResource_GetTargetResource_rtti,
     &MSFT_nxGroupResource_TestTargetResource_rtti,
     &MSFT_nxGroupResource_SetTargetResource_rtti,
@@ -1991,7 +2030,7 @@ static MI_CONST MI_ProviderFT MSFT_nxGroupResource_funcs =
   (MI_ProviderFT_Invoke)NULL,
 };
 
-static MI_CONST MI_Char* MSFT_nxGroupResource_Description_qual_value = MI_T("1");
+static MI_CONST MI_Char* MSFT_nxGroupResource_Description_qual_value = MI_T("7");
 
 static MI_CONST MI_Qualifier MSFT_nxGroupResource_Description_qual =
 {
@@ -2017,8 +2056,18 @@ static MI_CONST MI_Qualifier MSFT_nxGroupResource_FriendlyName_qual =
 {
     MI_T("FriendlyName"),
     MI_STRING,
-    MI_FLAG_RESTRICTED,
+    MI_FLAG_ENABLEOVERRIDE,
     &MSFT_nxGroupResource_FriendlyName_qual_value
+};
+
+static MI_CONST MI_Boolean MSFT_nxGroupResource_SupportsInventory_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxGroupResource_SupportsInventory_qual =
+{
+    MI_T("SupportsInventory"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE,
+    &MSFT_nxGroupResource_SupportsInventory_qual_value
 };
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxGroupResource_quals[] =
@@ -2026,6 +2075,7 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_nxGroupResource_quals[] =
     &MSFT_nxGroupResource_Description_qual,
     &MSFT_nxGroupResource_ClassVersion_qual,
     &MSFT_nxGroupResource_FriendlyName_qual,
+    &MSFT_nxGroupResource_SupportsInventory_qual,
 };
 
 /* class MSFT_nxGroupResource */
