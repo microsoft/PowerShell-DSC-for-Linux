@@ -6239,6 +6239,11 @@ MI_Result MI_CALL LCM_Pull_Execute(
 
                 if (numModulesInstalled > 0)
                 {
+		    result = ModuleManager_Update(moduleManager, cimErrorDetails);
+		    if (result != MI_RESULT_OK)
+		    {
+			return result;
+		    }
                     system(OMI_RELOAD_COMMAND);
                 }
 
