@@ -231,6 +231,8 @@ chown -R omsagent /opt/microsoft/omsagent/plugin
 /opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0
 /opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_1.0.zip 0
 
+chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
+
 #else
 /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
 #endif
