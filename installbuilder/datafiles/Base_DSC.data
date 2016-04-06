@@ -252,7 +252,11 @@ fi
 ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.3
 ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.4
 
+#if BUILD_OMS == 1
+su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py"
+#else
 /opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py
+#endif
 
 /opt/omi/bin/service_control restart
 
