@@ -220,10 +220,7 @@ for prov in ${{PROVIDERS}}; do
 done
 
 #if BUILD_OMS == 1
-chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
-chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
 /usr/sbin/usermod -g omiusers omsagent
-chown -R omsagent /opt/microsoft/omsagent/plugin
 
 # Set up the nxOMSAgent module
 /opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0
@@ -231,6 +228,9 @@ chown -R omsagent /opt/microsoft/omsagent/plugin
 /opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0
 /opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_1.0.zip 0
 
+chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
+chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
+chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
 
 #else
