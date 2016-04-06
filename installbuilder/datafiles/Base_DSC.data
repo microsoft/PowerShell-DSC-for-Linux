@@ -221,17 +221,16 @@ done
 
 #if BUILD_OMS == 1
 /usr/sbin/usermod -g omiusers omsagent
+chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
+chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
+chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
+chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
 
 # Set up the nxOMSAgent module
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_1.0.zip 0"
-
-chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
-chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
-chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
-chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
 
 #else
 /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
