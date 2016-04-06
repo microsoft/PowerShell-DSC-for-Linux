@@ -14,6 +14,7 @@ import copy
 import fnmatch
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
+helperlib = imp.load_source('helperlib', '../helperlib.py')
 LG = nxDSCLog.DSCLog
 
 # [ClassVersion("1.0.0"), FriendlyName("nxUser"),SupportsInventory()]
@@ -74,6 +75,8 @@ def init_vars(UserName, Ensure, FullName, Description, Password, Disabled, Passw
 
 
 def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
         init_vars(UserName, Ensure, FullName, Description, Password,
                   Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
@@ -83,6 +86,8 @@ def Set_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, Pa
 
 
 def Test_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
         init_vars(UserName, Ensure, FullName, Description, Password,
                   Disabled, PasswordChangeRequired, HomeDirectory, GroupID)
@@ -92,6 +97,8 @@ def Test_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, P
 
 
 def Get_Marshall(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     arg_names = list(locals().keys())
     (UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID) = \
         init_vars(UserName, Ensure, FullName, Description, Password,
@@ -496,12 +503,8 @@ def Get(UserName, Ensure, FullName, Description, Password, Disabled, PasswordCha
 def GetInventory(UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID):
     Inventory=[]
     passwd_entries = None
-    shadow_entries = None
     passwd_entries = ReadPasswd("/etc/passwd")
     if passwd_entries is None:
-        return [-1, Inventory]
-    shadow_entries = ReadPasswd("/etc/shadow")
-    if shadow_entries is None:
         return [-1, Inventory]
     exit_code = 0
     d={}
@@ -521,15 +524,8 @@ def GetInventory(UserName, Ensure, FullName, Description, Password, Disabled, Pa
         d['HomeDirectory'] = passwd_entries[Uname][4]
         d['UserID'] = passwd_entries[Uname][1]
         d['GroupID'] = passwd_entries[Uname][2]
-        d['Password'] = shadow_entries[Uname][0]
         d['Disabled'] = False
-        if len(d['Password']) > 0:
-            if d['Password'][0] == "!":
-                d['Disabled'] = True
         d['Password'] = '' # not showing the password.
-        if PasswordExpired(shadow_entries[Uname]):
-            d['PasswordChangeRequired'] = True
-        else:
-            d['PasswordChangeRequired'] = False
+        d['PasswordChangeRequired'] = False
         Inventory.append(copy.deepcopy(d))
     return [exit_code, Inventory]

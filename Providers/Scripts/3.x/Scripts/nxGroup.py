@@ -14,6 +14,7 @@ import copy
 import fnmatch
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
+helperlib = imp.load_source('helperlib', '../helperlib.py')
 LG = nxDSCLog.DSCLog
 
 # [ClassVersion("1.0.0"), FriendlyName("nxGroup"),SupportsInventory()]
@@ -50,6 +51,8 @@ def init_vars(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, Pr
 
 
 def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = \
         init_vars(GroupName, Ensure, Members, MembersToInclude,
                   MembersToExclude, PreferredGroupID)
@@ -59,6 +62,8 @@ def Set_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude,
 
 
 def Test_Marshall(GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID):
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        return [-1]
     (GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID) = \
         init_vars(GroupName, Ensure, Members, MembersToInclude,
                   MembersToExclude, PreferredGroupID)
