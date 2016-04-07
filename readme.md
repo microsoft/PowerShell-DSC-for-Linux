@@ -12,6 +12,10 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Getting Started
+##Latest Release##
+The latest release packages for PowerShell DSC for Linux can be downloaded here:
+[Releases](https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases)
+
 
 ## Supported Linux operating systems
 The following Linux operating system versions are supported by DSC for Linux. 
@@ -154,5 +158,6 @@ make reg
 # Start the OMI server
 ./omi-1.0.8/output/bin/omiserver
 ```
+
 
 
