@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxAvailableUpdatesResource
+HOSTING=@requestor@
+CLASS=MSFT_nxAvailableUpdatesResource:OMI_BaseResource
