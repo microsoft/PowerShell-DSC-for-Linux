@@ -71,6 +71,8 @@ PROVIDERS+=nxPackage
 PROVIDERS+=nxUser
 PROVIDERS+=nxGroup
 PROVIDERS+=nxOMSPlugin
+PROVIDERS+=nxInventoryMOF
+PROVIDERS+=nxAvailableUpdates
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript
@@ -89,6 +91,8 @@ PROVIDERS+=nxArchive
 PROVIDERS+=nxMySqlDatabase
 PROVIDERS+=nxMySqlGrant
 PROVIDERS+=nxMySqlUser
+PROVIDERS+=nxInventoryMOF
+PROVIDERS+=nxAvailableUpdates
 endif
 
 # this is used to enable the printing of xml style tags for help in debugging
