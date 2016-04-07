@@ -61,6 +61,11 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/mof/MSFT_nxOMSCustomLogResource.schema.mof;  Providers/nxOMSCustomLog/MSFT_nxOMSCustomLogResource.schema.mof;      755; root; root
 /opt/microsoft/omsconfig/mof/MSFT_nxOMSCustomLogResource.registration.mof;  Providers/nxOMSCustomLog/MSFT_nxOMSCustomLogResource.registration.mof;      755; root; root
 
+/opt/microsoft/omsconfig/lib/libMSFT_nxOMSCustomLogResource.so;   Providers/bin/libMSFT_nxOMSPluginResource.so;       755; root; root
+/opt/microsoft/omsconfig/etc/MSFT_nxOMSPluginResource.reg;  Providers/nxOMSPlugin/MSFT_nxOMSPluginResource.reg;      755; root; root
+/opt/microsoft/omsconfig/mof/MSFT_nxOMSPluginResource.schema.mof;  Providers/nxOMSPlugin/MSFT_nxOMSPluginResource.schema.mof;      755; root; root
+/opt/microsoft/omsconfig/mof/MSFT_nxOMSPluginResource.registration.mof;  Providers/nxOMSPlugin/MSFT_nxOMSPluginResource.registration.mof;      755; root; root
+
 /opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSAgent.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSAgent.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSSyslog.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSSyslog.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.4x-2.5x/Scripts/nxOMSCustomLog.py; Providers/Scripts/2.4x-2.5x/Scripts/nxOMSCustomLog.py; 755; root; root
@@ -68,6 +73,8 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSAgent.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSSyslog.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSCustomLog.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSCustomLog.py; 755; root; root
+
+/opt/microsoft/omsconfig/Scripts/2.6x-2.7x/Scripts/nxOMSPlugin.py; Providers/Scripts/2.6x-2.7x/Scripts/nxOMSPlugin.py; 755; root; root
 
 /opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSAgent.py; Providers/Scripts/3.x/Scripts/nxOMSAgent.py; 755; root; root
 /opt/microsoft/omsconfig/Scripts/3.x/Scripts/nxOMSSyslog.py; Providers/Scripts/3.x/Scripts/nxOMSSyslog.py; 755; root; root
