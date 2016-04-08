@@ -9,7 +9,7 @@ import time
 import inspect
 import codecs
 import imp
-helperlib = imp.load_source('helperlib', 'helperlib.py')
+helperlib = imp.load_source('helperlib', '../helperlib.py')
 
 VarDir = "<PYTHON_PID_DIR>"
 
