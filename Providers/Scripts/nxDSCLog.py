@@ -8,6 +8,8 @@ import sys
 import time
 import inspect
 import codecs
+import imp
+helperlib = imp.load_source('helperlib', 'helperlib.py')
 
 VarDir = "<PYTHON_PID_DIR>"
 
@@ -34,8 +36,12 @@ class DSCLog(object):
         self.levels = ((0, 'FATAL'), (1, 'ERROR'), (2, 'WARNING'), (3, 'INFO'),
                        (4, 'DEBUG'), (5, 'VERBOSE'))
         self.current_level = self.GetCurrentLogLevel()
-        os.system('mkdir -p ' + VarDir + '/log')
-        self.file_path = VarDir + "/log/dsc.log"
+        LogFile = VarDir + "/log/dsc.log"
+        if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+            LogFile = "/var/opt/microsoft/omsconfig/omsconfig.log"
+        else:
+            os.system('mkdir -p ' + VarDir + '/log')
+        self.file_path = LogFile
 
     def Log(self, log_level, message):
         last_frame = inspect.currentframe().f_back

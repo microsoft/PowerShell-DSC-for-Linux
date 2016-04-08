@@ -15,7 +15,6 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.schema.mof; LCM/dsc/mof/MSFT_LogResource.schema.mof; 755; ${{RUN_AS_USER}}; root
 
 /etc/opt/omi/conf/${{SHORT_NAME}}/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; ${{RUN_AS_USER}}; root
 
 /opt/microsoft/${{SHORT_NAME}}/Scripts/client.py; intermediate/Scripts/client.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
@@ -43,8 +42,8 @@ SHLIB_EXT: 'so'
 
 #if BUILD_OMS == 1
 
+/opt/microsoft/omsconfig/etc/logrotate.conf; Providers/Extras/Scripts/omsconfig_logrotate.conf; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
-
 /opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf; LCM/omsconfig.consistencyinvoker.conf; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/etc/omsconfig.reg; LCM/omsconfig.reg; 755; ${{RUN_AS_USER}}; root
@@ -59,6 +58,7 @@ SHLIB_EXT: 'so'
 
 #else
 
+/opt/microsoft/${{SHORT_NAME}}/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg; LCM/dsccore.reg; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/bin/ConsistencyInvoker; omi-1.0.8/output/bin/ConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/lib/libdsccore.so; omi-1.0.8/output/lib/libdsccore.so; 755; ${{RUN_AS_USER}}; root

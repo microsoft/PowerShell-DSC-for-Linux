@@ -200,7 +200,7 @@ unsigned long DSC_EventRegister()
     Strlcat(logpath, "/", PAL_MAX_PATH_SIZE);
     Strlcat(logpath, "dsc.log", PAL_MAX_PATH_SIZE);
 #endif
-    DSCLog_Open(logpath, OMI_VERBOSE);
+    DSCLog_Open(logpath, OMI_WARNING);
     return 0;
 }
 
