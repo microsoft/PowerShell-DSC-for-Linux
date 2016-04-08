@@ -17,9 +17,9 @@ HOME=$DSC_ETC_DIR gpg --no-default-keyring  --keyring $DSC_ETC_DIR/$KEYRING_NAME
 RETVAL=$?
 
 if [ "<CONFIG_SYSCONFDIR_DSC>" = "omsagent" ]; then
-    chown omsagent $DSC_ETC_DIR/$KEYRING_NAME
-else
-    chown root $DSC_ETC_DIR/$KEYRING_NAME
+    if [ `id -u` = 0 ] ; then
+        chown omsagent $DSC_ETC_DIR/$KEYRING_NAME
+    fi
 fi
 
 exit $RETVAL
