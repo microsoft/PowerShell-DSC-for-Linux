@@ -16,31 +16,33 @@ OPTIONS:
 --RefreshMode (Pull|Push)
 """)
 
-# register Linux DSC agent with AA
+# Apply a DSC meta configuration based on a template
 Variables = dict()
-Defines = []
 
 # Parse command line arguments
 args = []
 optlist = []
-for arg in sys.argv[1:]:
-    if len(arg) < 2:
-        # Must be a file
-        args.append(arg)
-        continue
-    
-    if arg[0:2] == "--":
-        tokens = arg[2:].split("=",1)
-        current_option = tokens[0]
-        if len(tokens) == 1:
-            # This is a define
-            Defines.append(current_option.lower())
-            Variables[current_option] = ""
-        else:
-            # This is a variable
-            Variables[current_option] = tokens[1]
-    else:
-        args.append(arg)
+
+command_line_length = len(sys.argv)
+i = 0
+inArgument = False
+currentArgument = ""
+while i < command_line_length:
+   arg = sys.argv[i]
+   if i == 0:
+      # skip the program name
+      pass
+   elif inArgument:
+      Variables[currentArgument] = arg
+      inArgument = False
+   else:
+      if arg[0:2] == "--":
+         inArgument = True
+         currentArgument = arg[2:].lower()
+      else:
+         # The rest are not options
+         args = sys.argv[i:]
+   i += 1
 
 AcceptableOptions = ["registrationkey", "serverurl", "refreshfrequencymins", "configurationmodefrequencymins", "configurationmode", "refreshmode"]
 
@@ -60,7 +62,7 @@ if optionsValid == False:
 
 # If RefreshMode == Pull (which is default), then RegistrationKey and ServerURL are required.
 RefreshMode = "Pull"
-if "refreshmode" in Varables:
+if "refreshmode" in Variables:
    RefreshMode = Variables["refreshmode"]
 
 if RefreshMode == "Pull":
