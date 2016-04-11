@@ -454,7 +454,7 @@ INTERNAL_Intlstr_Define2( ID_PULL_CURLPERFORMFAILED,
 			  ID_PULL_CURLPERFORMFAILED,
       			  _In_z_ const PAL_Char*, firstString,
                           _In_z_ const PAL_Char*, secondString,
-                 	  "cURL failed to perform on this base url: " Intlstr_tstr(1)  " with this error message: "  Intlstr_tstr(2) ".")
+                 	  "cURL failed to perform on this base url: " Intlstr_tstr(1)  " with this error message: "  Intlstr_tstr(2) ". Make sure cURL and SSL libraries are up to date.")
 
 INTERNAL_Intlstr_Define0( ID_PULL_INVALIDRESPONSEFROMSERVER,
 			  ID_PULL_INVALIDRESPONSEFROMSERVER,
