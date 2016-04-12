@@ -1998,6 +1998,18 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(r[0] == 0,"Inventory_Marshall('*', " + self.provider + "provider, False,'')  should return == 0")
         print(repr(r[1]))
 
+    def testInventoryMarshallControllerWildcard(self):
+        r=nxService.Inventory_Marshall('*', '*', False,'')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('*', " + self.provider + "provider, False,'')  should return == 0")
+        print(repr(r[1]))
+
+    def testInventoryMarshallControllerError(self):
+        l = ['systemd', 'upstart', 'init']
+        l.remove(self.provider)
+        r=nxService.Inventory_Marshall('*', l[0], False,'')
+        self.assertTrue(r[0] == -1,"Inventory_Marshall('*', " + self.provider + "provider, False,'')  should return == -1")
+        print(repr(r[1]))
+
     def testInventoryMarshallDummyService(self):
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
@@ -2031,6 +2043,7 @@ class nxServiceTestCases(unittest2.TestCase):
                         'CheckInventory("dummy?*ice", self.provider, True, "running", r[1]) should == True')
 
     def testInventoryMarshallDummyServiceError(self):
+        time.sleep(3)
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
         r=nxService.Inventory_Marshall('Gummy_service', self.provider, True,'')
@@ -2039,6 +2052,7 @@ class nxServiceTestCases(unittest2.TestCase):
                         'CheckInventory("Gummy_service", self.provider, True, "", r[1]) should == False')
 
     def testInventoryMarshallDummyServiceFilterNameError(self):
+        time.sleep(3)
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
         r=nxService.Inventory_Marshall('dummy?*rice', self.provider, True,'')
@@ -2047,6 +2061,7 @@ class nxServiceTestCases(unittest2.TestCase):
                         'CheckInventory("dummy?*rice", self.provider, True, "", r[1]) should == False')
 
     def testInventoryMarshallDummyServiceFilterEnabledError(self):
+        time.sleep(3)
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
         r=nxService.Inventory_Marshall('dummy?*ice', self.provider, True,'')
@@ -2055,6 +2070,7 @@ class nxServiceTestCases(unittest2.TestCase):
                         'CheckInventory("dummy?*ice", self.provider, False, "", r[1]) should == False')
 
     def testInventoryMarshallDummyServiceFilterStateError(self):
+        time.sleep(3)
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
         r=nxService.Inventory_Marshall('dummy?*ice', self.provider, True,'stopped')
@@ -3457,3 +3473,4 @@ if __name__ == '__main__':
     s20=unittest2.TestLoader().loadTestsFromTestCase(nxOMSCustomLogTestCases)
     alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20])
     unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)
+    )
