@@ -1,0 +1,10 @@
+[ClassVersion("1.0.0"),FriendlyName("nxAvailableUpdates")]
+class MSFT_nxAvailableUpdatesResource:OMI_BaseResource
+{
+  [Key] string Name;
+  [read] string BuildDate;
+  [read] string Repository;
+  [read] string Version;
+  [read] string Architecture;
+
+};
