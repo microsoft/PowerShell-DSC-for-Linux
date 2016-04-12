@@ -112,10 +112,11 @@ def Inventory_Marshall(Name, Controller, Enabled, State):
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
     if Controller == '':
-        return [-1], {"__Inventory":{}}
+        return -1, {"__Inventory":{}}
     sc = ServiceContext(Name, Controller, Enabled, State)
     sc.FilterEnabled = FilterEnabled
-    GetAll(sc)
+    if not GetAll(sc):
+        return  -1, {"__Inventory":{}}
     for srv in sc.services_list:
         srv['Name'] = protocol.MI_String(srv['Name'])
         srv['Controller'] = protocol.MI_String(srv['Controller'])
@@ -1334,11 +1335,11 @@ def GetOne(sc):
 
 def GetAll(sc):
     if sc.Controller == 'init':
-        InitdGetAll(sc)
+        return InitdGetAll(sc)
     if sc.Controller == 'systemd':
-        SystemdGetAll(sc)
+        return SystemdGetAll(sc)
     if sc.Controller == 'upstart':
-        UpstartGetAll(sc)
+        return UpstartGetAll(sc)
 
 def GetRunlevels(sc):
     if sc.runlevels_d == None:
@@ -1365,6 +1366,10 @@ def GetRunlevels(sc):
 
 def SystemdGetAll(sc):
     d = {}
+    if os.system('which systemctl') != 0:
+        Print("Error: Controller incorectly specified", file=sys.stderr)
+        LG().Log('ERROR', "Error: 'Controller' incorrectly specified.")
+        return False
     Name=sc.Name
     if '*' not in Name and len(Name) > 0:
         Name = Name.replace('.service','')
@@ -1395,9 +1400,14 @@ def SystemdGetAll(sc):
         else:
             d['Runlevels'] = subs.sub('',s[1])
         sc.services_list.append(copy.deepcopy(d))
+    return True
 
 def UpstartGetAll(sc):
     d={}
+    if os.system('which initctl') != 0:
+        Print("Error: Controller incorectly specified", file=sys.stderr)
+        LG().Log('ERROR', "Error: 'Controller' incorrectly specified.")
+        return False
     cmd = "initctl list  | sed 's/[(].*[)] //g' | tr ', ' ' ' | awk '{print $1,$2}'"
     code, txt = RunGetOutput(cmd, False, False)
     services=txt.splitlines()
@@ -1428,9 +1438,14 @@ def UpstartGetAll(sc):
         code, out = RunGetOutput(cmd, False, False) 
         d['Runlevels'] = out[1:]
         sc.services_list.append(copy.deepcopy(d))
+    return True
 
 def InitdGetAll(sc):
     d={}
+    if os.system('which chkconfig') != 0:
+        Print("Error: Controller incorectly specified", file=sys.stderr)
+        LG().Log('ERROR', "Error: 'Controller' incorrectly specified.")
+        return False
     cmd = 'chkconfig -l | grep -vE "based| off"'
     code, txt = RunGetOutput(cmd, False, False)
     services=txt.splitlines()
@@ -1458,6 +1473,7 @@ def InitdGetAll(sc):
             continue
         d['Runlevels'] = reduce(lambda x, y: x + ' ' + y, s[1:])
         sc.services_list.append(copy.deepcopy(d))
+    return True
 
 def GetController():
     if UpstartExists():
