@@ -7,13 +7,14 @@ import shutil
 
 def usage():
    print("""Usage: Register.py [OPTIONS]
-OPTIONS:
---RegistrationKey KEY
---ServerURL URL
---RefreshFrequencyMins NUM
---ConfigurationModeFrequencyMins NUM
---ConfigurationMode MODE
---RefreshMode (Pull|Push)
+OPTIONS (case insensitive):
+ --RegistrationKey KEY
+ --ServerURL URL
+ --RefreshFrequencyMins NUM                                          default=30
+ --ConfigurationModeFrequencyMins NUM                                default=15
+ --ConfigurationMode (ApplyAndMonitor,ApplyAndAutoCorrect,ApplyOnly) default=ApplyAndMonitor
+ --RefreshMode (Pull|Push)                                           default=Pull
+ --Help
 """)
 
 # Apply a DSC meta configuration based on a template
@@ -27,12 +28,15 @@ command_line_length = len(sys.argv)
 i = 0
 inArgument = False
 currentArgument = ""
+arg = ""
 while i < command_line_length:
    arg = sys.argv[i]
    if i == 0:
       # skip the program name
-      pass
-   elif inArgument:
+      i += 1
+      continue
+
+   if inArgument:
       Variables[currentArgument] = arg
       inArgument = False
    else:
@@ -43,8 +47,11 @@ while i < command_line_length:
          # The rest are not options
          args = sys.argv[i:]
    i += 1
+   
+if inArgument:
+   Variables[currentArgument] = arg
 
-AcceptableOptions = ["registrationkey", "serverurl", "refreshfrequencymins", "configurationmodefrequencymins", "configurationmode", "refreshmode"]
+AcceptableOptions = ["registrationkey", "serverurl", "refreshfrequencymins", "configurationmodefrequencymins", "configurationmode", "refreshmode", "help"]
 
 if "help" in Variables:
    usage()
@@ -68,9 +75,11 @@ if "refreshmode" in Variables:
 if RefreshMode == "Pull":
    if "registrationkey" not in Variables:
       print("Error: RegistrationKey must be specified for Pull mode")
+      usage()
       sys.exit(1)
    if "serverurl" not in Variables:
       print("Error: ServerURL must be specified for Pull mode")
+      usage()
       sys.exit(1)
 
 ConfigurationMode = "ApplyAndMonitor"
