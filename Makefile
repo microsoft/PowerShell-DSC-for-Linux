@@ -76,6 +76,7 @@ endif
 
 dsc098: lcm098 providers
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Modules
 	.  omi-1.0.8/output_openssl_0.9.8/config.mak; \
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
@@ -97,6 +98,7 @@ dsc098: lcm098 providers
 
 dsc100: lcm100 providers
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Modules
 	.  omi-1.0.8/output_openssl_1.0.0/config.mak; \
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
