@@ -1793,7 +1793,7 @@ class nxServiceTestCases(unittest2.TestCase):
         """
         Setup test resources
         """
-        self.provider = None
+        self.controller = None
         nxService.SetShowMof(True)
         print self.id() + '\n'
         dist=platform.dist()[0].lower()
@@ -1814,7 +1814,7 @@ class nxServiceTestCases(unittest2.TestCase):
         elif 'debian' in dist:
             init_file=debian_init_file
         if nxService.SystemdExists():
-            self.provider='systemd'
+            self.controller='systemd'
             try:
                 if 'ubuntu' in dist or 'debian' in dist or 'cent' in dist:
                     nxService.WriteFile('/lib/systemd/system/dummy_service.service',init_file)
@@ -1828,7 +1828,7 @@ class nxServiceTestCases(unittest2.TestCase):
                 print repr(sys.exc_info())
             os.system('systemctl --system daemon-reload &> /dev/null')
         elif nxService.UpstartExists():
-            self.provider='upstart'
+            self.controller='upstart'
             try:
                 nxService.WriteFile('/etc/default/dummy_service',upstart_etc_default)
                 os.chmod('/etc/default/dummy_service',0744)
@@ -1841,7 +1841,7 @@ class nxServiceTestCases(unittest2.TestCase):
                 print repr(sys.exc_info())
 
         elif nxService.InitExists():
-            self.provider='init'
+            self.controller='init'
             try:
                 nxService.WriteFile('/etc/init.d/dummy_service',init_file)
                 os.chmod('/etc/init.d/dummy_service',0744)
@@ -1864,12 +1864,12 @@ class nxServiceTestCases(unittest2.TestCase):
             else:
                 os.system('rm /usr/sbin/dummy_service.py /etc/rc.d/dummy_service &> /dev/null')
             os.system('systemctl --system daemon-reload &> /dev/null')
-        elif nxService.InitExists():
-            os.system('chkconfig --del dummy_service &> /dev/null')
-            os.system('rm /usr/sbin/dummy_service.py /etc/init.d/dummy_service &> /dev/null')
         elif nxService.UpstartExists():
             os.system('update-rc.d -f dummy_service remove &> /dev/null')
             os.system('rm /usr/sbin/dummy_service.py /etc/init/dummy_service.conf /etc/init.d/dummy_service /etc/default/dummy_service &> /dev/null')
+        elif nxService.InitExists():
+            os.system('chkconfig --del dummy_service &> /dev/null')
+            os.system('rm /usr/sbin/dummy_service.py /etc/init.d/dummy_service &> /dev/null')
             
         time.sleep(1)
         os.system("ps -ef | grep -v grep | grep dummy_service | awk '{print $2}' | xargs -L1 kill &> /dev/null")
@@ -1923,147 +1923,155 @@ class nxServiceTestCases(unittest2.TestCase):
         return retval,d
 
     def testSetEnable(self):
-        provider=self.provider
-        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        controller=self.controller
+        self.assertTrue(nxService.Set_Marshall("dummy_service", controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+controller+'", True, "running") should return ==[0]')
 
     def testSetDisable(self):
-        provider=self.provider
-        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
-        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, False, "stopped")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
+        controller=self.controller
+        self.assertTrue(nxService.Set_Marshall("dummy_service", controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+controller+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", controller, False, "stopped")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+controller+'", False, "stopped") should return ==[0]')
 
     def testSetEnableError(self):
-        provider=self.provider
-        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, True, "running")==
-                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
+        controller=self.controller
+        self.assertTrue(nxService.Set_Marshall("yummyservice", controller, True, "running")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+controller+'", True, "running") should return ==[-1]')
 
     def testSetDisableError(self):
-        provider=self.provider
-        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, False, "stopped")==
-                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
+        controller=self.controller
+        self.assertTrue(nxService.Set_Marshall("yummyservice", controller, False, "stopped")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+controller+'", False, "stopped") should return ==[-1]')
 
     def testGetEnable(self):
-        provider=self.provider
-        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
-        r=nxService.Get_Marshall("dummy_service", provider, True, "running")
+        controller=self.controller
+        self.assertTrue(nxService.Set_Marshall("dummy_service", controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+controller+'", True, "running") should return ==[0]')
+        r=nxService.Get_Marshall("dummy_service", controller, True, "running")
         print repr(r[1])
-        self.assertTrue(check_values(r,self.make_MI(0,"dummy_service", provider, True, "running",None,None,None)) == True
-                        ,'nxService.Get_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
+        self.assertTrue(check_values(r,self.make_MI(0,"dummy_service", controller, True, "running",None,None,None)) == True
+                        ,'nxService.Get_Marshall("dummy_service", "'+controller+'", True, "running") should return ==[0]')
 
     def testGetDisable(self):
-        provider=self.provider
-        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", True, "running") should return ==[0]')
-        self.assertTrue(nxService.Set_Marshall("dummy_service", provider, False, "stopped")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+provider+'", False, "stopped") should return ==[0]')
-        r=nxService.Get_Marshall("dummy_service", provider, False, "stopped")
+        controller=self.controller
+        self.assertTrue(nxService.Set_Marshall("dummy_service", controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+controller+'", True, "running") should return ==[0]')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", controller, False, "stopped")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+controller+'", False, "stopped") should return ==[0]')
+        r=nxService.Get_Marshall("dummy_service", controller, False, "stopped")
         print 'GET:'+repr(r)
-        self.assertTrue(check_values(r,self.make_MI(0,"dummy_service", provider, False, "stopped", None, None, None)) == True
-                        ,'nxService.Get_Marshall("dummy_service", "'+provider+'", False, "stopped") should return ==[0,"dummy_service", provider, False, "stopped"]')
+        self.assertTrue(check_values(r,self.make_MI(0,"dummy_service", controller, False, "stopped", None, None, None)) == True
+                        ,'nxService.Get_Marshall("dummy_service", "'+controller+'", False, "stopped") should return ==[0,"dummy_service", controller, False, "stopped"]')
 
     def testGetEnableError(self):
-        provider=self.provider
-        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, True, "running")==
-                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", True, "running") should return ==[-1]')
-        r=nxService.Get_Marshall("yummyservice", provider, True, "running")
+        controller=self.controller
+        self.assertTrue(nxService.Set_Marshall("yummyservice", controller, True, "running")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+controller+'", True, "running") should return ==[-1]')
+        r=nxService.Get_Marshall("yummyservice", controller, True, "running")
         print 'GET:'+repr(r)
-        self.assertTrue(check_values(r,self.make_MI(0,"yummyservice", provider, True, "running", None, None, None)) == False
-                        ,'nxService.Get_Marshall("yummyservice", "'+provider+'", True, "running")[0:5] should return ==[-1,"yummyservice", provider, True, "running"]')
+        self.assertTrue(check_values(r,self.make_MI(0,"yummyservice", controller, True, "running", None, None, None)) == False
+                        ,'nxService.Get_Marshall("yummyservice", "'+controller+'", True, "running")[0:5] should return ==[-1,"yummyservice", controller, True, "running"]')
 
     def testGetDisableError(self):
-        provider=self.provider
-        self.assertTrue(nxService.Set_Marshall("yummyservice", provider, False, "stopped")==
-                        [-1],'nxService.Set_Marshall("yummyservice", "'+provider+'", False, "stopped") should return ==[-1]')
-        r=nxService.Get_Marshall("yummyservice", provider, False, "stopped")
+        controller=self.controller
+        self.assertTrue(nxService.Set_Marshall("yummyservice", controller, False, "stopped")==
+                        [-1],'nxService.Set_Marshall("yummyservice", "'+controller+'", False, "stopped") should return ==[-1]')
+        r=nxService.Get_Marshall("yummyservice", controller, False, "stopped")
         print 'GET:'+repr(r)
-        self.assertTrue(check_values(r,self.make_MI(0,"yummyservice", provider, False, "stopped", None, None, None)) == False
-                        ,'nxService.Get_Marshall("yummyservice", "'+provider+'", False, "stopped")[0:5] should return ==[-1,"yummyservice", provider, False, "stopped"]')
+        self.assertTrue(check_values(r,self.make_MI(0,"yummyservice", controller, False, "stopped", None, None, None)) == False
+                        ,'nxService.Get_Marshall("yummyservice", "'+controller+'", False, "stopped")[0:5] should return ==[-1,"yummyservice", controller, False, "stopped"]')
 
     def testInventoryMarshall(self):
-        r=nxService.Inventory_Marshall('*', self.provider, False,'')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('*', " + self.provider + "provider, False,'')  should return == 0")
+        r=nxService.Inventory_Marshall('*', self.controller, None,'')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('*', " + self.controller + ", None,'')  should return == 0")
         print repr(r[1])
 
     def testInventoryMarshallControllerWildcard(self):
-        r=nxService.Inventory_Marshall('*', '*', False,'')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('*', " + self.provider + "provider, False,'')  should return == 0")
+        r=nxService.Inventory_Marshall('*', '*', None,'')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('*', '*', None,'')  should return == 0")
         print repr(r[1])
 
     def testInventoryMarshallControllerError(self):
-        l = ['systemd', 'upstart', 'init']
-        l.remove(self.provider)
-        r=nxService.Inventory_Marshall('*', l[0], False,'')
-        self.assertTrue(r[0] == -1,"Inventory_Marshall('*', " + self.provider + "provider, False,'')  should return == -1")
+        controllers = ['systemd', 'upstart', 'init']
+        controllers.remove(self.controller)
+        r=nxService.Inventory_Marshall('*', controllers[0], None,'')
+        self.assertTrue(r[0] == -1,"Inventory_Marshall('*', " + self.controller + ", None,'')  should return == -1")
         print repr(r[1])
 
     def testInventoryMarshallDummyService(self):
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy_service', self.provider, True,'')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy_service', " + self.provider + "provider, True,'')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy_service', self.provider, True, '', r[1]) == True, \
-                        'CheckInventory("dummy_service", self.provider, True, "", r[1]) should == True')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+        r=nxService.Inventory_Marshall('dummy_service', self.controller, None,'')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy_service', " + self.controller + ", None,'')  should return == 0")
+        self.assertTrue(self.CheckInventory('dummy_service', self.controller, None, '', r[1]) == True, \
+                        'CheckInventory("dummy_service", self.controller, None, "", r[1]) should == True')
 
     def testInventoryMarshallDummyServiceFilterName(self):
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy?*ice', self.provider, True,'')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.provider + "provider, True,'')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy?*ice', self.provider, True, '', r[1]) == True, \
-                        'CheckInventory("dummy?*ice", self.provider, True, "", r[1]) should == True')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+        r=nxService.Inventory_Marshall('dummy?*ice', self.controller, None,'')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.controller + ", None,'')  should return == 0")
+        self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, '', r[1]) == True, \
+                        'CheckInventory("dummy?*ice", ' + self.controller + ', None, "", r[1]) should == True')
 
     def testInventoryMarshallDummyServiceFilterEnabled(self):
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy?*ice', self.provider, True,'')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.provider + "provider, True,'')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy?*ice', self.provider, True, '', r[1]) == True, \
-                        'CheckInventory("dummy?*ice", self.provider, True, "", r[1]) should == True')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+        r=nxService.Inventory_Marshall('dummy?*ice', self.controller, True,'')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.controller + ", True,'')  should return == 0")
+        self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, True, '', r[1]) == True, \
+                        'CheckInventory("dummy?*ice", ' + self.controller + ', True, "", r[1]) should == True')
 
     def testInventoryMarshallDummyServiceFilterState(self):
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy?*ice', self.provider, True,'running')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.provider + "provider, True,'running')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy?*ice', self.provider, True, 'running', r[1]) == True, \
-                        'CheckInventory("dummy?*ice", self.provider, True, "running", r[1]) should == True')
+        # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
+        time.sleep(3)
+        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+        r=nxService.Inventory_Marshall('dummy?*ice', self.controller, None,'running')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.controller + ", None,'running')  should return == 0")
+        self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, 'running', r[1]) == True, \
+                        'CheckInventory("dummy?*ice", ' + self.controller + ', None, "running", r[1]) should == True')
 
     def testInventoryMarshallDummyServiceError(self):
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('Gummy_service', self.provider, True,'')
-        self.assertTrue(r[0] == 0, "Inventory_Marshall('Gummy_service', " + self.provider + "provider, True,'')  should return == 0")
-        self.assertTrue(self.CheckInventory('Gummy_service', self.provider, True, '', r[1]) == False, \
-                        'CheckInventory("Gummy_service", self.provider, True, "", r[1]) should == False')
+        # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
+        time.sleep(3)
+        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+        r=nxService.Inventory_Marshall('Gummy_service', self.controller, None,'')
+        self.assertTrue(r[0] == 0, "Inventory_Marshall('Gummy_service', " + self.controller + ", None,'')  should return == 0")
+        self.assertTrue(self.CheckInventory('Gummy_service', self.controller, None, '', r[1]) == False, \
+                        'CheckInventory("Gummy_service", self.controller, None, "", r[1]) should == False')
 
     def testInventoryMarshallDummyServiceFilterNameError(self):
+        # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
         time.sleep(3)
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy?*rice', self.provider, True,'')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*rice', " + self.provider + "provider, True,'')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy?*rice', self.provider, True, '', r[1]) == False, \
-                        'CheckInventory("dummy?*rice", self.provider, True, "", r[1]) should == False')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+        r=nxService.Inventory_Marshall('dummy?*rice', self.controller, None,'')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*rice', " + self.controller + ", None,'')  should return == 0")
+        self.assertTrue(self.CheckInventory('dummy?*rice', self.controller, None, '', r[1]) == False, \
+                        'CheckInventory("dummy?*rice", self.controller, None, "", r[1]) should == False')
 
     def testInventoryMarshallDummyServiceFilterEnabledError(self):
+        # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
         time.sleep(3)
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy?*ice', self.provider, True,'')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.provider + "provider, True,'')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy?*ice', self.provider, False, '', r[1]) == False, \
-                        'CheckInventory("dummy?*ice", self.provider, False, "", r[1]) should == False')
+        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+        r=nxService.Inventory_Marshall('dummy?*ice', self.controller, False,'')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.controller + ", False,'')  should return == 0")
+        self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, False, '', r[1]) == False, \
+                        'CheckInventory("dummy?*ice", ' + self.controller + ', False, "", r[1]) should == False')
 
     def testInventoryMarshallDummyServiceFilterStateError(self):
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.provider, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.provider+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy?*ice', self.provider, True,'stopped')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.provider + "provider, True,'stopped')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy?*ice', self.provider, True, 'stopped', r[1]) == False, \
-                        'CheckInventory("dummy?*ice", self.provider, True, "stopped", r[1]) should == False')
+        # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
+        time.sleep(3)
+        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+        r=nxService.Inventory_Marshall('dummy?*ice', self.controller, None,'stopped')
+        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.controller + ", None,'stopped')  should return == 0")
+        self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, 'stopped', r[1]) == False, \
+                        'CheckInventory("dummy?*ice", ' + self.controller + ', None, "stopped", r[1]) should == False')
 
 
 class nxSshAuthorizedKeysTestCases(unittest2.TestCase):

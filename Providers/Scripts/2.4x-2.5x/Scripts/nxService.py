@@ -1260,8 +1260,8 @@ def Get(Name, Controller, Enabled, State):
     exit_code = 0
 
     if not sc.Controller:
-        Print("Error: Controller not specified", file=sys.stderr)
-        LG().Log('ERROR', "Error: Controller not specified")
+        Print("Error: Controller not specified.", file=sys.stderr)
+        LG().Log('ERROR', "Error: Controller not specified.")
         exit_code = -1
     elif sc.Controller == "systemd":
         if not ServiceExistsInSystemd(sc):
@@ -1349,8 +1349,8 @@ def GetRunlevels(sc):
 def SystemdGetAll(sc):
     d = {}
     if os.system('which systemctl') != 0:
-        Print("Error: Controller incorectly specified", file=sys.stderr)
-        LG().Log('ERROR', "Error: 'Controller' incorrectly specified.")
+        Print("Error: 'Controller' = " + sc.Controller + " is incorrectly specified.", file=sys.stderr)
+        LG().Log('ERROR', "Error: 'Controller' = " + sc.Controller + " is incorrectly specified.")
         return False
     Name=sc.Name
     if '*' not in Name and len(Name) > 0:
@@ -1386,24 +1386,35 @@ def SystemdGetAll(sc):
 
 def UpstartGetAll(sc):
     d={}
+    names={}
     if os.system('which initctl') != 0:
-        Print("Error: Controller incorectly specified", file=sys.stderr)
-        LG().Log('ERROR', "Error: 'Controller' incorrectly specified.")
+        Print("Error: 'Controller' = " + sc.Controller + " is incorrectly specified.", file=sys.stderr)
+        LG().Log('ERROR', "Error: 'Controller' = " + sc.Controller + " is incorrectly specified.")
         return False
     cmd = "initctl list  | sed 's/[(].*[)] //g' | tr ', ' ' ' | awk '{print $1,$2}'"
     code, txt = RunGetOutput(cmd, False, False)
-    services=txt.splitlines()
+    services = txt.splitlines()
+    cmd = "service --status-all &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile"
+    code, txt = RunGetOutput(cmd, False, False)
+    txt = txt.replace('[','')
+    txt = txt.replace(']','')
+    services.extend(txt.splitlines())
     for srv in services:
         if len(srv) == 0:
             continue
         s=srv.split()
+        if len(s[0]) == 1: #swap them.
+            s.reverse()
         d['Name'] = s[0]
         if len(sc.Name) and not fnmatch.fnmatch(d['Name'],sc.Name):
             continue
+        if d['Name'] in names.keys():
+            continue
+        names[d['Name']] = None
         d['Controller'] =  sc.Controller
         d['Description'] = ''
         d['State'] = 'stopped'
-        if 'running' in s[1]:
+        if 'running' in s[1] or '+' in s[1]:
             d['State'] = 'running'
         if len(sc.State) and sc.State != d['State'].lower():
             continue
@@ -1416,17 +1427,20 @@ def UpstartGetAll(sc):
         d['Enabled'] = True
         if sc.FilterEnabled and sc.Enabled != d['Enabled']:
             continue
-        cmd = 'initctl show-config ' + d['Name'] + ' | grep -E "start |stop " | tr "\n" " " | tr -s " " '
-        code, out = RunGetOutput(cmd, False, False) 
-        d['Runlevels'] = out[1:]
+        if len(s[1]) > 1:
+            cmd = 'initctl show-config ' + d['Name'] + ' | grep -E "start |stop " | tr "\n" " " | tr -s " " '
+            code, out = RunGetOutput(cmd, False, False) 
+            d['Runlevels'] = out[1:]
+        else:
+            d['Runlevels'] = GetRunlevels(sc)
         sc.services_list.append(copy.deepcopy(d))
     return True
 
 def InitdGetAll(sc):
     d={}
     if os.system('which chkconfig') != 0:
-        Print("Error: Controller incorectly specified", file=sys.stderr)
-        LG().Log('ERROR', "Error: 'Controller' incorrectly specified.")
+        Print("Error: 'Controller' = " + sc.Controller + " is incorrectly specified.", file=sys.stderr)
+        LG().Log('ERROR', "Error: 'Controller' = " + sc.Controller + " is incorrectly specified.")
         return False
     cmd = 'chkconfig -l | grep -vE "based| off"'
     code, txt = RunGetOutput(cmd, False, False)
