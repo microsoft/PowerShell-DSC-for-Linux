@@ -226,7 +226,7 @@ for prov in ${{PROVIDERS}}; do
 done
 
 #if BUILD_OMS == 1
-/usr/sbin/usermod -g omiusers omsagent
+/usr/sbin/usermod -g omiusers omsagent 1> /dev/null 2> /dev/null
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
 chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
 chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
