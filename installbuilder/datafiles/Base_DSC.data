@@ -298,8 +298,8 @@ fi
 
 cp -f /opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
 cp -f /opt/microsoft/omsconfig/etc/Inventory.mof /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
-chown omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
-chgrp omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
+chown omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
+chgrp omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 /opt/microsoft/omsagent/bin/service_control reload
 
 #endif
