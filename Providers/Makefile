@@ -71,7 +71,6 @@ PROVIDERS+=nxPackage
 PROVIDERS+=nxUser
 PROVIDERS+=nxGroup
 PROVIDERS+=nxOMSPlugin
-PROVIDERS+=nxInventoryMOF
 PROVIDERS+=nxAvailableUpdates
 else
 PROVIDERS:=nxFile
@@ -91,7 +90,6 @@ PROVIDERS+=nxArchive
 PROVIDERS+=nxMySqlDatabase
 PROVIDERS+=nxMySqlGrant
 PROVIDERS+=nxMySqlUser
-PROVIDERS+=nxInventoryMOF
 PROVIDERS+=nxAvailableUpdates
 endif
 

@@ -1,7 +1,0 @@
-[ClassVersion("1.0.0"), Description("The configuration provider for inventory collection."), FriendlyName("nxInventoryMOF")]
-class MSFT_nxInventoryMOFResource:OMI_BaseResource
-{
-  [Key] string DestinationPath;
-  [Write] string MOFContents;
-
-};
