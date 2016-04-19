@@ -1619,7 +1619,7 @@ case "$1" in
         $0 start
         ;;
     status)
-        status_of_proc $WAZD_BIN && exit 0 || exit $?
+	status_of_proc -p $WAZD_PID $WAZD_BIN && exit 0 || exit $?
         ;;
     *)
         log_success_msg "Usage: /etc/init.d/dummy_service {start|stop|force-reload|restart|status}"

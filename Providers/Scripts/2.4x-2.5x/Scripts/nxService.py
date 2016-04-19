@@ -244,7 +244,8 @@ systemctl_path = "/usr/bin/systemctl"
 upstart_start_path = "/sbin/start"
 upstart_stop_path = "/sbin/stop"
 upstart_status_path = "/sbin/status"
-initd_service = "/sbin/service"
+code, out = RunGetOutput('which service', False, False)
+initd_service = out.strip('\n')
 initd_chkconfig = "/sbin/chkconfig"
 initd_invokerc = "/usr/sbin/invoke-rc.d"
 initd_updaterc = "/usr/sbin/update-rc.d"
@@ -793,7 +794,8 @@ def ServiceExistsInInit(sc):
         [check_state_program, sc.Name, "status"])
 
     if "unrecognized service" in process_stderr \
-           or "no such service" in process_stderr:
+           or "no such service" in process_stderr \
+           or "not found" in process_stderr:
         Print(process_stderr, file=sys.stderr)
         LG().Log('INFO', process_stderr)
         return False
@@ -1323,27 +1325,28 @@ def GetAll(sc):
     if sc.Controller == 'upstart':
         return UpstartGetAll(sc)
 
-def GetRunlevels(sc):
+def GetRunlevels(sc,Name):
     if sc.runlevels_d == None:
         sc.runlevels_d = {}
         cmd="file /etc/rc*.d/* | grep link | awk '{print $5,$1}' | sort"
         code, out = RunGetOutput(cmd, False, False)
         for line in out.splitlines():
+            line = line.replace("'",'')
             srv = line.split(' ')[0]
             rl = line.split(' ')[1]
             n = os.path.basename(srv)
             if n not in sc.runlevels_d.keys():
                 sc.runlevels_d[n]={}
-            if 'path' not in sc.runlevels_d[n].keys():
-                sc.runlevels_d[n]['path']=srv.replace('..','/etc')
-            if 'runlevels' not in sc.runlevels_d[n].keys():
-                sc.runlevels_d[n]['runlevels']=''
+            if 'Path' not in sc.runlevels_d[n].keys():
+                sc.runlevels_d[n]['Path']=srv.replace('..','/etc')
+            if 'Runlevels' not in sc.runlevels_d[n].keys():
+                sc.runlevels_d[n]['Runlevels']=''
             s='off'
-            if rl[11] == 's':
+            if rl[11].lower() == 's':
                 s='on'
-            sc.runlevels_d[n]['runlevels'] += rl[7]+':'+s+ ' '
-    if sc.Name in sc.runlevels_d.keys():
-        return sc.runlevels_d[sc.Name]
+            sc.runlevels_d[n]['Runlevels'] += rl[7]+':'+s+ ' '
+    if Name in sc.runlevels_d.keys():
+        return sc.runlevels_d[Name]
     return None
 
 def SystemdGetAll(sc):
@@ -1376,7 +1379,7 @@ def SystemdGetAll(sc):
         d['Enabled'] = 'enabled' in subs.sub('',s[5])
         if sc.FilterEnabled and sc.Enabled != d['Enabled']:
             continue
-        rld=GetRunlevels(sc)
+        rld=GetRunlevels(sc,d['Name'])
         if rld != None and 'Runlevels' in rld.keys():
             d['Runlevels'] = rld['Runlevels']
         else:
@@ -1423,7 +1426,7 @@ def UpstartGetAll(sc):
             d['Path'] = '/etc/init.d/' + s[0]
         elif os.path.exists('/etc/init/' + s[0] + '.conf'):
             d['Path'] = '/etc/init/' + s[0] + '.conf'
-        # 'initclt list' won't show disabled services
+        # 'initctl list' won't show disabled services
         d['Enabled'] = True
         if sc.FilterEnabled and sc.Enabled != d['Enabled']:
             continue
@@ -1432,42 +1435,73 @@ def UpstartGetAll(sc):
             code, out = RunGetOutput(cmd, False, False) 
             d['Runlevels'] = out[1:]
         else:
-            d['Runlevels'] = GetRunlevels(sc)
+            rld=GetRunlevels(sc,d['Name'])
+            if rld != None and 'Runlevels' in rld.keys():
+                d['Runlevels'] = rld['Runlevels']
         sc.services_list.append(copy.deepcopy(d))
     return True
 
 def InitdGetAll(sc):
     d={}
-    if os.system('which chkconfig') != 0:
-        Print("Error: 'Controller' = " + sc.Controller + " is incorrectly specified.", file=sys.stderr)
-        LG().Log('ERROR', "Error: 'Controller' = " + sc.Controller + " is incorrectly specified.")
-        return False
-    cmd = 'chkconfig -l | grep -vE "based| off"'
-    code, txt = RunGetOutput(cmd, False, False)
-    services=txt.splitlines()
+    if os.path.exists(initd_chkconfig):
+        cmd = initd_chkconfig + ' -l | grep -vE "based| off"'
+        code, txt = RunGetOutput(cmd, False, False)
+        services=txt.splitlines()
+        for srv in services:
+            if len(srv) == 0:
+                continue
+            s=srv.split()
+            d['Name'] = s[0]
+            if len(sc.Name) and not fnmatch.fnmatch(d['Name'],sc.Name):
+                continue
+            d['Controller'] =  sc.Controller
+            d['Description'] = ''
+            d['State'] = 'stopped'
+            cmd = 'service ' + s[0] + ' status'
+            code, txt = RunGetOutput(cmd, False, False)
+            if 'running' in txt:
+                d['State'] = 'running'
+            if len(sc.State) and sc.State != d['State'].lower():
+                continue
+            d['Path'] = ''
+            if os.path.exists('/etc/init.d/' + s[0]):
+                d['Path'] = '/etc/init.d/' + s[0]
+            d['Enabled'] = ':on' in srv
+            if sc.FilterEnabled and sc.Enabled != d['Enabled']:
+                continue
+            d['Runlevels'] = reduce(lambda x, y: x + ' ' + y, s[1:])
+            sc.services_list.append(copy.deepcopy(d))
+    else:
+        cmd = initd_service + ' --status-all &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile'
+        code, txt = RunGetOutput(cmd, False, False)
+        txt = txt.replace('[','')
+        txt = txt.replace(']','')
+        services = txt.splitlines()
     for srv in services:
         if len(srv) == 0:
             continue
         s=srv.split()
-        d['Name'] = s[0]
+        d['Name'] = s[1]
         if len(sc.Name) and not fnmatch.fnmatch(d['Name'],sc.Name):
             continue
         d['Controller'] =  sc.Controller
         d['Description'] = ''
         d['State'] = 'stopped'
-        cmd = 'service ' + s[0] + ' status'
-        code, txt = RunGetOutput(cmd, False, False)
-        if 'running' in txt:
+        if '+' in s[0]:
             d['State'] = 'running'
         if len(sc.State) and sc.State != d['State'].lower():
             continue
         d['Path'] = ''
-        if os.path.exists('/etc/init.d/' + s[0]):
-            d['Path'] = '/etc/init.d/' + s[0]
-        d['Enabled'] = ':on' in srv
+        if os.path.exists('/etc/init.d/' + s[1]):
+            d['Path'] = '/etc/init.d/' + s[1]
+        elif os.path.exists('/etc/init/' + s[1] + '.conf'):
+            d['Path'] = '/etc/init/' + s[1] + '.conf'
+        rld=GetRunlevels(sc,d['Name'])
+        if rld != None and 'Runlevels' in rld.keys():
+            d['Runlevels'] = rld['Runlevels']
+        d['Enabled'] = 'on' in d['Runlevels']
         if sc.FilterEnabled and sc.Enabled != d['Enabled']:
             continue
-        d['Runlevels'] = reduce(lambda x, y: x + ' ' + y, s[1:])
         sc.services_list.append(copy.deepcopy(d))
     return True
 
