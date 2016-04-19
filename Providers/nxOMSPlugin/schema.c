@@ -921,7 +921,7 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSPlugin_props[] =
     &MSFT_nxOMSPlugin_Ensure_prop,
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSPlugin_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxOMSPlugin_ClassVersion_qual_value = MI_T("2.0.0");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSPlugin_ClassVersion_qual =
 {
@@ -1801,7 +1801,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSPluginResource_Description_qual =
     &MSFT_nxOMSPluginResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSPluginResource_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxOMSPluginResource_ClassVersion_qual_value = MI_T("2.0.0");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSPluginResource_ClassVersion_qual =
 {
