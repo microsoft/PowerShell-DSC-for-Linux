@@ -1606,7 +1606,7 @@ case "$1" in
         $0 start
         ;;
     status)
-        status_of_proc $WAZD_BIN && exit 0 || exit $?
+	status_of_proc -p $WAZD_PID $WAZD_BIN && exit 0 || exit $?
         ;;
     *)
         log_success_msg "Usage: /etc/init.d/dummy_service {start|stop|force-reload|restart|status}"
@@ -1799,10 +1799,12 @@ class nxServiceTestCases(unittest2.TestCase):
         dist=platform.dist()[0].lower()
         if os.path.exists('/etc/centos-release'):
             dist = 'centos'
+        if os.system('uname -a | grep -i ubuntu') == 0:
+            dist='ubuntu'
         init_file=''
         if 'suse' in dist:
             init_file=suse_init_file
-        elif 'ubuntu' in dist or 'debian' in dist:
+        elif 'ubuntu' in dist:
             if nxService.SystemdExists():
                 init_file=ubuntu_systemd_init_file
         elif 'redhat' in dist:
@@ -1816,7 +1818,7 @@ class nxServiceTestCases(unittest2.TestCase):
         if nxService.SystemdExists():
             self.controller='systemd'
             try:
-                if 'ubuntu' in dist or 'debian' in dist or 'cent' in dist:
+                if 'ubuntu' in dist  or 'cent' in dist:
                     nxService.WriteFile('/lib/systemd/system/dummy_service.service',init_file)
                     os.chmod('/lib/systemd/system/dummy_service.service',0744)
                 else:
