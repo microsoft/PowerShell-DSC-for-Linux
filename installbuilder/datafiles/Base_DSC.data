@@ -55,7 +55,6 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip; release/nxOMSAgent_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_1.0.zip; release/nxOMSPlugin_1.0.zip; 755; ${{RUN_AS_USER}}; root
 
 #else
 
