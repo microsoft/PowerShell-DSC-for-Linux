@@ -29,6 +29,7 @@ os.system("rm -f " + dsc_reportdir + "/*")
 
 p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 stdout, stderr = p.communicate()
+retval = p.returncode
 
 print(stdout)
 print(stderr)
@@ -47,7 +48,9 @@ for f in reportFiles:
 
 final_xml_report = final_xml_report + "".join(values) + "</VALUE.ARRAY></PROPERTY.ARRAY></INSTANCE>"
 
-f = open(dsc_sysconfdir + "/configuration/Inventory.xml", "w")
+f = open(dsc_sysconfdir + "/configuration/Inventory.xml.temp", "w")
 f.write(final_xml_report)
 f.close()
 os.system("rm -f " + dsc_reportdir + "/*")
+os.rename(dsc_sysconfdir + "/configuration/Inventory.xml.temp", dsc_sysconfdir + "/configuration/Inventory.xml")
+sys.exit(retval)
