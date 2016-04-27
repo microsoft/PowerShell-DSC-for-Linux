@@ -107,16 +107,17 @@ def Get_Marshall(Name, Controller, Enabled, State):
         retd[k] = ld[k]
     return retval, retd
 
+
 def Inventory_Marshall(Name, Controller, Enabled, State):
-    FilterEnabled = ( Enabled != None )
+    FilterEnabled = (Enabled != None)
     (Name, Controller, Enabled, State) = init_vars(
         Name, Controller, Enabled, State)
     if Controller == '':
-        return -1, {"__Inventory":{}}
+        return -1, {"__Inventory": {}}
     sc = ServiceContext(Name, Controller, Enabled, State)
     sc.FilterEnabled = FilterEnabled
     if not GetAll(sc):
-        return  -1, {"__Inventory":{}}
+        return -1, {"__Inventory": {}}
     for srv in sc.services_list:
         srv['Name'] = protocol.MI_String(srv['Name'])
         srv['Controller'] = protocol.MI_String(srv['Controller'])
@@ -125,14 +126,14 @@ def Inventory_Marshall(Name, Controller, Enabled, State):
         srv['Path'] = protocol.MI_String(srv['Path'])
         srv['Description'] = protocol.MI_String(srv['Description'])
         srv['Runlevels'] = protocol.MI_String(srv['Runlevels'])
-    Inventory=protocol.MI_InstanceA(sc.services_list)
+    Inventory = protocol.MI_InstanceA(sc.services_list)
     retd = {}
     retd["__Inventory"] = Inventory
     return 0, retd
 
-# ##########################
+#
 # Begin user defined DSC functions
-# ##########################
+#
 
 
 def SetShowMof(a):
@@ -670,7 +671,7 @@ def GetInitState(sc):
         check_state_program = '/usr/sbin/service'
         if os.path.isfile('/usr/sbin/service'):
             check_state_program = '/usr/sbin/service'
-        else: # invoke the service directly
+        else:  # invoke the service directly
             check_state_program = '/etc/init.d/'
     if check_state_program == '/etc/init.d/':
         (process_stdout, process_stderr, retval) = Process(
@@ -1040,7 +1041,7 @@ def ModifyInitService(sc):
     if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
         if os.path.isfile('/usr/sbin/service'):
             check_state_program = '/usr/sbin/service'
-        else: # invoke the service directly
+        else:  # invoke the service directly
             check_state_program = '/etc/init.d/'
         check_enabled_program = initd_updaterc
         if sc.Enabled is True:
@@ -1055,17 +1056,17 @@ def ModifyInitService(sc):
                 # try 'defaults'
                 (process_stdout, process_stderr, retval) = Process(
                 [check_enabled_program, "-f", sc.Name, "defaults"])
-                if retval is not 0 :
+                if retval is not 0:
                     Print("Error: " + check_enabled_program + " -f " +
                           sc.Name + " defaults failed: " + process_stderr,
                           file=sys.stderr)
                     LG().Log('ERROR', "Error: " + check_enabled_program +
                              " -f " + sc.Name + " defaults failed: " + process_stderr)
                     return [-1]
-                if 'already exist' in process_stdout: # we need to remove them first
+                if 'already exist' in process_stdout:  # we need to remove them first
                     (process_stdout, process_stderr, retval) = Process(
                         [check_enabled_program, "-f", sc.Name, "remove"])
-                    if retval is not 0 :
+                    if retval is not 0:
                         Print("Error: " + check_enabled_program + " -f " +
                               sc.Name + " remove failed: " + process_stderr,
                               file=sys.stderr)
@@ -1075,7 +1076,7 @@ def ModifyInitService(sc):
                     # it should work now
                     (process_stdout, process_stderr, retval) = Process(
                         [check_enabled_program, "-f", sc.Name, "defaults"])
-                    if retval is not 0 :
+                    if retval is not 0:
                         Print("Error: " + check_enabled_program + " -f " +
                               sc.Name + " defaults failed: " + process_stderr,
                               file=sys.stderr)
@@ -1113,17 +1114,17 @@ def ModifyInitService(sc):
                 # try 'defaults'
                 (process_stdout, process_stderr, retval) = Process(
                 [check_enabled_program, "-f", sc.Name, "defaults"])
-                if retval is not 0 :
+                if retval is not 0:
                     Print("Error: " + check_enabled_program + " -f " +
                           sc.Name + " defaults failed: " + process_stderr,
                           file=sys.stderr)
                     LG().Log('ERROR', "Error: " + check_enabled_program +
                              " -f " + sc.Name + " defaults failed: " + process_stderr)
                     return [-1]
-                if 'already exist' in process_stdout: # we need to remove them first
+                if 'already exist' in process_stdout:  # we need to remove them first
                     (process_stdout, process_stderr, retval) = Process(
                         [check_enabled_program, "-f", sc.Name, "remove"])
-                    if retval is not 0 :
+                    if retval is not 0:
                         Print("Error: " + check_enabled_program + " -f " +
                               sc.Name + " remove failed: " + process_stderr,
                               file=sys.stderr)
@@ -1133,14 +1134,14 @@ def ModifyInitService(sc):
                     # it should work now
                     (process_stdout, process_stderr, retval) = Process(
                         [check_enabled_program, "-f", sc.Name, "defaults"])
-                    if retval is not 0 :
+                    if retval is not 0:
                         Print("Error: " + check_enabled_program + " -f " +
                               sc.Name + " defaults failed: " + process_stderr,
                               file=sys.stderr)
                         LG().Log('ERROR', "Error: " + check_enabled_program +
                                  " -f " + sc.Name + " defaults failed: " + process_stderr)
                         return [-1]
-                    
+
         elif sc.Enabled is False:
             (process_stdout, process_stderr, retval) = Process(
                 [check_enabled_program, sc.Name, "off"])
@@ -1160,7 +1161,7 @@ def ModifyInitService(sc):
                              " -f " + sc.Name + " remove failed: " + process_stderr)
                     return [-1]
 
-    if sc.State == "running":		
+    if sc.State == "running":
         # don't try to read stdout or stderr as 'service start' comand
         # re-directs them, causing a hang in subprocess.communicate()
         if check_state_program == '/etc/init.d/':
@@ -1329,11 +1330,13 @@ def Get(Name, Controller, Enabled, State):
         GetOne(sc)
     return [exit_code, Name, Controller, Enabled, State, Path, sc.Description, sc.Runlevels]
 
+
 def GetOne(sc):
     GetAll(sc)
     if len(sc.services_list):
-        sc.Description=sc.services_list[0]['Description']
-        sc.Runlevels=sc.services_list[0]['Runlevels']
+        sc.Description = sc.services_list[0]['Description']
+        sc.Runlevels = sc.services_list[0]['Runlevels']
+
 
 def GetAll(sc):
     if sc.Controller == 'init':
@@ -1343,41 +1346,64 @@ def GetAll(sc):
     if sc.Controller == 'upstart':
         return UpstartGetAll(sc)
 
-def GetRunlevels(sc,Name):
+
+def GetRunlevels(sc, Name):
     if sc.runlevels_d == None:
         sc.runlevels_d = {}
-        cmd="file /etc/rc*.d/* | grep link | awk '{print $5,$1}' | sort"
+        cmd = "file /etc/rc*.d/* | grep link | awk '{print $5,$1}' | sort"
         code, out = RunGetOutput(cmd, False, False)
         for line in out.splitlines():
-            line = line.replace("'",'')
+            line = line.replace("'", '')
             srv = line.split(' ')[0]
             rl = line.split(' ')[1]
             n = os.path.basename(srv)
             if n not in sc.runlevels_d.keys():
-                sc.runlevels_d[n]={}
+                sc.runlevels_d[n] = {}
             if 'Path' not in sc.runlevels_d[n].keys():
-                sc.runlevels_d[n]['Path']=srv.replace('..','/etc')
+                sc.runlevels_d[n]['Path'] = srv.replace('..', '/etc')
             if 'Runlevels' not in sc.runlevels_d[n].keys():
-                sc.runlevels_d[n]['Runlevels']=''
-            s='off'
+                sc.runlevels_d[n]['Runlevels'] = ''
+            s = 'off'
             if rl[11].lower() == 's':
-                s='on'
-            sc.runlevels_d[n]['Runlevels'] += rl[7]+':'+s+ ' '
+                s = 'on'
+            sc.runlevels_d[n]['Runlevels'] += rl[7] + ':' + s + ' '
     if Name in sc.runlevels_d.keys():
         return sc.runlevels_d[Name]
     return None
 
+
 def SystemdGetAll(sc):
     d = {}
     if os.system('which systemctl') != 0:
-        Print("Error: 'Controller' = " + sc.Controller + " is incorrectly specified.", file=sys.stderr)
-        LG().Log('ERROR', "Error: 'Controller' = " + sc.Controller + " is incorrectly specified.")
+        Print("Error: 'Controller' = " + sc.Controller +
+              " is incorrectly specified.", file=sys.stderr)
+        LG().Log('ERROR', "Error: 'Controller' = " +
+           sc.Controller + " is incorrectly specified.")
         return False
-    Name=sc.Name
-    if '*' not in Name and len(Name) > 0:
-        Name = Name.replace('.service','')
+    Name = sc.Name
+    if '*' not in Name and '?' not in Name and len(Name) > 0:
+        Name = Name.replace('.service', '')
         Name += '.service'
-    cmd='systemctl -a list-unit-files ' + Name +  '| grep \.service | grep -v "@" | awk \'{print $1}\' | xargs systemctl -a --no-pager --no-legend -p "Names,WantedBy,Description,SubState,FragmentPath,UnitFileState" show'
+    # Do the commands work?
+    # There may be no error detected in our multi-pipe command below.
+    # To keep from returning garbage, we must test the commands.
+    # RunGetOutput(chk_err = True) will log the error message here if it
+    # occurs.
+    cmd = 'systemctl -a list-unit-files ' + Name
+    code, txt = RunGetOutput(cmd, False, True)
+    if code != 0:
+        return False
+    sname = ''
+    # Get the last service name from the output.
+    m = re.search(r'.*?\n(.*?)[.]service.*?\n', txt, re.M)
+    if m is not None:
+        sname = m.group(1)
+    cmd = 'systemctl -a --no-pager --no-legend -p "Names,WantedBy,Description,SubState,FragmentPath,UnitFileState" show ' + sname
+    code, txt = RunGetOutput(cmd, False, True)
+    if code != 0: 
+        return False
+    # Now we know it will work.
+    cmd = 'systemctl -a list-unit-files ' + Name +  '| grep \.service | grep -v "@" | awk \'{print $1}\' | xargs systemctl -a --no-pager --no-legend -p "Names,WantedBy,Description,SubState,FragmentPath,UnitFileState" show'
     code, txt = RunGetOutput(cmd, False, False)
     txt=txt.replace('\n\n','@@')
     txt=txt.replace('\n','|')
@@ -1412,6 +1438,19 @@ def UpstartGetAll(sc):
         Print("Error: 'Controller' = " + sc.Controller + " is incorrectly specified.", file=sys.stderr)
         LG().Log('ERROR', "Error: 'Controller' = " + sc.Controller + " is incorrectly specified.")
         return False
+    # Do the commands work?
+    # There may be no error detected in our multi-pipe command below.
+    # To keep from returning garbage, we must test the commands.
+    # RunGetOutput(chk_err = True) will log the error message here if it occurs.
+    cmd = 'initctl list'
+    code, txt = RunGetOutput(cmd, False, True)
+    if code != 0: 
+        return False
+    cmd = 'service --status-all'
+    code, txt = RunGetOutput(cmd, False, True)
+    if code != 0: 
+        return False
+    # Now we know it will work.
     cmd = "initctl list  | sed 's/[(].*[)] //g' | tr ', ' ' ' | awk '{print $1,$2}'"
     code, txt = RunGetOutput(cmd, False, False)
     services = txt.splitlines()
@@ -1462,7 +1501,16 @@ def UpstartGetAll(sc):
 def InitdGetAll(sc):
     d={}
     if os.path.exists(initd_chkconfig):
-        cmd = initd_chkconfig + ' -l | grep -vE "based| off"'
+        # Does the command work?
+        # There may be no error detected in our multi-pipe command below.
+        # To keep from returning garbage, we must test the command.
+        # RunGetOutput(chk_err = True) will log the error message here if it occurs.
+        cmd = initd_chkconfig + ' --list '
+        code, txt = RunGetOutput(cmd, False, True)
+        if code != 0: 
+            return False
+        # Now we know it will work.
+        cmd = initd_chkconfig + ' --list | grep -vE "based| off"'
         code, txt = RunGetOutput(cmd, False, False)
         services=txt.splitlines()
         for srv in services:
@@ -1490,6 +1538,15 @@ def InitdGetAll(sc):
             d['Runlevels'] = reduce(lambda x, y: x + ' ' + y, s[1:])
             sc.services_list.append(copy.deepcopy(d))
     else:
+        # Does the command work?
+        # There may be no error detected in our multi-statement command below.
+        # To keep from returning garbage, we must test the command.
+        # RunGetOutput(chk_err = True) will log the error message here if it occurs.
+        cmd =  initd_service + ' --status-all '
+        code, txt = RunGetOutput(cmd, False, True)
+        if code != 0: 
+            return False
+        # Now we know it will work.
         cmd = initd_service + ' --status-all &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile'
         code, txt = RunGetOutput(cmd, False, False)
         txt = txt.replace('[','')
