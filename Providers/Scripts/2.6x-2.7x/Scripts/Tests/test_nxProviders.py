@@ -1072,6 +1072,14 @@ class nxPackageTestCases(unittest2.TestCase):
         self.assertTrue(self.CheckInventory(self.pkg[2:], r[1]) == False, \
                         'CheckInventory(self.pkg, r[1]) should == False')
 
+    def testInventoryMarshallCmdlineError(self):
+        os.system('cp  ./Scripts/nxPackage.py /tmp/nxPackageBroken.py')
+        os.system(r'sed -i "s/\((f).*\)[0-9]/\120/" /tmp/nxPackageBroken.py')
+        nxPackageBroken = imp.load_source('nxPackageBroken','/tmp/nxPackageBroken.py') 
+        r=nxPackageBroken.Inventory_Marshall('','','*','',False,'',0)
+        os.system('rm /tmp/nxPackageBroken.py')
+        self.assertTrue(len(r[1]['__Inventory'].value) == 0,"nxPackageBroken.Inventory_Marshall('','','*','',False,'',0)  should return empty MI_INSTANCEA.")
+        print(repr(r[1]))
 
 
 class nxFileTestCases(unittest2.TestCase):
@@ -1425,6 +1433,7 @@ while True:
 upstart_etc_default="""# To disable , set DUMMY_SERVICE_ENABLED=0
 DUMMY_SERVICE_ENABLED=1
 """
+
 upstart_init_conf="""description "dummy_service"
 author "Eric Gable"
 export PATH=$PATH:/usr/local/bin
@@ -1594,7 +1603,7 @@ WAZD_PID=/var/run/dummy_service.pid
 case "$1" in
     start)
         log_begin_msg "Starting dummy_service..."
-        pid=$( pidofproc $WAZD_BIN )
+        pid=$( pidofproc -p $WAZD_PID $WAZD_BIN)
         if [ -n "$pid" ] ; then
               log_begin_msg "Already running."
               log_end_msg 0
@@ -1724,6 +1733,7 @@ case "$1" in
 esac
 rc_exit
 """
+
 redhat_init_file= """#!/bin/bash
 #
 # Init file for dummy_service.
@@ -1998,6 +2008,18 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(r[0] == 0,"Inventory_Marshall('*', " + self.controller + ", None,'')  should return == 0")
         print repr(r[1])
 
+    def testInventoryMarshallCmdlineError(self):
+        os.system('cp  ./Scripts/nxService.py /tmp/nxServiceBroken.py')
+        os.system('sed -i "s/cmd =  initd_service + \' --status-all \'/cmd =  initd_service + \' --atus-all \'/" /tmp/nxServiceBroken.py')
+        os.system('sed -i "s/cmd = initd_chkconfig + \' --list \'/cmd = initd_chkconfig + \' --ist \'/" /tmp/nxServiceBroken.py')
+        os.system('sed -i "s/cmd = \'initctl list\'/cmd = \'initctl ist\'/" /tmp/nxServiceBroken.py')
+        os.system('sed -i "s/cmd = \'systemctl -a list-unit-files \'/cmd = \'systemctl -a ist-unit-files \'/" /tmp/nxServiceBroken.py')
+        nxServiceBroken = imp.load_source('nxServiceBroken','/tmp/nxServiceBroken.py') 
+        r=nxServiceBroken.Inventory_Marshall('*', self.controller, None,'')
+        os.system('rm /tmp/nxServiceBroken.py')
+        self.assertTrue(r[0] == -1,"nxServiceBroken.Inventory_Marshall('*', " + self.controller + ", None,'')  should return == -1")
+        print(repr(r[1]))
+
     def testInventoryMarshallControllerWildcard(self):
         r=nxService.Inventory_Marshall('*', '*', None,'')
         self.assertTrue(r[0] == 0,"Inventory_Marshall('*', '*', None,'')  should return == 0")
@@ -2026,6 +2048,7 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, '', r[1]) == True, \
                         'CheckInventory("dummy?*ice", ' + self.controller + ', None, "", r[1]) should == True')
 
+    @unittest2.skipIf(self.controller == 'upstart','Not implemented in upstart')
     def testInventoryMarshallDummyServiceFilterEnabled(self):
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
@@ -2044,7 +2067,7 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, 'running', r[1]) == True, \
                         'CheckInventory("dummy?*ice", ' + self.controller + ', None, "running", r[1]) should == True')
 
-    def testInventoryMarshallDummyServiceError(self):
+    def testInventoryMarshallDummyServiceFilterNameError(self):
         # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
         time.sleep(3)
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
@@ -2053,16 +2076,6 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(r[0] == 0, "Inventory_Marshall('Gummy_service', " + self.controller + ", None,'')  should return == 0")
         self.assertTrue(self.CheckInventory('Gummy_service', self.controller, None, '', r[1]) == False, \
                         'CheckInventory("Gummy_service", self.controller, None, "", r[1]) should == False')
-
-    def testInventoryMarshallDummyServiceFilterNameError(self):
-        # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
-        time.sleep(3)
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy?*rice', self.controller, None,'')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*rice', " + self.controller + ", None,'')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy?*rice', self.controller, None, '', r[1]) == False, \
-                        'CheckInventory("dummy?*rice", self.controller, None, "", r[1]) should == False')
 
     def testInventoryMarshallDummyServiceFilterEnabledError(self):
         # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.

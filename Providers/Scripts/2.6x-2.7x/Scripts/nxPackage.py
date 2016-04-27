@@ -48,7 +48,7 @@ LG = nxDSCLog.DSCLog
 #   [read] string Version;
 #   [read] boolean Installed;
 #   [read] string Architecture;
- 
+
 # };
 
 cache_file_dir = '/var/opt/microsoft/dsc/cache/nxPackage'
@@ -147,6 +147,7 @@ def Get_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments
         retd[k] = ld[k]
     return retval, retd
 
+
 def Inventory_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode):
     retval = 0
     sys.stdin.flush()
@@ -155,7 +156,7 @@ def Inventory_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arg
     (Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode) = init_vars(
         Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnCode)
     retval, pkgs = GetAll(Ensure, PackageManager, Name,
-                   FilePath, PackageGroup, Arguments, ReturnCode)
+                          FilePath, PackageGroup, Arguments, ReturnCode)
     for p in pkgs:
         p['Ensure'] = protocol.MI_String('present')
         p['PackageManager'] = protocol.MI_String(PackageManager)
@@ -171,7 +172,7 @@ def Inventory_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arg
         p['Size'] = protocol.MI_Uint32(int(p['Size']))
         p['Version'] = protocol.MI_String(p['Version'])
         p['Installed'] = protocol.MI_Boolean(True)
-    Inventory=protocol.MI_InstanceA(pkgs)
+    Inventory = protocol.MI_InstanceA(pkgs)
     retd = {}
     retd["__Inventory"] = Inventory
     return retval, retd
@@ -179,6 +180,7 @@ def Inventory_Marshall(Ensure, PackageManager, Name, FilePath, PackageGroup, Arg
 #
 # Begin user defined DSC functions
 #
+
 
 def GetPackageSystem():
     ret = None
@@ -287,8 +289,10 @@ class Params:
         self.cmds['apt'] = {}
         self.cmds['yum'] = {}
         self.cmds['zypper'] = {}
-        self.cmds['dpkg']['present'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -i '
-        self.cmds['dpkg']['absent'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -r '
+        self.cmds['dpkg'][
+            'present'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -i '
+        self.cmds['dpkg'][
+            'absent'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -r '
         self.cmds['dpkg'][
             'stat'] = "dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n' "
         self.cmds['dpkg'][
@@ -439,16 +443,19 @@ def ParseInfo(p, info):
             p.Architecture = f[6]
 
         if len(f) is not 6:
-            print('ERROR.   ' + p.PackageManager, file=sys.stdout)
-            LG().Log('ERROR', 'ERROR.   ' + p.PackageManager)
+            print(
+                'ERROR in ParseInfo.  Output was ' + info, file=sys.stdout)
+            LG().Log(
+                'ERROR', 'ERROR in ParseInfo.  Output was ' + info)
 
 
-def ParseAllInfo(info,p):
-    pkg_list=[]
-    d={}
-    if len(info) < 1 or  '@@' not in info:
+def ParseAllInfo(info, p):
+    pkg_list = []
+    d = {}
+    if len(info) < 1 or '@@' not in info:
         return pkg_list
     for pkg in info.split('@@'):
+        d['Name'] = ''
         d['PackageDescription'] = ''
         d['Publisher'] = ''
         d['InstalledOn'] = ''
@@ -460,7 +467,7 @@ def ParseAllInfo(info,p):
                 f = pkg.strip().split('|')
                 if len(f) is 8:
                     d['Name'] = f[0]
-                    if len(p.Name) and not fnmatch.fnmatch(d['Name'],p.Name):
+                    if len(p.Name) and not fnmatch.fnmatch(d['Name'], p.Name):
                         continue
                     d['PackageDescription'] = f[1]
                     d['Publisher'] = f[2]
@@ -473,10 +480,14 @@ def ParseAllInfo(info,p):
                     d['Installed'] = ('install' in f[6])
                     d['Architecture'] = f[7]
                 if len(f) is not 8:
-                    print('ERROR in ParseAll.', file=sys.stdout)
-                    LG().Log('ERROR', 'ERROR in ParseAll.')
+                    print(
+                        'ERROR in ParseAllInfo.  Output was ' + info, file=sys.stdout)
+                    LG().Log(
+                        'ERROR', 'ERROR in ParseAllInfo.  Output was ' + info)
+                    return pkg_list         
                 pkg_list.append(copy.deepcopy(d))
     return pkg_list
+
 
 def DoEnableDisable(p):
     # if the path is set, use the path and self.PackageSystem
@@ -510,16 +521,17 @@ def DoEnableDisable(p):
                 'ERROR', 'Error: Group mode not implemented for ' + p.PackageManager)
             return False, 'Error: Group mode not implemented for ' + p.PackageManager
     else:
-        cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager][p.Ensure] + ' ' + p.Name
+        cmd = 'LANG=en_US.UTF8 ' + \
+            p.cmds[p.PackageManager][p.Ensure] + ' ' + p.Name
     cmd = cmd.replace('%', p.Arguments)
     cmd = cmd.replace('^', p.CommandArguments)
     code, out = RunGetOutput(cmd, False)
     if len(p.LocalPath) > 1:  # create cache entry and remove the tmp file
         WriteCacheInfo(p)
         RemoveFile(p.LocalPath)
-    if p.PackageManager == 'yum' and ( 'No Match for argument: ' + p.Name in out or 'Nothing to do' in out ): # yum returns 0 on unknown package  
+    if p.PackageManager == 'yum' and ('No Match for argument: ' + p.Name in out or 'Nothing to do' in out):  # yum returns 0 on unknown package
         return False, out
-    if p.PackageManager == 'zypper' and "package '" + p.Name + "' not found" in out: # zypper returns 0 on unknown package
+    if p.PackageManager == 'zypper' and "package '" + p.Name + "' not found" in out:  # zypper returns 0 on unknown package
         return False, out
     if code is not int(p.ReturnCode):
         return False, out
@@ -660,9 +672,10 @@ def Get(Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments, ReturnC
     ParseInfo(p, out)
     return [0, p.PackageManager, p.PackageDescription, p.Publisher, p.InstalledOn, p.Size, p.Version, installed, p.Architecture]
 
+
 def GetAll(Ensure, PackageManager, Name,
-                   FilePath, PackageGroup, Arguments, ReturnCode):
-    pkgs=None
+           FilePath, PackageGroup, Arguments, ReturnCode):
+    pkgs = None
     try:
         p = Params(Ensure, PackageManager, Name,
                    FilePath, PackageGroup, Arguments, ReturnCode)
@@ -674,7 +687,7 @@ def GetAll(Ensure, PackageManager, Name,
         return [-1, ]
     cmd = 'LANG=en_US.UTF8 ' + p.cmds[p.PackageManager]['stat_all']
     code, out = RunGetOutput(cmd, False)
-    pkgs=ParseAllInfo(out,p)
+    pkgs = ParseAllInfo(out, p)
     return [0, pkgs]
 
 
@@ -743,17 +756,20 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             no_output, cmd, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError, e:
         if chk_err:
-            print("CalledProcessError.  Error Code is " + str(e.returncode), file=sys.stdout)
-            print("CalledProcessError.  Command string was " + e.cmd, file=sys.stdout)
-            print("CalledProcessError.  Command result was " + (e.output[:-1]).decode('utf8','ignore').encode("ascii", "ignore"), file=sys.stdout)
+            print("CalledProcessError.  Error Code is " +
+                  str(e.returncode), file=sys.stdout)
+            print(
+                "CalledProcessError.  Command string was " + e.cmd, file=sys.stdout)
+            print("CalledProcessError.  Command result was " + (e.output[:-1]).decode(
+                'utf8', 'ignore').encode("ascii", "ignore"), file=sys.stdout)
         if no_output:
             return e.returncode, None
         else:
-            return e.returncode, e.output.decode('utf8','ignore').encode('ascii', 'ignore')
+            return e.returncode, e.output.decode('utf8', 'ignore').encode('ascii', 'ignore')
     if no_output:
         return 0, None
     else:
-        return 0, output.decode('utf8','ignore').encode('ascii', 'ignore')
+        return 0, output.decode('utf8', 'ignore').encode('ascii', 'ignore')
 
 
 def GetTimeFromString(s):
@@ -845,9 +861,9 @@ def GetRemoteFile(p):
     if dst_st is not None:
         dst_mtime = time.gmtime(dst_st.st_mtime)
     if lm_mtime is not None and dst_mtime is not None and dst_mtime >= lm_mtime:
-        data = '' # skip download, the file is the same
+        data = ''  # skip download, the file is the same
     else:
-        data=b'keep going'
+        data = b'keep going'
         with (open(p.LocalPath, 'wb+')) as F:
             try:
                 while data:
