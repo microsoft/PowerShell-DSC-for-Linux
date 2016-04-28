@@ -10,6 +10,7 @@ def usage():
 OPTIONS (case insensitive):
  --RegistrationKey KEY
  --ServerURL URL
+ --ConfigurationName NAME
  --RefreshFrequencyMins NUM                                          default=30
  --ConfigurationModeFrequencyMins NUM                                default=15
  --ConfigurationMode (ApplyAndMonitor,ApplyAndAutoCorrect,ApplyOnly) default=ApplyAndMonitor
@@ -52,7 +53,7 @@ while i < command_line_length:
 if inArgument:
    Variables[currentArgument] = arg
 
-AcceptableOptions = ["registrationkey", "serverurl", "refreshfrequencymins", "configurationmodefrequencymins", "configurationmode", "refreshmode", "help"]
+AcceptableOptions = ["registrationkey", "serverurl", "configurationname", "refreshfrequencymins", "configurationmodefrequencymins", "configurationmode", "refreshmode", "help"]
 
 if "help" in Variables:
    usage()
@@ -79,6 +80,7 @@ if optionsValid == False:
 
 ServerURL = ""
 RegistrationKey = ""
+ConfigurationName = ""
 
 # If RefreshMode == Pull (which is default), then RegistrationKey and ServerURL are required.
 RefreshMode = "Pull"
@@ -96,6 +98,8 @@ if RefreshMode == "Pull":
       sys.exit(1)
    ServerURL = Variables["serverurl"]
    RegistrationKey = Variables["registrationkey"]
+   if "configurationname" in Variables:
+      ConfigurationName = Variables["configurationname"]
 
 ConfigurationMode = "ApplyAndMonitor"
 if "configurationmode" in Variables:
@@ -133,6 +137,7 @@ else:
      SourceInfo = "C:\\\\OaaS-RegistrationMetaConfig2.ps1::20::9::ConfigurationRepositoryWeb";
      RegistrationKey = "<REGKEY>"; 
      ServerURL = "<SERVERURL>";
+     ConfigurationNames = {"<CONFIGURATIONNAME>"};
      };
      
      instance of MSFT_WebResourceManager as $MSFT_WebResourceManager1ref
@@ -186,7 +191,7 @@ metaConfig = metaConfig.replace("<CONFIGURATIONMODEFREQUENCYMINS>", Configuratio
 metaConfig = metaConfig.replace("<CONFIGURATIONMODE>", ConfigurationMode)
 metaConfig = metaConfig.replace("<SERVERURL>", ServerURL)
 metaConfig = metaConfig.replace("<REGKEY>", RegistrationKey)
-
+metaConfig = metaConfig.replace("<CONFIGURATIONNAME>", ConfigurationName)
 
 # Write to file and run SendMetaConfigurationApply.py
 tempdir = tempfile.mkdtemp()
