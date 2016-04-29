@@ -1308,6 +1308,107 @@ MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventory_C
 /*
 **==============================================================================
 **
+** MSFT_DSCLocalConfigurationManager.PerformInventoryOOB()
+**
+**==============================================================================
+*/
+
+typedef struct _MSFT_DSCLocalConfigurationManager_PerformInventoryOOB
+{
+    MI_Instance __instance;
+    /*OUT*/ MI_ConstUint32Field MIReturn;
+    /*IN*/ MI_ConstStringField InventoryMOFPath;
+}
+MSFT_DSCLocalConfigurationManager_PerformInventoryOOB;
+
+MI_EXTERN_C MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_rtti;
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Construct(
+    _Out_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self,
+    _In_ MI_Context* context)
+{
+    return MI_Context_ConstructParameters(context, &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_rtti,
+        (MI_Instance*)&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Clone(
+    _In_ const MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self,
+    _Outptr_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB** newInstance)
+{
+    return MI_Instance_Clone(
+        &self->__instance, (MI_Instance**)newInstance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Destruct(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self)
+{
+    return MI_Instance_Destruct(&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Delete(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self)
+{
+    return MI_Instance_Delete(&self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Post(
+    _In_ const MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self,
+    _In_ MI_Context* context)
+{
+    return MI_Context_PostInstance(context, &self->__instance);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Set_MIReturn(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self,
+    _In_ MI_Uint32 x)
+{
+    ((MI_Uint32Field*)&self->MIReturn)->value = x;
+    ((MI_Uint32Field*)&self->MIReturn)->exists = 1;
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Clear_MIReturn(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self)
+{
+    memset((void*)&self->MIReturn, 0, sizeof(self->MIReturn));
+    return MI_RESULT_OK;
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Set_InventoryMOFPath(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_SetPtr_InventoryMOFPath(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Clear_InventoryMOFPath(
+    _Inout_ MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        1);
+}
+
+/*
+**==============================================================================
+**
 ** MSFT_DSCLocalConfigurationManager provider function prototypes
 **
 **==============================================================================
@@ -1423,6 +1524,15 @@ MI_EXTERN_C void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_PerformInvento
     _In_opt_z_ const MI_Char* methodName,
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
     _In_opt_ const MSFT_DSCLocalConfigurationManager_PerformInventory* in);
+
+MI_EXTERN_C void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_PerformInventoryOOB(
+    _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
+    _In_opt_ const MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* in);
 
 
 #endif /* _MSFT_DSCLocalConfigurationManager_h */

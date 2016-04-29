@@ -6812,6 +6812,7 @@ MI_Result GetLCMStatusCodeHistory(
 
 /* caller release outinstances */
 MI_Result CallPerformInventory(
+    _In_ MI_Char * InMOF,
     _Inout_ MI_InstanceA *outInstances,
     _In_ MI_Context* context,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
@@ -6842,7 +6843,12 @@ MI_Result CallPerformInventory(
         return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_VALIDATE_CONFGDIR_FAILED);
     }
 
-    if (File_ExistT(GetInventoryFileName()) != 0)
+    if (InMOF == NULL || InMOF[0] == '\0')
+    {
+        InMOF = GetInventoryFileName();
+    }
+
+    if (File_ExistT(InMOF) != 0)
     {
 	SetLCMStatusReady();
 	return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);
@@ -6855,7 +6861,7 @@ MI_Result CallPerformInventory(
         return result;
     }
 
-    result =  moduleManager->ft->LoadInstanceDocumentFromLocation(moduleManager, 0, GetInventoryFileName(), cimErrorDetails, &inventoryInstances, &documentIns);
+    result =  moduleManager->ft->LoadInstanceDocumentFromLocation(moduleManager, 0, InMOF, cimErrorDetails, &inventoryInstances, &documentIns);
     if (result != MI_RESULT_OK)
     {
         moduleManager->ft->Close(moduleManager, NULL);

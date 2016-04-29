@@ -125,6 +125,7 @@ typedef struct _Context_Invoke_Basic
     MI_Uint32 flag;
     MI_Boolean force;
     MI_ConstUint8A data;
+    MI_Char * stringdata;
     MI_Boolean dataExist;
     
 } Context_Invoke_Basic;

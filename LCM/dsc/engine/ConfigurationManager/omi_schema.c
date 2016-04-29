@@ -3250,7 +3250,6 @@ static MI_CONST MI_PropertyDecl MSFT_DSCMetaConfiguration_DisableModuleSignature
     NULL,
 };
 
-
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_DSCMetaConfiguration_props[] =
 {
     &MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins_prop,
@@ -4842,6 +4841,125 @@ MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_PerformInventory_rtti =
     (MI_ProviderFT_Invoke)MSFT_DSCLocalConfigurationManager_Invoke_PerformInventory, /* method */
 };
 
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Static_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Static_qual =
+{
+    MI_T("Static"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Static_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Description_qual_value = MI_T("75");
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_quals[] =
+{
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Static_qual,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_Description_qual,
+};
+
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_In_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_In_qual =
+{
+    MI_T("In"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_In_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_quals[] =
+{
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_In_qual,
+};
+
+/* parameter MSFT_DSCLocalConfigurationManager.PerformInventoryOOB(): InventoryMOFPath */
+static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_param =
+{
+    MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
+    0x00696810, /* code */
+    MI_T("InventoryMOFPath"), /* name */
+    MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCLocalConfigurationManager_PerformInventoryOOB, InventoryMOFPath), /* offset */
+};
+
+static MI_CONST MI_Boolean MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_Static_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_Static_qual =
+{
+    MI_T("Static"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_Static_qual_value
+};
+
+static MI_CONST MI_Char* MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_Description_qual_value = MI_T("75");
+
+static MI_CONST MI_Qualifier MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_Description_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_quals[] =
+{
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_Static_qual,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_Description_qual,
+};
+
+/* parameter MSFT_DSCLocalConfigurationManager.PerformInventoryOOB(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_param =
+{
+    MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
+    0x006D6E08, /* code */
+    MI_T("MIReturn"), /* name */
+    MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_quals), /* numQualifiers */
+    MI_UINT32, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_DSCLocalConfigurationManager_PerformInventoryOOB, MIReturn), /* offset */
+};
+
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_params[] =
+{
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_MIReturn_param,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_InventoryMOFPath_param,
+};
+
+/* method MSFT_DSCLocalConfigurationManager.PerformInventoryOOB() */
+MI_CONST MI_MethodDecl MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_rtti =
+{
+    MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
+    0x00706213, /* code */
+    MI_T("PerformInventoryOOB"), /* name */
+    MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_quals, /* qualifiers */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_quals), /* numQualifiers */
+    MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_params, /* parameters */
+    MI_COUNT(MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_params), /* numParameters */
+    sizeof(MSFT_DSCLocalConfigurationManager_PerformInventoryOOB), /* size */
+    MI_UINT32, /* returnType */
+    MI_T("MSFT_DSCLocalConfigurationManager"), /* origin */
+    MI_T("MSFT_DSCLocalConfigurationManager"), /* propagator */
+    &schemaDecl, /* schema */
+    (MI_ProviderFT_Invoke)MSFT_DSCLocalConfigurationManager_Invoke_PerformInventoryOOB, /* method */
+};
+
 static MI_MethodDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_meths[] =
 {
     &MSFT_DSCLocalConfigurationManager_SendConfiguration_rtti,
@@ -4855,6 +4973,7 @@ static MI_MethodDecl MI_CONST* MI_CONST MSFT_DSCLocalConfigurationManager_meths[
     &MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks_rtti,
     &MSFT_DSCLocalConfigurationManager_StopConfiguration_rtti,
     &MSFT_DSCLocalConfigurationManager_PerformInventory_rtti,
+    &MSFT_DSCLocalConfigurationManager_PerformInventoryOOB_rtti,
 };
 
 static MI_CONST MI_ProviderFT MSFT_DSCLocalConfigurationManager_funcs =

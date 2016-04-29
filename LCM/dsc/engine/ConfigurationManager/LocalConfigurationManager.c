@@ -2683,7 +2683,7 @@ void Invoke_SendMetaConfigurationApply(
     args->data.data = dataValue;
     args->data.size = in->ConfigurationData.value.size;
     args->flag = GetCallSetConfigurationFlags(context) | LCM_SET_METACONFIG;  
-    Thread_CreateDetached(Invoke_SendConfigurationApply_Internal, NULL, args);  
+    Thread_CreateDetached(Invoke_SendConfigurationApply_Internal, NULL, args);
 }
 
 
@@ -2925,8 +2925,8 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
     MI_Uint8A dataValue = {0};
     MI_Real64 duration;
     ptrdiff_t start, finish;   
-
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)param;
+    MI_Char * InMOF;
 
     if( args == NULL )
     {
@@ -2936,7 +2936,12 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }    
+    }   
+    if (args->stringdata == NULL)
+    {
+        MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
+        return 0;
+    }
 
     miResult = InitHandler(args->methodName, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -2964,11 +2969,14 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTGET_FAILED);
         goto ExitWithError;
-    }   
+    }
 
     start=CPU_GetTimeStamp();
     SetLCMStatusBusy();
-    miResult = CallPerformInventory(&outInstances, 
+
+    InMOF = (MI_Char*) args->stringdata;
+
+    miResult = CallPerformInventory(InMOF, &outInstances, 
         args->context, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
     {
@@ -3010,8 +3018,8 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
-
     ResetJobId();
+    PAL_Free(args->stringdata);
     PAL_Free(args);    
 
     return 0;
@@ -3022,6 +3030,7 @@ ExitWithError:
     SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
+    PAL_Free(args->stringdata);
     PAL_Free(args);    
     return 0;
 }
@@ -3038,6 +3047,7 @@ void Invoke_PerformInventory(
 {
     MI_Instance *cimErrorDetails = NULL;
     MI_Result miResult;
+    MI_Char * InMOF;
 
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
@@ -3067,7 +3077,76 @@ void Invoke_PerformInventory(
         MI_Instance_Delete(cimErrorDetails);
         return;
     }
-    args->dataExist = MI_FALSE;
+
+    InMOF = (MI_Char*) DSC_malloc ( sizeof(MI_Char) * 1, NitsHere());
+
+    InMOF[0] = '\0';
+
+    args->dataExist = MI_TRUE;
+    args->stringdata = InMOF;
+    args->context = context;
+    args->methodName = methodName;
+    Thread_CreateDetached(Invoke_PerformInventory_Internal, NULL, args);
+
+}
+
+void Invoke_PerformInventoryOOB(
+    _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
+    _In_ MI_Context* context,
+    _In_opt_z_ const MI_Char* nameSpace,
+    _In_opt_z_ const MI_Char* className,
+    _In_opt_z_ const MI_Char* methodName,
+    _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
+    _In_opt_ const MSFT_DSCLocalConfigurationManager_PerformInventoryOOB* in)
+{
+    MI_Instance *cimErrorDetails = NULL;
+    MI_Result miResult;
+    MI_Char * InMOF;
+    size_t length;
+
+    if (in->InventoryMOFPath.exists == MI_FALSE || in->InventoryMOFPath.value == NULL)
+    {
+	MI_Context_PostResult(context, MI_RESULT_INVALID_PARAMETER);
+        return 0;
+    }
+
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+	miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+	MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+	return;
+    }
+#endif
+    
+    MI_Uint8 *dataValue = NULL;
+    MI_Uint32 dataSize = 0;
+    Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
+    if( args == NULL)
+    {
+        miResult = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, &cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
+        MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);
+        return;
+    }
+
+    length = strlen(in->InventoryMOFPath.value);
+    InMOF = (MI_Char*) DSC_malloc ( sizeof(MI_Char) * (length + 1), NitsHere());
+
+    memcpy(InMOF, in->InventoryMOFPath.value, length);
+    InMOF[length] = '\0';
+
+    args->dataExist = MI_TRUE;
+    args->stringdata = InMOF;
     args->context = context;
     args->methodName = methodName;
     Thread_CreateDetached(Invoke_PerformInventory_Internal, NULL, args);

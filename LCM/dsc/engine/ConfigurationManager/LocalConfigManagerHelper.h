@@ -150,6 +150,12 @@ extern "C"
         MI_Boolean force,
         _In_ MI_Context* context,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
+    MI_Result CallPerformInventory(
+        _In_ MI_Char * InMOF,
+        _Inout_ MI_InstanceA *outInstances,
+        _In_ MI_Context* context,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
     
     MI_Result CallRestoreConfiguration(MI_Uint32 dwFlags,
                                _In_ MI_Context* context,
