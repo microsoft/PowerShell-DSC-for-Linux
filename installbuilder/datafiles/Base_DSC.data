@@ -329,6 +329,7 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $OMI_REGISTER_DIR/root-oms
     rm -f $OMI_HOME/bin/OMSConsistencyInvoker
     rm -f $OMI_LIB/libomsconfig.so    
+    rm -f /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
 #else
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
@@ -341,7 +342,6 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
 fi
 
 #if BUILD_OMS == 1
-rm -f /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
 
 # Note that omsagent's service_control uses systemctl to kill agent (omsagent
 # still doesn't shut down in a controlled fashion). Two rapid 'kill -9'
