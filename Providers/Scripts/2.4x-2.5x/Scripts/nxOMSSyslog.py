@@ -15,6 +15,7 @@ LG = nxDSCLog.DSCLog
 rsyslog_conf_path = '/etc/rsyslog.conf'
 rsyslog_inc_conf_path = '/etc/rsyslog.d/95-omsagent.conf'
 syslog_ng_conf_path = '/etc/syslog-ng/syslog-ng.conf'
+sysklog_conf_path='/etc/syslog.conf'
 oms_syslog_ng_conf_path = '/etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf'
 oms_rsyslog_conf_path = '/etc/opt/omi/conf/omsconfig/rsyslog-oms.conf'
 conf_path = ''
@@ -42,6 +43,9 @@ def init_vars(SyslogSource):
 
 
 def Set_Marshall(SyslogSource):
+    if os.path.exists(sysklog_conf_path):
+        LG().Log('ERROR', 'Sysklogd is unsupported.')
+        return [0]
     init_vars(SyslogSource)
     retval = Set(SyslogSource)
     if retval is False:
@@ -52,11 +56,17 @@ def Set_Marshall(SyslogSource):
 
 
 def Test_Marshall(SyslogSource):
+    if os.path.exists(sysklog_conf_path):
+        LG().Log('ERROR', 'Sysklogd is unsupported.')
+        return [0]
     init_vars(SyslogSource)
     return Test(SyslogSource)
 
 
 def Get_Marshall(SyslogSource):
+    if os.path.exists(sysklog_conf_path):
+        LG().Log('ERROR', 'Sysklogd is unsupported.')
+        return 0, {'SyslogSource':protocol.MI_InstanceA([])}
     arg_names = list(locals().keys())
     init_vars(SyslogSource)
     retval = 0

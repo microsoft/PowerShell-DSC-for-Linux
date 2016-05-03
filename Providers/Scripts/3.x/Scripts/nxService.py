@@ -246,6 +246,80 @@ def RunGetOutput(cmd, no_output, chk_err=True):
         return 0, output.decode('ascii', 'ignore')
 
 
+def RunGetOutputNoStderr(cmd, no_output, chk_err=True):
+    """
+    Wrapper for subprocess.check_output without stderr.
+    Execute 'cmd'.  Returns return code and STDOUT,
+    trapping expected exceptions.
+    Reports exceptions to Error if chk_err parameter is True
+    """
+    def check_output(no_output, *popenargs, **kwargs):
+        r"""Backport from subprocess module from python 2.7"""
+        if 'stdout' in kwargs:
+            raise ValueError(
+                'stdout argument not allowed, it will be overridden.')
+        if no_output:
+            out_file = None
+        else:
+            out_file = subprocess.PIPE
+        process = subprocess.Popen(stdout=out_file, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise subprocess.CalledProcessError(retcode, cmd, output=output)
+        return output
+
+    # Exception classes used by this module.
+    class CalledProcessError(Exception):
+
+        def __init__(self, returncode, cmd, output=None):
+            self.returncode = returncode
+            self.cmd = cmd
+            self.output = output
+
+        def __str__(self):
+            return "Command '%s' returned non-zero exit status %d" \
+                   % (self.cmd, self.returncode)
+
+    subprocess.check_output = check_output
+    subprocess.CalledProcessError = CalledProcessError
+    output = b''
+    try:
+        output = subprocess.check_output(
+            no_output, cmd, stderr=subprocess.DEVNULL, shell=True)
+        if output is None:
+            output = b''
+    except subprocess.CalledProcessError as e:
+        if chk_err:
+            Print('CalledProcessError.  Error Code is ' +
+                  str(e.returncode), file=sys.stderr)
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Error Code is '
+                + str(e.returncode))
+            Print(
+                'CalledProcessError.  Command string was '
+                + e.cmd, file=sys.stderr)
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Command string was ' + e.cmd)
+            Print('CalledProcessError.  Command result was ' +
+                  (e.output[:-1]).decode('ascii', 'ignore'), file=sys.stderr)
+            LG().Log(
+                'ERROR', 'CalledProcessError.  Command result was '
+                + (e.output[:-1]).decode('ascii', 'ignore'))
+        if no_output:
+            return e.returncode, None
+        else:
+            return e.returncode, e.output.decode('ascii', 'ignore')
+
+    if no_output:
+        return 0, None
+    else:
+        return 0, output.decode('ascii', 'ignore')
+
+
 systemctl_path = "/usr/bin/systemctl"
 upstart_start_path = "/sbin/start"
 upstart_stop_path = "/sbin/stop"
@@ -1386,7 +1460,7 @@ def SystemdGetAll(sc):
     # RunGetOutput(chk_err = True) will log the error message here if it
     # occurs.
     cmd = 'systemctl -a list-unit-files ' + Name
-    code, txt = RunGetOutput(cmd, False, True)
+    code, txt = RunGetOutputNoStderr(cmd, False, True)
     if code != 0:
         return False
     sname = ''
@@ -1395,12 +1469,12 @@ def SystemdGetAll(sc):
     if m is not None:
         sname = m.group(1)
     cmd = 'systemctl -a --no-pager --no-legend -p "Names,WantedBy,Description,SubState,FragmentPath,UnitFileState" show ' + sname
-    code, txt = RunGetOutput(cmd, False, True)
+    code, txt = RunGetOutputNoStderr(cmd, False, True)
     if code != 0: 
         return False
     # Now we know it will work.
     cmd = 'systemctl -a list-unit-files ' + Name +  '| grep \.service | grep -v "@" | awk \'{print $1}\' | xargs systemctl -a --no-pager --no-legend -p "Names,WantedBy,Description,SubState,FragmentPath,UnitFileState" show'
-    code, txt = RunGetOutput(cmd, False, False)
+    code, txt = RunGetOutputNoStderr(cmd, False, False)
     txt=txt.replace('\n\n','@@')
     txt=txt.replace('\n','|')
     services=txt.split('@@')
@@ -1439,19 +1513,19 @@ def UpstartGetAll(sc):
     # To keep from returning garbage, we must test the commands.
     # RunGetOutput(chk_err = True) will log the error message here if it occurs.
     cmd = 'initctl list'
-    code, txt = RunGetOutput(cmd, False, True)
+    code, txt = RunGetOutputNoStderr(cmd, False, True)
     if code != 0: 
         return False
     cmd = 'service --status-all'
-    code, txt = RunGetOutput(cmd, False, True)
+    code, txt = RunGetOutputNoStderr(cmd, False, True)
     if code != 0: 
         return False
     # Now we know it will work.
     cmd = "initctl list  | sed 's/[(].*[)] //g' | tr ', ' ' ' | awk '{print $1,$2}'"
-    code, txt = RunGetOutput(cmd, False, False)
+    code, txt = RunGetOutputNoStderr(cmd, False, False)
     services = txt.splitlines()
     cmd = "service --status-all &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile"
-    code, txt = RunGetOutput(cmd, False, False)
+    code, txt = RunGetOutputNoStderr(cmd, False, False)
     txt = txt.replace('[','')
     txt = txt.replace(']','')
     services.extend(txt.splitlines())
@@ -1485,7 +1559,7 @@ def UpstartGetAll(sc):
             continue
         if len(s[1]) > 1:
             cmd = 'initctl show-config ' + d['Name'] + ' | grep -E "start |stop " | tr "\n" " " | tr -s " " '
-            code, out = RunGetOutput(cmd, False, False) 
+            code, out = RunGetOutputNoStderr(cmd, False, False) 
             d['Runlevels'] = out[1:]
         else:
             rld=GetRunlevels(sc,d['Name'])
@@ -1502,12 +1576,12 @@ def InitdGetAll(sc):
         # To keep from returning garbage, we must test the command.
         # RunGetOutput(chk_err = True) will log the error message here if it occurs.
         cmd = initd_chkconfig + ' --list '
-        code, txt = RunGetOutput(cmd, False, True)
+        code, txt = RunGetOutputNoStderr(cmd, False, True)
         if code != 0: 
             return False
         # Now we know it will work.
         cmd = initd_chkconfig + ' --list | grep -vE "based| off"'
-        code, txt = RunGetOutput(cmd, False, False)
+        code, txt = RunGetOutputNoStderr(cmd, False, False)
         services=txt.splitlines()
         for srv in services:
             if len(srv) == 0:
@@ -1520,7 +1594,7 @@ def InitdGetAll(sc):
             d['Description'] = ''
             d['State'] = 'stopped'
             cmd = 'service ' + s[0] + ' status'
-            code, txt = RunGetOutput(cmd, False, False)
+            code, txt = RunGetOutputNoStderr(cmd, False, False)
             if 'running' in txt:
                 d['State'] = 'running'
             if len(sc.State) and sc.State != d['State'].lower():
@@ -1539,12 +1613,12 @@ def InitdGetAll(sc):
         # To keep from returning garbage, we must test the command.
         # RunGetOutput(chk_err = True) will log the error message here if it occurs.
         cmd =  initd_service + ' --status-all '
-        code, txt = RunGetOutput(cmd, False, True)
+        code, txt = RunGetOutputNoStderr(cmd, False, True)
         if code != 0: 
             return False
         # Now we know it will work.
         cmd = initd_service + ' --status-all &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile'
-        code, txt = RunGetOutput(cmd, False, False)
+        code, txt = RunGetOutputNoStderr(cmd, False, False)
         txt = txt.replace('[','')
         txt = txt.replace(']','')
         services = txt.splitlines()

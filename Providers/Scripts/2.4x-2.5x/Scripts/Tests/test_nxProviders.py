@@ -1066,7 +1066,7 @@ class nxPackageTestCases(unittest2.TestCase):
         r=nxPackageBroken.Inventory_Marshall('','','*','',False,'',0)
         os.system('rm /tmp/nxPackageBroken.py')
         self.assertTrue(len(r[1]['__Inventory'].value) == 0,"nxPackageBroken.Inventory_Marshall('','','*','',False,'',0)  should return empty MI_INSTANCEA.")
-        print(repr(r[1]))
+        print repr(r[1])
 
 
 class nxFileTestCases(unittest2.TestCase):
@@ -2009,7 +2009,7 @@ class nxServiceTestCases(unittest2.TestCase):
         r=nxServiceBroken.Inventory_Marshall('*', self.controller, None,'')
         os.system('rm /tmp/nxServiceBroken.py')
         self.assertTrue(r[0] == -1,"nxServiceBroken.Inventory_Marshall('*', " + self.controller + ", None,'')  should return == -1")
-        print(repr(r[1]))
+        print repr(r[1])
 
     def testInventoryMarshallControllerWildcard(self):
         r=nxService.Inventory_Marshall('*', '*', None,'')
@@ -2039,7 +2039,7 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, '', r[1]) == True, \
                         'CheckInventory("dummy?*ice", ' + self.controller + ', None, "", r[1]) should == True')
 
-    @unittest2.skipIf(self.controller == 'upstart','Not implemented in upstart')
+    @unittest2.skipIf(nxService.UpstartExists() == True,'Not implemented in upstart')
     def testInventoryMarshallDummyServiceFilterEnabled(self):
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
@@ -2088,7 +2088,12 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, 'stopped', r[1]) == False, \
                         'CheckInventory("dummy?*ice", ' + self.controller + ', None, "stopped", r[1]) should == False')
 
+    def testInventoryMarshallNoStderr(self):
+        code, out = nxService.RunGetOutputNoStderr('ls -l /tmp/bad/path', False, True)
+        self.assertTrue(code !=0 and len(out) == 0, "code, out = nxService.RunGetOutputNoStderr('ls -l /tmp/bad/path', False, True) \
+        should be code !=0 and len(out) == 0")
 
+ 
 class nxSshAuthorizedKeysTestCases(unittest2.TestCase):
     """
     Test cases for nxSshAuthorizedKeys.py
@@ -3152,8 +3157,7 @@ class nxOMSSyslogTestCases(unittest2.TestCase):
             d['SyslogSource'] = None
         else :
             for source in SyslogSource:
-                if source['Severities'] is not None:
-                    source['Severities'] = nxOMSSyslog.protocol.MI_StringA(source['Severities'])
+                source['Severities'] = nxOMSSyslog.protocol.MI_StringA(source['Severities'])
                 source['Facility']=nxOMSSyslog.protocol.MI_String(source['Facility'])
             d['SyslogSource'] = nxOMSSyslog.protocol.MI_InstanceA(SyslogSource)
         return retval,d
@@ -3168,11 +3172,13 @@ class nxOMSSyslogTestCases(unittest2.TestCase):
         self.assertTrue(nxOMSSyslog.Test_Marshall(**d) == [0],'Test_Marshall('+repr(d)+') should return == [0]') 
 
     def testGetOMSSyslog_add(self):
-        d={'SyslogSource': [{'Facility': 'auth','Severities': ['emerg','crit','warning']},{'Facility': 'kern','Severities': ['emerg','crit','warning']}] }
-        t={'SyslogSource': [{'Facility': 'auth','Severities': ['emerg','crit','warning']},{'Facility': 'kern','Severities': ['emerg','crit','warning']}] }
+        d={'SyslogSource': [{'Facility': 'auth','Severities': ['crit','emerg','warning']},{'Facility': 'kern','Severities': ['crit','emerg','warning']}] }
+        e=copy.deepcopy(d)
+        t=copy.deepcopy(d)
         self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        m=self.make_MI(0,**d)
+        m=self.make_MI(0,**e)
         g=nxOMSSyslog.Get_Marshall(**t)
+        print 'GET '+ repr(g) 
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get('+repr(g)+' should return ==['+repr(m)+']')
 
@@ -3181,14 +3187,31 @@ class nxOMSSyslogTestCases(unittest2.TestCase):
         self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
 
     def testGetOMSSyslog_del(self):
-        d={'SyslogSource': [{'Facility': 'kern','Severities': None },{'Facility': 'auth','Severities': None }] }
+        d={'SyslogSource': [{'Facility': 'auth','Severities': None },{'Facility': 'kern','Severities': None }] }
+        e=copy.deepcopy(d)
+        t=copy.deepcopy(d)
         self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        t={'SyslogSource': [{'Facility': 'auth','Severities': [] },{'Facility': 'kern','Severities': []}] }
         m=self.make_MI(0,**t)
-        g=nxOMSSyslog.Get_Marshall(**d)
+        g=nxOMSSyslog.Get_Marshall(**e)
         print 'GET '+ repr(g)
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+    def testTestSetOMSSyslog_addSysklogd(self):
+        sysklogd_exists = False
+        if not os.path.exists('/etc/syslog.conf'):
+            os.system('touch /etc/syslog.conf')
+        else:
+            sysklogd_exists = True
+        d={'SyslogSource': [{'Facility': 'kern','Severities': ['emerg','crit','warning']},{'Facility': 'auth','Severities': ['emerg','crit','warning']}] }
+        self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set_Marshall('+repr(d)+') should return == [0]') 
+        self.assertTrue(nxOMSSyslog.Test_Marshall(**d) == [0],'Test_Marshall('+repr(d)+') should return == [0]') 
+        g=nxOMSSyslog.Get_Marshall(**d)
+        print 'GET '+ repr(g) 
+        self.assertTrue(g[0] == 0 and g[1]["SyslogSource"].value == [], \
+       'Get('+repr(g)+' should return g[0] == 0 and g[1]["SyslogSource"].value == []')
+        if sysklogd_exists == False:
+            os.system('rm /etc/syslog.conf')
 
 nxOMSSyslogTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
                                             0,'Skipping nxOMSSyslogTestCases.   omsagent is not running.' \
