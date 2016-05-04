@@ -70,7 +70,6 @@ void AddToTaskQueue(LCMTaskNode * node)
     pthread_mutex_lock(&g_TaskQueueMutex);
     if (g_TaskHead == NULL)
     {
-	printf("Added Task to Head of TaskQueue\n");
 	g_TaskHead = node;
     }
     else
@@ -78,16 +77,13 @@ void AddToTaskQueue(LCMTaskNode * node)
 	current = g_TaskHead;
 	while (current != NULL)
 	{
-	    printf("Checking current->next for empty space\n");
 	    if (current->next == NULL)
 	    {
-		printf("Added Task to end of TaskQueue\n");
 		current->next = node;
 		break;
 	    }
 	    else
 	    {
-		printf("Moving to next task\n");
 		current = current->next;
 	    }
 	}
@@ -104,8 +100,6 @@ void TaskQueueLoop()
     shouldShutdown = g_TaskQueueShutdown;
     pthread_mutex_unlock(&g_TaskQueueMutex);
     
-    printf("In TaskQueueLoop Begin\n");
-
     while (shouldShutdown == 0)
     {
 	pthread_mutex_lock(&g_TaskQueueMutex);
@@ -118,15 +112,10 @@ void TaskQueueLoop()
 	    g_TaskHead = currentTask->next;
 	    pthread_mutex_unlock(&g_TaskQueueMutex);
 
-	    printf("Grabbed Head, Running Thread\n");
 	    Thread_CreateJoinable(&t, currentTask->task, NULL, currentTask->params);
-	    printf("Thread Created\n");
 	    Thread_Join(&t, &ret);
-	    printf("Thread Joined\n");
 	    Thread_Destroy(&t);
 	    DSC_free(currentTask);
-	    printf("Thread Destroyed\n");
-
 	}
 	else
 	{
@@ -141,7 +130,6 @@ void TaskQueueLoop()
 	pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 
-    printf("Shutting down TaskQueueLoop!\n");
     g_TaskQueueShutdown = 0;
     g_TaskHead = NULL;
     g_TaskQueueExists = 0;
