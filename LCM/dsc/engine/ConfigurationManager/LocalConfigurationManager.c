@@ -50,7 +50,103 @@ MI_Boolean g_hPSInfraModuleHandleInitialized;
 
 #include "LocalConfigurationManager.h"
 
-// TODO: Temporary workaround until we can reload OMI provider registration without restarting omi.
+typedef struct _LCMTaskNode LCMTaskNode;
+
+struct _LCMTaskNode
+{
+    ThreadProc task;
+    void* params;
+    LCMTaskNode * next;
+};
+
+static LCMTaskNode * g_TaskHead = NULL;
+static pthread_mutex_t g_TaskQueueMutex;
+static int g_TaskQueueShutdown = 0;
+static int g_TaskQueueExists = 0;
+
+void AddToTaskQueue(LCMTaskNode * node)
+{
+    LCMTaskNode* current;
+    pthread_mutex_lock(&g_TaskQueueMutex);
+    if (g_TaskHead == NULL)
+    {
+	printf("Added Task to Head of TaskQueue\n");
+	g_TaskHead = node;
+    }
+    else
+    {
+	current = g_TaskHead;
+	while (current != NULL)
+	{
+	    printf("Checking current->next for empty space\n");
+	    if (current->next == NULL)
+	    {
+		printf("Added Task to end of TaskQueue\n");
+		current->next = node;
+		break;
+	    }
+	    else
+	    {
+		printf("Moving to next task\n");
+		current = current->next;
+	    }
+	}
+    }
+    pthread_mutex_unlock(&g_TaskQueueMutex);
+}
+
+void TaskQueueLoop()
+{
+    int shouldShutdown;
+    LCMTaskNode * currentTask = NULL;
+    
+    pthread_mutex_lock(&g_TaskQueueMutex);
+    shouldShutdown = g_TaskQueueShutdown;
+    pthread_mutex_unlock(&g_TaskQueueMutex);
+    
+    printf("In TaskQueueLoop Begin\n");
+
+    while (shouldShutdown == 0)
+    {
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskHead != NULL)
+	{
+	    Thread t;
+	    PAL_Uint32 ret;
+
+	    currentTask = g_TaskHead;
+	    g_TaskHead = currentTask->next;
+	    pthread_mutex_unlock(&g_TaskQueueMutex);
+
+	    printf("Grabbed Head, Running Thread\n");
+	    Thread_CreateJoinable(&t, currentTask->task, NULL, currentTask->params);
+	    printf("Thread Created\n");
+	    Thread_Join(&t, &ret);
+	    printf("Thread Joined\n");
+	    Thread_Destroy(&t);
+	    DSC_free(currentTask);
+	    printf("Thread Destroyed\n");
+
+	}
+	else
+	{
+	    currentTask = NULL;
+	    pthread_mutex_unlock(&g_TaskQueueMutex);
+	}
+
+	usleep(10000);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	shouldShutdown = g_TaskQueueShutdown;
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
+
+    printf("Shutting down TaskQueueLoop!\n");
+    g_TaskQueueShutdown = 0;
+    g_TaskHead = NULL;
+    g_TaskQueueExists = 0;
+}
+
 void ReloadOMI()
 {
     system(OMI_RELOAD_COMMAND);
@@ -92,6 +188,8 @@ void UnloadFromProvider(
         MI_Instance_Delete(cimErrorDetails);
         return;
     }
+
+    g_TaskQueueShutdown = 1;
 
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
@@ -2444,7 +2542,22 @@ void Invoke_SendConfiguration(
     {      
         args->force = MI_TRUE;
     }    
-    Thread_CreateDetached(Invoke_SendConfigurationApply_Internal, NULL, args); 
+
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_SendConfigurationApply_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 
@@ -2507,8 +2620,22 @@ void Invoke_SendConfigurationApply(
     {      
         args->force = MI_TRUE;
     }    
-    Thread_CreateDetached(Invoke_SendConfigurationApply_Internal, NULL, args);
-  
+
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_SendConfigurationApply_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 
@@ -2578,8 +2705,22 @@ void Invoke_GetConfiguration(
     args->methodName = methodName;
     args->data.data = dataValue;
     args->data.size = dataSize; 
-    Thread_CreateDetached(Invoke_GetConfiguration_Internal, NULL, args);
 
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_GetConfiguration_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 
@@ -2623,8 +2764,22 @@ void Invoke_ApplyConfiguration(
     }  
     args->context = context;
     args->methodName = methodName;   
-    Thread_CreateDetached(Invoke_ApplyConfiguration_Internal, NULL, args); 
 
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_ApplyConfiguration_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 
@@ -2683,7 +2838,22 @@ void Invoke_SendMetaConfigurationApply(
     args->data.data = dataValue;
     args->data.size = in->ConfigurationData.value.size;
     args->flag = GetCallSetConfigurationFlags(context) | LCM_SET_METACONFIG;  
-    Thread_CreateDetached(Invoke_SendConfigurationApply_Internal, NULL, args);
+
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_SendConfigurationApply_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 
@@ -2727,8 +2897,22 @@ void Invoke_GetMetaConfiguration(
     }  
     args->context = context;
     args->methodName = methodName;   
-    Thread_CreateDetached(Invoke_GetMetaConfiguration_Internal, NULL, args); 
 
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_GetMetaConfiguration_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 void Invoke_RollBack(
@@ -2772,8 +2956,22 @@ void Invoke_RollBack(
     args->context = context;
     args->methodName = methodName;  
     args->flag = GetCallSetConfigurationFlags(context);
-    Thread_CreateDetached(Invoke_RollBack_Internal, NULL, args);     
-      
+
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_RollBack_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 void Invoke_TestConfiguration(
@@ -2815,9 +3013,23 @@ void Invoke_TestConfiguration(
         return;
     }  
     args->context = context;
-    args->methodName = methodName;   
-    Thread_CreateDetached(Invoke_TestConfiguration_Internal, NULL, args); 
+    args->methodName = methodName;
 
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_TestConfiguration_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 
@@ -2864,7 +3076,22 @@ void Invoke_PerformRequiredConfigurationChecks(
     args->flag = TASK_REGULAR;
     if( in && in->Flags.exists)
         args->flag = in->Flags.value;
-    Thread_CreateDetached(Invoke_PerformRequiredConfigurationChecks_Internal, NULL, args);  
+
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_PerformRequiredConfigurationChecks_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 void Invoke_StopConfiguration(
@@ -2910,7 +3137,22 @@ void Invoke_StopConfiguration(
     args->force = MI_FALSE;
     if( in )
         args->force = in->force.exists ? in->force.value : MI_FALSE;
-    Thread_CreateDetached(Invoke_StopConfiguration_Internal, NULL, args);  
+
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_StopConfiguration_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 
@@ -3086,8 +3328,22 @@ void Invoke_PerformInventory(
     args->stringdata = InMOF;
     args->context = context;
     args->methodName = methodName;
-    Thread_CreateDetached(Invoke_PerformInventory_Internal, NULL, args);
 
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_PerformInventory_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 void Invoke_PerformInventoryOOB(
@@ -3149,8 +3405,22 @@ void Invoke_PerformInventoryOOB(
     args->stringdata = InMOF;
     args->context = context;
     args->methodName = methodName;
-    Thread_CreateDetached(Invoke_PerformInventory_Internal, NULL, args);
 
+    {
+	LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+	newNode->task = Invoke_PerformInventory_Internal;
+	newNode->params = args;
+	newNode->next = NULL;
+	AddToTaskQueue(newNode);
+	
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	if (g_TaskQueueExists == 0)
+	{
+	    Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+	    g_TaskQueueExists = 1;
+	}
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    }
 }
 
 #endif
