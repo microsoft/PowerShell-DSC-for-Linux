@@ -3,6 +3,7 @@ import fileinput
 import sys
 import subprocess
 import os
+import fcntl
 from xml.dom.minidom import parse
 
 def usage():
@@ -96,9 +97,9 @@ if len(dsc_sysconfdir) < 10:
     print("Error: Something has gone horribly wrong with the directory paths.")
     sys.exit(1)
 
-if os.path.isfile(temp_report_path):
-    print("Error: Cannot perform inventory while another inventory is being performed. Please wait for the other to finish.  If it has finished, then please remove " + temp_report_path)
-    sys.exit(1)
+# Acquire inventory file lock
+inventory_lock = open(dsc_sysconfdir + "/inventory_lock", "w+")
+fcntl.flock(inventory_lock, fcntl.LOCK_EX)
 
 os.system("touch " + temp_report_path)
 os.system("rm -f " + dsc_reportdir + "/*")
@@ -129,4 +130,8 @@ f.write(final_xml_report)
 f.close()
 os.system("rm -f " + dsc_reportdir + "/*")
 os.rename(temp_report_path, report_path)
+
+# Release inventory file lock
+fcntl.flock(inventory_lock, fcntl.LOCK_UN)
+
 sys.exit(retval)
