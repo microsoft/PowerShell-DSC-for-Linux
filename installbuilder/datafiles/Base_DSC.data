@@ -103,9 +103,9 @@ omsagent (>= 1.0.0)
 #endif
 #endif
 #if PACKAGE_TYPE == RPM
-omi >= 1.0.8-5
+omi >= 1.0.8-6
 #else
-omi (>= 1.0.8.5)
+omi (>= 1.0.8.6)
 #endif
 
 %Preinstall_10
