@@ -187,10 +187,6 @@ mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration/schema
 mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration/registration
 chmod 700 $CONFIG_SYSCONFDIR/${{SHORT_NAME}}
 
-# Make OMI listen on the standard DSC port
-$OMI_HOME/bin/omiconfigeditor httpsport -a 5986 < $CONFIG_SYSCONFDIR/omiserver.conf > $CONFIG_SYSCONFDIR/omiserver.conf_temp
-mv $CONFIG_SYSCONFDIR/omiserver.conf_temp $CONFIG_SYSCONFDIR/omiserver.conf
-
 # Create links in omi's directories for DSC data
 
 #if BUILD_OMS == 1
@@ -199,7 +195,13 @@ cp -f /opt/microsoft/${{SHORT_NAME}}/etc/*.reg $OMI_REGISTER_DIR/root-oms
 cp -f /opt/microsoft/${{SHORT_NAME}}/etc/omsconfig.reg $OMI_REGISTER_DIR/root-oms
 ln -fs /opt/microsoft/${{SHORT_NAME}}/lib/libomsconfig.so $OMI_HOME/lib/libomsconfig.so
 ln -fs /opt/microsoft/${{SHORT_NAME}}/bin/OMSConsistencyInvoker $OMI_HOME/bin/OMSConsistencyInvoker
+
 #else
+
+# Make OMI listen on the standard DSC port
+$OMI_HOME/bin/omiconfigeditor httpsport -a 5986 < $CONFIG_SYSCONFDIR/omiserver.conf > $CONFIG_SYSCONFDIR/omiserver.conf_temp
+mv $CONFIG_SYSCONFDIR/omiserver.conf_temp $CONFIG_SYSCONFDIR/omiserver.conf
+
 mkdir -p $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
 cp -f /opt/microsoft/${{SHORT_NAME}}/etc/*.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
 cp -f /opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration/
