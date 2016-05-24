@@ -1,0 +1,7 @@
+[ClassVersion("1.0.0"), Description("The configuration provider for module signature keys."), FriendlyName("nxOMSKeyMgmt")] 
+class MSFT_nxOMSKeyMgmtResource:OMI_BaseResource
+{ 
+  [Key] string KeyContents; 
+  [Write,required] string KeySignature;
+  [Write,ValueMap{"present", "absent"},Values{"present", "absent"}] string Ensure; 
+};

@@ -72,6 +72,7 @@ PROVIDERS+=nxUser
 PROVIDERS+=nxGroup
 PROVIDERS+=nxOMSPlugin
 PROVIDERS+=nxAvailableUpdates
+PROVIDERS+=nxOMSKeyMgmt
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript

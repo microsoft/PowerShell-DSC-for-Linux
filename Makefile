@@ -259,7 +259,7 @@ nxMySQL:
 nxOMSAgent:
 	rm -rf output/staging; \
 	VERSION="1.0"; \
-	PROVIDERS="nxOMSAgent nxOMSSyslog"; \
+	PROVIDERS="nxOMSAgent nxOMSSyslog nxOMSKeyMgmt"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
