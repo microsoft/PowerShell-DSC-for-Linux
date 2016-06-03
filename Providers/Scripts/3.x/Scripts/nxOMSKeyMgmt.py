@@ -89,7 +89,7 @@ def Set(KeyContents, KeySignature, Ensure):
             return [-1]
     error = None
     try:
-        out = base64.decodestring(KeySignature)
+        out = base64.decodestring(KeySignature.encode('utf8'))
     except Exception as error:
         print("ERROR:  Exception while base64 decoding  'KeySignature': " +
               str(error), file=sys.stderr)
@@ -109,7 +109,7 @@ def Set(KeyContents, KeySignature, Ensure):
             F.write(out)
             F.close()
     try:
-        out = base64.decodestring(KeyContents)
+        out = base64.decodestring(KeyContents.encode('utf8'))
     except Exception as error:
         print("ERROR:  Exception while base64 decoding  'KeyContents': " +
               str(error), file=sys.stderr)
@@ -129,7 +129,7 @@ def Set(KeyContents, KeySignature, Ensure):
             F.write(out)
             F.close()
     # Verify the signature.
-    cmd = gpg_bin + ' --options /dev/null --no-default-keyring --keyring ' \
+    cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --no-default-keyring --keyring ' \
         + signature_keyring_path + ' --verify ' + \
         key_signature_path + ' ' + key_contents_path
     code, out = RunGetOutput(cmd, False, False)
@@ -141,7 +141,7 @@ def Set(KeyContents, KeySignature, Ensure):
         return [-1]
     if Ensure == 'absent':
         # Get the id so we can remove the key.
-        cmd = gpg_bin + ' --dry-run --options /dev/null --no-default-keyring --keyring ' \
+        cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --dry-run --no-default-keyring --keyring ' \
             + dsc_keyring_path + ' --import ' + key_contents_path
         code, out = RunGetOutput(cmd, False, False)
         r = re.search(r'.*?key (.*?):.*?not changed', out)
@@ -153,7 +153,7 @@ def Set(KeyContents, KeySignature, Ensure):
             cleanup()
             return [-1]
         # We must use the fingerprint in batch mode to prevent interactive questions
-        cmd = gpg_bin + ' --batch --yes --options /dev/null --no-default-keyring --keyring ' \
+        cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --batch --yes --no-default-keyring --keyring ' \
             + dsc_keyring_path + ' --fingerprint ' + key_id
         code, out = RunGetOutput(cmd, False, False)
         r = re.search(r'.*?fingerprint = (.*?)\n', out)
@@ -166,7 +166,7 @@ def Set(KeyContents, KeySignature, Ensure):
             cleanup()
             return [-1]
         # Delete the key.
-        cmd = gpg_bin + ' --batch --yes --options /dev/null --no-default-keyring --keyring ' \
+        cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --batch --yes --no-default-keyring --keyring ' \
             + dsc_keyring_path + ' --delete-secret-and-public-key "' + key_fingerprint + '"'
         code, out = RunGetOutput(cmd, False, False)
         if code != 0:
@@ -176,7 +176,7 @@ def Set(KeyContents, KeySignature, Ensure):
             return [-1]
     else:
         # Add the key.
-        cmd = gpg_bin + ' --options /dev/null --no-default-keyring --keyring ' \
+        cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --no-default-keyring --keyring ' \
             + dsc_keyring_path + ' --import ' + key_contents_path
         code, out = RunGetOutput(cmd, False, False)
     if code != 0:
@@ -196,7 +196,7 @@ def Test(KeyContents, KeySignature, Ensure):
             return [-1]
     error = None
     try:
-        out = base64.decodestring(KeyContents)
+        out = base64.decodestring(KeyContents.encode('utf8'))
     except Exception as error:
         print("ERROR:  Exception while base64 decoding  'KeyContents': " +
               str(error), file=sys.stderr)
@@ -214,7 +214,7 @@ def Test(KeyContents, KeySignature, Ensure):
         else:
             F.write(out)
             F.close()
-    cmd = gpg_bin + ' --dry-run --options /dev/null --no-default-keyring --keyring ' \
+    cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --dry-run --options /dev/null --no-default-keyring --keyring ' \
         + dsc_keyring_path + ' --import ' + key_contents_path
     code, out = RunGetOutput(cmd, False, False)
     present = 'not changed' in out
