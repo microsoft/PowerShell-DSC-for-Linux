@@ -31,6 +31,11 @@ PROVIDERS=
 DESCRIPTION=Windows Powershell Desired State Configuration for Linux
 RUN_AS_USER=root
 endif
+ifeq ("$(wildcard /usr/bin/dpkg-deb)","")
+DPKG_LOCATION="--DPKG_LOCATION=$(PAL_DIR)/installer/InstallBuilder/tools/bin/dpkg-deb-$(PF_ARCH)"
+else
+DPKG_LOCATION=
+endif
 
 all:
 ifeq ($(BUILD_RPM),1)
@@ -61,6 +66,7 @@ ifeq ($(BUILD_RPM),1)
 		--DATAFILE_PATH=$(TOP)/installbuilder/datafiles \
 		Base_DSC.data
 endif
+
 ifeq ($(BUILD_DPKG),1)
 	@echo "========================= Make DSC installer"
 ifeq ($(BUILD_OMS_VAL),1)
@@ -89,7 +95,7 @@ endif
 		--DESCRIPTION="$(DESCRIPTION)" \
                 --RUN_AS_USER="$(RUN_AS_USER)" \
 		--OUTPUTFILE=$(SHORT_NAME)-$(CONFIG_VERSION)-$(DSC_BUILDVERSION_BUILDNR).ssl_$(SSL_VERSION).$(PF_ARCH) \
-		--DPKG_LOCATION=$(IB_DIR)/tools/bin/dpkg-deb-$(PF_ARCH) \
+		$(DPKG_LOCATION) \
 		--DATAFILE_PATH=$(TOP)/installbuilder/datafiles \
 		Base_DSC.data
 endif
