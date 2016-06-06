@@ -4999,53 +4999,12 @@ MI_Result InitDSCInternalCache(
     *DSCInternalCache = NULL;
 
     moduleLoader = (ModuleLoaderObject*)moduleManager->reserved2;
-    r = ExpandPath(CONFIGURATION_LOCATION_INTERNALSTATECACHE, &fileExpandedPath, cimErrorDetails);
+    
+    // reset to default values.
+    r = UpdateDSCCacheInstance(moduleLoader->application, DSCInternalCache, NULL, NULL, NULL, NULL, cimErrorDetails);
     if (r != MI_RESULT_OK)
     {
-        return r;
-    }
-
-    if (File_ExistT(fileExpandedPath) == -1) // File doesn't exist create the one on the fly
-    {
-        DSC_free(fileExpandedPath);
-
-        // reset to default values.
-        r = UpdateDSCCacheInstance(moduleLoader->application, DSCInternalCache, NULL, NULL, NULL, NULL, cimErrorDetails);
-        if (r != MI_RESULT_OK)
-        {
-            return r;
-        }
-    }
-    else
-    {
-        MI_Uint8 *buffer = NULL;
-        MI_Uint32 bufferSize = 0;   
-        MI_Uint32 deserializeSize = 0;
-        MI_InstanceA *miTempInstanceArray = NULL;
-
-        r = ReadFileContent(fileExpandedPath, &buffer, &bufferSize, cimErrorDetails);
-        DSC_free(fileExpandedPath);
-        if (r != MI_RESULT_OK)
-        {
-            return r;
-        }
-
-        r = MI_Deserializer_DeserializeInstanceArray(moduleLoader->deserializer, 0, moduleLoader->options, NULL,
-            buffer, bufferSize, NULL, &deserializeSize, &miTempInstanceArray, cimErrorDetails);
-        DSC_free(buffer);
-        if (r != MI_RESULT_OK)
-        {
-            return r;
-        }
-
-        if (miTempInstanceArray == NULL || miTempInstanceArray->size != 1)
-        {
-            return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DESERIALIZER_CREATE_FAILED);
-        }
-
-        *DSCInternalCache = miTempInstanceArray->data[0];
-        miTempInstanceArray->data[0] = NULL;
-        MI_Deserializer_ReleaseInstanceArray(miTempInstanceArray);
+	return r;
     }
 
     return MI_RESULT_OK;
