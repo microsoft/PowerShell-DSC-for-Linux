@@ -32,7 +32,7 @@ DESCRIPTION=Windows Powershell Desired State Configuration for Linux
 RUN_AS_USER=root
 endif
 ifeq ("$(wildcard /usr/bin/dpkg-deb)","")
-DPKG_LOCATION="--DPKG_LOCATION=$(PAL_DIR)/installer/InstallBuilder/tools/bin/dpkg-deb-$(PF_ARCH)"
+DPKG_LOCATION="--DPKG_LOCATION=$(IB_DIR)/tools/bin/dpkg-deb-$(PF_ARCH)"
 else
 DPKG_LOCATION=
 endif
