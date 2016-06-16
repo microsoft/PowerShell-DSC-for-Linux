@@ -328,6 +328,8 @@ systemctl_path = "/usr/bin/systemctl"
 upstart_start_path = "/sbin/start"
 upstart_stop_path = "/sbin/stop"
 upstart_status_path = "/sbin/status"
+if os.path.exists('/sbin'):
+    os.environ['PATH']=os.environ['PATH']+':/sbin'
 code, out = RunGetOutput('which service', False, False)
 initd_service = out.strip('\n')
 initd_chkconfig = "/sbin/chkconfig"
@@ -742,9 +744,9 @@ def GetInitState(sc):
     check_state_program = initd_service
     # debian style init. These are missing in redhat.
     if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
-        check_state_program = '/usr/sbin/service'
-        if os.path.isfile('/usr/sbin/service'):
-            check_state_program = '/usr/sbin/service'
+        check_state_program = initd_service
+        if os.path.isfile(initd_service):
+            check_state_program = initd_service
         else:  # invoke the service directly
             check_state_program = '/etc/init.d/'
     if check_state_program == '/etc/init.d/':
@@ -1113,8 +1115,8 @@ def ModifyInitService(sc):
     check_enabled_program = initd_chkconfig
     # debian style init. These are missing in redhat.
     if os.path.isfile(initd_invokerc) and os.path.isfile(initd_updaterc):
-        if os.path.isfile('/usr/sbin/service'):
-            check_state_program = '/usr/sbin/service'
+        if os.path.isfile(initd_service):
+            check_state_program = initd_service
         else:  # invoke the service directly
             check_state_program = '/etc/init.d/'
         check_enabled_program = initd_updaterc
@@ -1520,7 +1522,7 @@ def UpstartGetAll(sc):
     code, txt = RunGetOutputNoStderr(cmd, False, True)
     if code != 0: 
         return False
-    cmd = 'service --status-all'
+    cmd = initd_service + ' --status-all'
     code, txt = RunGetOutputNoStderr(cmd, False, True)
     if code != 0: 
         return False
@@ -1528,7 +1530,7 @@ def UpstartGetAll(sc):
     cmd = "initctl list  | sed 's/[(].*[)] //g' | tr ', ' ' ' | awk '{print $1,$2}'"
     code, txt = RunGetOutputNoStderr(cmd, False, False)
     services = txt.splitlines()
-    cmd = "service --status-all &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile"
+    cmd = initd_service + " --status-all &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile"
     code, txt = RunGetOutputNoStderr(cmd, False, False)
     txt = txt.replace('[','')
     txt = txt.replace(']','')
@@ -1574,16 +1576,32 @@ def UpstartGetAll(sc):
 
 def InitdGetAll(sc):
     d={}
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        initd_service_status = 'sudo /opt/microsoft/omsconfig/Scripts/OMSServiceStat.sh'
+        status_postfix = ''
+        initd_service_status_all = 'sudo /opt/microsoft/omsconfig/Scripts/OMSServiceStatAll.sh'
+    else:
+        initd_service_status = initd_service
+        status_postfix = ' status'
+        initd_service_status_all = initd_service + ' --status-all '
     if os.path.exists(initd_chkconfig):
-        # Does the command work?
-        # There may be no error detected in our multi-pipe command below.
-        # To keep from returning garbage, we must test the command.
-        # RunGetOutput(chk_err = True) will log the error message here if it occurs.
-        cmd = initd_chkconfig + ' --list '
-        code, txt = RunGetOutputNoStderr(cmd, False, True)
-        if code != 0: 
-            return False
-        # Now we know it will work.
+        # SLES 11-SP4 chkconfig can return error code on success,
+        # so don't check chkconfig error code if this is the case.
+        if os.path.exists('/etc/SuSE-release'):
+            txt = open('/etc/SuSE-release','r').read()
+            s=r'.*?VERSION.*?=(.*?)\n.*?PATCHLEVEL.*?=(.*?)\n'
+            m = re.search(s, txt, re.M)
+            if m != None:
+                if not (int(m.group(1)) == 11 and  int(m.group(1)) == 4 ) : 
+                    # Does the command work?
+                    # There may be no error detected in our multi-pipe command below.
+                    # To keep from returning garbage, we must test the command.
+                    # RunGetOutput(chk_err = True) will log the error message here if it occurs.
+                    cmd = initd_chkconfig + ' --list '
+                    code, txt = RunGetOutputNoStderr(cmd, False, True)
+                    if code != 0: 
+                        return False
+                    # Now we know it will work.
         cmd = initd_chkconfig + ' --list | grep -vE "based| off"'
         code, txt = RunGetOutputNoStderr(cmd, False, False)
         services=txt.splitlines()
@@ -1597,7 +1615,7 @@ def InitdGetAll(sc):
             d['Controller'] =  sc.Controller
             d['Description'] = ''
             d['State'] = 'stopped'
-            cmd = 'service ' + s[0] + ' status'
+            cmd = initd_service_status + ' ' + s[0] + status_postfix
             code, txt = RunGetOutputNoStderr(cmd, False, False)
             if 'running' in txt:
                 d['State'] = 'running'
@@ -1616,12 +1634,12 @@ def InitdGetAll(sc):
         # There may be no error detected in our multi-statement command below.
         # To keep from returning garbage, we must test the command.
         # RunGetOutput(chk_err = True) will log the error message here if it occurs.
-        cmd =  initd_service + ' --status-all '
+        cmd =  initd_service_status_all
         code, txt = RunGetOutputNoStderr(cmd, False, True)
         if code != 0: 
             return False
         # Now we know it will work.
-        cmd = initd_service + ' --status-all &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile'
+        cmd = initd_service_status_all + ' &> /tmp/tmpfile ; cat /tmp/tmpfile ; rm /tmp/tmpfile'
         code, txt = RunGetOutputNoStderr(cmd, False, False)
         txt = txt.replace('[','')
         txt = txt.replace(']','')
