@@ -1592,7 +1592,7 @@ def InitdGetAll(sc):
             s=r'.*?VERSION.*?=(.*?)\n.*?PATCHLEVEL.*?=(.*?)\n'
             m = re.search(s, txt, re.M)
             if m != None:
-                if not (int(m.group(1)) == 11 and  int(m.group(1)) == 4 ) : 
+                if not (int(m.group(1)) == 11 and  int(m.group(2)) == 4 ) : 
                     # Does the command work?
                     # There may be no error detected in our multi-pipe command below.
                     # To keep from returning garbage, we must test the command.
