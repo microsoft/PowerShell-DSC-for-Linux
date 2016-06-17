@@ -51,6 +51,8 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/OMSServiceStat.sh; intermediate/Scripts/OMSServiceStat.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/OMSServiceStatAll.sh; intermediate/Scripts/OMSServiceStatAll.sh; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSAgent_1.0.zip; release/nxOMSAgent_1.0.zip; 755; ${{RUN_AS_USER}}; root
