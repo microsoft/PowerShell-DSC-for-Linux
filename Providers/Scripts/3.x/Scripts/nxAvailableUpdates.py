@@ -64,6 +64,8 @@ def GetAptUpdates(Name):
     d={}
     cmd = 'LANG=en_US.UTF8 apt-get -s dist-upgrade | grep "^Inst"'
     code, out = RunGetOutput(cmd, False, False)
+    if len(out) < 2 :
+        return updates_list
     srch_txt=r'Inst[ ](.*?)[ ].*?[(](.*?)[ ](.*?)[ ]\[(.*?)\]'
     srch=re.compile(srch_txt, re.M|re.S)
     pkg_list=srch.findall(out)
@@ -95,9 +97,13 @@ def GetYumUpdates(Name):
     srch = re.compile(srch_str, re.M | re.S)
     updates_list = []
     d={}
-    cmd = "LANG=en_US.UTF8 yum check-update | grep -E '*updates$' | awk '{print $1}'"
+    cmd = "LANG=en_US.UTF8 yum -q check-update | awk '{print $1}'"
     code, pkg_list = RunGetOutput(cmd, False, False)
+    if len(pkg_list) < 2 :
+        return updates_list
     for pkg in pkg_list:
+        if len(pkg) < 2 :
+            continue
         cmd = 'LANG=en_US.UTF8 yum info available ' + pkg
         code, out = RunGetOutput(cmd, False, False)
         if len(out) < 1 or ':' not in out:
@@ -131,6 +137,8 @@ def GetZypperUpdates(Name):
     cmd = 'LANG=en_US.UTF8 zypper lp | grep '|' | grep -v Status'
     code, out = RunGetOutput(cmd, False, False)
     pkg_list += out
+    if len(pkg_list) < 2:
+        return updates_list
     for pkg in pkg_list:
         pkg=pkg.split('|')
         d['BuildDate'] = ''
