@@ -131,10 +131,10 @@ def GetZypperUpdates(Name):
     updates_list = []
     d={}
     pkg_list = ''
-    cmd = 'LANG=en_US.UTF8 zypper lu | grep '|' | grep -v Status'
+    cmd = 'LANG=en_US.UTF8 zypper lu | grep \'|\' | grep -v Status'
     code, out = RunGetOutput(cmd, False, False)
     pkg_list += out
-    cmd = 'LANG=en_US.UTF8 zypper lp | grep '|' | grep -v Status'
+    cmd = 'LANG=en_US.UTF8 zypper lp | grep \'|\' | grep -v Status'
     code, out = RunGetOutput(cmd, False, False)
     pkg_list += out
     if len(pkg_list) < 2:
