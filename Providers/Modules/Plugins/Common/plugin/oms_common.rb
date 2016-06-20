@@ -17,7 +17,12 @@ module OMS
     require_relative 'oms_configuration'
     
     @@OSFullName = nil
+    @@OSName = nil
+    @@OSVersion = nil
     @@Hostname = nil
+    @@FQDN = nil
+    @@InstalledDate = nil
+    @@AgentVersion = nil
     @@CurrentTimeZone = nil
 
     @@tzMapping = {
@@ -529,12 +534,38 @@ module OMS
 
         if File.file?(conf_path)
           conf = File.read(conf_path)
-          os_full_name = conf[/OSFullName=(.*?)\\n/, 1]
+          os_full_name = conf[/OSFullName=(.*?)\n/, 1]
           if os_full_name and os_full_name.size
             @@OSFullName = os_full_name
           end
         end
         return @@OSFullName
+      end
+
+      def get_os_name(conf_path = "/etc/opt/microsoft/scx/conf/scx-release")
+        return @@OSName if !@@OSName.nil?
+
+        if File.file?(conf_path)
+          conf = File.read(conf_path)
+          os_name = conf[/OSName=(.*?)\n/, 1]
+          if os_name and os_name.size
+            @@OSName = os_name
+          end
+        end
+        return @@OSName
+      end
+
+      def get_os_version(conf_path = "/etc/opt/microsoft/scx/conf/scx-release")
+        return @@OSVersion if !@@OSVersion.nil?
+
+        if File.file?(conf_path)
+          conf = File.read(conf_path)
+          os_version = conf[/OSVersion=(.*?)\n/, 1]
+          if os_version and os_version.size
+            @@OSVersion = os_version
+          end
+        end
+        return @@OSVersion
       end
 
       def get_hostname
@@ -548,6 +579,51 @@ module OMS
           @@Hostname = hostname
         end
         return @@Hostname
+      end
+
+      def get_fully_qualified_domain_name
+        return @@FQDN unless @@FQDN.nil?
+
+        begin
+          fqdn = Socket.gethostbyname(Socket.gethostname)[0]
+        rescue => error
+          Log.error_once("Unable to get the FQDN: #{error}")
+        else
+          @@FQDN = fqdn
+        end
+        return @@FQDN
+      end
+
+      def get_installed_date(conf_path = "/etc/opt/microsoft/omsagent/sysconf/installinfo.txt")
+        return @@InstalledDate if !@@InstalledDate.nil?
+
+        if File.file?(conf_path)
+          conf = File.read(conf_path)
+          installed_date = conf[/(.*)\n(.*)/, 2]
+          if installed_date and installed_date.size
+            begin
+              Time.parse(installed_date)
+            rescue ArgumentError
+              Log.error_once("Invalid install date: #{installed_date}")
+            else
+              @@InstalledDate = installed_date
+            end
+          end
+        end
+        return @@InstalledDate
+      end
+
+      def get_agent_version(conf_path = "/etc/opt/microsoft/omsagent/sysconf/installinfo.txt")
+        return @@AgentVersion if !@@AgentVersion.nil?
+
+        if File.file?(conf_path)
+          conf = File.read(conf_path)
+          agent_version = conf[/([\d]+\.[\d]+\.[\d]+-[\d]+)\s.*\n/, 1]
+          if agent_version and agent_version.size
+            @@AgentVersion = agent_version
+          end
+        end
+        return @@AgentVersion
       end
 
       def format_time(time)
@@ -585,17 +661,20 @@ module OMS
       #   path: string. path of the request
       #   record: Hash. body of the request
       #   compress: bool. Whether the body of the request should be compressed
+      #   extra_header: Hash. extra HTTP headers
+      #   serializer: method. serializer of the record
       # returns:
       #   HTTPRequest. request to ODS
-      def create_ods_request(path, record, compress)
-        headers = {}
+      def create_ods_request(path, record, compress, extra_headers=nil, serializer=method(:parse_json_record_encoding))
+        headers = extra_headers.nil? ? {} : extra_headers
+
         headers["Content-Type"] = "application/json"
         if compress == true
           headers["Content-Encoding"] = "deflate"
         end
 
         req = Net::HTTP::Post.new(path, headers)
-        json_msg = parse_json_record_encoding(record)
+        json_msg = serializer.call(record)
         if json_msg.nil?
           return nil
         else
@@ -636,6 +715,47 @@ module OMS
         end
         return msg
       end
+
+      # dump the records into json string
+      # assume the records is an array of single layer hash
+      # return nil if we cannot dump it
+      # parameters:
+      #   records: hash[]. an array of single layer hash
+      def safe_dump_simple_hash_array(records)
+        msg = nil
+
+        begin
+          msg = JSON.dump(records)
+        rescue JSON::GeneratorError => error
+          Log.warn_once("Unable to dump to JSON string. #{error}")
+          begin
+            # failed to dump, encode to utf-8, iso-8859-1 and try again
+            # records is an array of hash
+            records.each do | hash |
+              # the value is a hash
+              hash.each do | key, value |
+                # the value should be of simple type
+                # encode the string to utf-8
+                if value.instance_of? String
+                  hash[key] = value.encode('utf-8', 'iso-8859-1')
+                end
+              end
+            end
+
+            msg = JSON.dump(records)
+          rescue => error
+            # at this point we've given up, we don't recognize the encode,
+            # so return nil and log_warning for the record
+            Log.warn_once("Skipping due to failed encoding for #{records}: #{error}")
+          end
+        rescue => error
+          # unexpected error when dumpping the records into JSON string
+          # skip here and return nil
+          Log.warn_once("Skipping due to unexpected error for #{records}: #{error}")
+        end
+
+        return msg
+      end # safe_dump_simple_hash_array
 
       # start a request
       # parameters:
