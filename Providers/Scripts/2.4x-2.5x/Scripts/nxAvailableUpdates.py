@@ -103,7 +103,7 @@ def GetYumUpdates(Name):
     code, pkg_list = RunGetOutput(cmd, False, False)
     if len(pkg_list) < 2 :
         return updates_list
-    for pkg in pkg_list:
+    for pkg in pkg_list.splitlines():
         if len(pkg) < 2 :
             continue
         cmd = 'LANG=en_US.UTF8 yum info available ' + pkg
