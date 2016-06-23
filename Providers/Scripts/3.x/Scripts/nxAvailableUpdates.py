@@ -10,7 +10,6 @@ import imp
 import re
 import copy
 import fnmatch
-
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 helperlib = imp.load_source('helperlib', '../helperlib.py')
@@ -97,14 +96,20 @@ def GetYumUpdates(Name):
     srch = re.compile(srch_str, re.M | re.S)
     updates_list = []
     d={}
-    cmd = "LANG=en_US.UTF8 yum -q check-update | awk '{print $1}'"
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        yum_list = 'sudo /opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh '
+        yum_info = yum_list
+    else:
+        yum_list = 'yum -q check-update '
+        yum_info = 'yum info available '
+    cmd = "LANG=en_US.UTF8 " + yum_list + "| awk '{print $1}'"
     code, pkg_list = RunGetOutput(cmd, False, False)
     if len(pkg_list) < 2 :
         return updates_list
     for pkg in pkg_list.splitlines():
         if len(pkg) < 2 :
             continue
-        cmd = 'LANG=en_US.UTF8 yum info available ' + pkg
+        cmd = "LANG=en_US.UTF8 " + yum_info + pkg
         code, out = RunGetOutput(cmd, False, False)
         if len(out) < 1 or ':' not in out:
             continue
@@ -131,10 +136,14 @@ def GetZypperUpdates(Name):
     updates_list = []
     d={}
     pkg_list = ''
-    cmd = 'LANG=en_US.UTF8 zypper -q lu | grep "|" | grep -vE "Status|Current Version"'
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        zypper = 'sudo /opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh'
+    else:
+        zypper = 'zypper -q'
+    cmd = 'LANG=en_US.UTF8 ' + zypper + ' lu | grep "|" | grep -vE "Status|Current Version"'
     code, out = RunGetOutput(cmd, False, False)
     pkg_list += out
-    cmd = 'LANG=en_US.UTF8 zypper -q lp | grep "|" | grep -vE "Status|Current Version"'
+    cmd = 'LANG=en_US.UTF8 ' + zypper + ' lp | grep "|" | grep -vE "Status|Current Version"'
     code, out = RunGetOutput(cmd, False, False)
     pkg_list += out
     if len(pkg_list) < 2:
