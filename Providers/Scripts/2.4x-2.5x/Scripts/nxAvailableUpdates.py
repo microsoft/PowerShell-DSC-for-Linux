@@ -101,7 +101,7 @@ def GetYumUpdates(Name):
     # URL         : http://zsh.sourceforge.net/
     # License     : MIT
 
-    srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n'
+    srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Epoch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n'
     srch = re.compile(srch_str, re.M | re.S)
     updates_list = []
     d={}
@@ -115,25 +115,37 @@ def GetYumUpdates(Name):
     cmd = "LANG=en_US.UTF8 " + yum_list + "| awk '{print $1}'"
     code, pkg_list = RunGetOutput(cmd, False, False)
     if len(pkg_list) < 2 :
+        LG().Log('INFO', "Nothing to send info on. No packages")
         return updates_list
+    LG().Log('DEBUG', "Number of packages: " + len(pkg_list.splitlines()))
     for pkg in pkg_list.splitlines():
         if len(pkg) < 2 :
+            LG().Log('VERBOSE', "Avoiding very small entries.")
             continue
         cmd = "LANG=en_US.UTF8 " + yum_info + pkg
         code, out = RunGetOutput(cmd, False, False)
         if len(out) < 1 or ':' not in out:
+            LG().Log('DEBUG', "Checking the output in 'out': " + out)
             continue
         m = srch.search(out)
         if m == None:
             continue
+            
+        epoch =  0
+        if m.group(3) == "(none)":
+            epoch =  0
+        else:
+            epoch =  m.group(3)
+
         d['BuildDate'] = ''
         d['Name'] = m.group(1)
         if len(Name) and not fnmatch.fnmatch(d['Name'], Name):
             continue
         d['Architecture'] = m.group(2)
-        d['Version'] = m.group(3) + m.group(4)
-        d['Repository'] = m.group(5)
+        d['Version'] = epoch + ":" + m.group(4) + m.group(5)
+        d['Repository'] = m.group(6)
         updates_list.append(copy.deepcopy(d))
+    LG().Log('DEBUG', "Number of packages being written to the XML: " + len(updates_list))
     return updates_list
 
 def GetZypperUpdates(Name):
@@ -169,7 +181,7 @@ def GetZypperUpdates(Name):
         if len(Name) and not fnmatch.fnmatch(d['Name'], Name):
             continue
         d['Architecture'] = ''
-        d['Version'] = pkg[2]
+        d['Version'] = "0:" + pkg[2]
         d['Repository'] = pkg[0]
         updates_list.append(copy.deepcopy(d))
     return updates_list
