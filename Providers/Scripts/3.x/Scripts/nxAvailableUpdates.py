@@ -61,6 +61,12 @@ def GetAptUpdates(Name):
 
     updates_list = []
     d={}
+    # Refresh the repo
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        cmd = 'sudo /opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh'
+    else:
+        cmd = 'apt-get -q update'
+    code, out = RunGetOutput(cmd, False, False)
     cmd = 'LANG=en_US.UTF8 apt-get -s dist-upgrade | grep "^Inst"'
     code, out = RunGetOutput(cmd, False, False)
     if len(out) < 2 :
@@ -96,6 +102,7 @@ def GetYumUpdates(Name):
     srch = re.compile(srch_str, re.M | re.S)
     updates_list = []
     d={}
+    # No need to refresh the repo - 'check-update' will do this.
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         yum_list = 'sudo /opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh '
         yum_info = yum_list
@@ -136,10 +143,14 @@ def GetZypperUpdates(Name):
     updates_list = []
     d={}
     pkg_list = ''
+    # For omsagent the repo is refreshed in OMSZypperUpdates.sh.
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         zypper = 'sudo /opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh'
     else:
         zypper = 'zypper -q'
+        # Refresh the repo.
+        cmd = 'zypper -qn refresh'
+        code, out = RunGetOutput(cmd, False, False)
     cmd = 'LANG=en_US.UTF8 ' + zypper + ' lu | grep "|" | grep -vE "Status|Current Version"'
     code, out = RunGetOutput(cmd, False, False)
     pkg_list += out
