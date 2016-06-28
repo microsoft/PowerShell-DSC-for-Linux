@@ -1,5 +1,5 @@
 #!/bin/bash
-apt-get -q update
+apt-get -q update &> /dev/null
 
 
 
