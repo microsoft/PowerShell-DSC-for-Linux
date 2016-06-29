@@ -107,14 +107,17 @@ def GetYumUpdates(Name):
         yum_list = 'sudo /opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh '
         yum_info = yum_list
     else:
-        yum_list = 'yum -q check-update '
+        yum_list = 'yum check-update '
         yum_info = 'yum info available '
     cmd = "LANG=en_US.UTF8 " + yum_list + "| awk '{print $1}'"
     code, pkg_list = RunGetOutput(cmd, False, False)
     if len(pkg_list) < 2 :
         LG().Log('INFO', "Nothing to send info on. No packages")
         return updates_list
-    LG().Log('DEBUG', "Number of packages: " + len(pkg_list.splitlines()))
+    # Remove the chatter.  Yum puts a blank line before the list.
+    if pkg_list.find('\n\n') > -1:
+        pkg_list = pkg_list[pkg_list.find('\n\n')+2:]
+    LG().Log('DEBUG', "Number of packages: " + str(len(pkg_list.splitlines())))
     for pkg in pkg_list.splitlines():
         if len(pkg) < 2 :
             LG().Log('VERBOSE', "Avoiding very small entries.")
@@ -142,7 +145,7 @@ def GetYumUpdates(Name):
         d['Version'] = epoch + ":" + m.group(4) + m.group(5)
         d['Repository'] = m.group(6)
         updates_list.append(copy.deepcopy(d))
-    LG().Log('DEBUG', "Number of packages being written to the XML: " + len(updates_list))
+    LG().Log('DEBUG', "Number of packages being written to the XML: " + str(len(updates_list)))
     return updates_list
 
 def GetZypperUpdates(Name):
