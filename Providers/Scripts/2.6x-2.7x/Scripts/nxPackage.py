@@ -301,9 +301,9 @@ class Params:
         self.cmds['rpm']['present'] = 'rpm % -i '
         self.cmds['rpm']['absent'] = 'rpm % -e '
         self.cmds['rpm'][
-            'stat'] = 'rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}-%{RELEASE}|installed|%{ARCH}\n" | sed "s/(none)/0/g" '
+            'stat'] = 'rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{EPOCH}:%{VERSION}-%{RELEASE}|installed|%{ARCH}\n" | sed "s/(none)/0/g" '
         self.cmds['rpm'][
-            'stat_all'] = 'rpm -qa --queryformat "%{NAME}|%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{VERSION}-%{RELEASE}|installed|%{ARCH}\n@@" | sed "s/(none)/0/g" '
+            'stat_all'] = 'rpm -qa --queryformat "%{NAME}|%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{EPOCH}:%{VERSION}-%{RELEASE}|installed|%{ARCH}\n@@" | sed "s/(none)/0/g" '
         self.cmds['rpm']['stat_group'] = None
         self.cmds['apt'][
             'present'] = 'DEBIAN_FRONTEND=noninteractive apt-get % install ^ --allow-unauthenticated --yes '

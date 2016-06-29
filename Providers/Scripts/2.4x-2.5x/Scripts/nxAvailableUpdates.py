@@ -145,7 +145,7 @@ def GetYumUpdates(Name):
         if len(Name) and not fnmatch.fnmatch(d['Name'], Name):
             continue
         d['Architecture'] = m.group(2)
-        d['Version'] = epoch + ":" + m.group(4) + m.group(5)
+        d['Version'] = epoch + ":" + m.group(4) + "-"+ m.group(5)
         d['Repository'] = m.group(6)
         updates_list.append(copy.deepcopy(d))
     LG().Log('DEBUG', "Number of packages being written to the XML: " + str(len(updates_list)))
