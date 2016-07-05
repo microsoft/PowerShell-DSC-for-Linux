@@ -11,6 +11,8 @@ import imp
 import re
 import copy
 import fnmatch
+import time
+import os
 
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
@@ -34,7 +36,7 @@ def Inventory_Marshall(Name):
     retval, pkgs = GetUpdates(Name)
     for p in pkgs:
         p['Name'] = protocol.MI_String(p['Name'])
-        p['BuildDate'] = protocol.MI_String('BuildDate')
+        p['BuildDate'] = protocol.MI_String(p['BuildDate'])
         p['Repository'] = protocol.MI_String(p['Repository'])
         p['Version'] = protocol.MI_String(p['Version'])
         p['Architecture'] = protocol.MI_String(p['Architecture'])
@@ -101,9 +103,10 @@ def GetYumUpdates(Name):
     # Summary     : Powerful interactive shell
     # URL         : http://zsh.sourceforge.net/
     # License     : MIT
-
-    srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Epoch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n'
-    srch = re.compile(srch_str, re.M | re.S)
+    # Epoch and Buildtime are not available for 'yum info available'.
+    # If 'repoquery is installed Epoch and Buildtime will be used.
+    # Epoch is added to the front of the 'Version', and sanitized afterward.
+    
     updates_list = []
     d={}
     # No need to refresh the repo - 'check-update' will do this.
@@ -112,7 +115,13 @@ def GetYumUpdates(Name):
         yum_info = yum_list
     else:
         yum_list = 'yum check-update '
-        yum_info = 'yum info available '
+        if os.path.exists('/usr/bin/repoquery'):
+            yum_info = 'repoquery --queryformat "Name : %{NAME}\nArch : %{ARCH}\nVersion :  %{EPOCH}:%{VERSION}\nRelease : %{RELEASE}\nRepo : %{REPO}\nBuildtime : %{BUILDTIME}" '
+            srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n.*?Buildtime.*?: (.*?)\n'
+        else:
+            yum_info = 'yum info available '
+            srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n'
+
     cmd = "LANG=en_US.UTF8 " + yum_list + "| awk '{print $1}'"
     code, pkg_list = RunGetOutput(cmd, False, False)
     if len(pkg_list) < 2 :
@@ -122,6 +131,7 @@ def GetYumUpdates(Name):
     if pkg_list.find('\n\n') > -1:
         pkg_list = pkg_list[pkg_list.find('\n\n')+2:]
     LG().Log('DEBUG', "Number of packages: " + str(len(pkg_list.splitlines())))
+    srch = re.compile(srch_str, re.M | re.S)
     for pkg in pkg_list.splitlines():
         if len(pkg) < 2 :
             LG().Log('VERBOSE', "Avoiding very small entries.")
@@ -134,20 +144,18 @@ def GetYumUpdates(Name):
         m = srch.search(out)
         if m == None:
             continue
-
-        epoch =  0
-        if m.group(3) == "(none)":
-            epoch =  0
-        else:
-            epoch =  m.group(3)
-            
-        d['BuildDate'] = ''
         d['Name'] = m.group(1)
         if len(Name) and not fnmatch.fnmatch(d['Name'], Name):
             continue
         d['Architecture'] = m.group(2)
-        d['Version'] = epoch + ":" + m.group(4) + "-"+ m.group(5)
-        d['Repository'] = m.group(6)
+        d['Version'] =  m.group(3) + '-' + m.group(4)
+        if ':' not in d['Version']: # Add a '0:' for epoch.
+            d['Version'] = '0:' + d['Version']
+        d['Version'] = d['Version'].replace('(none)','0') # Handle the Epoch '(none)'. 
+        d['Repository'] = m.group(5)
+        d['BuildDate'] = ''
+        if len(m.groups()) == 6: # Buildtime
+            d['BuildDate'] = time.asctime(time.gmtime(int(m.group(6))))
         updates_list.append(copy.deepcopy(d))
     LG().Log('DEBUG', "Number of packages being written to the XML: " + str(len(updates_list)))
     return updates_list
@@ -166,27 +174,24 @@ def GetZypperUpdates(Name):
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         zypper = 'sudo /opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh'
     else:
-        zypper = 'zypper -q'
+        zypper = 'zypper -q lu'
         # Refresh the repo.
         cmd = 'zypper -qn refresh'
         code, out = RunGetOutput(cmd, False, False)
-    cmd = 'LANG=en_US.UTF8 ' + zypper + ' lu | grep "|" | grep -vE "Status|Current Version"'
+    cmd = 'LANG=en_US.UTF8 ' + zypper + ' | grep "|" | grep -vE "Status|Current Version"'
     code, out = RunGetOutput(cmd, False, False)
-    pkg_list += out
-    cmd = 'LANG=en_US.UTF8 ' + zypper + ' lp | grep "|" | grep -vE "Status|Current Version"'
-    code, out = RunGetOutput(cmd, False, False)
-    pkg_list += out
+    pkg_list = out
     if len(pkg_list) < 2:
         return updates_list
     for pkg in pkg_list.splitlines():
         pkg=pkg.split('|')
         d['BuildDate'] = ''
-        d['Name'] = pkg[1]
+        d['Name'] = pkg[2].strip()
         if len(Name) and not fnmatch.fnmatch(d['Name'], Name):
             continue
-        d['Architecture'] = ''
-        d['Version'] = "0:" + pkg[2]
-        d['Repository'] = pkg[0]
+        d['Architecture'] = pkg[5].strip()
+        d['Version'] = "0:" + pkg[4].strip()
+        d['Repository'] = pkg[1].strip()
         updates_list.append(copy.deepcopy(d))
     return updates_list
         
