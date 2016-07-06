@@ -110,6 +110,12 @@ def GetYumUpdates(Name):
     updates_list = []
     d={}
     # No need to refresh the repo - 'check-update' will do this.
+
+    if os.path.exists('/usr/bin/repoquery'):
+        srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n.*?Buildtime.*?: (.*?)\n'
+    else:
+        srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n'
+        
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         yum_list = 'sudo /opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh '
         yum_info = yum_list
@@ -117,11 +123,8 @@ def GetYumUpdates(Name):
         yum_list = 'yum check-update '
         if os.path.exists('/usr/bin/repoquery'):
             yum_info = 'repoquery --queryformat "Name : %{NAME}\nArch : %{ARCH}\nVersion :  %{EPOCH}:%{VERSION}\nRelease : %{RELEASE}\nRepo : %{REPO}\nBuildtime : %{BUILDTIME}" '
-            srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n.*?Buildtime.*?: (.*?)\n'
         else:
             yum_info = 'yum info available '
-            srch_str=r'Name.*?: (.*?)\n.*?Arch.*?: (.*?)\n.*?Version.*?: (.*?)\n.*?Release.*?: (.*?)\n.*?Repo.*?: (.*?)\n'
-
     cmd = "LANG=en_US.UTF8 " + yum_list + "| awk '{print $1}'"
     code, pkg_list = RunGetOutput(cmd, False, False)
     if len(pkg_list) < 2 :
