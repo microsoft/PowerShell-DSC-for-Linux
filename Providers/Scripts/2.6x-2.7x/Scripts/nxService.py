@@ -1602,7 +1602,7 @@ def InitdGetAll(sc):
                     if code != 0: 
                         return False
                     # Now we know it will work.
-        cmd = initd_chkconfig + ' --list | grep -vE "based| off"'
+        cmd = initd_chkconfig + ' --list | grep on | grep -v based'
         code, txt = RunGetOutputNoStderr(cmd, False, False)
         services=txt.splitlines()
         for srv in services:
