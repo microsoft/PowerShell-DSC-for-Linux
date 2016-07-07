@@ -8,7 +8,6 @@ import sys
 import subprocess
 import imp
 import re
-import base64
 
 # class MSFT_nxOMSKeyMgmt:OMI_BaseResource
 # {
@@ -27,7 +26,7 @@ signature_keyring_path = '/etc/opt/omi/conf/omsconfig/keymgmtring.gpg'
 gpg_bin = '/usr/bin/gpg'
 tmpdir = '/tmp/omsmgmt'
 key_contents_path = tmpdir + '/' + 'tmpkey.pub'
-key_signature_path = tmpdir + '/' + 'tmpkey.pub.sig'
+key_signature_path = tmpdir + '/' + 'tmpkey.asc'
 
 
 def init_vars(KeyContents, KeySignature, Ensure):
@@ -90,16 +89,7 @@ def Set(KeyContents, KeySignature, Ensure):
             Print("Exception - Unable to creaste " + tmpdir, file=sys.stderr)
             return [-1]
     error = None
-    try:
-        out = base64.decodestring(KeySignature)
-    except Exception, error:
-        Print("ERROR:  Exception while base64 decoding  'KeySignature': " +
-              str(error), file=sys.stderr)
-        LG().Log('ERROR', "Exception while base64 decoding  'KeySignature': " +
-                 str(error))
-        cleanup()
-        return [-1]
-    F, error = opened_w_error(key_signature_path, 'wb+')
+    F, error = opened_w_error(key_signature_path, 'w+')
     if error:
         Print("ERROR:  Exception opening file " +
               key_signature_path + " " + str(error), file=sys.stderr)
@@ -108,18 +98,9 @@ def Set(KeyContents, KeySignature, Ensure):
         cleanup()
         return [-1]
     else:
-        F.write(out)
+        F.write(KeySignature)
         F.close()
-    try:
-        out = base64.decodestring(KeyContents)
-    except Exception, error:
-        Print("ERROR:  Exception while base64 decoding  'KeyContents': " +
-              str(error), file=sys.stderr)
-        LG().Log('ERROR', "Exception while base64 decoding  'KeyContents': " +
-                 str(error))
-        cleanup()
-        return [-1]
-    F, error = opened_w_error(key_contents_path, 'wb+')
+    F, error = opened_w_error(key_contents_path, 'w+')
     if error:
         Print("ERROR:  Exception opening file " +
               key_contents_path + " " + str(error), file=sys.stderr)
@@ -128,7 +109,7 @@ def Set(KeyContents, KeySignature, Ensure):
         cleanup()
         return [-1]
     else:
-        F.write(out)
+        F.write(KeyContents)
         F.close()
     # Verify the signature.
     cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --no-default-keyring --keyring ' \
@@ -197,16 +178,7 @@ def Test(KeyContents, KeySignature, Ensure):
             Print("Exception - Unable to creaste " + tmpdir, file=sys.stderr)
             return [-1]
     error = None
-    try:
-        out = base64.decodestring(KeyContents)
-    except Exception, error:
-        Print("ERROR:  Exception while base64 decoding  'KeyContents': " +
-              str(error), file=sys.stderr)
-        LG().Log('ERROR', "Exception while base64 decoding  'KeyContents': " +
-                 str(error))
-        cleanup()
-        return [-1]
-    F, error =  opened_w_error(key_contents_path, 'wb+')
+    F, error =  opened_w_error(key_contents_path, 'w+')
     if error:
         LG().Log('ERROR', "Exception opening file " +
                  key_contents_path + " " + str(error))
@@ -214,7 +186,7 @@ def Test(KeyContents, KeySignature, Ensure):
                  key_contents_path + " " + str(error), file=sys.stderr)
         return [-1]
     else:
-        F.write(out)
+        F.write(KeyContents)
         F.close()
     cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --dry-run --options /dev/null --no-default-keyring --keyring ' \
         + dsc_keyring_path + ' --import ' + key_contents_path
