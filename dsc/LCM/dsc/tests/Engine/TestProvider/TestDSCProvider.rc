@@ -1,0 +1,38 @@
+/* @migen@ */
+/*
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+** IF YOU NEED TO ADD RESOURCES, CREATE A SECOND .RC FILE, AND USE #INCLUDE TO MERGE THIS FILE
+** INTO THE .RC FILE YOU CREATED.
+**
+**==============================================================================
+*/
+STRINGTABLE
+{
+    1, "Get resource states based on input configuration file."
+    2, "Configuration document that to be applied."
+    3, "Flags passed to the providers. reserved for future use."
+    4, "Current state of Configuration resources specified."
+    5, "Test resource states based on input configuration file."
+    6, "true if same, false otherwise."
+    7, "Context information provider can use to optimize set, this is optional."
+    8, "Set resource states based on input configuration file."
+    9, "Context information provider can use to optimize set from TestTargetResource, this is optional."
+    10, "1.0.0"
+    11, "Base schema for all native configuration providers."
+    12, "TestPath"
+    13, "TestProvider1"
+}
+
+
+#include <windows.h>
+#include <ntverp.h>
+
+#define VER_FILETYPE    		VFT_APP
+#define VER_FILESUBTYPE 		VFT2_UNKNOWN
+#define VER_FILEDESCRIPTION_STR     	"DSC"
+#define VER_INTERNALNAME_STR        	"NITS.TestDSCProvider.dll"
+#define VER_ORIGINALFILENAME_STR    	"NITS.TestDSCProvider.dll"
+
+#include "common.ver"

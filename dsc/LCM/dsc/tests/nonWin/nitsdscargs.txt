@@ -1,0 +1,9 @@
+-install
+-reset
+-match:Common,Linux
+-target:libdsccore.so
++loglevel:3
+libNITSDSCtestCA.so
+libNITSDSCtestLCM.so
+libNITSDSCtestEngineE2E.so
+libNITSDSCtestModuleLoader.so

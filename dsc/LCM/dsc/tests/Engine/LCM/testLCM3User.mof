@@ -1,0 +1,21 @@
+instance of TEST_Test3User
+{
+    ResourceId = "Res1";
+    ModuleName="PsModuleForTEST_Test3User";
+    ModuleVersion="1.0";
+    id1 = "ABCD ABCD";
+};
+
+instance of TEST_Test3User
+{
+    ResourceId = "Res2";
+    ModuleName="PsModuleForTEST_Test3User";
+    ModuleVersion="1.0";
+    id1 = "rtgt rtgt";
+};
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

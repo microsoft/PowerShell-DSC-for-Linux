@@ -1,0 +1,13 @@
+instance of TEST_Stop
+{
+    ResourceId = "Res1";
+    ModuleName="TEST_Stop";
+    ModuleVersion="1.0";
+    id1 = "ABCD ABCD";
+};
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

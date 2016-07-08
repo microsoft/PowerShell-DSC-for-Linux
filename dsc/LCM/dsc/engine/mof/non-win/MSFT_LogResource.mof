@@ -1,0 +1,6 @@
+
+[Description("This resource is used to send user provided messages to DSC specific channel on the DSC managed node."), ClassVersion("1.0.0")] 
+class MSFT_LogResource : OMI_BaseResource 
+{
+    [required] string Message;
+};
