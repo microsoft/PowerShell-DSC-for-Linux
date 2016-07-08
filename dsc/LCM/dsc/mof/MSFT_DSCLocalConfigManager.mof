@@ -1,0 +1,103 @@
+[ClassVersion ("1.0.0"),
+ Description (
+    "Local configuration manager that control the states of configuration files and use configuration agent to apply the configurations")]
+class MSFT_DSCLocalConfigManager
+{
+        [static, 
+         Description (
+            "Send configuration document to the managed node and save it as pending." )] 
+    uint32 SendConfiguration(
+            [in, Octetstring] 
+        uint8 ConfigurationData[]);
+    
+        [static,
+         Description (
+            "Send configuration document to the managed node and use configuration agent to apply the configuration." )]
+    uint32 SendConfigurationApply(
+            [in, Octetstring]
+        uint8 ConfigurationData[]);
+
+        [static,
+         Description (
+            "Send configuration document to the managed node and use configuration agent to apply the configuration with whatif option, output will be posted to MI_message." )]
+    uint32 SendConfigurationWhatIf(
+            [in, Octetstring]
+        uint8 configurationData[]);
+    
+        [static,
+         Description (
+            "Send configuration document to the managed node and use configuration agent to apply the configuration on a seperate thread and return immediately." )]
+    uint32 SendConfigurationApplyQuick(
+            [in, Octetstring]
+        uint8 configurationData[]);
+
+        [static,
+         Description (
+            "Send configuration document to the managed node and use configuration agent to apply the configuration using Get method." )]
+    uint32 GetConfiguration(
+            [in, Octetstring]
+        uint8 configurationData[],
+            [stream,
+             EmbeddedInstance("MSFT_BaseResourceConfiguration"),out]
+        string configurations[]);
+
+        [static,
+         Description (
+            "Get configuration history saved as current and previous." )]
+    uint32 GetConfigurationHistory(
+            [in]
+        uint16 configurationNumber,
+            [stream,
+             EmbeddedInstance("MSFT_BaseResourceConfiguration"),out]
+        string configurations[]);
+
+        [static,
+         Description (
+            "Use configuration agent to apply the configuration at the pending stage. If no pending we reaplly the current." )]
+    uint32 ApplyConfiguration();
+    
+        [static,
+         Description (
+            "Pull configuration from centrol location and save as pending." )]
+    uint32 PullConfigurationNow();
+
+        [static,
+         Description (
+            "Set meta configuration that is used to control configuraiton agent." )]
+    uint32 SendMetaConfiguration(
+            [in,
+             EmbeddedInstance("MSFT_DSCMetaConfiguration")]
+        string MetaConfiguration);
+    
+        [static,
+         Description (
+            "Get meta configuration that is used to control configuraiton agent." )]
+    uint32 GetMetaConfiguration(
+            [out, 
+            EmbeddedInstance("MSFT_DSCMetaConfiguration")]
+        string MetaConfiguration);
+
+        [static,
+         Description (
+            "Rollback to previous configuration." )]
+    uint32 RollBack(
+            [in]    
+        uint8 configurationNumber);
+
+        [static,
+         Description (
+            "Cancel the current operation." )]
+    uint32 Cancel();
+    
+        [static,
+         Description (
+            "Suspend the pulling and consistency engine." )]
+    uint32 Suspend(
+            [in]
+        boolean Force);
+
+        [static,
+         Description (
+            "Resume the pulling and consistency engine." )]
+    uint32 Resume();
+};

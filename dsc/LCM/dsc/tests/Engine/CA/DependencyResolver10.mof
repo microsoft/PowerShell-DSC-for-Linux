@@ -1,0 +1,46 @@
+instance of TEST_Test1
+{
+    ResourceId = "g";
+    ModuleName="TEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "10";
+};
+
+
+instance of TEST_Test1
+{
+    ResourceId = "h";
+    ModuleName="TEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "17";
+    DependsOn={"g"};
+};
+instance of TEST_Test1
+{
+    ResourceId = "j";
+    ModuleName="TEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "19";
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "i";
+    ModuleName="TEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "18";
+    DependsOn={"h"};
+};
+instance of TEST_Test1
+{
+    ResourceId = "k";
+    ModuleName="TEST_Test1";
+    ModuleVersion="1.0";
+    Id1 = "20";
+};
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

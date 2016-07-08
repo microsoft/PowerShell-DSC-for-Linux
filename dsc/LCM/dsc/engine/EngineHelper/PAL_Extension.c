@@ -1,0 +1,492 @@
+/*
+**==============================================================================
+**
+** Open Management Infrastructure (OMI)
+**
+** Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+**
+** Licensed under the Apache License, Version 2.0 (the "License"); you may not
+** use this file except in compliance with the License. You may obtain a copy
+** of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+** KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+** WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+** MERCHANTABLITY OR NON-INFRINGEMENT.
+**
+** See the Apache 2 License for the specific language governing permissions
+** and limitations under the License.
+**
+**==============================================================================
+*/
+
+#include "pal/palcommon.h"
+#include "pal/file.h"
+#include "pal/strings.h"
+#include "pal/memory.h"
+#include <pal/alloc.h>
+#include "PAL_Extension.h"
+
+#if defined(CONFIG_POSIX)
+    #include <sys/types.h>
+    #include <sys/stat.h>
+//    #include <uuid/uuid.h>
+    #include <dirent.h>
+    #include <unistd.h>
+    #include <ctype.h>
+    #include <openssl/sha.h>
+
+#endif
+
+#if defined(_MSC_VER)
+    #include <objbase.h>
+    #include <rpc.h>
+    #include <windows.h>
+    #include <sys/stat.h>
+    #include <io.h>
+#if _MSC_VER >= 1200
+#pragma warning(push)
+#endif
+#pragma warning(disable:4201)
+#include <sha2.h>
+#if _MSC_VER >= 1200
+#pragma warning(pop)
+#endif    
+#endif
+
+#if defined(PAL_HAVE_POSIX)
+
+struct _Internal_Dir
+{
+    DIR* dir;
+    Internal_DirEnt ent;
+    TChar dirName[PAL_MAX_PATH_SIZE];
+} ;
+
+#else
+
+struct _Internal_Dir
+{
+    intptr_t handle;
+    struct _wfinddata_t fileinfo;
+    Internal_DirEnt ent;
+    int firstTime;
+} ;
+
+#endif
+
+
+FILE* File_OpenW(
+    _In_z_ const wchar_t* path,
+    _In_z_ const wchar_t* mode)
+{
+#if defined(_MSC_VER)
+    FILE* fp;
+    return _wfopen_s(&fp, path, mode) == 0 ? fp : NULL;
+#else
+    char *filePath;
+    char *fileMode;
+    FILE* fp;
+    if( !UCS2ToAscii( path, &filePath) )
+        return NULL;
+
+    if( !UCS2ToAscii( mode, &fileMode) )
+    {
+        PAL_Free(filePath);
+        return NULL;
+    }
+    fp = fopen(filePath, fileMode);
+    PAL_Free(filePath);
+    PAL_Free(fileMode);
+    return fp;
+#endif    
+}
+
+int File_RemoveW(
+    _In_z_ const wchar_t* path)
+{
+#if defined(_MSC_VER)
+    return _wunlink(path) == 0 ? 0 : -1;
+#else
+    char *filePath;
+    int result;
+
+    if( !UCS2ToAscii( path, &filePath) )
+        return -1;
+
+    result = unlink(filePath) == 0 ? 0 : -1;
+    PAL_Free(filePath);
+    return result;
+#endif    
+}
+
+
+int File_TouchW(
+    _In_z_ const wchar_t* path)
+{
+    FILE* fp = File_OpenW(path, L"w");
+
+    if (!fp)
+        return -1;
+
+    File_Close(fp);
+    return 0;    
+}
+
+int UCS2ToAscii( _In_z_ const wchar_t *input,
+                  _Outptr_result_z_ char **output)
+{
+    size_t inputLen;
+    size_t xCount = 0;
+    char *incInput = (char*) input;
+    char *incOutput;
+    inputLen = Wcslen(input);
+    *output = (char*) PAL_Malloc(inputLen + 1 );
+    if( *output == NULL )
+    {
+        return -1;
+    }
+    incOutput = *output;
+    for( xCount = 0; xCount < inputLen; xCount++)
+    {
+        if( input[xCount] > 128 )
+        {
+            PAL_Free(*output);
+            return -1;
+        }
+        incOutput[xCount] = *incInput;
+        incInput +=2;
+    }
+    incOutput[inputLen] = '\0';
+    return 0;
+    
+}
+
+
+int File_CopyT(_In_z_ const PAL_Char* src, _In_z_ const PAL_Char* dest)
+{
+    FILE* is = NULL;
+    FILE* os = NULL;
+    char buf[4096];
+
+    /* Open input file */
+    is = File_OpenT(src, PAL_T("rb"));
+    if (!is)
+        return -1;
+
+#if defined(CONFIG_POSIX)
+#ifndef CONFIG_ENABLE_WCHAR
+
+    /* Unlink output file if it exists */
+    if (access(dest, F_OK) == 0)
+    {
+        unlink(dest);
+    }
+#endif
+#endif
+
+    /* Open output file */
+    os = File_OpenT(dest, PAL_T("wb"));
+    if (!os)
+    {
+        File_Close(is);
+        return -1;
+    }
+
+    /* Copy file */
+    for (;;)
+    {
+#if defined(_MSC_VER)
+        long n = (long)fread(buf, 1, sizeof(buf), is);
+        long m;
+#else
+        ssize_t n = fread(buf, 1, sizeof(buf), is);
+        ssize_t m;
+#endif
+
+        if (n <= 0)
+            break;
+
+#if defined(_MSC_VER)
+        m  = (long)fwrite(buf, 1, n, os);
+#else
+        m  = (ssize_t)fwrite(buf, 1, n, os);
+#endif
+
+        if (m != n)
+        {
+            File_Close(is);
+            File_Close(os);
+            return -1;
+        }
+    }
+
+    File_Close(is);
+    File_Close(os);
+    return 0;
+}
+
+
+int Directory_Exist( 
+        _In_z_ const char *path)
+{
+#if defined(_MSC_VER)
+    return _access_s(path, 0);
+#else
+    return access(path, 0);
+#endif
+}
+
+int Directory_ExistW(
+        _In_z_ const wchar_t *path)
+{
+#if defined(_MSC_VER)
+    return _waccess_s(path, 0);
+#else
+    char *filePath;
+    int result;
+
+    if( !UCS2ToAscii( path, &filePath) )
+        return -1;
+
+    result = access(filePath, 0);
+    PAL_Free(filePath);
+    return result;
+#endif        
+
+}
+
+int File_Exist( 
+        _In_z_ const char *path)
+{
+    FILE *fp = File_Open(path, "r");
+    if( !fp)
+        return -1;
+
+    File_Close(fp);
+    return 0;
+}
+
+int File_ExistW(
+        _In_z_ const wchar_t *path)
+{
+    FILE *fp = File_OpenW(path, L"r");
+    if( !fp)
+        return -1;
+
+    File_Close(fp);
+    return 0;    
+}
+
+
+Internal_Dir* Internal_Dir_Open(_In_z_ const TChar* path, NitsCallSite cs)
+{
+#if defined(_MSC_VER)
+
+    Internal_Dir* dir;
+    wchar_t filespec[PAL_MAX_PATH_SIZE];
+    
+    /* Allocate and zero-fill struct */
+    dir = (Internal_Dir*)PAL_CallocCallsite(cs, 1, sizeof(Internal_Dir));
+    if (!dir)
+        return NULL;
+
+    /* Build files spec */
+    {
+        if (Wcslcpy(filespec, path, PAL_MAX_PATH_SIZE) >= PAL_MAX_PATH_SIZE)
+            return NULL;
+
+        if (Wcslcat(filespec, L"/*", PAL_MAX_PATH_SIZE) >= PAL_MAX_PATH_SIZE)
+            return NULL;
+    }
+
+    /* Find first file matching the file spec */
+    dir->handle = _wfindfirst(filespec, &dir->fileinfo);
+    if (dir->handle == -1)
+    {
+        PAL_Free(dir);
+        return NULL;
+    }
+
+    /* Note that readdir() has not been called yet */
+    dir->firstTime = 1;
+
+    return dir;
+
+#else
+
+    Internal_Dir* self = (Internal_Dir*)PAL_CallocCallsite(cs, 1, sizeof(Internal_Dir));
+
+    if (!self)
+        return NULL;
+
+    self->dir = opendir(path);
+    if (!self->dir)
+    {
+        PAL_Free(self);
+        return NULL;
+    }
+    memcpy(self->dirName, path, (Tcslen(path)+1) * sizeof(TChar));
+
+    return self;
+
+#endif          
+}
+
+int StringEndsWith( _In_z_ TChar *self, _In_opt_z_ TChar *stringEndsWith)
+{
+    size_t len1 =0, len2 = 0, tempLen = 0;;
+    if( stringEndsWith == NULL)
+        return 0;
+    
+    len1 = Tcslen(self);
+    len2 = Tcslen(stringEndsWith);
+    if( len2 > len1 )
+        return -1;
+
+    for(;tempLen <len1 && tempLen < len2; tempLen++)
+    {
+        if( toupper(self[len1 - 1 - tempLen]) != toupper(stringEndsWith[len2 - 1 - tempLen]) )
+        {
+            return -1;
+        }
+    }
+    return 0;
+}
+
+Internal_DirEnt* Internal_Dir_Read(_In_ Internal_Dir* self, _In_opt_z_ TChar *fileEndsWith)
+{
+    for(;;)
+    {
+#if defined(_MSC_VER)
+
+        if (!self->firstTime)
+        {
+            if (_wfindnext(self->handle, &self->fileinfo) != 0)
+                return NULL;
+        }
+        self->firstTime = 0;
+        
+        if( StringEndsWith(self->fileinfo.name, fileEndsWith) != 0 )
+            continue;
+        Wcslcpy(self->ent.name, self->fileinfo.name, PAL_MAX_PATH_SIZE);
+        if( self->fileinfo.attrib & _A_SUBDIR )
+            self->ent.isDir = 1;
+        else
+            self->ent.isDir = 0;
+        
+        return &self->ent;
+
+#else
+        struct dirent* p = readdir(self->dir);
+        struct stat st;
+        TChar filespec[PAL_MAX_PATH_SIZE];
+        if (!p)
+            return NULL;
+
+        if( StringEndsWith(p->d_name, fileEndsWith) != 0 )
+            continue;        
+
+        Strlcpy(self->ent.name, p->d_name, PAL_MAX_PATH_SIZE);
+        // Logic to detect Dir may not work on non-linux, non-windows platforms, in which case
+        // We would need to use Isdir method.
+        //self->ent.isDir = Isdir(self->ent.name);  
+        if( Tcslcpy(filespec, self->dirName, PAL_MAX_PATH_SIZE) >= PAL_MAX_PATH_SIZE)
+            return NULL;
+
+        if( Tcslcat(filespec, "/", PAL_MAX_PATH_SIZE) >= PAL_MAX_PATH_SIZE)
+            return NULL;
+
+        if( Tcslcat(filespec, self->ent.name, PAL_MAX_PATH_SIZE) >= PAL_MAX_PATH_SIZE)
+            return NULL;
+
+        if (stat(filespec, &st) != 0)      
+            return NULL;
+        // self->ent.isDir = (p->d_type & DT_DIR) ? 1 : 0;
+        self->ent.isDir = S_ISDIR(st.st_mode);
+        return &self->ent;
+
+#endif       
+    }
+}
+
+int Internal_Dir_Close(Internal_Dir* dir)
+{
+#if defined(_MSC_VER)    
+    _findclose(dir->handle);
+    PAL_Free(dir);
+    return 0;    
+#else
+    if (!dir)
+        return -1;
+
+    if (closedir(dir->dir) != 0)
+    {
+        PAL_Free(dir);
+        return -1;
+    }
+
+    PAL_Free(dir);
+    return 0;
+
+#endif
+
+}
+
+int Directory_Remove( _In_z_ TChar *path)
+{
+#if defined(_MSC_VER) 
+    return RemoveDirectory(path) != 0? 0 : -1;
+#else
+    return unlink(path) == 0 ? 0 : -1;
+#endif
+}
+
+
+TChar * Generate_UUID( NitsCallSite cs)
+{
+    TChar *uuidString;
+#if defined(_MSC_VER) 
+        UUID uuid;
+#else
+//        uuid_t uuid;
+#endif
+
+        /* Allocate and zero-fill struct */
+    uuidString = (TChar*)PAL_CallocCallsite(cs, 1, sizeof(TChar) * 40); //holds both windows (40 chars) and non-windows( 37 chars).
+
+    if (!uuidString)
+        return NULL;  
+    
+#if defined(_MSC_VER)
+    if( UuidCreateSequential( &uuid) != RPC_S_OK )
+    {
+        PAL_Free(uuidString);
+        return NULL;
+    }
+
+    if( StringFromGUID2(&uuid, uuidString, 40) == 0 )
+    {
+        PAL_Free(uuidString);
+        return NULL;
+    }
+#else
+//    uuid_generate(uuid);
+//    uuid_unparse_upper(uuid, uuidString);
+#endif
+    
+    return uuidString;
+}
+
+int GetComputerHostName(_Inout_updates_z_(length) TChar *buffer, unsigned int length)
+{
+#if defined(_MSC_VER)
+    return !GetComputerName(buffer, (LPDWORD)&length);
+#else
+    return gethostname(buffer, length);
+#endif
+}
+
+
