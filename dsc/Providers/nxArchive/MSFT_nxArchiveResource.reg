@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxArchiveResource
+HOSTING=@requestor@
+CLASS=MSFT_nxArchiveResource:OMI_BaseResource

@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxSshAuthorizedKeysResource
+HOSTING=@requestor@
+CLASS=MSFT_nxSshAuthorizedKeysResource:OMI_BaseResource

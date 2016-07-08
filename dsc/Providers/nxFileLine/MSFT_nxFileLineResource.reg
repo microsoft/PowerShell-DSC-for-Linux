@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxFileLineResource
+HOSTING=@requestor@
+CLASS=MSFT_nxFileLineResource:OMI_BaseResource

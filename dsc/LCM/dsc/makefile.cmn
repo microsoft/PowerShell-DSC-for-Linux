@@ -1,0 +1,58 @@
+SOURCES_USED = $(SOURCES_USED) $(PROJECT_ROOT)\dsc\makefile.cmn
+
+_NT_TARGET_VERSION=$(_NT_TARGET_VERSION_WIN7)
+
+#WINBLUE
+
+!ifdef UPLEVEL
+OGRP = latest
+!endif
+!if ($(_NT_TARGET_VERSION) == $(_NT_TARGET_VERSION_WINBLUE))
+OGRP = latest
+!endif
+!if ($(_NT_TARGET_VERSION) == $(_NT_TARGET_VERSION_WIN8))
+OGRP = win8
+TARGET_SEGMENT=wmf_win8
+!endif
+!if ($(_NT_TARGET_VERSION) == $(_NT_TARGET_VERSION_WIN7))
+OGRP = win7
+!endif
+!if ($(_NT_TARGET_VERSION) == $(_NT_TARGET_VERSION_VISTA))
+OGRP = vista
+TARGET_SEGMENT=WINIP_NT
+!endif
+
+INCLUDES= $(INCLUDES); \
+    $(PROJECT_ROOT)\wmi\winomi; \
+    $(PROJECT_ROOT)\wmi\winomi\nits\base; \
+    $(PROJECT_ROOT)\dsc\common\inc; \
+    $(ADMIN_INC_PATH)\codec; \
+
+ENGINEHELPER_INC = $(PROJECT_ROOT)\DSC\engine\enginehelper
+MODULELIBRARY_INC = $(PROJECT_ROOT)\DSC\engine\ModuleLoader\ModuleLibrary
+CONFIGMANAGER_LIB_INC = $(PROJECT_ROOT)\DSC\Engine\ConfigurationManager
+CALOGINFRASTRUCTURE_LIB_INC = $(PROJECT_ROOT)\DSC\engine\ca\CALogInfrastructure
+CA_INC = $(PROJECT_ROOT)\DSC\engine\CA\CAInfrastructure
+EVENTING_INC = $(PROJECT_OBJ_ROOT)\dsc\engine\eventing\current\$(O)
+MOFCONVERTER_INC = $(PROJECT_ROOT)\DSC\engine\MofConverter
+PSINFRASRTUCTURE_INC=$(PROJECT_ROOT)\DSC\engine\ca\psinfrastructurenative
+CAINFRASRTUCTURE_INC=$(PROJECT_ROOT)\DSC\engine\ca\CAinfrastructure
+    
+#Temporary inclusion of STL for NITS portability lib
+USE_STL=1
+TARGETLIBS= $(TARGETLIBS) \
+  $(ADMIN_LIB_PATH)\pal.lib \
+  $(ADMIN_LIB_PATH)\nitsstub.lib \
+  $(SDK_LIB_PATH)\user32.lib \
+
+UNICODE=1
+USE_MSVCRT=1
+MSC_WARNING_LEVEL=/W4
+
+C_DEFINES= $(C_DEFINES) \
+    /DMI_INTERNAL \
+    /DWINBUILD \
+    /D_UNICODE \
+    /DUNICODE \
+    /DCONFIG_ENABLE_WCHAR \
+    /DHOOK_BUILD \
