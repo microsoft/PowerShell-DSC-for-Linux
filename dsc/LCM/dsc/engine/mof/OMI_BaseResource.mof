@@ -1,0 +1,28 @@
+// ===============================================================
+//  OMI_BaseResource
+// ===============================================================
+[Abstract, 
+ ClassVersion("1.0.0"), 
+ Description (
+    "Base schema for all native configuration providers." )]
+class OMI_BaseResource 
+{
+	[Description("Unique Id for a resource instance.") , required]
+	string ResourceId;
+
+  	[Description("Source Info to correlate it back to powershell configuration script.") , write] 
+	string SourceInfo;
+
+  	[Description("List of resources this resource depends on."), write] 
+	string Requires[];
+
+  	[Description("Name of the module that supports this resource."), required] 
+	string ModuleName;
+
+  	[Description("Version  of the module that supports this resource."), required] 
+	string ModuleVersion;
+
+	[Description("Name of the configuration this is a part of"), write]
+	string ConfigurationName;
+};
+

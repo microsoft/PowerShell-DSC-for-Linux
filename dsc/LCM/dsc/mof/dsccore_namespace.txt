@@ -1,0 +1,8 @@
+#pragma namespace("\\\\.\\root\\Microsoft\\Windows")
+
+[Locale(1033) : ToInstance, NamespaceSecuritySDDL("O:BAG:BAD:P(A;;CCDCLCSWRPWPRCWD;;;BA)(A;;CCDCRP;;;SY)(A;;CCDCRP;;;NS)")]     
+Instance of __Namespace
+{
+  Name = "DesiredStateConfiguration";
+};
+
