@@ -1,0 +1,16 @@
+
+[Abstract, ClassVersion("1.0.0")]
+class TEST_Test1 : OMI_BaseResource 
+{
+   [key]
+	string Id1;
+
+    [write]
+	string db1;
+
+    [read]
+	string db2;
+
+    
+};
+

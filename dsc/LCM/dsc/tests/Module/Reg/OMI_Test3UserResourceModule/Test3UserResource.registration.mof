@@ -1,0 +1,7 @@
+instance of MSFT_CimConfigurationProviderRegistration
+{
+	className="TEST_Test3User";
+	DSCEngineCompatVersion="1.0.0";
+	DSCModuleVersion="1.0.0";
+	Namespace="dsc";	
+};

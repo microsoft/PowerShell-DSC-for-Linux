@@ -1,0 +1,29 @@
+instance of TEST_Test1
+{
+    ResourceId = "Res1";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    id1 = "ABCD ABCD";
+};
+
+instance of TEST_Test1
+{
+    ResourceId = "Res2";
+    ModuleName="PsModuleForTEST_Test1";
+    ModuleVersion="1.0";
+    id1 = "rtgt rtgt";
+};
+
+instance of MSFT_LogResource
+{
+    ResourceId = "Res3";
+    ModuleName="MSFT_LogResource";
+    ModuleVersion="1.0";
+    Message ="MSFT_LogResource";
+};
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

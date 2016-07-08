@@ -1,0 +1,85 @@
+#!/bin/bash
+
+scxomi_dir=`(cd ../LCM/; pwd -P)`
+
+enable_debug=""
+enable_debug_flag=0
+enable_purify_agent=""
+enable_purify_server=""
+
+# Default OMI qualifiers for build purposes
+# (Not hugely important since we don't distribute OMI from this build)
+omi_configure_quals=""
+
+if [ ! -d "$scxomi_dir" ]; then
+    echo "OMI directory ($scxomi_dir) does not exist"
+    exit 1
+fi
+
+for opt
+do
+
+  arg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
+
+  case $opt in
+
+    -h | --help)
+      help=1
+    ;;
+
+    --enable-debug)
+      enable_debug="--enable-debug"
+      enable_debug_flag=1
+    ;;
+
+    --enable-purify-agent)
+      enable_purify_agent="--enable-purify-agent"
+    ;;
+
+    --enable-purify-server)
+      enable_purify_server="--enable-purify-server"
+    ;;
+
+    *)
+      echo "configure: invalid option '$opt'"
+      echo "Try configure --help' for more information."
+      exit 1
+    ;;
+
+  esac
+
+done
+
+if [ "$help" = "1" ]; then
+
+    cat<<EOF
+
+Usage: ./configure [OPTIONS]
+
+OVERVIEW:
+
+This script configures SCXOM for building. Type the following commands.
+
+    $ ./configure
+    $ make
+
+OPTIONS:
+    -h, --help                  Print this help message.
+    --enable-debug              Perform a debug build.
+    --enable-purify-agent       Allow agent to be run with purify (memory leak detection)
+    --enable-purify-server      Allow server to be run with purify (memory leak detection)
+
+EOF
+    exit 0
+fi
+
+omi_configure_quals="${enable_debug} ${enable_purify_agent} ${enable_purify_server} ${omi_configure_quals}"
+
+cat <<EOF > config.mak
+ENABLE_DEBUG=$enable_debug_flag
+OMI_CONFIGURE_QUALS=$omi_configure_quals
+EOF
+
+# Fix permissions in case they aren't executable - and then configure OMI
+chmod ug+x ${scxomi_dir}/configure ${scxomi_dir}/buildtool
+(cd ${scxomi_dir} && ./configure ${omi_configure_quals})

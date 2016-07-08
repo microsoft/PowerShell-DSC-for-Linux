@@ -1,0 +1,22 @@
+
+[ClassVersion("1.0.0"), FriendlyName("File")] 
+class MSFT_FileDirectoryConfiguration : OMI_BaseResource
+{
+  [Key] string DestinationPath;
+  [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+  [Write,ValueMap{"File", "Directory"},Values{"File", "Directory"}] string Type;
+  [Write] string SourcePath;
+  [Write] string Contents;
+  [Write,ValueMap{"SHA-1", "SHA-256", "SHA-512", "CreatedDate", "ModifiedDate"},Values{"SHA-1", "SHA-256", "SHA-512", "CreatedDate", "ModifiedDate"}] string Checksum;
+  [Write] boolean Recurse;
+  [Write] boolean Force;
+  [Write,EmbeddedInstance("MSFT_Credential")] string Credential;
+  [Read] datetime CreatedDate;
+  [Read] datetime ModifiedDate;
+  [Write,ValueMap{"ReadOnly", "Hidden", "System", "Archive"},Values{"ReadOnly", "Hidden", "System", "Archive"}] string Attributes[];
+  [Read] uint64 Size;
+  [Read,EmbeddedInstance("MSFT_FileDirectoryConfiguration")] string SubItems[];
+  [Write] boolean MatchSource;
+};
+
+

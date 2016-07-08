@@ -1,0 +1,28 @@
+/* @migen@ */
+/*
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+** IF YOU NEED TO ADD RESOURCES, CREATE A SECOND .RC FILE, AND USE #INCLUDE TO MERGE THIS FILE
+** INTO THE .RC FILE YOU CREATED.
+**
+**==============================================================================
+*/
+STRINGTABLE
+{
+    1, "Base schema for all native configuration providers."
+    2, "TestPath"
+    3, "Get resource states based on input configuration file."
+    4, "Configuration document that to be applied."
+    5, "Flags passed to the providers. reserved for future use."
+    6, "Current state of Configuration resources specified."
+    7, "Test resource states based on input configuration file."
+    8, "true if same, false otherwise."
+    9, "Context information provider can use to optimize set, this is optional."
+    10, "Set resource states based on input configuration file."
+    11, "Context information provider can use to optimize set from TestTargetResource, this is optional."
+    12, "TestProvider1"
+    13, "StopTestProvider1"
+    14, "TestProvider3"
+    15, "TestProvider4 doesn't derive OMI"
+}

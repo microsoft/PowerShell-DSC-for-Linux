@@ -1,0 +1,4 @@
+"C:\Program Files (x86)\Windows Kits\8.0\bin\x86\convert-moftoprovider.exe"  -moffile %sdxroot%\admin\dsc\providers\nativeproviders\MSFT_FileDirectoryConfiguration\MSFT_FileDirectoryConfiguration.mof  -classlist  MSFT_FileDirectoryConfiguration -includepath %sdxroot%\admin\wmi\WMIv2\CIM-2.26.0   %sdxroot%\admin\dsc\engine\mof -outpath .\temp
+
+
+%_NTTREE%\WinOMI\omigen  -moffile %sdxroot%\admin\dsc\providers\nativeproviders\MSFT_FileDirectoryConfiguration\MSFT_FileDirectoryConfiguration.mof  -classlist  MSFT_FileDirectoryConfiguration -includepath %sdxroot%\admin\wmi\WMIv2\CIM-2.26.0   %sdxroot%\admin\dsc\engine\mof -outpath .\temp

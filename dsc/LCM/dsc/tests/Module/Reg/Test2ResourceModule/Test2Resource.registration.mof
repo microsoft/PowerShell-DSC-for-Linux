@@ -1,0 +1,7 @@
+instance of MSFT_CimConfigurationProviderRegistration
+{
+	className="TEST_Test2";
+	DSCEngineCompatVersion="1.0.0";
+	DSCModuleVersion="1.0.0";
+	Namespace="root/Microsoft/Windows/DesiredStateConfiguration";	
+};

@@ -1,0 +1,25 @@
+instance of MSFT_FileDirectoryConfiguration
+{
+    ResourceId = "Res1";
+    ModuleName="PSDesiredStateConfiguration";
+    ModuleVersion="1.0";
+    DestinationPath = "C:\\DSCInstanceDoc.txt";
+    Contents = "ABCD ABCD";
+    checksum = "sha-1";
+};
+
+instance of MSFT_FileDirectoryConfiguration
+{
+    ResourceId = "Res2";
+    ModuleName="PSDesiredStateConfiguration";
+    ModuleVersion="1.0";
+    DestinationPath = "C:\\DSCInstanceDoc2.txt";
+    Contents = "rtgt rtgt";
+    checksum = "sha-1";
+};
+
+instance of OMI_ConfigurationDocument
+{
+    Version="1.0.0";
+    
+};

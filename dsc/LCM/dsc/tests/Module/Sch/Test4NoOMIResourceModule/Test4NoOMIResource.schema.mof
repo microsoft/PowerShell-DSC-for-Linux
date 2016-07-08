@@ -1,0 +1,16 @@
+
+[Abstract, ClassVersion("1.0.0")]
+class TEST_Test4NoOMI : OMI_BaseResource 
+{
+   [key]
+	uint32 Id1;
+
+    [write]
+	uint32 db1;
+
+    [read]
+	sint32 db2;
+
+    
+};
+
