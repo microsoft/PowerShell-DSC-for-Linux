@@ -150,10 +150,8 @@ def ReadOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
     sources = perf_src_srch.findall(txt)
     inst = ''
     interval = 0
-    all_instances = False
     for source in sources:
         s_perf = []
-        found = False
         if len(source[2]):
             s_perf = source[2].strip('(').strip(')').split('|')
         object_name = source[0]
@@ -243,10 +241,23 @@ def prune_perfs(PerfObject):
     l = len(PerfObject)
     i = 0
     while i < l:
-        if len(TranslatePerfs(PerfObject[i]['ObjectName'], PerfObject[i]['PerformanceCounter'])) == 0:
-            LG().Log('INFO', 'No match for ObjectName ' + repr(PerfObject[i]['ObjectName']) + ' and PerformanceCounter ' + repr(
-                PerfObject[i]['PerformanceCounter']) + ' in omi_mapping.json, ignoring.')
+        d = TranslatePerfs(PerfObject[i]['ObjectName'], PerfObject[i]['PerformanceCounter'])
+        if PerfObject[i]['ObjectName'] in d.keys():
+            for p in PerfObject[i]['PerformanceCounter']:
+                if p not in d[PerfObject[i]['ObjectName']]:
+                    LG().Log('INFO', 'No match for PerformanceCounter \'' \
+                             + p + '\' in ' \
+                             + repr(PerfObject[i]['ObjectName']) + ' in omi_mapping.json, ignoring.')
+                    PerfObject[i]['PerformanceCounter'].remove(p)
+            if len(PerfObject[i]['PerformanceCounter']) == 0:
+                PerfObject.pop(i)
+                l -= 1
+                i -= 1
+        else:
+            LG().Log('INFO', 'No matches for ObjectName ' \
+                     + repr(PerfObject[i]['ObjectName']) + ' and PerformanceCounter ' \
+                     + repr(PerfObject[i]['PerformanceCounter']) + ' in omi_mapping.json, ignoring.')
             PerfObject.pop(i)
             l -= 1
-        else:
-            i += 1
+            i -= 1
+        i += 1
