@@ -300,7 +300,7 @@ nxOMSCustomLog:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="2.3"; \
+	VERSION="2.4"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
