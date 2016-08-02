@@ -667,6 +667,9 @@ def SetDirectoryRecursive(DestinationPath, SourcePath, fc):
     if Destination_subfiles is None:
         return False
     if not SourcePath:
+        if not fc.Recurse :
+            return True
+
         # Enforce Owner/Group/Mode specified
         for f in Destination_subfiles:
             f_destpath = os.path.join(DestinationPath, f)
@@ -675,9 +678,8 @@ def SetDirectoryRecursive(DestinationPath, SourcePath, fc):
                     if SetOwnerGroupMode(f_destpath, "", fc) is False :
                         return False
                 elif os.path.isdir(f_destpath):
-                    if fc.Recurse :
-                        if SetDirectoryRecursive(f_destpath, "", fc) is False :
-                            return False
+                    if SetDirectoryRecursive(f_destpath, "", fc) is False :
+                        return False
         return True
 
     Source_subfiles = ListDir(SourcePath)
