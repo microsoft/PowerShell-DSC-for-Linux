@@ -1,0 +1,1 @@
+['/tmp/FileInventory/basedirfile1.txt', '/tmp/FileInventory/basedirfile2.txt', '/tmp/FileInventory/basedirfile3.bin']

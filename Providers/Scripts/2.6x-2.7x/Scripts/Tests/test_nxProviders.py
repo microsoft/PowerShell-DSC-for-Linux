@@ -18,6 +18,7 @@ import re
 import inspect
 import copy
 import fnmatch
+import cPickle as pickle
 from contextlib import contextmanager
 
 @contextmanager
@@ -178,6 +179,7 @@ nxOMSSyslog=imp.load_source('nxOMSSyslog','./Scripts/nxOMSSyslog.py')
 nxOMSAgent=imp.load_source('nxOMSAgent','./Scripts/nxOMSAgent.py')
 nxOMSCustomLog=imp.load_source('nxOMSCustomLog','./Scripts/nxOMSCustomLog.py')
 nxOMSKeyMgmt=imp.load_source('nxOMSKeyMgmt','./Scripts/nxOMSKeyMgmt.py')
+nxFileInventory=imp.load_source('nxFileInventory', './Scripts/nxFileInventory.py')
 
 
 class nxUserTestCases(unittest2.TestCase):
@@ -3591,6 +3593,728 @@ class nxOMSKeyMgmtTestCases(unittest2.TestCase):
                 "nxOMSKeyMgmt.Test_Marshall(bad['KeyContents'], bad['KeySignature'], 'present') should == [-1]")
 
 
+class nxFileInventoryTestCases(unittest2.TestCase):
+    """
+    Test cases for nxFileInventory.py
+    """
+    @classmethod    
+    def setUpClass(cls):
+        """
+        You should set 'create_files' to True
+        to re-create the picked files
+        when Inventory_Marshall
+        or the tests have changed.
+        """
+        cls.create_files = False
+        cls.linkfarm = '/tmp/linkfarm/'
+        os.system('rm -rf ' + cls.linkfarm)
+        os.makedirs(cls.linkfarm+'joe')
+        os.makedirs(cls.linkfarm+'bob')
+        open(cls.linkfarm+'joe/linkfarmjoefile1.txt','w+').write(\
+            'Contents of linkfarmjoefile1.txt\n')
+        open(cls.linkfarm+'joe/linkfarmjoefile2.txt','w+').write(\
+            'Contents of linkfarmjoefile2.txt\n')
+        open(cls.linkfarm+'bob/linkfarmbobfile1.txt','w+').write(\
+            'Contents of linkfarmbobfile1.txt\n')
+        open(cls.linkfarm+'bob/linkfarmbobfile2.txt','w+').write(\
+            'Contents of linkfarmbobfile2.txt\n')
+        cls.basepath = '/tmp/FileInventory/'
+        os.system('rm -rf ' + cls.basepath)
+        os.makedirs(cls.basepath+'joedir0/joedir1/joedir2/')
+        open(cls.basepath+'basedirfile1.txt','w+').write(\
+            'Contents of basedirfile1.txt\n')
+        open(cls.basepath+'basedirfile2.txt','w+').write(\
+            'Contents of basedirfile2.txt\n')
+        open(cls.basepath+'basedirfile3.bin','wb+').write(\
+            '\xff\xff\xfe\x00\xfe\x00\xff\x00\x00\x00')
+        os.chown(cls.basepath+'basedirfile3.bin', 7777, 7777)
+        open(cls.basepath+'joedir0/joedir0file1.txt','w+').write(\
+            'Contents of joedir0file1.txt\n')
+        open(cls.basepath+'joedir0/joedir0file2.txt','w+').write(\
+            'Contents of joedir0file2.txt\n')
+        open(cls.basepath+'joedir0/joedir0file3.bin','wb+').write(\
+            '\xff\xff\xfe\x00\xfe\x00\xff\x00\x00\x00')
+        os.chown(cls.basepath+'joedir0/joedir0file3.bin', 7777, 7777)
+        open(cls.basepath+'joedir0/joedir1/joedir1file1.txt','w+').write(\
+            'Contents of joedir1file1.txt\n')
+        open(cls.basepath+'joedir0/joedir1/joedir1file2.txt','w+').write(\
+            'Contents of joedir1file2.txt\n')
+        open(cls.basepath+'joedir0/joedir1/joedir1file3.bin','wb+').write(\
+            '\xff\xff\xfe\x00\xfe\x00\xff\x00\x00\x00')
+        os.chown(cls.basepath+'joedir0/joedir1/joedir1file3.bin', 7777, 7777)
+        open(cls.basepath+'joedir0/joedir1/joedir2/joedir2file1.txt','w+').write(\
+            'Contents of joedir2file1.txt\n')
+        open(cls.basepath+'joedir0/joedir1/joedir2/joedir2file2.txt','w+').write(\
+            'Contents of joedir2file2.txt\n')
+        open(cls.basepath+'joedir0/joedir1/joedir2/joedir2file3.bin','wb+').write(\
+            '\xff\xff\xfe\x00\xfe\x00\xff\x00\x00\x00')
+        os.chown(cls.basepath+'joedir0/joedir1/joedir2/joedir2file3.bin', 7777, 7777)
+        os.makedirs(cls.basepath+'bobdir0/bobdir1/bobdir2/')
+        open(cls.basepath+'bobdir0/bobdir0file1.txt','w+').write(\
+            'Contents of bobdir0file1.txt\n')
+        open(cls.basepath+'bobdir0/bobdir0file2.txt','w+').write(\
+            'Contents of bobdir0file2.txt\n')
+        open(cls.basepath+'bobdir0/bobdir0file3.bin','wb+').write(\
+            '\xff\xff\xfe\x00\xfe\x00\xff\x00\x00\x00')
+        os.chown(cls.basepath+'bobdir0/bobdir0file3.bin', 7777, 7777)
+        open(cls.basepath+'bobdir0/bobdir1/bobdir1file1.txt','w+').write(\
+            'Contents of bobdir1file1.txt\n')
+        open(cls.basepath+'bobdir0/bobdir1/bobdir1file2.txt','w+').write(\
+            'Contents of bobdir1file2.txt\n')
+        open(cls.basepath+'bobdir0/bobdir1/bobdir1file3.bin','wb+').write(\
+            '\xff\xff\xfe\x00\xfe\x00\xff\x00\x00\x00')
+        os.chown(cls.basepath+'bobdir0/bobdir1/bobdir1file3.bin', 7777, 7777)
+        open(cls.basepath+'bobdir0/bobdir1/bobdir2/bobdir2file1.txt','w+').write(\
+            'Contents of bobdir2file1.txt\n')
+        open(cls.basepath+'bobdir0/bobdir1/bobdir2/bobdir2file2.txt','w+').write(\
+            'Contents of bobdir2file2.txt\n')
+        open(cls.basepath+'bobdir0/bobdir1/bobdir2/bobdir2file3.bin','wb+').write(\
+            '\xff\xfe\x00\x00\xff\xfd\x00\x00\x00\x00')
+        os.chown(cls.basepath+'bobdir0/bobdir1/bobdir2/bobdir2file3.bin', 7777, 7777)
+        os.symlink(cls.basepath+'bobdir0/bobdir0file1.txt', cls.basepath+'basedirfilelink1.txt')
+        os.symlink(cls.basepath+'bobdir0/bobdir1', cls.basepath+'basedirdirlink1')
+        os.symlink(cls.basepath+'bobdir0/bobdir0file1.txt', cls.basepath+'joedir0/joedir0filelink1.txt')
+        os.symlink(cls.linkfarm+'joe', cls.basepath+'joedir0/joedir0dirlink1')
+        os.symlink(cls.basepath+'joedir0', cls.basepath+'joedir0/joedir1/joedir1dirlinktojoedir0') # infinite recursion
+        os.symlink(cls.basepath+'joedir0/joedir0file1.txt', cls.basepath+'bobdir0/bobdir0filelink1.txt')
+        os.symlink(cls.linkfarm+'bob', cls.basepath+'bobdir0/bobdir0dirlink1')
+        os.symlink(cls.basepath+'bobdir0', cls.basepath+'bobdir0/bobdir1/bobdir1dirlinktobobdir0') # infinite recursion
+
+    @classmethod    
+    def tearDownClass(cls):
+        os.system('rm -rf ' + cls.basepath)
+    
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        pass
+
+    
+    def tearDown(self):
+        """
+        Remove test resources.
+        """
+        pass
+
+
+    def SerializeInventoryObject(self, fname, ob):
+        # Persist the results of correct results for future tests.
+        # The pickled results are stored in test_mofs.
+        # You should re-create these files if Inventory_Marshall
+        # or the the tests have changed.
+        l = []
+        for d in ob[1]['__Inventory'].value:
+            l.append(d['DestinationPath'].value)
+        l.sort()
+        with open('./Scripts/Tests/test_mofs/' + fname + '.pkl', 'wb') as F:
+            pickle.dump(l, F, -1)
+
+    def DeserializeInventoryObject(self, fname):
+        with open('./Scripts/Tests/test_mofs/' + fname + '.pkl', 'rb') as F:
+            r = pickle.load(F)
+        return r
+        
+    def MakeList(self,ob):
+        l = []
+        for d in ob[1]['__Inventory'].value:
+            l.append(d['DestinationPath'].value)
+        l.sort()
+        return l
+    
+    def testFileInventoryInventory_MarshallDir(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0')
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallDir',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDir')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+
+    
+    def testFileInventoryInventory_MarshallFile(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0')
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallFile',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFile')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallSingleFile(self):
+        print('Using path:' + self.basepath + 'basedirfile1.txt') 
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath + 'basedirfile1.txt', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0')
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallSingleFile',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallSingleFile')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallTypeWild(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallTypeWild',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWild')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallDirRecurse(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallDirRecurse',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirRecurse')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallFileRecurse(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallFileRecurse',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileRecurse')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallTypeWildRecurse(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurse',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurse')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildDir(self):
+        print 'Using path:' + self.basepath +'*dir*'
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*dir*', 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildDir',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDir')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildFile(self):
+        print 'Using path:' + self.basepath +'*/*file*'
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*file*', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildFile',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFile')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildTypeWild(self):
+        print 'Using path:' + self.basepath +'*/*'
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*', 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWild',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWild')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildDirRecurse(self):
+        print 'Using path:' + self.basepath +'*/*dir*'
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*dir*', 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurse',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurse')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildFileRecurse(self):
+        print 'Using path:' + self.basepath +'*/*file*'
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*file*', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurse',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurse')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildTypeWildRecurse(self):
+        print 'Using path:' + self.basepath +'*/*'
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*', 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurse',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurse')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallDirFollowLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallDirFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallFileFollowLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallFileFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallTypeWildFollowLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallTypeWildFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallDirRecurseFollowLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallDirRecurseFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirRecurseFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallFileRecurseFollowLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallFileRecurseFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileRecurseFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallTypeWildRecurseFollowLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurseFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurseFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildDirFollowLink(self):
+        print 'Using path:' + self.basepath +'*dir*'
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*dir*', 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildDirFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildFileFollowLink(self):
+        print 'Using path:' + self.basepath +'*/*file*'
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*file*', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildFileFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildTypeWildFollowLink(self):
+        print 'Using path:' + self.basepath +'*/*'
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*', 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildDirRecurseFollowLink(self):
+        print 'Using path:' + self.basepath +'*/*dir*'
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*dir*', 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurseFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurseFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildFileRecurseFollowLink(self):
+        print 'Using path:' + self.basepath +'*/*file*'
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*file*', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurseFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurseFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildTypeWildRecurseFollowLink(self):
+        print 'Using path:' + self.basepath +'*/*'
+        d = {'Links': u'follow', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*', 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurseFollowLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurseFollowLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+
+    def testFileInventoryInventory_MarshallDirManageLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallDirManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallFileManageLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallFileManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallTypeWildManageLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallTypeWildManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallDirRecurseManageLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallDirRecurseManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirRecurseManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallFileRecurseManageLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallFileRecurseManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileRecurseManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallTypeWildRecurseManageLink(self):
+        print 'Using path:' + self.basepath 
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath, 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurseManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurseManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildDirManageLink(self):
+        print 'Using path:' + self.basepath +'*dir*'
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*dir*', 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildDirManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildFileManageLink(self):
+        print 'Using path:' + self.basepath +'*/*file*'
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*file*', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildFileManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildTypeWildManageLink(self):
+        print 'Using path:' + self.basepath +'*/*'
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*', 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildDirRecurseManageLink(self):
+        print 'Using path:' + self.basepath +'*/*dir*'
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*dir*', 'UseSudo': True, 'Type': u'directory'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurseManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurseManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildFileRecurseManageLink(self):
+        print 'Using path:' + self.basepath +'*/*file*'
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*file*', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurseManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurseManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallWildTypeWildRecurseManageLink(self):
+        print 'Using path:' + self.basepath +'*/*'
+        d = {'Links': u'manage', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': True, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath+'*/*', 'UseSudo': True, 'Type': u'*'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0') 
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurseManageLink',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurseManageLink')
+        self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+
 ######################################
 if __name__ == '__main__':
     s1=unittest2.TestLoader().loadTestsFromTestCase(nxUserTestCases)
@@ -3614,5 +4338,6 @@ if __name__ == '__main__':
     s19=unittest2.TestLoader().loadTestsFromTestCase(nxOMSAgentTestCases)
     s20=unittest2.TestLoader().loadTestsFromTestCase(nxOMSCustomLogTestCases)
     s21=unittest2.TestLoader().loadTestsFromTestCase(nxOMSKeyMgmtTestCases)
+    s22=unittest2.TestLoader().loadTestsFromTestCase(nxFileInventoryTestCases)
     alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20])
     unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)
