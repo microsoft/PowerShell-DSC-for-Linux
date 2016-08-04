@@ -1,0 +1,20 @@
+[ClassVersion("1.0.0"), Description("The configuration provider for files and directories."), FriendlyName("nxFileInventory")]
+class MSFT_nxFileInventoryResource:OMI_BaseResource
+{
+  [Key] string DestinationPath;
+  [Write] boolean Recurse;  //default = false
+  [Write] boolean UseSudo;  //default = false
+  [Write, ValueMap{"follow", "ignore" }, Values{"follow", "manage","ignore"}] string Links;
+  [Write, ValueMap{"md5", "sha-256", "mtime", "ctime"}, Values{"md5","sha-256","mtime","ctime"}] string Checksum; 
+  [Write, ValueMap{"file", "directory", "*"},Values{"file", "directory","*"}] string Type;
+  [Write] uint32 MaxContentsReturnable;
+  [Write] uint64 MaxOutputSize;
+  [Read] string Contents;
+  [Read] datetime ModifiedDate;
+  [Read] datetime CreatedDate; 
+  [Read] string Mode;
+  [Read] string Group;
+  [Read] string Owner;
+  [Read] uint64 FileSize;
+};
+		

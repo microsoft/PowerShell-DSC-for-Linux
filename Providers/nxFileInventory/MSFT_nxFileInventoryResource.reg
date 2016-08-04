@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxFileInventoryResource
+HOSTING=@requestor@
+CLASS=MSFT_nxFileInventoryResource:OMI_BaseResource

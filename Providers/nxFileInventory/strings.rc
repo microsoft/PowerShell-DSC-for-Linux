@@ -1,0 +1,36 @@
+/* @migen@ */
+/*
+**==============================================================================
+**
+** WARNING: THIS FILE WAS AUTOMATICALLY GENERATED. PLEASE DO NOT EDIT.
+** IF YOU NEED TO ADD RESOURCES, CREATE A SECOND .RC FILE, AND USE #INCLUDE TO MERGE THIS FILE
+** INTO THE .RC FILE YOU CREATED.
+**
+**==============================================================================
+*/
+STRINGTABLE
+{
+    1, "Base schema for all native configuration providers."
+    2, "follow"
+    3, "manage"
+    4, "ignore"
+    5, "md5"
+    6, "sha-256"
+    7, "mtime"
+    8, "ctime"
+    9, "file"
+    10, "directory"
+    11, "*"
+    12, "Get resource states based on input configuration file."
+    13, "Configuration document that is to be applied."
+    14, "Flags passed to the providers. Reserved for future use."
+    15, "The current state of the specified configuration resources."
+    16, "Test resource states based on input configuration file."
+    17, "Configuration document that to be applied."
+    18, "Flags passed to the providers. reserved for future use."
+    19, "True if identical. False otherwise."
+    20, "Context information that the provider can use to optimize the set, This is optional."
+    21, "Set resource states based on input configuration file."
+    22, "Context information that the provider can use to optimize the set from TestTargetResource, This is optional."
+    23, "The configuration provider for files and directories."
+}

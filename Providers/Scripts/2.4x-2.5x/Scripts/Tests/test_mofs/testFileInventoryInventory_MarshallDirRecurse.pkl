@@ -1,0 +1,1 @@
+['/tmp/FileInventory/basedirdirlink1', '/tmp/FileInventory/bobdir0', '/tmp/FileInventory/bobdir0/bobdir0dirlink1', '/tmp/FileInventory/bobdir0/bobdir1', '/tmp/FileInventory/joedir0', '/tmp/FileInventory/joedir0/joedir0dirlink1', '/tmp/FileInventory/joedir0/joedir1', '/tmp/FileInventory/joedir0/joedir1/joedir1dirlinktojoedir0', '/tmp/FileInventory/joedir0/joedir1/joedir2']
