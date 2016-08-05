@@ -33,7 +33,7 @@ def init_vars(KeyContents, KeySignature, Ensure):
     KeySignature = KeySignature.encode('ascii', 'ignore')
     KeyContents = KeyContents.encode('ascii', 'ignore')
     Ensure = Ensure.encode('ascii', 'ignore')
-    return KeyContents, KeySignature, Ensure
+    return KeyContents, KeySignature, Ensure.lower()
 
 
 def Set_Marshall(KeyContents, KeySignature, Ensure):
@@ -191,7 +191,11 @@ def Test(KeyContents, KeySignature, Ensure):
     cmd = 'HOME=/var/opt/microsoft/omsagent/run ' + gpg_bin + ' --dry-run --options /dev/null --no-default-keyring --keyring ' \
         + dsc_keyring_path + ' --import ' + key_contents_path
     code, out = RunGetOutput(cmd, False, False)
+    if code != 0:
+        LG().Log('ERROR', '"KeyContents" may be invalid. Output is: ' + out)
+        Print('ERROR: "KeyContents" may be invalid. Output is: ' + out, file=sys.stderr)
     present = 'not changed' in out
+
     if ( Ensure == 'present' and not present ) or \
             (Ensure == 'absent' and present):
         cleanup()
