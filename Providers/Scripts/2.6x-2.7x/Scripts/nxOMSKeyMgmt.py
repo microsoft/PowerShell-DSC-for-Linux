@@ -208,7 +208,7 @@ def Test(KeyContents, KeySignature, Ensure):
 
 def Get(KeyContents, KeySignature, Ensure):
     # Get wil not determine the value of Ensure.
-    return KeyContents, KeySignature, Ensure.lower()
+    return KeyContents, KeySignature, Ensure
 
 
 def cleanup():
