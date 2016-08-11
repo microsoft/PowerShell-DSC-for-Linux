@@ -43,7 +43,7 @@ def Set_Marshall(KeyContents, KeySignature, Ensure):
         Print(
             'Both "KeyContents" and "KeySignature" must be set.', file=sys.stderr)
         return [-1]
-    init_vars(KeyContents, KeySignature, Ensure)
+    KeyContents, KeySignature, Ensure = init_vars(KeyContents, KeySignature, Ensure)
     return Set(KeyContents, KeySignature, Ensure)
 
 
