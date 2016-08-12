@@ -193,7 +193,7 @@ $(BIN_PATH)/libMSFT_$1Resource.so : \
 	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
 	$(BIN_PATH)/MSFT_$1Resource.o
 	@echo ...linking: $(BIN_PATH)/libMSFT_$1Resource.so
-	$(CXX) -shared -o $$@ $$^ -L$(LIBDIR) -lmiapi -lprotocol -lomi_error -lxmlserializer -lbase -lpal
+	$(CXX) -shared -o $$@ $$^ -L$(LIBDIR) -lmiapi -lmicodec -lmofparser -lmofparsererror -lprotocol -lomi_error -lxmlserializer -lbase -lpal
 endef
 
 # instantiate per provider rules
