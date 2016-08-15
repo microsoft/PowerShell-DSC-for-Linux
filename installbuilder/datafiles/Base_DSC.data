@@ -62,11 +62,13 @@ SHLIB_EXT: 'so'
 
 #else
 
+/opt/microsoft/${{SHORT_NAME}}/bin/omi_preexec.sh; intermediate/Scripts/omi_preexec.sh; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg; LCM/dsccore.reg; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/bin/ConsistencyInvoker; omi-1.0.8/output/bin/ConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/lib/libdsccore.so; omi-1.0.8/output/lib/libdsccore.so; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
+
 
 #endif
 
