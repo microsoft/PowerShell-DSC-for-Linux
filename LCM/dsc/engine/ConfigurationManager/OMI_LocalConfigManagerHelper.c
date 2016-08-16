@@ -32,7 +32,7 @@
 #endif
 
 // some constants, probably defined in EngineHelperInternal.h later
-#define CRON_FILE	MI_T("/etc/crontab")
+#define CRON_FILE	MI_T("/etc/cron.d/dsc")
 #define CRON_FILE_TMP	MI_T("/etc/crontabtmp")
 #define UNIT_LINE_SIZE	256
 
