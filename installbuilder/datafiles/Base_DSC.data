@@ -290,6 +290,10 @@ su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/mi
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc keyring.gpg"
 #else
 /opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py
+
+cat /etc/crontab | awk '{ if ($7 != "/opt/omi/bin/ConsistencyInvoker") { print $0 } }' > /etc/crontabtmp
+cat /etc/crontab | awk '{ if ($7 == "/opt/omi/bin/ConsistencyInvoker") { print $0 } }' > /etc/cron.d/dsc
+mv /etc/crontabtmp /etc/crontab
 #endif
 
 
@@ -337,7 +341,7 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $CONFIG_DATADIR/${{SHORT_NAME}}/
     rm -rf $OMI_LIB/Scripts
     rm -rf /opt/microsoft/${{SHORT_NAME}}/
-
+    rm -f /etc/cron.d/dsc
 #if BUILD_OMS == 1
     rm -rf $OMI_REGISTER_DIR/root-oms
     rm -f $OMI_HOME/bin/OMSConsistencyInvoker
