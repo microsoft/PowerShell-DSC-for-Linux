@@ -159,5 +159,117 @@ make reg
 ./omi-1.0.8/output/bin/omiserver
 ```
 
+### Use Azure Automation as a DSC Pull Server
+Note: For more information on Azure Automation’s DSC features, reference the [documentation](https://azure.microsoft.com/en-us/documentation/articles/automation-dsc-overview/).  
+Linux computers can be onboarded to Azure Automation DSC, as long as they have outbound access to the internet, via a few simple steps: 
+
+Make sure version 1.1 or later of the DSC Linux agent is installed on the machines you want to onboard to Azure Automation DSC.
+
+**To configure Azure Automation as a DSC Pull Server from the Linux computer:**
+
+- On each Linux machine to onboard to Azure Automation DSC, use Register.py to onboard using the PowerShell DSC Local Configuration Manager defaults:  
+```/opt/microsoft/dsc/Scripts/Register.py <Automation account registration key> <Automation account registration URL>  ```
+
+- To find the registration key and registration URL for your Automation account, see the Secure Registration section below.
+- Using the Azure portal or cmdlets, check that the machines to onboard now show up as DSC nodes registered in your Azure Automation account. 
+
+Additional configuration options:
+- --ConfigurationName: the name of the configuration to apply
+- --RefreshFrequencyMins: Specifies how often (in minutes) LCM attempts to obtain the configuration from the pull server. If configuration on the pull server differs from the current one on the target node, it is copied to the pending store and applied.
+- --ConfigurationModeFrequencyMins: Specifies how often (in minutes) LCM ensures that the configuration is in the desired state.
+- --ConfigurationMode: Specifies how LCM should apply the configuration. Valid values are: ApplyOnly, ApplyAndMonitor, ApplyAndAutoCorrect
+
+**To configure Azure Automation as a DSC Pull Server with a metaconfiguration MOF:**
+- Open the PowerShell console or PowerShell ISE as an administrator on a Windows machine in your local environment. This machine must have the latest version of WMF 5 installed
+- Connect to Azure Resource Manager using the Azure PowerShell module: 
+```
+Add-AzureAccount 
+Switch-AzureMode AzureResourceManager
+```
+- Download, from the Automation account you want to onboard nodes to, the PowerShell DSC metaconfigurations for the machines you want to onboard: 
+```Get-AzureAutomationDscOnboardingMetaconfig -ResourceGroupName MyResourceGroup AutomationAccountName MyAutomationAccount -ComputerName MyServer1, MyServer2 OutputFolder C:\Users\joe\Desktop```
+ 
+- Optionally, view and update the metaconfigurations in the output folder as needed to match the [PowerShell DSC Local Configuration Manager ](https://technet.microsoft.com/library/dn249922.aspx?f=255&MSPPError=-2147217396)fields and values you want, if the defaults do not match your use case.
+
+- Remotely apply the PowerShell DSC metaconfiguration to the machines you want to onboard: 
+
+```
+$SecurePass = ConvertTo -SecureString -string "<root password>" -AsPlainText Force 
+$Cred = New-Object System.Management.Automation.PSCredential "root" , $SecurePass 
+$Opt = New-CimSessionOption -UseSsl: $true -SkipCACheck: $true -SkipCNCheck: $true -SkipRevocationCheck: $true 
+ 
+$Session = New-CimSession -Credential: $Cred -ComputerName: <your Linux machine > -Port: 5986 -Authentication: basic -SessionOption: $Opt 
+Set-DscLocalConfigurationManager -CimSession $Session –Path C:\Users\joe\Desktop\DscMetaConfigs
+``` 
+- If you cannot apply the PowerShell DSC metaconfigurations remotely, for each Linux machine to onboard, copy the metaconfiguration corresponding to that machine from the folder in step 5 onto the Linux machine. Then call SetDscLocalConfigurationManager.py locally on each Linux machine to onboard to Azure Automation DSC:  
+
+```
+/opt/microsoft/dsc/Scripts/SetDscLocalConfigurationManager.py –configurationmof <path to metaconfiguration file> 
+```
+- Using the Azure portal or cmdlets, check that the machines to onboard now show up as DSC nodes registered in your Azure Automation account.  
+
+### Importing resource modules to Azure Automation
+The supplied resource modules with this release (nxNetworking, nxComputerManagement) can be imported to Azure Automation for distribution with DSC configurations. To import to Azure Automation, rename the .zip files to remove the _X.Y version string from the file name. Such as: nxNetworking.zip and nxComputerManagement.zip. 
+
+## Additional Information Performing DSC Operations from the Linux Computer 
+DSC for Linux includes scripts to work with configuration from the local Linux computer. These scripts are located in `/opt/microsoft/dsc/Scripts` and include the following:
+
+**GetDscConfiguration.py**
+Returns the current configuration applied to the computer. Similar to the Windows PowerShell cmdlet Get-DscConfiguration cmdlet. 
+`sudo ./GetDscConfiguration.py` 
+
+**GetDscLocalConfigurationManager.py**
+Returns the current meta-configuration applied to the computer. Similar to the Windows PowerShell cmdlet Get-DSCLocalConfigurationManager 
+`sudo ./GetDscLocalConfigurationManager.py` 
+
+**PerformRequiredConfigurationChecks.py**
+Immediately checks the configuration in accordance with the MetaConfiguration settings and applies the configuration if an update is available. Useful for immediately applying configuration changes on the pull server. 
+`sudo ./PerformRequiredConfigurationChecks.py`
+
+**RestoreConfiguration.py** 
+Applies the previous configuration known to DSC, a rollback.  
+`sudo ./RestoreConfiguration.py`
+
+**SetDscLocalConfigurationManager.py**
+Applies a Meta Configuration MOF file to the computer. Similar to the Windows PowerShell cmdlet: Set-DSCLocalConfigurationManager. Requires the path to the Meta Configuration MOF to apply. 
+`sudo ./SetDscLocalConfigurationManager.py –configurationmof /tmp/localhost.meta.mof`
+
+**StartDscConfiguration.py** 
+Applies a configuration MOF file to the computer. Similar to the Windows PowerShell cmdlet: StartDscConfiguration. Requires the path to the configuration MOF to apply. 
+`sudo ./StartDscConfiguration.py –configurationmof /tmp/localhost.mof`
+
+**TestDscConfiguration.py** 
+Tests the current system configuration for compliance desired state.  Similar to the Windows PowerShell cmdlet: Test-DscConfiguration.  
+`sudo ./TestDscConfiguration.py`
+
+**InstallModule.py**
+Installs a custom DSC resource module. Requires the path to a .zip file containing the module shared object library and schema MOF files. 
+`sudo ./InstallModule.py /tmp/cnx_Resource.zip` 
+
+**RemoveModule.py**
+Removes a custom DSC resource module. Requires the name of the module to remove. 
+`sudo ./RemoveModule.py cnx_Resource`
+
+## Using PowerShell Desired State Configuration for Linux with a Pull Server 
+### Using HTTPS with the Pull Server
+Though unencrypted HTTP is supported for communication with the Pull server, HTTPS (SSL/TLS) is recommended. When using HTTPS, the DSC Local Configuration Manager requires that the SSL certificate of the Pull server is verifiable (signed by a trusted authority, has a common name that matches the URL, etc.). 
+ 
+You can modify these HTTPS requirements as needed, by modifying the file /etc/opt/omi/dsc/dsc.conf. The supported properties defined in this file are:  
+- **NoSSLv3** set this to true to require the TLS protocol and set this to false to support SSLv3 or TLS. The default is false. 
+- **DoNotCheckCertificate** set this to true to ignore SSL certificate verification. The default is false. 
+- **CURL_CA_BUNDLE** an optional path to a curl-ca-bundle.crt file containing the CA certificates to trust for SSL/TLS. For more information, see: http://curl.haxx.se/docs/sslcerts.html
+- **sslCipherSuite** Optionally set your preferred SSL cipher suite list. Only ciphers matching the rules defined by this list will be supported for HTTPS negotiation. The syntax and available ciphers on your computer depend on whether the cURL package is configured to use OpenSSL or NSS as its SSL library. To determine which SSL library cURL is using, run the following command and look for OpenSSL or NSS in the list of linked libraries: 
+```
+curl --version |head -n 1 curl 7.29.0 (x86_64-redhat-linux-gnu) libcurl/7.29.0 NSS/3.15.4 zlib/1.2.7 libidn/1.28 libssh2/1.4.3
+```  
+ *For more information on configuring cipher support, see: http://curl.haxx.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html*
+
+## PowerShell Desired State Configuration for Linux Log Files  ##
+The following log files are generated for DSC for Linux messages. 
+
+ **Log File** 	| **Directory** 	| **Description**
+--------------------- | --------------------- | -------------------
+omiserver.log |	/var/opt/omi/log	| Messages relating to the operation of the OMI CIM server. 
+dsc.log |	/var/opt/omi/log	| Messages relating to the operation of the Local Configuration Manager and DSC resource operations. 
 
 
