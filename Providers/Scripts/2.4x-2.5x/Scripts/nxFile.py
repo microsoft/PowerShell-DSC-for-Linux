@@ -887,9 +887,6 @@ def TestDirectory(DestinationPath, SourcePath, fc):
 
 
 def TestFile(DestinationPath, SourcePath, fc):
-    if '://' in SourcePath and fc.LocalPath == '':  # we cannot verify the remote has not changed until the Set
-        return False
-
     if not os.path.exists(DestinationPath) or not os.path.isfile(DestinationPath) or os.path.islink(DestinationPath):
         return False
 
