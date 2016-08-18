@@ -12,7 +12,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Getting Started
-##Latest Release##
+## Latest Release ##
 The latest release packages for PowerShell DSC for Linux can be downloaded here:
 [Releases](https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases)
 
@@ -24,7 +24,7 @@ The following Linux operating system versions are supported by DSC for Linux.
 - Oracle Linux 5, 6 and 7 (x86/x64) 
 - Red Hat Enterprise Linux Server 5, 6 and 7 (x86/x64) 
 - SUSE Linux Enterprise Server 10, 11 and 12 (x86/x64) 
-- Ubuntu Server 12.04 LTS and 14.04 LTS (x86/x64) 
+- Ubuntu Server 12.04 LTS, 14.04 LTS, 16.04 LTS (x86/x64) 
 
 ## Requirements
 The following table describes the required package dependencies for DSC for Linux.
@@ -38,17 +38,26 @@ The following table describes the required package dependencies for DSC for Linu
 `python-ctypes`		| Python CTypes library			| Must match Python version
 `libcurl`		| cURL http client library		| 7.15.1
 
-OMI Packages can be found at [The Open Group](https://collaboration.opengroup.org/omi/documents.php?action=view&gdid=34607).
+OMI Packages can be found at [OMI](https://github.com/Microsoft/omi/releases "OMI Releases").
 
 ## Installing DSC Packages
+OMI and DSC packages are available in RPM and Debian packages, for x86 and x64 architectures, and for systems with OpenSSL version 0.9.8 and version 1.0.x. To install DSC, select determine the packages that are correct for your operating system, and install them. 
 
+**Examples**
+*Red Hat Enterprise Linux, CentOS, or Oracle Linux 7:*
 ```sh
-wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-70/dsc-1.1.1.packages.tar.gz
-tar -xvf dsc-1.1.1.packages.tar.gz
+wget https://github.com/Microsoft/omi/releases/download/v1.1.0-0/omi-1.1.0.ssl_100.x64.rpm
+wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-281/dsc-1.1.1-281.ssl_100.x64.rpm
 
-# Install the appropriate package for your architecture (x86 or x64) and OpenSSL version (1.0.x or 0.9.8):
-sudo dpkg -i dsc-1.1.1-70.ssl_100.x64.deb
-sudo rpm -Uvh dsc-1.1.1-70.ssl_100.x64.rpm
+sudo rpm -Uvh omi-1.1.0.ssl_100.x64.rpm dsc-1.1.1-281.ssl_100.x64.rpm
+```
+
+*Ubuntu 14.04 LTS, 16.04 LTS, or Debian GNU/Linux 8, x64:*
+```sh
+wget https://github.com/Microsoft/omi/releases/download/v1.1.0-0/omi-1.1.0.ssl_100.x64.deb
+wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-281/dsc-1.1.1-281.ssl_100.x64.debdsc-1.1.1-281.ssl_100.x64.rpm
+
+sudo dpkg -i omi-1.1.0.ssl_100.x64.rpm dsc-1.1.1-281.ssl_100.x64.rpm
 ```
 
 **For more information, review the latest [release notes](https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/tag/v1.1.1-70) and [product documentation](https://msdn.microsoft.com/en-us/powershell/dsc/lnxgettingstarted).**
@@ -63,6 +72,11 @@ sudo rpm -Uvh dsc-1.1.1-70.ssl_100.x64.rpm
 * A Windows computer with:
   * Adminstrative privileges
   * Windows PowerShell (>=4.0)
+ 
+*or*
+* A Linux computer with:
+  * [PowerShell v6.0.0-alpha.9 or later](https://github.com/PowerShell/PowerShell/releases)
+  * DSC v1.1.1 or later
 
 
 * Install the Linux Resource Provider MOF module:
@@ -70,15 +84,17 @@ sudo rpm -Uvh dsc-1.1.1-70.ssl_100.x64.rpm
 	`install-module nx`
    * In order to compile a Configuration MOF that uses the DSC for Linux resources, use `Import-DscResource -Module nx` inside a DSC Configuration block.
   
-* Managing a Linux system with DSC
-   * You need a compiled configuration MOF to apply a new configuration to a system.  Please refer to part 1 of this section, as well as the DSC for Windows documentation, for instructions on how to generate a configuration MOF.
-   * Once you have a MOF, you can apply it by running:
+* Remotely managing a Linux system with DSC
+   * You need a compiled configuration MOF to apply a new configuration to a system.  
         `Start-DscConfiguration -CimSession:$myCimSession -Path:"C:\path_to_compiled_mof_directory\" -Wait -Verbose`
    * You can get the current configuration of the system by running:
         `Get-DscConfiguration -CimSession:$myCimSession`
    * You can test the current configuration of the system by running:
        `Test-DscConfiguration -CimSession:$myCimSession`
    * For more information on creating a CimSession for use with the `-CimSession` parameter, see: http://technet.microsoft.com/en-us/library/jj590760.aspx
+
+* Locally managing a Linux system with DSC
+	* See [Performing DSC Operations from the Linux Computer](#performing-dsc-operations-from-the-linux-computer) below for a reference of DSC operations that can be performed on the managed computer
 
 
 ## Building the Desired State Configuration (DSC) Local Configuration Manager and Linux Resource Providers
@@ -211,7 +227,7 @@ Set-DscLocalConfigurationManager -CimSession $Session –Path C:\Users\joe\Deskt
 ### Importing resource modules to Azure Automation
 The supplied resource modules with this release (nxNetworking, nxComputerManagement) can be imported to Azure Automation for distribution with DSC configurations. To import to Azure Automation, rename the .zip files to remove the _X.Y version string from the file name. Such as: nxNetworking.zip and nxComputerManagement.zip. 
 
-## Additional Information Performing DSC Operations from the Linux Computer 
+## Performing DSC Operations from the Linux Computer 
 DSC for Linux includes scripts to work with configuration from the local Linux computer. These scripts are located in `/opt/microsoft/dsc/Scripts` and include the following:
 
 **GetDscConfiguration.py**
