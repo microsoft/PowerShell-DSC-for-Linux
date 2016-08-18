@@ -55,7 +55,7 @@ sudo rpm -Uvh omi-1.1.0.ssl_100.x64.rpm dsc-1.1.1-281.ssl_100.x64.rpm
 *Ubuntu 14.04 LTS, 16.04 LTS, or Debian GNU/Linux 8, x64:*
 ```sh
 wget https://github.com/Microsoft/omi/releases/download/v1.1.0-0/omi-1.1.0.ssl_100.x64.deb
-wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-281/dsc-1.1.1-281.ssl_100.x64.debdsc-1.1.1-281.ssl_100.x64.rpm
+wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-281/dsc-1.1.1-281.ssl_100.x64.deb
 
 sudo dpkg -i omi-1.1.0.ssl_100.x64.rpm dsc-1.1.1-281.ssl_100.x64.rpm
 ```
