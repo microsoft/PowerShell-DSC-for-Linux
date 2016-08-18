@@ -3,6 +3,8 @@ TOP = .
 include $(TOP)/config.mak
 
 DIRECTORIES = omiutils
+DIRECTORIES += codec/mof
+DIRECTORIES += codec/mof/parser
 DIRECTORIES += dsc/engine/EngineHelper
 DIRECTORIES += dsc/engine/ca/CAInfrastructure
 DIRECTORIES += dsc/engine/ca/CALogInfrastructure
