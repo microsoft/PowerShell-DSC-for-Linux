@@ -118,18 +118,15 @@ MI_Result Register(
     }
 
 
-#if defined(BUILD_OMS)
     // Check if RegistrationKey is specified. If not specified, do not attempt to register.
     result = MI_Instance_GetElement(request->registrationData, MSFT_RegistrationKey_Name, &value, NULL, &flags, NULL);
     if (result != MI_RESULT_OK || flags & MI_FLAG_NULL || value.string == NULL || value.string[0] == '\0')
     {
 	return MI_RESULT_OK;
     }
-#endif
 
-    // Check the cache for a given serverUrl
-    result = GetThumbprintForRegisteredServerURL(self, request->registrationData, &thumbprint, cimErrorDetails);
-    if (thumbprint == NULL)
+
+    if ( (access(OAAS_KEYPATH, F_OK) == -1) || (access(OAAS_CERTPATH, F_OK) == -1) )
     {
         system("touch "  OAAS_KEYPATH "; chmod 0600 "  OAAS_KEYPATH);
         system("touch "  OAAS_KEYPATH "_old; chmod 0600 "  OAAS_KEYPATH "_old");
@@ -169,12 +166,12 @@ MI_Result Register(
         }
 
         // Cache this URL.
-        result = CacheServerURL(self, request->registrationData, thumbprint, cimErrorDetails);
-        EH_CheckResult(result);
+        // result = CacheServerURL(self, request->registrationData, thumbprint, cimErrorDetails);
+        //EH_CheckResult(result);
 
         // Write this cache to DSC Cache
-        result = UpdateServerURLsToDSCCache(self, cimErrorDetails);
-        EH_CheckResult(result);
+        //result = UpdateServerURLsToDSCCache(self, cimErrorDetails);
+        //EH_CheckResult(result);
     }
 
     result = GetAgentInformation(&registrationPayload);
