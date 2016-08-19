@@ -15,12 +15,16 @@ ifeq ($(BUILD_OMS),BUILD_OMS)
 CONFIG_SYSCONFDIR_DSC=omsconfig
 DSC_NAMESPACE=root/oms
 OAAS_CERTPATH=/etc/opt/microsoft/omsagent/certs/oms.crt
+OAAS_KEYPATH=/etc/opt/microsoft/omsagent/certs/oms.key
+OAAS_THUMBRPINT=/etc/opt/microsoft/omsagent/certs/oms.thumbprint
 PYTHON_PID_DIR=/var/opt/microsoft/omsconfig
 BUILD_OMS_VAL=1
 else
 CONFIG_SYSCONFDIR_DSC=dsc
 DSC_NAMESPACE=root/Microsoft/DesiredStateConfiguration
 OAAS_CERTPATH=$$CONFIG_CERTSDIR/oaas.crt
+OAAS_KEYPATH=$$CONFIG_CERTSDIR/oaas.key
+OAAS_THUMBPRINT=$$CONFIG_CERTSDIR/oaas.thumbprint
 PYTHON_PID_DIR=/var/opt/omi
 BUILD_OMS_VAL=0
 endif
@@ -86,6 +90,8 @@ dsc098: lcm098 providers
 	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
 	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
 	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
@@ -108,6 +114,8 @@ dsc100: lcm100 providers
 	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
 	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
 	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
@@ -366,6 +374,8 @@ providersreg:
 	  sed "s@<CONFIG_SYSCONFDIR>@$(CONFIG_SYSCONFDIR)@" | \
 	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
 	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
 	  sed "s@<OMI_LIB_SCRIPTS>@$(CONFIG_LIBDIR)/Scripts@" | \
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \

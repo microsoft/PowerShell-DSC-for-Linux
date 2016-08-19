@@ -53,7 +53,7 @@ while i < command_line_length:
 if inArgument:
    Variables[currentArgument] = arg
 
-AcceptableOptions = ["registrationkey", "serverurl", "configurationname", "refreshfrequencymins", "configurationmodefrequencymins", "configurationmode", "refreshmode", "help"]
+AcceptableOptions = ["registrationkey", "serverurl", "configurationname", "refreshfrequencymins", "configurationmodefrequencymins", "configurationmode", "refreshmode", "help", "regeneratecert"]
 
 if "help" in Variables:
    usage()
@@ -112,6 +112,10 @@ if "refreshfrequencymins" in Variables:
 ConfigurationModeFrequencyMins = "15"
 if "configurationmodefrequencymins" in Variables:
    ConfigurationModeFrequencyMins = Variables["configurationmodefrequencymins"]
+
+RegenerateCert = False
+if "regeneratecert" in Variables:
+   RegenerateCert = True
 
 metaConfig = ""
 if RefreshMode == "Push":
@@ -199,6 +203,16 @@ meta_path = tempdir + "/metaconf.mof"
 f = open(meta_path, "w")
 f.write(metaConfig)
 f.close()
+
+# Generate new cert if specified
+if RegenerateCert == True:
+   OAAS_CERTPATH="<OAAS_CERTPATH>"
+   OAAS_KEYPATH="<OAAS_KEYPATH>"
+   OAAS_THUMBPRINT="<OAAS_THUMBPRINT>"
+   os.system("touch " + OAAS_KEYPATH + "; chmod 0600 " + OAAS_KEYPATH);
+   os.system("touch " + OAAS_KEYPATH + "_old; chmod 0600 " + OAAS_KEYPATH + "_old");
+   os.system("openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " + OAAS_KEYPATH + "_old -out " + OAAS_CERTPATH + " && openssl rsa -in " +  OAAS_KEYPATH + "_old -out " + OAAS_KEYPATH + " && rm -f " +  OAAS_KEYPATH + "_old");
+   os.system("openssl x509 -noout -in " + OAAS_CERTPATH + " -fingerprint | sed 's/^.*=//' > " + OAAS_THUMBPRINT);
 
 os.system("<DSC_SCRIPT_PATH>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
