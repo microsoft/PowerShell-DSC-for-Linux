@@ -28,7 +28,7 @@ MI_EXTERN_C MI_EXPORT MI_Module* MI_MAIN_CALL MI_Main(_In_ MI_Server* server)
     module.flags |= MI_MODULE_FLAG_BOOLEANS;
     module.flags |= MI_MODULE_FLAG_LOCALIZED;
     module.charSize = sizeof(MI_Char);
-    module.version = MI_VERSION;
+    module.version = MI_MAKE_VERSION(1, 0, 8);
     module.generatorVersion = MI_MAKE_VERSION(1,0,0);
     module.schemaDecl = &schemaDecl;
     module.Load = Load;
