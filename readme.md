@@ -280,6 +280,21 @@ curl --version |head -n 1 curl 7.29.0 (x86_64-redhat-linux-gnu) libcurl/7.29.0 N
 ```  
  *For more information on configuring cipher support, see: http://curl.haxx.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html*
 
+## Using an HTTP(s) Proxy Server with DSC ##
+DSC for Linux supports the use of an HTTP or HTTPS proxy server when communicating with a Pull Server. To configure a proxy server, edit the file `/etc/opt/omi/conf/dsc/dsc.conf` and add a line starting with `PROXY=`.  The proxy server specification takes the format: The proxy configuration value has the following syntax: `[protocol://][user:password@]proxyhost[:port]`
+
+Property|Description 
+---|---- 
+Protocol|http or https 
+user|Optional username for proxy authentication 
+password|Optional password for proxy authentication 
+proxyhost|Address or FQDN of the proxy server 
+port|Optional port number for the proxy server
+
+**Example**
+`PROXY=https://proxyuser:proxypassword@proxyserver01:8080`
+
+
 ## PowerShell Desired State Configuration for Linux Log Files  ##
 The following log files are generated for DSC for Linux messages. 
 
