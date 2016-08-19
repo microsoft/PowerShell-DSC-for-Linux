@@ -57,7 +57,7 @@ sudo rpm -Uvh omi-1.1.0.ssl_100.x64.rpm dsc-1.1.1-281.ssl_100.x64.rpm
 wget https://github.com/Microsoft/omi/releases/download/v1.1.0-0/omi-1.1.0.ssl_100.x64.deb
 wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-281/dsc-1.1.1-281.ssl_100.x64.deb
 
-sudo dpkg -i omi-1.1.0.ssl_100.x64.rpm dsc-1.1.1-281.ssl_100.x64.rpm
+sudo dpkg -i omi-1.1.0.ssl_100.x64.deb dsc-1.1.1-281.ssl_100.x64.deb
 ```
 
 **For more information, review the latest [release notes](https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/tag/v1.1.1-70) and [product documentation](https://msdn.microsoft.com/en-us/powershell/dsc/lnxgettingstarted).**
