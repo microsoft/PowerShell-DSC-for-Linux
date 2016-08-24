@@ -630,6 +630,10 @@ module OMS
         Time.at(time).utc.iso8601(3) # UTC with milliseconds
       end
 
+      def format_time_str(time)
+        DateTime.parse(time).strftime("%FT%H:%M:%S.%3NZ")
+      end
+
       def create_error_tag(tag)
         "ERROR::#{tag}::"
       end
