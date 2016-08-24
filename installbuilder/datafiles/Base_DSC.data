@@ -241,23 +241,18 @@ chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema
 chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/baseregistration
 chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration
 
+for f in /opt/omi/lib/libMSFT_*; do
+    if [ -L $f ]; then
+        rm $f
+    fi
+done
+
 #if BUILD_OMS == 1
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
 chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
 chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
-
-# If there are any symlinks of the OMS shared libraries, remove them
-if [ -L /opt/omi/lib/libMSFT_nxOMSAgentResource.so ]; then
-    rm /opt/omi/lib/libMSFT_nxOMSAgentResource.so
-fi
-if [ -L /opt/omi/lib/libMSFT_nxOMSCustomLogResource.so ]; then
-    rm /opt/omi/lib/libMSFT_nxOMSCustomLogResource.so
-fi
-if [ -L /opt/omi/lib/libMSFT_nxOMSSyslogResource.so ]; then
-    rm /opt/omi/lib/libMSFT_nxOMSSyslogResource.so
-fi
 
 # Set up the nxOMSAgent module
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
