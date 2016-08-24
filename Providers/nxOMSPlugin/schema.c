@@ -921,7 +921,7 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSPlugin_props[] =
     &MSFT_nxOMSPlugin_Ensure_prop,
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSPlugin_ClassVersion_qual_value = MI_T("2.5.0");
+static MI_CONST MI_Char* MSFT_nxOMSPlugin_ClassVersion_qual_value = MI_T("2.6.0");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSPlugin_ClassVersion_qual =
 {
