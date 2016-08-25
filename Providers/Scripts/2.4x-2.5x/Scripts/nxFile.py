@@ -397,7 +397,7 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
             LG().Log('ERROR', "Exception opening destination file " + DestinationPath + " Error : " + str(dest_error))
             src_file.close()
             return -1
-        while src_block != '' and dest_block != '':
+        while src_block != '' or dest_block != '':
             src_block = src_file.read(BLOCK_SIZE)
             dest_block = dest_file.read(BLOCK_SIZE)
             src_hash.update(src_block)
@@ -695,8 +695,6 @@ def SetFile(DestinationPath, SourcePath, fc):
             if ret != 0:
                 raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
             else:
-                if fc.LocalPath == '':  # Checksum !='md5' the remote time is not newer that dest's ctime or mtime no download needed
-                    return True
                 SourcePath = fc.LocalPath
         should_copy_file = False
         if os.path.isfile(DestinationPath):
@@ -887,11 +885,11 @@ def TestDirectory(DestinationPath, SourcePath, fc):
 
 
 def TestFile(DestinationPath, SourcePath, fc):
-    if '://' in SourcePath and fc.LocalPath == '':  # we cannot verify the remote has not changed until the Set
-        return False
-
     if not os.path.exists(DestinationPath) or not os.path.isfile(DestinationPath) or os.path.islink(DestinationPath):
         return False
+
+    if '://' in SourcePath:
+        return TestRemoteFile(fc)
 
     if TestOwnerGroupMode(DestinationPath, SourcePath, fc) is False:
         return False
@@ -1047,24 +1045,6 @@ def GetRemoteFile(fc):
         LG().Log('ERROR', repr(e))
         return 1
     fc.LocalPath = '/tmp/'+os.path.basename(fc.DestinationPath)+'_remote'
-    h = resp.info()
-    data = None
-    if fc.Checksum != 'md5' :  # if not 'md5' check the last_modified header time before we download
-        lm = h.getheader('last-modified')
-        remote_mtime = GetTimeFromString(lm)
-        destination_mtime = None
-        dst_st = None
-        if os.path.exists(fc.DestinationPath):
-            dst_st = LStatFile(fc.DestinationPath)
-        if dst_st is not None:
-            if fc.Checksum == 'ctime':
-                destination_mtime = time.gmtime(dst_st.st_ctime)
-            else:
-                destination_mtime = time.gmtime(dst_st.st_mtime)
-        if remote_mtime is not None and destination_mtime is not None and destination_mtime >= remote_mtime:
-            data = ''
-            fc.LocalPath = ''
-            return 0
     data='keep going'
     hasWritten = False
     try:
@@ -1079,7 +1059,6 @@ def GetRemoteFile(fc):
             F.close()
             os.unlink(fc.LocalPath)
             return 1
-        F.close()
     except  Exception, e:
         Print(repr(e))
         LG().Log('ERROR', repr(e))
@@ -1087,6 +1066,53 @@ def GetRemoteFile(fc):
         os.unlink(fc.LocalPath)
         return 1
     return 0
+
+def TestRemoteFile(fc):
+    req = urllib2.Request(fc.SourcePath)
+    try:
+        resp = urllib2.urlopen(req)
+    except urllib2.URLError , e:
+        Print(repr(e))
+        LG().Log('ERROR', repr(e))
+        return False
+    h = resp.info()
+    if fc.Checksum != 'md5' :  # if not 'md5' check the last_modified header time before we download
+        lm = h.getheader('last-modified')
+        remote_mtime = GetTimeFromString(lm)
+        destination_mtime = None
+        dst_st = None
+        if os.path.exists(fc.DestinationPath):
+            dst_st = LStatFile(fc.DestinationPath)
+        if dst_st is not None:
+            if fc.Checksum == 'ctime':
+                destination_mtime = time.gmtime(dst_st.st_ctime)
+            else:
+                destination_mtime = time.gmtime(dst_st.st_mtime)
+        if remote_mtime is not None and destination_mtime is not None and destination_mtime >= remote_mtime:
+            return True
+        else:
+            return False
+    #md5
+    if not os.path.exists(fc.DestinationPath):
+        return False
+    src_data='keep going'
+    dest_data='keep going'
+    src_hash = md5const()
+    dest_hash = md5const()
+    try:
+        F = open(fc.DestinationPath, 'rb')
+        while src_data or dest_data:
+            src_data = resp.read(1048576)
+            src_hash.update(src_data)
+            dest_data = F.read(1048576)
+            dest_hash.update(dest_data)
+            if src_hash.hexdigest() != dest_hash.hexdigest():
+                return False
+    except Exception, e:
+        F.close()
+        return False
+    F.close()
+    return True
 
 
 class FileContext:

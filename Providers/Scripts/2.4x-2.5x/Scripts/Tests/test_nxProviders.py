@@ -1080,6 +1080,7 @@ class nxFileTestCases(unittest2.TestCase):
         Setup test resources
         """
         os.system('rm -rf /tmp/*pp*')
+        os.system('rm -rf /tmp/Python-2.4.6.tgz')
         nxFile.SetShowMof(True)
         print self.id() + '\n'
         
@@ -1088,6 +1089,7 @@ class nxFileTestCases(unittest2.TestCase):
         Remove test resources.
         """
         os.system('rm -rf /tmp/*pp*')
+        os.system('rm -rf /tmp/Python-2.4.6.tgz')
 
     def make_MI(self,retval,DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate):
         d=dict();
@@ -1399,6 +1401,79 @@ class nxFileTestCases(unittest2.TestCase):
                         [0],'nxFile.Set_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", 776) should return [0]')
         self.assertTrue(nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", '776')==
                         [0],'nxFile.Test_Marshall("/tmp/pp", "", "Present", "Directory", "", "", "md5", "", "", "", "", 776) should return [0]')
+
+    def testRemoteFilePass(self):
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "ctime", "", "", "", "", '776') ==
+               [-1],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "ctime", "", "", "", "", 776) should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "ctime", "", "", "", "", '776') ==
+               [0],'nxFile.Set(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "ctime", "", "", "", "", 776) should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "ctime", "", "", "", "", '776') ==
+               [0],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "ctime", "", "", "", "", 776) should return [0]')
+                                                                                             
+
+    def testRemoteFileMtimePass(self):
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", '776') ==
+               [-1],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", 776) should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", '776') ==
+               [0],'nxFile.Set(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", 776) should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", '776') ==
+               [0],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", 776) should return [0]')
+
+
+    def testRemoteFileMD5Pass(self):
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", '776') ==
+               [-1],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", 776) should return [-1]')
+        self.assertTrue(nxFile.Set_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", '776') ==
+               [0],'nxFile.Set(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", 776) should return [0]')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", '776') ==
+               [0],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", 776) should return [0]')
+
+    def testRemoteFileMtimeFail(self):
+        self.assertTrue(nxFile.Set_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", '776') ==
+               [0],'nxFile.Set(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", 776) should return [-1]')
+        os.utime('/tmp/Python-2.4.6.tgz',(0,0))
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", '776') ==
+               [-1],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "mtime", "", "", "", "", 776) should return [-1]')
+
+
+    def testRemoteFileMD5Fail(self):
+        self.assertTrue(nxFile.Set_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", '776') ==
+                [0],'nxFile.Set(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", 776) should return [0]')
+        os.system('ls >> /tmp/Python-2.4.6.tgz')
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", '776') ==
+               [-1],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", 776) should return [-1]')
+
+    def testRemoteFileBadUrl(self):
+        self.assertTrue(nxFile.Test_Marshall("/tmp/Python-2.4.6.tgz",\
+               "https://www.python.org/ftp/python/2.4.6/Python-2.4.6.nope", "Present", "File", "", "", "md5", "", "", "", "", '776') ==
+               [-1],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
+               '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", 776) should return [-1]')
 
 dummy_service_file=r"""#!/usr/bin/env python
 from __future__ import with_statement
@@ -4347,3 +4422,4 @@ if __name__ == '__main__':
     s22=unittest2.TestLoader().loadTestsFromTestCase(nxFileInventoryTestCases)
     alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20])
     unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)
+    
