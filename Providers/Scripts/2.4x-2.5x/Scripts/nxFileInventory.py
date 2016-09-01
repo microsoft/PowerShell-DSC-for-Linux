@@ -228,8 +228,8 @@ def GetFileInfo(fname, Links, MaxContentsReturnable, Checksum):
     except:
         d['Group'] = str(stat_info.st_gid)
     d['Mode'] = str(oct(stat_info.st_mode))[-3:]
-    d['ModifiedDate'] = int(stat_info.st_mtime)
-    d['CreatedDate'] = int(stat_info.st_ctime)
+    d['ModifiedDate'] = str(int(stat_info.st_mtime))
+    d['CreatedDate'] = str(int(stat_info.st_ctime))
     d['FileSize'] = stat_info.st_size
     if Checksum == 'md5' or Checksum == 'sha-256':
         d['Checksum'] = GetChecksum(fname,Checksum)
@@ -269,8 +269,8 @@ def GetDirInfo(dname, stat_info, Checksum, Links):
     else : # Checksum == "mtime":
         d['Checksum']= str(int(stat_info.st_mtime))
     d['Mode'] = str(oct(stat_info.st_mode))[-3:]
-    d['ModifiedDate'] = int(stat_info.st_mtime)
-    d['CreatedDate'] = int(stat_info.st_ctime)
+    d['ModifiedDate'] = str(int(stat_info.st_mtime))
+    d['CreatedDate'] = str(int(stat_info.st_ctime))
     d['FileSize'] = stat_info.st_size
     d['Contents'] = ''
     if Links == 'manage' and os.path.islink(dname):
