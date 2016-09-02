@@ -13,6 +13,8 @@ import time
 import imp
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
+helperlib = imp.load_source('helperlib', '../helperlib.py')
+
 LG = nxDSCLog.DSCLog
 try:
     import hashlib
@@ -1036,7 +1038,28 @@ def GetTimeFromString(s):
     return st
 
 
+def SetProxyFromConf():
+    """
+    Check for PROXY definition in dsc.conf.
+    All we must do is set the appropriate value in the environment.
+    HTTP_PROXY
+    HTTPS_PROXY
+    """
+    path = helperlib.CONFIG_SYSCONFDIR+ '/' + helperlib.CONFIG_SYSCONFDIR_DSC + '/dsc.conf'
+    txt, error = ReadFile(path)
+    if error :
+        return
+    for l in txt.splitlines():
+        if l.startswith('PROXY'):
+            info = l.split('=')[1].strip()
+            if 'https' in info:
+                os.environ['HTTPS_PROXY'] = info
+            if 'http:' in info:
+                os.environ['HTTP_PROXY'] = info
+    return
+        
 def GetRemoteFile(fc):
+    SetProxyFromConf()
     req = urllib2.Request(fc.SourcePath)
     try:
         resp = urllib2.urlopen(req)
@@ -1068,6 +1091,7 @@ def GetRemoteFile(fc):
     return 0
 
 def TestRemoteFile(fc):
+    SetProxyFromConf()
     req = urllib2.Request(fc.SourcePath)
     try:
         resp = urllib2.urlopen(req)
