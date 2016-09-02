@@ -47,20 +47,20 @@ OMI and DSC packages are available in RPM and Debian packages, for x86 and x64 a
 *Red Hat Enterprise Linux, CentOS, or Oracle Linux 7:*
 ```sh
 wget https://github.com/Microsoft/omi/releases/download/v1.1.0-0/omi-1.1.0.ssl_100.x64.rpm
-wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-281/dsc-1.1.1-281.ssl_100.x64.rpm
+wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-294/dsc-1.1.1-294.ssl_100.x64.rpm
 
-sudo rpm -Uvh omi-1.1.0.ssl_100.x64.rpm dsc-1.1.1-281.ssl_100.x64.rpm
+sudo rpm -Uvh omi-1.1.0.ssl_100.x64.rpm dsc-1.1.1-294.ssl_100.x64.rpm
 ```
 
 *Ubuntu 14.04 LTS, 16.04 LTS, or Debian GNU/Linux 8, x64:*
 ```sh
 wget https://github.com/Microsoft/omi/releases/download/v1.1.0-0/omi-1.1.0.ssl_100.x64.deb
-wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-281/dsc-1.1.1-281.ssl_100.x64.deb
+wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-294/dsc-1.1.1-294.ssl_100.x64.deb
 
-sudo dpkg -i omi-1.1.0.ssl_100.x64.deb dsc-1.1.1-281.ssl_100.x64.deb
+sudo dpkg -i omi-1.1.0.ssl_100.x64.deb dsc-1.1.1-294.ssl_100.x64.deb
 ```
 
-**For more information, review the latest [release notes](https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/tag/v1.1.1-70) and [product documentation](https://msdn.microsoft.com/en-us/powershell/dsc/lnxgettingstarted).**
+**For more information, review the latest [release notes](https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/tag/v1.1.1-294) and [product documentation](https://msdn.microsoft.com/en-us/powershell/dsc/lnxgettingstarted).**
 
 ## To author DSC MOF configuration for Linux on a Windows computer:
 
