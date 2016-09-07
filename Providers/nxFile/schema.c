@@ -1310,10 +1310,32 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_Checksum_ValueMap_qual =
     &MSFT_nxFileResource_Checksum_ValueMap_qual_value
 };
 
+static MI_CONST MI_Char* MSFT_nxFileResource_Checksum_Values_qual_data_value[] =
+{
+    MI_T("7"),
+    MI_T("8"),
+    MI_T("9"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxFileResource_Checksum_Values_qual_value =
+{
+    MSFT_nxFileResource_Checksum_Values_qual_data_value,
+    MI_COUNT(MSFT_nxFileResource_Checksum_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Checksum_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_nxFileResource_Checksum_Values_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Checksum_quals[] =
 {
     &MSFT_nxFileResource_Checksum_Write_qual,
     &MSFT_nxFileResource_Checksum_ValueMap_qual,
+    &MSFT_nxFileResource_Checksum_Values_qual,
 };
 
 /* property MSFT_nxFileResource.Checksum */
@@ -1396,10 +1418,32 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_Links_ValueMap_qual =
     &MSFT_nxFileResource_Links_ValueMap_qual_value
 };
 
+static MI_CONST MI_Char* MSFT_nxFileResource_Links_Values_qual_data_value[] =
+{
+    MI_T("10"),
+    MI_T("11"),
+    MI_T("12"),
+};
+
+static MI_CONST MI_ConstStringA MSFT_nxFileResource_Links_Values_qual_value =
+{
+    MSFT_nxFileResource_Links_Values_qual_data_value,
+    MI_COUNT(MSFT_nxFileResource_Links_Values_qual_data_value),
+};
+
+static MI_CONST MI_Qualifier MSFT_nxFileResource_Links_Values_qual =
+{
+    MI_T("Values"),
+    MI_STRINGA,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &MSFT_nxFileResource_Links_Values_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxFileResource_Links_quals[] =
 {
     &MSFT_nxFileResource_Links_Write_qual,
     &MSFT_nxFileResource_Links_ValueMap_qual,
+    &MSFT_nxFileResource_Links_Values_qual,
 };
 
 /* property MSFT_nxFileResource.Links */
@@ -1574,7 +1618,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_Static_qual =
     &MSFT_nxFileResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_Description_qual_value = MI_T("13");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_Description_qual =
 {
@@ -1610,7 +1654,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_InputResource
     &MSFT_nxFileResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_InputResource_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_InputResource_Description_qual_value = MI_T("14");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_InputResource_Description_qual =
 {
@@ -1651,7 +1695,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_Flags_In_qual
     &MSFT_nxFileResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_Flags_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_Flags_Description_qual_value = MI_T("15");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_Flags_Description_qual =
 {
@@ -1701,7 +1745,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_OutputResourc
     &MSFT_nxFileResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("16");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_OutputResource_Description_qual =
 {
@@ -1742,7 +1786,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_MIReturn_Stat
     &MSFT_nxFileResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxFileResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("13");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_GetTargetResource_MIReturn_Description_qual =
 {
@@ -1808,7 +1852,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Static_qual 
     &MSFT_nxFileResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Description_qual_value = MI_T("17");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Description_qual =
 {
@@ -1844,7 +1888,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_InputResourc
     &MSFT_nxFileResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_InputResource_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_InputResource_Description_qual_value = MI_T("18");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_InputResource_Description_qual =
 {
@@ -1885,7 +1929,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Flags_In_qua
     &MSFT_nxFileResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Flags_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Flags_Description_qual_value = MI_T("19");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Flags_Description_qual =
 {
@@ -1925,7 +1969,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Result_Out_q
     &MSFT_nxFileResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Result_Description_qual_value = MI_T("14");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_Result_Description_qual_value = MI_T("20");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_Result_Description_qual =
 {
@@ -1965,7 +2009,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_ProviderCont
     &MSFT_nxFileResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("15");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("21");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_ProviderContext_Description_qual =
 {
@@ -2005,7 +2049,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_MIReturn_Sta
     &MSFT_nxFileResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxFileResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("17");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_TestTargetResource_MIReturn_Description_qual =
 {
@@ -2072,7 +2116,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_Static_qual =
     &MSFT_nxFileResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_Description_qual_value = MI_T("16");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_Description_qual_value = MI_T("22");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_Description_qual =
 {
@@ -2108,7 +2152,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_InputResource
     &MSFT_nxFileResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_InputResource_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_InputResource_Description_qual_value = MI_T("18");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_InputResource_Description_qual =
 {
@@ -2149,7 +2193,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_ProviderConte
     &MSFT_nxFileResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("17");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("23");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_ProviderContext_Description_qual =
 {
@@ -2189,7 +2233,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_Flags_In_qual
     &MSFT_nxFileResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_Flags_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_Flags_Description_qual_value = MI_T("19");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_Flags_Description_qual =
 {
@@ -2229,7 +2273,7 @@ static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_MIReturn_Stat
     &MSFT_nxFileResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("16");
+static MI_CONST MI_Char* MSFT_nxFileResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("22");
 
 static MI_CONST MI_Qualifier MSFT_nxFileResource_SetTargetResource_MIReturn_Description_qual =
 {
