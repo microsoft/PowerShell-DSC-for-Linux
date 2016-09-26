@@ -12,6 +12,8 @@ module OMS
     require 'time'
     require 'zlib'
     require 'digest'
+    require 'date'
+    require 'securerandom'
 
     require_relative 'omslog'
     require_relative 'oms_configuration'
@@ -475,9 +477,13 @@ module OMS
     @@tzRightFolder = 'right/'
 
     class << self
+      # get the unified timezone id by absolute file path of the timezone file
+      # file path: the absolute path of the file
       def get_unified_timezoneid(filepath)
         # remove the baseFolder path
         tzID = filepath[@@tzBaseFolder.length..-1] if filepath.start_with?(@@tzBaseFolder)
+
+        return 'Unknown' if tzID.nil?
 
         # if the rest starts with 'right/', remove it to unify the format
         tzID = tzID[@@tzRightFolder.length..-1] if tzID.start_with?(@@tzRightFolder)
@@ -493,7 +499,7 @@ module OMS
         begin
           # if /etc/localtime is a symlink, check the link file's path
           if File.symlink?(@@tzLocalTimePath)
-            symlinkpath = File.readlink(@@tzLocalTimePath)
+            symlinkpath = File.absolute_path(File.readlink(@@tzLocalTimePath), File.dirname(@@tzLocalTimePath))
             tzID = get_unified_timezoneid(symlinkpath)
             
             # look for the entry in the timezone mapping
@@ -672,6 +678,23 @@ module OMS
       def create_ods_request(path, record, compress, extra_headers=nil, serializer=method(:parse_json_record_encoding))
         headers = extra_headers.nil? ? {} : extra_headers
 
+        azure_resource_id = OMS::Configuration.azure_resource_id
+        if !azure_resource_id.to_s.empty?
+          headers[OMS::CaseSensitiveString.new("x-ms-AzureResourceId")] = azure_resource_id
+        end
+
+        omscloud_id = OMS::Configuration.omscloud_id
+        if !omscloud_id.to_s.empty?
+          headers[OMS::CaseSensitiveString.new("x-ms-OMSCloudId")] = omscloud_id
+        end
+        
+        uuid = OMS::Configuration.uuid
+        if !uuid.to_s.empty?
+          headers[OMS::CaseSensitiveString.new("x-ms-UUID")] = uuid
+        end
+ 
+        headers[OMS::CaseSensitiveString.new("X-Request-ID")] = SecureRandom.uuid
+
         headers["Content-Type"] = "application/json"
         if compress == true
           headers["Content-Encoding"] = "deflate"
@@ -793,7 +816,8 @@ module OMS
 
           if res.code != "200"
             # Retry all failure error codes...
-            res_summary = "(class=#{res.class.name}; code=#{res.code}; message=#{res.message}; body=#{res.body};)"
+            res_summary = "(request-id=#{req["X-Request-ID"]}; class=#{res.class.name}; code=#{res.code}; message=#{res.message}; body=#{res.body};)"
+            Log.error_once("HTTP Error: #{res_summary}")
             raise RetryRequestException, "HTTP error: #{res_summary}"
           end
 
@@ -830,7 +854,8 @@ module OMS
     def get_ip_from_socket(hostname)
       begin
         addrinfos = Socket::getaddrinfo(hostname, "echo", Socket::AF_UNSPEC)
-      rescue => e
+      rescue => error
+        Log.error_once("Unable to resolve the IP of '#{hostname}': #{error}")
         return nil
       end
 
