@@ -840,8 +840,47 @@ def MakeDirs(path):
                  path + " Error: " + str(error))
     return error
 
+def ReadFile(path):
+    """
+    Safely attempt to read a file,
+    ensuring file is always closed at exit.
+    Return the data and the exception object.
+    The data is None if an error occurred.
+    The error is None if the data was read.
+    Log results to stderr.
+    """
+    d = None
+    error = None
+    F, error = opened_bin_w_error(path)
+    if error:
+        Print("Exception opening file " + path + " Error: " + str(error), file=sys.stderr )
+        LG().Log('ERROR', "Exception opening file " + path + " Error: " + str(error))
+    else:
+        d=F.read()
+        F.close()
+    return d,error
+
+def SetProxyFromConf():
+    """
+    Check for PROXY definition in dsc.conf.
+    All we must do is set the appropriate value in the environment.
+    HTTP_PROXY
+    HTTPS_PROXY
+    """
+    path = helperlib.CONFIG_SYSCONFDIR+ '/' + helperlib.CONFIG_SYSCONFDIR_DSC + '/dsc.conf'
+    txt, error = ReadFile(path)
+    if error :
+        return
+    for l in txt.splitlines():
+        if l.startswith('PROXY'):
+            info = l.split('=')[1].strip()
+            if 'https' in info:
+                os.environ['HTTPS_PROXY'] = info
+            if 'http:' in info:
+                os.environ['HTTP_PROXY'] = info
 
 def GetRemoteFile(p):
+    SetProxyFromConf()
     req = urllib2.Request(p.FilePath)
     try:
         resp = urllib2.urlopen(req)
