@@ -1,0 +1,8 @@
+
+
+[ClassVersion("1.0.0"),FriendlyName("nxAutomationWorker")]
+class MSFT_nxAutomationWorkerResource:OMI_BaseResource
+{        
+    [Key] string Name;
+
+};

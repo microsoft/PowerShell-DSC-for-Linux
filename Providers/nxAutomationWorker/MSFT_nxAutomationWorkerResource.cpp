@@ -1,5 +1,5 @@
 /* @migen@ */
-#include "MSFT_nxAutomationWorker.h"
+#include "MSFT_nxAutomationWorkerResource.h"
 
 
 #include "debug_tags.hpp"
@@ -12,18 +12,18 @@
 #include <cstdlib>
 
 
-typedef struct _MSFT_nxAutomationWorker_Self : public scx::PythonProvider
+typedef struct _MSFT_nxAutomationWorkerResource_Self : public scx::PythonProvider
 {
-    /*ctor*/ _MSFT_nxAutomationWorker_Self ()
+    /*ctor*/ _MSFT_nxAutomationWorkerResource_Self ()
         : scx::PythonProvider ("nxPackage")
     {
         // empty
     }
-} MSFT_nxAutomationWorker_Self;
+} MSFT_nxAutomationWorkerResource_Self;
 
 
-void MI_CALL MSFT_nxAutomationWorker_Load(
-    _Outptr_result_maybenull_ MSFT_nxAutomationWorker_Self** self,
+void MI_CALL MSFT_nxAutomationWorkerResource_Load(
+    _Outptr_result_maybenull_ MSFT_nxAutomationWorkerResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
@@ -34,7 +34,7 @@ void MI_CALL MSFT_nxAutomationWorker_Load(
     {
         if (0 == *self)
         {
-            *self = new MSFT_nxAutomationWorker_Self;
+            *self = new MSFT_nxAutomationWorkerResource_Self;
             if (EXIT_SUCCESS != (*self)->init ())
             {
                 delete *self;
@@ -50,8 +50,8 @@ void MI_CALL MSFT_nxAutomationWorker_Load(
     MI_Context_PostResult(context, res);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_Unload(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_Unload(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context)
 {
     SCX_BOOKEND_EX ("Unload", " name=\"nxPackage\"");
@@ -62,8 +62,8 @@ void MI_CALL MSFT_nxAutomationWorker_Unload(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_EnumerateInstances(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_EnumerateInstances(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
@@ -81,12 +81,12 @@ void MI_CALL MSFT_nxAutomationWorker_EnumerateInstances(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_GetInstance(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_GetInstance(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxAutomationWorker* instanceName,
+    _In_ const MSFT_nxAutomationWorkerResource* instanceName,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -98,12 +98,12 @@ void MI_CALL MSFT_nxAutomationWorker_GetInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_CreateInstance(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_CreateInstance(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxAutomationWorker* newInstance)
+    _In_ const MSFT_nxAutomationWorkerResource* newInstance)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -113,12 +113,12 @@ void MI_CALL MSFT_nxAutomationWorker_CreateInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_ModifyInstance(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_ModifyInstance(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxAutomationWorker* modifiedInstance,
+    _In_ const MSFT_nxAutomationWorkerResource* modifiedInstance,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -130,12 +130,12 @@ void MI_CALL MSFT_nxAutomationWorker_ModifyInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_DeleteInstance(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_DeleteInstance(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxAutomationWorker* instanceName)
+    _In_ const MSFT_nxAutomationWorkerResource* instanceName)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -145,14 +145,14 @@ void MI_CALL MSFT_nxAutomationWorker_DeleteInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_Invoke_GetTargetResource(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_Invoke_GetTargetResource(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxAutomationWorker* instanceName,
-    _In_opt_ const MSFT_nxAutomationWorker_GetTargetResource* in)
+    _In_ const MSFT_nxAutomationWorkerResource* instanceName,
+    _In_opt_ const MSFT_nxAutomationWorkerResource_GetTargetResource* in)
 {
     SCX_BOOKEND_EX ("Get", " name=\"nxPackage\"");
     MI_Result result = MI_RESULT_FAILED;
@@ -165,19 +165,19 @@ void MI_CALL MSFT_nxAutomationWorker_Invoke_GetTargetResource(
         if (MI_RESULT_OK == result)
         {
             SCX_BOOKEND_PRINT ("packing succeeded!");
-            MSFT_nxAutomationWorker_GetTargetResource out;
-            MSFT_nxAutomationWorker_GetTargetResource_Construct (&out, context);
-            MSFT_nxAutomationWorker_GetTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxAutomationWorkerResource_GetTargetResource out;
+            MSFT_nxAutomationWorkerResource_GetTargetResource_Construct (&out, context);
+            MSFT_nxAutomationWorkerResource_GetTargetResource_Set_MIReturn (&out, 0);
             MI_Value value;
             value.instance = retInstance;
             MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
                                     MI_INSTANCE, 0);
-            result = MSFT_nxAutomationWorker_GetTargetResource_Post (&out, context);
+            result = MSFT_nxAutomationWorkerResource_GetTargetResource_Post (&out, context);
             if (MI_RESULT_OK != result)
             {
                 SCX_BOOKEND_PRINT ("post Failed");
             }
-            MSFT_nxAutomationWorker_GetTargetResource_Destruct (&out);
+            MSFT_nxAutomationWorkerResource_GetTargetResource_Destruct (&out);
         }
         else
         {
@@ -188,14 +188,14 @@ void MI_CALL MSFT_nxAutomationWorker_Invoke_GetTargetResource(
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_Invoke_InventoryTargetResource(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_Invoke_InventoryTargetResource(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxAutomationWorker* instanceName,
-    _In_opt_ const MSFT_nxAutomationWorker_InventoryTargetResource* in)
+    _In_ const MSFT_nxAutomationWorkerResource* instanceName,
+    _In_opt_ const MSFT_nxAutomationWorkerResource_InventoryTargetResource* in)
 {
     SCX_BOOKEND_EX ("Inventory", " name=\"nxPackage\"");
     MI_Result result = MI_RESULT_FAILED;
@@ -211,9 +211,9 @@ void MI_CALL MSFT_nxAutomationWorker_Invoke_InventoryTargetResource(
         if (MI_RESULT_OK == result)
         {
             SCX_BOOKEND_PRINT ("packing succeeded!");
-            MSFT_nxAutomationWorker_InventoryTargetResource out;
-            MSFT_nxAutomationWorker_InventoryTargetResource_Construct (&out, context);
-            MSFT_nxAutomationWorker_InventoryTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxAutomationWorkerResource_InventoryTargetResource out;
+            MSFT_nxAutomationWorkerResource_InventoryTargetResource_Construct (&out, context);
+            MSFT_nxAutomationWorkerResource_InventoryTargetResource_Set_MIReturn (&out, 0);
 
 
  {
@@ -290,12 +290,12 @@ void MI_CALL MSFT_nxAutomationWorker_Invoke_InventoryTargetResource(
 		free(clientBuffer);
 	    }
 
-            result = MSFT_nxAutomationWorker_InventoryTargetResource_Post (&out, context);
+            result = MSFT_nxAutomationWorkerResource_InventoryTargetResource_Post (&out, context);
             if (MI_RESULT_OK != result)
             {
                 SCX_BOOKEND_PRINT ("post Failed");
             }
-            MSFT_nxAutomationWorker_InventoryTargetResource_Destruct (&out);
+            MSFT_nxAutomationWorkerResource_InventoryTargetResource_Destruct (&out);
         }
         else
         {
@@ -306,14 +306,14 @@ void MI_CALL MSFT_nxAutomationWorker_Invoke_InventoryTargetResource(
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_Invoke_TestTargetResource(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_Invoke_TestTargetResource(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxAutomationWorker* instanceName,
-    _In_opt_ const MSFT_nxAutomationWorker_TestTargetResource* in)
+    _In_ const MSFT_nxAutomationWorkerResource* instanceName,
+    _In_opt_ const MSFT_nxAutomationWorkerResource_TestTargetResource* in)
 {
     MI_Result result = MI_RESULT_FAILED;
     if (self)
@@ -322,26 +322,26 @@ void MI_CALL MSFT_nxAutomationWorker_Invoke_TestTargetResource(
         result = self->test (in->InputResource.value->__instance, &testResult);
         if (MI_RESULT_OK == result)
         {
-            MSFT_nxAutomationWorker_TestTargetResource out;
-            MSFT_nxAutomationWorker_TestTargetResource_Construct (&out, context);
-            MSFT_nxAutomationWorker_TestTargetResource_Set_Result (
+            MSFT_nxAutomationWorkerResource_TestTargetResource out;
+            MSFT_nxAutomationWorkerResource_TestTargetResource_Construct (&out, context);
+            MSFT_nxAutomationWorkerResource_TestTargetResource_Set_Result (
                 &out, testResult);
-            MSFT_nxAutomationWorker_TestTargetResource_Set_MIReturn (&out, 0);
-            MSFT_nxAutomationWorker_TestTargetResource_Post (&out, context);
-            MSFT_nxAutomationWorker_TestTargetResource_Destruct (&out);
+            MSFT_nxAutomationWorkerResource_TestTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxAutomationWorkerResource_TestTargetResource_Post (&out, context);
+            MSFT_nxAutomationWorkerResource_TestTargetResource_Destruct (&out);
         }
     }
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxAutomationWorker_Invoke_SetTargetResource(
-    _In_opt_ MSFT_nxAutomationWorker_Self* self,
+void MI_CALL MSFT_nxAutomationWorkerResource_Invoke_SetTargetResource(
+    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxAutomationWorker* instanceName,
-    _In_opt_ const MSFT_nxAutomationWorker_SetTargetResource* in)
+    _In_ const MSFT_nxAutomationWorkerResource* instanceName,
+    _In_opt_ const MSFT_nxAutomationWorkerResource_SetTargetResource* in)
 {
     MI_Result result = MI_RESULT_FAILED;
     if (self)
@@ -351,12 +351,12 @@ void MI_CALL MSFT_nxAutomationWorker_Invoke_SetTargetResource(
         if (MI_RESULT_OK == result)
         {
             result = setResult;
-            MSFT_nxAutomationWorker_SetTargetResource out;
-            MSFT_nxAutomationWorker_SetTargetResource_Construct (&out, context);
-            MSFT_nxAutomationWorker_SetTargetResource_Set_MIReturn (
+            MSFT_nxAutomationWorkerResource_SetTargetResource out;
+            MSFT_nxAutomationWorkerResource_SetTargetResource_Construct (&out, context);
+            MSFT_nxAutomationWorkerResource_SetTargetResource_Set_MIReturn (
                 &out, setResult);
-            MSFT_nxAutomationWorker_SetTargetResource_Post (&out, context);
-            MSFT_nxAutomationWorker_SetTargetResource_Destruct (&out);
+            MSFT_nxAutomationWorkerResource_SetTargetResource_Post (&out, context);
+            MSFT_nxAutomationWorkerResource_SetTargetResource_Destruct (&out);
         }
     }
     MI_Context_PostResult (context, result);
