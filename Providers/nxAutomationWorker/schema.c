@@ -8,7 +8,7 @@
 */
 #include <ctype.h>
 #include <MI.h>
-#include "MSFT_nxAutomationWorker.h"
+#include "MSFT_nxAutomationWorkerResource.h"
 
 /*
 **==============================================================================
@@ -804,785 +804,785 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 /*
 **==============================================================================
 **
-** MSFT_nxAutomationWorker
+** MSFT_nxAutomationWorkerResource
 **
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_DestinationPath_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_Name_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_DestinationPath_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_Name_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_DestinationPath_Key_qual_value
+    &MSFT_nxAutomationWorkerResource_Name_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_DestinationPath_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_Name_quals[] =
 {
-    &MSFT_nxAutomationWorker_DestinationPath_Key_qual,
+    &MSFT_nxAutomationWorkerResource_Name_Key_qual,
 };
 
-/* property MSFT_nxAutomationWorker.DestinationPath */
-static MI_CONST MI_PropertyDecl MSFT_nxAutomationWorker_DestinationPath_prop =
+/* property MSFT_nxAutomationWorkerResource.Name */
+static MI_CONST MI_PropertyDecl MSFT_nxAutomationWorkerResource_Name_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
-    0x0064680F, /* code */
-    MI_T("DestinationPath"), /* name */
-    MSFT_nxAutomationWorker_DestinationPath_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_DestinationPath_quals), /* numQualifiers */
+    0x006E6504, /* code */
+    MI_T("Name"), /* name */
+    MSFT_nxAutomationWorkerResource_Name_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_Name_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker, DestinationPath), /* offset */
-    MI_T("MSFT_nxAutomationWorker"), /* origin */
-    MI_T("MSFT_nxAutomationWorker"), /* propagator */
+    offsetof(MSFT_nxAutomationWorkerResource, Name), /* offset */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* origin */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* propagator */
     NULL,
 };
 
-static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxAutomationWorker_props[] =
+static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_props[] =
 {
-    &MSFT_nxAutomationWorker_DestinationPath_prop,
+    &MSFT_nxAutomationWorkerResource_Name_prop,
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_GetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_GetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_GetTargetResource_Static_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_GetTargetResource_Description_qual_value = MI_T("866");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_GetTargetResource_Description_qual_value = MI_T("866");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_GetTargetResource_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_GetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_GetTargetResource_quals[] =
 {
-    &MSFT_nxAutomationWorker_GetTargetResource_Static_qual,
-    &MSFT_nxAutomationWorker_GetTargetResource_Description_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Static_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_GetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_GetTargetResource_InputResource_In_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxAutomationWorker");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxAutomationWorkerResource");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_GetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_GetTargetResource_InputResource_Description_qual_value = MI_T("867");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_Description_qual_value = MI_T("867");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_GetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_GetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_quals[] =
 {
-    &MSFT_nxAutomationWorker_GetTargetResource_InputResource_In_qual,
-    &MSFT_nxAutomationWorker_GetTargetResource_InputResource_EmbeddedInstance_qual,
-    &MSFT_nxAutomationWorker_GetTargetResource_InputResource_Description_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_In_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.GetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_GetTargetResource_InputResource_param =
+/* parameter MSFT_nxAutomationWorkerResource.GetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    MSFT_nxAutomationWorker_GetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_GetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("MSFT_nxAutomationWorker"), /* className */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_GetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_GetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_GetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_GetTargetResource_Flags_In_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_GetTargetResource_Flags_Description_qual_value = MI_T("868");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_Description_qual_value = MI_T("868");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_GetTargetResource_Flags_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_GetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_quals[] =
 {
-    &MSFT_nxAutomationWorker_GetTargetResource_Flags_In_qual,
-    &MSFT_nxAutomationWorker_GetTargetResource_Flags_Description_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_In_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.GetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_GetTargetResource_Flags_param =
+/* parameter MSFT_nxAutomationWorkerResource.GetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    MSFT_nxAutomationWorker_GetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_GetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_GetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_GetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_GetTargetResource_OutputResource_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_OutputResource_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_GetTargetResource_OutputResource_Out_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxAutomationWorker");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxAutomationWorkerResource");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_OutputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_GetTargetResource_OutputResource_Description_qual_value = MI_T("869");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("869");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_OutputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_GetTargetResource_OutputResource_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_GetTargetResource_OutputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_quals[] =
 {
-    &MSFT_nxAutomationWorker_GetTargetResource_OutputResource_Out_qual,
-    &MSFT_nxAutomationWorker_GetTargetResource_OutputResource_EmbeddedInstance_qual,
-    &MSFT_nxAutomationWorker_GetTargetResource_OutputResource_Description_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_Out_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.GetTargetResource(): OutputResource */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_GetTargetResource_OutputResource_param =
+/* parameter MSFT_nxAutomationWorkerResource.GetTargetResource(): OutputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006F650E, /* code */
     MI_T("OutputResource"), /* name */
-    MSFT_nxAutomationWorker_GetTargetResource_OutputResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_GetTargetResource_OutputResource_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("MSFT_nxAutomationWorker"), /* className */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_GetTargetResource, OutputResource), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_GetTargetResource, OutputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_GetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_GetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_GetTargetResource_MIReturn_Description_qual_value = MI_T("866");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("866");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_GetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_GetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_GetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_quals[] =
 {
-    &MSFT_nxAutomationWorker_GetTargetResource_MIReturn_Static_qual,
-    &MSFT_nxAutomationWorker_GetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.GetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_GetTargetResource_MIReturn_param =
+/* parameter MSFT_nxAutomationWorkerResource.GetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    MSFT_nxAutomationWorker_GetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_GetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_GetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_GetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxAutomationWorker_GetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_GetTargetResource_params[] =
 {
-    &MSFT_nxAutomationWorker_GetTargetResource_MIReturn_param,
-    &MSFT_nxAutomationWorker_GetTargetResource_InputResource_param,
-    &MSFT_nxAutomationWorker_GetTargetResource_Flags_param,
-    &MSFT_nxAutomationWorker_GetTargetResource_OutputResource_param,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_MIReturn_param,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_InputResource_param,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_Flags_param,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_OutputResource_param,
 };
 
-/* method MSFT_nxAutomationWorker.GetTargetResource() */
-MI_CONST MI_MethodDecl MSFT_nxAutomationWorker_GetTargetResource_rtti =
+/* method MSFT_nxAutomationWorkerResource.GetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxAutomationWorkerResource_GetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00676511, /* code */
     MI_T("GetTargetResource"), /* name */
-    MSFT_nxAutomationWorker_GetTargetResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_GetTargetResource_quals), /* numQualifiers */
-    MSFT_nxAutomationWorker_GetTargetResource_params, /* parameters */
-    MI_COUNT(MSFT_nxAutomationWorker_GetTargetResource_params), /* numParameters */
-    sizeof(MSFT_nxAutomationWorker_GetTargetResource), /* size */
+    MSFT_nxAutomationWorkerResource_GetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_GetTargetResource_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_GetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_GetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxAutomationWorkerResource_GetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("MSFT_nxAutomationWorker"), /* origin */
-    MI_T("MSFT_nxAutomationWorker"), /* propagator */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* origin */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)MSFT_nxAutomationWorker_Invoke_GetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxAutomationWorkerResource_Invoke_GetTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_TestTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_TestTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_TestTargetResource_Static_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_TestTargetResource_Description_qual_value = MI_T("870");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_TestTargetResource_Description_qual_value = MI_T("870");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_TestTargetResource_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_TestTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_TestTargetResource_quals[] =
 {
-    &MSFT_nxAutomationWorker_TestTargetResource_Static_qual,
-    &MSFT_nxAutomationWorker_TestTargetResource_Description_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Static_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_TestTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_TestTargetResource_InputResource_In_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxAutomationWorker");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxAutomationWorkerResource");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_TestTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_TestTargetResource_InputResource_Description_qual_value = MI_T("871");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_Description_qual_value = MI_T("871");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_TestTargetResource_InputResource_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_TestTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_quals[] =
 {
-    &MSFT_nxAutomationWorker_TestTargetResource_InputResource_In_qual,
-    &MSFT_nxAutomationWorker_TestTargetResource_InputResource_EmbeddedInstance_qual,
-    &MSFT_nxAutomationWorker_TestTargetResource_InputResource_Description_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_In_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.TestTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_TestTargetResource_InputResource_param =
+/* parameter MSFT_nxAutomationWorkerResource.TestTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    MSFT_nxAutomationWorker_TestTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_TestTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("MSFT_nxAutomationWorker"), /* className */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_TestTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_TestTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_TestTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_TestTargetResource_Flags_In_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_TestTargetResource_Flags_Description_qual_value = MI_T("872");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_Description_qual_value = MI_T("872");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_TestTargetResource_Flags_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_TestTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_quals[] =
 {
-    &MSFT_nxAutomationWorker_TestTargetResource_Flags_In_qual,
-    &MSFT_nxAutomationWorker_TestTargetResource_Flags_Description_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_In_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.TestTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_TestTargetResource_Flags_param =
+/* parameter MSFT_nxAutomationWorkerResource.TestTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    MSFT_nxAutomationWorker_TestTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_TestTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_TestTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_TestTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_TestTargetResource_Result_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_TestTargetResource_Result_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_Result_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_Result_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_TestTargetResource_Result_Out_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_TestTargetResource_Result_Description_qual_value = MI_T("873");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_TestTargetResource_Result_Description_qual_value = MI_T("873");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_Result_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_Result_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_TestTargetResource_Result_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Result_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_TestTargetResource_Result_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_TestTargetResource_Result_quals[] =
 {
-    &MSFT_nxAutomationWorker_TestTargetResource_Result_Out_qual,
-    &MSFT_nxAutomationWorker_TestTargetResource_Result_Description_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Result_Out_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Result_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.TestTargetResource(): Result */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_TestTargetResource_Result_param =
+/* parameter MSFT_nxAutomationWorkerResource.TestTargetResource(): Result */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_TestTargetResource_Result_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x00727406, /* code */
     MI_T("Result"), /* name */
-    MSFT_nxAutomationWorker_TestTargetResource_Result_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_TestTargetResource_Result_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_TestTargetResource_Result_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_TestTargetResource_Result_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_TestTargetResource, Result), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_TestTargetResource, Result), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_Out_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_Description_qual_value = MI_T("874");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("874");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_quals[] =
 {
-    &MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_Out_qual,
-    &MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_Out_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.TestTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_param =
+/* parameter MSFT_nxAutomationWorkerResource.TestTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_TestTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_TestTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_TestTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_TestTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_TestTargetResource_MIReturn_Description_qual_value = MI_T("870");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("870");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_TestTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_TestTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_TestTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_quals[] =
 {
-    &MSFT_nxAutomationWorker_TestTargetResource_MIReturn_Static_qual,
-    &MSFT_nxAutomationWorker_TestTargetResource_MIReturn_Description_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_Static_qual,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.TestTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_TestTargetResource_MIReturn_param =
+/* parameter MSFT_nxAutomationWorkerResource.TestTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    MSFT_nxAutomationWorker_TestTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_TestTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_TestTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_TestTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxAutomationWorker_TestTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_TestTargetResource_params[] =
 {
-    &MSFT_nxAutomationWorker_TestTargetResource_MIReturn_param,
-    &MSFT_nxAutomationWorker_TestTargetResource_InputResource_param,
-    &MSFT_nxAutomationWorker_TestTargetResource_Flags_param,
-    &MSFT_nxAutomationWorker_TestTargetResource_Result_param,
-    &MSFT_nxAutomationWorker_TestTargetResource_ProviderContext_param,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_MIReturn_param,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_InputResource_param,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Flags_param,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_Result_param,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_ProviderContext_param,
 };
 
-/* method MSFT_nxAutomationWorker.TestTargetResource() */
-MI_CONST MI_MethodDecl MSFT_nxAutomationWorker_TestTargetResource_rtti =
+/* method MSFT_nxAutomationWorkerResource.TestTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxAutomationWorkerResource_TestTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00746512, /* code */
     MI_T("TestTargetResource"), /* name */
-    MSFT_nxAutomationWorker_TestTargetResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_TestTargetResource_quals), /* numQualifiers */
-    MSFT_nxAutomationWorker_TestTargetResource_params, /* parameters */
-    MI_COUNT(MSFT_nxAutomationWorker_TestTargetResource_params), /* numParameters */
-    sizeof(MSFT_nxAutomationWorker_TestTargetResource), /* size */
+    MSFT_nxAutomationWorkerResource_TestTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_TestTargetResource_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_TestTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_TestTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxAutomationWorkerResource_TestTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("MSFT_nxAutomationWorker"), /* origin */
-    MI_T("MSFT_nxAutomationWorker"), /* propagator */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* origin */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)MSFT_nxAutomationWorker_Invoke_TestTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxAutomationWorkerResource_Invoke_TestTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_SetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_SetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_SetTargetResource_Static_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_SetTargetResource_Description_qual_value = MI_T("875");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_SetTargetResource_Description_qual_value = MI_T("875");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_SetTargetResource_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_SetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_SetTargetResource_quals[] =
 {
-    &MSFT_nxAutomationWorker_SetTargetResource_Static_qual,
-    &MSFT_nxAutomationWorker_SetTargetResource_Description_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Static_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_SetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_SetTargetResource_InputResource_In_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxAutomationWorker");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxAutomationWorkerResource");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_SetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_SetTargetResource_InputResource_Description_qual_value = MI_T("871");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_Description_qual_value = MI_T("871");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_SetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_SetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_quals[] =
 {
-    &MSFT_nxAutomationWorker_SetTargetResource_InputResource_In_qual,
-    &MSFT_nxAutomationWorker_SetTargetResource_InputResource_EmbeddedInstance_qual,
-    &MSFT_nxAutomationWorker_SetTargetResource_InputResource_Description_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_In_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.SetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_SetTargetResource_InputResource_param =
+/* parameter MSFT_nxAutomationWorkerResource.SetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    MSFT_nxAutomationWorker_SetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_SetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("MSFT_nxAutomationWorker"), /* className */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_SetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_SetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_In_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_Description_qual_value = MI_T("876");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("876");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_quals[] =
 {
-    &MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_In_qual,
-    &MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_In_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.SetTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_param =
+/* parameter MSFT_nxAutomationWorkerResource.SetTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_SetTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_SetTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_SetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_SetTargetResource_Flags_In_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_SetTargetResource_Flags_Description_qual_value = MI_T("872");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_Description_qual_value = MI_T("872");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_SetTargetResource_Flags_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_SetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_quals[] =
 {
-    &MSFT_nxAutomationWorker_SetTargetResource_Flags_In_qual,
-    &MSFT_nxAutomationWorker_SetTargetResource_Flags_Description_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_In_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.SetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_SetTargetResource_Flags_param =
+/* parameter MSFT_nxAutomationWorkerResource.SetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    MSFT_nxAutomationWorker_SetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_SetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_SetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_SetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxAutomationWorker_SetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxAutomationWorker_SetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_SetTargetResource_MIReturn_Description_qual_value = MI_T("875");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("875");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_SetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_SetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_SetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_quals[] =
 {
-    &MSFT_nxAutomationWorker_SetTargetResource_MIReturn_Static_qual,
-    &MSFT_nxAutomationWorker_SetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter MSFT_nxAutomationWorker.SetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorker_SetTargetResource_MIReturn_param =
+/* parameter MSFT_nxAutomationWorkerResource.SetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    MSFT_nxAutomationWorker_SetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_SetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxAutomationWorker_SetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxAutomationWorkerResource_SetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxAutomationWorker_SetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_SetTargetResource_params[] =
 {
-    &MSFT_nxAutomationWorker_SetTargetResource_MIReturn_param,
-    &MSFT_nxAutomationWorker_SetTargetResource_InputResource_param,
-    &MSFT_nxAutomationWorker_SetTargetResource_ProviderContext_param,
-    &MSFT_nxAutomationWorker_SetTargetResource_Flags_param,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_MIReturn_param,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_InputResource_param,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_ProviderContext_param,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_Flags_param,
 };
 
-/* method MSFT_nxAutomationWorker.SetTargetResource() */
-MI_CONST MI_MethodDecl MSFT_nxAutomationWorker_SetTargetResource_rtti =
+/* method MSFT_nxAutomationWorkerResource.SetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxAutomationWorkerResource_SetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00736511, /* code */
     MI_T("SetTargetResource"), /* name */
-    MSFT_nxAutomationWorker_SetTargetResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_SetTargetResource_quals), /* numQualifiers */
-    MSFT_nxAutomationWorker_SetTargetResource_params, /* parameters */
-    MI_COUNT(MSFT_nxAutomationWorker_SetTargetResource_params), /* numParameters */
-    sizeof(MSFT_nxAutomationWorker_SetTargetResource), /* size */
+    MSFT_nxAutomationWorkerResource_SetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_SetTargetResource_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_SetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_SetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxAutomationWorkerResource_SetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("MSFT_nxAutomationWorker"), /* origin */
-    MI_T("MSFT_nxAutomationWorker"), /* propagator */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* origin */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)MSFT_nxAutomationWorker_Invoke_SetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxAutomationWorkerResource_Invoke_SetTargetResource, /* method */
 };
 
-static MI_MethodDecl MI_CONST* MI_CONST MSFT_nxAutomationWorker_meths[] =
+static MI_MethodDecl MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_meths[] =
 {
-    &MSFT_nxAutomationWorker_GetTargetResource_rtti,
-    &MSFT_nxAutomationWorker_TestTargetResource_rtti,
-    &MSFT_nxAutomationWorker_SetTargetResource_rtti,
+    &MSFT_nxAutomationWorkerResource_GetTargetResource_rtti,
+    &MSFT_nxAutomationWorkerResource_TestTargetResource_rtti,
+    &MSFT_nxAutomationWorkerResource_SetTargetResource_rtti,
 };
 
-static MI_CONST MI_ProviderFT MSFT_nxAutomationWorker_funcs =
+static MI_CONST MI_ProviderFT MSFT_nxAutomationWorkerResource_funcs =
 {
-  (MI_ProviderFT_Load)MSFT_nxAutomationWorker_Load,
-  (MI_ProviderFT_Unload)MSFT_nxAutomationWorker_Unload,
-  (MI_ProviderFT_GetInstance)MSFT_nxAutomationWorker_GetInstance,
-  (MI_ProviderFT_EnumerateInstances)MSFT_nxAutomationWorker_EnumerateInstances,
-  (MI_ProviderFT_CreateInstance)MSFT_nxAutomationWorker_CreateInstance,
-  (MI_ProviderFT_ModifyInstance)MSFT_nxAutomationWorker_ModifyInstance,
-  (MI_ProviderFT_DeleteInstance)MSFT_nxAutomationWorker_DeleteInstance,
+  (MI_ProviderFT_Load)MSFT_nxAutomationWorkerResource_Load,
+  (MI_ProviderFT_Unload)MSFT_nxAutomationWorkerResource_Unload,
+  (MI_ProviderFT_GetInstance)MSFT_nxAutomationWorkerResource_GetInstance,
+  (MI_ProviderFT_EnumerateInstances)MSFT_nxAutomationWorkerResource_EnumerateInstances,
+  (MI_ProviderFT_CreateInstance)MSFT_nxAutomationWorkerResource_CreateInstance,
+  (MI_ProviderFT_ModifyInstance)MSFT_nxAutomationWorkerResource_ModifyInstance,
+  (MI_ProviderFT_DeleteInstance)MSFT_nxAutomationWorkerResource_DeleteInstance,
   (MI_ProviderFT_AssociatorInstances)NULL,
   (MI_ProviderFT_ReferenceInstances)NULL,
   (MI_ProviderFT_EnableIndications)NULL,
@@ -1592,49 +1592,49 @@ static MI_CONST MI_ProviderFT MSFT_nxAutomationWorker_funcs =
   (MI_ProviderFT_Invoke)NULL,
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_Description_qual_value = MI_T("877");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_Description_qual_value = MI_T("877");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxAutomationWorker_Description_qual_value
+    &MSFT_nxAutomationWorkerResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxAutomationWorker_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxAutomationWorkerResource_ClassVersion_qual_value = MI_T("1.0.0");
 
-static MI_CONST MI_Qualifier MSFT_nxAutomationWorker_ClassVersion_qual =
+static MI_CONST MI_Qualifier MSFT_nxAutomationWorkerResource_ClassVersion_qual =
 {
     MI_T("ClassVersion"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &MSFT_nxAutomationWorker_ClassVersion_qual_value
+    &MSFT_nxAutomationWorkerResource_ClassVersion_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorker_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxAutomationWorkerResource_quals[] =
 {
-    &MSFT_nxAutomationWorker_Description_qual,
-    &MSFT_nxAutomationWorker_ClassVersion_qual,
+    &MSFT_nxAutomationWorkerResource_Description_qual,
+    &MSFT_nxAutomationWorkerResource_ClassVersion_qual,
 };
 
-/* class MSFT_nxAutomationWorker */
-MI_CONST MI_ClassDecl MSFT_nxAutomationWorker_rtti =
+/* class MSFT_nxAutomationWorkerResource */
+MI_CONST MI_ClassDecl MSFT_nxAutomationWorkerResource_rtti =
 {
     MI_FLAG_CLASS, /* flags */
-    0x006D7217, /* code */
-    MI_T("MSFT_nxAutomationWorker"), /* name */
-    MSFT_nxAutomationWorker_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxAutomationWorker_quals), /* numQualifiers */
-    MSFT_nxAutomationWorker_props, /* properties */
-    MI_COUNT(MSFT_nxAutomationWorker_props), /* numProperties */
-    sizeof(MSFT_nxAutomationWorker), /* size */
+    0x006D651F, /* code */
+    MI_T("MSFT_nxAutomationWorkerResource"), /* name */
+    MSFT_nxAutomationWorkerResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_quals), /* numQualifiers */
+    MSFT_nxAutomationWorkerResource_props, /* properties */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_props), /* numProperties */
+    sizeof(MSFT_nxAutomationWorkerResource), /* size */
     MI_T("OMI_BaseResource"), /* superClass */
     &OMI_BaseResource_rtti, /* superClassDecl */
-    MSFT_nxAutomationWorker_meths, /* methods */
-    MI_COUNT(MSFT_nxAutomationWorker_meths), /* numMethods */
+    MSFT_nxAutomationWorkerResource_meths, /* methods */
+    MI_COUNT(MSFT_nxAutomationWorkerResource_meths), /* numMethods */
     &schemaDecl, /* schema */
-    &MSFT_nxAutomationWorker_funcs, /* functions */
+    &MSFT_nxAutomationWorkerResource_funcs, /* functions */
     NULL /* owningClass */
 };
 
@@ -1657,7 +1657,7 @@ MI_Server* __mi_server;
 
 static MI_ClassDecl MI_CONST* MI_CONST classes[] =
 {
-    &MSFT_nxAutomationWorker_rtti,
+    &MSFT_nxAutomationWorkerResource_rtti,
     &OMI_BaseResource_rtti,
 };
 
