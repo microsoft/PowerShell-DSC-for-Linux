@@ -201,10 +201,10 @@ nx:
 endif
 
 nxAutomationWorker:
-    rm -rf output/staging; \
-    VERSION="1.0"; \
-    PROVIDERS="nxAutomationWroker"; \
-    STAGINGDIR="output/staging/$@/DSCResources"; \
+	rm -rf output/staging; \
+	VERSION="1.0"; \
+	PROVIDERS="nxAutomationWroker"; \
+	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
@@ -215,7 +215,7 @@ nxAutomationWorker:
 		cp Providers/Scripts/2.4x-2.5x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.4x-2.5x/Scripts; \
 		cp Providers/Scripts/2.6x-2.7x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.6x-2.7x/Scripts; \
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
-	done;\
+	done; \
 	cd output/staging; \
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
