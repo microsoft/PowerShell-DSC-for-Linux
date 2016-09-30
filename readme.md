@@ -157,7 +157,7 @@ cd PowerShell-DSC-for-Linux
 
 # Place the OMI source where DSC expects it
 # Alternatively clone from Git and symlink to omi/Unix
-wget https://collaboration.opengroup.org/omi/documents/33715/omi-1.0.8.tar.gz
+wget https://collaboration.opengroup.org/omi/documents/30532/omi-1.0.8.tar.gz
 tar xf omi-1.0.8.tar.gz
 
 # Build OMI in developer mode
