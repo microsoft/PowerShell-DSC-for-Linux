@@ -1,13 +1,10 @@
 /* @migen@ */
 #include "MSFT_nxAutomationWorkerResource.h"
 
-
 #include "debug_tags.hpp"
 #include "MI.h"
-#include <common/common.h>
-#include <xmlserializer/xmlserializer.h>
 #include "PythonProvider.hpp"
-#include <dsc_config.h>
+
 
 #include <cstdlib>
 
@@ -15,7 +12,7 @@
 typedef struct _MSFT_nxAutomationWorkerResource_Self : public scx::PythonProvider
 {
     /*ctor*/ _MSFT_nxAutomationWorkerResource_Self ()
-        : scx::PythonProvider ("nxPackage")
+        : scx::PythonProvider ("nxAutomationWorker")
     {
         // empty
     }
@@ -27,7 +24,7 @@ void MI_CALL MSFT_nxAutomationWorkerResource_Load(
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
-    SCX_BOOKEND_EX ("Load", " name=\"nxPackage\"");
+    SCX_BOOKEND_EX ("Load", " name=\"nxAutomationWorker\"");
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
     if (0 != self)
@@ -54,7 +51,7 @@ void MI_CALL MSFT_nxAutomationWorkerResource_Unload(
     _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context)
 {
-    SCX_BOOKEND_EX ("Unload", " name=\"nxPackage\"");
+    SCX_BOOKEND_EX ("Unload", " name=\"nxAutomationWorker\"");
     if (self)
     {
         delete self;
@@ -154,7 +151,7 @@ void MI_CALL MSFT_nxAutomationWorkerResource_Invoke_GetTargetResource(
     _In_ const MSFT_nxAutomationWorkerResource* instanceName,
     _In_opt_ const MSFT_nxAutomationWorkerResource_GetTargetResource* in)
 {
-    SCX_BOOKEND_EX ("Get", " name=\"nxPackage\"");
+    SCX_BOOKEND_EX ("Get", " name=\"nxAutomationWorker\"");
     MI_Result result = MI_RESULT_FAILED;
     if (self)
     {
@@ -188,128 +185,10 @@ void MI_CALL MSFT_nxAutomationWorkerResource_Invoke_GetTargetResource(
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxAutomationWorkerResource_Invoke_InventoryTargetResource(
-    _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
-    _In_ MI_Context* context,
-    _In_opt_z_ const MI_Char* nameSpace,
-    _In_opt_z_ const MI_Char* className,
-    _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxAutomationWorkerResource* instanceName,
-    _In_opt_ const MSFT_nxAutomationWorkerResource_InventoryTargetResource* in)
-{
-    SCX_BOOKEND_EX ("Inventory", " name=\"nxPackage\"");
-    MI_Result result = MI_RESULT_FAILED;
-    if (self)
-    {
-        MI_Instance* retInstance;
-	MI_NewDynamicInstance (
-	    context, className,
-	    0, &retInstance);
-
-        result = self->inventory (in->InputResource.value->__instance, context,
-                            retInstance);
-        if (MI_RESULT_OK == result)
-        {
-            SCX_BOOKEND_PRINT ("packing succeeded!");
-            MSFT_nxAutomationWorkerResource_InventoryTargetResource out;
-            MSFT_nxAutomationWorkerResource_InventoryTargetResource_Construct (&out, context);
-            MSFT_nxAutomationWorkerResource_InventoryTargetResource_Set_MIReturn (&out, 0);
-
-
- {
-		const MI_Uint32 c_initBufferLength = 1000000;
-		MI_Application application;
-		MI_Serializer serializer;
-		MI_Uint8 *clientBuffer;
-		MI_Uint32 clientBufferLength = c_initBufferLength;
-		MI_Uint32 clientBufferNeeded = 0;
-		const char * reportTemplateBase = DSC_ETC_PATH "/InventoryReports/nxPackage_XXXXXX";
-
-		FILE *fp = NULL;
-		
-		clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
-		MI_Application_Initialize(0,NULL,NULL, &application);
-		result = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
-		if (result != MI_RESULT_OK)
-		{
-		    MI_Application_Close(&application);
-		    MI_Context_PostResult (context, result);
-		    return;
-		}
-		
-		result = XmlSerializer_SerializeInstance( &serializer, 0, retInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
-		if (result != MI_RESULT_OK)
-		{
-		    free(clientBuffer);
-		    if (clientBufferNeeded > 0)
-		    {
-			// Try again with a buffer given to us by the clientBufferNeeded field
-			clientBufferLength = clientBufferNeeded;
-			clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
-			result = XmlSerializer_SerializeInstance( &serializer, 0, retInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
-		    }
-		    else
-		    {
-			XmlSerializer_Close(&serializer);
-			MI_Application_Close(&application);
-			MI_Context_PostResult (context, result);
-			return;
-		    }
-		}
-		
-		XmlSerializer_Close(&serializer);
-		MI_Application_Close(&application);
-		if (result == MI_RESULT_OK)
-		{
-		    clientBuffer[clientBufferNeeded] = '\0';
-		    printf((char*)clientBuffer);
-		}
-
-		
-		{
-		    char * reportTemplate = (char*)malloc(strlen(reportTemplateBase));
-		    strcpy(reportTemplate, reportTemplateBase);
-		    int fd = mkstemp(reportTemplate);
-		    if (fd == -1)
-		    {
-			std::cerr << std::endl << "Error running mkstemp, errno = " << errno << std::endl;
-		    }
-		    fp = fdopen(fd, "w");
-		    if( fp != NULL )
-		    {
-			fwrite(clientBuffer, 1, clientBufferNeeded, fp);
-			fclose(fp);
-		    }
-		    else
-		    {
-			std::cerr << std::endl << "Error opening file descriptor for reportTemplate, errno = " << errno << std::endl;
-		    }
-		    free(reportTemplate);
-		}
-		
-		free(clientBuffer);
-	    }
-
-            result = MSFT_nxAutomationWorkerResource_InventoryTargetResource_Post (&out, context);
-            if (MI_RESULT_OK != result)
-            {
-                SCX_BOOKEND_PRINT ("post Failed");
-            }
-            MSFT_nxAutomationWorkerResource_InventoryTargetResource_Destruct (&out);
-        }
-        else
-        {
-            SCX_BOOKEND_PRINT ("inventory FAILED");
-        }
-        MI_Instance_Delete (retInstance);
-    }
-    MI_Context_PostResult (context, result);
-}
-
 void MI_CALL MSFT_nxAutomationWorkerResource_Invoke_TestTargetResource(
     _In_opt_ MSFT_nxAutomationWorkerResource_Self* self,
     _In_ MI_Context* context,
-    _In_opt_z_ const MI_Char* nameSpace,
+   _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
     _In_ const MSFT_nxAutomationWorkerResource* instanceName,
