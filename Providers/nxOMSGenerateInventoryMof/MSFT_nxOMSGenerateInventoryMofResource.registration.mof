@@ -1,0 +1,8 @@
+Instance of MSFT_CimConfigurationProviderRegistration
+{
+  className = "MSFT_nxOMSGenerateInventoryMofResource";
+  DSCEngineCompatVersion = "1.0.0";
+  DSCModuleVersion = "1.0.0";
+  Namespace = "root/oms";
+};
+

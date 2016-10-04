@@ -1,0 +1,42 @@
+instance of MSFT_nxOMSGenerateInventoryMofInstance as $MSFT_nxOMSGenerateInventoryMofInstance1ref
+{
+  InstanceName = "FileChangeTracking";
+  ClassName = "MSFT_nxFileInventoryResource";
+  Properties = {
+     "DestinationPath = \"/etc/*.conf\"",
+     "Recurse = false",
+     "UseSudo = true",
+     "Links = \"follow\"",
+     "Checksum = \"md5\"",
+     "Type = \"file\"",
+     "MaxContentsReturnable=0",
+     "MaxOutputSize = 5000000",
+     "ResourceId = \"[MSFT_nxFileInventoryResource]Inventory\"",
+     "ModuleName = \"PSDesiredStateConfiguration\"",
+     "ModuleVersion = \"1.0\""
+  };
+};
+
+instance of MSFT_nxOMSGenerateInventoryMofResource as $MSFT_nxOMSGenerateInventoryMofResource1ref
+{
+  ResourceID = "[nxOMSGenerateInventoryMofResource]nodegenerateinventoryconf";
+  ModuleName = "nxOMSGenerateInventoryMof";
+  ModuleVersion = "1.0";
+  FeatureName = "linuxfile_change_tracking";
+  Enable = true;
+  Instances = {
+    $MSFT_nxOMSGenerateInventoryMofInstance1ref
+  };
+  RunIntervalInSeconds = 30;
+  Tag = "oms.linuxfilechangetracking";
+  Format = "tsv";
+  FilterType = "filter_changetracking";
+};
+
+instance of OMI_ConfigurationDocument
+{
+  Version="2.0.0";
+  Author="OMS";
+  GenerationDate="04/18/2016 15:23:05";
+  GenerationHost="OMSService";
+};
