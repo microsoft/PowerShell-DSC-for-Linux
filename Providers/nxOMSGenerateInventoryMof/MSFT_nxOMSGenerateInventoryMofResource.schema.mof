@@ -1,0 +1,20 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSGenerateInventoryMofInstance
+{
+    [key] string InstanceName;
+    [write] string ClassName;
+    [write] string Properties[];
+};
+
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSGenerateInventoryMofResource : OMI_BaseResource
+{
+        [key] string FeatureName;
+        [write] boolean Enable;
+        [write, EmbeddedInstance("MSFT_nxOMSGenerateInventoryMofInstance") : ToSubclass ] string Instances[];
+        [write] uint64 RunIntervalInSeconds;
+        [write] string Tag;
+        [write] string Format;
+        [write] string FilterType;
+        [write] string Configuration[]; 
+};
