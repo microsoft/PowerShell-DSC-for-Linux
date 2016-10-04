@@ -217,7 +217,10 @@ def GetFileInfo(fname, Links, MaxContentsReturnable, Checksum):
         d['Type'] = 'file'
     if d['Type'] == 'link' and Links == 'ignore':
         return {}
+    stat_info = None
     stat_info = LStatFile(fname)
+    if stat_info == None:
+        return {}
     d['DestinationPath'] = fname
     try:
         d['Owner'] = pwd.getpwuid(stat_info.st_uid).pw_name
@@ -252,6 +255,8 @@ def GetDirInfo(dname, stat_info, Checksum, Links):
     processed here as directories.
     """
     d = {}
+    if stat_info == None:
+        return d
     d['Type'] = 'directory'
     d['DestinationPath'] = dname
     try:
