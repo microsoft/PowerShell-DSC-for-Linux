@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSInventoryMOFResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSInventoryMOFResource:OMI_BaseResource

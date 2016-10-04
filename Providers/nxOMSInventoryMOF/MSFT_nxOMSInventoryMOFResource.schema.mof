@@ -1,0 +1,15 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSInventoryMOFInstance
+{
+    [Key] string InstanceName; //Arbitrary name for the instance
+    [write] string ClassName; //Class name for the instance
+    [write] string Properties; //Properties for the instance, delimited string or embedded instance of [key,value]?
+};
+
+[ClassVersion("2.0.0")]
+class MSFT_nxOMSInventoryMOFResource : OMI_BaseResource
+{
+        [Key] string FilePath;
+	[Write,ValueMap{"present", "absent"},Values{"present", "absent"}] string Ensure;   
+	[EmbeddedInstance("MSFT_nxOMSInventoryMOFInstance") : ToSubclass ] string Instances[];
+};
