@@ -130,9 +130,11 @@ void TaskQueueLoop()
 	pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 
+    pthread_mutex_lock(&g_TaskQueueMutex);
     g_TaskQueueShutdown = 0;
     g_TaskHead = NULL;
     g_TaskQueueExists = 0;
+    pthread_mutex_unlock(&g_TaskQueueMutex);
 }
 
 void ReloadOMI()
@@ -158,6 +160,7 @@ void UnloadFromProvider(
 {
     MI_Result miResult;
     MI_Instance *cimErrorDetails = NULL;
+    int taskQueueExists;
     MI_UNREFERENCED_PARAMETER(self);
 
 #if defined(_MSC_VER)
@@ -177,7 +180,19 @@ void UnloadFromProvider(
         return;
     }
 
+    pthread_mutex_lock(&g_TaskQueueMutex);
     g_TaskQueueShutdown = 1;
+    pthread_mutex_unlock(&g_TaskQueueMutex);
+
+    // Wait until the TaskQueue is complete before allowing unload
+    do 
+    {
+	usleep(10000);
+
+	pthread_mutex_lock(&g_TaskQueueMutex);
+	taskQueueExists = g_TaskQueueExists;
+	pthread_mutex_unlock(&g_TaskQueueMutex);
+    } while (taskQueueExists != 0);
 
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
