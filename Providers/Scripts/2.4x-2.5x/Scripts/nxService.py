@@ -118,7 +118,10 @@ def Inventory_Marshall(Name, Controller, Enabled, State):
         srv['Name'] = protocol.MI_String(srv['Name'])
         srv['Controller'] = protocol.MI_String(srv['Controller'])
         srv['Enabled'] = protocol.MI_Boolean(srv['Enabled'])
-        srv['State'] = protocol.MI_String(srv['State'])
+        if 'running' in srv['State'].lower():
+            srv['State'] = protocol.MI_String('Running')
+        else:
+            srv['State'] = protocol.MI_String('Stopped')
         srv['Path'] = protocol.MI_String(srv['Path'])
         srv['Description'] = protocol.MI_String(srv['Description'])
         srv['Runlevels'] = protocol.MI_String(srv['Runlevels'])
