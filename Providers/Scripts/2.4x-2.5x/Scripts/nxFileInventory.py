@@ -113,8 +113,8 @@ def Inventory_Marshall(DestinationPath, Recurse, Links, Checksum, Type, MaxConte
     for d in Inventory:
         if out_size_cur <  MaxOutputSize:
             out_size_cur += len(repr(d))
-        if out_size_cur >  MaxOutputSize:
-            continue
+        if out_size_cur >=  MaxOutputSize:
+            break
         d['DestinationPath'] = protocol.MI_String(d['DestinationPath'])
         d['Checksum'] = protocol.MI_String(d['Checksum'])
         d['Type'] = protocol.MI_String(d['Type'])
