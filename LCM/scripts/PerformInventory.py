@@ -4,6 +4,7 @@ import sys
 import subprocess
 import os
 import fcntl
+import shutil
 from xml.dom.minidom import parse
 
 def usage():
@@ -129,7 +130,7 @@ f = open(temp_report_path, "w")
 f.write(final_xml_report)
 f.close()
 os.system("rm -f " + dsc_reportdir + "/*")
-os.rename(temp_report_path, report_path)
+shutil.move(temp_report_path, report_path)
 
 # Release inventory file lock
 fcntl.flock(inventory_lock, fcntl.LOCK_UN)
