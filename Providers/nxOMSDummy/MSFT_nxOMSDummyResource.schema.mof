@@ -1,0 +1,13 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSDummyProperty
+{
+    [key] string Name;
+    [write,ValueMap{"present", "absent"},Values{"Present", "Absent"}] string Ensure; 
+};
+ 
+[ClassVersion("1.0.0")] 
+class MSFT_nxOMSDummyResource : OMI_BaseResource
+{
+    [key] string Name;
+    [write, EmbeddedInstance("MSFT_nxOMSDummyProperty") : ToSubclass] string Properties[];
+};

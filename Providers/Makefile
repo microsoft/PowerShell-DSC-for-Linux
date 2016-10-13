@@ -74,6 +74,7 @@ PROVIDERS+=nxOMSPlugin
 PROVIDERS+=nxAvailableUpdates
 PROVIDERS+=nxOMSKeyMgmt
 PROVIDERS+=nxFileInventory
+PROVIDERS+=nxOMSDummy
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript

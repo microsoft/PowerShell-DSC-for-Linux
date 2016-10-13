@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSDummyResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSDummyResource:OMI_BaseResource
