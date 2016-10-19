@@ -334,7 +334,7 @@ def ReadFileLimited(path, MaxContentsReturnable):
                 d = F.read(MaxContentsReturnable)
             except:
                 F.close()
-    return d, error
+    return d.encode('ascii', 'ignore'), error
 
 
 def LStatFile(path):

@@ -319,7 +319,7 @@ def ReadFileLimited(path, MaxContentsReturnable):
         except:
             pass
     F.close()
-    return d, error
+    return d.encode('ascii', 'ignore'), error
 
 def Print(s, file=sys.stderr):
     file.write(s.encode('utf8') + '\n')
