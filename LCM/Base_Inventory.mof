@@ -23,14 +23,6 @@ instance of MSFT_nxServiceResource
 
 };
 
-instance of MSFT_nxAutomationWorkerResource
-{
-    Name = "/opt/microsoft/omsconfig/helloWorld.txt";
-    ResourceId = "[MSFT_nxAutomationWorkerResource]Inventory";
-    ModuleName = "PSDesiredStateConfiguration";
-    ModuleVersion = "1.0";
-}
-
 
 instance of OMI_ConfigurationDocument
 {
