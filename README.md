@@ -303,4 +303,11 @@ The following log files are generated for DSC for Linux messages.
 omiserver.log |	/var/opt/omi/log	| Messages relating to the operation of the OMI CIM server. 
 dsc.log |	/var/opt/omi/log	| Messages relating to the operation of the Local Configuration Manager and DSC resource operations. 
 
+## Code of Conduct
 
+This project has adopted the [Microsoft Open Source Code of Conduct]
+(https://opensource.microsoft.com/codeofconduct/).  For more
+information see the [Code of Conduct FAQ]
+(https://opensource.microsoft.com/codeofconduct/faq/) or contact
+[opencode@microsoft.com](mailto:opencode@microsoft.com) with any
+additional questions or comments.
