@@ -259,7 +259,7 @@ void MI_CALL MSFT_nxFileInventoryResource_Invoke_InventoryTargetResource(
 		if (result == MI_RESULT_OK)
 		{
 		    clientBuffer[clientBufferNeeded] = '\0';
-		    printf((char*)clientBuffer);
+		    // printf((char*)clientBuffer);
 		}
 		
 		{
