@@ -8,7 +8,7 @@
 */
 #include <ctype.h>
 #include <MI.h>
-#include "MSFT_nxOMSAgentResource.h"
+#include "MSFT_nxOMSPerfCounterResource.h"
 
 /*
 **==============================================================================
@@ -978,7 +978,7 @@ static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSPerfObject_props[] =
     &MSFT_nxOMSPerfObject_PerformanceCounter_prop,
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSPerfObject_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxOMSPerfObject_ClassVersion_qual_value = MI_T("1.1.0");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSPerfObject_ClassVersion_qual =
 {
@@ -1016,829 +1016,829 @@ MI_CONST MI_ClassDecl MSFT_nxOMSPerfObject_rtti =
 /*
 **==============================================================================
 **
-** MSFT_nxOMSAgentResource
+** MSFT_nxOMSPerfCounterResource
 **
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_Write_qual_value
+    &MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_quals[] =
 {
-    &MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_Write_qual,
+    &MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_Write_qual,
 };
 
-/* property MSFT_nxOMSAgentResource.HeartbeatIntervalSeconds */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_prop =
+/* property MSFT_nxOMSPerfCounterResource.HeartbeatIntervalSeconds */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00687318, /* code */
     MI_T("HeartbeatIntervalSeconds"), /* name */
-    MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_quals), /* numQualifiers */
     MI_UINT16, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource, HeartbeatIntervalSeconds), /* offset */
-    MI_T("MSFT_nxOMSAgentResource"), /* origin */
-    MI_T("MSFT_nxOMSAgentResource"), /* propagator */
+    offsetof(MSFT_nxOMSPerfCounterResource, HeartbeatIntervalSeconds), /* offset */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_PerfObject_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_PerfObject_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_PerfObject_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfObject_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_PerfObject_Key_qual_value
+    &MSFT_nxOMSPerfCounterResource_PerfObject_Key_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_PerfObject_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfObject");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_PerfObject_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfObject");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_PerfObject_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfObject_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_PerfObject_EmbeddedInstance_qual_value
+    &MSFT_nxOMSPerfCounterResource_PerfObject_EmbeddedInstance_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_PerfObject_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_PerfObject_quals[] =
 {
-    &MSFT_nxOMSAgentResource_PerfObject_Key_qual,
-    &MSFT_nxOMSAgentResource_PerfObject_EmbeddedInstance_qual,
+    &MSFT_nxOMSPerfCounterResource_PerfObject_Key_qual,
+    &MSFT_nxOMSPerfCounterResource_PerfObject_EmbeddedInstance_qual,
 };
 
-/* property MSFT_nxOMSAgentResource.PerfObject */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSAgentResource_PerfObject_prop =
+/* property MSFT_nxOMSPerfCounterResource.PerfObject */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_PerfObject_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
     0x0070740A, /* code */
     MI_T("PerfObject"), /* name */
-    MSFT_nxOMSAgentResource_PerfObject_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_PerfObject_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_PerfObject_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_PerfObject_quals), /* numQualifiers */
     MI_INSTANCEA, /* type */
     MI_T("MSFT_nxOMSPerfObject"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource, PerfObject), /* offset */
-    MI_T("MSFT_nxOMSAgentResource"), /* origin */
-    MI_T("MSFT_nxOMSAgentResource"), /* propagator */
+    offsetof(MSFT_nxOMSPerfCounterResource, PerfObject), /* offset */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* propagator */
     NULL,
 };
 
-static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSAgentResource_props[] =
+static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_props[] =
 {
-    &MSFT_nxOMSAgentResource_HeartbeatIntervalSeconds_prop,
-    &MSFT_nxOMSAgentResource_PerfObject_prop,
+    &MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_prop,
+    &MSFT_nxOMSPerfCounterResource_PerfObject_prop,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_GetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_GetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_GetTargetResource_Static_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_GetTargetResource_Description_qual_value = MI_T("2");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_GetTargetResource_Description_qual_value = MI_T("2");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_GetTargetResource_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_GetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_GetTargetResource_quals[] =
 {
-    &MSFT_nxOMSAgentResource_GetTargetResource_Static_qual,
-    &MSFT_nxOMSAgentResource_GetTargetResource_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Static_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_GetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_GetTargetResource_InputResource_In_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSAgentResource");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfCounterResource");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_GetTargetResource_InputResource_Description_qual_value = MI_T("3");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_Description_qual_value = MI_T("3");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_GetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_GetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_quals[] =
 {
-    &MSFT_nxOMSAgentResource_GetTargetResource_InputResource_In_qual,
-    &MSFT_nxOMSAgentResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
-    &MSFT_nxOMSAgentResource_GetTargetResource_InputResource_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_In_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.GetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_GetTargetResource_InputResource_param =
+/* parameter MSFT_nxOMSPerfCounterResource.GetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    MSFT_nxOMSAgentResource_GetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_GetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("MSFT_nxOMSAgentResource"), /* className */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_GetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_GetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_GetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_GetTargetResource_Flags_In_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_GetTargetResource_Flags_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_Description_qual_value = MI_T("4");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_GetTargetResource_Flags_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_GetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_quals[] =
 {
-    &MSFT_nxOMSAgentResource_GetTargetResource_Flags_In_qual,
-    &MSFT_nxOMSAgentResource_GetTargetResource_Flags_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_In_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.GetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_GetTargetResource_Flags_param =
+/* parameter MSFT_nxOMSPerfCounterResource.GetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    MSFT_nxOMSAgentResource_GetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_GetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_GetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_GetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_Out_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSAgentResource");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfCounterResource");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("5");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("5");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_quals[] =
 {
-    &MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_Out_qual,
-    &MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
-    &MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_Out_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_EmbeddedInstance_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.GetTargetResource(): OutputResource */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_param =
+/* parameter MSFT_nxOMSPerfCounterResource.GetTargetResource(): OutputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006F650E, /* code */
     MI_T("OutputResource"), /* name */
-    MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("MSFT_nxOMSAgentResource"), /* className */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_GetTargetResource, OutputResource), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_GetTargetResource, OutputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("2");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("2");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_quals[] =
 {
-    &MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_Static_qual,
-    &MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.GetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_param =
+/* parameter MSFT_nxOMSPerfCounterResource.GetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_GetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_GetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxOMSAgentResource_GetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_GetTargetResource_params[] =
 {
-    &MSFT_nxOMSAgentResource_GetTargetResource_MIReturn_param,
-    &MSFT_nxOMSAgentResource_GetTargetResource_InputResource_param,
-    &MSFT_nxOMSAgentResource_GetTargetResource_Flags_param,
-    &MSFT_nxOMSAgentResource_GetTargetResource_OutputResource_param,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_MIReturn_param,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_InputResource_param,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_Flags_param,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_OutputResource_param,
 };
 
-/* method MSFT_nxOMSAgentResource.GetTargetResource() */
-MI_CONST MI_MethodDecl MSFT_nxOMSAgentResource_GetTargetResource_rtti =
+/* method MSFT_nxOMSPerfCounterResource.GetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxOMSPerfCounterResource_GetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00676511, /* code */
     MI_T("GetTargetResource"), /* name */
-    MSFT_nxOMSAgentResource_GetTargetResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_GetTargetResource_quals), /* numQualifiers */
-    MSFT_nxOMSAgentResource_GetTargetResource_params, /* parameters */
-    MI_COUNT(MSFT_nxOMSAgentResource_GetTargetResource_params), /* numParameters */
-    sizeof(MSFT_nxOMSAgentResource_GetTargetResource), /* size */
+    MSFT_nxOMSPerfCounterResource_GetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_GetTargetResource_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_GetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_GetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxOMSPerfCounterResource_GetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("MSFT_nxOMSAgentResource"), /* origin */
-    MI_T("MSFT_nxOMSAgentResource"), /* propagator */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)MSFT_nxOMSAgentResource_Invoke_GetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxOMSPerfCounterResource_Invoke_GetTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_TestTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_TestTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Static_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_TestTargetResource_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_TestTargetResource_Description_qual_value = MI_T("6");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_TestTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_TestTargetResource_quals[] =
 {
-    &MSFT_nxOMSAgentResource_TestTargetResource_Static_qual,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Static_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_TestTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_TestTargetResource_InputResource_In_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSAgentResource");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfCounterResource");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_TestTargetResource_InputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_Description_qual_value = MI_T("7");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_TestTargetResource_InputResource_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_TestTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_quals[] =
 {
-    &MSFT_nxOMSAgentResource_TestTargetResource_InputResource_In_qual,
-    &MSFT_nxOMSAgentResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
-    &MSFT_nxOMSAgentResource_TestTargetResource_InputResource_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_In_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.TestTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_TestTargetResource_InputResource_param =
+/* parameter MSFT_nxOMSPerfCounterResource.TestTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    MSFT_nxOMSAgentResource_TestTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_TestTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("MSFT_nxOMSAgentResource"), /* className */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_TestTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_TestTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_TestTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Flags_In_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_TestTargetResource_Flags_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_Description_qual_value = MI_T("8");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Flags_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_TestTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_quals[] =
 {
-    &MSFT_nxOMSAgentResource_TestTargetResource_Flags_In_qual,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Flags_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_In_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.TestTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_TestTargetResource_Flags_param =
+/* parameter MSFT_nxOMSPerfCounterResource.TestTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    MSFT_nxOMSAgentResource_TestTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_TestTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_TestTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_TestTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_TestTargetResource_Result_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_Result_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Result_Out_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_TestTargetResource_Result_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_Description_qual_value = MI_T("9");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_Result_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Result_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_TestTargetResource_Result_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_quals[] =
 {
-    &MSFT_nxOMSAgentResource_TestTargetResource_Result_Out_qual,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Result_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_Out_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.TestTargetResource(): Result */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_TestTargetResource_Result_param =
+/* parameter MSFT_nxOMSPerfCounterResource.TestTargetResource(): Result */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x00727406, /* code */
     MI_T("Result"), /* name */
-    MSFT_nxOMSAgentResource_TestTargetResource_Result_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_TestTargetResource_Result_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_TestTargetResource, Result), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_TestTargetResource, Result), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_Out_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_Out_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_Out_qual =
 {
     MI_T("Out"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_Out_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("10");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_quals[] =
 {
-    &MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_Out_qual,
-    &MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_Out_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.TestTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_param =
+/* parameter MSFT_nxOMSPerfCounterResource.TestTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_TestTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_TestTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("6");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_quals[] =
 {
-    &MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_Static_qual,
-    &MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_Static_qual,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.TestTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_param =
+/* parameter MSFT_nxOMSPerfCounterResource.TestTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_TestTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_TestTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxOMSAgentResource_TestTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_TestTargetResource_params[] =
 {
-    &MSFT_nxOMSAgentResource_TestTargetResource_MIReturn_param,
-    &MSFT_nxOMSAgentResource_TestTargetResource_InputResource_param,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Flags_param,
-    &MSFT_nxOMSAgentResource_TestTargetResource_Result_param,
-    &MSFT_nxOMSAgentResource_TestTargetResource_ProviderContext_param,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_MIReturn_param,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_InputResource_param,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Flags_param,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_Result_param,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_ProviderContext_param,
 };
 
-/* method MSFT_nxOMSAgentResource.TestTargetResource() */
-MI_CONST MI_MethodDecl MSFT_nxOMSAgentResource_TestTargetResource_rtti =
+/* method MSFT_nxOMSPerfCounterResource.TestTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxOMSPerfCounterResource_TestTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00746512, /* code */
     MI_T("TestTargetResource"), /* name */
-    MSFT_nxOMSAgentResource_TestTargetResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_TestTargetResource_quals), /* numQualifiers */
-    MSFT_nxOMSAgentResource_TestTargetResource_params, /* parameters */
-    MI_COUNT(MSFT_nxOMSAgentResource_TestTargetResource_params), /* numParameters */
-    sizeof(MSFT_nxOMSAgentResource_TestTargetResource), /* size */
+    MSFT_nxOMSPerfCounterResource_TestTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_TestTargetResource_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_TestTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_TestTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxOMSPerfCounterResource_TestTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("MSFT_nxOMSAgentResource"), /* origin */
-    MI_T("MSFT_nxOMSAgentResource"), /* propagator */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)MSFT_nxOMSAgentResource_Invoke_TestTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxOMSPerfCounterResource_Invoke_TestTargetResource, /* method */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_SetTargetResource_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_SetTargetResource_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_SetTargetResource_Static_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_SetTargetResource_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_SetTargetResource_Description_qual_value = MI_T("11");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_SetTargetResource_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_SetTargetResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_SetTargetResource_quals[] =
 {
-    &MSFT_nxOMSAgentResource_SetTargetResource_Static_qual,
-    &MSFT_nxOMSAgentResource_SetTargetResource_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Static_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Description_qual,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_SetTargetResource_InputResource_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_InputResource_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_SetTargetResource_InputResource_In_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSAgentResource");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfCounterResource");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_SetTargetResource_InputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_Description_qual_value = MI_T("7");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_InputResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_SetTargetResource_InputResource_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_SetTargetResource_InputResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_quals[] =
 {
-    &MSFT_nxOMSAgentResource_SetTargetResource_InputResource_In_qual,
-    &MSFT_nxOMSAgentResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
-    &MSFT_nxOMSAgentResource_SetTargetResource_InputResource_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_In_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_EmbeddedInstance_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.SetTargetResource(): InputResource */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_SetTargetResource_InputResource_param =
+/* parameter MSFT_nxOMSPerfCounterResource.SetTargetResource(): InputResource */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0069650D, /* code */
     MI_T("InputResource"), /* name */
-    MSFT_nxOMSAgentResource_SetTargetResource_InputResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_SetTargetResource_InputResource_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_quals), /* numQualifiers */
     MI_INSTANCE, /* type */
-    MI_T("MSFT_nxOMSAgentResource"), /* className */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_SetTargetResource, InputResource), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_SetTargetResource, InputResource), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_In_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("12");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_quals[] =
 {
-    &MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_In_qual,
-    &MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_In_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.SetTargetResource(): ProviderContext */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_param =
+/* parameter MSFT_nxOMSPerfCounterResource.SetTargetResource(): ProviderContext */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x0070740F, /* code */
     MI_T("ProviderContext"), /* name */
-    MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_quals), /* numQualifiers */
     MI_UINT64, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_SetTargetResource, ProviderContext), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_SetTargetResource, ProviderContext), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_SetTargetResource_Flags_In_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_In_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_Flags_In_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_In_qual =
 {
     MI_T("In"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_SetTargetResource_Flags_In_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_SetTargetResource_Flags_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_Description_qual_value = MI_T("8");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_Flags_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_SetTargetResource_Flags_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_SetTargetResource_Flags_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_quals[] =
 {
-    &MSFT_nxOMSAgentResource_SetTargetResource_Flags_In_qual,
-    &MSFT_nxOMSAgentResource_SetTargetResource_Flags_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_In_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.SetTargetResource(): Flags */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_SetTargetResource_Flags_param =
+/* parameter MSFT_nxOMSPerfCounterResource.SetTargetResource(): Flags */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_IN, /* flags */
     0x00667305, /* code */
     MI_T("Flags"), /* name */
-    MSFT_nxOMSAgentResource_SetTargetResource_Flags_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_SetTargetResource_Flags_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_SetTargetResource, Flags), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_SetTargetResource, Flags), /* offset */
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_Static_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_Static_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_Static_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_Static_qual =
 {
     MI_T("Static"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_Static_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("11");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_Description_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_quals[] =
 {
-    &MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_Static_qual,
-    &MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_Static_qual,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_Description_qual,
 };
 
-/* parameter MSFT_nxOMSAgentResource.SetTargetResource(): MIReturn */
-static MI_CONST MI_ParameterDecl MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_param =
+/* parameter MSFT_nxOMSPerfCounterResource.SetTargetResource(): MIReturn */
+static MI_CONST MI_ParameterDecl MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_param =
 {
     MI_FLAG_PARAMETER|MI_FLAG_OUT, /* flags */
     0x006D6E08, /* code */
     MI_T("MIReturn"), /* name */
-    MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_quals), /* numQualifiers */
     MI_UINT32, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAgentResource_SetTargetResource, MIReturn), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource_SetTargetResource, MIReturn), /* offset */
 };
 
-static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxOMSAgentResource_SetTargetResource_params[] =
+static MI_ParameterDecl MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_SetTargetResource_params[] =
 {
-    &MSFT_nxOMSAgentResource_SetTargetResource_MIReturn_param,
-    &MSFT_nxOMSAgentResource_SetTargetResource_InputResource_param,
-    &MSFT_nxOMSAgentResource_SetTargetResource_ProviderContext_param,
-    &MSFT_nxOMSAgentResource_SetTargetResource_Flags_param,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_MIReturn_param,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_InputResource_param,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_ProviderContext_param,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_Flags_param,
 };
 
-/* method MSFT_nxOMSAgentResource.SetTargetResource() */
-MI_CONST MI_MethodDecl MSFT_nxOMSAgentResource_SetTargetResource_rtti =
+/* method MSFT_nxOMSPerfCounterResource.SetTargetResource() */
+MI_CONST MI_MethodDecl MSFT_nxOMSPerfCounterResource_SetTargetResource_rtti =
 {
     MI_FLAG_METHOD|MI_FLAG_STATIC, /* flags */
     0x00736511, /* code */
     MI_T("SetTargetResource"), /* name */
-    MSFT_nxOMSAgentResource_SetTargetResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_SetTargetResource_quals), /* numQualifiers */
-    MSFT_nxOMSAgentResource_SetTargetResource_params, /* parameters */
-    MI_COUNT(MSFT_nxOMSAgentResource_SetTargetResource_params), /* numParameters */
-    sizeof(MSFT_nxOMSAgentResource_SetTargetResource), /* size */
+    MSFT_nxOMSPerfCounterResource_SetTargetResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_SetTargetResource_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_SetTargetResource_params, /* parameters */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_SetTargetResource_params), /* numParameters */
+    sizeof(MSFT_nxOMSPerfCounterResource_SetTargetResource), /* size */
     MI_UINT32, /* returnType */
-    MI_T("MSFT_nxOMSAgentResource"), /* origin */
-    MI_T("MSFT_nxOMSAgentResource"), /* propagator */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* propagator */
     &schemaDecl, /* schema */
-    (MI_ProviderFT_Invoke)MSFT_nxOMSAgentResource_Invoke_SetTargetResource, /* method */
+    (MI_ProviderFT_Invoke)MSFT_nxOMSPerfCounterResource_Invoke_SetTargetResource, /* method */
 };
 
-static MI_MethodDecl MI_CONST* MI_CONST MSFT_nxOMSAgentResource_meths[] =
+static MI_MethodDecl MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_meths[] =
 {
-    &MSFT_nxOMSAgentResource_GetTargetResource_rtti,
-    &MSFT_nxOMSAgentResource_TestTargetResource_rtti,
-    &MSFT_nxOMSAgentResource_SetTargetResource_rtti,
+    &MSFT_nxOMSPerfCounterResource_GetTargetResource_rtti,
+    &MSFT_nxOMSPerfCounterResource_TestTargetResource_rtti,
+    &MSFT_nxOMSPerfCounterResource_SetTargetResource_rtti,
 };
 
-static MI_CONST MI_ProviderFT MSFT_nxOMSAgentResource_funcs =
+static MI_CONST MI_ProviderFT MSFT_nxOMSPerfCounterResource_funcs =
 {
-  (MI_ProviderFT_Load)MSFT_nxOMSAgentResource_Load,
-  (MI_ProviderFT_Unload)MSFT_nxOMSAgentResource_Unload,
-  (MI_ProviderFT_GetInstance)MSFT_nxOMSAgentResource_GetInstance,
-  (MI_ProviderFT_EnumerateInstances)MSFT_nxOMSAgentResource_EnumerateInstances,
-  (MI_ProviderFT_CreateInstance)MSFT_nxOMSAgentResource_CreateInstance,
-  (MI_ProviderFT_ModifyInstance)MSFT_nxOMSAgentResource_ModifyInstance,
-  (MI_ProviderFT_DeleteInstance)MSFT_nxOMSAgentResource_DeleteInstance,
+  (MI_ProviderFT_Load)MSFT_nxOMSPerfCounterResource_Load,
+  (MI_ProviderFT_Unload)MSFT_nxOMSPerfCounterResource_Unload,
+  (MI_ProviderFT_GetInstance)MSFT_nxOMSPerfCounterResource_GetInstance,
+  (MI_ProviderFT_EnumerateInstances)MSFT_nxOMSPerfCounterResource_EnumerateInstances,
+  (MI_ProviderFT_CreateInstance)MSFT_nxOMSPerfCounterResource_CreateInstance,
+  (MI_ProviderFT_ModifyInstance)MSFT_nxOMSPerfCounterResource_ModifyInstance,
+  (MI_ProviderFT_DeleteInstance)MSFT_nxOMSPerfCounterResource_DeleteInstance,
   (MI_ProviderFT_AssociatorInstances)NULL,
   (MI_ProviderFT_ReferenceInstances)NULL,
   (MI_ProviderFT_EnableIndications)NULL,
@@ -1848,49 +1848,49 @@ static MI_CONST MI_ProviderFT MSFT_nxOMSAgentResource_funcs =
   (MI_ProviderFT_Invoke)NULL,
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_Description_qual_value = MI_T("1");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_Description_qual_value = MI_T("1");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_Description_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_Description_qual =
 {
     MI_T("Description"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSAgentResource_Description_qual_value
+    &MSFT_nxOMSPerfCounterResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentResource_ClassVersion_qual_value = MI_T("2.0.0");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_ClassVersion_qual_value = MI_T("1.1.0");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAgentResource_ClassVersion_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_ClassVersion_qual =
 {
     MI_T("ClassVersion"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &MSFT_nxOMSAgentResource_ClassVersion_qual_value
+    &MSFT_nxOMSPerfCounterResource_ClassVersion_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAgentResource_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_quals[] =
 {
-    &MSFT_nxOMSAgentResource_Description_qual,
-    &MSFT_nxOMSAgentResource_ClassVersion_qual,
+    &MSFT_nxOMSPerfCounterResource_Description_qual,
+    &MSFT_nxOMSPerfCounterResource_ClassVersion_qual,
 };
 
-/* class MSFT_nxOMSAgentResource */
-MI_CONST MI_ClassDecl MSFT_nxOMSAgentResource_rtti =
+/* class MSFT_nxOMSPerfCounterResource */
+MI_CONST MI_ClassDecl MSFT_nxOMSPerfCounterResource_rtti =
 {
     MI_FLAG_CLASS, /* flags */
     0x006D6517, /* code */
-    MI_T("MSFT_nxOMSAgentResource"), /* name */
-    MSFT_nxOMSAgentResource_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAgentResource_quals), /* numQualifiers */
-    MSFT_nxOMSAgentResource_props, /* properties */
-    MI_COUNT(MSFT_nxOMSAgentResource_props), /* numProperties */
-    sizeof(MSFT_nxOMSAgentResource), /* size */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* name */
+    MSFT_nxOMSPerfCounterResource_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterResource_props, /* properties */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_props), /* numProperties */
+    sizeof(MSFT_nxOMSPerfCounterResource), /* size */
     MI_T("OMI_BaseResource"), /* superClass */
     &OMI_BaseResource_rtti, /* superClassDecl */
-    MSFT_nxOMSAgentResource_meths, /* methods */
-    MI_COUNT(MSFT_nxOMSAgentResource_meths), /* numMethods */
+    MSFT_nxOMSPerfCounterResource_meths, /* methods */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_meths), /* numMethods */
     &schemaDecl, /* schema */
-    &MSFT_nxOMSAgentResource_funcs, /* functions */
+    &MSFT_nxOMSPerfCounterResource_funcs, /* functions */
     NULL /* owningClass */
 };
 
@@ -1913,7 +1913,7 @@ MI_Server* __mi_server;
 
 static MI_ClassDecl MI_CONST* MI_CONST classes[] =
 {
-    &MSFT_nxOMSAgentResource_rtti,
+    &MSFT_nxOMSPerfCounterResource_rtti,
     &MSFT_nxOMSPerfObject_rtti,
     &OMI_BaseResource_rtti,
 };

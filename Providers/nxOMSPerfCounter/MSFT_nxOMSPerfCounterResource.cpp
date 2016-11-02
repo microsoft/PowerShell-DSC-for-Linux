@@ -1,5 +1,5 @@
 /* @migen@ */
-#include "MSFT_nxOMSAgentResource.h"
+#include "MSFT_nxOMSPerfCounterResource.h"
 
 
 #include "debug_tags.hpp"
@@ -10,29 +10,29 @@
 #include <cstdlib>
 
 
-typedef struct _MSFT_nxOMSAgentResource_Self : public scx::PythonProvider
+typedef struct _MSFT_nxOMSPerfCounterResource_Self : public scx::PythonProvider
 {
-    /*ctor*/ _MSFT_nxOMSAgentResource_Self ()
-        : scx::PythonProvider ("nxOMSAgent")
+    /*ctor*/ _MSFT_nxOMSPerfCounterResource_Self ()
+        : scx::PythonProvider ("nxOMSPerfCounter")
     {
         // empty
     }
-} MSFT_nxOMSAgentResource_Self;
+} MSFT_nxOMSPerfCounterResource_Self;
 
 
-void MI_CALL MSFT_nxOMSAgentResource_Load(
-    _Outptr_result_maybenull_ MSFT_nxOMSAgentResource_Self** self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_Load(
+    _Outptr_result_maybenull_ MSFT_nxOMSPerfCounterResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
-    SCX_BOOKEND_EX ("Load", " name=\"nxOMSAgent\"");
+    SCX_BOOKEND_EX ("Load", " name=\"nxOMSPerfCounter\"");
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
     if (0 != self)
     {
         if (0 == *self)
         {
-            *self = new MSFT_nxOMSAgentResource_Self;
+            *self = new MSFT_nxOMSPerfCounterResource_Self;
             if (EXIT_SUCCESS != (*self)->init ())
             {
                 delete *self;
@@ -48,11 +48,11 @@ void MI_CALL MSFT_nxOMSAgentResource_Load(
     MI_Context_PostResult(context, res);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_Unload(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_Unload(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context)
 {
-    SCX_BOOKEND_EX ("Unload", " name=\"nxOMSAgent\"");
+    SCX_BOOKEND_EX ("Unload", " name=\"nxOMSPerfCounter\"");
     if (self)
     {
         delete self;
@@ -60,8 +60,8 @@ void MI_CALL MSFT_nxOMSAgentResource_Unload(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_EnumerateInstances(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_EnumerateInstances(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
@@ -79,12 +79,12 @@ void MI_CALL MSFT_nxOMSAgentResource_EnumerateInstances(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_GetInstance(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_GetInstance(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxOMSAgentResource* instanceName,
+    _In_ const MSFT_nxOMSPerfCounterResource* instanceName,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -96,12 +96,12 @@ void MI_CALL MSFT_nxOMSAgentResource_GetInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_CreateInstance(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_CreateInstance(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxOMSAgentResource* newInstance)
+    _In_ const MSFT_nxOMSPerfCounterResource* newInstance)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -111,12 +111,12 @@ void MI_CALL MSFT_nxOMSAgentResource_CreateInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_ModifyInstance(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_ModifyInstance(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxOMSAgentResource* modifiedInstance,
+    _In_ const MSFT_nxOMSPerfCounterResource* modifiedInstance,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -128,12 +128,12 @@ void MI_CALL MSFT_nxOMSAgentResource_ModifyInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_DeleteInstance(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_DeleteInstance(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxOMSAgentResource* instanceName)
+    _In_ const MSFT_nxOMSPerfCounterResource* instanceName)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -143,16 +143,16 @@ void MI_CALL MSFT_nxOMSAgentResource_DeleteInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_Invoke_GetTargetResource(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_Invoke_GetTargetResource(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxOMSAgentResource* instanceName,
-    _In_opt_ const MSFT_nxOMSAgentResource_GetTargetResource* in)
+    _In_ const MSFT_nxOMSPerfCounterResource* instanceName,
+    _In_opt_ const MSFT_nxOMSPerfCounterResource_GetTargetResource* in)
 {
-    SCX_BOOKEND_EX ("Get", " name=\"nxOMSAgent\"");
+    SCX_BOOKEND_EX ("Get", " name=\"nxOMSPerfCounter\"");
     MI_Result result = MI_RESULT_FAILED;
     if (self)
     {
@@ -163,19 +163,19 @@ void MI_CALL MSFT_nxOMSAgentResource_Invoke_GetTargetResource(
         if (MI_RESULT_OK == result)
         {
             SCX_BOOKEND_PRINT ("packing succeeded!");
-            MSFT_nxOMSAgentResource_GetTargetResource out;
-            MSFT_nxOMSAgentResource_GetTargetResource_Construct (&out, context);
-            MSFT_nxOMSAgentResource_GetTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxOMSPerfCounterResource_GetTargetResource out;
+            MSFT_nxOMSPerfCounterResource_GetTargetResource_Construct (&out, context);
+            MSFT_nxOMSPerfCounterResource_GetTargetResource_Set_MIReturn (&out, 0);
             MI_Value value;
             value.instance = retInstance;
             MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
                                     MI_INSTANCE, 0);
-            result = MSFT_nxOMSAgentResource_GetTargetResource_Post (&out, context);
+            result = MSFT_nxOMSPerfCounterResource_GetTargetResource_Post (&out, context);
             if (MI_RESULT_OK != result)
             {
                 SCX_BOOKEND_PRINT ("post Failed");
             }
-            MSFT_nxOMSAgentResource_GetTargetResource_Destruct (&out);
+            MSFT_nxOMSPerfCounterResource_GetTargetResource_Destruct (&out);
         }
         else
         {
@@ -186,14 +186,14 @@ void MI_CALL MSFT_nxOMSAgentResource_Invoke_GetTargetResource(
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_Invoke_TestTargetResource(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_Invoke_TestTargetResource(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxOMSAgentResource* instanceName,
-    _In_opt_ const MSFT_nxOMSAgentResource_TestTargetResource* in)
+    _In_ const MSFT_nxOMSPerfCounterResource* instanceName,
+    _In_opt_ const MSFT_nxOMSPerfCounterResource_TestTargetResource* in)
 {
     MI_Result result = MI_RESULT_FAILED;
     if (self)
@@ -202,26 +202,26 @@ void MI_CALL MSFT_nxOMSAgentResource_Invoke_TestTargetResource(
         result = self->test (in->InputResource.value->__instance, &testResult);
         if (MI_RESULT_OK == result)
         {
-            MSFT_nxOMSAgentResource_TestTargetResource out;
-            MSFT_nxOMSAgentResource_TestTargetResource_Construct (&out, context);
-            MSFT_nxOMSAgentResource_TestTargetResource_Set_Result (
+            MSFT_nxOMSPerfCounterResource_TestTargetResource out;
+            MSFT_nxOMSPerfCounterResource_TestTargetResource_Construct (&out, context);
+            MSFT_nxOMSPerfCounterResource_TestTargetResource_Set_Result (
                 &out, testResult);
-            MSFT_nxOMSAgentResource_TestTargetResource_Set_MIReturn (&out, 0);
-            MSFT_nxOMSAgentResource_TestTargetResource_Post (&out, context);
-            MSFT_nxOMSAgentResource_TestTargetResource_Destruct (&out);
+            MSFT_nxOMSPerfCounterResource_TestTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxOMSPerfCounterResource_TestTargetResource_Post (&out, context);
+            MSFT_nxOMSPerfCounterResource_TestTargetResource_Destruct (&out);
         }
     }
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxOMSAgentResource_Invoke_SetTargetResource(
-    _In_opt_ MSFT_nxOMSAgentResource_Self* self,
+void MI_CALL MSFT_nxOMSPerfCounterResource_Invoke_SetTargetResource(
+    _In_opt_ MSFT_nxOMSPerfCounterResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxOMSAgentResource* instanceName,
-    _In_opt_ const MSFT_nxOMSAgentResource_SetTargetResource* in)
+    _In_ const MSFT_nxOMSPerfCounterResource* instanceName,
+    _In_opt_ const MSFT_nxOMSPerfCounterResource_SetTargetResource* in)
 {
     MI_Result result = MI_RESULT_FAILED;
     if (self)
@@ -231,12 +231,12 @@ void MI_CALL MSFT_nxOMSAgentResource_Invoke_SetTargetResource(
         if (MI_RESULT_OK == result)
         {
             result = setResult;
-            MSFT_nxOMSAgentResource_SetTargetResource out;
-            MSFT_nxOMSAgentResource_SetTargetResource_Construct (&out, context);
-            MSFT_nxOMSAgentResource_SetTargetResource_Set_MIReturn (
+            MSFT_nxOMSPerfCounterResource_SetTargetResource out;
+            MSFT_nxOMSPerfCounterResource_SetTargetResource_Construct (&out, context);
+            MSFT_nxOMSPerfCounterResource_SetTargetResource_Set_MIReturn (
                 &out, setResult);
-            MSFT_nxOMSAgentResource_SetTargetResource_Post (&out, context);
-            MSFT_nxOMSAgentResource_SetTargetResource_Destruct (&out);
+            MSFT_nxOMSPerfCounterResource_SetTargetResource_Post (&out, context);
+            MSFT_nxOMSPerfCounterResource_SetTargetResource_Destruct (&out);
         }
     }
     MI_Context_PostResult (context, result);

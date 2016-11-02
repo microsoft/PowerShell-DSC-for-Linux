@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSPerfCounterResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSPerfCounterResource:OMI_BaseResource

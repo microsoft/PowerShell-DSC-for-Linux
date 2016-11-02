@@ -63,7 +63,7 @@ GENERATED_OBJS:=$(GENERATED_SOURCES:.c=.o)
 
 # list of providers
 ifeq ($(BUILD_OMS),BUILD_OMS)
-PROVIDERS:=nxOMSAgent
+PROVIDERS:=nxOMSPerfCounter
 PROVIDERS+=nxOMSSyslog
 PROVIDERS+=nxOMSCustomLog
 PROVIDERS+=nxOMSGenerateInventoryMof

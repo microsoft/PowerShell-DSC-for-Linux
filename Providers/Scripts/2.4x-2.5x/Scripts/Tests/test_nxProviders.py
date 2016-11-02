@@ -164,7 +164,7 @@ nxMySqlUser=imp.load_source('nxMySqlUser', './Scripts/nxMySqlUser.py')
 nxMySqlGrant=imp.load_source('nxMySqlGrant', './Scripts/nxMySqlGrant.py')
 nxMySqlDatabase=imp.load_source('nxMySqlDatabase', './Scripts/nxMySqlDatabase.py')
 nxOMSSyslog=imp.load_source('nxOMSSyslog','./Scripts/nxOMSSyslog.py')
-nxOMSAgent=imp.load_source('nxOMSAgent','./Scripts/nxOMSAgent.py')
+nxOMSPerfCounter=imp.load_source('nxOMSPerfCounter','./Scripts/nxOMSPerfCounter.py')
 nxOMSCustomLog=imp.load_source('nxOMSCustomLog','./Scripts/nxOMSCustomLog.py')
 nxOMSKeyMgmt=imp.load_source('nxOMSKeyMgmt','./Scripts/nxOMSKeyMgmt.py')
 nxFileInventory=imp.load_source('nxFileInventory', './Scripts/nxFileInventory.py')
@@ -3297,9 +3297,9 @@ nxOMSSyslogTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | g
                                             )(nxOMSSyslogTestCases)
 
 
-class nxOMSAgentTestCases(unittest2.TestCase):
+class nxOMSPerfCounterTestCases(unittest2.TestCase):
     """
-    Test cases for nxOMSAgent.py
+    Test cases for nxOMSPerfCounter.py
     """
     def setUp(self):
         """
@@ -3321,13 +3321,13 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             d['PerfObject'] = None
         else :
             for perf in PerfObject:
-                perf['PerformanceCounter'] =  nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-                perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-                perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-                perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-                perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
-            d['PerfObject'] = nxOMSAgent.protocol.MI_InstanceA(PerfObject)
-        d['HeartbeatIntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(HeartbeatIntervalSeconds)
+                perf['PerformanceCounter'] =  nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+                perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+                perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+                perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+                perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
+            d['PerfObject'] = nxOMSPerfCounter.protocol.MI_InstanceA(PerfObject)
+        d['HeartbeatIntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(HeartbeatIntervalSeconds)
         return retval,d
     
     def testSetOMSAgent_add(self):
@@ -3338,12 +3338,12 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
         for perf in d['PerfObject']:
-            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
-        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
+        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
 
     def testGetOMSAgent_add(self):
         d={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
@@ -3353,11 +3353,11 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
         for perf in d['PerfObject']:
-            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
+            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         e=copy.deepcopy(d)
         t={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
             'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
@@ -3365,34 +3365,34 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
-        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
         m=self.make_MI(0,**t)
-        g=nxOMSAgent.Get_Marshall(**e)
+        g=nxOMSPerfCounter.Get_Marshall(**e)
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get '+repr(g)+' should return == '+repr(m)+'')
 
     def testSetOMSAgent_del(self):
         d={'HeartbeatIntervalSeconds':600,'PerfObject':[]}
         for perf in d['PerfObject']:
-            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
-        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
+        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
 
     def testGetOMSAgent_del(self):
         d={'HeartbeatIntervalSeconds':600,'PerfObject':[]}
         for perf in d['PerfObject']:
-            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
-        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
+        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
         t={'HeartbeatIntervalSeconds':600,'PerfObject':[]}
         m=self.make_MI(0,**t)
-        g=nxOMSAgent.Get_Marshall(**d)
+        g=nxOMSPerfCounter.Get_Marshall(**d)
         print 'GET '+ repr(g)
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get('+repr(g)+' should return ==['+repr(m)+']')
@@ -3406,12 +3406,12 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
         for perf in d['PerfObject']:
-            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
-        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
+        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
 
     def testSetGetOMSAgent_add_missing_conf_file(self):
         os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
@@ -3422,11 +3422,11 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
         for perf in d['PerfObject']:
-            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
+            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         e=copy.deepcopy(d)
         t={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
             'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
@@ -3434,9 +3434,9 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
-        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
         m=self.make_MI(0,**t)
-        g=nxOMSAgent.Get_Marshall(**e)
+        g=nxOMSPerfCounter.Get_Marshall(**e)
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get '+repr(g)+' should return == '+repr(m)+'')
 
@@ -3449,14 +3449,14 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
         for perf in d['PerfObject']:
-            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
+            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         t={'HeartbeatIntervalSeconds':None,'PerfObject':[]}
         m=self.make_MI(0,**t)
-        g=nxOMSAgent.Get_Marshall(**d)
+        g=nxOMSPerfCounter.Get_Marshall(**d)
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get '+repr(g)+' should return == '+repr(m)+'')
 
@@ -3469,11 +3469,11 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
         for perf in d['PerfObject']:
-            perf['PerformanceCounter'] = nxOMSAgent.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSAgent.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSAgent.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSAgent.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSAgent.protocol.MI_String(perf['ObjectName'])
+            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
+            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
+            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
+            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
+            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         e=copy.deepcopy(d)
         t={'HeartbeatIntervalSeconds':600,'PerfObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
             'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
@@ -3481,15 +3481,15 @@ class nxOMSAgentTestCases(unittest2.TestCase):
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
             'ObjectName':'Processor'}]}
-        self.assertTrue(nxOMSAgent.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
         m=self.make_MI(0,**t)
-        g=nxOMSAgent.Get_Marshall(**e)
+        g=nxOMSPerfCounter.Get_Marshall(**e)
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get '+repr(g)+' should return == '+repr(m)+'')
 
-nxOMSAgentTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
-                                            0,'Skipping nxOMSAgentTestCases.   omsagent is not running.' \
-                                            )(nxOMSAgentTestCases)
+nxOMSPerfCounterTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
+                                            0,'Skipping nxOMSPerfCounterTestCases.   omsagent is not running.' \
+                                            )(nxOMSPerfCounterTestCases)
 
 
 class nxOMSCustomLogTestCases(unittest2.TestCase):
@@ -4526,7 +4526,7 @@ if __name__ == '__main__':
     s16=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlUserTestCases)
     s17=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlGrantTestCases)
     s18=unittest2.TestLoader().loadTestsFromTestCase(nxOMSSyslogTestCases)
-    s19=unittest2.TestLoader().loadTestsFromTestCase(nxOMSAgentTestCases)
+    s19=unittest2.TestLoader().loadTestsFromTestCase(nxOMSPerfCounterTestCases)
     s20=unittest2.TestLoader().loadTestsFromTestCase(nxOMSCustomLogTestCases)
     s21=unittest2.TestLoader().loadTestsFromTestCase(nxOMSKeyMgmtTestCases)
     s22=unittest2.TestLoader().loadTestsFromTestCase(nxFileInventoryTestCases)

@@ -7,14 +7,20 @@ import os
 import imp
 import re
 import codecs
-import json
+
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 
 LG = nxDSCLog.DSCLog
 
 conf_path = '/etc/opt/microsoft/omsagent/conf/omsagent.conf'
+omi_map_path = '/etc/opt/microsoft/omsagent/conf/omsagent.d/omi_mapping.json'
 omi_map = None
+
+def init_omi_map():
+    global omi_map
+    txt = codecs.open(omi_map_path, 'r', 'utf8').read()
+    omi_map = eval(txt)
 
 
 def init_vars(HeartbeatIntervalSeconds, PerfObject):
@@ -39,7 +45,10 @@ def init_vars(HeartbeatIntervalSeconds, PerfObject):
             if perf['AllInstances'].value is None:
                 perf['AllInstances'] = False
             else:
-                perf['AllInstances'] = perf['AllInstances'].value.value
+                if perf['AllInstances'].value.value == 1:
+                    perf['AllInstances'] = True
+                else:
+                    perf['AllInstances'] = False
             perf['IntervalSeconds'] = perf['IntervalSeconds'].value.value
 
 
@@ -225,13 +234,6 @@ def rm_unicode(obj):
         return obj.encode('ascii', 'ignore')
     else:
         return obj
-
-
-def init_omi_map():
-    global omi_map
-    txt = codecs.open(
-        '/etc/opt/microsoft/omsagent/sysconf/omi_mapping.json', 'r', 'utf8').read()
-    omi_map = rm_unicode(json.loads(txt))
 
 
 def prune_perfs(PerfObject):

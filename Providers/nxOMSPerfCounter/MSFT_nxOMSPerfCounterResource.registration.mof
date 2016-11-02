@@ -1,7 +1,7 @@
 
 Instance of MSFT_CimConfigurationProviderRegistration
 {
-  className = "MSFT_nxOMSAgentResource";
+  className = "MSFT_nxOMSPerfCounterResource";
   DSCEngineCompatVersion = "1.0.0";
   DSCModuleVersion = "1.0.0";
   Namespace = "root/oms";

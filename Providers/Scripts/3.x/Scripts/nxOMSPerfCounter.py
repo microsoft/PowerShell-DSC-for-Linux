@@ -7,14 +7,21 @@ import os
 import imp
 import re
 import codecs
-
+import json
+from functools import reduce
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 
 LG = nxDSCLog.DSCLog
 
 conf_path = '/etc/opt/microsoft/omsagent/conf/omsagent.conf'
+omi_map_path = '/etc/opt/microsoft/omsagent/conf/omsagent.d/omi_mapping.json'
 omi_map = None
+
+def init_omi_map():
+    global omi_map
+    txt = codecs.open(omi_map_path, 'r', 'utf8').read()
+    omi_map = eval(txt)
 
 
 def init_vars(HeartbeatIntervalSeconds, PerfObject):
@@ -24,25 +31,20 @@ def init_vars(HeartbeatIntervalSeconds, PerfObject):
             new_perfs = []
             if len(perf['PerformanceCounter'].value):
                 for perf_counter in perf['PerformanceCounter'].value:
-                    new_perfs.append(perf_counter.encode('ascii', 'ignore'))
+                    new_perfs.append(perf_counter)
                 perf['PerformanceCounter'] = new_perfs
             if perf['InstanceName'].value is None:
                 perf['InstanceName'] = ''
             else:
-                perf['InstanceName'] = perf[
-                    'InstanceName'].value.encode('ascii', 'ignore')
+                perf['InstanceName'] = perf['InstanceName'].value
             if perf['ObjectName'].value is None:
                 perf['ObjectName'] = ''
             else:
-                perf['ObjectName'] = perf[
-                    'ObjectName'].value.encode('ascii', 'ignore')
+                perf['ObjectName'] = perf['ObjectName'].value
             if perf['AllInstances'].value is None:
                 perf['AllInstances'] = False
             else:
-                if perf['AllInstances'].value.value == 1:
-                    perf['AllInstances'] = True
-                else:
-                    perf['AllInstances'] = False
+                perf['AllInstances'] = perf['AllInstances'].value.value
             perf['IntervalSeconds'] = perf['IntervalSeconds'].value.value
 
 
@@ -94,11 +96,9 @@ def Test(HeartbeatIntervalSeconds, PerfObject):
         HeartbeatIntervalSeconds, PerfObject)
     if NewHeartbeatIntervalSeconds != HeartbeatIntervalSeconds:
         return [-1]
-    PerfObject.sort()
     for perf in PerfObject:
         perf['PerformanceCounter'].sort()
         perf['AllInstances'] = True
-    NewPerfs.sort()
     for perf in NewPerfs:
         perf['PerformanceCounter'].sort()
     if PerfObject != NewPerfs:
@@ -128,8 +128,7 @@ def TranslatePerfs(object_name, perfs):
 def ReadOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
     txt = ''
     try:
-        txt = codecs.open(conf_path, 'r', 'utf8').read().encode(
-            'ascii', 'ignore')
+        txt = codecs.open(conf_path, 'r', 'utf8').read()
         LG().Log('INFO', 'Read omsagent configuration ' + conf_path + '.')
     except:
         LG().Log(
@@ -167,8 +166,7 @@ def ReadOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
 
 def UpdateOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
     if os.path.exists(conf_path):
-        txt = codecs.open(conf_path, 'r', 'utf8').read().encode(
-            'ascii', 'ignore')
+        txt = codecs.open(conf_path, 'r', 'utf8').read()
         LG().Log('INFO', 'Read omsagent configuration ' + conf_path + '.')
     else:
         LG().Log(
@@ -228,13 +226,6 @@ def rm_unicode(obj):
         return obj.encode('ascii', 'ignore')
     else:
         return obj
-
-
-def init_omi_map():
-    global omi_map
-    txt = codecs.open(
-        '/etc/opt/microsoft/omsagent/sysconf/omi_mapping.json', 'r', 'utf8').read()
-    omi_map = eval(txt)
 
 
 def prune_perfs(PerfObject):
