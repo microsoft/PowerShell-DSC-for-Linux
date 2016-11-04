@@ -11,7 +11,7 @@
 
 #include <MI.h>
 #include "OMI_BaseResource.h"
-#include "MSFT_nxOMSPerfObject.h"
+#include "MSFT_nxOMSPerfCounterObject.h"
 #include "MSFT_nxOMSPerfCounterResource.h"
 
 /*
@@ -20,7 +20,7 @@
 ** MSFT_nxOMSPerfCounterResource [MSFT_nxOMSPerfCounterResource]
 **
 ** Keys:
-**    PerfObject
+**    PerfCounterObject
 **
 **==============================================================================
 */
@@ -31,7 +31,7 @@ typedef struct _MSFT_nxOMSPerfCounterResource /* extends OMI_BaseResource */
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSPerfCounterResource properties */
     MI_ConstUint16Field HeartbeatIntervalSeconds;
-    /*KEY*/ MSFT_nxOMSPerfObject_ConstArrayRef PerfObject;
+    /*KEY*/ MSFT_nxOMSPerfCounterObject_ConstArrayRef PerfCounterObject;
 }
 MSFT_nxOMSPerfCounterResource;
 
@@ -139,9 +139,9 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Clear_HeartbeatInterva
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_PerfObject(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_PerfCounterObject(
     _Inout_ MSFT_nxOMSPerfCounterResource* self,
-    _In_reads_opt_(size) const MSFT_nxOMSPerfObject * const * data,
+    _In_reads_opt_(size) const MSFT_nxOMSPerfCounterObject * const * data,
     _In_ MI_Uint32 size)
 {
     MI_Array arr;
@@ -155,9 +155,9 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_PerfObject(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_SetPtr_PerfObject(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_SetPtr_PerfCounterObject(
     _Inout_ MSFT_nxOMSPerfCounterResource* self,
-    _In_reads_opt_(size) const MSFT_nxOMSPerfObject * const * data,
+    _In_reads_opt_(size) const MSFT_nxOMSPerfCounterObject * const * data,
     _In_ MI_Uint32 size)
 {
     MI_Array arr;
@@ -171,7 +171,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_SetPtr_PerfObject(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Clear_PerfObject(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Clear_PerfCounterObject(
     _Inout_ MSFT_nxOMSPerfCounterResource* self)
 {
     return self->__instance.ft->ClearElementAt(

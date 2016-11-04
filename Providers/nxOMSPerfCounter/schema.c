@@ -804,206 +804,206 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 /*
 **==============================================================================
 **
-** MSFT_nxOMSPerfObject
+** MSFT_nxOMSPerfCounterObject
 **
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean MSFT_nxOMSPerfObject_ObjectName_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterObject_ObjectName_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfObject_ObjectName_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterObject_ObjectName_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSPerfObject_ObjectName_Key_qual_value
+    &MSFT_nxOMSPerfCounterObject_ObjectName_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfObject_ObjectName_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterObject_ObjectName_quals[] =
 {
-    &MSFT_nxOMSPerfObject_ObjectName_Key_qual,
+    &MSFT_nxOMSPerfCounterObject_ObjectName_Key_qual,
 };
 
-/* property MSFT_nxOMSPerfObject.ObjectName */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfObject_ObjectName_prop =
+/* property MSFT_nxOMSPerfCounterObject.ObjectName */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterObject_ObjectName_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
     0x006F650A, /* code */
     MI_T("ObjectName"), /* name */
-    MSFT_nxOMSPerfObject_ObjectName_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSPerfObject_ObjectName_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterObject_ObjectName_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterObject_ObjectName_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSPerfObject, ObjectName), /* offset */
-    MI_T("MSFT_nxOMSPerfObject"), /* origin */
-    MI_T("MSFT_nxOMSPerfObject"), /* propagator */
+    offsetof(MSFT_nxOMSPerfCounterObject, ObjectName), /* offset */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSPerfObject_InstanceName_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterObject_InstanceName_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfObject_InstanceName_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterObject_InstanceName_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSPerfObject_InstanceName_Write_qual_value
+    &MSFT_nxOMSPerfCounterObject_InstanceName_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfObject_InstanceName_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterObject_InstanceName_quals[] =
 {
-    &MSFT_nxOMSPerfObject_InstanceName_Write_qual,
+    &MSFT_nxOMSPerfCounterObject_InstanceName_Write_qual,
 };
 
-/* property MSFT_nxOMSPerfObject.InstanceName */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfObject_InstanceName_prop =
+/* property MSFT_nxOMSPerfCounterObject.InstanceName */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterObject_InstanceName_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x0069650C, /* code */
     MI_T("InstanceName"), /* name */
-    MSFT_nxOMSPerfObject_InstanceName_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSPerfObject_InstanceName_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterObject_InstanceName_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterObject_InstanceName_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSPerfObject, InstanceName), /* offset */
-    MI_T("MSFT_nxOMSPerfObject"), /* origin */
-    MI_T("MSFT_nxOMSPerfObject"), /* propagator */
+    offsetof(MSFT_nxOMSPerfCounterObject, InstanceName), /* offset */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSPerfObject_AllInstances_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterObject_AllInstances_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfObject_AllInstances_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterObject_AllInstances_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSPerfObject_AllInstances_Write_qual_value
+    &MSFT_nxOMSPerfCounterObject_AllInstances_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfObject_AllInstances_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterObject_AllInstances_quals[] =
 {
-    &MSFT_nxOMSPerfObject_AllInstances_Write_qual,
+    &MSFT_nxOMSPerfCounterObject_AllInstances_Write_qual,
 };
 
-/* property MSFT_nxOMSPerfObject.AllInstances */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfObject_AllInstances_prop =
+/* property MSFT_nxOMSPerfCounterObject.AllInstances */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterObject_AllInstances_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x0061730C, /* code */
     MI_T("AllInstances"), /* name */
-    MSFT_nxOMSPerfObject_AllInstances_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSPerfObject_AllInstances_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterObject_AllInstances_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterObject_AllInstances_quals), /* numQualifiers */
     MI_BOOLEAN, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSPerfObject, AllInstances), /* offset */
-    MI_T("MSFT_nxOMSPerfObject"), /* origin */
-    MI_T("MSFT_nxOMSPerfObject"), /* propagator */
+    offsetof(MSFT_nxOMSPerfCounterObject, AllInstances), /* offset */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSPerfObject_IntervalSeconds_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterObject_IntervalSeconds_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfObject_IntervalSeconds_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterObject_IntervalSeconds_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSPerfObject_IntervalSeconds_Write_qual_value
+    &MSFT_nxOMSPerfCounterObject_IntervalSeconds_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfObject_IntervalSeconds_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterObject_IntervalSeconds_quals[] =
 {
-    &MSFT_nxOMSPerfObject_IntervalSeconds_Write_qual,
+    &MSFT_nxOMSPerfCounterObject_IntervalSeconds_Write_qual,
 };
 
-/* property MSFT_nxOMSPerfObject.IntervalSeconds */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfObject_IntervalSeconds_prop =
+/* property MSFT_nxOMSPerfCounterObject.IntervalSeconds */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterObject_IntervalSeconds_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x0069730F, /* code */
     MI_T("IntervalSeconds"), /* name */
-    MSFT_nxOMSPerfObject_IntervalSeconds_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSPerfObject_IntervalSeconds_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterObject_IntervalSeconds_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterObject_IntervalSeconds_quals), /* numQualifiers */
     MI_UINT16, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSPerfObject, IntervalSeconds), /* offset */
-    MI_T("MSFT_nxOMSPerfObject"), /* origin */
-    MI_T("MSFT_nxOMSPerfObject"), /* propagator */
+    offsetof(MSFT_nxOMSPerfCounterObject, IntervalSeconds), /* offset */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* propagator */
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSPerfObject_PerformanceCounter_Write_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterObject_PerformanceCounter_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfObject_PerformanceCounter_Write_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterObject_PerformanceCounter_Write_qual =
 {
     MI_T("Write"),
     MI_BOOLEAN,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSPerfObject_PerformanceCounter_Write_qual_value
+    &MSFT_nxOMSPerfCounterObject_PerformanceCounter_Write_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfObject_PerformanceCounter_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterObject_PerformanceCounter_quals[] =
 {
-    &MSFT_nxOMSPerfObject_PerformanceCounter_Write_qual,
+    &MSFT_nxOMSPerfCounterObject_PerformanceCounter_Write_qual,
 };
 
-/* property MSFT_nxOMSPerfObject.PerformanceCounter */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfObject_PerformanceCounter_prop =
+/* property MSFT_nxOMSPerfCounterObject.PerformanceCounter */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterObject_PerformanceCounter_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
     0x00707212, /* code */
     MI_T("PerformanceCounter"), /* name */
-    MSFT_nxOMSPerfObject_PerformanceCounter_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSPerfObject_PerformanceCounter_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterObject_PerformanceCounter_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterObject_PerformanceCounter_quals), /* numQualifiers */
     MI_STRINGA, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSPerfObject, PerformanceCounter), /* offset */
-    MI_T("MSFT_nxOMSPerfObject"), /* origin */
-    MI_T("MSFT_nxOMSPerfObject"), /* propagator */
+    offsetof(MSFT_nxOMSPerfCounterObject, PerformanceCounter), /* offset */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* propagator */
     NULL,
 };
 
-static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSPerfObject_props[] =
+static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSPerfCounterObject_props[] =
 {
-    &MSFT_nxOMSPerfObject_ObjectName_prop,
-    &MSFT_nxOMSPerfObject_InstanceName_prop,
-    &MSFT_nxOMSPerfObject_AllInstances_prop,
-    &MSFT_nxOMSPerfObject_IntervalSeconds_prop,
-    &MSFT_nxOMSPerfObject_PerformanceCounter_prop,
+    &MSFT_nxOMSPerfCounterObject_ObjectName_prop,
+    &MSFT_nxOMSPerfCounterObject_InstanceName_prop,
+    &MSFT_nxOMSPerfCounterObject_AllInstances_prop,
+    &MSFT_nxOMSPerfCounterObject_IntervalSeconds_prop,
+    &MSFT_nxOMSPerfCounterObject_PerformanceCounter_prop,
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSPerfObject_ClassVersion_qual_value = MI_T("1.1.0");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterObject_ClassVersion_qual_value = MI_T("1.1.0");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfObject_ClassVersion_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterObject_ClassVersion_qual =
 {
     MI_T("ClassVersion"),
     MI_STRING,
     MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
-    &MSFT_nxOMSPerfObject_ClassVersion_qual_value
+    &MSFT_nxOMSPerfCounterObject_ClassVersion_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfObject_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterObject_quals[] =
 {
-    &MSFT_nxOMSPerfObject_ClassVersion_qual,
+    &MSFT_nxOMSPerfCounterObject_ClassVersion_qual,
 };
 
-/* class MSFT_nxOMSPerfObject */
-MI_CONST MI_ClassDecl MSFT_nxOMSPerfObject_rtti =
+/* class MSFT_nxOMSPerfCounterObject */
+MI_CONST MI_ClassDecl MSFT_nxOMSPerfCounterObject_rtti =
 {
     MI_FLAG_CLASS, /* flags */
-    0x006D7414, /* code */
-    MI_T("MSFT_nxOMSPerfObject"), /* name */
-    MSFT_nxOMSPerfObject_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSPerfObject_quals), /* numQualifiers */
-    MSFT_nxOMSPerfObject_props, /* properties */
-    MI_COUNT(MSFT_nxOMSPerfObject_props), /* numProperties */
-    sizeof(MSFT_nxOMSPerfObject), /* size */
+    0x006D741B, /* code */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* name */
+    MSFT_nxOMSPerfCounterObject_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterObject_quals), /* numQualifiers */
+    MSFT_nxOMSPerfCounterObject_props, /* properties */
+    MI_COUNT(MSFT_nxOMSPerfCounterObject_props), /* numProperties */
+    sizeof(MSFT_nxOMSPerfCounterObject), /* size */
     NULL, /* superClass */
     NULL, /* superClassDecl */
     NULL, /* methods */
@@ -1053,44 +1053,44 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_HeartbeatIntervalS
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_PerfObject_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_PerfCounterObject_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfObject_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfCounterObject_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSPerfCounterResource_PerfObject_Key_qual_value
+    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_Key_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_PerfObject_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfObject");
+static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_PerfCounterObject_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfCounterObject");
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfObject_EmbeddedInstance_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfCounterObject_EmbeddedInstance_qual =
 {
     MI_T("EmbeddedInstance"),
     MI_STRING,
     MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSPerfCounterResource_PerfObject_EmbeddedInstance_qual_value
+    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_EmbeddedInstance_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_PerfObject_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_PerfCounterObject_quals[] =
 {
-    &MSFT_nxOMSPerfCounterResource_PerfObject_Key_qual,
-    &MSFT_nxOMSPerfCounterResource_PerfObject_EmbeddedInstance_qual,
+    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_Key_qual,
+    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_EmbeddedInstance_qual,
 };
 
-/* property MSFT_nxOMSPerfCounterResource.PerfObject */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_PerfObject_prop =
+/* property MSFT_nxOMSPerfCounterResource.PerfCounterObject */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_PerfCounterObject_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
-    0x0070740A, /* code */
-    MI_T("PerfObject"), /* name */
-    MSFT_nxOMSPerfCounterResource_PerfObject_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSPerfCounterResource_PerfObject_quals), /* numQualifiers */
+    0x00707411, /* code */
+    MI_T("PerfCounterObject"), /* name */
+    MSFT_nxOMSPerfCounterResource_PerfCounterObject_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_PerfCounterObject_quals), /* numQualifiers */
     MI_INSTANCEA, /* type */
-    MI_T("MSFT_nxOMSPerfObject"), /* className */
+    MI_T("MSFT_nxOMSPerfCounterObject"), /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSPerfCounterResource, PerfObject), /* offset */
+    offsetof(MSFT_nxOMSPerfCounterResource, PerfCounterObject), /* offset */
     MI_T("MSFT_nxOMSPerfCounterResource"), /* origin */
     MI_T("MSFT_nxOMSPerfCounterResource"), /* propagator */
     NULL,
@@ -1099,7 +1099,7 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_PerfObject_prop =
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_props[] =
 {
     &MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_prop,
-    &MSFT_nxOMSPerfCounterResource_PerfObject_prop,
+    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_prop,
 };
 
 static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_GetTargetResource_Static_qual_value = 1;
@@ -1878,7 +1878,7 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_quals[] =
 MI_CONST MI_ClassDecl MSFT_nxOMSPerfCounterResource_rtti =
 {
     MI_FLAG_CLASS, /* flags */
-    0x006D6517, /* code */
+    0x006D651D, /* code */
     MI_T("MSFT_nxOMSPerfCounterResource"), /* name */
     MSFT_nxOMSPerfCounterResource_quals, /* qualifiers */
     MI_COUNT(MSFT_nxOMSPerfCounterResource_quals), /* numQualifiers */
@@ -1913,8 +1913,8 @@ MI_Server* __mi_server;
 
 static MI_ClassDecl MI_CONST* MI_CONST classes[] =
 {
+    &MSFT_nxOMSPerfCounterObject_rtti,
     &MSFT_nxOMSPerfCounterResource_rtti,
-    &MSFT_nxOMSPerfObject_rtti,
     &OMI_BaseResource_rtti,
 };
 
