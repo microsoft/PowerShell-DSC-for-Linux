@@ -24,10 +24,10 @@ def init_omi_map():
     omi_map = eval(txt)
 
 
-def init_vars(HeartbeatIntervalSeconds, PerfObject):
+def init_vars(HeartbeatIntervalSeconds, PerfCounterObject):
     init_omi_map()
-    if PerfObject is not None:
-        for perf in PerfObject:
+    if PerfCounterObject is not None:
+        for perf in PerfCounterObject:
             new_perfs = []
             if len(perf['PerformanceCounter'].value):
                 for perf_counter in perf['PerformanceCounter'].value:
@@ -48,22 +48,22 @@ def init_vars(HeartbeatIntervalSeconds, PerfObject):
             perf['IntervalSeconds'] = perf['IntervalSeconds'].value.value
 
 
-def Set_Marshall(HeartbeatIntervalSeconds, PerfObject):
-    init_vars(HeartbeatIntervalSeconds, PerfObject)
-    return Set(HeartbeatIntervalSeconds, PerfObject)
+def Set_Marshall(HeartbeatIntervalSeconds, PerfCounterObject):
+    init_vars(HeartbeatIntervalSeconds, PerfCounterObject)
+    return Set(HeartbeatIntervalSeconds, PerfCounterObject)
 
 
-def Test_Marshall(HeartbeatIntervalSeconds, PerfObject):
-    init_vars(HeartbeatIntervalSeconds, PerfObject)
-    return Test(HeartbeatIntervalSeconds, PerfObject)
+def Test_Marshall(HeartbeatIntervalSeconds, PerfCounterObject):
+    init_vars(HeartbeatIntervalSeconds, PerfCounterObject)
+    return Test(HeartbeatIntervalSeconds, PerfCounterObject)
 
 
-def Get_Marshall(HeartbeatIntervalSeconds, PerfObject):
+def Get_Marshall(HeartbeatIntervalSeconds, PerfCounterObject):
     arg_names = list(locals().keys())
-    init_vars(HeartbeatIntervalSeconds, PerfObject)
+    init_vars(HeartbeatIntervalSeconds, PerfCounterObject)
     retval = 0
     NewHeartbeatIntervalSeconds, NewPerf = Get(
-        HeartbeatIntervalSeconds, PerfObject)
+        HeartbeatIntervalSeconds, PerfCounterObject)
     for perf in NewPerf:
         if len(perf['PerformanceCounter']):
             perf['PerformanceCounter'] = protocol.MI_StringA(
@@ -72,7 +72,7 @@ def Get_Marshall(HeartbeatIntervalSeconds, PerfObject):
         perf['InstanceName'] = protocol.MI_String(perf['InstanceName'])
         perf['AllInstances'] = protocol.MI_Boolean(perf['AllInstances'])
         perf['IntervalSeconds'] = protocol.MI_Uint16(perf['IntervalSeconds'])
-    PerfObject = protocol.MI_InstanceA(NewPerf)
+    PerfCounterObject = protocol.MI_InstanceA(NewPerf)
     HeartbeatIntervalSeconds = protocol.MI_Uint16(NewHeartbeatIntervalSeconds)
     retd = {}
     ld = locals()
@@ -81,34 +81,34 @@ def Get_Marshall(HeartbeatIntervalSeconds, PerfObject):
     return retval, retd
 
 
-def Set(HeartbeatIntervalSeconds, PerfObject):
-    if Test(HeartbeatIntervalSeconds, PerfObject) == [0]:
+def Set(HeartbeatIntervalSeconds, PerfCounterObject):
+    if Test(HeartbeatIntervalSeconds, PerfCounterObject) == [0]:
         return [0]
-    if UpdateOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
+    if UpdateOMSAgentConf(HeartbeatIntervalSeconds, PerfCounterObject):
         return [0]
     else:
         return [-1]
 
 
-def Test(HeartbeatIntervalSeconds, PerfObject):
-    prune_perfs(PerfObject)
+def Test(HeartbeatIntervalSeconds, PerfCounterObject):
+    prune_perfs(PerfCounterObject)
     NewHeartbeatIntervalSeconds, NewPerfs = ReadOMSAgentConf(
-        HeartbeatIntervalSeconds, PerfObject)
+        HeartbeatIntervalSeconds, PerfCounterObject)
     if NewHeartbeatIntervalSeconds != HeartbeatIntervalSeconds:
         return [-1]
-    for perf in PerfObject:
+    for perf in PerfCounterObject:
         perf['PerformanceCounter'].sort()
         perf['AllInstances'] = True
     for perf in NewPerfs:
         perf['PerformanceCounter'].sort()
-    if PerfObject != NewPerfs:
+    if PerfCounterObject != NewPerfs:
             return [-1]
     return [0]
 
 
-def Get(HeartbeatIntervalSeconds, PerfObject):
+def Get(HeartbeatIntervalSeconds, PerfCounterObject):
     NewHeartbeatIntervalSeconds, NewPerf = ReadOMSAgentConf(
-        HeartbeatIntervalSeconds, PerfObject)
+        HeartbeatIntervalSeconds, PerfCounterObject)
     return NewHeartbeatIntervalSeconds, NewPerf
 
 
@@ -125,7 +125,7 @@ def TranslatePerfs(object_name, perfs):
     return d
 
 
-def ReadOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
+def ReadOMSAgentConf(HeartbeatIntervalSeconds, PerfCounterObject):
     txt = ''
     try:
         txt = codecs.open(conf_path, 'r', 'utf8').read()
@@ -164,7 +164,7 @@ def ReadOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
     return new_heartbeat, new_perfobj
 
 
-def UpdateOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
+def UpdateOMSAgentConf(HeartbeatIntervalSeconds, PerfCounterObject):
     if os.path.exists(conf_path):
         txt = codecs.open(conf_path, 'r', 'utf8').read()
         LG().Log('INFO', 'Read omsagent configuration ' + conf_path + '.')
@@ -183,7 +183,7 @@ def UpdateOMSAgentConf(HeartbeatIntervalSeconds, PerfObject):
     for source in perf_src_srch.findall(txt):
         txt = txt.replace(source, '')
     new_source = ''
-    for perf in PerfObject:
+    for perf in PerfCounterObject:
         d = TranslatePerfs(perf['ObjectName'], perf['PerformanceCounter'])
         for k in d.keys():
             names = '(' + reduce(lambda x, y: x + '|' + y, d[k]) + ')'
@@ -228,27 +228,27 @@ def rm_unicode(obj):
         return obj
 
 
-def prune_perfs(PerfObject):
-    l = len(PerfObject)
+def prune_perfs(PerfCounterObject):
+    l = len(PerfCounterObject)
     i = 0
     while i < l:
-        d = TranslatePerfs(PerfObject[i]['ObjectName'], PerfObject[i]['PerformanceCounter'])
-        if PerfObject[i]['ObjectName'] in d.keys():
-            for p in PerfObject[i]['PerformanceCounter']:
-                if p not in d[PerfObject[i]['ObjectName']]:
+        d = TranslatePerfs(PerfCounterObject[i]['ObjectName'], PerfCounterObject[i]['PerformanceCounter'])
+        if PerfCounterObject[i]['ObjectName'] in d.keys():
+            for p in PerfCounterObject[i]['PerformanceCounter']:
+                if p not in d[PerfCounterObject[i]['ObjectName']]:
                     LG().Log('INFO', 'No match for PerformanceCounter \'' \
                              + p + '\' in ' \
-                             + repr(PerfObject[i]['ObjectName']) + ' in omi_mapping.json, ignoring.')
-                    PerfObject[i]['PerformanceCounter'].remove(p)
-            if len(PerfObject[i]['PerformanceCounter']) == 0:
-                PerfObject.pop(i)
+                             + repr(PerfCounterObject[i]['ObjectName']) + ' in omi_mapping.json, ignoring.')
+                    PerfCounterObject[i]['PerformanceCounter'].remove(p)
+            if len(PerfCounterObject[i]['PerformanceCounter']) == 0:
+                PerfCounterObject.pop(i)
                 l -= 1
                 i -= 1
         else:
             LG().Log('INFO', 'No matches for ObjectName ' \
-                     + repr(PerfObject[i]['ObjectName']) + ' and PerformanceCounter ' \
-                     + repr(PerfObject[i]['PerformanceCounter']) + ' in omi_mapping.json, ignoring.')
-            PerfObject.pop(i)
+                     + repr(PerfCounterObject[i]['ObjectName']) + ' and PerformanceCounter ' \
+                     + repr(PerfCounterObject[i]['PerformanceCounter']) + ' in omi_mapping.json, ignoring.')
+            PerfCounterObject.pop(i)
             l -= 1
             i -= 1
         i += 1
