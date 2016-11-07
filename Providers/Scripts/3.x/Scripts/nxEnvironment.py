@@ -126,6 +126,8 @@ class Params:
             # create the /etc/environment file and source it from
             # DSCEnvironment.sh
             os.system('echo > /etc/environment')
+        if not os.path.exists('/etc/profile.d'):
+            os.system('mkdir /etc/profile.d/')
         if not os.path.isfile('/etc/profile.d/DSCEnvironment.sh'):
             os.system(
                 'echo ". /etc/environment" > /etc/profile.d/DSCEnvironment.sh')
@@ -278,7 +280,7 @@ def FindVar(p):
     found = False
     error = None
     if not os.path.isfile(p.file_path):
-        return found
+        return found, error
     with opened_w_error(p.file_path, 'r') as (F, error):
         if error:
             Print("Exception opening file " + p.file_path + " Error Code: " +
