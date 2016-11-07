@@ -1021,6 +1021,38 @@ MI_CONST MI_ClassDecl MSFT_nxOMSPerfCounterObject_rtti =
 **==============================================================================
 */
 
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_Name_Key_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_Name_Key_qual =
+{
+    MI_T("Key"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxOMSPerfCounterResource_Name_Key_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_Name_quals[] =
+{
+    &MSFT_nxOMSPerfCounterResource_Name_Key_qual,
+};
+
+/* property MSFT_nxOMSPerfCounterResource.Name */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_Name_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
+    0x006E6504, /* code */
+    MI_T("Name"), /* name */
+    MSFT_nxOMSPerfCounterResource_Name_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSPerfCounterResource_Name_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxOMSPerfCounterResource, Name), /* offset */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* origin */
+    MI_T("MSFT_nxOMSPerfCounterResource"), /* propagator */
+    NULL,
+};
+
 static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_Write_qual_value = 1;
 
 static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_Write_qual =
@@ -1053,14 +1085,14 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_HeartbeatIntervalS
     NULL,
 };
 
-static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_PerfCounterObject_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSPerfCounterResource_PerfCounterObject_Write_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfCounterObject_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfCounterObject_Write_qual =
 {
-    MI_T("Key"),
+    MI_T("Write"),
     MI_BOOLEAN,
-    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_Key_qual_value
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_Write_qual_value
 };
 
 static MI_CONST MI_Char* MSFT_nxOMSPerfCounterResource_PerfCounterObject_EmbeddedInstance_qual_value = MI_T("MSFT_nxOMSPerfCounterObject");
@@ -1075,14 +1107,14 @@ static MI_CONST MI_Qualifier MSFT_nxOMSPerfCounterResource_PerfCounterObject_Emb
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_PerfCounterObject_quals[] =
 {
-    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_Key_qual,
+    &MSFT_nxOMSPerfCounterResource_PerfCounterObject_Write_qual,
     &MSFT_nxOMSPerfCounterResource_PerfCounterObject_EmbeddedInstance_qual,
 };
 
 /* property MSFT_nxOMSPerfCounterResource.PerfCounterObject */
 static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_PerfCounterObject_prop =
 {
-    MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
+    MI_FLAG_PROPERTY, /* flags */
     0x00707411, /* code */
     MI_T("PerfCounterObject"), /* name */
     MSFT_nxOMSPerfCounterResource_PerfCounterObject_quals, /* qualifiers */
@@ -1098,6 +1130,7 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSPerfCounterResource_PerfCounterObject_
 
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSPerfCounterResource_props[] =
 {
+    &MSFT_nxOMSPerfCounterResource_Name_prop,
     &MSFT_nxOMSPerfCounterResource_HeartbeatIntervalSeconds_prop,
     &MSFT_nxOMSPerfCounterResource_PerfCounterObject_prop,
 };

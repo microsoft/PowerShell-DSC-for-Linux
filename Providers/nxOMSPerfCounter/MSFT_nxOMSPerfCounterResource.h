@@ -20,7 +20,7 @@
 ** MSFT_nxOMSPerfCounterResource [MSFT_nxOMSPerfCounterResource]
 **
 ** Keys:
-**    PerfCounterObject
+**    Name
 **
 **==============================================================================
 */
@@ -30,8 +30,9 @@ typedef struct _MSFT_nxOMSPerfCounterResource /* extends OMI_BaseResource */
     MI_Instance __instance;
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSPerfCounterResource properties */
+    /*KEY*/ MI_ConstStringField Name;
     MI_ConstUint16Field HeartbeatIntervalSeconds;
-    /*KEY*/ MSFT_nxOMSPerfCounterObject_ConstArrayRef PerfCounterObject;
+    MSFT_nxOMSPerfCounterObject_ConstArrayRef PerfCounterObject;
 }
 MSFT_nxOMSPerfCounterResource;
 
@@ -123,6 +124,38 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Post(
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_Name(
+    _Inout_ MSFT_nxOMSPerfCounterResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        0,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_SetPtr_Name(
+    _Inout_ MSFT_nxOMSPerfCounterResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        0,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Clear_Name(
+    _Inout_ MSFT_nxOMSPerfCounterResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        0);
+}
+
 MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_HeartbeatIntervalSeconds(
     _Inout_ MSFT_nxOMSPerfCounterResource* self,
     _In_ MI_Uint16 x)
@@ -149,7 +182,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_PerfCounterObject(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        1,
+        2,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         0);
@@ -165,7 +198,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_SetPtr_PerfCounterObje
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        1,
+        2,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         MI_FLAG_BORROW);
@@ -176,7 +209,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Clear_PerfCounterObjec
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        1);
+        2);
 }
 
 /*
