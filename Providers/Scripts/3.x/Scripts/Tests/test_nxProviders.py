@@ -3313,7 +3313,7 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
         os.system('mv /etc/opt/microsoft/omsagent/conf/omsagent.conf.bak /etc/opt/microsoft/omsagent/conf/omsagent.conf')            
 
         
-    def make_MI(self,retval,HeartbeatIntervalSeconds, PerfCounterObject):
+    def make_MI(self, retval, Name, HeartbeatIntervalSeconds, PerfCounterObject):
         d=dict()
         d.clear()
         if PerfCounterObject == None :
@@ -3327,9 +3327,10 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
                 perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
             d['PerfCounterObject'] = nxOMSPerfCounter.protocol.MI_InstanceA(PerfCounterObject)
         d['HeartbeatIntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(HeartbeatIntervalSeconds)
+        d['Name']=nxOMSPerfCounter.protocol.MI_String(Name)
         return retval,d
     
-    def testSetOMSAgent_add(self):
+    def testSetPerfCounter_add(self):
         d={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
             'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
@@ -3344,9 +3345,9 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
             perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
 
-    def testGetOMSAgent_add(self):
-        d={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+    def testGetPerfCounter_add(self):
+        d={'Name':'testPerfCounter', 'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 
+            'AllInstances':True, 'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
@@ -3358,8 +3359,8 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
             perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
             perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         e=copy.deepcopy(d)
-        t={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+        t={'Name':'testPerfCounter', 'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600,
+            'AllInstances':True, 'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
@@ -3370,8 +3371,8 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get '+repr(g)+' should return == '+repr(m)+'')
 
-    def testSetOMSAgent_del(self):
-        d={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
+    def testSetPerfCounter_del(self):
+        d={'Name':'testPerfCounter', 'HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
         for perf in d['PerfCounterObject']:
             perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
             perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
@@ -3380,8 +3381,8 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
             perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
 
-    def testGetOMSAgent_del(self):
-        d={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
+    def testGetPerfCounter_del(self):
+        d={'Name':'testPerfCounter', 'HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
         for perf in d['PerfCounterObject']:
             perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
             perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
@@ -3389,17 +3390,17 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
             perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
             perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        t={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
+        t={'Name':'testPerfCounter', 'HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
         m=self.make_MI(0,**t)
         g=nxOMSPerfCounter.Get_Marshall(**d)
         print('GET '+ repr(g))
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get('+repr(g)+' should return ==['+repr(m)+']')
 
-    def testSetOMSAgent_add_missing_conf_file(self):
+    def testSetPerfCounter_add_missing_conf_file(self):
         os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
-        d={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 
+            'AllInstances':True, 'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
@@ -3412,10 +3413,10 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
             perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
 
-    def testSetGetOMSAgent_add_missing_conf_file(self):
+    def testSetGetPerfCounter_add_missing_conf_file(self):
         os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
-        d={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600,
+            'AllInstances':True, 'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
@@ -3427,8 +3428,8 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
             perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
             perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         e=copy.deepcopy(d)
-        t={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+        t={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600,
+            'AllInstances':True, 'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
@@ -3439,10 +3440,10 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get '+repr(g)+' should return == '+repr(m)+'')
 
-    def testGetOMSAgent_add_missing_conf_file(self):
+    def testGetPerfCounter_add_missing_conf_file(self):
         os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
-        d={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600,
+            'AllInstances':True,'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
@@ -3453,16 +3454,16 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
             perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
             perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
             perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        t={'HeartbeatIntervalSeconds':None,'PerfCounterObject':[]}
+        t={'Name':'testPerfCounter','HeartbeatIntervalSeconds':None,'PerfCounterObject':[]}
         m=self.make_MI(0,**t)
         g=nxOMSPerfCounter.Get_Marshall(**d)
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get '+repr(g)+' should return == '+repr(m)+'')
 
-    def testTestOMSAgent_add_missing_conf_file(self):
+    def testTestPerfCounter_add_missing_conf_file(self):
         os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
-        d={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600,
+            'AllInstances':True,'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
@@ -3474,8 +3475,8 @@ class nxOMSPerfCounterTestCases(unittest2.TestCase):
             perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
             perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
         e=copy.deepcopy(d)
-        t={'HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
+        t={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600,
+            'AllInstances':True,'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
             'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
             'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
             'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],

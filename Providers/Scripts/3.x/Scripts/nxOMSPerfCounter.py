@@ -48,17 +48,17 @@ def init_vars(HeartbeatIntervalSeconds, PerfCounterObject):
             perf['IntervalSeconds'] = perf['IntervalSeconds'].value.value
 
 
-def Set_Marshall(HeartbeatIntervalSeconds, PerfCounterObject):
+def Set_Marshall(Name, HeartbeatIntervalSeconds, PerfCounterObject):
     init_vars(HeartbeatIntervalSeconds, PerfCounterObject)
     return Set(HeartbeatIntervalSeconds, PerfCounterObject)
 
 
-def Test_Marshall(HeartbeatIntervalSeconds, PerfCounterObject):
+def Test_Marshall(Name, HeartbeatIntervalSeconds, PerfCounterObject):
     init_vars(HeartbeatIntervalSeconds, PerfCounterObject)
     return Test(HeartbeatIntervalSeconds, PerfCounterObject)
 
 
-def Get_Marshall(HeartbeatIntervalSeconds, PerfCounterObject):
+def Get_Marshall(Name, HeartbeatIntervalSeconds, PerfCounterObject):
     arg_names = list(locals().keys())
     init_vars(HeartbeatIntervalSeconds, PerfCounterObject)
     retval = 0
@@ -74,6 +74,7 @@ def Get_Marshall(HeartbeatIntervalSeconds, PerfCounterObject):
         perf['IntervalSeconds'] = protocol.MI_Uint16(perf['IntervalSeconds'])
     PerfCounterObject = protocol.MI_InstanceA(NewPerf)
     HeartbeatIntervalSeconds = protocol.MI_Uint16(NewHeartbeatIntervalSeconds)
+    Name = protocol.MI_String(Name)
     retd = {}
     ld = locals()
     for k in arg_names:
