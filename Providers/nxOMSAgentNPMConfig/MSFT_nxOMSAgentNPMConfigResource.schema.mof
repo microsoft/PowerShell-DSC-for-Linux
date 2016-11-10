@@ -1,0 +1,9 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSAgentNPMConfigResource : OMI_BaseResource
+{
+                  [key] string ConfigType;
+                  [write] string ConfigID;
+                  [write] string Contents;
+                  [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+                  [write] string ContentChecksum;
+};
