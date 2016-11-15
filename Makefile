@@ -42,18 +42,17 @@ else
 	ln -fs $(current_dir)/ext/curl/x86 $(current_dir)/ext/curl/current_platform
  endif
 	cd ../pal/build; ./configure --enable-ulinux
- ifeq ($(BUILD_SSL_098),1)
-	rm -rf omi-1.0.8/output_openssl_0.9.8/lib/libdsccore.so
+	cd omi-1.0.8; ./configure $(DEBUG_FLAGS) --enable-microsoft --enable-ulinux
+
+	$(MAKE) -C omi-1.0.8
+
 	$(MAKE) omi098
 	$(MAKE) dsc098
 	$(MAKE) dsckit098
- endif
- ifeq ($(BUILD_SSL_100),1)
-	rm -rf omi-1.0.8/output_openssl_1.0.0/lib/libdsccore.so
+
 	$(MAKE) omi100
 	$(MAKE) dsc100
 	$(MAKE) dsckit100
- endif
 
 endif
 
@@ -128,24 +127,14 @@ dsc100: lcm100 providers
 
 
 omi098:
-	$(MAKE) configureomi098
+	rm -rf omi-1.0.8/output_openssl_0.9.8/lib/libdsccore.so
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_0.9.8 omi-1.0.8/output
-	$(MAKE) -C omi-1.0.8
-	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
 
 omi100:
-	$(MAKE) configureomi100
+	rm -rf omi-1.0.8/output_openssl_1.0.0/lib/libdsccore.so
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_1.0.0 omi-1.0.8/output
-	$(MAKE) -C omi-1.0.8
-	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
-
-configureomi098:
-	(cd omi-1.0.8; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_0.9.8 --localstatedir=/var/opt/omi --sysconfdir=/etc/opt/omi/conf --certsdir=/etc/opt/omi/ssl --opensslcflags="$(openssl098_cflags)" --openssllibs="-L$(current_dir)/ext/curl/current_platform/lib $(openssl098_libs)" --openssllibdir="$(openssl098_libdir)")
-
-configureomi100:
-	(cd omi-1.0.8; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_1.0.0 --localstatedir=/var/opt/omi --sysconfdir=/etc/opt/omi/conf --certsdir=/etc/opt/omi/ssl --opensslcflags="$(openssl100_cflags)" --openssllibs="-L$(current_dir)/ext/curl/current_platform/lib $(openssl100_libs)" --openssllibdir="$(openssl100_libdir)")
 
 lcm098:
 	$(MAKE) -C LCM
