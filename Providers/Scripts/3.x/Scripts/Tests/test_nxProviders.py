@@ -4505,42 +4505,83 @@ class nxOMSAgentNPMConfigTestCases(unittest2.TestCase):
     """
     Test cases for nxOMSAgentNPMConfig.py
     """
+
+    class TestOMSAgentUtil(nxNPMD.IOMSAgent):
+        def restart_oms_agent(self):
+            return True
+
+    class TestNPMAgentUtil(nxNPMD.IOMSAgent):
+        def binary_setcap(self, binaryPath):
+            return True
+
     def setUp(self):
         """
         Setup test resources
         """
         #time.sleep(1)
-        nxNPMD.CONFIG_PATH = 'var/tmp/etc/opt/microsoft/omsagent/conf/'
+        nxNPMD.CONFIG_PATH = '/var/tmp/etc/opt/microsoft/omsagent/conf/'
         nxNPMD.SERVER_ADDRESS = '/var/tmp/run/npmdagent.sock'
-        
-        self.config_type = 'UpdateNPMAgentConfig'
+        nxNPMD.DSC_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+        nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/AGENTVERSION'
+        nxNPMD.PLUGIN_PATH = '/var/tmp/opt/microsoft/omsagent/plugin/'
+        nxNPMD.PLUGIN_CONF_PATH = '/var/tmp/etc/opt/microsoft/omsagent/conf/omsagent.d/'
+        nxNPMD.AGENT_BINARY_PATH = '/var/tmp/opt/microsoft/omsagent/'
+        nxNPMD.RESOURCE_MODULE_PATH = '/var/tmp/opt/microsoft/omsconfig/modules/NPM/'
+
+        self.config_type = 'UpdatedAgentConfig'
         self.config_id = '12345'
-        self.contents = base64.b64encode('<Configuration></Configuration>')
-        self.content_checksum = hashlib.md5(self.contents).hexdigest()
+        self.contents = base64.b64encode(b'<Configuration></Configuration>').decode('utf-8')
+        self.content_checksum = hashlib.md5(self.contents.encode('utf-8')).hexdigest()
         self.ensure_present = 'Present'
         self.ensure_absent = 'Absent'
         self.out_file = nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME)
         self.server_address = nxNPMD.SERVER_ADDRESS
 
+        x64binaryPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_X64_AGENT_PATH)
+        x86binaryPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_X86_AGENT_PATH)
+        dscPluginPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_PLUGIN_PATH)
+        dscConfPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_PLUGIN_CONF_PATH)
+        
         # remove files from directory
-        os.system('rm -rf /var/tmp/run' +
+        os.system('rm -rf /var/tmp/run;' +
             'rm -rf /var/tmp/etc;'
+            'rm -rf /var/tmp/opt;'
         )
-
         os.system('mkdir -p ' + nxNPMD.CONFIG_PATH + ';'
             'mkdir -p ' + '/var/tmp/run/' + ';'
+            'mkdir -p ' + nxNPMD.PLUGIN_PATH + ';'
+            'mkdir -p ' + nxNPMD.PLUGIN_CONF_PATH + ';'
+            'mkdir -p ' + x64binaryPath + ';'
+            'mkdir -p ' + x86binaryPath + ';'
+            'mkdir -p ' + dscPluginPath + ';'
+            'mkdir -p ' + dscConfPath + ';'
+            'echo testfile >> ' + x64binaryPath + 'binary;'
+            'echo testfile >> ' + x86binaryPath + 'binary;'
+            'echo testfile >> ' + dscPluginPath + 'plugin;'
+            'echo testfile >> ' + dscConfPath + 'config;'
         )
-        thread.start_new_thread(self.createUDSServer, ())
+        
+        with open(nxNPMD.DSC_RESOURCE_VERSION_PATH, 'w+') as dFile:
+            dFile.write('1.0')
+        with open(nxNPMD.AGENT_RESOURCE_VERSION_PATH, 'w+') as dFile:
+            dFile.write('1.0')
+
+        nxNPMD.OMS_ACTION = nxOMSAgentNPMConfigTestCases.TestOMSAgentUtil()
+        nxNPMD.NPM_ACTION = nxOMSAgentNPMConfigTestCases.TestNPMAgentUtil()
+
+        #thread.start_new_thread(self.createUDSServer, ())
     def tearDown(self):
         """
         Remove test resources.
         """
         # remove files from directory
-        os.system('rm -rf /var/tmp/run' +
+        os.system('rm -rf /var/tmp/run;' +
             'rm -rf /var/tmp/etc;'
+            'rm -rf /var/tmp/opt;'
         )
         #time.sleep(1)
 
+    
     def make_MI(self, retval, ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
         d=dict();
         if ConfigType == None :
@@ -4570,8 +4611,9 @@ class nxOMSAgentNPMConfigTestCases(unittest2.TestCase):
         try:
             with codecs.open (path, encoding = 'utf8', mode = "r") as dFile:
                 content = dFile.read()
-        except IOError, error:
-            print "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror
+        except IOError as error:
+            errno, strerror = error.args
+            print ('Exception opening file ' + path + ' Error Code: ' + str(errno) + ' Error: ' + format(error) + strerror)
         return content
 
     def createUDSServer(self):
@@ -4603,56 +4645,159 @@ class nxOMSAgentNPMConfigTestCases(unittest2.TestCase):
                 # Clean up the connection
                 connection.close()
 
-    def testSetUpdateConfigChecksumMismatch(self):
-        newStr = 'New config string'
-        r=nxNPMD.Set_Marshall(self.config_type, self.config_id, base64.b64encode(newStr), self.ensure_present, self.content_checksum)
-        print r
-        self.assertTrue(r == [-1],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-        content = self.readFile(self.out_file)
-        print content
-        self.assertTrue(content != newStr, 'Contents written to file do not match')
+    def verifyFileContents(self, text):
+        content = self.readFile(nxNPMD.AGENT_BINARY_PATH.__add__('binary'))
+        self.assertTrue(content == text, 'Contents written to file do not match')
+        content = self.readFile(nxNPMD.PLUGIN_PATH.__add__('plugin'))
+        self.assertTrue(content == text, 'Contents written to file do not match')
+        content = self.readFile(nxNPMD.PLUGIN_CONF_PATH.__add__('config'))
+        self.assertTrue(content == text, 'Contents written to file do not match')
+
+    def updateFileContents(self, text):
+        with open(nxNPMD.AGENT_BINARY_PATH.__add__('binary'), 'w+') as dFile:
+            dFile.write(text)
+        with open(nxNPMD.PLUGIN_PATH.__add__('plugin'), 'w+') as dFile:
+            dFile.write(text)
+        with open(nxNPMD.PLUGIN_CONF_PATH.__add__('config'), 'w+') as dFile:
+            dFile.write(text)
 
     def testGetUpdateAgentConfig(self):
         r=nxNPMD.Get_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-        print r
-        print self.make_MI([0], self.config_type, self.config_id, base64.b64decode(self.contents), self.ensure_present, self.content_checksum)
-        self.assertTrue(check_values(r,self.make_MI([0], self.config_type, self.config_id, base64.b64decode(self.contents), self.ensure_present, self.content_checksum)) == True,'nxNPMD.Get_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)[0] should return == 0')
+        self.assertTrue(check_values(r,self.make_MI([0], self.config_type, self.config_id, base64.b64decode(self.contents.encode('utf-8')).decode('utf-8'), self.ensure_present, self.content_checksum)) == True,'nxNPMD.Get_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)[0] should return == 0')
+
 
     def testTestNewAgentConfig(self):
+        # disables check for binary update
+        nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
         r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-        print r
         self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
 
     def testTestUpdateConfigChecksumMismatch(self):
+        # disables check for binary update
+        nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
         nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, base64.b64encode('New config string'), self.ensure_present, self.content_checksum)
-        print r
+        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, base64.b64encode(b'New config string').decode('utf-8'), self.ensure_present, self.content_checksum)
         self.assertTrue(r == [0],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
 
     def testTestUpdateNewConfig(self):
+        # disables check for binary update
+        nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
         nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
         newContent = 'New config string'
-        newChecksum = hashlib.md5(newContent).hexdigest()
-        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, base64.b64encode(newContent), self.ensure_present, newChecksum)
-        print r
+        newChecksum = hashlib.md5(base64.b64encode(newContent.encode('utf-8'))).hexdigest()
+        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, base64.b64encode(newContent.encode('utf-8')).decode('utf-8'), self.ensure_present, newChecksum)
         self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
 
+    def testTestSolutionEnable(self):
+        # disable config update
+        with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+            dFile.write(base64.b64decode(self.contents.encode('utf-8')).decode('utf-8'))
+        # remove agent resource version file
+        os.unlink(nxNPMD.AGENT_RESOURCE_VERSION_PATH)
+        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+        self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+
+    def testTestBinaryUpdate(self):
+        # disable config update
+        with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+            dFile.write(base64.b64decode(self.contents.encode('utf-8')).decode('utf-8'))
+        # update dsc resource version file
+        with open(nxNPMD.DSC_RESOURCE_VERSION_PATH, 'w+') as dFile:
+            dFile.write('1.1')
+        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+        self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+
+    def testTestNoChange(self):
+        # disable config update
+        with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+            dFile.write(base64.b64decode(self.contents.encode('utf-8')).decode('utf-8'))
+        # disables check for binary update
+        nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+        self.assertTrue(r == [0],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+
+    def testTestEnsureAbsentNoAgent(self):
+        # remove agent resource version file
+        os.unlink(nxNPMD.AGENT_RESOURCE_VERSION_PATH)
+        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum)
+        self.assertTrue(r == [0],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+
+    def testTestEnsureAbsentSolutionPurge(self):
+        r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum)
+        self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+
+
     def testSetNewAgentConfig(self):
+        # disables check for binary update
+        nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
         r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-        print r
         self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
         content = self.readFile(self.out_file)
-        self.assertTrue(content == base64.b64decode(self.contents), 'Contents written to file do not match')
+        self.assertTrue(content == base64.b64decode(self.contents.encode('utf-8')).decode('utf-8'), 'Contents written to file do not match')
+
+    def testSetUpdateConfigChecksumMismatch(self):
+        # disables check for binary update
+        nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+        newStr = 'New config string'
+        r=nxNPMD.Set_Marshall(self.config_type, self.config_id, base64.b64encode(newStr.encode('utf-8')).decode('utf-8'), self.ensure_present, self.content_checksum)
+        self.assertTrue(r == [-1],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+        content = self.readFile(self.out_file)
+        self.assertTrue(content != newStr, 'Contents written to file do not match')
 
     def testSetUpdateNewConfig(self):
+        # disables check for binary update
+        nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
         nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
         newContent = 'New config string'
-        newChecksum = hashlib.md5(newContent).hexdigest()
-        r=nxNPMD.Set_Marshall(self.config_type, self.config_id, base64.b64encode(newContent), self.ensure_present, newChecksum)
-        print r
+        newChecksum = hashlib.md5(base64.b64encode(newContent.encode('utf-8'))).hexdigest()
+        r=nxNPMD.Set_Marshall(self.config_type, self.config_id, base64.b64encode(newContent.encode('utf-8')).decode('utf-8'), self.ensure_present, newChecksum)
         self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
         content = self.readFile(self.out_file)
         self.assertTrue(newContent == content, 'Contents written to file do not match')
+
+    def testSetSolutionEnable(self):
+        # disable config update
+        with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+            dFile.write(base64.b64decode(self.contents.encode('utf-8')).decode('utf-8'))
+        # remove agent resource version file
+        os.unlink(nxNPMD.AGENT_RESOURCE_VERSION_PATH)
+        r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+        self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+        
+        #verify file contents
+        self.verifyFileContents('testfile\n')
+
+    def testSetBinaryUpdate(self):
+        # disable config update
+        with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+            dFile.write(base64.b64decode(self.contents.encode('utf-8')).decode('utf-8'))
+        # update dsc resource version file
+        with open(nxNPMD.DSC_RESOURCE_VERSION_PATH, 'w+') as dFile:
+            dFile.write('1.1')
+        r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+
+        #change contents
+        self.updateFileContents('newText')
+
+        # making sure we are able to override files
+        with open(nxNPMD.DSC_RESOURCE_VERSION_PATH, 'w+') as dFile:
+            dFile.write('1.2')
+
+        r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)        
+        self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+
+        #verify file contents
+        self.verifyFileContents('testfile\n')
+
+    def testSetEnsureAbsentSolutionPurge(self):
+        r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum)
+        self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+
+        # make sure files are not present
+        if os.path.exists(nxNPMD.AGENT_BINARY_PATH.__add__('binary')):
+            self.assertTrue(False, 'binary file exists')
+        if os.path.exists(nxNPMD.AGENT_RESOURCE_VERSION_PATH):
+            self.assertTrue(False, 'agent resource version file exists')
 
 ######################################
 if __name__ == '__main__':
