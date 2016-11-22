@@ -28,7 +28,7 @@ instance of MSFT_nxOMSGenerateInventoryMofResource as $MSFT_nxOMSGenerateInvento
     $MSFT_nxOMSGenerateInventoryMofInstance1ref
   };
   RunIntervalInSeconds = 30;
-  Tag = "oms.linuxfilechangetracking";
+  Tag = "oms.changetracking.file";
   Format = "tsv";
   FilterType = "filter_changetracking";
 };

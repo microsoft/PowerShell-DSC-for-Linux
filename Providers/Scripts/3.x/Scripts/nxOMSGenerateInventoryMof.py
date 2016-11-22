@@ -17,7 +17,7 @@ nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
 inventoryMof_path = '/etc/opt/microsoft/omsagent/conf/omsagent.d/'
-outputxml_path = '/etc/opt/omi/conf/omsconfig/configuration/'
+outputxml_path = '/var/opt/microsoft/omsagent/tmp/'
 
 def init_vars(Instances):
     new_instances = []
@@ -137,9 +137,8 @@ def GenerateInventoyConfContents(FeatureName, Instances, RunIntervalInSeconds, T
 <source> \n \
   type exec \n \
   tag ' + Tag + ' \n \
-  command /opt/microsoft/omsconfig/Scripts/PerformInventory.py --InMOF ' + mof_file_path + ' --OutXML ' + outputxml_path + FeatureName + '.xml > /dev/null && cat ' + outputxml_path + FeatureName + '.xml \n \
+  command /opt/microsoft/omsconfig/Scripts/PerformInventory.py --InMOF ' + mof_file_path + ' --OutXML ' + outputxml_path + FeatureName + '.xml > /dev/null && /opt/microsoft/omsagent/ruby/bin/ruby /opt/microsoft/omsagent/plugin/change_tracking_runner.rb ' + outputxml_path + FeatureName + '.xml \n \
   format '+ Format + '\n \
-  keys xml \n \
   run_interval ' + str(RunIntervalInSeconds) + 's \n \
 </source> \n \
 <filter '+ Tag + '> \n \

@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0")]
+[ClassVersion("1.1.0")]
 class MSFT_nxOMSGenerateInventoryMofInstance
 {
     [key] string InstanceName;
@@ -6,7 +6,7 @@ class MSFT_nxOMSGenerateInventoryMofInstance
     [write] string Properties[];
 };
 
-[ClassVersion("1.0.0")]
+[ClassVersion("1.1.0")]
 class MSFT_nxOMSGenerateInventoryMofResource : OMI_BaseResource
 {
         [key] string FeatureName;
