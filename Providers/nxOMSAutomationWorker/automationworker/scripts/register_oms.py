@@ -9,10 +9,12 @@ import sys
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# since we are using the worker httpclient, worker_version is expected to be in the configuration
+# since we are using the worker httpclient, some configuration values are expected
 from worker import configuration
 
-configuration.set_config({configuration.WORKER_VERSION: "LinuxAutoRegister"})
+configuration.delete_config()
+configuration.set_config({configuration.WORKER_VERSION: "LinuxAutoRegister",
+                          configuration.WORKING_DIRECTORY_PATH: "/var/opt/microsoft/omsagent/tmp"})
 
 from worker import CurlHttpClient
 from worker import simplejson as json
@@ -118,7 +120,7 @@ def deregister(registration_endpoint, worker_group_name, machine_id, cert_path, 
 
 def create_worker_configuration_file(working_directory, jrds_uri, registration_endpoint, workspace_id,
                                      automation_account_id, worker_group_name, machine_id, oms_cert_path, oms_key_path,
-                                     state_directory, gpg_keyring_path, proxy_configuration_path):
+                                     state_directory, gpg_keyring_path, proxy_configuration_path, test_mode):
     """Creates the automation hybrid worker configuration file.
 
     Note:
@@ -150,6 +152,8 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
     config.set(section, "gpg_public_keyring_path", gpg_keyring_path)
     config.set(section, "proxy_configuration_path", proxy_configuration_path)
     config.set(section, "state_directory_path", state_directory)
+    if test_mode is True:
+        config.set(section, "bypass_certificate_verification", True)
 
     section = "oms-metadata"
     if not config.has_section(section):
@@ -217,7 +221,8 @@ def main(argv):
             test_mode = True
 
     if workspace_id is None or agent_id is None or oms_cert_path is None or oms_key_path is None \
-            or endpoint is None or gpg_keyring_path is None or proxy_configuration_path is None or working_directory is None:
+            or endpoint is None or gpg_keyring_path is None or proxy_configuration_path is None\
+            or working_directory is None or state_directory is None:
         print "Missing mandatory arguments."
         print "Use -h or --help for usage."
         sys.exit(1)
@@ -229,6 +234,9 @@ def main(argv):
         # build registration endpoint
         # example endpoint : agentsvc.azure-automation.net
         registration_endpoint = "https://" + workspace_id + "." + endpoint + "/accounts/" + workspace_id
+        if "df-agentsvc" in registration_endpoint:
+            registration_endpoint = "https://oaasagentsvcdf.test.azure-automation.net/accounts/" + workspace_id
+            test_mode = True
 
         # rename to match oms concepts to automation
         machine_id = agent_id
@@ -241,7 +249,7 @@ def main(argv):
             create_worker_configuration_file(working_directory, registration_response["jobRuntimeDataServiceUri"],
                                              registration_endpoint, workspace_id, registration_response["AccountId"],
                                              worker_group_name, machine_id, oms_cert_path, oms_key_path,
-                                             state_directory, gpg_keyring_path, proxy_configuration_path)
+                                             state_directory, gpg_keyring_path, proxy_configuration_path, test_mode)
         elif operation == DEREGISTER:
             deregister(registration_endpoint, worker_group_name, machine_id, oms_cert_path, oms_key_path, test_mode)
         else:
