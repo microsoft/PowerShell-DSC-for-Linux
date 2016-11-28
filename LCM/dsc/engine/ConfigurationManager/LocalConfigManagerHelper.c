@@ -6116,66 +6116,66 @@ MI_Result MI_CALL LCM_Pull_Execute(
         for (xCount = 0; xCount < partialConfigurations.size && result == MI_RESULT_OK; xCount++)
         {
             result = GetPartialConfigurationName(bFullConfiguration ? NULL : partialConfigurations.data[xCount], (const MI_Char**)&partialConfigName, cimErrorDetails);
-                if (partialConfigName != NULL)
-                {
-                    DSC_EventWriteLCMPullingPartial(partialConfigName);//Log that we're pulling this partial configuration
-                }
-                if (result != MI_RESULT_OK)
-                {
-                        moduleManager->ft->Close(moduleManager, NULL);
-                        return result;
-                }
-                result = GetMofChecksum(&checkSumValue, partialConfigName, cimErrorDetails);
-                if (result != MI_RESULT_OK)
-                {
-                        moduleManager->ft->Close(moduleManager, NULL);
-                        return result;
-                }
-                result = LCM_Pull_ExecuteActionPerConfiguration(lcmContext, metaConfigInstance, partialConfigName,
-                                                                checkSumValue, bComplianceStatus, getActionStatusCode, 
-                                                                &numModulesInstalled, &resultStatus, &getActionStatusCode, &serverAssignedConfigurations,
-                                                                moduleManager, cimErrorDetails);
-                DSC_free(checkSumValue);
+            if (partialConfigName != NULL)
+            {
+                DSC_EventWriteLCMPullingPartial(partialConfigName);//Log that we're pulling this partial configuration
+            }
+            if (result != MI_RESULT_OK)
+            {
+                    moduleManager->ft->Close(moduleManager, NULL);
+                    return result;
+            }
+            result = GetMofChecksum(&checkSumValue, partialConfigName, cimErrorDetails);
+            if (result != MI_RESULT_OK)
+            {
+                    moduleManager->ft->Close(moduleManager, NULL);
+                    return result;
+            }
+            result = LCM_Pull_ExecuteActionPerConfiguration(lcmContext, metaConfigInstance, partialConfigName,
+                                                            checkSumValue, bComplianceStatus, getActionStatusCode, 
+                                                            &numModulesInstalled, &resultStatus, &getActionStatusCode, &serverAssignedConfigurations,
+                                                            moduleManager, cimErrorDetails);
+            DSC_free(checkSumValue);
 
-                if (serverAssignedConfigurations)
+            if (serverAssignedConfigurations)
+            {
+                // Release the memory block assigned to each configuration status and then release the overall configurationstatus (serverAssignedConfigurations)
+                // Please refer to the struct definition of 'OverAllGetActionResponse' to understand the logic below easily. 
+                if (serverAssignedConfigurations != NULL)
                 {
-                    // Release the memory block assigned to each configuration status and then release the overall configurationstatus (serverAssignedConfigurations)
-                    // Please refer to the struct definition of 'OverAllGetActionResponse' to understand the logic below easily. 
-                    if (serverAssignedConfigurations != NULL)
+                    MI_Uint32 totalConfigCounts = (serverAssignedConfigurations)->NumberOfConfiguration;
+                    MI_Uint32 memoryOffset;
+                    for (memoryOffset = 0; memoryOffset < totalConfigCounts; memoryOffset++)
                     {
-                        MI_Uint32 totalConfigCounts = (serverAssignedConfigurations)->NumberOfConfiguration;
-                        MI_Uint32 memoryOffset;
-                        for (memoryOffset = 0; memoryOffset < totalConfigCounts; memoryOffset++)
+                        ConfigurationStatus* currentMemoryBlock = (serverAssignedConfigurations)->Details + memoryOffset;
+                        if (currentMemoryBlock != NULL)
                         {
-                            ConfigurationStatus* currentMemoryBlock = (serverAssignedConfigurations)->Details + memoryOffset;
-                            if (currentMemoryBlock != NULL)
-                            {
-                                DSC_free(currentMemoryBlock);
-                                currentMemoryBlock = NULL;
-                            }
+                            DSC_free(currentMemoryBlock);
+                            currentMemoryBlock = NULL;
                         }
-                        DSC_free(serverAssignedConfigurations);
-                    }            
-                    serverAssignedConfigurations = NULL;       
-                }
+                    }
+                    DSC_free(serverAssignedConfigurations);
+                }            
+                serverAssignedConfigurations = NULL;       
+            }
 
-                if (result == MI_RESULT_OK)
+            if (result == MI_RESULT_OK)
+            {
+                // If GetAction required us to get the configuraiton then only we have to apply the new configuration.
+                if (resultStatus && Tcscasecmp(resultStatus, PULL_STATUSCODE_GETCONFIG) == 0)
                 {
-                        // If GetAction required us to get the configuraiton then only we have to apply the new configuration.
-                        if (resultStatus && Tcscasecmp(resultStatus, PULL_STATUSCODE_GETCONFIG) == 0)
-                        {
-                                bGotNewConfiguration = MI_TRUE;
-                        }
-                        else if (resultStatus && Tcscasecmp(resultStatus, PULL_STATUSCODE_RETRY) == 0)
-                        {
-                                // Pull server didn't have configuration file, ignore the failure, it will be handled later.
-                                DSC_EventWritePartialConfigurationNotAvailable(partialConfigName);
-                        }
-                        if (resultStatus)
-                        {
-                                DSC_free(resultStatus);
-                        }
+                        bGotNewConfiguration = MI_TRUE;
                 }
+                else if (resultStatus && Tcscasecmp(resultStatus, PULL_STATUSCODE_RETRY) == 0)
+                {
+                        // Pull server didn't have configuration file, ignore the failure, it will be handled later.
+                        DSC_EventWritePartialConfigurationNotAvailable(partialConfigName);
+                }
+                if (resultStatus)
+                {
+                        DSC_free(resultStatus);
+                }
+            }
         }
         if (result == MI_RESULT_OK && bGotNewConfiguration)
         {
