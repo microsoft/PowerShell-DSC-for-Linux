@@ -180,7 +180,9 @@ BaseResourceConfiguration g_PartialConfigurationProperties[] =
     { MSFT_PartialConfiguration_Description,            MI_STRING },
     { MSFT_PartialConfiguration_ExclusiveResources,     MI_STRINGA },
     { MSFT_PartialConfiguration_ConfigurationSource,    MI_STRING },
+    { MSFT_PartialConfiguration_ResourceModuleSource,   MI_STRINGA },
     { MSFT_PartialConfiguration_DependsOn,              MI_STRINGA },
+    { MSFT_PartialConfiguration_RefreshMode,            MI_STRING },
     { NULL, 0 }
 };
 
