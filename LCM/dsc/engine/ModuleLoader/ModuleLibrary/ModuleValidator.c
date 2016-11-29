@@ -710,11 +710,13 @@ MI_Result ValidateClassProperties(_In_ MI_Class *classInfo,
     /*Start Test*/
     for (count = 0; properties[count].wszPropName != NULL; count++)
     {
-        DSC_EventWriteValidatingClassProperty(properties[count].wszPropName,classInfo->classDecl->name);
-        r = DSC_MI_Class_GetElement(classInfo, properties[count].wszPropName, NULL, NULL, &type, NULL, NULL, NULL, NULL);
+        const TChar *propName = properties[count].wszPropName;
+        const TChar *className = classInfo->classDecl->name;
+        DSC_EventWriteValidatingClassProperty(propName,className);
+        r = DSC_MI_Class_GetElement(classInfo, propName, NULL, NULL, &type, NULL, NULL, NULL, NULL);
         if( r != MI_RESULT_OK )
         {
-            return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME);
+            return GetCimMIError2Params(r, extendedError, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, propName, className);
         }
 
         if(type != properties[count].propType || NitsShouldFault(NitsHere(), NitsAutomatic))
@@ -758,10 +760,11 @@ MI_Result ValidateBaseResourceConfigurationClass(_In_ MI_Class *baseResourceClas
     /* validate qualifier */
     for (xCount = 0; g_BaseResourceQualifiers[xCount].wszPropName != NULL; xCount++)
     {
+        const TChar * propName = g_BaseResourceQualifiers[xCount].wszPropName;
         r = DSC_MI_Class_GetElement(baseResourceClass, g_BaseResourceQualifiers[xCount].wszPropName, NULL, NULL, NULL, NULL, &qualifierSet, NULL, NULL);
         if( r != MI_RESULT_OK )
         {
-            return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME );
+            return GetCimMIError2Params(r, extendedError, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, propName, baseResourceClass->classDecl->name);            
         }
 
         r = DSC_MI_QualifierSet_GetQualifier(&qualifierSet, g_BaseResourceQualifiers[xCount].wszQualifierName, &qualifierType, &qualifierFlags, &qualifierValue, &index);
@@ -790,7 +793,7 @@ MI_Result ValidateBaseResourceRegistrationClass(_In_ MI_Class *baseRegistrationC
     r = DSC_MI_Class_GetElement(baseRegistrationClass, MSFT_BaseConfigurationProviderRegistration_ClassName, NULL, NULL, NULL, NULL, NULL, &flags, NULL);
     if( r != MI_RESULT_OK )
     {
-        return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME );
+        return GetCimMIError2Params(r, extendedError, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, MSFT_BaseConfigurationProviderRegistration_ClassName, baseRegistrationClass->classDecl->name);
     }
 
     if( !(flags & MI_FLAG_KEY) || NitsShouldFault(NitsHere(), NitsAutomatic))
@@ -1139,15 +1142,15 @@ MI_Result ValidateVersionNumbersCompatibility(_In_ MI_InstanceA *instanceA,
     MI_Instance *tempInstance;
     Intlstr pTempStr = Intlstr_Null;
     if (instanceA == 0 || instanceA->size == 0 || NitsShouldFault(NitsHere(), NitsAutomatic))
-        {
-                return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_CAINFRA_DEPENDCY_NULLPARAM);
-        }
+    {
+        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_CAINFRA_DEPENDCY_NULLPARAM);
+    }
 
-        if (extendedError == NULL)
-        {
-                return MI_RESULT_INVALID_PARAMETER;
-        }
-        *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+    if (extendedError == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
     //get the metaconfiguration instance first
 
     for (i = 0; i < instanceA->size; i++)
