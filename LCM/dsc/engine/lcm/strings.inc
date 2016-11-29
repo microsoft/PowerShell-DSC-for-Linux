@@ -311,7 +311,11 @@
    
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVREGINS_PROP_NAMESPACE, ID_MODMAN_VALIDATE_PROVREGINS_PROP_NAMESPACE, "Mandatory property Namespace not found.")
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVREGINS_PROP_MODULENAME, ID_MODMAN_VALIDATE_PROVREGINS_PROP_MODULENAME, "Mandatory property ModuleName not found.")
-    INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, "Mandatory property not found.")
+    INTERNAL_Intlstr_Define2( ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, 
+        ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, 
+        _In_z_ const PAL_Char*, className,
+        _In_z_ const PAL_Char*, propertyName,
+        "Mandatory property  " Intlstr_tstr(1) " not found for class " Intlstr_tstr(2))
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_CLASSPROP_MAND_TYPE, ID_MODMAN_VALIDATE_CLASSPROP_MAND_TYPE, "Mandatory property type does not match.")
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_CLASSPROP_MAND_GETCLASS, ID_MODMAN_VALIDATE_CLASSPROP_MAND_GETCLASS, "MGet class property count failed.")
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_CLASSPROP_MAND_NOMATCH, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NOMATCH, "The number of properties does not match the expected number.")

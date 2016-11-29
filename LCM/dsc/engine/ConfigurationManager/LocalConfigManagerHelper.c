@@ -233,11 +233,13 @@ MI_Result InitHandler(
         // already initialized.
         return MI_RESULT_OK;
     }
-    else if (initState == RUNNING_INITIALIZATION)
+    else if (initState == RUNNING_INITIALIZATION)   
     {
         // currently going on.
         return GetCimMIError3Params(MI_RESULT_FAILED, cimErrorDetails, ID_LCM_MULTIPLE_METHOD_REQUEST, methodName, (const MI_Char*)g_inializingOperationMethodName, methodName);
     }
+
+    InitLocTable();
 
     g_inializingOperationMethodName = (MI_Char*)methodName;
 
@@ -367,8 +369,6 @@ MI_Result InitHandler(
         g_inializingOperationMethodName = NULL;
         return result;
     }
-    InitLocTable();
-
     SetJobDeviceName();
 
     RegistrationManager_New((RegistrationManager**)&(g_registrationManager), cimErrorDetails);
