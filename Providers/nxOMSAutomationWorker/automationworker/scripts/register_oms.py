@@ -12,8 +12,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # since we are using the worker httpclient, some configuration values are expected
 from worker import configuration
 
-configuration.delete_config()
-configuration.set_config({configuration.WORKER_VERSION: "LinuxAutoRegister",
+configuration.clear_config()
+configuration.set_config({configuration.PROXY_CONFIGURATION_PATH: configuration.DEFAULT_PROXY_CONFIGURATION_PATH,
+                          configuration.WORKER_VERSION: "LinuxAutoRegister",
                           configuration.WORKING_DIRECTORY_PATH: "/var/opt/microsoft/omsagent/tmp"})
 
 from worker import CurlHttpClient

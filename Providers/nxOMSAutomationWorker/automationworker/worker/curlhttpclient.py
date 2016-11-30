@@ -32,6 +32,7 @@ OPTION_HEADER = "--header"
 OPTION_REQUEST = "--request"
 OPTION_INSECURE = "--insecure"
 OPTION_DATA = "--data"
+OPTION_PROXY = "--proxy"
 
 OPTION_CONNECT_TIMEOUT = "--connect-timeout"
 OPTION_MAX_TIME = "--max-time"
@@ -131,6 +132,9 @@ class CurlHttpClient(HttpClient):
 
         if self.cert_path is not None:
             cmd.extend([OPTION_CERT, self.cert_path, OPTION_KEY, self.key_path])
+
+        if self.proxy_configuration is not None:
+            cmd.extend([OPTION_PROXY, self.proxy_configuration])
         return cmd
 
     def build_request_cmd(self, url, headers, method=None, data_file_path=None):
@@ -138,10 +142,10 @@ class CurlHttpClient(HttpClient):
         optional parameters.
 
         Args:
-            url         : string    , the URL.
-            headers     : dictionary, contains the required headers.
-            method      : string    , specifies the http method to use.
-            data        : dictionary, contains the request payload.
+            url             : string    , the URL.
+            headers         : dictionary, contains the required headers.
+            method          : string    , specifies the http method to use.
+            data_file_path  : string    , data file path.
 
         Adds the following arguments to the base cmd when required:
             --write-out : Makes curl display information on stdout after a completed transfer (i.e status_code).
@@ -173,8 +177,6 @@ class CurlHttpClient(HttpClient):
         if self.insecure:
             cmd.append(OPTION_INSECURE)
 
-        # TODO(dalbe): Add proxy integration
-
         cmd.append(url)
         return cmd
 
@@ -202,7 +204,8 @@ class CurlHttpClient(HttpClient):
         try:
             try:
                 cmd = self.build_request_cmd(url, headers, method=method, data_file_path=data_file_path)
-                p = subprocessfactory.create_subprocess(cmd, stdout=subprocess.PIPE)
+                env = os.environ.copy()
+                p = subprocessfactory.create_subprocess(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err = p.communicate()
 
                 if p.returncode != EXIT_SUCCESS:

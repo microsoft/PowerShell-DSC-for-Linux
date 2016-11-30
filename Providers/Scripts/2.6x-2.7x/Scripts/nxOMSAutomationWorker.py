@@ -280,6 +280,8 @@ def start_daemon(args):
     os.chdir("/")
     os.setsid()
     os.umask(077)
+    os.close(1)
+    os.close(2)
     try:
         pc = subprocess.Popen(args)
         log(DEBUG, "pid of child python process is: " + str(os.getpid()))

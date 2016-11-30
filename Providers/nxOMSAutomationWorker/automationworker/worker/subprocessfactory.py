@@ -29,13 +29,6 @@ import sys
 CTYPES_MODULE_NAME = "ctypes"
 
 
-def get_env_var(env):
-    environment_var = os.environ.copy()
-    if env is not None:
-        environment_var.update(env)
-    return environment_var
-
-
 def create_subprocess(cmd, env=None, stdout=None, stderr=None, cwd=None):
     """Creates a process forcing and sets the SIGTERM signal handler using Ctypes (when available). Else creates a
     process based on the pipe_output argument.
@@ -51,10 +44,8 @@ def create_subprocess(cmd, env=None, stdout=None, stderr=None, cwd=None):
     Returns:
         The process object.
     """
-    environment_var = get_env_var(env)
-
     if CTYPES_MODULE_NAME not in sys.modules or os.name.lower() == "nt":
-        return subprocess.Popen(cmd, env=environment_var, stdout=stdout, stderr=stderr, cwd=cwd)
+        return subprocess.Popen(cmd, env=env, stdout=stdout, stderr=stderr, cwd=cwd)
     else:
-        return subprocess.Popen(cmd, env=environment_var, stdout=stdout, stderr=stderr, cwd=cwd,
+        return subprocess.Popen(cmd, env=env, stdout=stdout, stderr=stderr, cwd=cwd,
                                 preexec_fn=set_process_death_signal(signal.SIGTERM))
