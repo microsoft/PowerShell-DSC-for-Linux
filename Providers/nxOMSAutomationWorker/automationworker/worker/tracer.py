@@ -43,6 +43,7 @@ def safe_trace(func):
                 print "Logger not defined."
             else:
                 default_logger.critical(traceback.format_exc())
+
     return decorated_func
 
 
@@ -50,24 +51,26 @@ def background_thread(func):
     def decorated_func(*args, **kwargs):
         t = threading.Thread(target=func, args=args)
         t.start()
+
     return decorated_func
 
 
 def init():
     """Initializes all required variable for the tracer."""
-    global default_logger, sandbox_stdout, jrds_client, jrds_cert_path, jrds_key_path, jrds_base_uri, subscription_id,\
+    global default_logger, sandbox_stdout, jrds_client, jrds_cert_path, jrds_key_path, jrds_base_uri, subscription_id, \
         account_id, machine_id, hybrid_worker_group_name, worker_version, activity_id
 
     # Create the http client
-    http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path())
-    http_client = http_client_factory.create_http_client(sys.version_info, configuration.get_verify_certificates())
+    http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),
+                                            configuration.get_verify_certificates())
+    http_client = http_client_factory.create_http_client(sys.version_info)
     jrds_client = JRDSClient(http_client)
 
     # Populate global configuration values
     jrds_cert_path = configuration.get_jrds_cert_path()
     jrds_key_path = configuration.get_jrds_key_path()
     jrds_base_uri = configuration.get_jrds_base_uri()
-    subscription_id = "00000000-0000-0000-0000-000000000000" # temporary place holder
+    subscription_id = "00000000-0000-0000-0000-000000000000"  # temporary place holder
     account_id = configuration.get_account_id()
     machine_id = configuration.get_machine_id()
     hybrid_worker_group_name = configuration.get_hybrid_worker_name()

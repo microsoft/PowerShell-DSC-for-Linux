@@ -26,10 +26,11 @@ class HttpClient:
     PUT = "PUT"
     DELETE = "DELETE"
 
-    def __init__(self, cert_path, key_path, insecure=False):
+    def __init__(self, cert_path, key_path, insecure=False, proxy_configuration=None):
         self.cert_path = cert_path
         self.key_path = key_path
         self.insecure = insecure
+        self.proxy_configuration = proxy_configuration
 
         if (cert_path is not None and not os.path.isfile(self.cert_path)) or \
                 (key_path is not None and not os.path.isfile(self.key_path)):

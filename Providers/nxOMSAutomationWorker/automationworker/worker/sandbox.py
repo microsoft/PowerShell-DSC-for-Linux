@@ -12,12 +12,12 @@ from Queue import Queue, Empty
 
 import configuration
 import tracer
+from automationconstants import jobstatus
 from automationconstants import pendingactions
 from httpclientfactory import HttpClientFactory
 from job import Job
 from jrdsclient import JRDSClient
 from workerexception import *
-from automationconstants import jobstatus
 
 routine_loop = True
 job_map = {}
@@ -36,7 +36,7 @@ def safe_loop(func):
                 # this will work as long as all threads are daemon
                 # daemon threads are only supported in 2.6+
                 sys.exit(1)
-            time.sleep(configuration.get_jrds_get_job_actions_pooling_freq())
+            time.sleep(configuration.get_jrds_get_job_actions_polling_freq())
 
     return decorated_func
 
@@ -45,8 +45,9 @@ class Sandbox:
     def __init__(self):
         self.sandbox_id = os.environ["sandbox_id"]
         tracer.log_sandbox_starting(self.sandbox_id, os.getpid())
-        http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path())
-        http_client = http_client_factory.create_http_client(sys.version_info, configuration.get_verify_certificates())
+        http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),
+                                                configuration.get_verify_certificates())
+        http_client = http_client_factory.create_http_client(sys.version_info)
         self.jrds_client = JRDSClient(http_client)
 
     @staticmethod

@@ -2,6 +2,9 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+import os
+
+import configuration
 from curlhttpclient import CurlHttpClient
 from urllib2httpclient import Urllib2HttpClient
 
@@ -21,11 +24,23 @@ class HttpClientFactory:
         The ssl module was also unavailable for [2.4.0 - 2.6.0[.
     """
 
-    def __init__(self, cert, key):
+    def __init__(self, cert, key, insecure=False):
         self.cert = cert
         self.key = key
+        self.insecure = insecure
+        self.proxy_configuration = None
 
-    def create_http_client(self, version_info, insecure=False):
+        # set proxy if valid proxy_configuration path is detected
+        proxy_conf_path = configuration.get_proxy_configuration_path()
+        if configuration.get_proxy_configuration_path() != configuration.DEFAULT_PROXY_CONFIGURATION_PATH \
+                and os.path.isfile(proxy_conf_path):
+            proxy_conf_file = open(configuration.get_proxy_configuration_path(), "r")
+            proxy_configuration = proxy_conf_file.readline().strip()
+            if proxy_configuration != "":
+                self.proxy_configuration = proxy_configuration
+            proxy_conf_file.close()
+
+    def create_http_client(self, version_info):
         """Create a new instance of the appropriate HttpClient.
 
         Args:
@@ -37,9 +52,9 @@ class HttpClientFactory:
             An instance of Urllib2 if the installed Python version is or is above 2.7.9
         """
         if version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] < 7:
-            return CurlHttpClient(self.cert, self.key, insecure)
+            return CurlHttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)
         elif version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] <= 7 and version_info[
-                PY_MICRO_VERSION] < 9:
-            return CurlHttpClient(self.cert, self.key, insecure)
+            PY_MICRO_VERSION] < 9:
+            return CurlHttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)
         else:
-            return Urllib2HttpClient(self.cert, self.key, insecure)
+            return Urllib2HttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)

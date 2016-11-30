@@ -34,7 +34,9 @@ BYPASS_CERTIFICATE_VERIFICATION = "bypass_certificate_verification"
 ENFORCE_RUNBOOK_SIGNATURE_VALIDATION = "enforce_runbook_signature_validation"
 GPG_PUBLIC_KEYRING_PATH = "gpg_public_keyring_path"
 STATE_DIRECTORY_PATH = "state_directory_path"
-JRDS_POOLING_FREQUENCY = "jrds_pooling_frequency"
+JRDS_POLLING_FREQUENCY = "jrds_polling_frequency"
+PROXY_CONFIGURATION_PATH = "proxy_configuration_path"
+PROXY_CONFIGURATION_PATH = "proxy_configuration_path"
 
 # optional configuration default values
 DEFAULT_EMPTY = ""
@@ -43,9 +45,10 @@ DEFAUTL_BYPASS_CERTIFICATE_VERIFICATION = "false"
 DEFAULT_ENFORCE_RUNBOOK_SIGNATURE_VALIDATION = "true"
 DEFAULT_GPG_PUBLIC_KEYRING_PATH = DEFAULT_EMPTY
 DEFAULT_STATE_DIRECTORY_PATH = DEFAULT_EMPTY
+DEFAULT_PROXY_CONFIGURATION_PATH = DEFAULT_EMPTY
 DEFAULT_COMPONENT = "Unknown"
 DEFAULT_WORKER_VERSION = "8.0.0.0"
-DEFAULT_JRDS_POOLING_FREQUENCY = "30"
+DEFAULT_JRDS_POLLING_FREQUENCY = "30"
 
 # state configuration keys
 STATE_PID = "pid"
@@ -68,10 +71,7 @@ def read_and_set_configuration(config_path):
     Args:
         config_path: string, the configuration file path.
     """
-    try:
-        del os.environ[CONFIG_ENV_KEY]
-    except Exception:
-        pass
+    clear_config()
 
     # init and set default values for optional configuration keys
     config = ConfigParser.SafeConfigParser({DEBUG_TRACES: DEFAULT_DEBUG_TRACES,
@@ -79,7 +79,8 @@ def read_and_set_configuration(config_path):
                                             ENFORCE_RUNBOOK_SIGNATURE_VALIDATION: DEFAULT_ENFORCE_RUNBOOK_SIGNATURE_VALIDATION,
                                             GPG_PUBLIC_KEYRING_PATH: DEFAULT_GPG_PUBLIC_KEYRING_PATH,
                                             STATE_DIRECTORY_PATH: DEFAULT_STATE_DIRECTORY_PATH,
-                                            JRDS_POOLING_FREQUENCY: DEFAULT_JRDS_POOLING_FREQUENCY})
+                                            JRDS_POLLING_FREQUENCY: DEFAULT_JRDS_POLLING_FREQUENCY,
+                                            PROXY_CONFIGURATION_PATH : DEFAULT_PROXY_CONFIGURATION_PATH})
 
     # load the worker configuration file
     config.read(config_path)
@@ -106,7 +107,8 @@ def read_and_set_configuration(config_path):
                                                                                   ENFORCE_RUNBOOK_SIGNATURE_VALIDATION),
                           GPG_PUBLIC_KEYRING_PATH: config.get(OPTIONAL_CONFIG_SECTION, GPG_PUBLIC_KEYRING_PATH),
                           STATE_DIRECTORY_PATH: config.get(OPTIONAL_CONFIG_SECTION, STATE_DIRECTORY_PATH),
-                          JRDS_POOLING_FREQUENCY: config.getint(OPTIONAL_CONFIG_SECTION, JRDS_POOLING_FREQUENCY)})
+                          JRDS_POLLING_FREQUENCY: config.getint(OPTIONAL_CONFIG_SECTION, JRDS_POLLING_FREQUENCY),
+                          PROXY_CONFIGURATION_PATH: config.get(OPTIONAL_CONFIG_SECTION, PROXY_CONFIGURATION_PATH)})
 
     # set the worker conf to env var
     set_config(configuration)
@@ -131,6 +133,13 @@ def set_config(configuration):
     os.environ[CONFIG_ENV_KEY] = json.dumps(configuration)
 
 
+def clear_config():
+    try:
+        del os.environ[CONFIG_ENV_KEY]
+    except Exception:
+        pass
+
+
 def get_value(key):
     """Gets a specific value from the configuration value in the environment variable.
 
@@ -148,12 +157,12 @@ def get_value(key):
         raise KeyError("Configuration environment variable not found. [key=" + key + "].")
 
 
-def get_jrds_get_sandbox_actions_pooling_freq():
-    return get_value(JRDS_POOLING_FREQUENCY)
+def get_jrds_get_sandbox_actions_polling_freq():
+    return get_value(JRDS_POLLING_FREQUENCY)
 
 
-def get_jrds_get_job_actions_pooling_freq():
-    return get_value(JRDS_POOLING_FREQUENCY)
+def get_jrds_get_job_actions_polling_freq():
+    return get_value(JRDS_POLLING_FREQUENCY)
 
 
 def get_component():
@@ -218,3 +227,7 @@ def get_state_directory_path():
 
 def get_temporary_request_directory_path():
     return os.path.join(get_working_directory_path(), "req_tmp")
+
+
+def get_proxy_configuration_path():
+    return get_value(PROXY_CONFIGURATION_PATH)

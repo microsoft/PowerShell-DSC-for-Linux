@@ -45,11 +45,9 @@ class Runtime:
             for parameter in job_parameters:
                 cmd += [json.loads(parameter["Value"])]
 
-        env = os.environ.copy()
-        env["AUTOMATION_JOB_ID"] = str(self.job_data["jobId"])  # TODO (dalbe) : review key name
-
-        # TODO(dalbe): Apply only for Python
-        env["PYTHONPATH"] = str(configuration.get_source_directory_path())  # windows env have to be str (not unicode)
+        # Do not copy current process env var to the sandbox process
+        env = {"AUTOMATION_JOB_ID": str(self.job_data["jobId"]),
+               "PYTHONPATH": str(configuration.get_source_directory_path())}  # windows env have to be str (not unicode)
         self.runbook_subprocess = subprocessfactory.create_subprocess(cmd=cmd,
                                                                       env=env,
                                                                       stdout=subprocess.PIPE,

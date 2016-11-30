@@ -25,7 +25,7 @@ def safe_loop(func):
                 func(*args, **kwargs)
             except Exception:
                 tracer.log_exception_trace(traceback.format_exc())
-            time.sleep(configuration.get_jrds_get_sandbox_actions_pooling_freq())
+            time.sleep(configuration.get_jrds_get_sandbox_actions_polling_freq())
 
     return decorated_func
 
@@ -120,8 +120,9 @@ def generate_state_file():
 class Worker:
     def __init__(self):
         tracer.log_worker_starting(configuration.get_worker_version())
-        http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path())
-        http_client = http_client_factory.create_http_client(sys.version_info, configuration.get_verify_certificates())
+        http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),
+                                                configuration.get_verify_certificates())
+        http_client = http_client_factory.create_http_client(sys.version_info)
         self.jrds_client = JRDSClient(http_client)
         self.running_sandboxes = {}
 
@@ -151,8 +152,11 @@ class Worker:
                 tracer.log_debug_trace("Failed to create sandbox folder.")
                 pass
 
+            # copy current process env variable (contains configuration) and add the sanbox_id key
+            process_env_variables = os.environ.copy()
+            process_env_variables["sandbox_id"] = sandbox_id
+
             cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py")]
-            process_env_variables = {"sandbox_id": sandbox_id}
             sandbox_process = subprocessfactory.create_subprocess(cmd=cmd,
                                                                   env=process_env_variables,
                                                                   stdout=subprocess.PIPE,

@@ -77,8 +77,8 @@ class Urllib2HttpClient(HttpClient):
         post    (url, headers, data)
     """
 
-    def __init__(self, cert_path, key_path, insecure=False):
-        HttpClient.__init__(self, cert_path, key_path, insecure)
+    def __init__(self, cert_path, key_path, insecure=False, proxy_configuration=None):
+        HttpClient.__init__(self, cert_path, key_path, insecure, proxy_configuration)
 
     def issue_request(self, url, headers, method=None, data=None):
         """Issues a GET request to the provided url and using the provided headers.
@@ -94,6 +94,10 @@ class Urllib2HttpClient(HttpClient):
         """
         https_handler = HttpsClientHandler(self.cert_path, self.key_path, self.insecure)
         opener = urllib2.build_opener(https_handler)
+        if self.proxy_configuration is not None:
+            proxy_handler = urllib2.ProxyHandler({'http': self.proxy_configuration,
+                                                  'https': self.proxy_configuration})
+            opener.add_handler(proxy_handler)
         req = urllib2.Request(url, data=data, headers=headers)
         req.get_method = lambda: method
         response = opener.open(req, timeout=30)
@@ -175,7 +179,6 @@ class Urllib2HttpClient(HttpClient):
             return RequestResponse(error.code)
 
         return RequestResponse(response.getcode(), response.read())
-
 
     def delete(self, url, headers=None, data=None):
         """Issues a DELETE request to the provided url and using the provided headers.
