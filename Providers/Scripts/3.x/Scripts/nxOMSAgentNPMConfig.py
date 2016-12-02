@@ -36,7 +36,7 @@ class INPMAgent:
 
 class NPMAgentUtil(IOMSAgent):
     def binary_setcap(self, binaryPath):
-        if os.system('sudo /opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh ' + binaryPath) == 0:
+        if os.path.exists('/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh') and os.system('sudo /opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh ' + binaryPath) == 0:
             return True
         else:
             LG().Log('ERROR', 'Error setting capabilities to npmd agent binary.')
@@ -258,7 +258,7 @@ def SetConfigUpdate(Contents):
         retval = -1
     else:
         retval = WriteFile(destFileFullPath, Contents)
-        if retval == 0:
+        if retval == 0 and os.path.exists(AGENT_RESOURCE_VERSION_PATH): #notify server only if plugin is present
             LG().Log('INFO', 'Updated the file, going to notify server')
             retval = NotifyServer(Commands.Config)
     return retval
@@ -284,9 +284,9 @@ def UpdateAgentBinary(newVersion):
         retval &= CopyAllFiles(src, AGENT_BINARY_PATH)
 
     # set capabilities to binary
-    src_files = os.listdir(AGENT_BINARY_PATH)
+    src_files = os.listdir(src)
     for file_name in src_files:
-        full_file_name = os.path.join(src, file_name) # assuming only file in directory
+        full_file_name = os.path.join(AGENT_BINARY_PATH, file_name) # assuming only file in directory
         break
     NPM_ACTION.binary_setcap(full_file_name)
 
