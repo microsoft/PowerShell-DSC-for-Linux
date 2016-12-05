@@ -35,7 +35,7 @@ class INPMAgent:
 
 class NPMAgentUtil(IOMSAgent):
     def binary_setcap(self, binaryPath):
-        if os.path.exists('/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh') and os.system('sudo /opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh ' + binaryPath) == 0:
+        if os.path.exists(AGENT_SCRIPT_PATH) and os.system('sudo %s %s' %(AGENT_SCRIPT_PATH, binaryPath)) == 0:
             return True
         else:
             LG().Log('ERROR', 'Error setting capabilities to npmd agent binary.')
@@ -47,7 +47,7 @@ show_mof = False
 # Paths
 CONFIG_PATH = '/etc/opt/microsoft/omsagent/conf/'
 SERVER_ADDRESS = '/var/opt/microsoft/omsagent/run/npmdagent.sock'
-DEST_FILE_NAME = 'npmd_agent_config'
+DEST_FILE_NAME = 'npmd_agent_config.xml'
 PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
 PLUGIN_CONF_PATH = '/etc/opt/microsoft/omsagent/conf/omsagent.d/'
 RESOURCE_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSAgentNPMConfig/DSCResources/MSFT_nxOMSAgentNPMConfigResource/NPM/'
@@ -58,6 +58,7 @@ DSC_X86_AGENT_PATH = 'Agent/32/'
 DSC_PLUGIN_PATH = 'Plugin/plugin/'
 DSC_PLUGIN_CONF_PATH = 'Plugin/conf/'
 AGENT_BINARY_PATH = '/opt/microsoft/omsagent/plugin/'
+AGENT_SCRIPT_PATH = '/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh'
 
 # Constants
 X64 = '64bit'
@@ -100,7 +101,7 @@ def init_vars(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
 
 
 def Set_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
-    recvdContentChecksum = hashlib.md5(Contents).hexdigest()
+    recvdContentChecksum = hashlib.md5(Contents).hexdigest().upper()
     if recvdContentChecksum != ContentChecksum:
         # data is corrupt do not proceed further
         LG().Log('ERROR', 'Content received did not match checksum, exiting Set')
@@ -111,7 +112,7 @@ def Set_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
 
 
 def Test_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
-    recvdContentChecksum = hashlib.md5(Contents).hexdigest()
+    recvdContentChecksum = hashlib.md5(Contents).hexdigest().upper()
     if recvdContentChecksum != ContentChecksum:
         # data is corrupt do not proceed further
         LG().Log('ERROR', 'Content received did not match checksum, exiting Test')
@@ -192,6 +193,9 @@ def Set(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
 def Test(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     ShowMof('TEST', ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = 0
+    if not os.path.exists(AGENT_SCRIPT_PATH):
+        LG().Log('ERROR', 'npmd set cap script does not exist, exiting test')
+        return [retval]
     if ConfigType != 'UpdatedAgentConfig':
         LG().Log('ERROR', 'Config type did not match, exiting test')
         return [retval]
@@ -287,13 +291,14 @@ def UpdateAgentBinary(newVersion):
     for file_name in src_files:
         full_file_name = os.path.join(AGENT_BINARY_PATH, file_name) # assuming only file in directory
         break
-    NPM_ACTION.binary_setcap(full_file_name)
+    retval &= NPM_ACTION.binary_setcap(full_file_name)
 
     # Notify ruby plugin
     #retval &= NotifyServer(Commands.RestartNPM)
 
     #Update version number
-    WriteFile(AGENT_RESOURCE_VERSION_PATH, newVersion)
+    if retval == True:
+        WriteFile(AGENT_RESOURCE_VERSION_PATH, newVersion)
     return retval
 
 def UpdatePluginFiles():

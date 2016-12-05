@@ -18,7 +18,7 @@ import copy
 import sha
 import fnmatch
 import codecs
-import hashlib
+import md5
 import base64
 import socket
 import thread
@@ -4542,11 +4542,12 @@ class nxOMSAgentNPMConfigTestCases(unittest2.TestCase):
         nxNPMD.PLUGIN_CONF_PATH = '/var/tmp/etc/opt/microsoft/omsagent/conf/omsagent.d/'
         nxNPMD.AGENT_BINARY_PATH = '/var/tmp/opt/microsoft/omsagent/'
         nxNPMD.RESOURCE_MODULE_PATH = '/var/tmp/opt/microsoft/omsconfig/modules/NPM/'
-
+        nxNPMD.AGENT_SCRIPT_PATH = '/var/tmp/etc/opt/microsoft/omsagent/scipt.sh'
+        
         self.config_type = 'UpdatedAgentConfig'
         self.config_id = '12345'
         self.contents = base64.b64encode('<Configuration></Configuration>')
-        self.content_checksum = md5.md5(self.contents).hexdigest()
+        self.content_checksum = md5.md5(self.contents).hexdigest().upper()
         self.ensure_present = 'Present'
         self.ensure_absent = 'Absent'
         self.out_file = nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME)
@@ -4574,6 +4575,7 @@ class nxOMSAgentNPMConfigTestCases(unittest2.TestCase):
             'echo testfile >> ' + x86binaryPath + 'binary;'
             'echo testfile >> ' + dscPluginPath + 'plugin;'
             'echo testfile >> ' + dscConfPath + 'config;'
+            'echo testfile >> ' + nxNPMD.AGENT_SCRIPT_PATH + ';'
         )
 
         self.WriteToFile(nxNPMD.DSC_RESOURCE_VERSION_PATH, '1.0')
@@ -4582,7 +4584,7 @@ class nxOMSAgentNPMConfigTestCases(unittest2.TestCase):
         nxNPMD.OMS_ACTION = nxOMSAgentNPMConfigTestCases.TestOMSAgentUtil()
         nxNPMD.NPM_ACTION = nxOMSAgentNPMConfigTestCases.TestNPMAgentUtil()
 
-        #thread.start_new_thread(self.createUDSServer, ())
+        thread.start_new_thread(self.createUDSServer, ())
     def tearDown(self):
         """
         Remove test resources.
@@ -4710,7 +4712,7 @@ class nxOMSAgentNPMConfigTestCases(unittest2.TestCase):
         nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
         nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
         newContent = 'New config string'
-        newChecksum = md5.md5(base64.b64encode(newContent)).hexdigest()
+        newChecksum = md5.md5(base64.b64encode(newContent)).hexdigest().upper()
         r=nxNPMD.Test_Marshall(self.config_type, self.config_id, base64.b64encode(newContent), self.ensure_present, newChecksum)
         print r
         self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
@@ -4775,7 +4777,7 @@ class nxOMSAgentNPMConfigTestCases(unittest2.TestCase):
         nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
         nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
         newContent = 'New config string'
-        newChecksum = md5.md5(base64.b64encode(newContent)).hexdigest()
+        newChecksum = md5.md5(base64.b64encode(newContent)).hexdigest().upper()
         r=nxNPMD.Set_Marshall(self.config_type, self.config_id, base64.b64encode(newContent), self.ensure_present, newChecksum)
         print r
         self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
