@@ -36,7 +36,7 @@ module OMS
             }
 
             asm_baseline_results.each do |asm_baseline_result|
-                if asm_baseline_result["result"] == "MISS"
+                if asm_baseline_result["result"] == "MISS" || asm_baseline_result["result"] == "SKIP"
                     next
                 end
                 
@@ -63,7 +63,7 @@ module OMS
     
             asm_baseline_results.each do |asm_baseline_result|
 
-                if asm_baseline_result["result"] == "MISS"
+                if asm_baseline_result["result"] == "MISS" || asm_baseline_result["result"] == "SKIP"
                     next 
                 end
                 
