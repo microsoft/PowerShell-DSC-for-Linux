@@ -494,6 +494,13 @@ int Get_LocMappingIndex(_In_ MI_Uint32 errorStringId)
 extern Loc_Mapping g_UndefinedMessageTable[];
 #define ERROR_ID_SIZE 10
 
+void GetUndefinedString(_In_ MI_Uint32 errorStringId, _Inout_ Intlstr *resStr)
+{
+    MI_Char id[ERROR_ID_SIZE];
+    Stprintf(id,ERROR_ID_SIZE,MI_T("%d"), errorStringId);
+    *resStr = g_UndefinedMessageTable[0].LocFunctionOneArgs(id);
+}
+
 void GetResourceString( _In_ MI_Uint32 errorStringId, _Inout_ Intlstr *resStr)
 {
    int index = Get_LocMappingIndex(errorStringId);
@@ -503,10 +510,7 @@ void GetResourceString( _In_ MI_Uint32 errorStringId, _Inout_ Intlstr *resStr)
    }
    else
    {
-       MI_Char id[ERROR_ID_SIZE];
-       Stprintf(id,ERROR_ID_SIZE,MI_T("%d"), errorStringId);
-       *resStr = g_UndefinedMessageTable[0].LocFunctionOneArgs(id);
-
+       GetUndefinedString(errorStringId);
    }
 }
 
@@ -519,9 +523,7 @@ void GetResourceString1Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    }
    else
    {
-       MI_Char id[ERROR_ID_SIZE];
-       Stprintf(id,ERROR_ID_SIZE,MI_T("%d"), errorStringId);
-       *resStr = g_UndefinedMessageTable[1].LocFunctionTwoArgs(id, (MI_Char*)param1);
+       GetUndefinedString(errorStringId);
    }
 }
 
@@ -535,9 +537,7 @@ void GetResourceString2Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    }
    else
    {
-       MI_Char id[ERROR_ID_SIZE];
-       Stprintf(id,ERROR_ID_SIZE,MI_T("%d"), errorStringId);
-       *resStr = g_UndefinedMessageTable[2].LocFunctionThreeArgs(id, (MI_Char*)param1, (MI_Char*) param2);
+       GetUndefinedString(errorStringId);
    }
 }
  
@@ -551,9 +551,7 @@ void GetResourceString3Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    }
    else
    {
-       MI_Char id[ERROR_ID_SIZE];
-       Stprintf(id,ERROR_ID_SIZE,MI_T("%d"), errorStringId);
-       *resStr = g_UndefinedMessageTable[3].LocFunctionFourArgs(id, (MI_Char*)param1, (MI_Char*) param2, (MI_Char*) param3);
+       GetUndefinedString(errorStringId);
    }
 }
 
@@ -567,9 +565,7 @@ void GetResourceString4Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    }
    else
    {
-       MI_Char id[ERROR_ID_SIZE];
-       Stprintf(id,ERROR_ID_SIZE,MI_T("%d"), errorStringId);
-       *resStr = g_UndefinedMessageTable[4].LocFunctionFourArgs(id, (MI_Char*)param1, (MI_Char*) param2, (MI_Char*) param3);
+       GetUndefinedString(errorStringId);
    }
 }
 

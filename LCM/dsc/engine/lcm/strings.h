@@ -52,31 +52,6 @@ INTERNAL_Intlstr_Define1( ID_UNDEFINEDERROR_NOPARAM, ID_UNDEFINEDERROR_NOPARAM,
      _In_z_ const PAL_Char*, firstString,
     "Undefined error id " Intlstr_tstr(1) "." )
 
-INTERNAL_Intlstr_Define2( ID_UNDEFINEDERROR_ONEPARAM, ID_UNDEFINEDERROR_ONEPARAM, 
-     _In_z_ const PAL_Char*, firstString,
-     _In_z_ const PAL_Char*, secondString,
-    "Undefined error id " Intlstr_tstr(1) " Param:" Intlstr_tstr(2) ".")
-
-INTERNAL_Intlstr_Define3( ID_UNDEFINEDERROR_TWOPARAM, ID_UNDEFINEDERROR_TWOPARAM, 
-     _In_z_ const PAL_Char*, firstString,
-     _In_z_ const PAL_Char*, secondString,
-     _In_z_ const PAL_Char*, thirdString,
-    "Undefined error id " Intlstr_tstr(1) " Param:" Intlstr_tstr(2) " Param:" Intlstr_tstr(3) ".")
-
-INTERNAL_Intlstr_Define4( ID_UNDEFINEDERROR_THREEPARAM, ID_UNDEFINEDERROR_THREEPARAM, 
-     _In_z_ const PAL_Char*, firstString,
-     _In_z_ const PAL_Char*, secondString,
-     _In_z_ const PAL_Char*, thirdString,
-     _In_z_ const PAL_Char*, fourthString,
-    "Undefined error id " Intlstr_tstr(1) " Param:" Intlstr_tstr(2) " Param:" Intlstr_tstr(3) " Param:" Intlstr_tstr(4) ".")
-
-INTERNAL_Intlstr_Define4( ID_UNDEFINEDERROR_FOURPARAM, ID_UNDEFINEDERROR_FOURPARAM, 
-     _In_z_ const PAL_Char*, firstString,
-     _In_z_ const PAL_Char*, secondString,
-     _In_z_ const PAL_Char*, thirdString,
-     _In_z_ const PAL_Char*, fourthString,
-    "Undefined error id " Intlstr_tstr(1) " Param:" Intlstr_tstr(2) " Param:" Intlstr_tstr(3) " Param:" Intlstr_tstr(4) ".")
-
 #undef INTERNAL_Intlstr_Define0
 #undef INTERNAL_Intlstr_Define1
 #undef INTERNAL_Intlstr_Define2
@@ -104,31 +79,6 @@ Loc_Mapping g_UndefinedMessageTable[] =
 INTERNAL_Intlstr_Define1( ID_UNDEFINEDERROR_NOPARAM, ID_UNDEFINEDERROR_NOPARAM,
      _In_z_ const PAL_Char*, firstString,
     "Undefined error id " Intlstr_tstr(1) "." )
-
-INTERNAL_Intlstr_Define2( ID_UNDEFINEDERROR_ONEPARAM, ID_UNDEFINEDERROR_ONEPARAM, 
-     _In_z_ const PAL_Char*, firstString,
-     _In_z_ const PAL_Char*, secondString,
-    "Undefined error id " Intlstr_tstr(1) " Param:" Intlstr_tstr(2) ".")
-
-INTERNAL_Intlstr_Define3( ID_UNDEFINEDERROR_TWOPARAM, ID_UNDEFINEDERROR_TWOPARAM, 
-     _In_z_ const PAL_Char*, firstString,
-     _In_z_ const PAL_Char*, secondString,
-     _In_z_ const PAL_Char*, thirdString,
-    "Undefined error id " Intlstr_tstr(1) " Param:" Intlstr_tstr(2) " Param:" Intlstr_tstr(3) ".")
-
-INTERNAL_Intlstr_Define4( ID_UNDEFINEDERROR_THREEPARAM, ID_UNDEFINEDERROR_THREEPARAM, 
-     _In_z_ const PAL_Char*, firstString,
-     _In_z_ const PAL_Char*, secondString,
-     _In_z_ const PAL_Char*, thirdString,
-     _In_z_ const PAL_Char*, fourthString,
-    "Undefined error id " Intlstr_tstr(1) " Param:" Intlstr_tstr(2) " Param:" Intlstr_tstr(3) " Param:" Intlstr_tstr(4) ".")
-
-INTERNAL_Intlstr_Define4( ID_UNDEFINEDERROR_FOURPARAM, ID_UNDEFINEDERROR_FOURPARAM, 
-     _In_z_ const PAL_Char*, firstString,
-     _In_z_ const PAL_Char*, secondString,
-     _In_z_ const PAL_Char*, thirdString,
-     _In_z_ const PAL_Char*, fourthString,
-    "Undefined error id " Intlstr_tstr(1) " Param:" Intlstr_tstr(2) " Param:" Intlstr_tstr(3) " Param:" Intlstr_tstr(4) ".")
 };
 
 #endif /* !defined(_strings_h_) */

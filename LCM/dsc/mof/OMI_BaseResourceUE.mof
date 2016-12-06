@@ -198,7 +198,7 @@ class MSFT_PartialConfiguration : OMI_MetaConfigurationResource
 	String ExclusiveResources[]; 
  
 	[Description ("The configuration repository source that this partial configuration will use" )  , Write] 
-	String ConfigurationSource; 
+	String ConfigurationSource[]; 
 
   [Description ("The resource module repository source that this partial configuration will use" )  , Write] 
   String ResourceModuleSource[]; 
