@@ -311,7 +311,7 @@ def log_worker_general_telemetry(worker_version):
 
 
 def log_worker_python_telemetry(version, build, compiler):
-    message = "Worker python telemetry. [version=" + str(version) + "][build=" + str(' '.join(build)) +\
+    message = "Worker python telemetry. [version=" + str(version) + "][build=" + str(' '.join(map(str, build))) +\
               "][compiler=" + str(compiler) + "]"
     trace_generic_hybrid_worker_event(5002, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 

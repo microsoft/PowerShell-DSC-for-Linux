@@ -99,8 +99,8 @@ class Job(Thread):
         """Executes the job runtime and performs runtime operation (stream upload / status change)."""
         # set status to running
         tracer.log_sandbox_job_started(self.job_id)
-        time_taken_to_start_td = datetime.utcnow() - datetime.strptime(self.job_data.start_request_time.split(".")[0],
-                                                                       "%Y-%m-%dT%H:%M:%S")
+        start_request_time = time.strptime(self.job_data.start_request_time.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        time_taken_to_start_td = datetime.utcnow() - datetime.fromtimestamp(time.mktime(start_request_time))
         time_taken_to_start_in_seconds = (time_taken_to_start_td.microseconds + (time_taken_to_start_td.seconds +
                                                                                  time_taken_to_start_td.days * 24 * 3600) * 10 ** 6) / 10 ** 6
         tracer.log_etw_job_status_changed_running(self.job_data.subscription_id, self.job_data.account_id,
@@ -159,8 +159,8 @@ class Job(Thread):
         """Unloads the job."""
         self.jrds_client.unload_job(self.job_data.subscription_id, self.sandbox_id, self.job_id,
                                     self.job_updatable_data.is_draft, datetime.now(), 2)
-        duration_td = datetime.utcnow() - datetime.strptime(self.job_data.start_request_time.split(".")[0],
-                                                            "%Y-%m-%dT%H:%M:%S")
+        start_request_time = time.strptime(self.job_data.start_request_time.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        duration_td = datetime.utcnow() - datetime.fromtimestamp(time.mktime(start_request_time))
         duration_seconds = (duration_td.microseconds + (
                             duration_td.seconds + duration_td.days * 24 * 3600) * 10 ** 6) / 10 ** 6
         tracer.log_etw_job_duration(self.job_data.subscription_id, self.job_data.account_id, self.sandbox_id,
