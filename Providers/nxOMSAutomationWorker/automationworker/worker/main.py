@@ -4,6 +4,8 @@
 
 import ConfigParser
 import os
+import platform
+import shutil
 import subprocess
 import sys
 import threading
@@ -16,6 +18,8 @@ import subprocessfactory
 import tracer
 from httpclientfactory import HttpClientFactory
 from jrdsclient import JRDSClient
+
+sandboxes_root_folder_name = "sandboxes"
 
 
 def safe_loop(func):
@@ -33,6 +37,7 @@ def safe_loop(func):
 def background_thread(func):
     def decorated_func(*args, **kwargs):
         t = threading.Thread(target=func, args=args)
+        t.daemon = True
         t.start()
 
     return decorated_func
@@ -142,14 +147,13 @@ class Worker:
                 return
 
             # create sandboxes folder if needed
-            sandboxes_base_path = "sandboxes"
-            sandbox_working_dir = os.path.join(configuration.get_working_directory_path(), sandboxes_base_path,
+            sandbox_working_dir = os.path.join(configuration.get_working_directory_path(), sandboxes_root_folder_name,
                                                sandbox_id)
 
             try:
                 iohelper.assert_or_create_path(sandbox_working_dir)
-            except OSError:
-                tracer.log_debug_trace("Failed to create sandbox folder.")
+            except OSError, exception:
+                tracer.log_worker_failed_to_create_sandbox_root_folder(sandbox_id, exception)
                 pass
 
             # copy current process env variable (contains configuration) and add the sanbox_id key
@@ -157,14 +161,17 @@ class Worker:
             process_env_variables["sandbox_id"] = sandbox_id
 
             cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py")]
+            tracer.log_worker_starting_sandbox(sandbox_id)
             sandbox_process = subprocessfactory.create_subprocess(cmd=cmd,
                                                                   env=process_env_variables,
                                                                   stdout=subprocess.PIPE,
                                                                   stderr=subprocess.PIPE,
                                                                   cwd=sandbox_working_dir)
             self.running_sandboxes[sandbox_id] = sandbox_process
+            tracer.log_worker_started_tracking_sandbox(sandbox_id)
+
             self.monitor_sandbox_process_outputs(sandbox_id, sandbox_process)
-            tracer.log_worker_starting_sandbox(sandbox_id, str(sandbox_process.pid))
+            tracer.log_worker_sandbox_process_started(sandbox_id, str(sandbox_process.pid))
 
     @background_thread
     def monitor_sandbox_process_outputs(self, sandbox_id, process):
@@ -182,9 +189,25 @@ class Worker:
                 if error_output is None or error_output == '':
                     break
                 full_error_output += error_output
-            tracer.log_debug_trace("Sandbox crashed : " + str(full_error_output))
+            tracer.log_worker_sandbox_process_crashed(sandbox_id, process.pid, process.poll(), full_error_output)
 
         tracer.log_worker_sandbox_process_exited(sandbox_id, str(process.pid), process.poll())
+
+        # cleanup sandbox directory
+        sandbox_working_dir = os.path.join(configuration.get_working_directory_path(), sandboxes_root_folder_name,
+                                           sandbox_id)
+        shutil.rmtree(sandbox_working_dir, ignore_errors=True)
+
+    @background_thread
+    def telemetry_routine(self):
+        while True:
+            tracer.log_worker_general_telemetry(configuration.get_worker_version())
+            tracer.log_worker_python_telemetry(platform.python_version(), platform.python_build(),
+                                               platform.python_compiler())
+            tracer.log_worker_system_telemetry(platform.system(), platform.node(), platform.version(),
+                                               platform.machine(), platform.processor())
+            # sleep for 6 hours, this allows us to gather daily telemetry
+            time.sleep(60 * 60 * 6)
 
     def stop_tracking_terminated_sandbox(self):
         terminated_sandbox_ids = []
@@ -198,7 +221,7 @@ class Worker:
         for sandbox_id in terminated_sandbox_ids:
             removal = self.running_sandboxes.pop(sandbox_id, None)
             if removal is not None:
-                tracer.log_debug_trace("Worker stopped tracking sandbox : " + str(sandbox_id))
+                tracer.log_worker_stopped_tracking_sandbox(sandbox_id)
 
 
 def main():
@@ -225,6 +248,7 @@ def main():
 
     generate_state_file()
     worker = Worker()
+    worker.telemetry_routine()
     worker.routine()
 
 

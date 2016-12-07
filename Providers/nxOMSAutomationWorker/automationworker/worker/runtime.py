@@ -22,6 +22,10 @@ class Runtime:
     """Runtime base class."""
 
     def __init__(self, job_data, runbook):
+        """
+        :type job_data  : jrdsclient.JobData"
+        :type runbook   : Runbook
+        """
         # should be overwritten by language runtime
         self.execution_alias = None
         self.base_cmd = None
@@ -40,14 +44,16 @@ class Runtime:
         Requires self.base_cmd & self.runbook_file_path to be set by derived class.
         """
         cmd = self.base_cmd + [self.runbook.runbook_file_path]
-        job_parameters = self.job_data["parameters"]
+        job_parameters = self.job_data.parameters
         if job_parameters is not None and len(job_parameters) > 0:
             for parameter in job_parameters:
                 cmd += [json.loads(parameter["Value"])]
 
         # Do not copy current process env var to the sandbox process
-        env = {"AUTOMATION_JOB_ID": str(self.job_data["jobId"]),
-               "PYTHONPATH": str(configuration.get_source_directory_path())}  # windows env have to be str (not unicode)
+        env = os.environ.copy()
+        env.update({"AUTOMATION_JOB_ID": str(self.job_data.job_id),
+                    "PYTHONPATH": str(
+                        configuration.get_source_directory_path())})  # windows env have to be str (not unicode)
         self.runbook_subprocess = subprocessfactory.create_subprocess(cmd=cmd,
                                                                       env=env,
                                                                       stdout=subprocess.PIPE,

@@ -29,6 +29,8 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
         try:
             if not os.path.isdir(WORKER_STATE_DIR):
                 os.mkdir(WORKER_STATE_DIR)
+            if not os.path.isdir(WORKING_DIRECTORY_PATH):
+                os.makedirs(WORKING_DIRECTORY_PATH)
             agent_id = read_oms_config_file()
             proc = subprocess.Popen(
                 ["python", REGISTRATION_FILE_PATH, "--register", "-w", WorkspaceId, "-a", agent_id,
@@ -145,7 +147,7 @@ DSC_RESOURCE_VERSION_FILE = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWor
 OMS_ADMIN_CONFIG_FILE = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
 OMS_CERTIFICATE_PATH = "/etc/opt/microsoft/omsagent/certs/oms.crt"
 OMS_CERT_KEY_PATH = "/etc/opt/microsoft/omsagent/certs/oms.key"
-WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run"
+WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run/automationworker"
 REGISTRATION_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/scripts/register_oms.py"
 HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
 PROXY_CONF_PATH="/etc/opt/microsoft/omsagent/conf/proxy.conf"

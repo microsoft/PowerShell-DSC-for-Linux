@@ -9,13 +9,29 @@ import os
 import configuration
 import gpg
 import iohelper
+import jrdsclient
 from workerexception import *
+
+definition_kind_int_to_str = {0: "Unknown",
+                              1: "Script",
+                              2: "Workflow",
+                              3: "Graph",
+                              4: "Configuration",
+                              5: "PowerShell",
+                              6: "PowerShellWorkflow",
+                              7: "GraphPowerShell",
+                              8: "GraphPowerShellWorkflow",
+                              9: "Python2",
+                              10: "Python3",
+                              11: "Bash"}
 
 
 class Runbook:
     def __init__(self, runbook_data):
+        """:type runbook_data: jrdsclient.RunbookData"""
         self.runbook_data = runbook_data
-        self.definition_kind = runbook_data["runbookDefinitionKind"]
+        self.definition_kind = runbook_data.runbook_definition_kind
+        self.definition_kind_str = definition_kind_int_to_str[runbook_data.runbook_definition_kind]
         self.runbook_file_path = ""
 
         # should be overwritten by derived class
@@ -29,9 +45,9 @@ class Runbook:
 
     def write_to_disk(self):
         """Writes the runbook's definition to disk."""
-        file_name = self.runbook_data["name"] + self.runbook_data["runbookVersionId"] + self.file_extension
+        file_name = self.runbook_data.name + self.runbook_data.runbook_version_id + self.file_extension
         self.runbook_file_path = os.path.join(configuration.get_working_directory_path(), file_name)
-        iohelper.write_to_file(self.runbook_file_path, data=self.runbook_data["definition"].encode("utf-8"), mode="w+b")
+        iohelper.write_to_file(self.runbook_file_path, data=self.runbook_data.definition.encode("utf-8"), mode="w+b")
 
     def validate_signature(self):
         """Validates that the runbook signature is valid.
