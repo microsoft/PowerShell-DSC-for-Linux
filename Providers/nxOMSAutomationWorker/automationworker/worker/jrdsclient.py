@@ -153,7 +153,7 @@ class JRDSClient:
         request = self.httpClient.get(url)
 
         if request.status_code == 200:
-            return request.deserialized_data
+            return JobData(request.deserialized_data)
         raise Exception("Unable to get job. [status=" + str(request.status_code) + "]")
 
     def get_job_updatable_data(self, job_id):
@@ -198,7 +198,7 @@ class JRDSClient:
         request = self.httpClient.get(url)
 
         if request.status_code == 200:
-            return request.deserialized_data
+            return JobUpdatableData(request.deserialized_data)
         raise Exception("Unable to get job. [status=" + str(request.status_code) + "]")
 
     def get_runbook_data(self, runbook_version_id):
@@ -228,7 +228,7 @@ class JRDSClient:
         request = self.httpClient.get(url)
 
         if request.status_code == 200:
-            return request.deserialized_data
+            return RunbookData(request.deserialized_data)
         raise Exception("Unable to get runbook. [status=" + str(request.status_code) + "]")
 
     def get_variable_asset(self, name):
@@ -386,3 +386,82 @@ class JRDSClient:
         if request.status_code == 200:
             return
         raise Exception("Unable to unload job. [status=" + str(request.status_code) + "]")
+
+
+class JobData:
+    """JRDS JobData model."""
+    def __init__(self, deserialized_response):
+        self.creation_time = deserialized_response["creationTime"]
+        self.end_time = deserialized_response["endTime"]
+        self.start_request_time = deserialized_response["startRequestTime"]
+        self.job_id = deserialized_response["jobId"]
+        self.job_key = deserialized_response["jobKey"]
+        self.job_status = deserialized_response["jobStatus"]
+        self.trigger_scope = deserialized_response["triggerScope"]
+        self.job_status_details = deserialized_response["jobStatusDetails"]
+        self.last_modified_time = deserialized_response["lastModifiedTime"]
+        self.last_status_modified_time = deserialized_response["lastStatusModifiedTime"]
+        self.partition_id = deserialized_response["partitionId"]
+        self.parameters = deserialized_response["parameters"]
+        self.invoked_runbook_versions = deserialized_response["invokedRunbookVersions"]
+        self.pending_action = deserialized_response["pendingAction"]
+        self.pendinc_action_data = deserialized_response["pendingActionData"]
+        self.runbook_version_id = deserialized_response["runbookVersionId"]
+        self.runbook_version = deserialized_response["runbookVersion"]
+        self.start_time = deserialized_response["startTime"]
+        self.account_id = deserialized_response["accountId"]
+        self.workflow_instance_id = deserialized_response["workflowInstanceId"]
+        self.runbook_version_key = deserialized_response["runbookVersionKey"]
+        self.runbook_key = deserialized_response["runbookKey"]
+        self.account_key = deserialized_response["accountKey"]
+        self.job_exception = deserialized_response["jobException"]
+        self.module_info = deserialized_response["moduleInfo"]
+        self.full_workflow_script = deserialized_response["fullWorkflowScript"]
+        self.tracking_id = deserialized_response["trackingId"]
+        self.subscription_id = deserialized_response["subscriptionId"]
+        self.no_persis_eviction_count = deserialized_response["noPersistEvictionsCount"]
+        self.status = deserialized_response["status"]
+        self.run_on = deserialized_response["runOn"]
+        self.tier_name = deserialized_response["tierName"]
+        self.account_name = deserialized_response["accountName"]
+        self.trigger_source = deserialized_response["triggerSource"]
+
+
+class JobUpdatableData:
+    """JRDS JobUpdatableData model."""
+    def __init__(self, deserialized_response):
+        self.log_activity_trace = deserialized_response["logActivityTrace"]
+        self.trigger_source = deserialized_response["triggerSource"]
+        self.job_id = deserialized_response["jobId"]
+        self.log_progress = deserialized_response["logProgress"]
+        self.job_status = deserialized_response["jobStatus"]
+        self.account_name = deserialized_response["accountName"]
+        self.partition_id = deserialized_response["partitionId"]
+        self.log_debug = deserialized_response["logDebug"]
+        self.is_draft = deserialized_response["isDraft"]
+        self.workflow_instance_id = deserialized_response["workflowInstanceId"]
+        self.job_key = deserialized_response["JobKey"]
+        self.subscription_id = deserialized_response["subscriptionId"]
+        self.noPersist_evictions_count = deserialized_response["noPersistEvictionsCount"]
+        self.account_key = deserialized_response["AccountKey"]
+        self.job_started_by = deserialized_response["jobStartedBy"]
+        self.job_run_destination = deserialized_response["jobRunDestination"]
+        self.tier_name = deserialized_response["tierName"]
+        self.pending_action_data = deserialized_response["pendingActionData"]
+        self.job_status_details = deserialized_response["jobStatusDetails"]
+        self.resource_group_name = deserialized_response["resourceGroupName"]
+        self.pending_action = deserialized_response["pendingAction"]
+        self.log_verbose = deserialized_response["logVerbose"]
+        self.runbook_key = deserialized_response["RunbookKey"]
+
+
+class RunbookData:
+    """JRDS RunbookData model."""
+    def __init__(self, deserialized_response):
+        self.name = deserialized_response["name"]
+        self.account_id = deserialized_response["accountId"]
+        self.runbook_id = deserialized_response["runbookId"]
+        self.definition = deserialized_response["definition"]
+        self.runbook_definition_kind = deserialized_response["runbookDefinitionKind"]
+        self.runbook_version_id = deserialized_response["runbookVersionId"]
+        self.parameters = deserialized_response["parameters"]

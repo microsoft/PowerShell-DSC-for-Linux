@@ -8,6 +8,7 @@ import codecs
 import traceback
 from threading import Thread
 
+import jrdsclient
 import tracer
 
 PREFIX_DEBUG = "DEBUG:"
@@ -26,6 +27,11 @@ class StreamHandler(Thread):
     """Stream handler class."""
 
     def __init__(self, job_data, runtime_process, jrds_client):
+        """
+        :type job_data: jrdsclient.JobData
+        :type runtime_process :
+        :type jrds_client : jrdsclient.JRDSClient
+        """
         Thread.__init__(self)
         self.job_data = job_data
         self.runtime_process = runtime_process
@@ -70,9 +76,9 @@ class StreamHandler(Thread):
                     # leave this as debug trace to prevent logging customer streams to automation logs
                     tracer.log_debug_trace("STDOUT : " + str(output.strip()))
             except:
-                tracer.log_exception_trace(traceback.format_exc())
+                tracer.log_sandbox_job_streamhandler_unhandled_exception(self.job_data.job_id, traceback.format_exc())
                 continue
-        tracer.log_debug_trace("Stream processing complete.")
+        tracer.log_sandbox_job_streamhandler_processing_complete(self.job_data.job_id)
 
     def process_debug_stream(self, stream_count, output):
         self.set_stream(stream_count, STREAM_TYPE_DEBUG, output)
@@ -95,5 +101,5 @@ class StreamHandler(Thread):
         pass
 
     def set_stream(self, stream_count, stream_type, output):
-        self.jrds_client.set_stream(self.job_data["jobId"], self.job_data["runbookVersionId"], output.strip(),
+        self.jrds_client.set_stream(self.job_data.job_id, self.job_data.runbook_version_id, output.strip(),
                                     stream_type, stream_count)

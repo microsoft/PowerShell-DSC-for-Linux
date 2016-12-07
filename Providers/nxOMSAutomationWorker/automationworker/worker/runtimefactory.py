@@ -17,9 +17,10 @@ BASH = 11
 def create_runtime(job_data, runbook_data):
     """Create a new instance of the appropriate language Runtime.
 
-    Args:
-        job_data         : dictionary, the job data.
-        runbook_data     : dictionary, the runbook_data.
+    :param job_data     : the job data
+    :param runbook_data : the runbook_data
+    :type job_data      : jrdsclient.JobData
+    :type runbook_data  : jrdsclient.RunbookData
 
     Returns:
         An instance of Python2Runtime if the runbook_definition_kind parameter is "Python2".
@@ -29,7 +30,7 @@ def create_runtime(job_data, runbook_data):
     Throws:
         UnsupportedRunbookType : If the OS or the worker doesn't support the specified runbook_definition_kind.
     """
-    runbook_definition_kind = runbook_data["runbookDefinitionKind"]
+    runbook_definition_kind = runbook_data.runbook_definition_kind
 
     if runbook_definition_kind == PowerShell:
         runbook = PowerShellRunbook(runbook_data)

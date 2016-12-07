@@ -36,7 +36,6 @@ GPG_PUBLIC_KEYRING_PATH = "gpg_public_keyring_path"
 STATE_DIRECTORY_PATH = "state_directory_path"
 JRDS_POLLING_FREQUENCY = "jrds_polling_frequency"
 PROXY_CONFIGURATION_PATH = "proxy_configuration_path"
-PROXY_CONFIGURATION_PATH = "proxy_configuration_path"
 
 # optional configuration default values
 DEFAULT_EMPTY = ""
@@ -47,7 +46,7 @@ DEFAULT_GPG_PUBLIC_KEYRING_PATH = DEFAULT_EMPTY
 DEFAULT_STATE_DIRECTORY_PATH = DEFAULT_EMPTY
 DEFAULT_PROXY_CONFIGURATION_PATH = DEFAULT_EMPTY
 DEFAULT_COMPONENT = "Unknown"
-DEFAULT_WORKER_VERSION = "8.0.0.0"
+DEFAULT_WORKER_VERSION = "1.0.0.0"
 DEFAULT_JRDS_POLLING_FREQUENCY = "30"
 
 # state configuration keys
