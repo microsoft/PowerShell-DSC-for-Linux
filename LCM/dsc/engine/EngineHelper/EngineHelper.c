@@ -510,7 +510,7 @@ void GetResourceString( _In_ MI_Uint32 errorStringId, _Inout_ Intlstr *resStr)
    }
    else
    {
-       GetUndefinedString(errorStringId);
+       GetUndefinedString(errorStringId, resStr);
    }
 }
 
@@ -523,7 +523,7 @@ void GetResourceString1Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    }
    else
    {
-       GetUndefinedString(errorStringId);
+       GetUndefinedString(errorStringId, resStr);
    }
 }
 
@@ -537,7 +537,7 @@ void GetResourceString2Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    }
    else
    {
-       GetUndefinedString(errorStringId);
+       GetUndefinedString(errorStringId, resStr);
    }
 }
  
@@ -551,7 +551,7 @@ void GetResourceString3Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    }
    else
    {
-       GetUndefinedString(errorStringId);
+       GetUndefinedString(errorStringId, resStr);
    }
 }
 
@@ -565,7 +565,7 @@ void GetResourceString4Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    }
    else
    {
-       GetUndefinedString(errorStringId);
+       GetUndefinedString(errorStringId, resStr);
    }
 }
 
