@@ -25,7 +25,7 @@
 
 
 
-#define INTERNAL_Intlstr_Define0( id, name, text)  \
+#define INTERNAL_Intlstr_Define0( id, name,text)  \
     Intlstr_Define0(id, name, text)
 
 #define INTERNAL_Intlstr_Define1( id, name,  parameter1_type, parameter1_name,text)  \
