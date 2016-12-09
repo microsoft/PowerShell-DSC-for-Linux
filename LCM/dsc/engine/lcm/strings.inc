@@ -468,20 +468,16 @@ INTERNAL_Intlstr_Define0( ID_PULL_INVALIDCHECKSUMALGORITHM,
 			  ID_PULL_INVALIDCHECKSUMALGORITHM,
                  	  "Receieved an invalid checksum algorithm from server.")
 
-INTERNAL_Intlstr_Define0( ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE,
+INTERNAL_Intlstr_Define1( ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE,
 			  ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE,
   			  _In_z_ const PAL_Char*, firstString,
-              "The download manager " Intlstr_tstr(1) "mentioned in the partial configuration is undefined in the meta configurationn or assigned incorrectly" Check the download manager and assign ResourceRepositoryWeb or ResourceReporistoryShare to ResourceModuleSource and ConfigurationRepositoryWeb or ConfigurationRepositoryShare to ConfigurationSource")
+              "The download manager " Intlstr_tstr(1) "mentioned in the partial configuration is undefined in the meta configuration or assigned incorrectly. Check the download manager and assign ResourceRepositoryWeb or ResourceReporistoryShare to ResourceModuleSource and ConfigurationRepositoryWeb or ConfigurationRepositoryShare to ConfigurationSource")
 
 INTERNAL_Intlstr_Define1( ID_PULL_NOCONFIGURATIONSOURCE,
 			  ID_PULL_NOCONFIGURATIONSOURCE,
       			  _In_z_ const PAL_Char*, firstString,
                  	  "No ConfigurationSource is specified for the PartialConfiguration: "  Intlstr_tstr(1) ".")
 
-INTERNAL_Intlstr_Define1( ID_PULL_NOCONFIGURATIONSOURCE,
-			  ID_PULL_NOCONFIGURATIONSOURCE,
-      			  _In_z_ const PAL_Char*, firstString,
-                 	  "No ConfigurationSource is specified for the PartialConfiguration: "  Intlstr_tstr(1) ".")
 
 INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODE,
 			  ID_PULL_SERVERHTTPERRORCODE,
