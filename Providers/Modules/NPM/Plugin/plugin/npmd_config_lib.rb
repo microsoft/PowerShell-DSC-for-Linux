@@ -52,13 +52,10 @@ module NPMDConfig
     require 'json'
     require 'ipaddr'
 
-    # Need to have two new methods to get mask and subnet id
+    # Need to have method to get the subnetmask
     class ::IPAddr
         def getNetMaskString
             _to_string(@mask_addr)
-        end
-        def getIPString
-            _to_string(@addr)
         end
     end
 
@@ -95,6 +92,11 @@ module NPMDConfig
 
         private
 
+        def self.getNetMask(ipaddrObj)
+            _tempIp = IPAddr.new(ipaddrObj.getNetMaskString)
+            _tempIp.to_s
+        end
+
         def self.getProcessedSubnetHash(subnetHash)
             _h = Hash.new
             _h["Masks"] = Hash.new
@@ -102,8 +104,8 @@ module NPMDConfig
             begin
                 subnetHash.each do |key, value|
                     _tempIp = IPAddr.new(value)
-                    _h["Masks"][key] = _tempIp.getNetMaskString
-                    _h["IDs"][key] = _tempIp.getIPString
+                    _h["Masks"][key] = getNetMask(_tempIp)
+                    _h["IDs"][key] = _tempIp.to_s
                 end
                 _h
             rescue StandardError => e
@@ -280,7 +282,8 @@ module NPMDConfig
                     value["IPs"].each do |ip|
                         _tempIp = Hash.new
                         _tempIp["IP"] = ip["Value"]
-                        _tempIp["SubnetName"] = ip["Subnet"]
+                        # Store agent subnet name as string
+                        _tempIp["SubnetName"] = ip["Subnet"].to_s
                         _agent["IPs"] << _tempIp
                     end
                     _a << _agent
@@ -324,5 +327,4 @@ module NPMDConfig
         _agentXml = AgentConfigCreator.createXmlFromUIConfigHash(_uiHash)
     end
 end
-
 
