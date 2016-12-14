@@ -33,6 +33,7 @@ class StreamHandler(Thread):
         :type jrds_client : jrdsclient.JRDSClient
         """
         Thread.__init__(self)
+        self.daemon = True
         self.job_data = job_data
         self.runtime_process = runtime_process
         self.jrds_client = jrds_client

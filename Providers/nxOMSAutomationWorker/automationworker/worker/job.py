@@ -84,22 +84,23 @@ class Job(Thread):
             self.execute_runbook()
             self.unload_job()
         except (WorkerUnsupportedRunbookType, OSUnsupportedRunbookType), e:
-            tracer.log_sandbox_job_unsupported_runbook_type(self.job_id, e)
+            tracer.log_sandbox_job_unsupported_runbook_type(self.job_id, e.message)
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
         except InvalidRunbookSignature, e:
             tracer.log_sandbox_job_invalid_signature(self.job_id)
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
-        except Exception, e:
-            tracer.log_sandbox_job_unhandled_exception(self.job_id, e, traceback.format_exc())
-            self.job_thread_exception_queue.put(sys.exc_info())
+        except Exception:
+            tracer.log_sandbox_job_unhandled_exception(self.job_id, traceback.format_exc())
+            self.job_thread_exception_queue.put(traceback.format_exc())
 
     def execute_runbook(self):
         """Executes the job runtime and performs runtime operation (stream upload / status change)."""
         # set status to running
         tracer.log_sandbox_job_started(self.job_id)
-        start_request_time = time.strptime(self.job_data.start_request_time.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        start_request_time = time.strptime(self.job_data.start_request_time.split("+")[0].split(".")[0],
+                                           "%Y-%m-%dT%H:%M:%S")
         time_taken_to_start_td = datetime.utcnow() - datetime.fromtimestamp(time.mktime(start_request_time))
         time_taken_to_start_in_seconds = (time_taken_to_start_td.microseconds + (time_taken_to_start_td.seconds +
                                                                                  time_taken_to_start_td.days * 24 * 3600) * 10 ** 6) / 10 ** 6
@@ -159,7 +160,8 @@ class Job(Thread):
         """Unloads the job."""
         self.jrds_client.unload_job(self.job_data.subscription_id, self.sandbox_id, self.job_id,
                                     self.job_updatable_data.is_draft, datetime.now(), 2)
-        start_request_time = time.strptime(self.job_data.start_request_time.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        start_request_time = time.strptime(self.job_data.start_request_time.split("+")[0].split(".")[0],
+                                           "%Y-%m-%dT%H:%M:%S")
         duration_td = datetime.utcnow() - datetime.fromtimestamp(time.mktime(start_request_time))
         duration_seconds = (duration_td.microseconds + (
                             duration_td.seconds + duration_td.days * 24 * 3600) * 10 ** 6) / 10 ** 6
