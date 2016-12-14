@@ -455,9 +455,9 @@ def log_sandbox_job_invalid_signature(job_id):
     trace_generic_hybrid_worker_event(10015, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
-def log_sandbox_job_unhandled_exception(job_id, e, stacktrace):
+def log_sandbox_job_unhandled_exception(job_id, stacktrace):
     message = "Job unhandled exception. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + \
-              "][exception=" + str(e) + "][stacktrace=" + str(stacktrace) + "]"
+              "][stacktrace=" + str(stacktrace) + "]"
     trace_generic_hybrid_worker_event(10016, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 

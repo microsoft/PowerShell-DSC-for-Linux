@@ -10,7 +10,6 @@ import configuration
 import subprocessfactory
 import tracer
 
-GPG_DECRYPT_BASE_CMD = ["gpg", "-d"]
 GPG_NO_DEFAULT_KEYRING_OPTION = "--no-default-keyring"
 GPG_KEYRING_ARG = "--keyring"
 
@@ -22,7 +21,7 @@ def verify_signature(signed_file_path, output_file_path):
         True    : If the signature is valid.
         False   : If the signature is invalid.
     """
-    cmd = GPG_DECRYPT_BASE_CMD
+    cmd = ["gpg", "-d"]
     keyring_path = configuration.get_gpg_public_keyring_path()
 
     # if a keyring is specified in the conf, used it, else use default one
