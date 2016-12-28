@@ -41,7 +41,6 @@ SHLIB_EXT: 'so'
 
 /opt/microsoft/omsconfig/etc/logrotate.conf; Providers/Extras/Scripts/omsconfig_logrotate.conf; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf; LCM/omsconfig.consistencyinvoker.conf; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/etc/Inventory.mof; LCM/Base_Inventory.mof; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/etc/omsconfig.reg; LCM/omsconfig.reg; 755; ${{RUN_AS_USER}}; root
@@ -315,11 +314,9 @@ if [ -f /etc/opt/microsoft/omsagent/conf/omsadmin.conf ]; then
    su - omsagent -c "/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py"
 fi
 
-cp -f /opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
 cp -f /opt/microsoft/omsconfig/etc/Inventory.mof /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
-chown omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
-chgrp omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
-/opt/microsoft/omsagent/bin/service_control reload
+chown omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
+chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 
 #endif
 
@@ -350,7 +347,6 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $OMI_REGISTER_DIR/root-oms
     rm -f $OMI_HOME/bin/OMSConsistencyInvoker
     rm -f $OMI_LIB/libomsconfig.so    
-    rm -f /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
 #else
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
