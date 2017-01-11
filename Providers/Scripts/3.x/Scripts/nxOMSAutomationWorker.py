@@ -12,6 +12,7 @@ import datetime
 import time
 
 import imp
+protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
@@ -20,11 +21,15 @@ def init_locals(WorkspaceId, AzureDnsAgentSvcZone):
         WorkspaceId = ''
     if AzureDnsAgentSvcZone is None:
         AzureDnsAgentSvcZone = ''
-    return WorkspaceId, AzureDnsAgentSvcZone
+    return str(WorkspaceId).encode('ascii', 'ignore'), str(AzureDnsAgentSvcZone).encode('ascii', 'ignore')
 
 
 def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
     WorkspaceId, AzureDnsAgentSvcZone = init_locals(WorkspaceId, AzureDnsAgentSvcZone)
+    return set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone)
+
+
+def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_config_file=False):
     if Enabled:
         try:
             if not os.path.isdir(WORKER_STATE_DIR):
@@ -38,21 +43,29 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
             proxy_conf_path = PROXY_CONF_PATH_NEW
             if not os.path.isfile(PROXY_CONF_PATH_NEW) and os.path.isfile(PROXY_CONF_PATH_LEGACY):
                 proxy_conf_path = PROXY_CONF_PATH_LEGACY
-            proc = subprocess.Popen(
-                ["python", REGISTRATION_FILE_PATH, "--register", "-w", WorkspaceId, "-a", agent_id,
-                 "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
-                 WORKER_STATE_DIR, "-e", AzureDnsAgentSvcZone, "-p", proxy_conf_path, "-g", KEYRING_PATH],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if mock_worker_config_file is True:
+                proc = subprocess.Popen(
+                    ["python", REGISTRATION_FILE_PATH, "--register", "-w", WorkspaceId, "-a", agent_id,
+                     "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
+                     WORKER_STATE_DIR, "-e", AzureDnsAgentSvcZone, "-p", proxy_conf_path, "-g", KEYRING_PATH,
+                     "--mock_powershelldsc_test"],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            else:
+                proc = subprocess.Popen(
+                    ["python", REGISTRATION_FILE_PATH, "--register", "-w", WorkspaceId, "-a", agent_id,
+                     "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
+                     WORKER_STATE_DIR, "-e", AzureDnsAgentSvcZone, "-p", proxy_conf_path, "-g", KEYRING_PATH],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             log(DEBUG, "Trying to register Linux hybrid worker")
             if proc.wait() != 0:
-                log(ERROR, "Linux Hybrid Worker registration failed: " + stderr + "\n" + stdout)
+                log(ERROR, "Linux Hybrid Worker registration failed: " + str(stderr) + "\n" + str(stdout))
                 return [-1]
             if not os.path.isfile(WORKER_CONF_FILE_PATH):
                 log(ERROR, "Linux Hybrid Worker registration file could not be created")
                 return [-1]
-        except Exception, exception:
-            log(ERROR, exception.message)
+        except Exception as exception:
+            log(ERROR, exception)
             return [-1]
 
         # Read the worker state file and try to kill linux hybrid worker process if running
@@ -63,11 +76,11 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
 
             # Start the worker again
             start_daemon(["python", HYBRID_WORKER_START_PATH, WORKER_CONF_FILE_PATH, WorkspaceId,
-                         read_resoruce_version_file()])
+                          read_resoruce_version_file()])
 
-            # Take your sweet time to check for the worker process
+            # Wait for the worker to actually start
             success = False
-            for i in range(0,5):
+            for i in range(0, 5):
                 time.sleep(5)
                 if verify_hybrid_worker() > 0:
                     success = True
@@ -76,18 +89,20 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
                 log(ERROR, "Linux Hybrid worker process was not detected")
                 return [-1]
 
-        except Exception, exception:
-            log(ERROR, exception.message)
+        except Exception as exception:
+            log(ERROR, exception)
             return [-1]
         log(INFO, "Set method exited successfully for Enabled = True")
     else:
         # enabled is set to false
         try:
             kill_hybrid_worker()
-            os.remove(WORKER_CONF_FILE_PATH)
-            os.remove(WORKER_STATE_FILE_PATH)
-        except Exception, exception:
-            log(ERROR, exception.message)
+            if os.path.isfile(WORKER_CONF_FILE_PATH):
+                os.remove(WORKER_CONF_FILE_PATH)
+            if os.path.isfile(WORKER_STATE_FILE_PATH):
+                os.remove(WORKER_STATE_FILE_PATH)
+        except Exception as exception:
+            log(ERROR, exception)
             return [-1]
         log(INFO, "Set method exited successfully for Enabled = False")
     return [0]
@@ -122,14 +137,12 @@ def Test_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
 
 def Get_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
     WorkspaceId, AzureDnsAgentSvcZone = init_locals(WorkspaceId, AzureDnsAgentSvcZone)
-    arg_names = list(locals().keys())
     retval = 0
-    retd = {}
-    ld = locals()
-    for k in arg_names:
-        retd[k] = ld[k]
+    retd = dict()
+    retd['WorkspaceId'] = protocol.MI_String(WorkspaceId)
+    retd['Enabled'] = protocol.MI_Boolean(Enabled)
+    retd['AzureDnsAgentSvcZone'] = protocol.MI_String(AzureDnsAgentSvcZone)
     return retval, retd
-
 
 # ###########################################################
 # Begin user defined DSC functions
@@ -159,22 +172,23 @@ HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWork
 PROXY_CONF_PATH_LEGACY="/etc/opt/microsoft/omsagent/conf/proxy.conf"
 PROXY_CONF_PATH_NEW="/etc/opt/microsoft/omsagent/proxy.conf"
 KEYRING_PATH="/etc/opt/omi/conf/omsconfig/keyring.gpg"
+LOCAL_LOG_LOCATION = "/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log"
 
 
 def read_worker_state():
     # Reads the state.config file and returns the values of pid, workspace_id, resource_running_version
     if os.path.isfile(WORKER_STATE_FILE_PATH):
-        state = configparser.configparser()
+        state = configparser.ConfigParser()
         try:
             state.read(WORKER_STATE_FILE_PATH)
             pid = state.get(STATE_SECTION, PID)
             workspace_id = state.get(STATE_SECTION, WORKSPACE_ID)
             resource_running_version = state.get(STATE_SECTION, DSC_RESOURCE_VERSION)
-        except configparser.NoSectionError, exception:
+        except configparser.NoSectionError as exception:
             log(DEBUG, exception.message)
             raise configparser.Error(exception.message)
 
-        except configparser.NoOptionError, exception:
+        except configparser.NoOptionError as exception:
             log(DEBUG, exception.message)
             raise configparser.Error(exception.message)
 
@@ -182,7 +196,7 @@ def read_worker_state():
     else:
         error_string = "could not find file" + WORKER_STATE_FILE_PATH
         log('DEUBG', error_string)
-        raise configparser.Error(error_string);
+        raise configparser.Error(error_string)
 
 
 def read_oms_config_file():
@@ -192,16 +206,16 @@ def read_oms_config_file():
         try:
             keyvals = config_file_to_kv_pair(OMS_ADMIN_CONFIG_FILE)
             return keyvals[AGENT_ID].strip()
-        except configparser.NoSectionError, exception:
+        except configparser.NoSectionError as exception:
             log(DEBUG, exception.message)
             raise configparser.Error(exception.message)
-        except configparser.NoOptionError, exception:
+        except configparser.NoOptionError as exception:
             log('DEUBG', exception.message)
             raise configparser.Error(exception.message)
     else:
         error_string = "could not find file" + OMS_ADMIN_CONFIG_FILE
         log('DEUBG', error_string)
-        raise configparser.Error(error_string);
+        raise configparser.Error(error_string)
 
 
 def config_file_to_kv_pair(filename):
@@ -229,9 +243,10 @@ def verify_hybrid_worker():
         pid, workspace_id, running_version = read_worker_state()
         proc = subprocess.Popen(["ps", "-p", pid, "-o", "args="], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         command, error = proc.communicate()
+        command = str(command)
         proc.wait()
-    except Exception, e:
-        log(DEBUG, e.message)
+    except Exception as e:
+        log(DEBUG, e)
         return -1
     if proc.returncode == 0 and command.__contains__(workspace_id):
         log(DEBUG, "PID was identified as " + pid + " workspace_id was " + workspace_id)
@@ -252,8 +267,8 @@ def kill_hybrid_worker():
     if pid > 0:
         try:
             os.kill(pid, signal.SIGTERM)
-        except Exception, exception:
-            log(ERROR, "Could not kill Linux Hybrid Worker process pid: " + pid + " " + exception.message)
+        except Exception as exception:
+            log(ERROR, "Could not kill Linux Hybrid Worker process pid: " + str(pid) + " " + str(exception))
             raise exception
 
 def read_resoruce_version_file():
@@ -280,25 +295,25 @@ def start_daemon(args):
             # exit the first parent
             log(DEBUG, "Forked first child")
             log(DEBUG, "Parent PID was: " + str(os.getpid()))
+            os.wait()
             return
-    except OSError, e:
+    except OSError as e:
         log(ERROR, "fork #1 failed: " + e.errno + "\n strerror: " + e.strerror)
         raise e
     # Child process will continue to run in absence of parent
     # Will start the Linux Hybrid Worker as a Popen process and wait forever for it to exit
     os.chdir("/")
     os.setsid()
-    os.umask(077)
+    os.umask(0o077)
     os.close(1)
     os.close(2)
     try:
         pc = subprocess.Popen(args)
         log(DEBUG, "pid of child python process is: " + str(os.getpid()))
         log(DEBUG, "pid of Popened linux hybrid worker is: " + str(pc.pid))
-        pc.wait()
         sys.exit(0)
-    except Exception, e:
-        log(ERROR, "fork #2 failed: " + e.message)
+    except Exception as e:
+        log(ERROR, "fork #2 failed: " + str(e))
         sys.exit(-1)
 
 
@@ -306,13 +321,13 @@ def log(level, message):
     log_local(level, message)
     try:
         LG().Log(level, message)
-    except Exception, e:
-        log_local(INFO, "DSC log to omsconfig.log failed with error " + e.message)
+    except Exception as e:
+        log_local(INFO, "DSC log to omsconfig.log failed with error " + str(e))
 
 
 def log_local(level, message):
     try:
-        fileh = open("/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log", "a")
+        fileh = open(LOCAL_LOG_LOCATION, "a")
         line = level + ": " + message + " " + str(datetime.datetime.now()) + "\n"
         fileh.writelines(line)
         fileh.flush()

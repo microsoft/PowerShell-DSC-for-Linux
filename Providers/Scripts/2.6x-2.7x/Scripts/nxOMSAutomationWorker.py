@@ -12,6 +12,7 @@ import datetime
 import time
 
 import imp
+protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
@@ -25,6 +26,10 @@ def init_locals(WorkspaceId, AzureDnsAgentSvcZone):
 
 def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
     WorkspaceId, AzureDnsAgentSvcZone = init_locals(WorkspaceId, AzureDnsAgentSvcZone)
+    return set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone)
+
+
+def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_config_file=False):
     if Enabled:
         try:
             if not os.path.isdir(WORKER_STATE_DIR):
@@ -38,11 +43,19 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
             proxy_conf_path = PROXY_CONF_PATH_NEW
             if not os.path.isfile(PROXY_CONF_PATH_NEW) and os.path.isfile(PROXY_CONF_PATH_LEGACY):
                 proxy_conf_path = PROXY_CONF_PATH_LEGACY
-            proc = subprocess.Popen(
-                ["python", REGISTRATION_FILE_PATH, "--register", "-w", WorkspaceId, "-a", agent_id,
-                 "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
-                 WORKER_STATE_DIR, "-e", AzureDnsAgentSvcZone, "-p", proxy_conf_path, "-g", KEYRING_PATH],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if mock_worker_config_file is True:
+                proc = subprocess.Popen(
+                    ["python", REGISTRATION_FILE_PATH, "--register", "-w", WorkspaceId, "-a", agent_id,
+                     "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
+                     WORKER_STATE_DIR, "-e", AzureDnsAgentSvcZone, "-p", proxy_conf_path, "-g", KEYRING_PATH,
+                     "--mock_powershelldsc_test"],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            else:
+                proc = subprocess.Popen(
+                    ["python", REGISTRATION_FILE_PATH, "--register", "-w", WorkspaceId, "-a", agent_id,
+                     "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
+                     WORKER_STATE_DIR, "-e", AzureDnsAgentSvcZone, "-p", proxy_conf_path, "-g", KEYRING_PATH],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             log(DEBUG, "Trying to register Linux hybrid worker")
             if proc.wait() != 0:
@@ -63,11 +76,11 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
 
             # Start the worker again
             start_daemon(["python", HYBRID_WORKER_START_PATH, WORKER_CONF_FILE_PATH, WorkspaceId,
-                         read_resoruce_version_file()])
+                          read_resoruce_version_file()])
 
-            # Take your sweet time to check for the worker process
+            # Wait for the worker process to actually start
             success = False
-            for i in range(0,5):
+            for i in range(0, 5):
                 time.sleep(5)
                 if verify_hybrid_worker() > 0:
                     success = True
@@ -84,8 +97,10 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
         # enabled is set to false
         try:
             kill_hybrid_worker()
-            os.remove(WORKER_CONF_FILE_PATH)
-            os.remove(WORKER_STATE_FILE_PATH)
+            if os.path.isfile(WORKER_CONF_FILE_PATH):
+                os.remove(WORKER_CONF_FILE_PATH)
+            if os.path.isfile(WORKER_STATE_FILE_PATH):
+                os.remove(WORKER_STATE_FILE_PATH)
         except Exception, exception:
             log(ERROR, exception.message)
             return [-1]
@@ -122,12 +137,11 @@ def Test_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
 
 def Get_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
     WorkspaceId, AzureDnsAgentSvcZone = init_locals(WorkspaceId, AzureDnsAgentSvcZone)
-    arg_names = list(locals().keys())
     retval = 0
-    retd = {}
-    ld = locals()
-    for k in arg_names:
-        retd[k] = ld[k]
+    retd = dict()
+    retd['WorkspaceId'] = protocol.MI_String(WorkspaceId)
+    retd['Enabled'] = protocol.MI_Boolean(Enabled)
+    retd['AzureDnsAgentSvcZone'] = protocol.MI_String(AzureDnsAgentSvcZone)
     return retval, retd
 
 
@@ -159,6 +173,7 @@ HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWork
 PROXY_CONF_PATH_LEGACY="/etc/opt/microsoft/omsagent/conf/proxy.conf"
 PROXY_CONF_PATH_NEW="/etc/opt/microsoft/omsagent/proxy.conf"
 KEYRING_PATH="/etc/opt/omi/conf/omsconfig/keyring.gpg"
+LOCAL_LOG_LOCATION = "/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log"
 
 
 def read_worker_state():
@@ -182,7 +197,7 @@ def read_worker_state():
     else:
         error_string = "could not find file" + WORKER_STATE_FILE_PATH
         log('DEUBG', error_string)
-        raise ConfigParser.Error(error_string);
+        raise ConfigParser.Error(error_string)
 
 
 def read_oms_config_file():
@@ -201,7 +216,7 @@ def read_oms_config_file():
     else:
         error_string = "could not find file" + OMS_ADMIN_CONFIG_FILE
         log('DEUBG', error_string)
-        raise ConfigParser.Error(error_string);
+        raise ConfigParser.Error(error_string)
 
 
 def config_file_to_kv_pair(filename):
@@ -280,6 +295,7 @@ def start_daemon(args):
             # exit the first parent
             log(DEBUG, "Forked first child")
             log(DEBUG, "Parent PID was: " + str(os.getpid()))
+            os.wait()
             return
     except OSError, e:
         log(ERROR, "fork #1 failed: " + e.errno + "\n strerror: " + e.strerror)
@@ -295,12 +311,10 @@ def start_daemon(args):
         pc = subprocess.Popen(args)
         log(DEBUG, "pid of child python process is: " + str(os.getpid()))
         log(DEBUG, "pid of Popened linux hybrid worker is: " + str(pc.pid))
-        pc.wait()
         sys.exit(0)
     except Exception, e:
         log(ERROR, "fork #2 failed: " + e.message)
         sys.exit(-1)
-
 
 def log(level, message):
     log_local(level, message)
@@ -312,7 +326,7 @@ def log(level, message):
 
 def log_local(level, message):
     try:
-        fileh = open("/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log", "a")
+        fileh = open(LOCAL_LOG_LOCATION, "a")
         line = level + ": " + message + " " + str(datetime.datetime.now()) + "\n"
         fileh.writelines(line)
         fileh.flush()
