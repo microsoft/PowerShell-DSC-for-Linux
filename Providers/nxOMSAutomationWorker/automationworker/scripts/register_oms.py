@@ -118,13 +118,14 @@ def deregister(registration_endpoint, worker_group_name, machine_id, cert_path, 
 
 def create_worker_configuration_file(working_directory, jrds_uri, registration_endpoint, workspace_id,
                                      automation_account_id, worker_group_name, machine_id, oms_cert_path, oms_key_path,
-                                     state_directory, gpg_keyring_path, proxy_configuration_path, test_mode):
+                                     state_directory, gpg_keyring_path, proxy_configuration_path, test_mode,
+                                     cert_info):
     """Creates the automation hybrid worker configuration file.
 
     Note:
         The generated file has to match the latest worker.conf template.
     """
-    issuer, subject, thumbprint = get_cert_info(oms_cert_path)
+    issuer, subject, thumbprint = cert_info
 
     worker_conf_path = os.path.join(state_directory, "worker.conf")
 
@@ -177,13 +178,14 @@ def main(argv):
     state_directory = None
     working_directory = None
     workspace_id = None
+    mock_powershelldsc_test = False
 
     # parse cmd line args
     try:
         opts, args = getopt.getopt(argv, "hrdw:a:c:k:e:f:s:p:g:t",
                                    ["help", "register", "deregister", "workspaceid=", "agentid=", "certpath=",
                                     "keypath=", "endpoint=", "workingdirpath=", "statepath=", "proxyconfpath=",
-                                    "gpgkeyringpath="])
+                                    "gpgkeyringpath=", "mock_powershelldsc_test"])
     except getopt.GetoptError:
         print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
                          "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>"
@@ -217,6 +219,10 @@ def main(argv):
             gpg_keyring_path = arg.strip()
         elif opt in ("-t", "--test"):
             test_mode = True
+        elif opt == "--mock_powershelldsc_test":
+            # generate a dummy configuration file
+            # does not do actual registration, just creates the resulting config file
+            mock_powershelldsc_test = True
 
     if workspace_id is None or agent_id is None or oms_cert_path is None or oms_key_path is None \
             or endpoint is None or gpg_keyring_path is None or proxy_configuration_path is None\
@@ -225,9 +231,13 @@ def main(argv):
         print "Use -h or --help for usage."
         sys.exit(1)
     else:
-        # validate that the cert and key exists
-        if os.path.isfile(oms_cert_path) is False or os.path.isfile(oms_key_path) is False:
-            raise Exception("Certificate or key file doesn't exist. Are you using absolute path?")
+        if mock_powershelldsc_test is True:
+            # Don't validate paths if we want to generate a dummy config file
+            pass
+        else:
+            # validate that the cert and key exists
+            if os.path.isfile(oms_cert_path) is False or os.path.isfile(oms_key_path) is False:
+                raise Exception("Certificate or key file doesn't exist. Are you using absolute path?")
 
         configuration.clear_config()
         configuration.set_config(
@@ -248,12 +258,22 @@ def main(argv):
 
         # action
         if operation == REGISTER:
-            registration_response = register(registration_endpoint, worker_group_name, machine_id, oms_cert_path,
-                                             oms_key_path, test_mode)
+            if mock_powershelldsc_test is True:
+                # Don't do the actual registration in case we want only a dummy registration file
+                # create a dummy response instead
+                registration_response = \
+                    {'jobRuntimeDataServiceUri': 'https://we-jobruntimedata-prod-su1.azure-automation.net',
+                     'AccountId': '23216587-8f56-428c-9006-4c2f28c036f5'}
+                cert_info = ['', '', '959GG850526XC5JT35E269CZ69A55E1C7E1256JH']
+            else:
+                registration_response = register(registration_endpoint, worker_group_name, machine_id, oms_cert_path,
+                                                 oms_key_path, test_mode)
+                cert_info = get_cert_info(oms_cert_path)
             create_worker_configuration_file(working_directory, registration_response["jobRuntimeDataServiceUri"],
                                              registration_endpoint, workspace_id, registration_response["AccountId"],
                                              worker_group_name, machine_id, oms_cert_path, oms_key_path,
-                                             state_directory, gpg_keyring_path, proxy_configuration_path, test_mode)
+                                             state_directory, gpg_keyring_path, proxy_configuration_path, test_mode,
+                                             cert_info)
         elif operation == DEREGISTER:
             deregister(registration_endpoint, worker_group_name, machine_id, oms_cert_path, oms_key_path, test_mode)
         else:
