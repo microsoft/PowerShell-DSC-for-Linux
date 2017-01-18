@@ -4,6 +4,7 @@
 
 """Gpg module. Used for runbook signature validation."""
 
+import os
 import subprocess
 
 import configuration
@@ -29,12 +30,19 @@ def verify_signature(signed_file_path, output_file_path):
         cmd += [GPG_NO_DEFAULT_KEYRING_OPTION, GPG_KEYRING_ARG, keyring_path]
     cmd += ["--output", output_file_path, signed_file_path]
 
-    proc = subprocessfactory.create_subprocess(cmd=cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # temporary workaround for the omi/gpg bug causing gpg to create a .gpg folder in the wrong home dir
+    # only apply the workaround for oms installation
+    env = None
+    if "nxOMSAutomationWorkerResource" in os.path.abspath(__file__):
+        env = os.environ.copy()
+        env["HOME"] = "/var/opt/microsoft/omsagent/run"
+
+    proc = subprocessfactory.create_subprocess(cmd=cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
 
     if proc.poll() == 0:
         tracer.log_debug_trace("Signature is valid.")
         return True
 
-    tracer.log_debug_trace("Signature is invalid.[exception=" + str(stderr) + "]")
+    tracer.log_sandbox_job_runbook_signature_validation_failed(stderr)
     return False

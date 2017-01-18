@@ -52,9 +52,7 @@ class AgentService:
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(self.cert_path).read())
         cert_thumbprint = cert.digest("sha1").replace(":", "")
 
-        # TODO : Handle timezone properly
-        date = datetime.datetime.now().isoformat() + "0-07:00"
-
+        date = datetime.datetime.utcnow().isoformat() + "0-00:00"
         payload = {'RunbookWorkerGroup': self.worker_group_name,
                    "MachineName": socket.gethostname(),
                    "IpAddress": socket.gethostbyname(socket.gethostname()),
@@ -89,9 +87,7 @@ class AgentService:
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(self.cert_path).read())
         cert_thumbprint = cert.digest("sha1").replace(":", "")
 
-        # TODO : Handle timezone properly
-        date = datetime.datetime.now().isoformat() + "0-07:00"
-
+        date = datetime.datetime.utcnow().isoformat() + "0-00:00"
         payload = {"Thumbprint": cert_thumbprint,
                    "Issuer": str(cert.get_issuer()),
                    "Subject": str(cert.get_subject())}

@@ -12,7 +12,7 @@ json = serializerfactory.get_serializer(sys.version_info)
 
 CONFIG_ENV_KEY = "WORKERCONF"
 WORKER_REQUIRED_CONFIG_SECTION = "worker-required"
-OPTIONAL_CONFIG_SECTION = "worker-optional"
+WORKER_OPTIONAL_CONFIG_SECTION = "worker-optional"
 
 # manually set configuration values
 SOURCE_DIRECTORY_PATH = "source_directory_path"
@@ -46,7 +46,7 @@ DEFAULT_GPG_PUBLIC_KEYRING_PATH = DEFAULT_EMPTY
 DEFAULT_STATE_DIRECTORY_PATH = DEFAULT_EMPTY
 DEFAULT_PROXY_CONFIGURATION_PATH = DEFAULT_EMPTY
 DEFAULT_COMPONENT = "Unknown"
-DEFAULT_WORKER_VERSION = "1.0.0.2"
+DEFAULT_WORKER_VERSION = "1.0.0.3"
 DEFAULT_JRDS_POLLING_FREQUENCY = "30"
 
 # state configuration keys
@@ -99,15 +99,15 @@ def read_and_set_configuration(config_path):
                      COMPONENT: DEFAULT_COMPONENT}
 
     # read optional configuration section
-    configuration.update({DEBUG_TRACES: config.getboolean(OPTIONAL_CONFIG_SECTION, DEBUG_TRACES),
-                          BYPASS_CERTIFICATE_VERIFICATION: config.getboolean(OPTIONAL_CONFIG_SECTION,
+    configuration.update({DEBUG_TRACES: config.getboolean(WORKER_OPTIONAL_CONFIG_SECTION, DEBUG_TRACES),
+                          BYPASS_CERTIFICATE_VERIFICATION: config.getboolean(WORKER_OPTIONAL_CONFIG_SECTION,
                                                                              BYPASS_CERTIFICATE_VERIFICATION),
-                          ENFORCE_RUNBOOK_SIGNATURE_VALIDATION: config.getboolean(OPTIONAL_CONFIG_SECTION,
+                          ENFORCE_RUNBOOK_SIGNATURE_VALIDATION: config.getboolean(WORKER_OPTIONAL_CONFIG_SECTION,
                                                                                   ENFORCE_RUNBOOK_SIGNATURE_VALIDATION),
-                          GPG_PUBLIC_KEYRING_PATH: config.get(OPTIONAL_CONFIG_SECTION, GPG_PUBLIC_KEYRING_PATH),
-                          STATE_DIRECTORY_PATH: config.get(OPTIONAL_CONFIG_SECTION, STATE_DIRECTORY_PATH),
-                          JRDS_POLLING_FREQUENCY: config.getint(OPTIONAL_CONFIG_SECTION, JRDS_POLLING_FREQUENCY),
-                          PROXY_CONFIGURATION_PATH: config.get(OPTIONAL_CONFIG_SECTION, PROXY_CONFIGURATION_PATH)})
+                          GPG_PUBLIC_KEYRING_PATH: config.get(WORKER_OPTIONAL_CONFIG_SECTION, GPG_PUBLIC_KEYRING_PATH),
+                          STATE_DIRECTORY_PATH: config.get(WORKER_OPTIONAL_CONFIG_SECTION, STATE_DIRECTORY_PATH),
+                          JRDS_POLLING_FREQUENCY: config.getint(WORKER_OPTIONAL_CONFIG_SECTION, JRDS_POLLING_FREQUENCY),
+                          PROXY_CONFIGURATION_PATH: config.get(WORKER_OPTIONAL_CONFIG_SECTION, PROXY_CONFIGURATION_PATH)})
 
     # set the worker conf to env var
     set_config(configuration)

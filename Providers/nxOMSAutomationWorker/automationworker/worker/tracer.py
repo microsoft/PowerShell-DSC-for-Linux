@@ -270,6 +270,7 @@ COMPONENT_WORKER = "Worker"
 KEYWORD_DEBUG = "Debug"
 KEYWORD_INFO = "Info"
 KEYWORD_ERROR = "Error"
+KEYWORD_WARNING = "Warning"
 KEYWORD_STARTUP = "Startup"
 KEYWORD_ROUTINE = "Routine"
 KEYWORD_JOB = "Job"
@@ -470,6 +471,12 @@ def log_sandbox_job_streamhandler_unhandled_exception(job_id, exception):
 def log_sandbox_job_streamhandler_processing_complete(job_id):
     message = "Job stream handler processing complete. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
     trace_generic_hybrid_worker_event(10018, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+
+
+def log_sandbox_job_runbook_signature_validation_failed(exception):
+    message = "Runbook signature validation failed. [sandboxId=" + str(sandbox_id) + "][gpgException=" +\
+              str(exception) + "]"
+    trace_generic_hybrid_worker_event(10019, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 # etw specific traces
