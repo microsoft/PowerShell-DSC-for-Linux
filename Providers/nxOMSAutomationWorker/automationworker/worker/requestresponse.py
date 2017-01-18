@@ -16,7 +16,6 @@ class RequestResponse:
         self.status_code = int(status_code)
         self.raw_data = raw_response_data
 
-        # TODO(dalbe): review deserialization logic
         self.json = serializerfactory.get_serializer(sys.version_info)
         if raw_response_data is not None:
             try:

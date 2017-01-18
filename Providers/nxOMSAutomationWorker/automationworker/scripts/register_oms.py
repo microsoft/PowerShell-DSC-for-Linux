@@ -12,12 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # since we are using the worker httpclient, some configuration values are expected
 from worker import configuration
 
-configuration.clear_config()
-configuration.set_config({configuration.PROXY_CONFIGURATION_PATH: configuration.DEFAULT_PROXY_CONFIGURATION_PATH,
-                          configuration.WORKER_VERSION: "LinuxAutoRegister",
-                          configuration.WORKING_DIRECTORY_PATH: "/var/opt/microsoft/omsagent/tmp"})
-
-from worker import CurlHttpClient
+from worker import httpclientfactory
 from worker import simplejson as json
 
 REGISTER = "register"
@@ -90,11 +85,12 @@ def register(registration_endpoint, worker_group_name, machine_id, cert_path, ke
     headers, payload = get_headers_and_payload(worker_group_name, cert_path)
     url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
 
-    http_client = CurlHttpClient(cert_path, key_path, test_mode)
+    http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode)
+    http_client = http_client_factory.create_http_client(sys.version_info)
     response = http_client.put(url, headers=headers, data=payload)
 
     if response.status_code != 200:
-        raise Exception("Unable to register [reason=" + response.raw_data + "]")
+        raise Exception("Unable to register [status_code=" + str(response.status_code) + "]")
 
     return json.loads(response.raw_data)
 
@@ -112,11 +108,12 @@ def deregister(registration_endpoint, worker_group_name, machine_id, cert_path, 
     headers, payload = get_headers_and_payload(worker_group_name, cert_path)
     url = registration_endpoint + "/Hybrid(MachineId='" + machine_id + "')"
 
-    http_client = CurlHttpClient(cert_path, key_path, test_mode)
+    http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode)
+    http_client = http_client_factory.create_http_client(sys.version_info)
     response = http_client.delete(url, headers=headers, data=payload)
 
     if response.status_code != 200:
-        raise Exception("Unable to deregister [reason=" + response.raw_data + "]")
+        raise Exception("Unable to deregister [status_code=" + str(response.status_code) + "]")
 
 
 def create_worker_configuration_file(working_directory, jrds_uri, registration_endpoint, workspace_id,
@@ -231,6 +228,12 @@ def main(argv):
         # validate that the cert and key exists
         if os.path.isfile(oms_cert_path) is False or os.path.isfile(oms_key_path) is False:
             raise Exception("Certificate or key file doesn't exist. Are you using absolute path?")
+
+        configuration.clear_config()
+        configuration.set_config(
+            {configuration.PROXY_CONFIGURATION_PATH: proxy_configuration_path,
+             configuration.WORKER_VERSION: "LinuxAutoRegister",
+             configuration.WORKING_DIRECTORY_PATH: "/var/opt/microsoft/omsagent/tmp"})
 
         # build registration endpoint
         # example endpoint : agentsvc.azure-automation.net
