@@ -32,10 +32,16 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
             if not os.path.isdir(WORKING_DIRECTORY_PATH):
                 os.makedirs(WORKING_DIRECTORY_PATH)
             agent_id = read_oms_config_file()
+            # If both proxy files exist use the new one
+            # If neither exist use the new path, path will have no file in it, but no file means no proxy set up
+            # If one of them exists, use that
+            proxy_conf_path = PROXY_CONF_PATH_NEW
+            if not os.path.isfile(PROXY_CONF_PATH_NEW) and os.path.isfile(PROXY_CONF_PATH_LEGACY):
+                proxy_conf_path = PROXY_CONF_PATH_LEGACY
             proc = subprocess.Popen(
                 ["python", REGISTRATION_FILE_PATH, "--register", "-w", WorkspaceId, "-a", agent_id,
                  "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
-                 WORKER_STATE_DIR, "-e", AzureDnsAgentSvcZone, "-p", PROXY_CONF_PATH, "-g", KEYRING_PATH],
+                 WORKER_STATE_DIR, "-e", AzureDnsAgentSvcZone, "-p", proxy_conf_path, "-g", KEYRING_PATH],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             log(DEBUG, "Trying to register Linux hybrid worker")
@@ -150,7 +156,8 @@ OMS_CERT_KEY_PATH = "/etc/opt/microsoft/omsagent/certs/oms.key"
 WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run/automationworker"
 REGISTRATION_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/scripts/register_oms.py"
 HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
-PROXY_CONF_PATH="/etc/opt/microsoft/omsagent/proxy.conf"
+PROXY_CONF_PATH_LEGACY="/etc/opt/microsoft/omsagent/conf/proxy.conf"
+PROXY_CONF_PATH_NEW="/etc/opt/microsoft/omsagent/proxy.conf"
 KEYRING_PATH="/etc/opt/omi/conf/omsconfig/keyring.gpg"
 
 
