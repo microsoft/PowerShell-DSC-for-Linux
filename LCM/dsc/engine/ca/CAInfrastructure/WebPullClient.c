@@ -240,9 +240,23 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
 #if defined(BUILD_OMS)
     // TODO: read from OMS's config file to read in the Proxy info
     size_t valueLength;
-    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsagent/conf/proxy.conf";
+    // If the user has setup proxy, a conf file will be in one of these two locations
+    // If the user has not setup proxy, no conf file will exist; this is valid
+    const char* legacyOMSProxyFileLocation = "/etc/opt/microsoft/omsagent/conf/proxy.conf";
+    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsagent/proxy.conf";
+
+    char* proxyFileLocationToUse = NULL;
 
     if (File_ExistT(omsProxyFileLocation) != -1)
+    {
+        proxyFileLocationToUse = omsProxyFileLocation;
+    }
+    else if (File_ExistT(legacyOMSProxyFileLocation) != -1)
+    {
+        proxyFileLocationToUse = legacyOMSProxyFileLocation;
+    }
+
+    if (proxyFileLocationToUse != NULL)
     {
 	text = InhaleTextFile(omsProxyFileLocation);
 	valueLength = strlen(text);
