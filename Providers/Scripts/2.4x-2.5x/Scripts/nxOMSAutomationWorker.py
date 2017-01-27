@@ -8,8 +8,9 @@ import sys
 import ConfigParser
 import subprocess
 import signal
-import datetime
 import time
+import logging
+import logging.handlers
 
 import imp
 protocol = imp.load_source('protocol', '../protocol.py')
@@ -30,13 +31,24 @@ def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
 
 
 def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_config_file=False):
+    try:
+        is_primary = is_oms_primary_workspace(WorkspaceId)
+    except Exception, e:
+        log(ERROR, "Could not detect if workspace is primary\n %s" %(str(e)))
+        return [-1]
+
+    if is_primary is False:
+        # Set_Marshall is a no-op on non-primary workspaces
+        log(INFO, "Set_Marshall skipped because workspace was not primary")
+        return [0]
+
     if Enabled:
         try:
             if not os.path.isdir(WORKER_STATE_DIR):
                 os.mkdir(WORKER_STATE_DIR)
             if not os.path.isdir(WORKING_DIRECTORY_PATH):
                 os.makedirs(WORKING_DIRECTORY_PATH)
-            agent_id = read_oms_config_file()
+            oms_workspace_id, agent_id = read_oms_primary_workspace_config_file()
             # If both proxy files exist use the new one
             # If neither exist use the new path, path will have no file in it, but no file means no proxy set up
             # If one of them exists, use that
@@ -65,7 +77,7 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
                 log(ERROR, "Linux Hybrid Worker registration file could not be created")
                 return [-1]
         except Exception, exception:
-            log(ERROR, exception.message)
+            log(ERROR, str(exception))
             return [-1]
 
         # Read the worker state file and try to kill linux hybrid worker process if running
@@ -88,9 +100,11 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
             if not success:
                 log(ERROR, "Linux Hybrid worker process was not detected")
                 return [-1]
-
+        except SystemExit:
+            # very important for the first child of the start_daemon method to die properly
+            exit(0)
         except Exception, exception:
-            log(ERROR, exception.message)
+            log(ERROR, str(exception))
             return [-1]
         log(INFO, "Set method exited successfully for Enabled = True")
     else:
@@ -102,7 +116,7 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
             if os.path.isfile(WORKER_STATE_FILE_PATH):
                 os.remove(WORKER_STATE_FILE_PATH)
         except Exception, exception:
-            log(ERROR, exception.message)
+            log(ERROR, str(exception))
             return [-1]
         log(INFO, "Set method exited successfully for Enabled = False")
     return [0]
@@ -110,6 +124,17 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
 
 def Test_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
     init_locals(WorkspaceId, AzureDnsAgentSvcZone)
+    try:
+        isprimary = is_oms_primary_workspace(WorkspaceId)
+    except Exception, e:
+        log(ERROR, "Could not detect if workspace is primary\n %s" %(str(e)))
+        return [-1]
+
+    if isprimary is False:
+        # Test_Marshall is a no-op on non-primary workspaces
+        log(INFO, "Test_Marshall skipped because workspace was not primary")
+        return [0]
+
     if Enabled:
         if os.path.isfile(WORKER_CONF_FILE_PATH):
             if os.path.isfile(WORKER_STATE_FILE_PATH):
@@ -148,13 +173,14 @@ def Get_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
 # ###########################################################
 # Begin user defined DSC functions
 # ###########################################################
-ERROR  = 'ERROR'
-DEBUG = 'DEBUG'
-INFO = 'INFO'
+ERROR = logging.ERROR
+DEBUG = logging.DEBUG
+INFO = logging.INFO
 
 STATE_SECTION = "state"
 PID = "pid"
 WORKSPACE_ID = "workspace_id"
+OMS_WORKSPACE_ID_KEY = "WORKSPACE_ID"
 CONFIGURATION = "configuration"
 DSC_RESOURCE_VERSION = "resource_version"
 AGENT_ID = "AGENT_GUID"
@@ -175,6 +201,22 @@ PROXY_CONF_PATH_NEW="/etc/opt/microsoft/omsagent/proxy.conf"
 KEYRING_PATH="/etc/opt/omi/conf/omsconfig/keyring.gpg"
 LOCAL_LOG_LOCATION = "/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log"
 
+def is_oms_primary_workspace(mof_workspace_id):
+    """
+    Detect if the passed workspace id is primary workspace on multi-homing enabled OMS agent
+    Mulit-homing for OMS is 2 tiered, one primary and multiple secondary workspaces are allowed
+    Currently, the Automation Worker should only run on primary workspace
+    A primary OMS workspace is pointed to by the symbolic links of old style (single homing) paths like
+    /etc/opt/microsoft/omsagent/ the actual location of which is /etc/opt/microsoft/omsagent/<workspace id>.
+    A sufficient test for checking whether a given workspace id belongs to a primary is to compare it against the
+    workspace id found in the oms config file in the old style path
+    :return: True, if the given workspace id belongs to the primary OMS workspace, False otherwise
+    """
+    oms_workspace_id, agent_id = read_oms_primary_workspace_config_file()
+    if oms_workspace_id == mof_workspace_id:
+        return True
+    else:
+        return False
 
 def read_worker_state():
     # Reads the state.config file and returns the values of pid, workspace_id, resource_running_version
@@ -186,36 +228,37 @@ def read_worker_state():
             workspace_id = state.get(STATE_SECTION, WORKSPACE_ID)
             resource_running_version = state.get(STATE_SECTION, DSC_RESOURCE_VERSION)
         except ConfigParser.NoSectionError, exception:
-            log(DEBUG, exception.message)
-            raise ConfigParser.Error(exception.message)
+            log(DEBUG, str(exception))
+            raise ConfigParser.Error(str(exception))
 
         except ConfigParser.NoOptionError, exception:
-            log(DEBUG, exception.message)
-            raise ConfigParser.Error(exception.message)
+            log(DEBUG, str(exception))
+            raise ConfigParser.Error(str(exception))
 
         return pid, workspace_id, resource_running_version
     else:
         error_string = "could not find file" + WORKER_STATE_FILE_PATH
-        log('DEUBG', error_string)
+        log(DEBUG, error_string)
         raise ConfigParser.Error(error_string)
 
 
-def read_oms_config_file():
+def read_oms_primary_workspace_config_file():
     # Reads the oms config file
     # Returns: AgentID config value
     if os.path.isfile(OMS_ADMIN_CONFIG_FILE):
+        # the above path always points to the oms configuration file of the primary workspace
         try:
             keyvals = config_file_to_kv_pair(OMS_ADMIN_CONFIG_FILE)
-            return keyvals[AGENT_ID].strip()
+            return keyvals[OMS_WORKSPACE_ID_KEY].strip(), keyvals[AGENT_ID].strip()
         except ConfigParser.NoSectionError, exception:
-            log(DEBUG, exception.message)
-            raise ConfigParser.Error(exception.message)
+            log(DEBUG, str(exception))
+            raise ConfigParser.Error(str(exception))
         except ConfigParser.NoOptionError, exception:
-            log('DEUBG', exception.message)
-            raise ConfigParser.Error(exception.message)
+            log(DEBUG, str(exception))
+            raise ConfigParser.Error(str(exception))
     else:
         error_string = "could not find file" + OMS_ADMIN_CONFIG_FILE
-        log('DEUBG', error_string)
+        log(DEBUG, error_string)
         raise ConfigParser.Error(error_string)
 
 
@@ -246,7 +289,7 @@ def verify_hybrid_worker():
         command, error = proc.communicate()
         proc.wait()
     except Exception, e:
-        log(DEBUG, e.message)
+        log(DEBUG, str(e))
         return -1
     if proc.returncode == 0 and command.__contains__(workspace_id):
         log(DEBUG, "PID was identified as " + pid + " workspace_id was " + workspace_id)
@@ -268,7 +311,7 @@ def kill_hybrid_worker():
         try:
             os.kill(pid, signal.SIGTERM)
         except Exception, exception:
-            log(ERROR, "Could not kill Linux Hybrid Worker process pid: " + pid + " " + exception.message)
+            log(ERROR, "Could not kill Linux Hybrid Worker process pid: " + pid + " " + str(exception))
             raise exception
 
 def read_resoruce_version_file():
@@ -311,27 +354,28 @@ def start_daemon(args):
         pc = subprocess.Popen(args)
         log(DEBUG, "pid of child python process is: " + str(os.getpid()))
         log(DEBUG, "pid of Popened linux hybrid worker is: " + str(pc.pid))
-        sys.exit(0)
     except Exception, e:
-        log(ERROR, "fork #2 failed: " + e.message)
+        log(ERROR, "fork #2 failed: " + str(e))
         sys.exit(-1)
+    sys.exit(0)
 
 def log(level, message):
-    log_local(level, message)
     try:
-        LG().Log(level, message)
-    except Exception, e:
-        log_local(INFO, "DSC log to omsconfig.log failed with error " + e.message)
-
-
-def log_local(level, message):
-    try:
-        fileh = open(LOCAL_LOG_LOCATION, "a")
-        line = level + ": " + message + " " + str(datetime.datetime.now()) + "\n"
-        fileh.writelines(line)
-        fileh.flush()
-        fileh.close()
-    except Exception:
-        ## If you want to disable logging, change the permissions to the nxOMSAutomationWorker.log file
+        LG().Log(logging._levelNames[level], message)
+    except:
         pass
+
+class local_log(object):
+    logger = None
+    logfh = None
+    def __init__(self):
+        if local_log.logger is None or local_log.logfh is None:
+            local_log.logger = logging.getLogger()
+            local_log.logfh = logging.handlers.RotatingFileHandler(LOCAL_LOG_LOCATION, mode='a', maxBytes=1048576, backupCount=20)
+            formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(message)s')
+            local_log.logger.setLevel(DEBUG)
+            local_log.logfh.setFormatter(formatter)
+            local_log.logger.addHandler(local_log.logfh)
+    def log(self, level, message):
+        local_log.logger.log(level, message)
 

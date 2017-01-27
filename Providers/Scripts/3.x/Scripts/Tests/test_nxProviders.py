@@ -4828,13 +4828,15 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
         Setup Test resources
         """
         if not os.path.isdir(self.tempWorkingDir):
-            os.mkdir(self.tempWorkingDir, 0o777)
+            os.mkdir(self.tempWorkingDir, 0o077)
 
     def tearDown(self):
         """
         Remove test resoruces
         """
-        shutil.rmtree(self.tempWorkingDir)
+        # tests in Python3 are weird, they may run parallelly
+        # do not kill workers on tearDown and do not delete tempWorkingDrir
+        return
 
     def find_all_worker_processes(self):
         """
@@ -4871,7 +4873,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
         for i in range(1, 5, 2):
             time.sleep(i)
             pids = self.find_all_worker_processes()
-            if len(pids) > 0:
+            if pids is not None and len(pids) > 0:
                 return
         raise Exception
 

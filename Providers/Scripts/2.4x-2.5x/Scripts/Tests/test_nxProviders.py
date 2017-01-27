@@ -4858,6 +4858,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
         """
         Remove test resoruces
         """
+        self.kill_all_workers()
         shutil.rmtree(self.tempWorkingDir)
 
     def find_all_worker_processes(self):
@@ -4894,7 +4895,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
         for i in range(1, 5, 2):
             time.sleep(i)
             pids = self.find_all_worker_processes()
-            if len(pids) > 0:
+            if pids is not None and len(pids) > 0:
                 return
         raise Exception
 
@@ -4938,7 +4939,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
                 nxOMSAutomationWorker.start_daemon(
                     ["python", nxOMSAutomationWorker.HYBRID_WORKER_START_PATH,
                      nxOMSAutomationWorker.WORKER_CONF_FILE_PATH,
-                     self.workspaceId, '0.9'])
+                     self.workspaceId, "0.9"])
                 self.wait_for_worker_to_start()
         # isWorkerLatest region
         elif isWorkerLatest:
@@ -4952,7 +4953,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
             nxOMSAutomationWorker.start_daemon(
                 ["python", nxOMSAutomationWorker.HYBRID_WORKER_START_PATH,
                  nxOMSAutomationWorker.WORKER_CONF_FILE_PATH,
-                 self.workspaceId, '0.9'])
+                 self.workspaceId, "0.9"])
             self.wait_for_worker_to_start()
             nxOMSAutomationWorker.kill_hybrid_worker()
 
