@@ -68,7 +68,16 @@ baseScriptPath = "<DSC_SCRIPT_PATH>"
 modulePath = baseModulePath + "/" + moduleName
 
 arch = zipfile.ZipFile(filepath)
+moduleNameLower = moduleName.lower
+
+# Detect if the module was zipped to include the module folder
+# or just the module folder's contents.
+# isModuleNested = True indicates the zip includes the module's folder
+isModuleNested = False
+
 for n in arch.namelist():
+    if n.lower == moduleNameLower:
+        isModuleNested = True
     if n.startswith('/') or n.startswith('..'):
         raise Exception(
             'Error: corrupted filename "' + n + '" in zipfile!')
@@ -76,7 +85,10 @@ bad = arch.testzip()
 if bad is not None:
     raise Exception('Error: First bad filename is "' + bad + '"')
 
-arch.extractall(baseModulePath)
+if isModuleNested:
+    arch.extractall(baseModulePath)
+else:
+    arch.extractall(modulePath) 
 
 if not os.path.isdir(modulePath):
     print("Error: After extracting module, unable to find module directory " + moduleName + " in " + baseModulePath)

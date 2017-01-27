@@ -103,8 +103,11 @@ MI_Result ValidateDocumentInstance(_In_ MI_Instance *docInstance,
 MI_Result ValidateClassPropertiesForMetaConfResourceChildren(_In_ MI_Class *configDocumentClass,
                                                              _Outptr_result_maybenull_ MI_Instance **extendedError);
 
-/*Function to check if the configurationsource exists as a defined download manatger*/
-MI_Result ValidatePartialMeta_ConfigDownloadMgr(_In_ MI_Instance* partialInstance,
+/*Function to check if the configurationsource exists as a defined download manatger
+varifyConfigSource = MI_TRUE to verify ConfigurationSource and MI_FALSE to verify ResourceModuleSource
+*/
+MI_Result ValidatePartialMeta_ConfigDownloadMgr(_In_ MI_Boolean verifyConfigSource,
+                                                _In_ MI_Instance* partialInstance,                                               
                                                 _In_ MI_Instance* metaConfInstance,
                                                 _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 

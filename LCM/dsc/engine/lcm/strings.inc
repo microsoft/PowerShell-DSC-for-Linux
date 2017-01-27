@@ -471,7 +471,25 @@ INTERNAL_Intlstr_Define0( ID_PULL_INVALIDCHECKSUMALGORITHM,
 INTERNAL_Intlstr_Define1( ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE,
 			  ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE,
   			  _In_z_ const PAL_Char*, firstString,
-              "The download manager " Intlstr_tstr(1) "mentioned in the partial configuration is undefined in the meta configuration or assigned incorrectly. Check the download manager and assign ResourceRepositoryWeb or ResourceReporistoryShare to ResourceModuleSource and ConfigurationRepositoryWeb or ConfigurationRepositoryShare to ConfigurationSource")
+              "The download manager " Intlstr_tstr(1) " mentioned in the partial configuration is undefined in the meta configuration or assigned incorrectly. Check the download manager and assign ResourceRepositoryWeb or ResourceReporistoryShare to ResourceModuleSource and ConfigurationRepositoryWeb or ConfigurationRepositoryShare to ConfigurationSource")
+
+              
+INTERNAL_Intlstr_Define1( ID_MODMAN_PARTIALCONFIG_CONFIGSOURCE_MUSTBEONE,
+			  ID_MODMAN_PARTIALCONFIG_CONFIGSOURCE_MUSTBEONE,
+  			  _In_z_ const PAL_Char*, firstString,
+              "The download manager " Intlstr_tstr(1) " mentioned in the partial configuration is not allowed. ConfigurationSource must have a single value.")
+
+INTERNAL_Intlstr_Define0( ID_MODMAN_PARTIALCONFIG_RESOURCEMODULESOURCE_NOTSUPPORTED,
+			  ID_MODMAN_PARTIALCONFIG_RESOURCEMODULESOURCE_NOTSUPPORTED,
+              "ResourceModuleSource is not supported for partial configurations on this system.")
+
+INTERNAL_Intlstr_Define0(ID_PARTIALCONFIG_NOPARTIALCONFIGPRESENT,
+              ID_PARTIALCONFIG_NOPARTIALCONFIGPRESENT,
+"None of the partial configurations defined in the mataconfiguraiton was found in the store. Either the configuraitons have not been pulled from the pull server (in the case of pull refres mode), or they have not been published ot the store (in the case of push refresh mode). ")
+
+INTERNAL_Intlstr_Define0(ID_PARTIALCONFIG_FAILEDPARTIALCONFIGS,
+              ID_PARTIALCONFIG_FAILEDPARTIALCONFIGS,
+              "One or more partial configurations failed to apply. No configuration could be created.")
 
 INTERNAL_Intlstr_Define1( ID_PULL_NOCONFIGURATIONSOURCE,
 			  ID_PULL_NOCONFIGURATIONSOURCE,
@@ -486,11 +504,13 @@ INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODE,
                  	  "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) ".")
 
 
-INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODEMODULE,
-			  ID_PULL_SERVERHTTPERRORCODEMODULE,
-      			  _In_z_ const PAL_Char*, firstString,
-                          _In_z_ const PAL_Char*, secondString,
-                 	  "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) " for a module.")
+INTERNAL_Intlstr_Define4( ID_PULL_SERVERHTTPERRORCODEMODULE,
+			    ID_PULL_SERVERHTTPERRORCODEMODULE,
+      			_In_z_ const PAL_Char*, firstString,
+                _In_z_ const PAL_Char*, secondString,
+                _In_z_ const PAL_Char*, thirdString,
+                _In_z_ const PAL_Char*, fourthString,
+                "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) " for module '"  Intlstr_tstr(3) "' version '"  Intlstr_tstr(4) "'.")
 
 INTERNAL_Intlstr_Define2( ID_PULL_INSTALLMODULEFAILED,
  			  ID_PULL_INSTALLMODULEFAILED,
