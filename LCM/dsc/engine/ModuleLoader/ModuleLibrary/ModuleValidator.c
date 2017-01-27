@@ -1248,7 +1248,7 @@ MI_Result ValidatePartialConfigurationName(_In_z_ const MI_Char* partialConfigNa
             result = MI_Instance_GetElement(value.instancea.data[count], MSFT_PartialConfiguration_ExclusiveResources, &valuePartialConfig, NULL, &flags, NULL);
             GOTO_CLEANUP_IF_FAILED(result, Cleanup);
             //Check the exclusive resources, if they're present, add it to the ongoing array
-            if (!(flags & MI_FLAG_NULL) || valuePartialConfig.stringa.data != NULL && valuePartialConfig.stringa.size > 0)
+            if (!(flags & MI_FLAG_NULL) && valuePartialConfig.stringa.data != NULL && valuePartialConfig.stringa.size > 0)
             {
                 //Copy both arrays into a tempArray
                 tempNewSize = valuePartialConfig.stringa.size + tempOldSize;
@@ -1314,8 +1314,12 @@ MI_Result ValidatePartialConfigMetaConfDefinition(_In_ MI_Instance* metaConfigIn
     //Iterate through all metaconfig partial config definitions and find if their properties are correctly defined
     for (count = 0; count < value.instancea.size; count++)
     {
-        //Check if configuration download anager is properly named
-        result = ValidatePartialMeta_ConfigDownloadMgr(value.instancea.data[count], metaConfigInstance, cimErrorDetails);
+        //Check if configuration download manager is properly named in ConfigurationSource
+        result = ValidatePartialMeta_ConfigDownloadMgr(MI_TRUE, value.instancea.data[count], metaConfigInstance, cimErrorDetails);
+        GOTO_CLEANUP_IF_FAILED(result, Cleanup);//Result and cimerror is set by the function above
+
+        //Check if configuration download manager is properly named in ResourceModuleSource
+        result = ValidatePartialMeta_ConfigDownloadMgr(MI_FALSE, value.instancea.data[count], metaConfigInstance, cimErrorDetails);
         GOTO_CLEANUP_IF_FAILED(result, Cleanup);//Result and cimerror is set by the function above
 
         result = ValidatePartialMeta_ExclusiveResources(value.instancea.data[count], &arrayOfAllExclusiveResources, cimErrorDetails);
@@ -1388,64 +1392,117 @@ MI_Result ValidatePartialConfigFile(_In_z_ const MI_Char* partialConfigName,
 }
 
 
-/*Function to check if the configurationsource exists as a defined download manatger*/
-MI_Result ValidatePartialMeta_ConfigDownloadMgr(_In_ MI_Instance* partialInstance,
+/*Function to check if the configurationsource exists as a defined download manager
+
+varifyConfigSource 
+    MI_TRUE to verify ConfigurationSource
+    MI_FALSE to verify ResourceModuleSource
+
+*/
+MI_Result ValidatePartialMeta_ConfigDownloadMgr(_In_ MI_Boolean verifyConfigSource,
+    _In_ MI_Instance* partialInstance,
     _In_ MI_Instance* metaConfInstance,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result result = MI_RESULT_OK;
     MI_Uint32 flags = 0;
     MI_Uint32 count = 0;
-    MI_Value valueConfigSource;
+    MI_Value valueSource;
+    MI_Type miType;
     MI_Value valueDownloadMgrs;
     MI_Value valueConfigDownloadMgrName;
     MI_Boolean isValidPartialConfig = MI_FALSE;
+    MI_Char* sourcePropertyValue;
+    const MI_Char* sourcePropertyName;
+    const MI_Char* downloadManagerName;
+
+
     if (cimErrorDetails == NULL)
     {
         return MI_RESULT_INVALID_PARAMETER;
     }
     *cimErrorDetails = NULL;
+
+    if (verifyConfigSource)
+    { 
+        sourcePropertyName = MSFT_PartialConfiguration_ConfigurationSource;
+        downloadManagerName = MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers;
+    }
+    else
+    {
+        sourcePropertyName = MSFT_PartialConfiguration_ResourceModuleSource;
+        downloadManagerName = MSFT_DSCMetaConfiguration_ResourceModuleManagers;
+    }
+
     DSC_EventWriteLCMValidatingPartialConfigMetaConfDownloadMgr();
-    //Get the property from the instance
-    result = MI_Instance_GetElement(partialInstance, MSFT_PartialConfiguration_ConfigurationSource, &valueConfigSource, NULL, &flags, 0);
+
+    //Get the property to validate from the instance
+    // either 
+    result = MI_Instance_GetElement(partialInstance, sourcePropertyName, &valueSource, &miType, &flags, 0);
     if (result != MI_RESULT_OK)
     {
-        result = GetCimMIError2Params(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_PartialConfiguration_ExclusiveResources, MSFT_PARTIALCONFIGURATION_CLASSNAME);
+        result = GetCimMIError2Params(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, sourcePropertyName, MSFT_PARTIALCONFIGURATION_CLASSNAME);
         return result;
     }
     if (flags & MI_FLAG_NULL)
     {
         return MI_RESULT_OK;//Since we don't have to bother if its not defined
     }
-    //Get the configuration download managers
-    result = MI_Instance_GetElement(metaConfInstance, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, &valueDownloadMgrs, NULL, &flags, 0);
+
+    //Get the download managers
+    result = MI_Instance_GetElement(metaConfInstance, downloadManagerName, &valueDownloadMgrs, &miType, &flags, 0);
     if (result != MI_RESULT_OK)
     {
-        result = GetCimMIError2Params(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, METACONFIG_CLASSNAME);
+        result = GetCimMIError2Params(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, downloadManagerName, METACONFIG_CLASSNAME);
         return result;
     }
+
+    if (valueSource.stringa.size == 0 || valueSource.stringa.data == NULL || valueSource.stringa.data[0] == NULL)
+    {
+        return MI_RESULT_OK;
+    }
+
+    if (!verifyConfigSource)
+    {
+        // ResourceModuleSource not supported on Linux
+        return GetCimMIError(MI_RESULT_NOT_SUPPORTED, cimErrorDetails, ID_MODMAN_PARTIALCONFIG_RESOURCEMODULESOURCE_NOTSUPPORTED);
+    }
+
+    // NOTE: MSFT_PartialConfiguration_ConfigurationSource is declared as an array but only allows a single entry.
+    if (valueSource.stringa.size > 1)
+    {
+        sourcePropertyValue = valueSource.stringa.data[1];
+        // NOTE: Update the error message when/if ResouceModuleSource is supported.
+        return GetCimMIError1Param(MI_RESULT_NOT_SUPPORTED, cimErrorDetails, ID_MODMAN_PARTIALCONFIG_CONFIGSOURCE_MUSTBEONE, sourcePropertyValue);
+    }
+
+    sourcePropertyValue = valueSource.stringa.data[0];
+
     if (valueDownloadMgrs.instancea.size != 0 && valueDownloadMgrs.instancea.data != NULL)
     {
         for (count = 0; count < valueDownloadMgrs.instancea.size; count++)
-        {
-            result = MI_Instance_GetElement(valueDownloadMgrs.instancea.data[count], OMI_MetaConfigurationResource_ResourceId, &valueConfigDownloadMgrName, NULL, &flags, NULL);
+        {           
+            result = MI_Instance_GetElement(valueDownloadMgrs.instancea.data[count], OMI_MetaConfigurationResource_ResourceId, &valueConfigDownloadMgrName, &miType, &flags, NULL);
             RETURN_RESULT_IF_FAILED(result);
 
-            if (valueConfigSource.string != NULL && valueConfigDownloadMgrName.string != NULL && Tcscasecmp(valueConfigSource.string, valueConfigDownloadMgrName.string) == 0)
+            if (valueConfigDownloadMgrName.string != NULL 
+                && 
+                Tcscasecmp(sourcePropertyValue, valueConfigDownloadMgrName.string) == 0)
             {
-                //This means there was a match between metaconfig config download manager and partial config's configsource
+                // This means there was a match between a metaconfig config download manager's resource id and the
+                // partial config's download manager reference.
                 isValidPartialConfig = MI_TRUE;
                 break;
             }
         }
         if (!isValidPartialConfig)
         {
-            result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE, valueConfigSource.string);
+            result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE, sourcePropertyValue);
         }
     }
     else
     {
-        result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE, valueConfigSource.string);
+        result = GetCimMIError1Param(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE, sourcePropertyValue);
     }
     return result;
 }

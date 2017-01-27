@@ -1344,16 +1344,16 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
         }
         else
         {
-                if (errorOccured)
-                {
-                        //This means there was an error and hence partial configurations couldn't be merged
-                        result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_FAILEDPARTIALCONFIGS);
-                }
-                else
-                {
-                        //That means there was no partial config file found that was valid, so throw error
-                        result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_NOPARTIALCONFIGPRESENT);
-                }
+            if (errorOccured)
+            {
+                //This means there was an error and hence partial configurations couldn't be merged
+                result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_FAILEDPARTIALCONFIGS);
+            }
+            else
+            {
+                //That means there was no partial config file found that was valid, so throw error
+                result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_NOPARTIALCONFIGPRESENT);
+            }
         }
         GOTO_CLEANUP_IF_FAILED(result, Exit);
 

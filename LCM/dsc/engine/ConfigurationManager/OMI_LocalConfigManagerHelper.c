@@ -61,9 +61,9 @@ MI_Result UpdateTask(
     {
 		refreshFrequencyInSeconds = THIRTY_ONE_DAYS_IN_SECONDS;
     }
-    if (refreshFrequencyInSeconds < FIFTEEN_MINUTES_IN_SECONDS)
+    if (refreshFrequencyInSeconds < REFRESH_MINIMUM_IN_SECONDS)
     {
-		refreshFrequencyInSeconds = FIFTEEN_MINUTES_IN_SECONDS;
+		refreshFrequencyInSeconds = REFRESH_MINIMUM_IN_SECONDS;
     }
 
     // PLAN 1 -- process each line of crontab file to a tmp file and then copy tmp file back
