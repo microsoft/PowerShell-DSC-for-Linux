@@ -4846,6 +4846,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
         """
         Remove test resoruces
         """
+        self.kill_all_workers()
         shutil.rmtree(self.tempWorkingDir)
 
     def find_all_worker_processes(self):
