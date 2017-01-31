@@ -95,7 +95,7 @@ module Fluent
             @agent_restart_count = 0
             @last_npmd_start = nil
             start_npmd()
-            @watch_dog_thread = Thread.new(&method(:watch_dog_wait_for_pet))
+            @watch_dog_thread = nil
             @watch_dog_sync = Mutex.new
             @watch_dog_last_pet = Time.new
         end
@@ -106,7 +106,7 @@ module Fluent
             kill_all_agent_instances()
             @npmdClientSock.close() unless @npmdClientSock.nil?
             @npmdClientSock = nil
-            Thread.kill(@watch_dog_thread)
+            Thread.kill(@watch_dog_thread) if @watch_dog_thread.is_a?(Thread)
             Thread.kill(@server_thread)
             File.unlink(@location_unix_endpoint) if File.exist?@location_unix_endpoint
             File.unlink(@location_agent_binary) if File.exist?@location_agent_binary and (!@do_purge.nil? and @do_purge)
@@ -217,7 +217,9 @@ module Fluent
                             _uploadData = _json["DataItems"].reject {|x| x["SubType"] == "ErrorLog"}
                             _diagLogs   = _json["DataItems"].select {|x| x["SubType"] == "ErrorLog"}
                             _validUploadDataItems = Array.new
+                            _batchTime = Time.now.utc.strftime("%Y-%m-%d %H:%M:%SZ")
                             _uploadData.each do |item|
+                                item["TimeGenerated"] = _batchTime
                                 if item.key?("SubType")
                                     # Append FQDN to path data
                                     if !@fqdn.nil? and item["SubType"] == "NetworkPath"
@@ -515,16 +517,23 @@ module Fluent
                         end
 
                         # Transform the UI XML configuration to agent configuration
-                        _agentConfig = NPMDConfig::GetAgentConfigFromUIConfig(_uiXml)
+                        _agentConfig, _errorSummary = NPMDConfig::GetAgentConfigFromUIConfig(_uiXml)
                         if _agentConfig.nil? or _agentConfig == ""
                             Logger::logWarn "Agent configuration transformation returned empty"
                             return
+                        end
+
+                        if _errorSummary.strip != ""
+                            log_error "Configuration drops: #{_errorSummary}"
                         end
 
                         @npmdClientSock.puts _agentConfig
                         @npmdClientSock.flush
                         @num_config_sent += 1 unless @num_config_sent.nil?
                         Logger::logInfo "Configuration file sent to npmd_agent"
+
+                        # Start the watch dog thread after first config
+                        @watch_dog_thread = Thread.new(&method(:watch_dog_wait_for_pet)) if @watch_dog_thread.nil?
 
                     else
                         Logger::logWarn "NPMD client socket not connected yet!"
@@ -589,6 +598,12 @@ module Fluent
 
         def watch_dog_wait_for_pet
             _sleepInterval = WATCHDOG_PET_INTERVAL_SECS
+
+            # Pet right after first agent configuration is sent
+            @watch_dog_sync.synchronize do
+                @watch_dog_last_pet = Time.now
+            end
+
             loop do
                 sleep(_sleepInterval)
                 _diffTime = Time.now
