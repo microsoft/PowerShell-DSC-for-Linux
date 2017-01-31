@@ -754,7 +754,7 @@ static MI_CONST MI_Qualifier OMI_BaseResource_Abstract_qual =
     &OMI_BaseResource_Abstract_qual_value
 };
 
-static MI_CONST MI_Char* OMI_BaseResource_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* OMI_BaseResource_ClassVersion_qual_value = MI_T("1.1.0");
 
 static MI_CONST MI_Qualifier OMI_BaseResource_ClassVersion_qual =
 {
@@ -1668,7 +1668,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSAutomationWorkerResource_Description_qual
     &MSFT_nxOMSAutomationWorkerResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAutomationWorkerResource_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxOMSAutomationWorkerResource_ClassVersion_qual_value = MI_T("1.1.0");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSAutomationWorkerResource_ClassVersion_qual =
 {
