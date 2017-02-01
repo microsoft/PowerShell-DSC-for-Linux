@@ -47,4 +47,31 @@ function ImportLinuxTestConfigurtaion
     return $testMatrix[0]
 }
 
-Export-ModuleMember -function ImportLinuxTestConfigurtaion, CreateCimSession
+
+#
+# Create a connection to the OMI server: 
+#
+function CreateCimSession
+
+{
+    param 
+    ( 
+        [Parameter(Mandatory=$true)] 
+        [PSCredential] $credential, 
+ 
+        [Parameter(Mandatory=$true)] 
+        [ValidateNotNullOrEmpty()] 
+        [string] $server, 
+ 
+        [ValidateNotNull()] 
+        [Uint32] $port = 5986 
+ 
+    ) 
+ 
+    $sessionOptions = New-CimSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -UseSsl 
+    $session = New-CimSession -Credential $credential -ComputerName $server -Port $port -Authentication Basic -SessionOption $sessionOptions -OperationTimeoutSec:30 
+    return $session 
+ 
+}
+
+
