@@ -11,14 +11,14 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
 
     BeforeAll {               
 
-        #Install Modules needed for compliation on Widnows machine 
+        #Install Modules needed for compliation on Windows machine 
         Install-Module nx, nxComputerManagement, nxNetworking
 
         # Create a Cim session to Client Linux machine on which that we are testing DSC Functionality 
-        $linuxClient = ImportLinuxTestConfigurtaion         
-        $script:linuxClientName  = $linuxClient.Name
-        $rootUser = $linuxClient.UserName
-        $rootPassword = $linuxClient.Password
+        $linuxClient = ImportLinuxTestConfigurtaion  -testConfigFile ".\DSCLinuxTestConfig.json"
+        $script:linuxClientName  = $linuxClient.LinuxClient.Name
+        $rootUser = $linuxClient.LinuxClient.UserName
+        $rootPassword = $linuxClient.LinuxClient.Password
 
         $rootUserPassword = ConvertTo-SecureString -String $rootPassword -AsPlainText -Force
         $rootCredentials = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList $rootUser, $rootUserPassword
@@ -27,7 +27,8 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
     }
 
     AfterAll {
-   
+        Remove-Item -Path "$PWD\MetaConfigPush\" -force -Recurse
+        Remove-Item -Path "$PWD\FileProviderTestConfig1\" -force -Recurse
     }
     
     BeforeEach {
