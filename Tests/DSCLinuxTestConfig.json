@@ -1,16 +1,11 @@
 [ 
   {
     "LinuxClient": {
+
         "Name": "Linux-Dsc-ClientName",         
 	      "UserName": "root", 
 	      "Password": "rootPassword"
         }
-   },
-
-   {
-    "PullServer1": {
-        "Name": "Dsc-pullServer",
-        "IpAddress": "10.9.1.10"	    
-        }
    }
+
 ]
