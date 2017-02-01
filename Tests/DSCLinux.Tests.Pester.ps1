@@ -60,6 +60,7 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
            #Verify Get Dsc 
            Start-DscConfiguration -Path "$PWD\FileProviderTestConfig1\"  -Verbose -CimSession $script:session -wait 
            
+           #Verify Get Dsc 
            $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
            $dscConfig.Ensure | Should Be "Present" 
            $dscConfig.DestinationPath | Should Be "/tmp/dsctest1" 
@@ -68,6 +69,7 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
            #Verify Test Dsc 
            $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
            $testDscConfig.InDesiredState | Should Be "True" 
+
 
            # Use Dsc to cleanup by deleting the file created above            
             & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Absent"
