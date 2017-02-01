@@ -11,6 +11,9 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
 
     BeforeAll {               
 
+        #Install Modules needed for compliation on Widnows machine 
+        Install-Module nx, nxComputerManagement, nxNetworking
+
         # Create a Cim session to Client Linux machine on which that we are testing DSC Functionality 
         $linuxClient = ImportLinuxTestConfigurtaion         
         $script:linuxClientName  = $linuxClient.Name
@@ -51,11 +54,16 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
            & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Present"
            Start-DscConfiguration -Path "$PWD\FileProviderTestConfig1\"  -Verbose -CimSession $script:session -wait 
            
+           #Verify Get Dsc 
            $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
            $dscConfig.Ensure | Should Be "Present" 
            $dscConfig.DestinationPath | Should Be "/tmp/dsctest1" 
            $dscConfig.Contents | Should Be "Linux DSC Test1!" 
-           
+
+           #Verify Test Dsc 
+           $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+           $testDscConfig.InDesiredState | Should Be "True" 
+
            # Use Dsc to cleanup by deleting the file created above            
             & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Absent"
            Start-DscConfiguration -Path "$PWD\FileProviderTestConfig1\"  -Verbose -CimSession $script:session -wait            
