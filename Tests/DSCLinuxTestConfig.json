@@ -5,12 +5,13 @@
         "Name": "Linux-Dsc-ClientName",         
 	      "UserName": "root", 
 	      "Password": "rootPassword"
+
         }
    },
 
    {
-    "PullClient1": {
-        "Name": "DSC-pullServer",
+    "PullServer1": {
+        "Name": "fayza-pullServer",
         "IpAddress": "10.9.1.10"	    
         }
    }
