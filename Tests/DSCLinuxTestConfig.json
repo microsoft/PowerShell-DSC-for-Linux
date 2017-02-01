@@ -1,0 +1,17 @@
+[ 
+  {
+    "LinuxClient": {
+        "Name": "fayza-Virtual-Machine",
+        "IpAddress": "10.9.1.09", 
+	    "UserName": "root", 
+	    "Password": "AccessStart"
+        }
+   },
+
+   {
+    "PullClient1": {
+        "Name": "fayza-pullServer",
+        "IpAddress": "10.9.1.10"	    
+        }
+   }
+]
