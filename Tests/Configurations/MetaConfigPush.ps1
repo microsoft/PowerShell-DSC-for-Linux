@@ -30,4 +30,4 @@ Configuration MetaConfigPush
 }
 
 
-MetaConfigPush -targetClient $targetClient -Output .\MetaConfigPush 
+MetaConfigPush -targetClient $targetClient -Output "$env:temp\MetaConfigPush"
