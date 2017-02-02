@@ -26,9 +26,7 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
     
     }
 
-    AfterAll {
-      #  Remove-Item -Path "$PWD\MetaConfigPush\" -force -Recurse
-       # Remove-Item -Path "$PWD\FileProviderTestConfig1\" -force -Recurse
+    AfterAll {      
     }
     
     BeforeEach {
