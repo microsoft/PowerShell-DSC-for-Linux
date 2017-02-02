@@ -28,8 +28,8 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
     }
 
     AfterAll {
-        Remove-Item -Path "$PWD\MetaConfigPush\" -force -Recurse
-        Remove-Item -Path "$PWD\FileProviderTestConfig1\" -force -Recurse
+      #  Remove-Item -Path "$PWD\MetaConfigPush\" -force -Recurse
+       # Remove-Item -Path "$PWD\FileProviderTestConfig1\" -force -Recurse
     }
     
     BeforeEach {
@@ -43,7 +43,7 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
 	It "Verify we can Set and get Meta Configuration" {
             
            & "$PWD\Configurations\MetaConfigPush.ps1" -targetClient $script:linuxClientName 
-           Set-DscLocalConfigurationManager -Path "$PWD\MetaConfigPush\"  -Verbose -CimSession $script:session
+           Set-DscLocalConfigurationManager -Path "$env:temp\MetaConfigPush"  -Verbose -CimSession $script:session
            
            $metaConfig = Get-DscLocalConfigurationManager -Verbose -CimSession $script:session
            $metaConfig.RefreshMode | Should Be "Push" 
@@ -54,8 +54,7 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
 	It "Verify we can do Start DSC Configuration And Get Dsc Configuration" {
            
            & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Present"
-           #Verify Get Dsc 
-           Start-DscConfiguration -Path "$PWD\FileProviderTestConfig1\"  -Verbose -CimSession $script:session -wait 
+           Start-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession $script:session -wait 
            
            #Verify Get Dsc 
            $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
@@ -74,7 +73,7 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
            
            # Use Dsc to cleanup by deleting the file created above            
             & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Absent"
-           Start-DscConfiguration -Path "$PWD\FileProviderTestConfig1\"  -Verbose -CimSession $script:session -wait            
+           Start-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession $script:session -wait            
            $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
            $dscConfig.Ensure | Should Be "Absent" 
            $dscConfig.DestinationPath | Should Be "/tmp/dsctest1"            
@@ -85,7 +84,6 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
             
             & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Present"
            Publish-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession $script:session                 
-           Publish-DscConfiguration -Path "$PWD\FileProviderTestConfig1\"  -Verbose -CimSession $script:session                 
            Start-DscConfiguration -UseExisting  -Verbose -CimSession $script:session -wait   
            $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
            $dscConfig.Ensure | Should Be "Present" 
@@ -95,9 +93,7 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
     It "Verify we can do Update Dsc Configuration " {
        
            & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Absent"
-           Publish-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession $script:session                 
-           Publish-DscConfiguration -Path "$PWD\FileProviderTestConfig1\"  -Verbose -CimSession $script:session                 
-           Update-DscConfiguration -wait -Verbose -CimSession $script:session 
+           Publish-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession            Update-DscConfiguration -wait -Verbose -CimSession $script:session 
            $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
            $dscConfig.Ensure | Should Be "Absent" 
            $dscConfig.DestinationPath | Should Be "/tmp/dsctest1"    
