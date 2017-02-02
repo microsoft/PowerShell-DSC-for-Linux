@@ -11,7 +11,7 @@
 
    {
     "PullServer1": {
-        "Name": "fayza-pullServer",
+        "Name": "Dsc-pullServer",
         "IpAddress": "10.9.1.10"	    
         }
    }
