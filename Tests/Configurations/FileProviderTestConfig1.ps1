@@ -38,4 +38,4 @@ Configuration FileProviderTestConfig1
     }
 }
 
-FileProviderTestConfig1 -targetClient $targetClient -Ensure $Ensure -Output .\FileProviderTestConfig1
+FileProviderTestConfig1 -targetClient $targetClient -Ensure $Ensure -Output "$env:temp\FileProviderTestConfig1"
