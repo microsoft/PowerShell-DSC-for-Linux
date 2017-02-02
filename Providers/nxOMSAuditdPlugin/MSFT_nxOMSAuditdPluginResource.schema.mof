@@ -1,0 +1,5 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSAuditdPluginResource : OMI_BaseResource
+{
+    [key,write,ValueMap{"present", "absent"},Values{"Present", "Absent"}] string Ensure;
+};
