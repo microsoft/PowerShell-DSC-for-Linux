@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSAuditdPluginResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSAuditdPluginResource:OMI_BaseResource
