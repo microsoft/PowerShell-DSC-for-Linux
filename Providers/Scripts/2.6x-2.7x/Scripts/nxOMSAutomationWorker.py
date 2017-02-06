@@ -338,7 +338,6 @@ def start_daemon(args):
             # exit the first parent
             log(DEBUG, "Forked first child")
             log(DEBUG, "Parent PID was: " + str(os.getpid()))
-            os.wait()
             return
     except OSError, e:
         log(ERROR, "fork #1 failed: " + e.errno + "\n strerror: " + e.strerror)
@@ -354,9 +353,11 @@ def start_daemon(args):
         pc = subprocess.Popen(args)
         log(DEBUG, "pid of child python process is: " + str(os.getpid()))
         log(DEBUG, "pid of Popened linux hybrid worker is: " + str(pc.pid))
+        pc.wait()
     except Exception, e:
         log(ERROR, "fork #2 failed: " + e.message)
         sys.exit(-1)
+    # exit the first fork
     sys.exit(0)
 
 def log(level, message):

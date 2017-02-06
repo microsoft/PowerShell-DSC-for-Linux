@@ -1,4 +1,4 @@
-[ClassVersion("1.1.0")]
+[ClassVersion("1.2.0")]
 class MSFT_nxOMSAutomationWorkerResource : OMI_BaseResource
 {
     [Key] string WorkspaceId;
