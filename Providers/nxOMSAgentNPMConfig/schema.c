@@ -1776,7 +1776,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSAgentNPMConfigResource_Description_qual =
     &MSFT_nxOMSAgentNPMConfigResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAgentNPMConfigResource_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxOMSAgentNPMConfigResource_ClassVersion_qual_value = MI_T("1.1.0");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSAgentNPMConfigResource_ClassVersion_qual =
 {
