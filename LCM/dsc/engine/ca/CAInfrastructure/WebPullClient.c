@@ -258,7 +258,7 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
 
     if (proxyFileLocationToUse != NULL)
     {
-	text = InhaleTextFile(omsProxyFileLocation);
+	text = InhaleTextFile(proxyFileLocationToUse);
 	valueLength = strlen(text);
 	if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
 	{
