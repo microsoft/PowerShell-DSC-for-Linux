@@ -11,11 +11,13 @@ import signal
 import time
 import logging
 import logging.handlers
+import pwd
 
 import imp
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
+
 
 def init_locals(WorkspaceId, AzureDnsAgentSvcZone):
     if WorkspaceId is None:
@@ -28,6 +30,7 @@ def init_locals(WorkspaceId, AzureDnsAgentSvcZone):
 def Set_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
     WorkspaceId, AzureDnsAgentSvcZone = init_locals(WorkspaceId, AzureDnsAgentSvcZone)
     return set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone)
+
 
 def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_config_file=False):
     try:
@@ -45,8 +48,12 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
         try:
             if not os.path.isdir(WORKER_STATE_DIR):
                 os.mkdir(WORKER_STATE_DIR)
+            os.chmod(WORKER_STATE_DIR, PERMISSION_LEVEL_0770)
             if not os.path.isdir(WORKING_DIRECTORY_PATH):
                 os.makedirs(WORKING_DIRECTORY_PATH)
+            # if the directory has file permission level of at least 770 then no need to set it again
+            if os.stat(WORKING_DIRECTORY_PATH).st_mode & PERMISSION_LEVEL_0770 != PERMISSION_LEVEL_0770:
+                os.chmod(WORKING_DIRECTORY_PATH, PERMISSION_LEVEL_0770)
             oms_workspace_id, agent_id = read_oms_primary_workspace_config_file()
             # If both proxy files exist use the new one
             # If neither exist use the new path, path will have no file in it, but no file means no proxy set up
@@ -75,6 +82,8 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
             if not os.path.isfile(WORKER_CONF_FILE_PATH):
                 log(ERROR, "Linux Hybrid Worker registration file could not be created")
                 return [-1]
+            else:
+                os.chmod(WORKER_CONF_FILE_PATH, PERMISSION_LEVEL_0770)
         except Exception, exception:
             log(ERROR, exception.message)
             return [-1]
@@ -83,11 +92,28 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
         log(DEBUG, "Linux Hybrid Worker registration succeeded")
         try:
             # Kill hybrid worker if its already running
-            kill_hybrid_worker()
+            kill_hybrid_worker(WorkspaceId)
+
+            # Remove the conf file
+            # Important for avoiding file permission issues during update because the new worker now runs as nxautomation
+            if os.path.isfile(WORKER_STATE_FILE_PATH):
+                try:
+                    # there is a miniscule chance that the worker dies before it makes state.conf file readable by
+                    # omsagent, if omsagent can't delete the file, worker running as nxautomation will overwrite it
+                    # anyway
+                    os.remove(WORKER_STATE_FILE_PATH)
+                except OSError:
+                    pass
 
             # Start the worker again
-            start_daemon(["python", HYBRID_WORKER_START_PATH, WORKER_CONF_FILE_PATH, WorkspaceId,
-                          read_resoruce_version_file()])
+            if nxautomation_user_exists():
+                # With newer versions of OMS, worker should run as nxautomation user
+                start_daemon(["sudo", "-u", AUTOMATION_USER, "python", HYBRID_WORKER_START_PATH, WORKER_CONF_FILE_PATH,
+                              WorkspaceId, read_resource_version_file()])
+            else:
+                # With older versions versions of OMS, worker runs as omsagent
+                start_daemon(["python", HYBRID_WORKER_START_PATH, WORKER_CONF_FILE_PATH,
+                              WorkspaceId, read_resource_version_file()])
 
             # Wait for the worker process to actually start
             success = False
@@ -109,7 +135,7 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
     else:
         # enabled is set to false
         try:
-            kill_hybrid_worker()
+            kill_hybrid_worker(WorkspaceId)
             if os.path.isfile(WORKER_CONF_FILE_PATH):
                 os.remove(WORKER_CONF_FILE_PATH)
             if os.path.isfile(WORKER_STATE_FILE_PATH):
@@ -126,7 +152,7 @@ def Test_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
     try:
         isprimary = is_oms_primary_workspace(WorkspaceId)
     except Exception, e:
-        log(ERROR, "Could not detect if workspace is primary\n %s" %(str(e)))
+        log(ERROR, "Could not detect if workspace is primary\n %s" % (str(e)))
         return [-1]
 
     if isprimary is False:
@@ -200,8 +226,15 @@ PROXY_CONF_PATH_NEW="/etc/opt/microsoft/omsagent/proxy.conf"
 KEYRING_PATH="/etc/opt/omi/conf/omsconfig/keyring.gpg"
 LOCAL_LOG_LOCATION = "/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log"
 
+# permission level rwx rwx ---
+# leading zero is necessary because this is an octal number
+# Note: for python 3.x use 0o770 instead of 0770
+PERMISSION_LEVEL_0770 = 0770
 
-def is_oms_primary_workspace(mof_workspace_id):
+AUTOMATION_USER = "nxautomation"
+
+
+def is_oms_primary_workspace(workspace_id):
     """
     Detect if the passed workspace id is primary workspace on multi-homing enabled OMS agent
     Mulit-homing for OMS is 2 tiered, one primary and multiple secondary workspaces are allowed
@@ -213,10 +246,11 @@ def is_oms_primary_workspace(mof_workspace_id):
     :return: True, if the given workspace id belongs to the primary OMS workspace, False otherwise
     """
     oms_workspace_id, agent_id = read_oms_primary_workspace_config_file()
-    if oms_workspace_id == mof_workspace_id:
+    if oms_workspace_id == workspace_id:
         return True
     else:
         return False
+
 
 def read_worker_state():
     # Reads the state.config file and returns the values of pid, workspace_id, resource_running_version
@@ -257,7 +291,7 @@ def read_oms_primary_workspace_config_file():
             log(DEBUG, exception.message)
             raise ConfigParser.Error(exception.message)
     else:
-        error_string = "could not find file" + OMS_ADMIN_CONFIG_FILE
+        error_string = "could not find file " + OMS_ADMIN_CONFIG_FILE
         log(DEBUG, error_string)
         raise ConfigParser.Error(error_string)
 
@@ -298,37 +332,68 @@ def verify_hybrid_worker():
     return -1
 
 
-def kill_hybrid_worker():
+def kill_hybrid_worker(workspace_id):
     """Kill hybrid worker process if it exists
-    Returns:
-        true if it was running and killed
-        false if it was not running
     Exceptions:
         throws exception if process was running and could not be killed
     """
     pid = verify_hybrid_worker()
-    if pid > 0:
-        try:
-            os.kill(pid, signal.SIGTERM)
-        except Exception, exception:
-            log(ERROR, "Could not kill Linux Hybrid Worker process pid: " + pid + " " + exception.message)
-            raise exception
+    if nxautomation_user_exists():
+        subprocess.call(["sudo", "pkill", "-u", AUTOMATION_USER, "-f", workspace_id])
+        # can't depend on the return value to ensure that the process was killed since it pattern matches
+        retry_pid = verify_hybrid_worker()
+        if pid > 0 and retry_pid > 0:
+            # worker was not killed
+            try:
+                # try to kill it the old fashioned way
+                # should take care of the first run of the resource after an update from 1.2 to 1.3
+                os.kill(pid, signal.SIGTERM)
+            except Exception, exception:
+                log(ERROR, "Could not kill Linux Hybrid Worker process pid: " + str(pid) + " " + exception.message)
+                raise exception
+    else:
+        # nxautomation user does not exist, fall back to old behavior
+        if pid > 0:
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except Exception, exception:
+                log(ERROR, "Could not kill Linux Hybrid Worker process pid: " + str(pid) + " " + exception.message)
+                raise exception
 
-def read_resoruce_version_file():
+
+def read_resource_version_file():
     version_file_handle = open(DSC_RESOURCE_VERSION_FILE, 'r')
     version = version_file_handle.read().strip()
     version_file_handle.close()
     return version
 
+
 def worker_is_latest():
     # compares the versions of the DSC resoruce that stated the hybrid worker and the latest present version of DSC resoruce
     # returns true of the versions match, false otherwise
-    pid, workspaceid, runningversion = read_worker_state()
-    runningversion = runningversion.strip()
-    latest_available_version = read_resoruce_version_file()
-    log(DEBUG, "running version is: " + runningversion)
+    pid, workspace_id, running_version = read_worker_state()
+    running_version = running_version.strip()
+    latest_available_version = read_resource_version_file()
+    log(DEBUG, "running version is: " + running_version)
     log(DEBUG, "latest available version is: " + latest_available_version)
-    return runningversion == latest_available_version
+    return running_version == latest_available_version
+
+
+def nxautomation_user_exists():
+    """
+    Tests if the user nxautomation exists on the machine
+    Newer OMS agent installs will have that user
+    :return: True if user "nxautomation" exists on the system, False otherwise
+    """
+    try:
+        pwd.getpwnam(AUTOMATION_USER)
+    except KeyError:
+        # if the user was not found
+        log(INFO, "%s was NOT found on the system" %(AUTOMATION_USER))
+        return False
+    log(INFO, "%s was found on the system" %(AUTOMATION_USER))
+    return True
+
 
 def start_daemon(args):
     # Forks a subprocess from args
@@ -360,24 +425,30 @@ def start_daemon(args):
     # exit the first fork
     sys.exit(0)
 
+
 def log(level, message):
     try:
         LG().Log(logging._levelNames[level], message)
     except:
         pass
 
-class local_log():
+
+class LocalLog:
     logger = None
     logfh = None
+
+
     def __init__(self):
-        if local_log.logger is None or local_log.logfh is None:
-            local_log.logger = logging.getLogger()
-            local_log.logfh = logging.handlers.RotatingFileHandler(LOCAL_LOG_LOCATION, mode='a', maxBytes=1048576, backupCount=20)
+        if LocalLog.logger is None or LocalLog.logfh is None:
+            LocalLog.logger = logging.getLogger()
+            LocalLog.logfh = logging.handlers.RotatingFileHandler(LOCAL_LOG_LOCATION, mode='a', maxBytes=1048576, backupCount=20)
             formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(message)s')
-            local_log.logger.setLevel(DEBUG)
-            local_log.logfh.setFormatter(formatter)
-            local_log.logger.addHandler(local_log.logfh)
+            LocalLog.logger.setLevel(DEBUG)
+            LocalLog.logfh.setFormatter(formatter)
+            LocalLog.logger.addHandler(LocalLog.logfh)
+
+
     def log(self, level, message):
-        local_log.logger.log(level, message)
+        LocalLog.logger.log(level, message)
 
 

@@ -70,17 +70,20 @@ def validate_and_setup_path():
     if not os.path.isfile(configuration.get_jrds_cert_path()) or not os.path.isfile(configuration.get_jrds_key_path()):
         exit_on_error("Invalid certificate of key file path (absolute path is required).")
 
-    # test working dirextory for existance and permissions
-    if not os.path.exists(configuration.get_working_directory_path()):
+    # test working directory for existence and permissions
+    working_directory_path = configuration.get_working_directory_path()
+    if not os.path.exists(working_directory_path):
         exit_on_error("Invalid working directory path (absolute path is required).")
-    file_creation = test_file_creation(os.path.join(configuration.get_working_directory_path(), test_file_name))
+
+    file_creation = test_file_creation(os.path.join(working_directory_path, test_file_name))
     if file_creation is False:
         exit_on_error("Invalid working directory permission (read/write permissions are required).")
 
     # test keyring paths
-    keyring_path = configuration.get_gpg_public_keyring_path()
-    if keyring_path != configuration.DEFAULT_GPG_PUBLIC_KEYRING_PATH and not os.path.isfile(keyring_path):
-        exit_on_error("Invalid gpg public keyring path (absolute path is required).")
+    keyrings = configuration.get_gpg_public_keyrings_path()
+    for keyring_path in keyrings:
+        if keyring_path != configuration.DEFAULT_GPG_PUBLIC_KEYRING_PATH and not os.path.isfile(keyring_path):
+            exit_on_error("Invalid gpg public keyring path (absolute path is required).")
 
     # test state file path
     if configuration.get_state_directory_path() != configuration.DEFAULT_STATE_DIRECTORY_PATH:
@@ -90,6 +93,22 @@ def validate_and_setup_path():
         file_creation = test_file_creation(os.path.join(configuration.get_state_directory_path(), test_file_name))
         if file_creation is False:
             exit_on_error("Invalid state directory permission (read/write permissions are required).")
+
+    # OMS integration
+    # set the working directory owner to be nxautomation:omiusers
+    if os.name.lower() != "nt":
+        import pwd
+        try:
+            nxautomation_uid = int(pwd.getpwnam('nxautomation').pw_uid)
+            if os.getuid() == nxautomation_uid:
+                retval = subprocess.call(["sudo", "chown", "-R", "nxautomation:omiusers", working_directory_path])
+                if retval != 0:
+                    exit_on_error("Could not change owner of working directory %s to nxautomation:omiusers"
+                                  % (working_directory_path))
+        except KeyError:
+            # nxautomation user was not found on the system, skip this step
+            tracer.log_debug_trace("Ownership change of working directory skipped. nxautomation user not found.")
+            pass
 
 
 def generate_state_file():
@@ -120,6 +139,26 @@ def generate_state_file():
 
     config.write(conf_file)
     conf_file.close()
+
+    # OMS integration
+    # set the ownership of the state file to nxautomation:omiusers
+    # set the permission of the state file to 660
+    if os.name.lower() != "nt":
+        import pwd
+        try:
+            nxautomation_uid = int(pwd.getpwnam('nxautomation').pw_uid)
+            if os.getuid() == nxautomation_uid:
+                retval = subprocess.call(["sudo", "chown", "nxautomation:omiusers", state_file_path])
+                if retval != 0:
+                    exit_on_error("Could not change owner of state file %s to nxautomation:omiusers" % (state_file_path))
+
+                retval = subprocess.call(["sudo", "chmod", "660", state_file_path])
+                if retval != 0:
+                    exit_on_error("Could not change permission of state file %s " % (state_file_path))
+        except KeyError:
+            # nxautomation user was not found on the system, skip this step
+            tracer.log_debug_trace("State file permission change skipped. nxautomation user not found.")
+            pass
 
 
 class Worker:
@@ -227,10 +266,10 @@ class Worker:
 def main():
     if len(sys.argv) < 2:
         exit_on_error("Invalid configuration file path (absolute path is required).")
-    configuration_path = sys.argv[1]
+    configuration_path = str(sys.argv[1])
 
     if not os.path.isfile(configuration_path):
-        exit_on_error("Invalid configuration file path (absolute path is required).")
+        exit_on_error("Invalid configuration file path or empty configuration file (absolute path is required).")
 
     # configuration has to be read first thing
     try:
@@ -239,9 +278,8 @@ def main():
         del os.environ["test_mode"]
     except KeyError:
         pass
-    worker_dir = os.path.dirname(os.path.realpath(__file__))
-    config_path = os.path.join(worker_dir, configuration_path)
-    configuration.read_and_set_configuration(config_path)
+
+    configuration.read_and_set_configuration(configuration_path)
     configuration.set_config({configuration.COMPONENT: "worker"})
     validate_and_setup_path()
     # do not trace anything before this point

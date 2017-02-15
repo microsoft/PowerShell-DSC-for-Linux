@@ -231,51 +231,6 @@ class JRDSClient:
             return RunbookData(request.deserialized_data)
         raise Exception("Unable to get runbook. [status=" + str(request.status_code) + "]")
 
-    def get_variable_asset(self, name):
-        """Gets the requested automation variable asset.
-
-        Args:
-            name : Name of the automation variable.
-
-        Note:
-            The output list is of the following format:
-            {
-                "isEncrypted": false,
-                "name": "testvar",
-                "value": "Value of variable"
-            }
-        """
-        url = self.base_uri + "/automationAccounts/" + self.account_id + "/variables/" + name + "?api-version=" \
-              + self.protocol_version
-        request = self.httpClient.get(url)
-
-        if request.status_code == 200:
-            return request.deserialized_data
-        raise Exception("Unable to get variable asset. [status=" + str(request.status_code) + "]")
-
-    def get_credential_asset(self, name):
-        """Gets the requested automation credential asset.
-
-        Args:
-            name : Name of the automation credential.
-
-        Note:
-            The output list is of the following format:
-            {
-                "userName": "myusername",
-                "name": "testcred",
-                "value": "mypassword",
-                "description": "None"
-            }
-        """
-        url = self.base_uri + "/automationAccounts/" + self.account_id + "/credentials/" + name + "?api-version=" \
-              + self.protocol_version
-        request = self.httpClient.get(url)
-
-        if request.status_code == 200:
-            return request.deserialized_data
-        raise Exception("Unable to get credential asset. [status=" + str(request.status_code) + "]")
-
     def acknowledge_job_action(self, sandbox_id, message_metadatas):
         """Acknowledges the job action.
 
@@ -386,6 +341,132 @@ class JRDSClient:
         if request.status_code == 200:
             return
         raise Exception("Unable to unload job. [status=" + str(request.status_code) + "]")
+
+    def get_variable_asset(self, name):
+        """Gets the requested automation variable asset.
+
+        Args:
+            name : Name of the automation variable.
+
+        Note:
+            The JRDS response body is of the following format:
+            {
+                "isEncrypted": false,
+                "name": "testvar",
+                "value": "Value of variable"
+            }
+        """
+        url = self.base_uri + "/automationAccounts/" + self.account_id + "/variables/" + name + "?api-version=" \
+              + self.protocol_version
+        request = self.httpClient.get(url)
+
+        if request.status_code == 200:
+            return request.deserialized_data
+        elif request.status_code == 404:
+            raise AutomationAssetNotFound()
+        raise Exception("An unknown error occurred. Unable to get the requested variable asset.")
+
+    def set_variable_asset(self, name, value, isEncrypted):
+        """Sets the requested automation variable asset value. The specified variable has to exists for this request
+        to succeed.
+
+        Args:
+            name        : Name of the automation variable.
+            value       : Value of the automation variable to be persisted.
+            isEncrypted : specifies if the variable asset value is meant to be encrypted
+
+        Note:
+            JRDS can return the following code :
+            200 - successfull request
+            400 - invalid request (i.e mismatch between the url variable name and the body variable name).
+            404 - non-existant variable
+
+        """
+        payload = {'name': name,
+                   'value': value,
+                   'isEncrypted': isEncrypted}
+        url = self.base_uri + "/automationAccounts/" + self.account_id + "/variables/" + name + "?api-version=" \
+              + self.protocol_version
+        request = self.httpClient.post(url, data=payload)
+
+        if request.status_code == 200:
+            return request.deserialized_data
+        elif request.status_code == 404:
+            raise AutomationAssetNotFound()
+        raise Exception("An unknown error occurred. Unable to set the value of the specified variable asset.")
+
+    def get_credential_asset(self, name):
+        """Gets the requested automation credential asset.
+
+        Args:
+            name : Name of the automation credential.
+
+        Note:
+            The JRDS response body is of the following format:
+            {
+                "userName": "myusername",
+                "name": "testcred",
+                "value": "mypassword",
+                "description": "None"
+            }
+        """
+        url = self.base_uri + "/automationAccounts/" + self.account_id + "/credentials/" + name + "?api-version=" \
+              + self.protocol_version
+        request = self.httpClient.get(url)
+
+        if request.status_code == 200:
+            return request.deserialized_data
+        elif request.status_code == 404:
+            raise AutomationAssetNotFound()
+        raise Exception("An unknown error occurred. Unable to get the requested credential asset.")
+
+    def get_certificate_asset(self, name):
+        """Gets the requested automation credential asset.
+
+        Args:
+            name : Name of the automation certificate.
+
+        Note:
+            The JRDS response body is of the following format:
+            {
+                "userName": "myusername",
+                "name": "testcred",
+                "value": "mypassword",
+                "description": "None"
+            }
+        """
+        url = self.base_uri + "/automationAccounts/" + self.account_id + "/certificates/" + name + "?api-version=" \
+              + self.protocol_version
+        request = self.httpClient.get(url)
+
+        if request.status_code == 200:
+            return request.deserialized_data
+        elif request.status_code == 404:
+            raise AutomationAssetNotFound()
+        raise Exception("An unknown error occurred. Unable to get the requested certificate asset.")
+
+    def get_connection_asset(self, name):
+        """Gets the requested automation connection asset.
+
+        Args:
+            name : Name of the automation connection.
+
+        Note:
+            The JRDS response body is of the following format:
+            {
+                "encryptedFieldNames": [],
+                "connectionFields": {"SubscriptionID": "subId", "AutomationCertificateName":"certName"}
+            }
+        """
+        url = self.base_uri + "/automationAccounts/" + self.account_id + "/connections/" + name + "?api-version=" \
+              + self.protocol_version
+        request = self.httpClient.get(url)
+
+        if request.status_code == 200:
+            return request.deserialized_data
+        elif request.status_code == 404:
+            raise AutomationAssetNotFound()
+        raise AutomationAssetException("An unknown error occurred. Unable to get the requested connection asset.")
 
 
 class JobData:
