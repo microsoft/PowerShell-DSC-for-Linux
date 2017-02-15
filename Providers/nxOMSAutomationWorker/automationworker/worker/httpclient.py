@@ -32,6 +32,7 @@ class HttpClient:
         self.insecure = insecure
         self.proxy_configuration = proxy_configuration
 
+        # validate presence of cert/key in case they were removed after process creation
         if (cert_path is not None and not os.path.isfile(self.cert_path)) or \
                 (key_path is not None and not os.path.isfile(self.key_path)):
             print cert_path

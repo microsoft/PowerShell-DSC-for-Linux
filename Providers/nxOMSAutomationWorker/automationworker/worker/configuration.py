@@ -46,7 +46,7 @@ DEFAULT_GPG_PUBLIC_KEYRING_PATH = DEFAULT_EMPTY
 DEFAULT_STATE_DIRECTORY_PATH = DEFAULT_EMPTY
 DEFAULT_PROXY_CONFIGURATION_PATH = DEFAULT_EMPTY
 DEFAULT_COMPONENT = "Unknown"
-DEFAULT_WORKER_VERSION = "1.2.0.0"
+DEFAULT_WORKER_VERSION = "1.3.0.0"
 DEFAULT_JRDS_POLLING_FREQUENCY = "30"
 
 # state configuration keys
@@ -216,8 +216,11 @@ def get_enforce_runbook_signature_validation():
     return get_value(ENFORCE_RUNBOOK_SIGNATURE_VALIDATION)
 
 
-def get_gpg_public_keyring_path():
-    return get_value(GPG_PUBLIC_KEYRING_PATH)
+def get_gpg_public_keyrings_path():
+    """Return a list of string representing keyring path."""
+    keyring_list = str(get_value(GPG_PUBLIC_KEYRING_PATH)).split(",")
+    sanitized_list = map(str.strip, keyring_list)
+    return sanitized_list
 
 
 def get_state_directory_path():

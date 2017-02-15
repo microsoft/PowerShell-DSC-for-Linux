@@ -43,3 +43,19 @@ class InvalidRunbookSignature(Exception):
             self.message = "The runbook signature is invalid."
         else:
             self.message = msg
+
+
+class AutomationAssetNotFound(Exception):
+    def __init__(self, msg=None):
+        if msg is None:
+            self.message = "The requested asset was not found."
+        else:
+            self.message = msg
+
+
+class AutomationAssetException(Exception):
+    def __init__(self, msg=None):
+        if msg is None:
+            self.message = "An unknown error occurred while performing the operation."
+        else:
+            self.message = msg

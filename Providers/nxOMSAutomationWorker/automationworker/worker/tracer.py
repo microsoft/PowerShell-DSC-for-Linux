@@ -473,10 +473,21 @@ def log_sandbox_job_streamhandler_processing_complete(job_id):
     trace_generic_hybrid_worker_event(10018, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
-def log_sandbox_job_runbook_signature_validation_failed(exception):
+def log_sandbox_job_runbook_signature_validation_failed(keyring_path, exception):
     message = "Runbook signature validation failed. [sandboxId=" + str(sandbox_id) + "][gpgException=" +\
-              str(exception) + "]"
+              str(exception) + "]" + "[keyring_path=" + str(keyring_path) + "]"
     trace_generic_hybrid_worker_event(10019, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+
+
+def log_sandbox_job_runbook_signature_validation_succeeded(keyring_path):
+    message = "Runbook signature validation succeeded. [sandboxId=" + str(sandbox_id) + "]" +\
+              "[keyring_path=" + str(keyring_path) + "]"
+    trace_generic_hybrid_worker_event(10020, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+
+
+def log_sandbox_job_runbook_signature_invalid():
+    message = "Runbook signature validation is invalid. [sandboxId=" + str(sandbox_id) + "]"
+    trace_generic_hybrid_worker_event(10021, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 # etw specific traces
