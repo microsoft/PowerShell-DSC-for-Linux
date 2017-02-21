@@ -66,9 +66,9 @@ omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
 baseModulePath = "<DSC_MODULES_PATH>"
 baseScriptPath = "<DSC_SCRIPT_PATH>"
 modulePath = baseModulePath + "/" + moduleName
+moduleDirectory = moduleName + "/"
 
 arch = zipfile.ZipFile(filepath)
-moduleNameLower = moduleName.lower
 
 # Detect if the module was zipped to include the module folder
 # or just the module folder's contents.
@@ -76,18 +76,21 @@ moduleNameLower = moduleName.lower
 isModuleNested = False
 
 for n in arch.namelist():
-    if n.lower == moduleNameLower:
-        isModuleNested = True
     if n.startswith('/') or n.startswith('..'):
         raise Exception(
             'Error: corrupted filename "' + n + '" in zipfile!')
+    if n.startswith(moduleDirectory):
+        isModuleNested = True
+
 bad = arch.testzip()
 if bad is not None:
     raise Exception('Error: First bad filename is "' + bad + '"')
 
 if isModuleNested:
+    print("Extracting to " + baseModulePath)
     arch.extractall(baseModulePath)
 else:
+    print("Extracting to " + modulePath)
     arch.extractall(modulePath) 
 
 if not os.path.isdir(modulePath):
