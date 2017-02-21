@@ -425,6 +425,8 @@ void CleanUpClassCache(_Inout_ MI_ClassA *miClassArray)
         MI_Class_Delete(miClassArray->data[xCount]);
     }
     DSC_free(miClassArray->data);
+    miClassArray->data = 0;
+    miClassArray->size = 0;
 }
 
 void CleanUpInstanceCache(_Inout_ MI_InstanceA *instanceArray)
@@ -439,6 +441,8 @@ void CleanUpInstanceCache(_Inout_ MI_InstanceA *instanceArray)
         MI_Instance_Delete(instanceArray->data[xCount]);
     }
     DSC_free(instanceArray->data);
+    instanceArray->data = 0;
+    instanceArray->size = 0;
 }
 
 void InitLocTable()
