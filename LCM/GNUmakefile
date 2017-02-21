@@ -33,6 +33,7 @@ deploydsc:
 	cp  -r $(TOP)/dsc/mof/MSFT_LogResource.schema.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/schema/MSFT_LogResource
 	cp  -r $(TOP)/dsc/mof/MSFT_LogResource.registration.mof $(CONFIG_SYSCONFDIR)/dsc/configuration/registration/MSFT_LogResource
 	cp  $(TOP)/../Providers/Extras/Scripts/base_dsc.conf $(CONFIG_SYSCONFDIR)/dsc/dsc.conf
-	test -L $(OMI) || cp $(BINDIR)/ConsistencyInvoker $(CONFIG_BINDIR)/
+	#test -L $(OMI) || cp $(BINDIR)/ConsistencyInvoker $(CONFIG_BINDIR)/
+	cp $(BINDIR)/ConsistencyInvoker $(CONFIG_BINDIR)/
 	$(CONFIG_BINDIR)/omireg -n "root/Microsoft/DesiredStateConfiguration" $(LIBDIR)/libdsccore.so
 	ln -fs $(CONFIG_SYSCONFDIR)/omiregister/root-Microsoft-DesiredStateConfiguration $(CONFIG_SYSCONFDIR)/omiregister/root-Microsoft-Windows-DesiredStateConfiguration
