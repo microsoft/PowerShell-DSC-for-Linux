@@ -90,11 +90,10 @@ if moduleName == "nxOMSAutomationWorker":
             pass
         except OSError:
             pass
-        finally:
-            try:
-                os.remove(state_conf_location)
-            except:
-                pass
+        try:
+            os.remove(state_conf_location)
+        except:
+            pass
 
 resourcelist = os.listdir(modulePath + "/DSCResources")
 for resource in resourcelist:
