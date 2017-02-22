@@ -291,13 +291,15 @@
 
 
 /* MSFT_PartialConfiguration */
-#define MSFT_PartialConfiguration_Description                                    MI_T("Description")
-#define MSFT_PartialConfiguration_ExclusiveResources                             MI_T("ExclusiveResources")
-#define MSFT_PartialConfiguration_ConfigurationSource                            MI_T("ConfigurationSource")
-#define MSFT_PartialConfiguration_DependsOn                                      MI_T("DependsOn")
+#define MSFT_PartialConfiguration_Description                       MI_T("Description")
+#define MSFT_PartialConfiguration_ExclusiveResources                MI_T("ExclusiveResources")
+#define MSFT_PartialConfiguration_ConfigurationSource               MI_T("ConfigurationSource")
+#define MSFT_PartialConfiguration_ResourceModuleSource              MI_T("ResourceModuleSource")
+#define MSFT_PartialConfiguration_DependsOn                         MI_T("DependsOn")
+#define MSFT_PartialConfiguration_RefreshMode                       MI_T("RefreshMode")
 
 
-#define MSFT_PartialConfiguration_FriendlyName                                      MI_T("PartialConfiguration")
+#define MSFT_PartialConfiguration_FriendlyName          MI_T("PartialConfiguration")
 
 
 #define MSFT_RegistrationKey_Name MI_T("RegistrationKey")

@@ -1,0 +1,13 @@
+#pragma include ("MSFT_Qualifiers.mof")
+#pragma include ("OMI_BaseResource.mof")
+
+[ClassVersion("1.0.0"), Description("The test configuration provider ."), FriendlyName("nxNop")]
+class MSFT_nxNopResource : OMI_BaseResource
+{   
+    [Key] string Name;
+
+    [Write] string Value;
+
+    [Write, ValueMap{"present", "absent"}] 
+    string Ensure;
+};

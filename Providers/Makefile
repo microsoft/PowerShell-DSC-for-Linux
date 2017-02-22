@@ -100,6 +100,13 @@ PROVIDERS+=nxFileInventory
 PROVIDERS+=nxOMSAutomationWorker
 endif
 
+# list of providers
+ifeq ($(BUILD_OMS),BUILD_OMS)
+TEST_PROVIDERS:=nxNop
+else
+TEST_PROVIDERS:=nxNop
+endif
+
 # this is used to enable the printing of xml style tags for help in debugging
 PRINT_BOOKENDS?=0
 CPPFLAGS+=-DPRINT_BOOKENDS=$(PRINT_BOOKENDS)
@@ -206,6 +213,8 @@ endef
 $(foreach provider,$(PROVIDERS),\
     $(eval $(call PER-PROVIDER-RULES,$(provider))))
 
+$(foreach provider,$(TEST_PROVIDERS),\
+    $(eval $(call PER-PROVIDER-RULES,$(provider))))
 
 # miscellaneous rules
 ################################################################################
