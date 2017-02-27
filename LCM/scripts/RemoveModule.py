@@ -83,7 +83,8 @@ if moduleName == "nxOMSAutomationWorker":
             # Typicallly the above kill should be sufficient becasue we should never reach as state where there are more
             # than 1 workers. Since we introduced a new user to exclusively for worker, we can safely kill all processes
             # that user which were started with the workspace id for additional safety
-            subprocess.call(["sudo", "pkill", "-u", automation_user, "--full", workspace_id])
+            # Note: using "--full" option instead of "-f" may cause compatibility issue with older shells
+            subprocess.call(["sudo", "pkill", "-u", automation_user, "-f", workspace_id])
         except ConfigParser.NoSectionError:
             pass
         except ConfigParser.NoOptionError:
