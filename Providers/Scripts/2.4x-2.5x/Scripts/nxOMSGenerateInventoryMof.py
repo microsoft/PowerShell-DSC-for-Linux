@@ -135,6 +135,12 @@ def GenerateInventoyMOFContents(FeatureName, Instances, RunIntervalInSeconds, Ta
 def GenerateInventoyConfContents(FeatureName, Instances, RunIntervalInSeconds, Tag, Format, FilterType, Configuration):
     mof_file_path = inventoryMof_path + FeatureName + '.mof'
     conf_file_path = inventoryMof_path + FeatureName + '.conf'
+
+    configurations = ''
+    if Configuration is not None:
+       for configuration in Configuration:
+           configurations += '  ' + configuration + '\n'
+
     conf_file_contents = '#This is auto-generated file \n \
 <source> \n \
   type exec \n \
@@ -148,7 +154,22 @@ def GenerateInventoyConfContents(FeatureName, Instances, RunIntervalInSeconds, T
   # Force upload even if the data has not changed \n \
   force_send_run_interval 24h \n \
   log_level warn \n \
-</filter> \n'
+</filter> \n \
+<match ' + Tag + '> \n \
+  type out.' + Tag + '\n \
+  log_level trace \n \
+  num_threads 5 \n \
+  buffer_chunk_limit 5m \n \
+  buffer_type file \n \
+  buffer_path /var/opt/microsoft/omsagent/state/out.' + Tag + '*.buffer \n \
+  buffer_queue_limit 10 \n \
+  buffer_queue_full_action drop_oldest_chunk \n \
+  flush_interval 20s \n \
+  retry_limit 10 \n \
+  retry_wait 30s \n \
+  max_retry_wait 9m \n \
+' + configurations + ' \n \
+</match> \n'
     return conf_file_contents
 
 
