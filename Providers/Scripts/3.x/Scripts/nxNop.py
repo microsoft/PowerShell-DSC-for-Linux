@@ -60,7 +60,6 @@ def Get_Marshall(Name, Value, Ensure):
 class Params:
 
     def __init__(self, Name, Value, Ensure):
-
         if not ("present" in Ensure or "absent" in Ensure):
             LG().Log('ERROR', 'ERROR: Param Ensure must be "Present" or "Absent".')
             raise Exception('BadParameter')
@@ -68,7 +67,7 @@ class Params:
         self.Ensure = Ensure
 
         if len(Name) < 1:
-            LG().Log('ERROR', 'ERROR: Param Name must be set if Path <> True.')
+            LG().Log('ERROR', 'ERROR: Param Name must be set.')
             raise Exception('BadParameter')
 
         self.Name = Name
@@ -119,7 +118,7 @@ def Set(Name, Value, Ensure):
 def Test(Name, Value, Ensure):
     retval = -1
     try:
-        p = Params(Name, Value, Ensure, Path)
+        p = Params(Name, Value, Ensure)
     except Exception, e:
         LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
         return [retval]
@@ -129,10 +128,11 @@ def Test(Name, Value, Ensure):
 
     return [retval]
 
-def Get(Name, Value, Ensure, Path):
+def Get(Name, Value, Ensure):
     retval = -1
     try:
         p = Params(Name, Value, Ensure)
+        retval = 0       
     except Exception, e:
         LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
 

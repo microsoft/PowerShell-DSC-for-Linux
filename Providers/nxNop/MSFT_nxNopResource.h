@@ -27,13 +27,6 @@
 typedef struct _MSFT_nxNopResource /* extends OMI_BaseResource */
 {
     MI_Instance __instance;
-    /* OMI_BaseResource properties */
-    MI_ConstStringField ResourceId;
-    MI_ConstStringField SourceInfo;
-    MI_ConstStringAField Requires;
-    MI_ConstStringField ModuleName;
-    MI_ConstStringField ModuleVersion;
-    MI_ConstStringField ConfigurationName;
     /* MSFT_nxNopResource properties */
     /*KEY*/ MI_ConstStringField Name;
     MI_ConstStringField Value;
