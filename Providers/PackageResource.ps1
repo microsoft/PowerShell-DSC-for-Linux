@@ -94,11 +94,11 @@ param
     [ValidateNotNullOrEmpty()]
     [string] $ClassName,
 
-    [Parameter(Mandatory, Position=1, ParameterSetName='MultipleResources')]
+    [Parameter(Mandatory, Position=3, ParameterSetName='MultipleResources')]
     [ValidateNotNullOrEmpty()]
     [HashTable] $Resources,
 
-    [Parameter(Position=5)]
+    [Parameter(Position=4)]
     [string] $GitLocation = $pwd,
 
     [switch] $x86
