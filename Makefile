@@ -503,8 +503,11 @@ endif
 
 
 # To build DSC without making kits (i.e. the old style), run 'make local'
-local: lcm providers
-
+local: 
+	rm -rf release/*.rpm release/*.deb
+	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Modules
+	$(MAKE) lcm providers
 lcm:
 	$(MAKE) -C omi-1.0.8
 	$(MAKE) -C LCM
