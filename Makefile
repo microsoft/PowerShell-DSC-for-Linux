@@ -288,7 +288,7 @@ nxMySQL:
 
 nxOMSPerfCounter:
 	rm -rf output/staging; \
-        VERSION="1.1"; \
+        VERSION="2.0"; \
         PROVIDERS="nxOMSPerfCounter"; \
         STAGINGDIR="output/staging/$@/DSCResources"; \
         cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
