@@ -653,7 +653,6 @@ module OMS
                                 proxy[:addr], proxy[:port], proxy[:user], proxy[:pass])
         end
         http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         http.open_timeout = 30
         return http
       end # create_secure_http
