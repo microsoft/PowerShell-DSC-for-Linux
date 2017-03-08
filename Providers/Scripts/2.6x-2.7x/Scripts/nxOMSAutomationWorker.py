@@ -317,6 +317,11 @@ def config_file_to_kv_pair(filename):
 
 def verify_hybrid_worker():
     # Returns the pid of the hybrid worker if its running, -1 otherwise
+    # Set COLUMNS wide enough so that output of ps does not get truncated
+    if 'COLUMNS' in os.environ:
+        os.environ['COLUMNS'] = "3000"
+    else:
+        log(DEBUG, "environment variable COLUMNS was not found")
     try:
         pid, workspace_id, running_version = read_worker_state()
         proc = subprocess.Popen(["ps", "-p", pid, "-o", "args="], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
