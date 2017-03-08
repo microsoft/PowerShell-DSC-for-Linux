@@ -11,6 +11,7 @@ import imp
 import urllib2
 import copy
 import fnmatch
+import re
 apt = None
 rpm = None
 try:
@@ -232,7 +233,6 @@ class Params:
                 raise Exception('BadParameter')
             if PackageManager == "*":
                 PackageManager = GetPackageManager()
-
         if len(Name) < 1 and len(FilePath) < 1:
             Print(
                 'ERROR: Param Name or FilePath must be set.', file=sys.stdout)
@@ -240,12 +240,12 @@ class Params:
             raise Exception('BadParameter')
         if len(Name) > 0 and len(FilePath) > 0:
             Print('Ignoring Name because FilePath is set.', file=sys.stdout)
-            LG().Log('INFO', 'Ignoring Name because FilePath is set.')
+            LG().Log('DEBUG', 'Ignoring Name because FilePath is set.')
         Print('PackageGroup value is ' + repr(PackageGroup), file=sys.stdout)
-        LG().Log('INFO',  'PackageGroup value is ' + repr(PackageGroup))
+        LG().Log('DEBUG',  'PackageGroup value is ' + repr(PackageGroup))
         Print('PackageGroup type is ' +
               repr(type(PackageGroup)), file=sys.stdout)
-        LG().Log('INFO', 'PackageGroup type is ' + repr(type(PackageGroup)))
+        LG().Log('DEBUG', 'PackageGroup type is ' + repr(type(PackageGroup)))
         if not (True is PackageGroup or False is PackageGroup):
             Print(
                 'ERROR: Param PackageGroup must be true or false.', file=sys.stdout)
@@ -281,6 +281,8 @@ class Params:
                 'ERROR', "ERROR: Unable to locate any of 'zypper', 'yum', 'apt-get', 'rpm' or 'dpkg' .")
             raise Exception('BadParameter')
         self.LocalPath = ''
+        self.record_delimiter = '@@'
+        self.field_delimiter = '#@#'
         self.cmds = {}
         self.cmds['dpkg'] = {}
         self.cmds['rpm'] = {}
@@ -292,16 +294,16 @@ class Params:
         self.cmds['dpkg'][
             'absent'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -r '
         self.cmds['dpkg'][
-            'stat'] = "dpkg-query -W -f='${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n' "
+            'stat'] = "dpkg-query -W -f='${{Description}}{0}${{Maintainer}}{0}'Unknown'{0}${{Installed-Size}}{0}${{Version}}{0}${{Status}}{0}${{Architecture}}\n' ".format(self.field_delimiter)
         self.cmds['dpkg'][
-            'stat_all'] = "dpkg-query -W -f='${Package}|${Description}|${Maintainer}|'Unknown'|${Installed-Size}|${Version}|${Status}|${Architecture}\n@@' "
+            'stat_all'] = "dpkg-query -W -f='${{Package}}{0}${{Description}}{0}${{Maintainer}}{0}'Unknown'{0}${{Installed-Size}}{0}${{Version}}{0}${{Status}}{0}${{Architecture}}\n{1}' ".format(self.field_delimiter, self.record_delimiter)
         self.cmds['dpkg']['stat_group'] = None
         self.cmds['rpm']['present'] = 'rpm % -i '
         self.cmds['rpm']['absent'] = 'rpm % -e '
         self.cmds['rpm'][
-            'stat'] = 'rpm -q --queryformat "%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{EPOCH}:%{VERSION}-%{RELEASE}|installed|%{ARCH}\n" '
+            'stat'] = 'rpm -q --queryformat "%{{SUMMARY}}{0}%{{PACKAGER}}{0}%{{INSTALLTIME}}{0}%{{SIZE}}{0}%{{EPOCH}}:%{{VERSION}}-%{{RELEASE}}{0}installed{0}%{{ARCH}}\n" '.format(self.field_delimiter)
         self.cmds['rpm'][
-            'stat_all'] = 'rpm -qa --queryformat "%{NAME}|%{SUMMARY}|%{PACKAGER}|%{INSTALLTIME}|%{SIZE}|%{EPOCH}:%{VERSION}-%{RELEASE}|installed|%{ARCH}\n@@" | sed "s/(none)/0/g" '
+            'stat_all'] = 'rpm -qa --queryformat "%{{NAME}}{0}%{{SUMMARY}}{0}%{{PACKAGER}}{0}%{{INSTALLTIME}}{0}%{{SIZE}}{0}%{{EPOCH}}:%{{VERSION}}-%{{RELEASE}}{0}installed{0}%{{ARCH}}\n{1}" | sed "s/(none)/0/g" '.format(self.field_delimiter, self.record_delimiter)
         self.cmds['rpm']['stat_group'] = None
         self.cmds['apt'][
             'present'] = 'DEBIAN_FRONTEND=noninteractive apt-get % install ^ --allow-unauthenticated --yes '
@@ -429,8 +431,8 @@ def ParseInfo(p, info):
     p.Installed = False
     p.Architecture = ''
     if len(info) > 1:
-        f = info.split('|')
-        if len(f) is 6:
+        f = re.split(p.field_delimiter, info)
+        if len(f) is 7:
             p.PackageDescription = f[0]
             p.Publisher = f[1]
             p.InstalledOn = f[2]
@@ -442,7 +444,7 @@ def ParseInfo(p, info):
             p.Installed = ('install' in f[5])
             p.Architecture = f[6]
 
-        if len(f) is not 6:
+        if len(f) is not 7:
             Print(
                 'ERROR in ParseInfo.  Output was ' + info, file=sys.stdout)
             LG().Log(
@@ -452,9 +454,9 @@ def ParseInfo(p, info):
 def ParseAllInfo(info, p):
     pkg_list = []
     d = {}
-    if len(info) < 1 or '@@' not in info:
+    if len(info) < 1 or p.record_delimiter not in info:
         return pkg_list
-    for pkg in info.split('@@'):
+    for pkg in re.split(p.record_delimiter, info):
         d['Name'] = ''
         d['PackageDescription'] = ''
         d['Publisher'] = ''
@@ -464,7 +466,8 @@ def ParseAllInfo(info, p):
         d['Installed'] = False
         d['Architecture'] = ''
         if len(pkg) > 1:
-                f = pkg.strip().split('|')
+                pkg = pkg.strip()
+                f = re.split(p.field_delimiter, pkg)
                 if len(f) is 8:
                     d['Name'] = f[0]
                     if len(p.Name) and not fnmatch.fnmatch(d['Name'], p.Name):
