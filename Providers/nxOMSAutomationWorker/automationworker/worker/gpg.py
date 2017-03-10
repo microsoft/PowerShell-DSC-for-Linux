@@ -45,9 +45,8 @@ def verify_signature(signed_file_path, output_file_path):
         # only apply the workaround for oms installation
         env = None
         if os.name.lower() != "nt" and "nxOMSAutomationWorkerResource" in os.path.abspath(__file__):
-            env = os.environ.copy()
-
             import pwd
+            env = os.environ.copy()
             current_username = pwd.getpwuid(os.getuid()).pw_name
             if "omsagent" in current_username:
                 env["HOME"] = "/var/opt/microsoft/omsagent/run"

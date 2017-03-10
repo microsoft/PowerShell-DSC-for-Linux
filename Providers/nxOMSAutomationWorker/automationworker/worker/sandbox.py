@@ -41,10 +41,24 @@ def safe_loop(func):
     return decorated_func
 
 
+def exit_on_error(message, exit_code=1):
+    print str(message)
+    try:
+        os.chdir(os.path.expanduser("~"))
+        open("automation_sandbox_crash_" + str(os.environ["sandbox_id"]) + ".log", "w").write(message)
+    except:
+        pass
+    sys.exit(exit_code)
+
+
 class Sandbox:
     def __init__(self):
         self.sandbox_id = os.environ["sandbox_id"]
         tracer.log_sandbox_starting(os.getpid())
+        tracer.log_sandbox_configuration(sandbox_id=self.sandbox_id,
+                                         enforce_runbook_signature_validation=configuration.get_enforce_runbook_signature_validation(),
+                                         gpg_public_keyring_paths=configuration.get_gpg_public_keyrings_path(),
+                                         working_directory=os.getcwd())
 
         http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),
                                                 configuration.get_verify_certificates())
@@ -121,9 +135,24 @@ class Sandbox:
 
 
 def main():
+    if len(sys.argv) < 2:
+        exit_on_error("Invalid configuration file path (absolute path is required).")
+    configuration_path = str(sys.argv[1])
+
+    if not os.path.isfile(configuration_path):
+        exit_on_error("Invalid configuration file path or empty configuration file (absolute path is required).")
+
     # configuration has to be read first thing
-    configuration.set_config({configuration.COMPONENT: "sandbox"})
-    configuration.set_config({configuration.WORKING_DIRECTORY_PATH: os.getcwd()})
+    try:
+        # remove the test_mode env_var value (mainly for Windows)
+        # this value is set in test
+        del os.environ["test_mode"]
+    except KeyError:
+        pass
+
+    configuration.read_and_set_configuration(configuration_path)
+    configuration.set_config({configuration.COMPONENT: "sandbox",
+                              configuration.WORKING_DIRECTORY_PATH: os.getcwd()})
     # do not trace anything before this point
 
     sandbox = Sandbox()

@@ -46,7 +46,7 @@ DEFAULT_GPG_PUBLIC_KEYRING_PATH = DEFAULT_EMPTY
 DEFAULT_STATE_DIRECTORY_PATH = DEFAULT_EMPTY
 DEFAULT_PROXY_CONFIGURATION_PATH = DEFAULT_EMPTY
 DEFAULT_COMPONENT = "Unknown"
-DEFAULT_WORKER_VERSION = "1.4.0.0"
+DEFAULT_WORKER_VERSION = "1.5.0.0"
 DEFAULT_JRDS_POLLING_FREQUENCY = "30"
 
 # state configuration keys
@@ -55,8 +55,10 @@ STATE_RESOURCE_VERSION = "resource_version"
 STATE_WORKSPACE_ID = "workspace_id"
 STATE_WORKER_VERSION = "worker_version"
 
+worker_configuration_file_path = DEFAULT_EMPTY
 
-def read_and_set_configuration(config_path):
+
+def read_and_set_configuration(configuration_file_path):
     """Reads the worker configuration from the file at config_path and sets the read configuration to
     the env variable.
 
@@ -68,8 +70,11 @@ def read_and_set_configuration(config_path):
         The COMPONENT has to be set manually at the entry point of each component (worker/sandbox).
 
     Args:
-        config_path: string, the configuration file path.
+        configuration_file_path: string, the configuration file path.
     """
+    global worker_configuration_file_path
+    worker_configuration_file_path = configuration_file_path
+
     clear_config()
 
     # init and set default values for optional configuration keys
@@ -82,7 +87,7 @@ def read_and_set_configuration(config_path):
                                             PROXY_CONFIGURATION_PATH : DEFAULT_PROXY_CONFIGURATION_PATH})
 
     # load the worker configuration file
-    config.read(config_path)
+    config.read(configuration_file_path)
 
     # create the configuration dictionary
     # read required configuration values
@@ -194,6 +199,10 @@ def get_hybrid_worker_name():
 
 def get_worker_version():
     return get_value(WORKER_VERSION)
+
+
+def get_worker_configuration_file_path():
+    return worker_configuration_file_path
 
 
 def get_working_directory_path():

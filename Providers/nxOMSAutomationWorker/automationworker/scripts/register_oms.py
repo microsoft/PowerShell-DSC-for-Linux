@@ -1,9 +1,12 @@
+#!/usr/bin/env python2
+#
+# Copyright (C) Microsoft Corporation, All rights reserved.
+
 import ConfigParser
 import datetime
 import getopt
 import os
 import socket
-import subprocess
 import sys
 
 # append worker binary source path
@@ -14,45 +17,14 @@ from worker import configuration
 
 from worker import httpclientfactory
 from worker import simplejson as json
+from worker import linuxutil
 
 REGISTER = "register"
 DEREGISTER = "deregister"
 
-
-def get_cert_info(certificate_path):
-    """Gets certificate information by invoking OpenSSL (OMS agent dependency).
-
-    Returns:
-        A tuple containing the certificate's issuer, subject and thumbprint.
-    """
-    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-fingerprint", "-sha1"],
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    raw_fingerprint, e = p.communicate()
-
-    if p.poll() != 0:
-        raise Exception("Unable to get certificate thumbprint.")
-    thumbprint = raw_fingerprint.split("SHA1 Fingerprint=")[1].replace(":", "").strip()
-
-    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-issuer"],
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    raw_issuer, e = p.communicate()
-
-    if p.poll() != 0:
-        raise Exception("Unable to get certificate issuer.")
-    issuer = raw_issuer.split("issuer= ")[1].strip()
-
-    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-subject"],
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    raw_subject, e = p.communicate()
-
-    if p.poll() != 0:
-        raise Exception("Unable to get certificate subject.")
-    subject = raw_subject.split("subject= ")[1].strip()
-
-    return issuer, subject, thumbprint
+CONFIGURATION_SECTION_WORKER_REQUIRED = "worker-required"
+CONFIGURATION_SECTION_WORKER_OPTIONAL = "worker-optional"
+CONFIGURATION_SECTION_OMS_METADATA = "oms-metadata"
 
 
 def get_headers_and_payload(worker_group_name, certificate_path):
@@ -61,7 +33,7 @@ def get_headers_and_payload(worker_group_name, certificate_path):
     Returns:
         A tuple containing a dictionary for the request headers and a dictionary for the payload (request body).
     """
-    issuer, subject, thumbprint = get_cert_info(certificate_path)
+    issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
     headers = {'ProtocolVersion': "2.0",
                'x-ms-date': datetime.datetime.utcnow().isoformat() + "0-00:00",
                "Content-Type": "application/json"}
@@ -134,33 +106,30 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
         config.read(worker_conf_path)
     conf_file = open(worker_conf_path, 'wb')
 
-    section = "worker-required"
-    if not config.has_section(section):
-        config.add_section(section)
-    config.set(section, "jrds_cert_path", oms_cert_path)
-    config.set(section, "jrds_key_path", oms_key_path)
-    config.set(section, "jrds_base_uri", jrds_uri)
-    config.set(section, "account_id", automation_account_id)
-    config.set(section, "machine_id", machine_id)
-    config.set(section, "hybrid_worker_group_name", worker_group_name)
-    config.set(section, "working_directory_path", working_directory)
+    if not config.has_section(CONFIGURATION_SECTION_WORKER_REQUIRED):
+        config.add_section(CONFIGURATION_SECTION_WORKER_REQUIRED)
+    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "jrds_cert_path", oms_cert_path)
+    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "jrds_key_path", oms_key_path)
+    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "jrds_base_uri", jrds_uri)
+    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "account_id", automation_account_id)
+    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "machine_id", machine_id)
+    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "hybrid_worker_group_name", worker_group_name)
+    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "working_directory_path", working_directory)
 
-    section = "worker-optional"
-    if not config.has_section(section):
-        config.add_section(section)
-    config.set(section, "gpg_public_keyring_path", gpg_keyring_path)
-    config.set(section, "proxy_configuration_path", proxy_configuration_path)
-    config.set(section, "state_directory_path", state_directory)
+    if not config.has_section(CONFIGURATION_SECTION_WORKER_OPTIONAL):
+        config.add_section(CONFIGURATION_SECTION_WORKER_OPTIONAL)
+    config.set(CONFIGURATION_SECTION_WORKER_OPTIONAL, "gpg_public_keyring_path", gpg_keyring_path)
+    config.set(CONFIGURATION_SECTION_WORKER_OPTIONAL, "proxy_configuration_path", proxy_configuration_path)
+    config.set(CONFIGURATION_SECTION_WORKER_OPTIONAL, "state_directory_path", state_directory)
     if test_mode is True:
-        config.set(section, "bypass_certificate_verification", True)
+        config.set(CONFIGURATION_SECTION_WORKER_OPTIONAL, "bypass_certificate_verification", True)
 
-    section = "oms-metadata"
-    if not config.has_section(section):
-        config.add_section(section)
-    config.set(section, "agent_id", machine_id)
-    config.set(section, "workspace_id", workspace_id)
-    config.set(section, "registration_endpoint", registration_endpoint)
-    config.set(section, "oms_cert_thumbprint", thumbprint)
+    if not config.has_section(CONFIGURATION_SECTION_OMS_METADATA):
+        config.add_section(CONFIGURATION_SECTION_OMS_METADATA)
+    config.set(CONFIGURATION_SECTION_OMS_METADATA, "agent_id", machine_id)
+    config.set(CONFIGURATION_SECTION_OMS_METADATA, "workspace_id", workspace_id)
+    config.set(CONFIGURATION_SECTION_OMS_METADATA, "registration_endpoint", registration_endpoint)
+    config.set(CONFIGURATION_SECTION_OMS_METADATA, "oms_cert_thumbprint", thumbprint)
 
     config.write(conf_file)
     conf_file.close()
@@ -179,21 +148,24 @@ def main(argv):
     working_directory = None
     workspace_id = None
     mock_powershelldsc_test = False
+    diy_account_id = None
 
     # parse cmd line args
     try:
-        opts, args = getopt.getopt(argv, "hrdw:a:c:k:e:f:s:p:g:t",
+        opts, args = getopt.getopt(argv, "hrdw:a:c:k:e:f:s:p:g:y:t",
                                    ["help", "register", "deregister", "workspaceid=", "agentid=", "certpath=",
                                     "keypath=", "endpoint=", "workingdirpath=", "statepath=", "proxyconfpath=",
-                                    "gpgkeyringpath=", "mock_powershelldsc_test"])
+                                    "gpgkeyringpath=", "diyaccountid=", "mock_powershelldsc_test="])
     except getopt.GetoptError:
         print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
-                         "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>"
+                         "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
+                         "-y <diyaccountid>"
         sys.exit(2)
     for opt, arg in opts:
         if opt == ("-h", "--help"):
             print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
-                             "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>"
+                             "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
+                             "-y <diyaccountid>"
             sys.exit()
         elif opt in ("-r", "--register"):
             operation = REGISTER
@@ -217,6 +189,8 @@ def main(argv):
             state_directory = arg.strip()
         elif opt in ("-g", "--gpgkeyringpath"):
             gpg_keyring_path = arg.strip()
+        elif opt in ("-y", "--diyaccountid"):
+            diy_account_id = arg.strip()
         elif opt in ("-t", "--test"):
             test_mode = True
         elif opt == "--mock_powershelldsc_test":
@@ -225,7 +199,7 @@ def main(argv):
             mock_powershelldsc_test = True
 
     if workspace_id is None or agent_id is None or oms_cert_path is None or oms_key_path is None \
-            or endpoint is None or gpg_keyring_path is None or proxy_configuration_path is None\
+            or endpoint is None or gpg_keyring_path is None or proxy_configuration_path is None \
             or working_directory is None or state_directory is None:
         print "Missing mandatory arguments."
         print "Use -h or --help for usage."
@@ -268,12 +242,19 @@ def main(argv):
             else:
                 registration_response = register(registration_endpoint, worker_group_name, machine_id, oms_cert_path,
                                                  oms_key_path, test_mode)
-                cert_info = get_cert_info(oms_cert_path)
-            create_worker_configuration_file(working_directory, registration_response["jobRuntimeDataServiceUri"],
-                                             registration_endpoint, workspace_id, registration_response["AccountId"],
-                                             worker_group_name, machine_id, oms_cert_path, oms_key_path,
-                                             state_directory, gpg_keyring_path, proxy_configuration_path, test_mode,
-                                             cert_info)
+                cert_info = linuxutil.get_cert_info(oms_cert_path)
+                account_id = registration_response["AccountId"]
+
+                if test_mode is False and diy_account_id is not None and diy_account_id != account_id:
+                    sys.stderr.write("Unable to create worker configuration. DIY Automation account differs from "
+                                     "linked account.")
+                    sys.exit(-5)
+
+                create_worker_configuration_file(working_directory, registration_response["jobRuntimeDataServiceUri"],
+                                                 registration_endpoint, workspace_id, account_id,
+                                                 worker_group_name, machine_id, oms_cert_path, oms_key_path,
+                                                 state_directory, gpg_keyring_path, proxy_configuration_path, test_mode,
+                                                 cert_info)
         elif operation == DEREGISTER:
             deregister(registration_endpoint, worker_group_name, machine_id, oms_cert_path, oms_key_path, test_mode)
         else:
