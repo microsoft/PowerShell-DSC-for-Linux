@@ -8,7 +8,6 @@ import inspect
 import logging
 import logging.handlers
 import os
-import random
 import sys
 import threading
 import time
@@ -17,6 +16,7 @@ import traceback
 import configuration
 from httpclientfactory import HttpClientFactory
 from jrdsclient import JRDSClient
+import util
 
 jrds_client = None
 jrds_cert_path = None
@@ -27,7 +27,6 @@ account_id = None
 machine_id = None
 hybrid_worker_group_name = None
 worker_version = None
-activity_id = None
 sandbox_id = None
 
 default_logger = None
@@ -77,7 +76,6 @@ def init():
     machine_id = configuration.get_machine_id()
     hybrid_worker_group_name = configuration.get_hybrid_worker_name()
     worker_version = configuration.get_worker_version()
-    activity_id = generate_activity_id()
 
     sandbox_id = None
     try:
@@ -219,8 +217,6 @@ def format_and_issue_generic_hybrid_worker_trace(event_id, task_name, message, t
         t_id        : int   , the thread id.
         keyword     : string, the keyword.
     """
-    u_activity_id = generate_activity_id()
-
     # The local trace is converted into the "GenericHybridWorker" trace in the cloud (eventId: 16000).
     # For this reason, this trace has to follow the JRDS TraceEventSource.cs event's signature contract
     # for eventId 16000.
@@ -251,18 +247,7 @@ def dict_to_str(input_dict):
     return output_str
 
 
-def generate_activity_id():
-    """ UUID module isn't available in python 2.4. Since activity id are only required for tracing this is enough.
-
-    Returns: string, an activity id which has a GUID format
-    """
-    uuid = [random.randint(10000000, 99999999),
-            random.randint(1000, 9999),
-            random.randint(1000, 9999),
-            random.randint(1000, 9999),
-            random.randint(100000000000, 999999999999)]
-    return '-'.join(map(str, uuid))
-
+u_activity_id = util.generate_uuid()
 
 COMPONENT_SANDBOX = "Sandbox"
 COMPONENT_WORKER = "Worker"
@@ -308,11 +293,11 @@ def log_worker_starting(version):
 
 def log_worker_general_telemetry(worker_version):
     message = "Worker general telemetry. [workerVersion=" + str(worker_version) + "]"
-    trace_generic_hybrid_worker_event(5002, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
+    trace_generic_hybrid_worker_event(5001, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
 def log_worker_python_telemetry(version, build, compiler):
-    message = "Worker python telemetry. [version=" + str(version) + "][build=" + str(' '.join(map(str, build))) +\
+    message = "Worker python telemetry. [version=" + str(version) + "][build=" + str(' '.join(map(str, build))) + \
               "][compiler=" + str(compiler) + "]"
     trace_generic_hybrid_worker_event(5002, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
@@ -323,47 +308,58 @@ def log_worker_system_telemetry(system, node, version, machine, processor):
     trace_generic_hybrid_worker_event(5003, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
+def log_worker_user_telemetry(username):
+    message = "Worker user context telemetry. [username=" + str(username) + "]"
+    trace_generic_hybrid_worker_event(5004, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
+
+
+def log_worker_lsb_release_telemetry(distributor_id, description, release, codename):
+    message = "Worker lsb_release telemetry. [distributor_id=" + str(distributor_id) + "][description=" + \
+              str(description) + "][release=" + str(release) + "][codename=" + str(codename) + "]"
+    trace_generic_hybrid_worker_event(5005, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
+
+
 def log_worker_sandbox_action_found(sandbox_actions):
     message = "Get sandbox actions found " + str(sandbox_actions) + " new action(s)."
-    trace_generic_hybrid_worker_event(5004, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
+    trace_generic_hybrid_worker_event(5100, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
 
 
 def log_worker_starting_sandbox(sandbox_id):
     message = "Starting sandbox process. [sandboxId=" + str(sandbox_id) + "]"
-    trace_generic_hybrid_worker_event(5005, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
+    trace_generic_hybrid_worker_event(5101, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
 
 
 def log_worker_sandbox_process_started(sandbox_id, pid):
     message = "Sandbox process started. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) + "]"
-    trace_generic_hybrid_worker_event(5006, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
+    trace_generic_hybrid_worker_event(5102, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
 
 
 def log_worker_sandbox_process_exited(sandbox_id, pid, exit_code):
     message = "Sandbox process exited. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) + "][exitCode=" + \
               str(exit_code) + "]"
-    trace_generic_hybrid_worker_event(5007, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event(5103, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_worker_sandbox_process_crashed(sandbox_id, pid, exit_code, exception):
     message = "Sandbox process crashed. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) + "][exitCode=" + \
               str(exit_code) + "][exception=" + str(exception) + "]"
-    trace_generic_hybrid_worker_event(5008, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event(5104, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
 def log_worker_failed_to_create_sandbox_root_folder(sandbox_id, exception):
     message = "Failed to create sandbox root folder. [sandboxId=" + str(sandbox_id) + "][exception=" + \
               str(exception) + "]"
-    trace_generic_hybrid_worker_event(5009, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event(5105, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 def log_worker_started_tracking_sandbox(sandbox_id):
     message = "Worker started tracking sandbox. [sandboxId=" + str(sandbox_id) + "]"
-    trace_generic_hybrid_worker_event(50010, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event(5106, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_worker_stopped_tracking_sandbox(sandbox_id):
     message = "Worker stopped tracking sandbox. [sandboxId=" + str(sandbox_id) + "]"
-    trace_generic_hybrid_worker_event(50011, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event(5107, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 # sandbox specific traces
@@ -429,8 +425,10 @@ def log_sandbox_job_loaded(job_id):
     trace_generic_hybrid_worker_event(10010, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
-def log_sandbox_job_started(job_id):
-    message = "Job started. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
+def log_sandbox_job_started(job_id, runbook_definition_kind, runbook_name, runbook_version_id):
+    message = "Job started. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookDefinitionKind=" +\
+              str(runbook_definition_kind) + "][runbookName=" + str(runbook_name) + "][runbookVersionId=" +\
+              str(runbook_version_id) + "]"
     trace_generic_hybrid_worker_event(10011, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
@@ -474,13 +472,13 @@ def log_sandbox_job_streamhandler_processing_complete(job_id):
 
 
 def log_sandbox_job_runbook_signature_validation_failed(keyring_path, exception):
-    message = "Runbook signature validation failed. [sandboxId=" + str(sandbox_id) + "][gpgException=" +\
+    message = "Runbook signature validation failed. [sandboxId=" + str(sandbox_id) + "][gpgException=" + \
               str(exception) + "]" + "[keyring_path=" + str(keyring_path) + "]"
     trace_generic_hybrid_worker_event(10019, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 def log_sandbox_job_runbook_signature_validation_succeeded(keyring_path):
-    message = "Runbook signature validation succeeded. [sandboxId=" + str(sandbox_id) + "]" +\
+    message = "Runbook signature validation succeeded. [sandboxId=" + str(sandbox_id) + "]" + \
               "[keyring_path=" + str(keyring_path) + "]"
     trace_generic_hybrid_worker_event(10020, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
@@ -488,6 +486,14 @@ def log_sandbox_job_runbook_signature_validation_succeeded(keyring_path):
 def log_sandbox_job_runbook_signature_invalid():
     message = "Runbook signature validation is invalid. [sandboxId=" + str(sandbox_id) + "]"
     trace_generic_hybrid_worker_event(10021, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+
+
+def log_sandbox_configuration(sandbox_id, enforce_runbook_signature_validation, gpg_public_keyring_paths,
+                              working_directory):
+    message = "Sandbox configuration. [sandboxId=" + str(sandbox_id) + "][enforceRunbookSignatureValidation=" +\
+              str(enforce_runbook_signature_validation) + "][gpgPublicKeyringPaths=" + str(gpg_public_keyring_paths) +\
+              "][workingDirectory=" + str(working_directory) + "]"
+    trace_generic_hybrid_worker_event(10022, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 # etw specific traces
@@ -505,7 +511,7 @@ def log_etw_job_status_changed_completed(subscription_id, account_id, account_na
                     "][accountId=" + str(account_id) + "][accountName=" + str(account_name) + "][sandboxId=" + \
                     str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + \
                     str(runbook_definition_kind) + "][runbookName=" + str(runbook_name) + "]"
-    trace_etw_event(3181, local_message, generate_activity_id(), 0, cloud_trace_format)
+    trace_etw_event(3181, local_message, u_activity_id, 0, cloud_trace_format)
 
 
 def log_etw_job_status_changed_failed(subscription_id, account_id, account_name, sandbox_id, job_id,
@@ -524,7 +530,7 @@ def log_etw_job_status_changed_failed(subscription_id, account_id, account_name,
                     "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + str(runbook_definition_kind) + \
                     "][runbookName=" + str(runbook_name) + "][runbookVersionId=" + str(runbook_version_id) + \
                     "][exception=" + str(exception) + "]"
-    trace_etw_event(3182, local_message, generate_activity_id(), 0, cloud_trace_format)
+    trace_etw_event(3182, local_message, u_activity_id, 0, cloud_trace_format)
 
 
 def log_etw_job_status_changed_running(subscription_id, account_id, account_name, sandbox_id, job_id,
@@ -542,7 +548,7 @@ def log_etw_job_status_changed_running(subscription_id, account_id, account_name
                     "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + str(runbook_definition_kind) + \
                     "][runbookName=" + str(runbook_name) + "][timeTakenToStartRunningInSeconds=" + \
                     str(time_taken_to_start_running_in_seconds) + "]"
-    trace_etw_event(3183, local_message, generate_activity_id(), 0, cloud_trace_format)
+    trace_etw_event(3183, local_message, u_activity_id, 0, cloud_trace_format)
 
 
 def log_etw_job_status_changed_stopped(subscription_id, account_id, account_name, sandbox_id, job_id,
@@ -558,7 +564,7 @@ def log_etw_job_status_changed_stopped(subscription_id, account_id, account_name
                     str(account_id) + "][accountName=" + str(account_name) + "][sandboxId=" + str(sandbox_id) + \
                     "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + str(runbook_definition_kind) + \
                     "][runbookName=" + str(runbook_name) + "]"
-    trace_etw_event(3184, local_message, generate_activity_id(), 0, cloud_trace_format)
+    trace_etw_event(3184, local_message, u_activity_id, 0, cloud_trace_format)
 
 
 def log_etw_job_status_changed_suspended_by_user(account_id, sandbox_id, job_id, runbook_name, runbook_definition_kind,
@@ -573,7 +579,7 @@ def log_etw_job_status_changed_suspended_by_user(account_id, sandbox_id, job_id,
                     str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookName=" + str(runbook_name) + \
                     "][runbookDefinitionKind=" + str(runbook_definition_kind) + "][accountName=" + str(account_name) + \
                     "]"
-    trace_etw_event(3185, local_message, generate_activity_id(), 0, cloud_trace_format)
+    trace_etw_event(3185, local_message, u_activity_id, 0, cloud_trace_format)
 
 
 def log_etw_job_status_changed_suspended_by_exception(account_id, sandbox_id, job_id, runbook_name, exception,
@@ -587,7 +593,7 @@ def log_etw_job_status_changed_suspended_by_exception(account_id, sandbox_id, jo
     local_message = "Job state changed to suspended after an exception was encountered. [accountId=" + \
                     str(account_id) + "][sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookName=" + \
                     str(runbook_name) + "][exception=" + str(exception) + "]"
-    trace_etw_event(3186, local_message, generate_activity_id(), 0, cloud_trace_format)
+    trace_etw_event(3186, local_message, u_activity_id, 0, cloud_trace_format)
 
 
 def log_etw_user_requested_start_or_resume(account_id, sandbox_id, job_id, runbook_name, account_name,
@@ -603,7 +609,7 @@ def log_etw_user_requested_start_or_resume(account_id, sandbox_id, job_id, runbo
                     "][sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookName=" + \
                     str(runbook_name) + "][timeTakenToStartRunningInSeconds=" + \
                     str(time_taken_to_start_running_in_seconds) + "][runbookType=" + str(runbook_definition_kind) + "]"
-    trace_etw_event(3732, local_message, generate_activity_id(), 0, cloud_trace_format)
+    trace_etw_event(3732, local_message, u_activity_id, 0, cloud_trace_format)
 
 
 def log_etw_job_duration(subscription_id, account_id, sandbox_id, job_id, duration, duration_in_seconds, tier_name,
@@ -627,4 +633,4 @@ def log_etw_job_duration(subscription_id, account_id, sandbox_id, job_id, durati
                     "][jobTriggerSource=" + str(job_trigger_source) + "][runbookSource=" + str(runbook_source) + \
                     "][runbookType=" + str(runbook_type) + "][runbookName=" + str(runbook_name) + \
                     "][jobRunDestination=" + str(job_run_destination) + "]"
-    trace_etw_event(3453, local_message, generate_activity_id(), 0, cloud_trace_format)
+    trace_etw_event(3453, local_message, u_activity_id, 0, cloud_trace_format)

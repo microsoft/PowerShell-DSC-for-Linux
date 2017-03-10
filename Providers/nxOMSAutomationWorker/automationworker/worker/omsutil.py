@@ -7,10 +7,13 @@ import sys
 import os
 import pwd
 import grp
-import subprocess
 
-import configuration
-import serializerfactory
+# append worker binary source path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from worker import configuration
+from worker import serializerfactory
+from worker import linuxutil
 
 json = serializerfactory.get_serializer(sys.version_info)
 configuration.clear_config()
@@ -33,9 +36,44 @@ def initialize():
     Args:
         None
     """
-    command = ["sudo", "chmod", "g+rx", "-R", "/etc/opt/microsoft/omsagent/certs"]
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output, error = process.communicate()
+    # add nxautomation to omsagent group
+    nxautomation_uid = int(pwd.getpwnam(USERNAME_NXAUTOMATION).pw_uid)
+    if os.getuid() == nxautomation_uid:
+        omsagent_group = grp.getgrnam(GROUPNAME_OMSAGENT)
+        if USERNAME_NXAUTOMATION not in omsagent_group.gr_mem:
+            process, output, error = linuxutil.popen_communicate(["sudo", "/usr/sbin/usermod", "-g", "nxautomation",
+                                                                  "-a", "-G", "omsagent,omiusers", "nxautomation"])
+            if process.returncode != 0:
+                raise Exception("Unable to add nxautomation to omsagent group. Error: " + str(error))
+            else:
+                print "Successfully added omsagent secondary group to nxautomation user."
+
+    # change permissions for the keyring.gpg
+    process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+r",
+                                                          "/etc/opt/omi/conf/omsconfig/keyring.gpg"])
+    if process.returncode != 0:
+        raise Exception("Unable set group permission to keyring. Error: " + str(error))
+    else:
+        print "Successfully set group permissions to keyring.gpg."
+
+    # change permission for the certificate folder, oms.crt and oms.key
+    process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+rx", "-R",
+                                                          "/etc/opt/microsoft/omsagent/certs"])
+    if process.returncode != 0:
+        raise Exception("Unable set group permissions to certificate folder. Error: " + str(error))
+    else:
+        print "Successfully set group permissions to certificate folder."
+
+    # change owner for the worker working directory
+    process, output, error = linuxutil.popen_communicate(["sudo", "chown", "nxautomation:omiusers", "-R",
+                                                          "/var/opt/microsoft/omsagent/run/automationworker"])
+    if process.returncode != 0:
+        raise Exception("Unable set group owner to certificate folder. Error: " + str(error))
+    else:
+        print "Successfully set group permissions to certificate folder."
+
+    process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+rx", "-R",
+                                                          "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
         raise Exception("Unable set owners of certificate folder. Error: " + str(error))
     else:

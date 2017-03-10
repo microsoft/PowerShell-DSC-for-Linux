@@ -98,7 +98,8 @@ class Job(Thread):
     def execute_runbook(self):
         """Executes the job runtime and performs runtime operation (stream upload / status change)."""
         # set status to running
-        tracer.log_sandbox_job_started(self.job_id)
+        tracer.log_sandbox_job_started(self.job_id, self.runbook.definition_kind_str, self.runbook_data.name,
+                                       self.runbook_data.runbook_version_id)
         start_request_time = time.strptime(self.job_data.start_request_time.split("+")[0].split(".")[0],
                                            "%Y-%m-%dT%H:%M:%S")
         time_taken_to_start_td = datetime.utcnow() - datetime.fromtimestamp(time.mktime(start_request_time))

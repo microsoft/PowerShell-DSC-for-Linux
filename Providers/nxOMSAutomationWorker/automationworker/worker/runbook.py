@@ -10,6 +10,7 @@ import configuration
 import gpg
 import iohelper
 import jrdsclient
+import linuxutil
 from workerexception import *
 
 definition_kind_int_to_str = {0: "Unknown",
@@ -47,7 +48,11 @@ class Runbook:
         """Writes the runbook's definition to disk."""
         file_name = self.runbook_data.name + self.runbook_data.runbook_version_id + self.file_extension
         self.runbook_file_path = os.path.join(configuration.get_working_directory_path(), file_name)
-        iohelper.write_to_file(self.runbook_file_path, data=self.runbook_data.definition.encode("utf-8"), mode="w+b")
+        runbook_definition = str(self.runbook_data.definition.encode("utf-8"))
+        if linuxutil.is_posix_host() is True:
+            # replace dos end of line to unix end of line
+            runbook_definition = runbook_definition.replace("\r\n", "\n")
+        iohelper.write_to_file(self.runbook_file_path, data=runbook_definition, mode="w+b")
 
     def validate_signature(self):
         """Validates that the runbook signature is valid.
