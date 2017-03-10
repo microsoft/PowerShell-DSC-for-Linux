@@ -1,9 +1,12 @@
+#!/usr/bin/env python2
+#
+# Copyright (C) Microsoft Corporation, All rights reserved.
+
 import ConfigParser
 import datetime
 import getopt
 import os
 import socket
-import subprocess
 import sys
 
 # append worker binary source path
@@ -14,45 +17,10 @@ from worker import configuration
 
 from worker import httpclientfactory
 from worker import simplejson as json
+from worker import linuxutil
 
 REGISTER = "register"
 DEREGISTER = "deregister"
-
-
-def get_cert_info(certificate_path):
-    """Gets certificate information by invoking OpenSSL (OMS agent dependency).
-
-    Returns:
-        A tuple containing the certificate's issuer, subject and thumbprint.
-    """
-    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-fingerprint", "-sha1"],
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    raw_fingerprint, e = p.communicate()
-
-    if p.poll() != 0:
-        raise Exception("Unable to get certificate thumbprint.")
-    thumbprint = raw_fingerprint.split("SHA1 Fingerprint=")[1].replace(":", "").strip()
-
-    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-issuer"],
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    raw_issuer, e = p.communicate()
-
-    if p.poll() != 0:
-        raise Exception("Unable to get certificate issuer.")
-    issuer = raw_issuer.split("issuer= ")[1].strip()
-
-    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-subject"],
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    raw_subject, e = p.communicate()
-
-    if p.poll() != 0:
-        raise Exception("Unable to get certificate subject.")
-    subject = raw_subject.split("subject= ")[1].strip()
-
-    return issuer, subject, thumbprint
 
 
 def get_headers_and_payload(worker_group_name, certificate_path):
@@ -61,7 +29,7 @@ def get_headers_and_payload(worker_group_name, certificate_path):
     Returns:
         A tuple containing a dictionary for the request headers and a dictionary for the payload (request body).
     """
-    issuer, subject, thumbprint = get_cert_info(certificate_path)
+    issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
     headers = {'ProtocolVersion': "2.0",
                'x-ms-date': datetime.datetime.utcnow().isoformat() + "0-00:00",
                "Content-Type": "application/json"}
@@ -268,7 +236,7 @@ def main(argv):
             else:
                 registration_response = register(registration_endpoint, worker_group_name, machine_id, oms_cert_path,
                                                  oms_key_path, test_mode)
-                cert_info = get_cert_info(oms_cert_path)
+                cert_info = linuxutil.get_cert_info(oms_cert_path)
             create_worker_configuration_file(working_directory, registration_response["jobRuntimeDataServiceUri"],
                                              registration_endpoint, workspace_id, registration_response["AccountId"],
                                              worker_group_name, machine_id, oms_cert_path, oms_key_path,

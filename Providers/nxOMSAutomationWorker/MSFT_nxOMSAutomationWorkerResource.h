@@ -19,7 +19,7 @@
 ** MSFT_nxOMSAutomationWorkerResource [MSFT_nxOMSAutomationWorkerResource]
 **
 ** Keys:
-**    WorkspaceId
+**    ResourceSettings
 **
 **==============================================================================
 */
@@ -29,9 +29,7 @@ typedef struct _MSFT_nxOMSAutomationWorkerResource /* extends OMI_BaseResource *
     MI_Instance __instance;
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSAutomationWorkerResource properties */
-    /*KEY*/ MI_ConstStringField WorkspaceId;
-    MI_ConstBooleanField Enabled;
-    MI_ConstStringField AzureDnsAgentSvcZone;
+    /*KEY*/ MI_ConstStringField ResourceSettings;
 }
 MSFT_nxOMSAutomationWorkerResource;
 
@@ -123,7 +121,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Post(
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Set_WorkspaceId(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Set_ResourceSettings(
     _Inout_ MSFT_nxOMSAutomationWorkerResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -135,7 +133,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Set_WorkspaceId(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_SetPtr_WorkspaceId(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_SetPtr_ResourceSettings(
     _Inout_ MSFT_nxOMSAutomationWorkerResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -147,60 +145,12 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_SetPtr_WorkspaceI
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Clear_WorkspaceId(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Clear_ResourceSettings(
     _Inout_ MSFT_nxOMSAutomationWorkerResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Set_Enabled(
-    _Inout_ MSFT_nxOMSAutomationWorkerResource* self,
-    _In_ MI_Boolean x)
-{
-    ((MI_BooleanField*)&self->Enabled)->value = x;
-    ((MI_BooleanField*)&self->Enabled)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Clear_Enabled(
-    _Inout_ MSFT_nxOMSAutomationWorkerResource* self)
-{
-    memset((void*)&self->Enabled, 0, sizeof(self->Enabled));
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Set_AzureDnsAgentSvcZone(
-    _Inout_ MSFT_nxOMSAutomationWorkerResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        2,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_SetPtr_AzureDnsAgentSvcZone(
-    _Inout_ MSFT_nxOMSAutomationWorkerResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        2,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAutomationWorkerResource_Clear_AzureDnsAgentSvcZone(
-    _Inout_ MSFT_nxOMSAutomationWorkerResource* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        2);
 }
 
 /*
