@@ -18,33 +18,6 @@ protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
-class IOMSAgent:
-    def restart_oms_agent(self):
-        pass
-
-class OMSAgentUtil(IOMSAgent):
-    def restart_oms_agent(self):
-        if os.system('sudo /opt/microsoft/omsagent/bin/service_control restart') == 0:
-            return True
-        else:
-            LG().Log('ERROR', 'Error restarting omsagent.')
-            return False
-
-class INPMAgent:
-    def binary_setcap(self):
-        pass
-
-class NPMAgentUtil(IOMSAgent):
-    def binary_setcap(self, binaryPath):
-        if os.path.exists(AGENT_SCRIPT_PATH) and os.system('sudo %s %s' %(AGENT_SCRIPT_PATH, binaryPath)) == 0:
-            return True
-        else:
-            LG().Log('ERROR', 'Error setting capabilities to npmd agent binary.')
-            return False
-
-global show_mof
-show_mof = False
-
 # Paths
 CONFIG_PATH = '/etc/opt/microsoft/omsagent/conf/'
 SERVER_ADDRESS = '/var/opt/microsoft/omsagent/run/npmdagent.sock'
@@ -65,8 +38,57 @@ AGENT_SCRIPT_PATH = '/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh'
 X64 = '64bit'
 def enum(**enums):
     return type('Enum', (), enums)
-Commands = enum(RestartNPM = 'RestartNPM', StartNPM = 'StartNPM', StopNPM = 'StopNPM', Config = 'Config', Purge = 'Purge')
+Commands = enum(LogNPM = 'ErrorLog', StartNPM = 'StartNPM', StopNPM = 'StopNPM', Config = 'Config', Purge = 'Purge')
+LogType  = enum(Error = 'ERROR', Info = 'INFO')
 
+class INPMDiagnosticLog:
+    def log(self):
+        pass
+
+class NPMDiagnosticLogUtil(INPMDiagnosticLog):
+    def log(self, logType, logString):
+        # Create a UDS socket
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+        try:
+            # Connect the socket to the port where the server is listening
+            sock.connect(SERVER_ADDRESS)
+            # Send data
+            message = Commands.LogNPM + ':' + '[' + logType + ']' + logString
+            sock.send(message.encode('utf-8'))
+        except Exception as msg:
+            LG().Log(LogType.Error, str(msg))
+        finally:
+            sock.close()
+
+LOG_ACTION = NPMDiagnosticLogUtil()
+
+class IOMSAgent:
+    def restart_oms_agent(self):
+        pass
+
+class OMSAgentUtil(IOMSAgent):
+    def restart_oms_agent(self):
+        if os.system('sudo /opt/microsoft/omsagent/bin/service_control restart') == 0:
+            return True
+        else:
+            LOG_ACTION.log(LogType.Error, 'Error restarting omsagent.')
+            return False
+
+class INPMAgent:
+    def binary_setcap(self):
+        pass
+
+class NPMAgentUtil(IOMSAgent):
+    def binary_setcap(self, binaryPath):
+        if os.path.exists(AGENT_SCRIPT_PATH) and os.system('sudo %s %s' %(AGENT_SCRIPT_PATH, binaryPath)) == 0:
+            return True
+        else:
+            LOG_ACTION.log(LogType.Error, 'Error setting capabilities to npmd agent binary.')
+            return False
+
+global show_mof
+show_mof = False
 
 OMS_ACTION = OMSAgentUtil()
 NPM_ACTION = NPMAgentUtil()
@@ -105,7 +127,7 @@ def Set_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     recvdContentChecksum = hashlib.md5(Contents.encode('utf-8')).hexdigest().upper()
     if recvdContentChecksum != ContentChecksum:
         # data is corrupt do not proceed further
-        LG().Log('ERROR', 'Content received did not match checksum, exiting Set')
+        LOG_ACTION.log(LogType.Error, 'Content received did not match checksum, exiting Set')
         return [-1]
     (ConfigType, ConfigID, Contents, Ensure, ContentChecksum) = init_vars(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = Set(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
@@ -116,7 +138,7 @@ def Test_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     recvdContentChecksum = hashlib.md5(Contents.encode('utf-8')).hexdigest().upper()
     if recvdContentChecksum != ContentChecksum:
         # data is corrupt do not proceed further
-        LG().Log('ERROR', 'Content received did not match checksum, exiting Test')
+        LOG_ACTION.log(LogType.Error, 'Content received did not match checksum, exiting Test')
         return [0]
     (ConfigType, ConfigID, Contents, Ensure, ContentChecksum) = init_vars(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = Test(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
@@ -164,7 +186,7 @@ def ShowMof(op, ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     mof += '}\n'
     f = open('./test_mofs.log', 'a')
     Print(mof, file=f)
-    LG().Log('INFO', mof)
+    LG().Log(LogType.Info, mof)
     f.close()
 
 
@@ -172,11 +194,11 @@ def Set(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     ShowMof('SET', ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = 0
     if ConfigType != 'UpdatedAgentConfig':
-        LG().Log('ERROR', 'Config type did not match, exiting set')
+        LOG_ACTION.log(LogType.Error, 'Config type did not match, exiting set')
         return [-1]
     if Ensure == 'Absent':
         if os.path.exists(AGENT_RESOURCE_VERSION_PATH):
-            LG().Log('INFO', 'Ensure is absent, but resource is present, purging')
+            LG().Log(LogType.Info, 'Ensure is absent, but resource is present, purging')
             success = PurgeSolution()
             if not success:
                 retval = -1
@@ -195,14 +217,14 @@ def Test(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     ShowMof('TEST', ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = 0
     if not os.path.exists(AGENT_SCRIPT_PATH):
-        LG().Log('ERROR', 'npmd set cap script does not exist, exiting test')
+        LG().Log(LogType.Error, 'npmd set cap script does not exist, exiting test')
         return [retval]
     if ConfigType != 'UpdatedAgentConfig':
-        LG().Log('ERROR', 'Config type did not match, exiting test')
+        LOG_ACTION.log(LogType.Error, 'Config type did not match, exiting test')
         return [retval]
     if Ensure == 'Absent':
         if os.path.exists(AGENT_RESOURCE_VERSION_PATH):
-            LG().Log('INFO', 'Ensure is absent, resource is present on the agent, set will purge')
+            LG().Log(LogType.Info, 'Ensure is absent, resource is present on the agent, set will purge')
             retval = -1
         return [retval]
     
@@ -221,7 +243,7 @@ def Print(s, file=sys.stdout):
     file.write(s + '\n')
 
 # Compare resource version in DSC and agent machine
-# Returns 
+# Returns
 #   0 if version is same
 #   dsc version number if there is a mismatch or agent config not present
 def TestResourceVersion():
@@ -241,7 +263,7 @@ def TestConfigUpdate(Contents):
     retval = 0
     destFileFullPath = CONFIG_PATH.__add__(DEST_FILE_NAME)
     if not os.path.exists(CONFIG_PATH):
-        LG().Log('ERROR', 'CONFIG_PATH does not exist')
+        LOG_ACTION.log(LogType.Error, 'CONFIG_PATH does not exist')
         retval = 0
     elif not os.path.exists(destFileFullPath):
         # Configuration does not exist, fail
@@ -258,12 +280,12 @@ def SetConfigUpdate(Contents):
 
     # Update config after checking if directory exists
     if not os.path.exists(CONFIG_PATH):
-        LG().Log('ERROR', 'CONFIG_PATH does not exist')
+        LOG_ACTION.log(LogType.Error, 'CONFIG_PATH does not exist')
         retval = -1
     else:
         retval = WriteFile(destFileFullPath, Contents)
         if retval == 0 and os.path.exists(AGENT_RESOURCE_VERSION_PATH): #notify server only if plugin is present
-            LG().Log('INFO', 'Updated the file, going to notify server')
+            LG().Log(LogType.Info, 'Updated the file, going to notify server')
             retval = NotifyServer(Commands.Config)
     return retval
 
@@ -324,7 +346,7 @@ def CopyAllFiles(src, dest):
             if (os.path.isfile(full_file_name)):
                 shutil.copy(full_file_name, dest)
     except:
-        LG().Log('ERROR', 'copy_all_files failed for src: ' + src + ' dest: ' + dest)
+        LOG_ACTION.log(LogType.Error, 'copy_all_files failed for src: ' + src + ' dest: ' + dest)
         return False
     return True
 
@@ -337,7 +359,7 @@ def DeleteAllFiles(src, dest):
             if (os.path.isfile(full_file_name)):
                 os.remove(full_file_name)
     except:
-        LG().Log('ERROR', 'delete_all_files failed for src: ' + src + ' dest: ' + dest)
+        LOG_ACTION.log(LogType.Error, 'delete_all_files failed for src: ' + src + ' dest: ' + dest)
         return False
     return True
 
@@ -349,7 +371,7 @@ def PurgeSolution():
     try:
         os.remove(AGENT_RESOURCE_VERSION_PATH)
     except:
-        LG().Log('ERROR', 'failed to remove version file')
+        LOG_ACTION.log(LogType.Error, 'failed to remove version file')
         retval = False
 
     # notify ruby plugin to purge agent
@@ -362,7 +384,7 @@ def NotifyServer(command):
     retval = 0
     # Create a UDS socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    LG().Log('INFO', 'connecting to ' +  SERVER_ADDRESS)
+    LG().Log(LogType.Info, 'connecting to ' +  SERVER_ADDRESS)
 
     try:
         # Connect the socket to the port where the server is listening
@@ -370,13 +392,13 @@ def NotifyServer(command):
 
         # Send data
         message = command.encode('utf-8')
-        LG().Log('INFO', 'sending ' + message.decode('utf-8'))
+        LG().Log(LogType.Info, 'sending ' + message.decode('utf-8'))
         sock.sendall(message)
     except Exception as msg:
-        LG().Log('ERROR', str(msg))
+        LG().Log(LogType.Error, str(msg))
         retval = -1
     finally:
-        LG().Log('INFO', 'closing socket')
+        LG().Log(LogType.Info, 'closing socket')
         sock.close()
     return retval
 
@@ -398,6 +420,6 @@ def ReadFile(path):
             content = dFile.read()
     except IOError as error:
         errno, strerror = error.args
-        print ('Exception opening file ' + path + ' Error Code: ' + str(errno) + ' Error: ' + format(error) + strerror)        
+        print ('Exception opening file ' + path + ' Error Code: ' + str(errno) + ' Error: ' + format(error) + strerror)
     return content
 
