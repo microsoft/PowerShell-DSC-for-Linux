@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSSudoCustomLogResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSSudoCustomLogResource:OMI_BaseResource

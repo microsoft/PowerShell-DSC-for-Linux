@@ -1,0 +1,293 @@
+#!/usr/bin/env python2
+#
+# Copyright (C) Microsoft Corporation, All rights reserved.
+
+import os
+import random
+import subprocess
+import sys
+
+# workaround when unexpected environment variables are present
+# sets COLUMNS wide enough so that output of ps does not get truncated
+if 'COLUMNS' in os.environ:
+    os.environ['COLUMNS'] = "3000"
+
+# pwd will not be present on windows
+# not using if clause in case some os other than posix has support for pwd
+try:
+    import pwd
+    import grp
+except:
+    pass
+
+PS_FJH_HEADER = ["UID", "PID", "PPID", "PGID", "SID", "C", "STIME", "TTY", "TIME", "CMD"]
+PY_MAJOR_VERSION = 0
+PY_MINOR_VERSION = 1
+PY_MICRO_VERSION = 2
+
+def posix_only(func):
+    """Decorator to prevent linux specific methods to run on other OS."""
+    if is_posix_host() is False:
+        print func.__name__ + " isn't supported on " + str(os.name) + " os."
+        return bypass
+    else:
+        return func
+
+
+def bypass():
+    pass
+
+
+def format_process_entries_to_list(process_list):
+    """Formats a list of raw list of string to process model objects.
+
+    Example input :
+            ["UID        PID  PPID  PGID   SID  C STIME TTY          TIME CMD",
+             "oaastest 22448 22445 22448 22448  0 Mar08 pts/0    00:00:03 bash",
+             "oaastest  2509 22448  2509 22448  0 06:14 pts/0    00:00:00 ps -fjH"]
+
+    Returns:
+        A list of ProcessModel objects.
+
+    Note : The header row will be discarded.
+    """
+    formatted_entries = []
+    for entry in process_list:
+        sanitized_entry = filter(None, entry.split(" "))
+        if len(sanitized_entry) < 1 or sanitized_entry == PS_FJH_HEADER:
+            continue
+        process = ProcessModel(sanitized_entry)
+        formatted_entries.append(process)
+    return formatted_entries
+
+
+def is_posix_host():
+    """Returns the True if the host is posix else False.
+
+    Returns:
+        bool, True if the host is posix else False.
+    """
+    return os.name.lower() == "posix"
+
+
+@posix_only
+def generate_uuid():
+    """ UUID module isn't available in python 2.4. Since activity id are only required for tracing this is enough.
+
+    Returns: string, an activity id which has a GUID format
+    """
+    proc = subprocess.Popen(["cat", "/proc/sys/kernel/random/uuid"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    uuid, error = proc.communicate()
+    if proc.poll() != 0:
+        raise Exception("Unable to get uuid from /proc/sys/kernel/random/uuid : " + str(error))
+    return uuid.strip()
+
+
+@posix_only
+def get_current_username():
+    """Returns the username owning the current process.
+
+    Returns:
+        string, representing the username (i.e myusername)
+    """
+    user_id = os.getuid()
+    return pwd.getpwuid(user_id).pw_name
+
+
+@posix_only
+def is_existing_group(group_name):
+    """Asserts the group exists on the host.
+
+    Returns:
+        bool, True if group exists on the box, False otherwise
+    """
+    try:
+        grp.getgrnam(group_name)
+        return True
+    except KeyError:
+        return False
+
+
+@posix_only
+def is_existing_user(username):
+    """Asserts the user exists on the host.
+
+    Returns:
+        bool, True if user exists on the box, False otherwise
+    """
+    try:
+        pwd.getpwnam(username)
+        return True
+    except KeyError:
+        return False
+
+
+@posix_only
+def get_current_user_processes():
+    """Gets the list of process of the current user.
+
+    Returns:
+        A list of ProcessModel objects.
+    """
+    current_username = get_current_username()
+    proc = subprocess.Popen(["ps", "-fjH", "-u", current_username], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = proc.communicate()
+    if proc.poll() != 0:
+        raise Exception("Unable to get processes : " + str(error))
+    formatted_entries = format_process_entries_to_list(output.split("\n"))
+    return formatted_entries
+
+
+@posix_only
+def get_lsb_release():
+    """Gets the os info through lsb_release.
+
+    Returns:
+        (distributor_id, description, release, codename)
+    """
+    proc = subprocess.Popen(["lsb_release", "-i", "-d", "-r", "-c"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = proc.communicate()
+    if proc.poll() != 0:
+        raise Exception("Unable to get lsb_release info. Error : " + str(error))
+
+    formatted_output = [entry.split("\t") for entry in output.strip().split("\n")]
+    distributor_id = formatted_output[0][1]
+    description = formatted_output[1][1]
+    release = formatted_output[2][1]
+    codename = formatted_output[3][1]
+    return distributor_id, description, release, codename
+
+
+@posix_only
+def kill_current_user_process(pid):
+    """Kills the process specified by the pid argument.
+
+    Note:
+        The specified pid has to be own by the same user owning the current process.
+    """
+    subprocess.call(["kill", "-9", str(pid)])
+
+
+@posix_only
+def get_cert_info(certificate_path):
+    """Gets certificate information by invoking OpenSSL (OMS agent dependency).
+
+    Returns:
+        A tuple containing the certificate's issuer, subject and thumbprint.
+    """
+    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-fingerprint", "-sha1"],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    raw_fingerprint, e = p.communicate()
+
+    if p.poll() != 0:
+        raise Exception("Unable to get certificate thumbprint.")
+    thumbprint = raw_fingerprint.split("SHA1 Fingerprint=")[1].replace(":", "").strip()
+
+    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-issuer"],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    raw_issuer, e = p.communicate()
+
+    if p.poll() != 0:
+        raise Exception("Unable to get certificate issuer.")
+    issuer = raw_issuer.split("issuer= ")[1].strip()
+
+    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-subject"],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    raw_subject, e = p.communicate()
+
+    if p.poll() != 0:
+        raise Exception("Unable to get certificate subject.")
+    subject = raw_subject.split("subject= ")[1].strip()
+
+    return issuer, subject, thumbprint
+
+
+@posix_only
+def fork_and_exit_parent():
+    """Forks and kills the parent process."""
+    try:
+        pid = os.fork()
+        if pid > 0:
+            print "parent process " + str(os.getpid()) + " exiting"
+            sys.exit(0)
+    except OSError, e:
+        print "fork failed. " + str(e.message)
+        sys.exit(1)
+
+
+@posix_only
+def daemonize():
+    """Daemonize the current process by double forking and closing all file descriptors
+
+    Note:
+        One of the fork fails, the process will exit
+    """
+    # fork first child and exist parent
+    fork_and_exit_parent()
+
+    # decouple from parent environment
+    os.setsid()
+
+    process_std_fd = [sys.stdin.fileno(), sys.stdout.fileno(), sys.stderr.fileno()]
+    for fd in process_std_fd:
+        try:
+            os.close(fd)
+        except OSError:
+            # fd is already closed
+            pass
+
+    fd_devnull = os.open(os.devnull, os.O_RDWR)
+    for fd in process_std_fd:
+        try:
+            os.dup2(fd_devnull, fd)
+        except OSError:
+            pass
+
+    # fork second child and exit parent
+    fork_and_exit_parent()
+
+
+@posix_only
+def popen_communicate(command, shell=False):
+    """Issues a process open followed by a communicate call.
+
+    Args:
+        command : array, the process command
+        shell :   shell, if true the specified command will be executed through the shell
+
+    Returns:
+        The process, output and error tuple
+    """
+    process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = process.communicate()
+    return process, output, error
+
+
+class ProcessModel:
+    def __init__(self, process_info):
+        """FORMAT : ['UID', 'PID', 'PPID', 'PGID', 'SID', 'C', 'STIME', 'TTY', 'TIME', 'CMD']"""
+        self.uid = process_info[0]
+        self.pid = int(process_info[1])
+        self.ppid = int(process_info[2])
+        self.pgid = int(process_info[3])
+        self.sid = int(process_info[4])
+        self.c = process_info[5]
+        self.stime = process_info[6]
+        self.tty = process_info[7]
+        self.time = process_info[8]
+        self.cmd = " ".join(process_info[9:])
+
+    def __str__(self):
+        return " ".join([self.uid,
+                         self.pid,
+                         self.ppid,
+                         self.pgid,
+                         self.sid,
+                         self.c,
+                         self.stime,
+                         self.tty,
+                         self.time,
+                         self.cmd])

@@ -17,6 +17,7 @@ import socket
 import hashlib
 import cPickle as pickle
 from contextlib import contextmanager
+import time
 
 @contextmanager
 def opened_w_error(filename, mode="r"):
@@ -1662,6 +1663,10 @@ if nxNPMD != None:
             self.ensure_absent = 'Absent'
             self.out_file = nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME)
             self.server_address = nxNPMD.SERVER_ADDRESS
+            self.server_read_data = ''
+            self.server_bound = False
+            self.server_read_retries = 5
+            self.server_bound_retries = 5
     
             x64binaryPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_X64_AGENT_PATH)
             x86binaryPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_X86_AGENT_PATH)
@@ -1749,6 +1754,8 @@ if nxNPMD != None:
                 if os.path.exists(self.server_address):
                     raise
     
+            # Reset the socket read data
+            self.server_read_data = ''
             # Create a UDS socket
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     
@@ -1756,7 +1763,8 @@ if nxNPMD != None:
             sock.bind(self.server_address)
     
             # Listen for incoming connections
-            sock.listen(1)
+            sock.listen(socket.SOMAXCONN)
+            self.server_bound = True
     
             while True:
                 connection, client_address = sock.accept()
@@ -1766,6 +1774,8 @@ if nxNPMD != None:
                         data = connection.recv(100)
                         if not data:
                             break
+                        else:
+                            self.server_read_data += data
                 finally:
                     # Clean up the connection
                     connection.close()
@@ -1779,6 +1789,11 @@ if nxNPMD != None:
             content = self.readFile(nxNPMD.PLUGIN_CONF_PATH.__add__('config'))
             self.assertTrue(content == text, 'Contents written to file do not match')
     
+        def verifySocketRead(self, text):
+            if text in self.server_read_data:
+                return True
+            return False
+    
         def updateFileContents(self, text):
             with open(nxNPMD.AGENT_BINARY_PATH.__add__('binary'), 'w+') as dFile:
                 dFile.write(text)
@@ -1787,6 +1802,34 @@ if nxNPMD != None:
             with open(nxNPMD.PLUGIN_CONF_PATH.__add__('config'), 'w+') as dFile:
                 dFile.write(text)
     
+        def testSendDiagnosticLog(self):
+            #check that the UDS server is bound
+            retry = 0
+            while not self.server_bound and retry < self.server_bound_retries:
+                time.sleep(1)
+                retry += 1
+            self.assertTrue(retry <= self.server_bound_retries,
+                    'Server at ' + self.server_address + ' should be bound')
+
+            #create the diagnostic logging util object
+            DLOG = nxNPMD.NPMDiagnosticLogUtil()
+            testStr = 'This is a test log string'
+
+            #emit the log
+            DLOG.log(nxNPMD.LogType.Error, testStr)
+
+            #check that some log has arrived
+            retry = 0
+            while len(self.server_read_data) == 0 and retry < self.server_read_retries:
+                time.sleep(1)
+                retry += 1
+            self.assertTrue(retry <= self.server_read_retries,
+                    'Some data should be emitted to the server')
+
+            #check that test log is part of emit
+            self.assertTrue(self.verifySocketRead(testStr),
+                    'Given test string should have been emitted to UDS server')
+   
         def testGetUpdateAgentConfig(self):
             r=nxNPMD.Get_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
             print r

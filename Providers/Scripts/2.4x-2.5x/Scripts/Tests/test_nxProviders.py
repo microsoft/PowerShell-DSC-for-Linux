@@ -23,6 +23,7 @@ import base64
 import socket
 import thread
 import signal
+import filecmp
 import shutil
 
 def opened_w_error(filename, mode="r"):
@@ -172,6 +173,7 @@ nxMySqlDatabase=imp.load_source('nxMySqlDatabase', './Scripts/nxMySqlDatabase.py
 nxOMSSyslog=imp.load_source('nxOMSSyslog','./Scripts/nxOMSSyslog.py')
 nxOMSPerfCounter=imp.load_source('nxOMSPerfCounter','./Scripts/nxOMSPerfCounter.py')
 nxOMSCustomLog=imp.load_source('nxOMSCustomLog','./Scripts/nxOMSCustomLog.py')
+nxOMSSudoCustomLog=imp.load_source('nxOMSSudoCustomLog','./Scripts/nxOMSSudoCustomLog.py')
 nxOMSKeyMgmt=imp.load_source('nxOMSKeyMgmt','./Scripts/nxOMSKeyMgmt.py')
 nxFileInventory=imp.load_source('nxFileInventory', './Scripts/nxFileInventory.py')
 nxOMSGenerateInventoryMof=imp.load_source('nxOMSGenerateInventoryMof', './Scripts/nxOMSGenerateInventoryMof.py')
@@ -3583,7 +3585,109 @@ class nxOMSCustomLogTestCases(unittest2.TestCase):
         print 'GET '+ repr(g)
         self.assertTrue(check_values(g, m)  ==  True, \
         'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+   
+class nxOMSSudoCustomLogTestCases(unittest2.TestCase):
+    """
+    Test Case for nxOMSSudoCustomLog.py
+    """
+
+    original_conf_path = None
+    mock_conf_path = './ut_sudocustomlog.conf'
+
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        self.original_conf_path = nxOMSSudoCustomLog.CONF_PATH
+        nxOMSSudoCustomLog.CONF_PATH = self.mock_conf_path
+        os.system('rm -rf %s' %self.mock_conf_path)
+        
+        nxOMSSudoCustomLog.RESOURCE_DIR = '/var/tmp/omsconfig_CL/modules/nxOMSSudoCustomLog/'
+        nxOMSSudoCustomLog.RESOURCE_PLUGIN_DIR = nxOMSSudoCustomLog.RESOURCE_DIR + 'Plugin/'
+        nxOMSSudoCustomLog.PLUGIN = nxOMSSudoCustomLog.RESOURCE_PLUGIN_DIR + 'in_sudo_tail.rb'
+        nxOMSSudoCustomLog.SCRIPT = nxOMSSudoCustomLog.RESOURCE_PLUGIN_DIR + 'tailfilereader.rb'
+        nxOMSSudoCustomLog.AGENT_PLUGIN_DIR = '/var/tmp/omsagent_CL/plugin/'
+      
+        os.system('rm -rf /var/tmp/omsconfig_CL /var/tmp/omsagent_CL;') 
+
+        os.system('mkdir -p ' + nxOMSSudoCustomLog.RESOURCE_PLUGIN_DIR + ';' 
+              'mkdir -p ' + nxOMSSudoCustomLog.AGENT_PLUGIN_DIR + ';' 
+              'echo sudo_tail plugin >> ' + nxOMSSudoCustomLog.PLUGIN + ';' 
+              'echo tailfilereader script >> ' + nxOMSSudoCustomLog.SCRIPT + ';'
+        )
+
+    def tearDown(self):
+        """
+        Remove test resources
+        """
+        nxOMSSudoCustomLog.CONF_PATH = self.original_conf_path
+        os.system('rm -rf /var/tmp/omsconfig_CL /var/tmp/omsagent_CL')
+
+    def make_MI(self, retval, Name, Ensure, EnableCustomLogConfiguration, CustomLogObjects):
+        d = dict()
+        d['Name'] = nxOMSSudoCustomLog.protocol.MI_String(Name)
+        d['Ensure'] = nxOMSSudoCustomLog.protocol.MI_String(Ensure) 
+        d['EnableCustomLogConfiguration'] = nxOMSSudoCustomLog.protocol.MI_Boolean(EnableCustomLogConfiguration)
+        if CustomLogObjects is None:
+            CustomLogObjects = []
+        for customlog in CustomLogObjects:
+            customlog['LogName'] = nxOMSSudoCustomLog.protocol.MI_String(customlog['LogName'])
+            if customlog['FilePath'] is not None and len(customlog['FilePath']):
+                customlog['FilePath'] = nxOMSSudoCustomLog.protocol.MI_StringA(customlog['FilePath'])
+        d['CustomLogObjects'] = nxOMSSudoCustomLog.protocol.MI_InstanceA(CustomLogObjects)
+        return retval, d
     
+    def testSetOMSSudoCustomLog_add(self):
+        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'Ensure': 'Present', 'CustomLogObjects': [{ 'LogName': 'CUSTOM_LOG_BLOB.LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'CUSTOM_LOG_BLOB.LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+        for customlog in d['CustomLogObjects']:
+            customlog['LogName'] = nxOMSSudoCustomLog.protocol.MI_String(customlog['LogName'])
+            customlog['FilePath'] = nxOMSSudoCustomLog.protocol.MI_StringA(customlog['FilePath'])
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0], 'Set('+repr(d)+') should return == [0]')
+
+    def testGetOMSSudoCustomLog_add(self):
+        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'Ensure': 'Present', 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+        for customlog in d['CustomLogObjects']:
+            customlog['LogName'] = nxOMSSudoCustomLog.protocol.MI_String(customlog['LogName'])
+            customlog['FilePath'] = nxOMSSudoCustomLog.protocol.MI_StringA(customlog['FilePath'])
+
+        e = copy.deepcopy(d)
+        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'Ensure': 'Present', 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/logs/*.log', '/tmp/test1.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+         
+        m = self.make_MI(0,**t)
+        g = nxOMSSudoCustomLog.Get_Marshall(**e)
+        self.assertTrue(check_values(g, m)  ==  True, 'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+    def testSetOMSSudoCustomLog_del(self):
+        d = { 'Name': 'SimpleCustomLog', 'Ensure': 'Present', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetOMSSudoCustomLog_default(self):
+        d = { 'Name': 'SimpleCustomLog', 'Ensure': 'Absent' }
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+
+        t = { 'Name': 'SimpleCustomLog', 'Ensure': 'Absent', 'EnableCustomLogConfiguration': False, 'CustomLogObjects': None }
+        m=self.make_MI(0,**t)
+        g=nxOMSSudoCustomLog.Get_Marshall(**d)
+        print 'GET '+ repr(g)
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+    def testGetOMSSudoCustomLog_del(self):
+        d = { 'Name': 'SimpleCustomLog', 'Ensure': 'Present', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        t = { 'Name': 'SimpleCustomLog', 'Ensure': 'Present', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        m=self.make_MI(0,**t)
+        g=nxOMSSudoCustomLog.Get_Marshall(**d)
+        print 'GET '+ repr(g)
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+nxOMSSudoCustomLogTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
+                      0,'Skipping nxOMSSudoCustomLogTestCases.   omsagent is not running.')(nxOMSSudoCustomLogTestCases)
+ 
 class nxOMSGenerateInventoryMofTestCases(unittest2.TestCase):
     """
     Test Case for nxOMSGenerateInventoryMof.py
@@ -4832,280 +4936,199 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
     """
     Test Case for nxOMSAutomationWorker.py
     """
-    workspaceId = 'cfd4ef08-4011-428a-8947-0c2f4605980f'
+    workspace_id = 'cfd4ef08-4011-428a-8947-0c2f4605980f'
     agent_id = 'cfd4ef08-4011-428a-8947-0c2f4605980g'
     AzureDnsAgentSvcZone = 'agentsvc.azure-automation.net'
-    tempWorkingDir = os.path.join(os.getcwd(), 'Scripts/Tests/temp')
+    temp_run_dir = os.path.join(os.getcwd(), 'Scripts/Tests/temp')
     dummyFileLocation = os.path.join(os.getcwd(), 'Scripts/Tests/dummy_nxOMSAutomationWorker_files')
-    nxOMSAutomationWorker.WORKER_STATE_DIR = tempWorkingDir
-    nxOMSAutomationWorker.WORKER_CONF_FILE_PATH = os.path.join(tempWorkingDir, 'worker.conf')
-    nxOMSAutomationWorker.WORKER_STATE_FILE_PATH = os.path.join(tempWorkingDir, 'state.conf')
-    nxOMSAutomationWorker.REGISTRATION_FILE_PATH = os.path.join(os.getcwd(),
-        '../../nxOMSAutomationWorker/automationworker/scripts/register_oms.py')
-    nxOMSAutomationWorker.HYBRID_WORKER_START_PATH = os.path.join(dummyFileLocation, 'main.py')
+
+    nxOMSAutomationWorker.WORKER_CONF_DIR = temp_run_dir
+    nxOMSAutomationWorker.OMS_CONF_FILE_PATH = os.path.join(temp_run_dir, "oms.conf")
+    nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH = os.path.join(temp_run_dir, "worker.conf")
+    nxOMSAutomationWorker.WORKER_MANAGER_START_PATH = os.path.join(dummyFileLocation, 'main.py')
     nxOMSAutomationWorker.DSC_RESOURCE_VERSION_FILE = os.path.join(dummyFileLocation, 'VERSION')
-    nxOMSAutomationWorker.LOCAL_LOG_LOCATION = os.path.join(tempWorkingDir, 'nxOMSAutomationWorker.log')
+    nxOMSAutomationWorker.LOCAL_LOG_LOCATION = os.path.join(temp_run_dir, 'nxOMSAutomationWorker.log')
+    nxOMSAutomationWorker.LOG_LOCALLY = True
     nxOMSAutomationWorker.OMS_ADMIN_CONFIG_FILE = os.path.join(dummyFileLocation, 'omsadmin.conf')
+    nxOMSAutomationWorker.DIY_WORKER_CONF_PATH = nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH
+
+    automation_user = "nxautomation"
+
+    def create_nxautomation_user_and_group(self):
+        try:
+            grp.getgrnam(self.automation_user)
+        except KeyError:
+            # group nxautomation not found, create one
+            subprocess.call(["groupadd", "-r", self.automation_user])
+        try:
+            pwd.getpwnam(self.automation_user)
+        except KeyError:
+            # user nxautomation does not exist, create one
+            if subprocess.call(
+                    ["useradd", "-r", "-c", "nxOMSAutomation", "-d", "/var/opt/microsoft/omsagent/run", "-g",
+                     self.automation_user, "-s", "/bin/bash", self.automation_user]) != 0:
+                raise OSError("could not create %s user" % self.automation_user)
+            if subprocess.call(
+                    ["/usr/sbin/usermod", "-g", self.automation_user, "-a", "-G", "omsagent", "-G", "omiusers",
+                     self.automation_user]) != 0:
+                raise OSError("could not add %s to groups omsaget and omiusers", self.automation_user)
+            if subprocess.call(["chmod", "-R", "0777", self.dummyFileLocation]) != 0:
+                raise OSError("could not change permissions for dummy file")
+
+    def remove_nxautomation_user_and_group(self):
+        subprocess.call(["userdel", self.automation_user])
 
     def setUp(self):
         """
         Setup Test resources
         """
-        if not os.path.isdir(self.tempWorkingDir):
-            os.mkdir(self.tempWorkingDir)
+        if not os.path.isdir(self.temp_run_dir):
+            os.mkdir(self.temp_run_dir, 0777)
+        # create nxautomation user on the machine
+        self.create_nxautomation_user_and_group()
+        subprocess.call(["sudo", "pkill", "-u", self.automation_user])
+        shutil.copyfile(os.path.join(self.dummyFileLocation, "worker.conf"),
+                        nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH)
 
     def tearDown(self):
         """
         Remove test resoruces
         """
-        self.kill_all_workers()
-        shutil.rmtree(self.tempWorkingDir)
+        subprocess.call(["sudo", "pkill", "-u", self.automation_user])
+        shutil.rmtree(self.temp_run_dir, ignore_errors=True)
+        self.remove_nxautomation_user_and_group()
 
-    def find_all_worker_processes(self):
-        """
-        Finds all the process that were called with 'python' as the command and <workspaceId> in its arguments
-        These are sufficient conditions for finding all the worker processes that were started by this test instance
-        :return: list[int] of the PID's that matched the above condition
-        """
-        retval = []
-        pc = subprocess.Popen(['ps', '-o', 'pid,args', '-C', 'python'], stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-        result, error = pc.communicate()
-        if pc.returncode != 0:
-            return
-        splitResults = result.split("\n")
-        for s in splitResults:
-            if s.__contains__(self.workspaceId):
-                striped = str.strip(s)
-                try:
-                    i = int(striped.split(' ')[0])
-                    retval.append(i)
-                except:
-                    pass
-        return retval
+    def test_can_start_verify_kill_worker_manager(self):
+        shutil.copyfile(os.path.join(self.dummyFileLocation, "oms_conf_auto_manual.conf"),
+                        nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
+        nxOMSAutomationWorker.start_worker_manager_process(self.workspace_id)
+        pid, version = nxOMSAutomationWorker.get_worker_manager_pid_and_version(self.workspace_id)
+        self.assertTrue(nxOMSAutomationWorker.is_worker_manager_running_latest_version(self.workspace_id))
+        self.assertTrue(pid > 0)
+        self.assertTrue(version == "1.4")
 
-    def kill_all_workers(self):
-        pids = self.find_all_worker_processes()
-        if pids is None:
-            return
-        for pid in pids:
-            os.kill(pid, signal.SIGTERM)
+        nxOMSAutomationWorker.kill_worker_manager(self.workspace_id)
+        self.assertFalse(nxOMSAutomationWorker.is_worker_manager_running_latest_version(self.workspace_id))
+        pid, version = nxOMSAutomationWorker.get_worker_manager_pid_and_version(self.workspace_id)
+        self.assertTrue(pid == -1)
+        os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
 
-    def wait_for_worker_to_start(self):
-        for i in range(1, 5, 2):
-            time.sleep(i)
-            pids = self.find_all_worker_processes()
-            if pids is not None and len(pids) > 0:
-                return
-        raise Exception
+    def test_parsing_parameters_and_creation_of_omsconf(self):
+        auto_enabled_manual_enabled = "[{\"WorksapceId\":\"%s\",\"AzureDnsAgentSvcZone\":\"df-agentsvc.azure-automation.net\",\"Solutions\":{\"Updates\":{\"Enabled\":true},\"AzureAutomation\":{\"Enabled\":true,\"Parameter1\":\"PARAM_11\",\"Parameter2\":\"PARAM_12\"}}}]" % self.workspace_id
+        auto_disabled_manual_enabled = "[{\"WorksapceId\":\"%s\",\"AzureDnsAgentSvcZone\":\"df-agentsvc.azure-automation.net\",\"Solutions\":{\"Updates\":{\"Enabled\":false},\"AzureAutomation\":{\"Enabled\":true,\"Parameter1\":\"PARAM_11\",\"Parameter2\":\"PARAM_12\"}}}]" % self.workspace_id
+        auto_enabled_manual_disabled = "[{\"WorksapceId\":\"%s\",\"AzureDnsAgentSvcZone\":\"df-agentsvc.azure-automation.net\",\"Solutions\":{\"Updates\":{\"Enabled\":true},\"AzureAutomation\":{\"Enabled\":false,\"Parameter1\":\"PARAM_11\",\"Parameter2\":\"PARAM_12\"}}}]" % self.workspace_id
+        auto_disabled_manual_disabled = "[{\"WorksapceId\":\"%s\",\"AzureDnsAgentSvcZone\":\"df-agentsvc.azure-automation.net\",\"Solutions\":{\"Updates\":{\"Enabled\":false},\"AzureAutomation\":{\"Enabled\":false,\"Parameter1\":\"PARAM_11\",\"Parameter2\":\"PARAM_12\"}}}]" % self.workspace_id
 
-    def set_automation_worker_state(self, isWorkerConfFilePresent, isStateConfFilePresent, isWorkerLatest, isWorkerRunning):
-        """
-        This function puts the system in a specific state based on the input
-        :param isWorkerConfFilePresent: if set to True, worker.conf will be present, false otherwise
-        :param isStateConfFilePresent: if set to True, state.conf file will be present, false otherwise
-        :param isWorkerLatest: if set to True, worker version will be the latest version, else the current runnning worker
-            will have an older version number than the worker available on disk
-        :param isWorkerRunning: if set to True, a worker daemon with be running, else it will kill existing worker daemon
-        :return: void
-        """
-        latestVersion = nxOMSAutomationWorker.read_resoruce_version_file()
+        if os.path.isfile(nxOMSAutomationWorker.OMS_CONF_FILE_PATH):
+            os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
+        settings = nxOMSAutomationWorker.read_settings_from_mof_json(
+            auto_enabled_manual_enabled)
+        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.updates_enabled,
+                                                 settings.diy_enabled)
+        self.assertTrue(filecmp.cmp(os.path.join(self.dummyFileLocation, "oms_conf_auto_manual.conf"),
+                                    nxOMSAutomationWorker.OMS_CONF_FILE_PATH))
 
-        # create new registration file, delete later if required
-        retcode = subprocess.call(
-            ["python", nxOMSAutomationWorker.REGISTRATION_FILE_PATH, "--register", "-w", self.workspaceId, "-a",
-             self.agent_id,
-             "-c", nxOMSAutomationWorker.OMS_CERTIFICATE_PATH, "-k",
-             nxOMSAutomationWorker.OMS_CERT_KEY_PATH, "-f",
-             nxOMSAutomationWorker.WORKING_DIRECTORY_PATH, "-s",
-             nxOMSAutomationWorker.WORKER_STATE_DIR, "-e", self.AzureDnsAgentSvcZone, "-p",
-             nxOMSAutomationWorker.PROXY_CONF_PATH_NEW, "-g", nxOMSAutomationWorker.KEYRING_PATH,
-             "--mock_powershelldsc_test"])
-        if retcode != 0:
-            raise Exception
+        if os.path.isfile(nxOMSAutomationWorker.OMS_CONF_FILE_PATH):
+            os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
+        settings = nxOMSAutomationWorker.read_settings_from_mof_json(
+            auto_disabled_manual_enabled)
+        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.updates_enabled,
+                                                 settings.diy_enabled)
+        self.assertTrue(filecmp.cmp(os.path.join(self.dummyFileLocation, "oms_conf_manual.conf"),
+                                    nxOMSAutomationWorker.OMS_CONF_FILE_PATH))
 
-        # isWorkerRunning region
-        # Always kill the worker and start a dummy instance
-        self.kill_all_workers()
+        if os.path.isfile(nxOMSAutomationWorker.OMS_CONF_FILE_PATH):
+            os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
+        settings = nxOMSAutomationWorker.read_settings_from_mof_json(
+            auto_enabled_manual_disabled)
+        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.updates_enabled,
+                                                 settings.diy_enabled)
+        self.assertTrue(filecmp.cmp(os.path.join(self.dummyFileLocation, "oms_conf_auto.conf"),
+                                    nxOMSAutomationWorker.OMS_CONF_FILE_PATH))
 
-        if isWorkerRunning:
-            if isWorkerLatest:
-                nxOMSAutomationWorker.start_daemon(
-                    ["python", nxOMSAutomationWorker.HYBRID_WORKER_START_PATH,
-                     nxOMSAutomationWorker.WORKER_CONF_FILE_PATH,
-                     self.workspaceId, latestVersion])
-                self.wait_for_worker_to_start()
-            else:
-                nxOMSAutomationWorker.start_daemon(
-                    ["python", nxOMSAutomationWorker.HYBRID_WORKER_START_PATH,
-                     nxOMSAutomationWorker.WORKER_CONF_FILE_PATH,
-                     self.workspaceId, "0.9"])
-                self.wait_for_worker_to_start()
-        # isWorkerLatest region
-        elif isWorkerLatest:
-            nxOMSAutomationWorker.start_daemon(
-                ["python", nxOMSAutomationWorker.HYBRID_WORKER_START_PATH,
-                 nxOMSAutomationWorker.WORKER_CONF_FILE_PATH,
-                 self.workspaceId, latestVersion])
-            self.wait_for_worker_to_start()
-            nxOMSAutomationWorker.kill_hybrid_worker()
-        else:
-            nxOMSAutomationWorker.start_daemon(
-                ["python", nxOMSAutomationWorker.HYBRID_WORKER_START_PATH,
-                 nxOMSAutomationWorker.WORKER_CONF_FILE_PATH,
-                 self.workspaceId, "0.9"])
-            self.wait_for_worker_to_start()
-            nxOMSAutomationWorker.kill_hybrid_worker()
+        if os.path.isfile(nxOMSAutomationWorker.OMS_CONF_FILE_PATH):
+            os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
+        settings = nxOMSAutomationWorker.read_settings_from_mof_json(
+            auto_disabled_manual_disabled)
+        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.updates_enabled,
+                                                 settings.diy_enabled)
+        self.assertTrue(filecmp.cmp(os.path.join(self.dummyFileLocation, "oms_conf_none.conf"),
+                                    nxOMSAutomationWorker.OMS_CONF_FILE_PATH))
 
-        if not isStateConfFilePresent:
-            try:
-                os.remove(nxOMSAutomationWorker.WORKER_STATE_FILE_PATH)
-            except OSError:
-                pass
+    def test_is_oms_config_consistent_with_mof(self):
+        dummy_oms_conf_filepaths = [os.path.join(self.dummyFileLocation, "oms_conf_auto_manual.conf"),
+                                    os.path.join(self.dummyFileLocation, "oms_conf_manual.conf"),
+                                    os.path.join(self.dummyFileLocation, "oms_conf_auto.conf"),
+                                    os.path.join(self.dummyFileLocation, "oms_conf_none.conf")
+                                    ]
+        valid_results = {dummy_oms_conf_filepaths[0]: [True, True],
+                         dummy_oms_conf_filepaths[1]: [False, True],
+                         dummy_oms_conf_filepaths[2]: [True, False],
+                         dummy_oms_conf_filepaths[3]: [False, False],
+                         }
+        for updates_enabled in [True, False]:
+            for diy_enabled in [True, False]:
+                for dummy_oms_conf_file_path in dummy_oms_conf_filepaths:
+                    result = nxOMSAutomationWorker.is_oms_config_consistent_with_mof(updates_enabled,
+                                                                                     diy_enabled,
+                                                                                     dummy_oms_conf_file_path)
+                    updates_expected_value, diy_expected_value = valid_results[dummy_oms_conf_file_path]
+                    if updates_enabled == updates_expected_value and diy_enabled == diy_expected_value:
+                        self.assertTrue(result)
+                    else:
+                        self.assertFalse(result)
 
-        if not isWorkerConfFilePresent:
-            os.remove(nxOMSAutomationWorker.WORKER_CONF_FILE_PATH)
+    def test_get_diy_account_id(self):
+        self.assertTrue(nxOMSAutomationWorker.get_diy_account_id() == "cfd4ef08-4011-428a-8947-0c2f4605980h")
+        os.remove(nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH)
+        self.assertFalse(nxOMSAutomationWorker.get_diy_account_id())
 
-    def verify_automation_worker_state(self, resourceEnabled):
-        if resourceEnabled:
-            # try to read the oms registration config file
-            if not os.path.isfile(nxOMSAutomationWorker.WORKER_CONF_FILE_PATH):
-                return False
-            # try to verify whether the worker version is the latest, also ensures the existence of the worker state file
-            try:
-                workerIsLatest = nxOMSAutomationWorker.worker_is_latest()
-            except:
-                workerIsLatest = False
-            if not workerIsLatest:
-                return False
-            if nxOMSAutomationWorker.verify_hybrid_worker() == -1:
-                return False
-            return True
-        else:
-            # resourceEnabled == false
-            # Hybrid worker should not be running
+    def test_get_stray_worker_and_manager_pids(self):
+        processes = [
+            '1000 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py /var/opt/microsoft/omsagent/state/automationworker/worker.conf managed rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f rversion:1.4',
+            '1001 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py /var/opt/microsoft/omsagent/state/automationworker/worker.conf managed rworkspace:dfd4ef08-4011-428a-8947-0c2f4605980f rversion:1.4',
+            '1002 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.4',
+            '1003 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:efd4ef08-4011-428a-8947-0c2f4605980f 1.4',
+            '']
+        stray_processes = nxOMSAutomationWorker.get_stray_worker_and_manager_wsids(processes, self.workspace_id)
+        self.assertTrue(stray_processes == set(
+            ['dfd4ef08-4011-428a-8947-0c2f4605980f', 'efd4ef08-4011-428a-8947-0c2f4605980f']))
 
-            try:
-                retval = nxOMSAutomationWorker.verify_hybrid_worker()
-            except:
-                retval = -1
-            if retval != -1:
-                return False
-            # worker state file should not exist
-            if os.path.exists(nxOMSAutomationWorker.WORKER_STATE_FILE_PATH):
-                return False
-            # worker registration file should not exist
-            if os.path.exists(nxOMSAutomationWorker.WORKER_CONF_FILE_PATH):
-                return False
-            return True
+        processes = [
+            '1000 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py /var/opt/microsoft/omsagent/state/automationworker/worker.conf managed rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f rversion:1.4',
+            '1001 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py /var/opt/microsoft/omsagent/state/automationworker/worker.conf managed rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f rversion:1.4',
+            '1002 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.4',
+            '1003 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.4',
+            '']
+        stray_processes = nxOMSAutomationWorker.get_stray_worker_and_manager_wsids(processes, self.workspace_id)
+        self.assertFalse(stray_processes)
 
-    def make_MI(self, retval, WorkspaceId, Enabled, AzureDnsAgentSvcZone):
-        d = dict()
-        d['Workspace'] = nxOMSAutomationWorker.protocol.MI_String(WorkspaceId)
-        d['Enabled'] = nxOMSAutomationWorker.protocol.MI_Boolean(Enabled)
-        d['AzureDnsAgentSvcZone'] = nxOMSAutomationWorker.protocol.MI_String(AzureDnsAgentSvcZone)
-        return retval, d
+        processes = ['']
+        stray_processes = nxOMSAutomationWorker.get_stray_worker_and_manager_wsids(processes, self.workspace_id)
+        self.assertFalse(stray_processes)
 
-    # States for the Linux hybrid worker are a vector of the following
-    # [
-    #   is worker.conf file present,
-    #   is state.conf file present
-    #   is the worker version in the state file is the same as the one in the resource,
-    #   is the Linux Hybrid Worker running
-    # ]
-    all_possible_states_of_hybrid_worker = [
-        [False, False, False, False],
-        [False, False, False, True],
-        [False, False, True, False],
-        [False, False, True, True],
-        [False, True, False, False],
-        [False, True, False, True],
-        [False, True, True, False],
-        [False, True, True, True],
-        [True, False, False, False],
-        [True, False, False, True],
-        [True, False, True, False],
-        [True, False, True, True],
-        [True, True, False, False],
-        [True, True, False, True],
-        [True, True, True, False],
-        [True, True, True, True],
-    ]
+    def test_is_any_1_3_process_running(self):
+        processes = [
+            '1002 python %s /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.3' % nxOMSAutomationWorker.WORKER_MANAGER_START_PATH,
+            '1003 python %s /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.4' % nxOMSAutomationWorker.WORKER_MANAGER_START_PATH,
+            '']
+        self.assertTrue(nxOMSAutomationWorker.is_any_1_3_process_running(processes, self.workspace_id))
 
-    def expected_test_marshall_return_value(self, state, enabledFlag):
-        isWorkerConfFilePresent = state[0]
-        isStateConfFilePresent = state[1]
-        isWorkerLatest = state[2]
-        isWorkerRunning = state[3]
-        if enabledFlag:
-            if isWorkerConfFilePresent is True and isStateConfFilePresent is True and isWorkerLatest is True \
-                    and isWorkerRunning is True:
-                return [0]
-            else:
-                return [-1]
-        else:
-            if isWorkerConfFilePresent is False and isStateConfFilePresent is False:
-                return [0]
-            else:
-                return [-1]
+        processes = [
+            '1000 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py /var/opt/microsoft/omsagent/state/automationworker/worker.conf managed rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f rversion:1.4',
+            '1001 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py /var/opt/microsoft/omsagent/state/automationworker/worker.conf managed rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f rversion:1.4',
+            '1002 python %s /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.4' % nxOMSAutomationWorker.WORKER_MANAGER_START_PATH,
+            '1003 python %s /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.4' % nxOMSAutomationWorker.WORKER_MANAGER_START_PATH,
+            '']
+        self.assertFalse(nxOMSAutomationWorker.is_any_1_3_process_running(processes, self.workspace_id))
 
-    def test_Test_Marshall_enabledFlag_true(self):
-        """
-        For any given state verify whether Test_Marshall returns the expected output
-        """
-        enabledFlag = True
-        for state in self.all_possible_states_of_hybrid_worker:
-            self.set_automation_worker_state(*state)
-            expectedValue = self.expected_test_marshall_return_value(state, enabledFlag)
-            self.assertTrue(
-                nxOMSAutomationWorker.Test_Marshall(self.workspaceId, enabledFlag, self.AzureDnsAgentSvcZone)
-                == expectedValue,
-                "Test should return %s for state %s" % (str(expectedValue), str(state)))
-
-    def test_Test_Marshall_enabledFlag_false(self):
-        """
-        For any given state verify whether Test_Marshall returns the expected output
-        """
-        enabledFlag = False
-        for state in self.all_possible_states_of_hybrid_worker:
-            self.set_automation_worker_state(*state)
-            expectedValue = self.expected_test_marshall_return_value(state, enabledFlag)
-            self.assertTrue(
-                nxOMSAutomationWorker.Test_Marshall(self.workspaceId, enabledFlag, self.AzureDnsAgentSvcZone)
-                == expectedValue,
-                "Test should return %s for state %s" % (str(expectedValue), str(state)))
-
-    def test_Set_Marshall_enabledFlag_true(self):
-        """
-        Verify whether the Set_Marshall puts the system in the proper final state for any given initial state
-        """
-        enabledFlag = True
-        mock_worker_config_file = True
-        for state in self.all_possible_states_of_hybrid_worker:
-            self.set_automation_worker_state(*state)
-            retval = nxOMSAutomationWorker.set_marshall_helper(self.workspaceId, enabledFlag, self.AzureDnsAgentSvcZone,
-                                                               mock_worker_config_file)
-            # Set_Marshall should always succeed regardless of the initial state
-            self.assertTrue(retval == [0], "Retval should be for [0] Set_Marshall. Initial state was %s" % str(state))
-            # Verify that we are indeed in the proper final state
-            self.assertTrue(self.verify_automation_worker_state(enabledFlag),
-                            "Set failed for initial state %s" %(str(state)))
-
-    def test_Set_Marshall_enabledFlag_false(self):
-        """
-        Verify whether the Set_Marshall puts the system in the proper final state for any given initial state
-        """
-        enabledFlag = False
-        mock_worker_config_file = True
-        for state in self.all_possible_states_of_hybrid_worker:
-            self.set_automation_worker_state(*state)
-            retval = nxOMSAutomationWorker.set_marshall_helper(self.workspaceId, enabledFlag, self.AzureDnsAgentSvcZone,
-                                                               mock_worker_config_file)
-            # Set_Marshall should always succeed regardless of the initial state
-            self.assertTrue(retval == [0], "Retval should be for [0] Set_Marshall. Initial state was %s" % str(state))
-            # Verify that we are indeed in the proper final state
-            self.assertTrue(self.verify_automation_worker_state(enabledFlag), 'Set failed for initial state %s'
-                            %(str(state)))
+        processes = [
+            '1000 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py /var/opt/microsoft/omsagent/state/automationworker/worker.conf managed rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f rversion:1.4',
+            '1001 python /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py /var/opt/microsoft/omsagent/state/automationworker/worker.conf managed rworkspace:dfd4ef08-4011-428a-8947-0c2f4605980f rversion:1.3',
+            '1002 python %s /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:dfd4ef08-4011-428a-8947-0c2f4605980f 1.3' % nxOMSAutomationWorker.WORKER_MANAGER_START_PATH,
+            '1003 python %s /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.4' % nxOMSAutomationWorker.WORKER_MANAGER_START_PATH,
+            '']
+        self.assertFalse(nxOMSAutomationWorker.is_any_1_3_process_running(processes, self.workspace_id))
 
 
 ######################################
@@ -5134,7 +5157,8 @@ if __name__ == '__main__':
     s22=unittest2.TestLoader().loadTestsFromTestCase(nxFileInventoryTestCases)
     s23=unittest2.TestLoader().loadTestsFromTestCase(nxOMSGenerateInventoryMofTestCases)
     s24=unittest2.TestLoader().loadTestsFromTestCase(nxOMSAgentNPMConfigTestCases)
-    s25 = unittest2.TestLoader().loadTestsFromTestCase(nxOMSAutomationWorkerTestCases)
-    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s23,s24,s25])
+    s25=unittest2.TestLoader().loadTestsFromTestCase(nxOMSAutomationWorkerTestCases)
+    s26=unittest2.TestLoader().loadTestsFromTestCase(nxOMSSudoCustomLogTestCases)
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s23,s24,s25,s26])
     unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)
     

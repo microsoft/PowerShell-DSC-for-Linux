@@ -2,43 +2,35 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+""" Worker manager module.
+
+    Note:
+        This module is meant to be ran on posix systems and OMS integrated scenarios only.
+
+        When testing this module make sure to add MSFT_nxOMSAutomationWorkerResource as an argument to started
+        worker processes.
+"""
+
 import ConfigParser
 import os
-import platform
-import shutil
 import subprocess
 import sys
-import threading
 import time
 import traceback
 
-import configuration
-import iohelper
-import subprocessfactory
-import tracer
-from httpclientfactory import HttpClientFactory
-from jrdsclient import JRDSClient
-
-sandboxes_root_folder_name = "sandboxes"
+RESOURCE_VERSION_ARG_PREFIX = "rversion:"
 
 
-def safe_loop(func):
+def loop(func):
     def decorated_func(*args, **kwargs):
         while True:
             try:
                 func(*args, **kwargs)
             except Exception:
-                tracer.log_exception_trace(traceback.format_exc())
-            time.sleep(configuration.get_jrds_get_sandbox_actions_polling_freq())
-
-    return decorated_func
-
-
-def background_thread(func):
-    def decorated_func(*args, **kwargs):
-        t = threading.Thread(target=func, args=args)
-        t.daemon = True
-        t.start()
+                exception_trace = str(traceback.format_exc())
+                print exception_trace
+                exit_on_error(exception_trace)
+            time.sleep(30)
 
     return decorated_func
 
@@ -47,280 +39,324 @@ def exit_on_error(message, exit_code=1):
     print str(message)
     try:
         os.chdir(os.path.expanduser("~"))
-        open("automation_worker_crash.log", "w").write(message)
+        open("worker_manager.log", "w").write(message)
     except:
         pass
     sys.exit(exit_code)
 
 
-def test_file_creation(path):
-    try:
-        iohelper.write_to_file(path, path)
-        os.remove(path)
-        return True
-    except IOError:
-        return False
+class WorkerManager:
+    def __init__(self, oms_configuration_path):
+        self.oms_configuration = OMSConfiguration(oms_configuration_path)
 
+    @staticmethod
+    def get_worker_and_sandbox_processes(process_list):
+        """Gets a list of automation hybrid worker and sandbox process.
 
-def validate_and_setup_path():
-    # default to user dir for exception logs to be writen to disk
-    test_file_name = "test_file"
+        Args:
+            process_list : list, a list of process models used for the search.
 
-    # test certificate and key path
-    if not os.path.isfile(configuration.get_jrds_cert_path()) or not os.path.isfile(configuration.get_jrds_key_path()):
-        exit_on_error("Invalid certificate of key file path (absolute path is required).")
+        Note:
+            For worker and sandbox process to be found, 3 conditions have to be met :
+                1. The cmd used to start these process has to contain the python interpreter keyword (python)
+                1. The cmd used to start these process has to refer to the respective python source (hybridworker.py/sandbox.py)
+                2. The resource folder name has to be present in the path to the python source (nxOMSAutomationWorkerResource)
 
-    # test working directory for existence and permissions
-    working_directory_path = configuration.get_working_directory_path()
-    if not os.path.exists(working_directory_path):
-        exit_on_error("Invalid working directory path (absolute path is required).")
+        Returns:
+            A list of process model meeting the 3 conditions above
+        """
+        worker_and_sandbox_processes = []
+        for process in process_list:
+            if "python" in process.cmd and ("hybridworker.py" in process.cmd or "sandbox.py" in process.cmd) \
+                    and "MSFT_nxOMSAutomationWorkerResource" in process.cmd:
+                worker_and_sandbox_processes.append(process)
+        return worker_and_sandbox_processes
 
-    file_creation = test_file_creation(os.path.join(working_directory_path, test_file_name))
-    if file_creation is False:
-        exit_on_error("Invalid working directory permission (read/write permissions are required).")
+    @staticmethod
+    def get_worker_processes(process_list):
+        """Gets a list of automation hybrid worker.
 
-    # test keyring paths
-    keyrings = configuration.get_gpg_public_keyrings_path()
-    for keyring_path in keyrings:
-        if keyring_path != configuration.DEFAULT_GPG_PUBLIC_KEYRING_PATH and not os.path.isfile(keyring_path):
-            exit_on_error("Invalid gpg public keyring path (absolute path is required).")
+        Args:
+            process_list : list, a list of process models.
 
-    # test state file path
-    if configuration.get_state_directory_path() != configuration.DEFAULT_STATE_DIRECTORY_PATH:
-        if not os.path.exists(configuration.get_state_directory_path()):
-            exit_on_error("Invalid state directory path (absolute path is required).")
+        Note:
+            For worker process to be found, 3 conditions have to be met :
+                1. The cmd used to start these process has to contain the python interpreter keyword (python)
+                1. The cmd used to start these process has to refer to the respective python source (hybridworker.py)
+                2. The resource folder name has to be present in the path to the python source (nxOMSAutomationWorkerResource)
 
-        file_creation = test_file_creation(os.path.join(configuration.get_state_directory_path(), test_file_name))
-        if file_creation is False:
-            exit_on_error("Invalid state directory permission (read/write permissions are required).")
+        Returns:
+            A list of process model meeting the 3 conditions above
+        """
+        worker_processes = []
+        for process in process_list:
+            if "python" in process.cmd and "hybridworker.py" in process.cmd \
+                    and "MSFT_nxOMSAutomationWorkerResource" in process.cmd:
+                worker_processes.append(process)
+        return worker_processes
 
-    # OMS integration
-    # set the working directory owner to be nxautomation:omiusers
-    if os.name.lower() != "nt":
-        import pwd
-        try:
-            nxautomation_uid = int(pwd.getpwnam('nxautomation').pw_uid)
-            if os.getuid() == nxautomation_uid:
-                retval = subprocess.call(["sudo", "chown", "-R", "nxautomation:omiusers", working_directory_path])
-                if retval != 0:
-                    exit_on_error("Could not change owner of working directory %s to nxautomation:omiusers"
-                                  % (working_directory_path))
-        except KeyError:
-            # nxautomation user was not found on the system, skip this step
-            tracer.log_debug_trace("Ownership change of working directory skipped. nxautomation user not found.")
-            pass
+    @staticmethod
+    def get_process_containing_arg(process_list, arg_to_match):
+        """Gets a list of process containing a specific argument.
 
+        Args:
+            process_list : list  , a list of process models.
+            arg_to_match : string, a specific keyword to match
 
-def generate_state_file():
-    state_file_name = "state.conf"
-    if configuration.get_state_directory_path() == configuration.DEFAULT_STATE_DIRECTORY_PATH:
-        state_file_path = os.path.join(configuration.get_working_directory_path(), state_file_name)
-    else:
-        state_file_path = os.path.join(configuration.get_state_directory_path(), state_file_name)
+        Returns:
+            A list of process model containing the specific argument
+        """
+        valid_worker_processes = []
+        for process in process_list:
+            if arg_to_match in process.cmd:
+                valid_worker_processes.append(process)
+        return valid_worker_processes
 
-    tracer.log_debug_trace("State file path : " + str(state_file_path))
+    @staticmethod
+    def kill_process_list(process_list):
+        """Kills a list of process.
 
-    if os.path.isfile(state_file_path):
-        os.remove(state_file_path)
+        Args:
+            process_list : list , a list of process models.
 
-    section = "state"
-    conf_file = open(state_file_path, 'wb')
-    config = ConfigParser.ConfigParser()
-    config.add_section(section)
-    config.set(section, configuration.STATE_PID, str(os.getpid()))
-    config.set(section, configuration.WORKER_VERSION, str(configuration.get_worker_version()))
+        Note:
+            The list of process has to be owned by the current user
+        """
+        for process in process_list:
+            print "killing " + str(process.pid)
+            linuxutil.kill_current_user_process(process.pid)
+            print "killed " + str(process.pid)
 
-    # for OMS scenarios, optional for DIY
-    if len(sys.argv) >= 3:
-        config.set(section, configuration.STATE_WORKSPACE_ID, str(sys.argv[2]))
+    @staticmethod
+    def get_configuration_path_to_be_started(worker_process_list, valid_configuration_paths):
+        """Returns a list of configuration path that has to be started. Configuration paths that are already being
+        executed by a worker process will not be returned.
 
-    if len(sys.argv) >= 4:
-        config.set(section, configuration.STATE_RESOURCE_VERSION, str(sys.argv[3]))
+        Args:
+            worker_process_list : list , a list of worker process models.
+            valid_configuration_paths : list, a list of configuration path
 
-    config.write(conf_file)
-    conf_file.close()
+        Returns:
+            A list of configuration paths to be started
+        """
+        configuration_path_to_be_started = []
+        for path in valid_configuration_paths:
+            path_already_in_use = False
+            for worker in worker_process_list:
+                if path in worker.cmd:
+                    path_already_in_use = True
 
-    # OMS integration
-    # set the ownership of the state file to nxautomation:omiusers
-    # set the permission of the state file to 660
-    if os.name.lower() != "nt":
-        import pwd
-        try:
-            nxautomation_uid = int(pwd.getpwnam('nxautomation').pw_uid)
-            if os.getuid() == nxautomation_uid:
-                retval = subprocess.call(["sudo", "chown", "nxautomation:omiusers", state_file_path])
-                if retval != 0:
-                    exit_on_error("Could not change owner of state file %s to nxautomation:omiusers" % (state_file_path))
+            if path_already_in_use is False:
+                configuration_path_to_be_started.append(path)
+        return configuration_path_to_be_started
 
-                retval = subprocess.call(["sudo", "chmod", "660", state_file_path])
-                if retval != 0:
-                    exit_on_error("Could not change permission of state file %s " % (state_file_path))
-        except KeyError:
-            # nxautomation user was not found on the system, skip this step
-            tracer.log_debug_trace("State file permission change skipped. nxautomation user not found.")
-            pass
+    def get_process_running_valid_configuration(self, process_list, valid_configuration_paths):
+        """Returns a list of process running valid configuration path.
 
+        Args:
+            process_list : list , a list of process models.
+            valid_configuration_paths : list, a list of configuration path
 
-class Worker:
-    def __init__(self):
-        tracer.log_worker_starting(configuration.get_worker_version())
-        http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),
-                                                configuration.get_verify_certificates())
-        http_client = http_client_factory.create_http_client(sys.version_info)
-        self.jrds_client = JRDSClient(http_client)
-        self.running_sandboxes = {}
+        Returns:
+            A list of process running valid configuration paths
+        """
+        process_running_valid_configuration = []
+        for valid_configuration_path in valid_configuration_paths:
+            process_running_valid_configuration += self.get_process_containing_arg(process_list,
+                                                                                   arg_to_match=valid_configuration_path)
+        return process_running_valid_configuration
 
-    @safe_loop
+    def get_worker_and_sandbox_process_running_invalid_configuration(self, process_list, valid_configuration_paths):
+        """Returns a list of process running invalid configuration path.
+
+        Args:
+            process_list : list , a list of process models.
+            valid_configuration_paths : list, a list of configuration path
+
+        Returns:
+           A list of process running invalid configuration paths
+        """
+        worker_and_sandbox_processes = self.get_worker_and_sandbox_processes(process_list)
+        process_running_valid_config = self.get_process_running_valid_configuration(worker_and_sandbox_processes,
+                                                                                    valid_configuration_paths=
+                                                                                    valid_configuration_paths)
+        return set(worker_and_sandbox_processes).difference(process_running_valid_config)
+
+    def get_process_running_up_to_date_resource_version(self, process_running_valid_config, current_resource_version):
+        """Returns a list of process running source code that IS up to date based on the DSC resource version.
+
+        Args:
+            process_running_valid_config : list , a list of process models.
+            current_resource_version : int, the most up to date dsc resource version
+
+        Returns:
+            A list of process running up to date source code
+        """
+        version_arg = RESOURCE_VERSION_ARG_PREFIX + current_resource_version
+        return self.get_process_containing_arg(process_running_valid_config, arg_to_match=version_arg)
+
+    def get_worker_process_running_outdated_resource_version(self, process_list, current_resource_version):
+        """Returns a list of worker process running source code that IS NOT up to date based on the DSC resource
+        version.
+
+        Args:
+            process_list : list , a list of process models.
+            current_resource_version : int, the most up to date dsc resource version
+
+        Returns:
+            A list of process running outdated source code
+        """
+        worker_processes = self.get_worker_processes(process_list)
+        worker_process_running_up_to_date_version = self.get_process_running_up_to_date_resource_version(
+            worker_processes, current_resource_version=current_resource_version)
+        return set(worker_processes).difference(worker_process_running_up_to_date_version)
+
+    @loop
     def routine(self):
-        self.stop_tracking_terminated_sandbox()
+        """Main OMS worker manager routine.
 
-        sandbox_actions = self.jrds_client.get_sandbox_actions()
-        tracer.log_debug_trace("Get sandbox action. Found " + str(len(sandbox_actions)) + " action(s).")
+        All the steps below are in the context of the nxautomation user
+        1. Remove WORKER and SANDBOX processes that are not running "unknown" configuration path
+        2. Remove WORKER processes running outdated resource version (we do not care about sandbox processes)
+        3. Start worker processes for configuration path that are not yet running
+        """
+        print "in routine"
+        valid_configuration_paths = self.oms_configuration.get_active_worker_configuration_paths()
+        current_resource_version = self.oms_configuration.get_current_resource_version()
 
-        for action in sandbox_actions:
-            tracer.log_worker_sandbox_action_found(len(sandbox_actions))
-            sandbox_id = str(action["SandboxId"])
+        # kill workers running rogue config
+        process_running_invalid_configuration = self.get_worker_and_sandbox_process_running_invalid_configuration(
+            linuxutil.get_current_user_processes(), valid_configuration_paths=valid_configuration_paths)
+        print "removing " + str(len(process_running_invalid_configuration)) + " process running rogue config"
+        self.kill_process_list(process_running_invalid_configuration)
 
-            # prevent duplicate sandbox from running
-            if sandbox_id in self.running_sandboxes:
-                return
+        # kill outdated worker
+        worker_process_running_outdated_version = self.get_worker_process_running_outdated_resource_version(
+            linuxutil.get_current_user_processes(), current_resource_version=current_resource_version)
+        print "removing " + str(
+            len(worker_process_running_outdated_version)) + " process running outdated resource version"
+        self.kill_process_list(worker_process_running_outdated_version)
 
-            # create sandboxes folder if needed
-            sandbox_working_dir = os.path.join(configuration.get_working_directory_path(), sandboxes_root_folder_name,
-                                               sandbox_id)
+        configuration_path_to_be_started = self.get_configuration_path_to_be_started(
+            self.get_worker_processes(linuxutil.get_current_user_processes()),
+            valid_configuration_paths=valid_configuration_paths)
 
-            try:
-                iohelper.assert_or_create_path(sandbox_working_dir)
-            except OSError, exception:
-                tracer.log_worker_failed_to_create_sandbox_root_folder(sandbox_id, exception)
-                pass
+        print "worker to be started " + str(len(configuration_path_to_be_started))
+        for configuration_path in configuration_path_to_be_started:
+            start_worker_for_path = True
+            running_workers = self.get_worker_processes(linuxutil.get_current_user_processes())
 
-            # copy current process env variable (contains configuration) and add the sanbox_id key
-            process_env_variables = os.environ.copy()
-            process_env_variables["sandbox_id"] = sandbox_id
+            # check if there's an existing worker running the desired configuration
+            for worker in running_workers:
+                if configuration_path in worker.cmd:
+                    start_worker_for_path = False
 
-            cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py")]
-            tracer.log_worker_starting_sandbox(sandbox_id)
-            sandbox_process = subprocessfactory.create_subprocess(cmd=cmd,
-                                                                  env=process_env_variables,
-                                                                  stdout=subprocess.PIPE,
-                                                                  stderr=subprocess.PIPE,
-                                                                  cwd=sandbox_working_dir)
-            self.running_sandboxes[sandbox_id] = sandbox_process
-            tracer.log_worker_started_tracking_sandbox(sandbox_id)
+            # create a new worker if needed
+            if os.path.isfile(configuration_path) and start_worker_for_path is True and \
+                            self.oms_configuration.get_disable_worker_creation() is False:
+                cmd = ["python", self.oms_configuration.get_hybrid_worker_source_path(), configuration_path, "managed"]
 
-            self.monitor_sandbox_process_outputs(sandbox_id, sandbox_process)
-            tracer.log_worker_sandbox_process_started(sandbox_id, str(sandbox_process.pid))
+                # workspace id arg is used by the oms uninstall script
+                workspace_id = self.oms_configuration.get_workspace_id()
+                if workspace_id != self.oms_configuration.DEFAULT_EMPTY_VALUE:
+                    cmd.append("rworkspace:" + str(workspace_id))
 
-    @background_thread
-    def monitor_sandbox_process_outputs(self, sandbox_id, process):
-        while process.poll() is None:
-            output = process.stdout.readline().replace("\n", "")
-            if output == '':
-                continue
-            if output != '':
-                tracer.log_sandbox_stdout(output)
+                # resource version is used by the oms resource when resource update are required
+                resource_version_arg = "rversion:" + str(current_resource_version)
+                cmd.append(resource_version_arg)
 
-        if process.poll() != 0:
-            full_error_output = ""
-            while True:
-                error_output = process.stderr.readline()
-                if error_output is None or error_output == '':
-                    break
-                full_error_output += error_output
-            tracer.log_worker_sandbox_process_crashed(sandbox_id, process.pid, process.poll(), full_error_output)
+                print "starting worker process " + str(configuration_path)
+                subprocess.Popen(cmd)
+            else:
+                print "configuration path doesn't exist or worker already running configuration"
 
-        tracer.log_worker_sandbox_process_exited(sandbox_id, str(process.pid), process.poll())
 
-        # cleanup sandbox directory
-        sandbox_working_dir = os.path.join(configuration.get_working_directory_path(), sandboxes_root_folder_name,
-                                           sandbox_id)
-        shutil.rmtree(sandbox_working_dir, ignore_errors=True)
+class OMSConfiguration:
+    SECTION_WORKER_CONF = "oms-worker-conf"
+    KEY_AUTO_REGISTERED_WORKER_CONF_PATH = "auto_registered_worker_conf_path"
+    KEY_MANUALLY_AUTO_REGISTERED_WORKER_CONF_PATH = "manually_registered_worker_conf_path"
 
-    @background_thread
-    def telemetry_routine(self):
-        while True:
-            tracer.log_worker_general_telemetry(configuration.get_worker_version())
-            tracer.log_worker_python_telemetry(platform.python_version(), platform.python_build(),
-                                               platform.python_compiler())
-            tracer.log_worker_system_telemetry(platform.system(), platform.node(), platform.version(),
-                                               platform.machine(), platform.processor())
-            # sleep for 6 hours, this allows us to gather daily telemetry
-            time.sleep(60 * 60 * 6)
+    SECTION_OMS_GLOBAL = "oms-global"
+    KEY_RESOURCE_VERSION = "resource_version"
+    KEY_HYBRID_WORKER_PATH = "hybrid_worker_path"
+    KEY_DISABLE_WORKER_CREATION = "disable_worker_creation"
+    KEY_WORKSPACE_ID = "workspace_id"
 
-    def stop_tracking_terminated_sandbox(self):
-        terminated_sandbox_ids = []
+    DEFAULT_EMPTY_VALUE = ""
+    DEFAULT_HYBRID_WORKER_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py"
 
-        # detect terminated sandboxes
-        for sandbox_id, sandbox_process in self.running_sandboxes.items():
-            if sandbox_process.poll() is not None:
-                terminated_sandbox_ids.append(sandbox_id)
+    def __init__(self, oms_configuration_path):
+        self.oms_configuration_path = oms_configuration_path
 
-        # clean-up terminated sandboxes
-        for sandbox_id in terminated_sandbox_ids:
-            removal = self.running_sandboxes.pop(sandbox_id, None)
-            if removal is not None:
-                tracer.log_worker_stopped_tracking_sandbox(sandbox_id)
+    def get_config_reader(self):
+        config = ConfigParser.SafeConfigParser({self.KEY_AUTO_REGISTERED_WORKER_CONF_PATH: self.DEFAULT_EMPTY_VALUE,
+                                                self.KEY_MANUALLY_AUTO_REGISTERED_WORKER_CONF_PATH:
+                                                    self.DEFAULT_EMPTY_VALUE,
+                                                self.KEY_HYBRID_WORKER_PATH: self.DEFAULT_HYBRID_WORKER_PATH,
+                                                self.KEY_DISABLE_WORKER_CREATION: "False",
+                                                self.KEY_WORKSPACE_ID: self.DEFAULT_EMPTY_VALUE})
+
+        config.read(self.oms_configuration_path)
+        return config
+
+    def get_active_worker_configuration_paths(self):
+        if not os.path.isfile(self.oms_configuration_path):
+            return []
+
+        worker_configuration_paths = []
+        config = self.get_config_reader()
+
+        try:
+            worker_configuration_paths.append(config.get(self.SECTION_WORKER_CONF,
+                                                         self.KEY_AUTO_REGISTERED_WORKER_CONF_PATH))
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            pass
+
+        try:
+            worker_configuration_paths.append(config.get(self.SECTION_WORKER_CONF,
+                                                         self.KEY_MANUALLY_AUTO_REGISTERED_WORKER_CONF_PATH))
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            pass
+
+        print worker_configuration_paths
+        valid_worker_configuration_paths = []
+        for path in worker_configuration_paths:
+            if path != self.DEFAULT_EMPTY_VALUE and os.path.isfile(path):
+                valid_worker_configuration_paths.append(path)
+        return valid_worker_configuration_paths
+
+    def get_current_resource_version(self):
+        config = self.get_config_reader()
+        return config.get(self.SECTION_OMS_GLOBAL, self.KEY_RESOURCE_VERSION)
+
+    def get_hybrid_worker_source_path(self):
+        config = self.get_config_reader()
+        return config.get(self.SECTION_OMS_GLOBAL, self.KEY_HYBRID_WORKER_PATH)
+
+    def get_disable_worker_creation(self):
+        config = self.get_config_reader()
+        return config.getboolean(self.SECTION_OMS_GLOBAL, self.KEY_DISABLE_WORKER_CREATION)
+
+    def get_workspace_id(self):
+        config = self.get_config_reader()
+        return config.get(self.SECTION_OMS_GLOBAL, self.KEY_WORKSPACE_ID)
+
 
 def main():
     if len(sys.argv) < 2:
-        exit_on_error("Invalid configuration file path (absolute path is required).")
-    configuration_path = str(sys.argv[1])
+        exit_on_error("Missing oms configuration file path.")
+    oms_configuration_path = str(sys.argv[1])
 
-    if not os.path.isfile(configuration_path):
-        exit_on_error("Invalid configuration file path or empty configuration file (absolute path is required).")
+    if not os.path.isfile(oms_configuration_path):
+        exit_on_error("Invalid oms configuration file path or empty configuration file (absolute path is required).")
 
-    # configuration has to be read first thing
-    try:
-        # remove the test_mode env_var value (mainly for Windows)
-        # this value is set in test
-        del os.environ["test_mode"]
-    except KeyError:
-        pass
-
-    # fix for nxautomation OMS integration
-    # add the nxautomation user to omsagent (omsagent-1.2.0-75.universal.x64.sh and older create the cert under omsagent:omsagent)
-    if os.name.lower() != "nt":
-        import pwd
-        import grp
-        nxautomation_username = "nxautomation"
-        omsagent_group_name = "omsagent"
-        try:
-            nxautomation_uid = int(pwd.getpwnam(nxautomation_username).pw_uid)
-            if os.getuid() == nxautomation_uid:
-                omsagent_group = grp.getgrnam(omsagent_group_name)
-                if nxautomation_username not in omsagent_group.gr_mem:
-                    proc = subprocess.Popen(["sudo", "/usr/sbin/usermod", "-g", "nxautomation", "-a", "-G", "omsagent,omiusers", "nxautomation"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    output, error = proc.communicate()
-
-                    if proc.returncode != 0:
-                        exit_on_error(str(error))
-
-                    # exiting to reflect group permission, proper permission will reflect for the process on the next execution
-                    sys.exit(3)
-
-                #change permissions for the keyring.gpg
-                proc = subprocess.Popen(["sudo", "chmod", "g+r", "/etc/opt/omi/conf/omsconfig/keyring.gpg"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                output, error = proc.communicate()
-
-                if proc.returncode != 0:
-                    exit_on_error(str(error))
-
-        except SystemExit:
-            raise
-        except:
-            pass
-
-    configuration.read_and_set_configuration(configuration_path)
-    configuration.set_config({configuration.COMPONENT: "worker"})
-    validate_and_setup_path()
-    # do not trace anything before this point
-
-    generate_state_file()
-    worker = Worker()
-    worker.telemetry_routine()
-    worker.routine()
+    manager = WorkerManager(oms_configuration_path)
+    manager.routine()
 
 
 if __name__ == "__main__":
+    # daemonize before loading the logging library to prevent deadlock in 2.4 (see: http://bugs.python.org/issue6721)
+    import linuxutil
+
+    linuxutil.daemonize()
     main()

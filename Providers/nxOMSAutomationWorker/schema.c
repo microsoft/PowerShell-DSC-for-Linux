@@ -754,7 +754,7 @@ static MI_CONST MI_Qualifier OMI_BaseResource_Abstract_qual =
     &OMI_BaseResource_Abstract_qual_value
 };
 
-static MI_CONST MI_Char* OMI_BaseResource_ClassVersion_qual_value = MI_T("1.2.0");
+static MI_CONST MI_Char* OMI_BaseResource_ClassVersion_qual_value = MI_T("1.0.0");
 
 static MI_CONST MI_Qualifier OMI_BaseResource_ClassVersion_qual =
 {
@@ -809,97 +809,33 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean MSFT_nxOMSAutomationWorkerResource_WorkspaceId_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSAutomationWorkerResource_ResourceSettings_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAutomationWorkerResource_WorkspaceId_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSAutomationWorkerResource_ResourceSettings_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAutomationWorkerResource_WorkspaceId_Key_qual_value
+    &MSFT_nxOMSAutomationWorkerResource_ResourceSettings_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAutomationWorkerResource_WorkspaceId_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAutomationWorkerResource_ResourceSettings_quals[] =
 {
-    &MSFT_nxOMSAutomationWorkerResource_WorkspaceId_Key_qual,
+    &MSFT_nxOMSAutomationWorkerResource_ResourceSettings_Key_qual,
 };
 
-/* property MSFT_nxOMSAutomationWorkerResource.WorkspaceId */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSAutomationWorkerResource_WorkspaceId_prop =
+/* property MSFT_nxOMSAutomationWorkerResource.ResourceSettings */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSAutomationWorkerResource_ResourceSettings_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
-    0x0077640B, /* code */
-    MI_T("WorkspaceId"), /* name */
-    MSFT_nxOMSAutomationWorkerResource_WorkspaceId_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAutomationWorkerResource_WorkspaceId_quals), /* numQualifiers */
+    0x00727310, /* code */
+    MI_T("ResourceSettings"), /* name */
+    MSFT_nxOMSAutomationWorkerResource_ResourceSettings_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSAutomationWorkerResource_ResourceSettings_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSAutomationWorkerResource, WorkspaceId), /* offset */
-    MI_T("MSFT_nxOMSAutomationWorkerResource"), /* origin */
-    MI_T("MSFT_nxOMSAutomationWorkerResource"), /* propagator */
-    NULL,
-};
-
-static MI_CONST MI_Boolean MSFT_nxOMSAutomationWorkerResource_Enabled_Write_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_nxOMSAutomationWorkerResource_Enabled_Write_qual =
-{
-    MI_T("Write"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAutomationWorkerResource_Enabled_Write_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAutomationWorkerResource_Enabled_quals[] =
-{
-    &MSFT_nxOMSAutomationWorkerResource_Enabled_Write_qual,
-};
-
-/* property MSFT_nxOMSAutomationWorkerResource.Enabled */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSAutomationWorkerResource_Enabled_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00656407, /* code */
-    MI_T("Enabled"), /* name */
-    MSFT_nxOMSAutomationWorkerResource_Enabled_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAutomationWorkerResource_Enabled_quals), /* numQualifiers */
-    MI_BOOLEAN, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_nxOMSAutomationWorkerResource, Enabled), /* offset */
-    MI_T("MSFT_nxOMSAutomationWorkerResource"), /* origin */
-    MI_T("MSFT_nxOMSAutomationWorkerResource"), /* propagator */
-    NULL,
-};
-
-static MI_CONST MI_Boolean MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_Write_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_Write_qual =
-{
-    MI_T("Write"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_Write_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_quals[] =
-{
-    &MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_Write_qual,
-};
-
-/* property MSFT_nxOMSAutomationWorkerResource.AzureDnsAgentSvcZone */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00616514, /* code */
-    MI_T("AzureDnsAgentSvcZone"), /* name */
-    MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_nxOMSAutomationWorkerResource, AzureDnsAgentSvcZone), /* offset */
+    offsetof(MSFT_nxOMSAutomationWorkerResource, ResourceSettings), /* offset */
     MI_T("MSFT_nxOMSAutomationWorkerResource"), /* origin */
     MI_T("MSFT_nxOMSAutomationWorkerResource"), /* propagator */
     NULL,
@@ -907,9 +843,7 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSAutomationWorkerResource_AzureDnsAgent
 
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSAutomationWorkerResource_props[] =
 {
-    &MSFT_nxOMSAutomationWorkerResource_WorkspaceId_prop,
-    &MSFT_nxOMSAutomationWorkerResource_Enabled_prop,
-    &MSFT_nxOMSAutomationWorkerResource_AzureDnsAgentSvcZone_prop,
+    &MSFT_nxOMSAutomationWorkerResource_ResourceSettings_prop,
 };
 
 static MI_CONST MI_Boolean MSFT_nxOMSAutomationWorkerResource_GetTargetResource_Static_qual_value = 1;
@@ -1668,7 +1602,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSAutomationWorkerResource_Description_qual
     &MSFT_nxOMSAutomationWorkerResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSAutomationWorkerResource_ClassVersion_qual_value = MI_T("1.2.0");
+static MI_CONST MI_Char* MSFT_nxOMSAutomationWorkerResource_ClassVersion_qual_value = MI_T("1.4.0");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSAutomationWorkerResource_ClassVersion_qual =
 {

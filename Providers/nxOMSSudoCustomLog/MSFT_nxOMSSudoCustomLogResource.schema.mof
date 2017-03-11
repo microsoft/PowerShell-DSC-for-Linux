@@ -1,0 +1,15 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSSudoCustomLogObject
+{
+    [key] string LogName;
+    [write] string FilePath[];
+};
+
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSSudoCustomLogResource : OMI_BaseResource
+{
+    [key] string Name;
+    [write] boolean EnableCustomLogConfiguration;
+    [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure; 
+    [write, EmbeddedInstance("MSFT_nxOMSSudoCustomLogObject") : ToSubclass] string CustomLogObjects[];
+};

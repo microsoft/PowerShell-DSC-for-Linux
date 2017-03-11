@@ -189,6 +189,7 @@ nxFileInventory=imp.load_source('nxFileInventory', './Scripts/nxFileInventory.py
 nxOMSGenerateInventoryMof=imp.load_source('nxOMSGenerateInventoryMof', './Scripts/nxOMSGenerateInventoryMof.py')
 nxNPMD=imp.load_source('nxNPMD','./Scripts/nxOMSAgentNPMConfig.py')
 nxOMSAutomationWorker=imp.load_source('nxOMSAutomationWorker', './Scripts/nxOMSAutomationWorker.py')
+nxOMSSudoCustomLog=imp.load_source('nxOMSSudoCustomLog','./Scripts/nxOMSSudoCustomLog.py')
 
 class nxUserTestCases(unittest2.TestCase):
     """
@@ -3578,6 +3579,106 @@ class nxOMSCustomLogTestCases(unittest2.TestCase):
         'Get('+repr(g)+' should return ==['+repr(m)+']')
     
 
+@unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
+                      0,'Skipping nxOMSSudoCustomLogTestCases.   omsagent is not running.')
+class nxOMSSudoCustomLogTestCases(unittest2.TestCase):
+    """
+    Test Case for nxOMSSudoCustomLog.py
+    """
+
+    original_conf_path = None
+    mock_conf_path = './ut_sudocustomlog.conf'
+
+    def setUp(self):
+        """
+        Setup test resources
+        """
+        self.original_conf_path = nxOMSSudoCustomLog.CONF_PATH
+        nxOMSSudoCustomLog.CONF_PATH = self.mock_conf_path
+        os.system('rm -rf {0}'.format(self.mock_conf_path))
+        
+        nxOMSSudoCustomLog.RESOURCE_DIR = '/var/tmp/omsconfig_CL/modules/nxOMSSudoCustomLog/'
+        nxOMSSudoCustomLog.RESOURCE_PLUGIN_DIR = nxOMSSudoCustomLog.RESOURCE_DIR + 'Plugin/'
+        nxOMSSudoCustomLog.PLUGIN = nxOMSSudoCustomLog.RESOURCE_PLUGIN_DIR + 'in_sudo_tail.rb'
+        nxOMSSudoCustomLog.SCRIPT = nxOMSSudoCustomLog.RESOURCE_PLUGIN_DIR + 'tailfilereader.rb'
+        nxOMSSudoCustomLog.AGENT_PLUGIN_DIR = '/var/tmp/omsagent_CL/plugin/'
+      
+        os.system('rm -rf /var/tmp/omsconfig_CL /var/tmp/omsagent_CL;') 
+
+        os.system('mkdir -p ' + nxOMSSudoCustomLog.RESOURCE_PLUGIN_DIR + ';' 
+              'mkdir -p ' + nxOMSSudoCustomLog.AGENT_PLUGIN_DIR + ';' 
+              'echo sudo_tail plugin >> ' + nxOMSSudoCustomLog.PLUGIN + ';' 
+              'echo tailfilereader script >> ' + nxOMSSudoCustomLog.SCRIPT + ';'
+        )
+
+    def tearDown(self):
+        """
+        Remove test resources
+        """
+        nxOMSSudoCustomLog.CONF_PATH = self.original_conf_path
+        os.system('rm -rf /var/tmp/omsconfig_CL /var/tmp/omsagent_CL')
+
+    def make_MI(self, retval, Name, Ensure, EnableCustomLogConfiguration, CustomLogObjects):
+        d = dict()
+        d['Name'] = nxOMSSudoCustomLog.protocol.MI_String(Name)
+        d['Ensure'] = nxOMSSudoCustomLog.protocol.MI_String(Ensure) 
+        d['EnableCustomLogConfiguration'] = nxOMSSudoCustomLog.protocol.MI_Boolean(EnableCustomLogConfiguration)
+        if CustomLogObjects is None:
+            CustomLogObjects = []
+        for customlog in CustomLogObjects:
+            customlog['LogName'] = nxOMSSudoCustomLog.protocol.MI_String(customlog['LogName'])
+            if customlog['FilePath'] is not None and len(customlog['FilePath']):
+                customlog['FilePath'] = nxOMSSudoCustomLog.protocol.MI_StringA(customlog['FilePath'])
+        d['CustomLogObjects'] = nxOMSSudoCustomLog.protocol.MI_InstanceA(CustomLogObjects)
+        return retval, d
+    
+    def testSetOMSSudoCustomLog_add(self):
+        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'Ensure': 'Present', 'CustomLogObjects': [{ 'LogName': 'CUSTOM_LOG_BLOB.LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'CUSTOM_LOG_BLOB.LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+        for customlog in d['CustomLogObjects']:
+            customlog['LogName'] = nxOMSSudoCustomLog.protocol.MI_String(customlog['LogName'])
+            customlog['FilePath'] = nxOMSSudoCustomLog.protocol.MI_StringA(customlog['FilePath'])
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0], 'Set('+repr(d)+') should return == [0]')
+
+    def testGetOMSSudoCustomLog_add(self):
+        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'Ensure': 'Present', 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+        for customlog in d['CustomLogObjects']:
+            customlog['LogName'] = nxOMSSudoCustomLog.protocol.MI_String(customlog['LogName'])
+            customlog['FilePath'] = nxOMSSudoCustomLog.protocol.MI_StringA(customlog['FilePath'])
+
+        e = copy.deepcopy(d)
+        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'Ensure': 'Present', 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/logs/*.log', '/tmp/test1.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
+
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+         
+        m = self.make_MI(0,**t)
+        g = nxOMSSudoCustomLog.Get_Marshall(**e)
+        self.assertTrue(check_values(g, m)  ==  True, 'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+    def testSetOMSSudoCustomLog_del(self):
+        d = { 'Name': 'SimpleCustomLog', 'Ensure': 'Present', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
+
+    def testGetOMSSudoCustomLog_default(self):
+        d = { 'Name': 'SimpleCustomLog', 'Ensure': 'Absent' }
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+
+        t = { 'Name': 'SimpleCustomLog', 'Ensure': 'Absent', 'EnableCustomLogConfiguration': False, 'CustomLogObjects': None }
+        m=self.make_MI(0,**t)
+        g=nxOMSSudoCustomLog.Get_Marshall(**d)
+        print('GET '+ repr(g))
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get('+repr(g)+' should return ==['+repr(m)+']')
+
+    def testGetOMSSudoCustomLog_del(self):
+        d = { 'Name': 'SimpleCustomLog', 'Ensure': 'Present', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        self.assertTrue(nxOMSSudoCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
+        t = { 'Name': 'SimpleCustomLog', 'Ensure': 'Present', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
+        m=self.make_MI(0,**t)
+        g=nxOMSSudoCustomLog.Get_Marshall(**d)
+        print('GET '+ repr(g))
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get('+repr(g)+' should return ==['+repr(m)+']')
+    
 class nxOMSGenerateInventoryMofTestCases(unittest2.TestCase):
     """
     Test Case for nxOMSGenerateInventoryMof.py
@@ -5118,5 +5219,6 @@ if __name__ == '__main__':
     s23=unittest2.TestLoader().loadTestsFromTestCase(nxOMSGenerateInventoryMofTestCases) 
     s24=unittest2.TestLoader().loadTestsFromTestCase(nxOMSAgentNPMConfigTestCases)
     s25 = unittest2.TestLoader().loadTestsFromTestCase(nxOMSAutomationWorkerTestCases)
-    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s23,s24,s25])
+    s26=unittest2.TestLoader().loadTestsFromTestCase(nxOMSSudoCustomLogTestCases)
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s23,s24,s25,s26])
     unittest2.TextTestRunner(stream=sys.stdout,verbosity=1).run(alltests)
