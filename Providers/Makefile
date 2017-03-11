@@ -66,6 +66,7 @@ ifeq ($(BUILD_OMS),BUILD_OMS)
 PROVIDERS:=nxOMSPerfCounter
 PROVIDERS+=nxOMSSyslog
 PROVIDERS+=nxOMSCustomLog
+PROVIDERS+=nxOMSSudoCustomLog
 PROVIDERS+=nxOMSGenerateInventoryMof
 PROVIDERS+=nxService
 PROVIDERS+=nxPackage
