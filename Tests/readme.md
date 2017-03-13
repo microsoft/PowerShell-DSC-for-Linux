@@ -20,7 +20,7 @@ The default file expected by the tests is DSCLinuxTestConfig.json.  To provide c
 
 1: Overwrite the file
 
-2: Create a new file and set the DSC_LINUX_TEST_CONFIG environment variable before running tests.  The environment variable takes precedence.
+2: Create a new file and set the ```DSC_LINUX_TEST_CONFIG``` environment variable before running tests.  The environment variable takes precedence.
 
 The current file is a simple dictionary containing the below entries. 
 
