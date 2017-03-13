@@ -15,10 +15,11 @@ Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
         Install-Module nx, nxComputerManagement, nxNetworking
 
         # Create a Cim session to Client Linux machine on which that we are testing DSC Functionality 
-        $linuxClient = ImportLinuxTestConfigurtaion  -testConfigFile ".\DSCLinuxTestConfig.json"
-        $script:linuxClientName  = $linuxClient.LinuxClient.Name
-        $rootUser = $linuxClient.LinuxClient.UserName
-        $rootPassword = $linuxClient.LinuxClient.Password
+        $cfg = Get-TestConfiguration
+        
+        $script:linuxClientName  = $cfg.LinuxClient.Name
+        $rootUser = $cfg.LinuxClient.UserName
+        $rootPassword = $cfg.LinuxClient.Password
 
         $rootUserPassword = ConvertTo-SecureString -String $rootPassword -AsPlainText -Force
         $rootCredentials = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList $rootUser, $rootUserPassword
