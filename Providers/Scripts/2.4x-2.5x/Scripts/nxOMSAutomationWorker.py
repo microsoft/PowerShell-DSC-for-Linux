@@ -164,9 +164,28 @@ def Test_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
         if os.path.isfile(WORKER_CONF_FILE_PATH):
             if os.path.isfile(WORKER_STATE_FILE_PATH):
                 if worker_is_latest():
-                    if verify_hybrid_worker() > 0:
-                        log(INFO, "Test returned [0] for Enabled = True")
-                        return [0]
+                    pid = verify_hybrid_worker()
+                    if pid > 0:
+                        if nxautomation_user_exists():
+                            proc = subprocess.Popen(["ps", "-p", str(pid), "-o", "user="],stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                            result, error = proc.communicate()
+                            if proc.returncode != 0 or error:
+                                log(INFO, "nxautomation user was found but could not determine the user for runnning process")
+                                return [-1]
+                            result = str(result)
+                            if AUTOMATION_USER in result:
+                                # the hybird worker process was running correctly under nxautomation user process
+                                log(INFO, "Test returned [0] for process running as nxautomation, Enabled = True")
+                                return [0]
+                            else:
+                                # this is a scenario where OMS agent was upgraded and the Hybrid Worker needs to be restarted as nxautomation user
+                                # it is still running as omsagent user
+                                log(INFO,
+                                    "Hybrid worker NOT running as nxautomation, restart required")
+                                return [-1]
+                        else:
+                            log(INFO, "Test returned [0] for process running as omsagent, Enabled = True")
+                            return [0]
                     else:
                         log(INFO, "The process for Linux hybrid worker was not running")
                 else:
@@ -177,10 +196,21 @@ def Test_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
             log(INFO, "worker.conf file was not found")
     else:
         # Enabled is False
+        # Nothing should be configured or running
         if not os.path.isfile(WORKER_CONF_FILE_PATH):
             if not os.path.isfile(WORKER_STATE_FILE_PATH):
-                log(INFO, "Test returned [0] for Enabled = False")
-                return [0]
+                if nxautomation_user_exists():
+                    exit_code = subprocess.call(["ps", "-u", AUTOMATION_USER])
+                    if exit_code == 0:
+                        log(INFO, "Test returned [-1] for Enabled = False, process running under nxautomation detected")
+                        return [-1]
+                    else:
+                        # any process under nxautomation user was not found
+                        log(INFO, "Test returned [0] for Enabled = False, NO process running under nxautomation")
+                        return [0]
+                else:
+                    log(INFO, "Test returned [0] for Enabled = False")
+                    return [0]
     log(INFO, "Test returned [-1] for Enabled = " + str(Enabled))
     return [-1]
 
