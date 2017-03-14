@@ -44,9 +44,15 @@ def verify_signature(signed_file_path, output_file_path):
         # temporary workaround for the omi/gpg bug causing gpg to create a .gpg folder in the wrong home dir
         # only apply the workaround for oms installation
         env = None
-        if "nxOMSAutomationWorkerResource" in os.path.abspath(__file__):
+        if os.name.lower() != "nt" and "nxOMSAutomationWorkerResource" in os.path.abspath(__file__):
             env = os.environ.copy()
-            env["HOME"] = "/var/opt/microsoft/omsagent/run"
+
+            import pwd
+            current_username = pwd.getpwuid(os.getuid()).pw_name
+            if "omsagent" in current_username:
+                env["HOME"] = "/var/opt/microsoft/omsagent/run"
+            elif "nxautomation" in current_username:
+                env["HOME"] = "/var/opt/microsoft/omsagent/run/automationworker"
 
         proc = subprocessfactory.create_subprocess(cmd=cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
