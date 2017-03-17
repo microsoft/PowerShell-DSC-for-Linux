@@ -37,7 +37,7 @@ function CreateCimSession
             "UserName": "root",
             "Password": "password",
             "Port": 5986
-        },    
+        },
 .Example
     Connect to a linux server defined in a test configuration file.
     $cfg = Get-TestConfiguration
@@ -445,7 +445,7 @@ class ConfigScriptBuilder
 .Parameter ConfigurationName
     The name to assign to the configuration.
 .Parameter Destination
-    The path to the directory where the script should be created.    
+    The path to the directory where the script should be created.
 .Parameter TestConfig
     The test configuration to use to create the script.
     See Get-TestConfiguration or ImportLinuxTestConfiguration.
@@ -749,21 +749,21 @@ function Format-MofSetting
         [ValidateNotNullOrEmpty()]
         [object] $Type
     )
-    [string] $result = $null 
-    switch ($Type)  
-    {       
+    [string] $result = $null
+    switch ($Type)
+    {
         'integer' {$result = [string]::Format(' {0} = {1:d};', $Name, $Value)}
         'string' {$result = [string]::Format(' {0} = "{1}";', $Name, $Value)}
         'value' {$result = [string]::Format(' {0} = "{1}";', $Name, $Value)}
-        'boolean' 
+        'boolean'
         {
             if ($Value -eq $true)
             {
                 $Value = 'True'
             }
-            else 
+            else
             {
-                $Value = 'False'    
+                $Value = 'False'
             }
             $result = [string]::Format(' {0} = {1};', $Name, $Value)
         }
@@ -782,7 +782,7 @@ function Format-MofSetting
 .Parameter Value
     The value to update.
 .Outputs
-    The updated MOF content as a string.    
+    The updated MOF content as a string.
 #>
 function Update-MetaConfigurationSetting
 {
@@ -803,7 +803,7 @@ function Update-MetaConfigurationSetting
     [string] $type = [ConfigScriptBuilder]::GetSettingType($Name)
     if ([string]::IsNullOrEmpty($type))
     {
-        throw "Update-MetaConfigurationMof - Setting name, $Name, is not supported. Verify the name or update ConfigScriptBuilder::SettingsProperties with the setting information." 
+        throw "Update-MetaConfigurationMof - Setting name, $Name, is not supported. Verify the name or update ConfigScriptBuilder::SettingsProperties with the setting information."
     }
 
     [string[]] $lines = $Content.Split($script:lineSeparators, [StringSplitOptions]::None)
@@ -845,7 +845,7 @@ function Update-MetaConfigurationSetting
         if ($line.StartsWith($Name, [StringComparison]::InvariantCultureIgnoreCase))
         {
             # replace the previous entry with the new one.
-            $lines[$x] = $newline 
+            $lines[$x] = $newline
             $replaced = $true
             break
         }
@@ -875,23 +875,23 @@ function Update-MetaConfigurationSetting
 .Synopsis
     Installs a Test Linux DSC Resource ZIP package to the modules directory under Program Files
 
-.Notes    
+.Notes
     This function should be called to install a Test Linux DSC resource, such as nxNop to enable compilation.
     Releases resources should use Install-Module.
 
 .Parameter Path
-    The path to the zip package.       
+    The path to the zip package.
 
 .Parameter ModuleName
     The name of the module in the package.
     This value determines the name of the directory to use to unpackage the resource files.
     If the zip package includes the module's containing folder, leave this parameter empty.
 #>
-Install-LinuxResource
+function Install-LinuxResource
 {
     param
     (
-        [Parameter(Mandatory)]   
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [string] $Path,
 
@@ -919,4 +919,4 @@ Export-ModuleMember -function CreateCimSession, Connect-Dsc
 # Configuration script functions
 Export-ModuleMember -function New-PartialConfigPullScript, Update-MetaConfigurationSetting
 # publishing (copying) functions.
-Export-ModuleMember -function Update-PullServer, Publish-Mof, Publish-ResourcePackage, Install-LinuxResource
+Export-ModuleMember -function Update-PullServer, Publish-Mof, Publish-ResourcePackage
