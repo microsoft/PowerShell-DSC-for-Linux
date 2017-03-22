@@ -16,7 +16,7 @@ show_mof = False
 
 # [Key] string Name;
 #
-# [Write, ValueMap{"Pass", "Fail"}, Values{"Pass", "Fail"}] 
+# [Write, ValueMap{"Pass", "Fail"}, Values{"any value", "Fail"}] 
 # string Value;
 #
 # [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] 
@@ -45,7 +45,7 @@ def Get_Marshall(Name, Value, Ensure):
     arg_names = list(locals().keys())
     (Name, Value, Ensure) = init_vars(Name, Value, Ensure)
     retval = 0
-    retval, Name, Value, Ensure = Get(Name, Value, Ensure)
+    (retval, Name, Value, Ensure) = Get(Name, Value, Ensure)
     Name = protocol.MI_String(Name)
     Value = protocol.MI_String(Value)
     Ensure = protocol.MI_String(Ensure)
@@ -60,32 +60,18 @@ def Get_Marshall(Name, Value, Ensure):
 class Params:
 
     def __init__(self, Name, Value, Ensure):
-
         if not ("present" in Ensure or "absent" in Ensure):
-            Print(
-                'ERROR: Param Ensure must be "Present" or "Absent".', file=sys.stderr)
-            LG().Log(
-                'ERROR', 'ERROR: Param Ensure must be "Present" or "Absent".')
+            LG().Log('ERROR', 'ERROR: Param Ensure must be "Present" or "Absent".')
             raise Exception('BadParameter')
 
         self.Ensure = Ensure
 
         if len(Name) < 1:
-            Print(
-                'ERROR: Param Name must be set.', file=sys.stderr)
-            LG().Log('ERROR', 'ERROR: Param Name must be set if Path <> True.')
+            LG().Log('ERROR', 'ERROR: Param Name must be set.')
             raise Exception('BadParameter')
 
         self.Name = Name
-
-        if not ("pass" in Ensure or "fail" in Ensure):
-            Print(
-                'ERROR: Param Ensure must be "Pass" or "Fail".', file=sys.stderr)
-            LG().Log(
-                'ERROR', 'ERROR: Param Ensure must be "Pass" or "Fail".')
-            raise Exception('BadParameter')
-
-        self.Value = Value.lower
+        self.Value = Value
 
 ############################################################
 # DSC functions
@@ -113,29 +99,17 @@ def Set(Name, Value, Ensure):
     try:
         p = Params(Name, Value, Ensure)
     except Exception, e:
-        Print(
-            'ERROR - Unable to initialize nxNopProvider. ' +
-            str(e), file=sys.stderr)
-        LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
+        LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
         return [retval]
-
-    ShowMof('Set', Name, Value, Ensure)
 
     if p.Ensure == 'present':
         if p.Value == 'fail':
-            Print(
-                'ERROR - Failing Set(present) due to Value = "fail". ' + str(e), file=sys.stderr)
-            LG().Log(
-                'ERROR', 'ERROR - Failing Set(present) due to Value = "fail".' + str(e))
+            LG().Log('ERROR', 'ERROR - Failing Set(present) due to Value = "fail".' + str(e))
         else:
             retval = 0
     else:
         if p.Value == 'fail':
-            Print(
-                'ERROR - Failing Set(absent) due to Value = "fail" ' + str(e), file=sys.stderr)
-            LG().Log(
-                'ERROR', 'ERROR - Failing Set(absent) due to Value = "fail". ' + str(e))
+            LG().Log('ERROR', 'ERROR - Failing Set(absent) due to Value = "fail". ' + str(e))
         else:
             retval = 0
 
@@ -144,34 +118,22 @@ def Set(Name, Value, Ensure):
 def Test(Name, Value, Ensure):
     retval = -1
     try:
-        p = Params(Name, Value, Ensure, Path)
+        p = Params(Name, Value, Ensure)
     except Exception, e:
-        Print(
-            'ERROR - Unable to initialize nxNopProvider. ' +
-            str(e), file=sys.stderr)
-        LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
+        LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
         return [retval]
-
-    ShowMof('Test', Name, Value, Ensure)
 
     if p.Value == 'pass':
         retval = 0
 
     return [retval]
 
-def Get(Name, Value, Ensure, Path):
+def Get(Name, Value, Ensure):
     retval = -1
     try:
         p = Params(Name, Value, Ensure)
+        retval = 0       
     except Exception, e:
-        Print(
-            'ERROR - Unable to initialize nxNopProvider. ' +
-            str(e), file=sys.stderr)
-        LG().Log(
-            'ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
-        return [retval, Name, Value, Ensure]
-
-    ShowMof('Get', Name, Value, Ensure)
+        LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
 
     return [retval, Name, Value, Ensure]

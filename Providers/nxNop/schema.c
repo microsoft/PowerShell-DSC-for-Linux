@@ -101,116 +101,14 @@ static MI_QualifierDecl MI_CONST* MI_CONST qualifierDecls[] =
 **==============================================================================
 */
 
-/* property OMI_BaseResource.ResourceId */
-static MI_CONST MI_PropertyDecl OMI_BaseResource_ResourceId_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED, /* flags */
-    0x0072640A, /* code */
-    MI_T("ResourceId"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_BaseResource, ResourceId), /* offset */
-    MI_T("OMI_BaseResource"), /* origin */
-    MI_T("OMI_BaseResource"), /* propagator */
-    NULL,
-};
+static MI_CONST MI_Boolean OMI_BaseResource_Abstract_qual_value = 1;
 
-/* property OMI_BaseResource.SourceInfo */
-static MI_CONST MI_PropertyDecl OMI_BaseResource_SourceInfo_prop =
+static MI_CONST MI_Qualifier OMI_BaseResource_Abstract_qual =
 {
-    MI_FLAG_PROPERTY, /* flags */
-    0x00736F0A, /* code */
-    MI_T("SourceInfo"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_BaseResource, SourceInfo), /* offset */
-    MI_T("OMI_BaseResource"), /* origin */
-    MI_T("OMI_BaseResource"), /* propagator */
-    NULL,
-};
-
-/* property OMI_BaseResource.Requires */
-static MI_CONST MI_PropertyDecl OMI_BaseResource_Requires_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00727308, /* code */
-    MI_T("Requires"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_STRINGA, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_BaseResource, Requires), /* offset */
-    MI_T("OMI_BaseResource"), /* origin */
-    MI_T("OMI_BaseResource"), /* propagator */
-    NULL,
-};
-
-/* property OMI_BaseResource.ModuleName */
-static MI_CONST MI_PropertyDecl OMI_BaseResource_ModuleName_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED, /* flags */
-    0x006D650A, /* code */
-    MI_T("ModuleName"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_BaseResource, ModuleName), /* offset */
-    MI_T("OMI_BaseResource"), /* origin */
-    MI_T("OMI_BaseResource"), /* propagator */
-    NULL,
-};
-
-/* property OMI_BaseResource.ModuleVersion */
-static MI_CONST MI_PropertyDecl OMI_BaseResource_ModuleVersion_prop =
-{
-    MI_FLAG_PROPERTY|MI_FLAG_REQUIRED, /* flags */
-    0x006D6E0D, /* code */
-    MI_T("ModuleVersion"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_BaseResource, ModuleVersion), /* offset */
-    MI_T("OMI_BaseResource"), /* origin */
-    MI_T("OMI_BaseResource"), /* propagator */
-    NULL,
-};
-
-/* property OMI_BaseResource.ConfigurationName */
-static MI_CONST MI_PropertyDecl OMI_BaseResource_ConfigurationName_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00636511, /* code */
-    MI_T("ConfigurationName"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(OMI_BaseResource, ConfigurationName), /* offset */
-    MI_T("OMI_BaseResource"), /* origin */
-    MI_T("OMI_BaseResource"), /* propagator */
-    NULL,
-};
-
-static MI_PropertyDecl MI_CONST* MI_CONST OMI_BaseResource_props[] =
-{
-    &OMI_BaseResource_ResourceId_prop,
-    &OMI_BaseResource_SourceInfo_prop,
-    &OMI_BaseResource_Requires_prop,
-    &OMI_BaseResource_ModuleName_prop,
-    &OMI_BaseResource_ModuleVersion_prop,
-    &OMI_BaseResource_ConfigurationName_prop,
+    MI_T("Abstract"),
+    MI_BOOLEAN,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_RESTRICTED,
+    &OMI_BaseResource_Abstract_qual_value
 };
 
 static MI_CONST MI_Char* OMI_BaseResource_ClassVersion_qual_value = MI_T("1.0.0");
@@ -223,9 +121,21 @@ static MI_CONST MI_Qualifier OMI_BaseResource_ClassVersion_qual =
     &OMI_BaseResource_ClassVersion_qual_value
 };
 
+static MI_CONST MI_Char* OMI_BaseResource_Description_qual_value = MI_T("1");
+
+static MI_CONST MI_Qualifier OMI_BaseResource_Description_qual =
+{
+    MI_T("Description"),
+    MI_STRING,
+    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
+    &OMI_BaseResource_Description_qual_value
+};
+
 static MI_Qualifier MI_CONST* MI_CONST OMI_BaseResource_quals[] =
 {
+    &OMI_BaseResource_Abstract_qual,
     &OMI_BaseResource_ClassVersion_qual,
+    &OMI_BaseResource_Description_qual,
 };
 
 /* class OMI_BaseResource */
@@ -236,8 +146,8 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
     MI_T("OMI_BaseResource"), /* name */
     OMI_BaseResource_quals, /* qualifiers */
     MI_COUNT(OMI_BaseResource_quals), /* numQualifiers */
-    OMI_BaseResource_props, /* properties */
-    MI_COUNT(OMI_BaseResource_props), /* numProperties */
+    NULL, /* properties */
+    0, /* numProperties */
     sizeof(OMI_BaseResource), /* size */
     NULL, /* superClass */
     NULL, /* superClassDecl */
@@ -245,7 +155,7 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
     0, /* numMethods */
     &schemaDecl, /* schema */
     NULL, /* functions */
-    NULL, /* owningClass */
+    NULL /* owningClass */
 };
 
 /*
@@ -309,12 +219,6 @@ static MI_CONST MI_PropertyDecl MSFT_nxNopResource_Ensure_prop =
 
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxNopResource_props[] =
 {
-    &OMI_BaseResource_ResourceId_prop,
-    &OMI_BaseResource_SourceInfo_prop,
-    &OMI_BaseResource_Requires_prop,
-    &OMI_BaseResource_ModuleName_prop,
-    &OMI_BaseResource_ModuleVersion_prop,
-    &OMI_BaseResource_ConfigurationName_prop,
     &MSFT_nxNopResource_Name_prop,
     &MSFT_nxNopResource_Value_prop,
     &MSFT_nxNopResource_Ensure_prop,
