@@ -1187,7 +1187,7 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
         MI_Instance* metaConfigInstance = NULL;
         MI_Char* unexpandedPartialConfigFilePath = NULL;
         MI_Char* partialConfigFilePath = NULL;
-	MI_Char* checksumFile = NULL;
+        MI_Char* checksumFile = NULL;
         MI_InstanceA resourceInstanceArray = { 0 };
         Internal_Dir *dirHandle = NULL;
         MI_Application application = MI_APPLICATION_NULL;
@@ -1273,12 +1273,12 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
                                 }
                                 File_RemoveT(partialConfigFilePath); //Delete the file since its irrelevant
                                
- 				ConcatStrings(&checksumFile, 0, partialConfigFilePath, CHECKSUM_EXTENSION);
-				File_RemoveT(checksumFile); //Delete the corresponding checksum file as well 
+                                ConcatStrings(&checksumFile, 0, partialConfigFilePath, CHECKSUM_EXTENSION);
+                                File_RemoveT(checksumFile); //Delete the corresponding checksum file as well 
                                 
-				dirEntry = Internal_Dir_Read(dirHandle, MOF_EXTENSION);
+                                dirEntry = Internal_Dir_Read(dirHandle, MOF_EXTENSION);
                                 DSCFREE_IF_NOT_NULL(partialConfigFilePath);
-				DSCFREE_IF_NOT_NULL(checksumFile);
+                                DSCFREE_IF_NOT_NULL(checksumFile);
                                                                 
 				result = MI_RESULT_OK;
                                 errorOccured = MI_TRUE;
