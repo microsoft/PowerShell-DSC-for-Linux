@@ -233,7 +233,7 @@ MI_Result InitHandler(
         // already initialized.
         return MI_RESULT_OK;
     }
-    else if (initState == RUNNING_INITIALIZATION)   
+    else if (initState == RUNNING_INITIALIZATION)
     {
         // currently going on.
         return GetCimMIError3Params(MI_RESULT_FAILED, cimErrorDetails, ID_LCM_MULTIPLE_METHOD_REQUEST, methodName, (const MI_Char*)g_inializingOperationMethodName, methodName);
@@ -1187,6 +1187,7 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
         MI_Instance* metaConfigInstance = NULL;
         MI_Char* unexpandedPartialConfigFilePath = NULL;
         MI_Char* partialConfigFilePath = NULL;
+	MI_Char* checksumFile = NULL;
         MI_InstanceA resourceInstanceArray = { 0 };
         Internal_Dir *dirHandle = NULL;
         MI_Application application = MI_APPLICATION_NULL;
@@ -1271,9 +1272,15 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
                                         INSTANCE_DELETE_IF_NOT_NULL(*cimErrorDetails);
                                 }
                                 File_RemoveT(partialConfigFilePath); //Delete the file since its irrelevant
-                                dirEntry = Internal_Dir_Read(dirHandle, MOF_EXTENSION);
+                               
+ 				ConcatStrings(&checksumFile, 0, partialConfigFilePath, CHECKSUM_EXTENSION);
+				File_RemoveT(checksumFile); //Delete the corresponding checksum file as well 
+                                
+				dirEntry = Internal_Dir_Read(dirHandle, MOF_EXTENSION);
                                 DSCFREE_IF_NOT_NULL(partialConfigFilePath);
-                                result = MI_RESULT_OK;
+				DSCFREE_IF_NOT_NULL(checksumFile);
+                                                                
+				result = MI_RESULT_OK;
                                 errorOccured = MI_TRUE;
                                 continue; //Carry on to the next file
                         }
