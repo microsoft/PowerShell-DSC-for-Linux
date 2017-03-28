@@ -19,40 +19,6 @@ module Fluent
             require_relative 'npmd_config_lib'
         end
 
-        config_param :location_unix_endpoint, :string, :default => "/var/opt/microsoft/omsagent/run/npmdagent.sock"
-        config_param :location_control_data,  :string, :default => "/etc/opt/microsoft/omagent/conf/npmd_agent_config.xml"
-        config_param :location_agent_binary,  :string, :default => "/opt/microsoft/omsagent/npmd_agent"
-        config_param :location_uuid_file,     :string, :default => "/etc/opt/microsoft/omsagent/conf/npmd_agent_guid.txt"
-        config_param :tag, :string, :default => "oms.npmd"
-        def configure(conf)
-            super
-
-            unless @location_unix_endpoint
-                raise ConfigError, "'location_unix_endpoint' is needed for agent communication"
-            end
-
-            unless @location_control_data
-                raise ConfigError, "'location_control_data' is needed to send config to agent"
-            end
-
-            unless @location_agent_binary
-                raise ConfigError, "'location_agent_binary' is needed to invoke the agent"
-            end
-
-            unless @location_uuid_file
-                raise ConfigError, "'location_uuid_file' is needed for storing the agent GUID"
-            end
-        end
-
-        attr_accessor :agentId
-        attr_accessor :binary_presence_test_string
-        attr_accessor :binary_invocation_cmd
-        attr_accessor :npmdClientSock
-        attr_accessor :num_path_data, :num_agent_data
-        attr_accessor :num_config_sent
-        attr_accessor :is_purged
-        attr_accessor :omsagentUID
-
         CMD_START         = "StartNPM"
         CMD_STOP          = "StopNPM"
         CMD_CONFIG        = "Config"
@@ -79,46 +45,117 @@ module Fluent
         EXIT_RESTART_BACKOFF_TIMES_SECS = [60, 120, 300, 600, 1200, 2400]
         EXIT_RESTART_BACKOFF_THRES_SECS = 900
 
+        NPMD_AGENT_CAPABILITY = "cap_net_raw+ep"
+        NPMD_STATE_DIR = "/var/opt/microsoft/omsagent/npm_state"
+        NPMD_VERSION_FILE_NAME = "npm_version"
+
+        config_param :omsadmin_conf_path,     :string, :default => "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
+        config_param :location_unix_endpoint, :string, :default => "#{NPMD_STATE_DIR}/npmdagent.sock"
+        config_param :location_control_data,  :string, :default => "/etc/opt/microsoft/omagent/conf/npmd_agent_config.xml"
+        config_param :location_agent_binary,  :string, :default => "/opt/microsoft/omsagent/plugin/npmd_agent"
+        config_param :tag, :string, :default => "oms.npmd"
+
+        def configure(conf)
+            super
+
+            unless @omsadmin_conf_path
+                raise ConfigError, "'omsadmin_conf_path' is needed to get the agent id"
+            end
+            if !File.exist?(@omsadmin_conf_path)
+                raise ConfigError, "no file #{@omsadmin_conf_path} exists"
+            end
+
+            unless @location_unix_endpoint
+                raise ConfigError, "'location_unix_endpoint' is needed for agent communication"
+            end
+
+            unless @location_control_data
+                raise ConfigError, "'location_control_data' is needed to send config to agent"
+            end
+
+            unless @location_agent_binary
+                raise ConfigError, "'location_agent_binary' is needed to invoke the agent"
+            end
+        end
+
+        attr_accessor :agentId
+        attr_accessor :binary_presence_test_string
+        attr_accessor :binary_invocation_cmd
+        attr_accessor :npmdClientSock
+        attr_accessor :num_path_data, :num_agent_data
+        attr_accessor :num_config_sent
+        attr_accessor :is_purged
+        attr_accessor :omsagentUID
+        attr_accessor :do_capability_check
+        attr_accessor :npmd_state_dir
+
         def start
+            # Fetch parameters related to instance
+            @agentId = get_agent_id()
+            return if @agentId.nil?
+            @fqdn = get_fqdn()
+
+            # Parameters that can be manipulated for testing
             @binary_presence_test_string = "npmd_agent" if @binary_presence_test_string.nil?
             @binary_invocation_cmd = @location_agent_binary if @binary_invocation_cmd.nil?
+            @npmd_state_dir = NPMD_STATE_DIR if @npmd_state_dir.nil?
+            @do_capability_check = true unless !@do_capability_check
+
+            # Setup steps for npmd_agent environment
             kill_all_agent_instances()
             upload_pending_stderrors()
             check_and_update_binaries()
+            check_agent_capability() unless !@do_capability_check
             setup_endpoint()
-            @fqdn = get_fqdn()
-            check_and_get_guid()
             @server_thread = Thread.new(&method(:server_run))
             @npmdIntendedStop = false
             @stderrFileNameHash = Hash.new
             @stop_sync = Mutex.new
+
+            # Parameters for restart backoffs
             @agent_restart_count = 0
             @last_npmd_start = nil
-            start_npmd()
+
+            # Watchdog based recovery parameters
             @watch_dog_thread = nil
             @watch_dog_sync = Mutex.new
             @watch_dog_last_pet = Time.new
+
+            # Start the npmd_agent
+            start_npmd() if File.exist?(@location_agent_binary)
         end
 
         def shutdown
             Logger::logInfo "Received shutdown notification"
+
+            # Stopping the npmd_agent
             stop_npmd()
+
+            # Cleanup agent related communication and instances
             kill_all_agent_instances()
             @npmdClientSock.close() unless @npmdClientSock.nil?
             @npmdClientSock = nil
+
+            # Stop recovery
             Thread.kill(@watch_dog_thread) if @watch_dog_thread.is_a?(Thread)
+
+            # Stop server
             Thread.kill(@server_thread)
+
+            # Cleanup filesystem resources
             File.unlink(@location_unix_endpoint) if File.exist?@location_unix_endpoint
-            File.unlink(@location_agent_binary) if File.exist?@location_agent_binary and (!@do_purge.nil? and @do_purge)
-            File.unlink(@location_uuid_file) if File.exist?@location_uuid_file and (!@do_purge.nil? and @do_purge)
-            delete_stale_stderror_files() if (!@do_purge.nil? and @do_purge)
-            @is_purged = true unless @is_purged.nil?
+            if !@do_purge.nil? and @do_purge
+                File.unlink(@location_agent_binary) if File.exist?@location_agent_binary
+                delete_state_directory()
+                @is_purged = true unless @is_purged.nil?
+            end
         end
 
         def setup_endpoint
             begin
                 _dirname = File.dirname(@location_unix_endpoint)
                 unless File.directory?(_dirname)
+                    # This is setting up the npm_state directory
                     FileUtils.mkdir_p(_dirname)
                 end
                 if File.exists?(@location_unix_endpoint)
@@ -334,21 +371,54 @@ module Fluent
             File.unlink(_x64BinPath) if File.exist?(_x64BinPath)
         end
 
-        def check_and_get_guid
-            create_new_guid = true
-            if File.exist?@location_uuid_file
-                f = File.new(@location_uuid_file, "r")
-                @agentId = f.read
-                f.close
+        def is_filesystem_capabilities_supported
+            _isGetCap = `whereis getcap`
+            _isGetCap.chomp!
+            if _isGetCap == "getcap:"
+                false
+            else
+                true
+            end
+        end
 
-                create_new_guid = false if (!@agentId.nil? and !@agentId.empty?)
+        def get_capability_str(loc)
+            _getCapResult = `getcap #{@location_agent_binary}`
+        end
+
+        def check_agent_capability
+            _deleteStateDir = false
+            _deleteBinary = false
+            _isCapSupported = is_filesystem_capabilities_supported()
+
+            if !_isCapSupported
+                _deleteBinary = true
+                log_error "Distro has no support for filesystem capabilities"
+            elsif !File.exist?(@location_agent_binary)
+                _deleteStateDir = true
+            else
+                _getCapResult = get_capability_str(@location_agent_binary)
+                if !_getCapResult.include?(NPMD_AGENT_CAPABILITY)
+                    _deleteBinary = true
+                    _deleteStateDir = true
+                end
             end
 
-            if create_new_guid
-                @agentId = SecureRandom.uuid
-                f = File.new(@location_uuid_file, "w")
-                f.write(@agentId)
-                f.close
+            # Delete state directory to allow DSC to copy binaries and setup
+            delete_state_directory() if _deleteStateDir
+
+            # We delete the binary because we do not want ruby to start it
+            if _deleteBinary and File.exist?(@location_agent_binary)
+                File.unlink(@location_agent_binary)
+            end
+
+        end
+
+        def get_agent_id
+            agentid_lines = IO.readlines(@omsadmin_conf_path).select { |line| line.start_with?("AGENT_GUID=")}
+            if agentid_lines.size == 0
+                return nil
+            else
+                return agentid_lines[0].split("=")[1].strip
             end
         end
 
@@ -391,24 +461,16 @@ module Fluent
             end
         end
 
-        def delete_stale_stderror_files
-            begin
-                _fileDir = File.dirname(@location_unix_endpoint)
-                _globPrefix = "#{_fileDir}/stderror_"
-                _fileList = Dir["#{_globPrefix}*"]
-                _fileList.each do |x|
-                    File.unlink(x)
-                end
-            rescue => e
-                log_error "Deleting stale stderror files exception: #{e}", Logger::resc
+        def delete_state_directory
+            if File.directory?(@npmd_state_dir)
+                FileUtils.rm_rf(@npmd_state_dir)
             end
         end
 
         def upload_pending_stderrors
             _arr = Array.new
             begin
-                _fileDir = File.dirname(@location_unix_endpoint)
-                _globPrefix = "#{_fileDir}/stderror_"
+                _globPrefix = "#{@npmd_state_dir}/stderror_"
                 _fileList = Dir["#{_globPrefix}*"]
                 _fileList.each do |x|
                     File.readlines(x).each do |line|
