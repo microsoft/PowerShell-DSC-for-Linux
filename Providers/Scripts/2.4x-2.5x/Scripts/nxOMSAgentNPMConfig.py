@@ -13,25 +13,39 @@ import codecs
 import base64
 import platform
 import shutil
+import re
+from fileinput import FileInput
+from distutils.version import LooseVersion
+
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
 # Paths
-CONFIG_PATH = '/etc/opt/microsoft/omsagent/conf/'
-SERVER_ADDRESS = '/var/opt/microsoft/omsagent/run/npmdagent.sock'
-DEST_FILE_NAME = 'npmd_agent_config.xml'
-PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
-PLUGIN_CONF_PATH = '/etc/opt/microsoft/omsagent/conf/omsagent.d/'
+PREFIX_ETC = '/etc/opt/microsoft/omsagent/'
+PREFIX_VAR = '/var/opt/microsoft/omsagent/'
+
+RPATH_AGENT_CONF = 'conf/'
+RPATH_PLUGIN_CONF = 'conf/omsagent.d/'
+RPATH_RUN = 'run/'
+
+FNAME_UDS_SERVER = 'npmdagent.sock'
+FNAME_AGENT_CONF = 'npmd_agent_config.xml'
+FNAME_NPM_VERSION = 'npm_version'
+FNAME_PLUGIN_CONF = 'npmd.conf'
+
+PATH_NPM_PLUGIN = '/opt/microsoft/omsagent/plugin/'
+PATH_NPM_STATE = os.path.join(PREFIX_VAR, 'npm_state')
+PATH_AGENT_BINARY = '/opt/microsoft/omsagent/plugin/'
+PATH_SETCAP_SCRIPT = '/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh'
+PATH_INSTALL_INFO = '/etc/opt/microsoft/omsagent/sysconf/installinfo.txt'
+
 RESOURCE_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSAgentNPMConfig/DSCResources/MSFT_nxOMSAgentNPMConfigResource/NPM/'
 DSC_RESOURCE_VERSION_PATH = '/opt/microsoft/omsconfig/modules/nxOMSAgentNPMConfig/VERSION'
-AGENT_RESOURCE_VERSION_PATH = '/var/opt/microsoft/omsagent/state/npm_version'
 DSC_X64_AGENT_PATH = 'Agent/64/'
 DSC_X86_AGENT_PATH = 'Agent/32/'
 DSC_PLUGIN_PATH = 'Plugin/plugin/'
 DSC_PLUGIN_CONF_PATH = 'Plugin/conf/'
-AGENT_BINARY_PATH = '/opt/microsoft/omsagent/plugin/'
-AGENT_SCRIPT_PATH = '/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh'
 
 # Constants
 X64 = '64bit'
@@ -50,13 +64,19 @@ class NPMDiagnosticLogUtil(INPMDiagnosticLog):
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
         try:
-            # Connect the socket to the port where the server is listening
-            sock.connect(SERVER_ADDRESS)
-            # Send data
-            message = Commands.LogNPM + ':' + '[' + logType + ']' + logString
-            sock.sendall(message)
-        except Exception, msg:
-            LG().Log(LogType.Error, str(msg))
+            try:
+                message = Commands.LogNPM + ':' + '[' + logType + ']' + logString
+                serverAddress = os.path.join(PATH_NPM_STATE, FNAME_UDS_SERVER)
+                if not os.path.exists(serverAddress):
+                    # Dump to DSC log if server sock does not exist
+                    LG().Log(logType, message)
+                    return
+                # Connect the socket to the port where the server is listening
+                sock.connect(serverAddress)
+                # Send data
+                sock.sendall(message)
+            except Exception, msg:
+                LG().Log(LogType.Error, str(msg))
         finally:
             sock.close()
 
@@ -67,11 +87,14 @@ class IOMSAgent:
         pass
 
 class OMSAgentUtil(IOMSAgent):
-    def restart_oms_agent(self):
-        if os.system('sudo /opt/microsoft/omsagent/bin/service_control restart') == 0:
+    def restart_oms_agent(self, workspaceId):
+        wsId = workspaceId
+        if wsId is None:
+            wsId = ''
+        if os.system('sudo /opt/microsoft/omsagent/bin/service_control restart %s' %(wsId)) == 0:
             return True
         else:
-            LOG_ACTION.log(LogType.Error, 'Error restarting omsagent.')
+            LOG_ACTION.log(LogType.Error, 'Error restarting omsagent for workspace ' + wsId)
             return False
 
 class INPMAgent:
@@ -80,7 +103,7 @@ class INPMAgent:
 
 class NPMAgentUtil(IOMSAgent):
     def binary_setcap(self, binaryPath):
-        if os.path.exists(AGENT_SCRIPT_PATH) and os.system('sudo %s %s' %(AGENT_SCRIPT_PATH, binaryPath)) == 0:
+        if os.path.exists(PATH_SETCAP_SCRIPT) and os.system('sudo %s %s' %(PATH_SETCAP_SCRIPT, binaryPath)) == 0:
             return True
         else:
             LOG_ACTION.log(LogType.Error, 'Error setting capabilities to npmd agent binary.')
@@ -126,7 +149,7 @@ def Set_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     recvdContentChecksum = md5.md5(Contents).hexdigest().upper()
     if recvdContentChecksum != ContentChecksum:
         # data is corrupt do not proceed further
-        LOG_ACTION.log(LogType.Error, 'Content received did not match checksum, exiting Set')
+        LG().Log(LogType.Error, 'Content received did not match checksum, exiting Set')
         return [-1]
     (ConfigType, ConfigID, Contents, Ensure, ContentChecksum) = init_vars(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = Set(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
@@ -137,7 +160,7 @@ def Test_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     recvdContentChecksum = md5.md5(Contents).hexdigest().upper()
     if recvdContentChecksum != ContentChecksum:
         # data is corrupt do not proceed further
-        LOG_ACTION.log(LogType.Error, 'Content received did not match checksum, exiting Test')
+        LOG_ACTION.log(LogType.Error, 'Content received did not match checksum, exiting Test for ' + ConfigID)
         return [0]
     (ConfigType, ConfigID, Contents, Ensure, ContentChecksum) = init_vars(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = Test(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
@@ -192,42 +215,45 @@ def ShowMof(op, ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
 def Set(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     ShowMof('SET', ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = 0
-    if ConfigType != 'UpdatedAgentConfig':
-        LOG_ACTION.log(LogType.Error, 'Config type did not match, exiting set')
+    if ConfigID == '' or not os.path.exists(os.path.join(PREFIX_ETC, ConfigID)):
+        # incorrect config id
+        LG().Log(LogType.Error, 'Received nonexistant workspace id ' + ConfigID)
         return [-1]
-    if Ensure == 'Absent':
-        if os.path.exists(AGENT_RESOURCE_VERSION_PATH):
-            LG().Log(LogType.Info, 'Ensure is absent, but resource is present, purging')
-            success = PurgeSolution()
-            if not success:
-                retval = -1
+    if SetMultiHoming(ConfigID, Ensure) != 0:
+        LG().Log(LogType.Error, 'Set failed for ' + ConfigID + ' and Ensure=' + Ensure)
+        retval = -1
         return [retval]
+    if ConfigType != 'UpdatedAgentConfig':
+        LG().Log(LogType.Error, 'Config type did not match, exiting set for workspace ' + ConfigID)
+        return [-1]
 
-    if TestConfigUpdate(Contents) != 0:
-        retval = SetConfigUpdate(Contents)
+    if Ensure == 'Present':
+        if TestConfigUpdate(ConfigID, Contents) != 0:
+            retval = SetConfigUpdate(ConfigID, Contents)
 
-    version = TestResourceVersion()
-    if version != 0:
-        retval = SetFilesUpdate(version)
+        if retval == 0:
+            retval = SetFilesUpdate(ConfigID)
     return [retval]
 
 
 def Test(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     ShowMof('TEST', ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = 0
-    if not os.path.exists(AGENT_SCRIPT_PATH):
-        LG().Log(LogType.Error, 'npmd set cap script does not exist, exiting test')
+    if ConfigID == '' or not os.path.exists(os.path.join(PREFIX_ETC, ConfigID)):
+        # incorrect config id
+        LOG_ACTION.log(LogType.Error, 'Received nonexistant workspace id ' + ConfigID)
+        return [retval]
+    if not os.path.exists(PATH_SETCAP_SCRIPT):
+        LOG_ACTION.log(LogType.Error, 'npmd set cap script does not exist, exiting test')
+        return [retval]
+    if TestMultiHoming(ConfigID, Ensure) != 0:
+        retval = -1
         return [retval]
     if ConfigType != 'UpdatedAgentConfig':
-        LOG_ACTION.log(LogType.Error, 'Config type did not match, exiting test')
+        LOG_ACTION.log(LogType.Error, 'Config type did not match, exiting test for workspace ' + ConfigID)
         return [retval]
-    if Ensure == 'Absent':
-        if os.path.exists(AGENT_RESOURCE_VERSION_PATH):
-            LG().Log(LogType.Info, 'Ensure is absent, resource is present on the agent, set will purge')
-            retval = -1
-        return [retval]
-
-    if TestResourceVersion() != 0 or TestConfigUpdate(Contents) != 0:
+    # check for config update or resource version only if ensure is present
+    if Ensure == 'Present' and (TestResourceVersion() != 0 or TestConfigUpdate(ConfigID, Contents) != 0):
         retval = -1
     return [retval]
 
@@ -242,27 +268,29 @@ def Print(s, file=sys.stdout):
     file.write(s + '\n')
 
 # Compare resource version in DSC and agent machine
-# Returns 
+# Returns
 #   0 if version is same
 #   dsc version number if there is a mismatch or agent config not present
 def TestResourceVersion():
     retval = 0
     dscVersion = ReadFile(DSC_RESOURCE_VERSION_PATH)
-    if not os.path.exists(AGENT_RESOURCE_VERSION_PATH):
+    agentVersionFile = os.path.join(PATH_NPM_STATE, FNAME_NPM_VERSION)
+    if not os.path.exists(agentVersionFile):
         #npmd agent is not present, copy binaries
         retval = dscVersion
     else:
-        agentVersion = ReadFile(AGENT_RESOURCE_VERSION_PATH)
+        agentVersion = ReadFile(agentVersionFile)
         if agentVersion != dscVersion:
             #version mismatch, copy binaries
             retval = dscVersion
     return retval
 
-def TestConfigUpdate(Contents):
+def TestConfigUpdate(ConfigID, Contents):
     retval = 0
-    destFileFullPath = CONFIG_PATH.__add__(DEST_FILE_NAME)
-    if not os.path.exists(CONFIG_PATH):
-        LOG_ACTION.log(LogType.Error, 'CONFIG_PATH does not exist')
+    destFileDirPath = os.path.join(PREFIX_ETC, ConfigID, RPATH_AGENT_CONF)
+    destFileFullPath = os.path.join(destFileDirPath, FNAME_AGENT_CONF)
+    if not os.path.exists(destFileDirPath):
+        LOG_ACTION.log(LogType.Error, 'Conf directory for workspace ' + ConfigID + ' does not exist')
         retval = 0
     elif not os.path.exists(destFileFullPath):
         # Configuration does not exist, fail
@@ -274,26 +302,86 @@ def TestConfigUpdate(Contents):
             retval = -1
     return retval
 
-def SetConfigUpdate(Contents):
-    destFileFullPath = CONFIG_PATH.__add__(DEST_FILE_NAME)
+def TestMultiHoming(ConfigID, Ensure):
+    wsRunningNPM = GetWorkspaceRunningNPM()
+    if wsRunningNPM is None:
+        if os.path.exists(PATH_NPM_STATE):
+            LG().Log(LogType.Info, 'NPM State directory exists when NPM is not running, set to clean up')
+            return -1
+        if Ensure == 'Present':
+            LG().Log(LogType.Info, 'NPM should be started for workspace ' + ConfigID + ' set to set it up')
+            return -1
+    elif not os.path.exists(PATH_NPM_STATE):
+        LG().Log(LogType.Info, 'NPM State directory deleted when NPM is running, set to check setup')
+        return -1
+    if wsRunningNPM == ConfigID and Ensure == 'Absent':
+        LG().Log(LogType.Info, 'NPM should be purged, set to purge')
+        return -1
+    return 0
+
+def SetMultiHoming(ConfigID, Ensure):
+    wsRunningNPM = GetWorkspaceRunningNPM()
+    retval = 0
+
+    if wsRunningNPM is None:
+        if os.path.exists(PATH_NPM_STATE):
+            LG().Log(LogType.Info, 'NPM State directory exists when NPM is not running, now removed')
+            shutil.rmtree(PATH_NPM_STATE, ignore_errors=True)
+        if Ensure == 'Present':
+            LG().Log(LogType.Info, 'NPM now getting setup for workspace ' + ConfigID)
+            retval = SetupNPM(ConfigID)
+    elif not os.path.exists(PATH_NPM_STATE):
+        # Ignore case when purge is supposed to be called
+        if wsRunningNPM != ConfigID or Ensure != 'Absent':
+            LOG_ACTION.log(LogType.Info, 'NPM State directory deleted when NPM is running, now again setting up')
+            retval = SetupNPM(wsRunningNPM)
+    if wsRunningNPM == ConfigID and Ensure == 'Absent':
+        LG().Log(LogType.Info, 'Purging NPM solution')
+        if not PurgeSolution(ConfigID):
+            retval = -1
+
+    return retval
+
+def SetConfigUpdate(ConfigID, Contents):
+    destFileDirPath = os.path.join(PREFIX_ETC, ConfigID, RPATH_AGENT_CONF)
+    destFileFullPath = os.path.join(destFileDirPath, FNAME_AGENT_CONF)
 
     # Update config after checking if directory exists
-    if not os.path.exists(CONFIG_PATH):
-        LOG_ACTION.log(LogType.Error, 'CONFIG_PATH does not exist')
+    if not os.path.exists(destFileDirPath):
+        LG().Log(LogType.Error, 'Conf directory for workspace ' + ConfigID + ' does not exist')
         retval = -1
     else:
         retval = WriteFile(destFileFullPath, Contents)
-        if retval == 0 and os.path.exists(AGENT_RESOURCE_VERSION_PATH): #notify server only if plugin is present
-            LG().Log(LogType.Info, 'Updated the file, going to notify server')
-            retval = NotifyServer(Commands.Config)
+        if retval == 0:
+            LOG_ACTION.log(LogType.Info, 'Updated agent config file for workspace ' + ConfigID)
+            if ConfigID == GetWorkspaceRunningNPM():
+                retval = NotifyServer(Commands.Config)
+        elif retval != 0:
+            LOG_ACTION.log(LogType.Error, 'Updating agent config file failed for workspace ' + ConfigID)
     return retval
 
-def SetFilesUpdate(newVersion):
-    retval = UpdateAgentBinary(newVersion)
-    retval &= UpdatePluginFiles()
+def SetFilesUpdate(ConfigID):
+    retval = True
+    version = TestResourceVersion()
+    if version != 0:
+        retval = UpdateAgentBinary(version)
+        retval &= UpdatePluginFiles()
+        retval &= UpdatePluginConfFiles(ConfigID)
     if retval:
         return 0
     return -1
+
+def SetupNPM(ConfigID):
+    retval = 0
+    # Create the npm state directory
+    if not os.path.exists(os.path.join(PATH_NPM_STATE)):
+        try:
+            os.makedirs(PATH_NPM_STATE, 0755)
+        except:
+            retval = -1
+    if retval == 0:
+        retval = SetFilesUpdate(ConfigID)
+    return retval
 
 def UpdateAgentBinary(newVersion):
     retval = True
@@ -301,41 +389,57 @@ def UpdateAgentBinary(newVersion):
     src = ''
     if arch is not None and arch[0] == X64:
         src = RESOURCE_MODULE_PATH.__add__(DSC_X64_AGENT_PATH)
-        retval &= DeleteAllFiles(src, AGENT_BINARY_PATH)
-        retval &= CopyAllFiles(src, AGENT_BINARY_PATH)
+        retval &= DeleteAllFiles(src, PATH_AGENT_BINARY)
+        retval &= CopyAllFiles(src, PATH_AGENT_BINARY)
     else:
         src = RESOURCE_MODULE_PATH.__add__(DSC_X86_AGENT_PATH)
-        retval &= DeleteAllFiles(src, AGENT_BINARY_PATH)
-        retval &= CopyAllFiles(src, AGENT_BINARY_PATH)
+        retval &= DeleteAllFiles(src, PATH_AGENT_BINARY)
+        retval &= CopyAllFiles(src, PATH_AGENT_BINARY)
 
     # set capabilities to binary
     src_files = os.listdir(src)
     for file_name in src_files:
-        full_file_name = os.path.join(AGENT_BINARY_PATH, file_name) # assuming only file in directory
+        full_file_name = os.path.join(PATH_AGENT_BINARY, file_name) # assuming only file in directory
         break
     retval &= NPM_ACTION.binary_setcap(full_file_name)
 
-    # Notify ruby plugin
-    #retval &= NotifyServer(Commands.RestartNPM)
-
     #Update version number
     if retval == True:
-        WriteFile(AGENT_RESOURCE_VERSION_PATH, newVersion)
+        WriteFile(os.path.join(PATH_NPM_STATE, FNAME_NPM_VERSION), newVersion)
     return retval
 
 def UpdatePluginFiles():
     retval = True
-
     #replace files
-    retval &= DeleteAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_PATH), PLUGIN_PATH)
-    retval &= DeleteAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_CONF_PATH), PLUGIN_CONF_PATH)
-    retval &= CopyAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_PATH), PLUGIN_PATH)
-    retval &= CopyAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_CONF_PATH), PLUGIN_CONF_PATH)
-
-    # restart oms agent
-    retval &= OMS_ACTION.restart_oms_agent()
-
+    retval &= DeleteAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_PATH), PATH_NPM_PLUGIN)
+    retval &= CopyAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_PATH), PATH_NPM_PLUGIN)
     return retval
+
+def UpdatePluginConfFiles(workspaceID):
+    retval = True
+    # restart oms agent
+    if workspaceID is not None:
+        pluginConfPath = os.path.join(PREFIX_ETC, workspaceID, RPATH_PLUGIN_CONF)
+        retval &= DeleteAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_CONF_PATH), pluginConfPath)
+        retval &= CopyAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_CONF_PATH), pluginConfPath)
+        # Update the plugin conf file to have correct directory info for agent config file
+        retval &= UpdateControlDataPathInPluginConfFile(workspaceID)
+        retval &= OMS_ACTION.restart_oms_agent(workspaceID)
+    return retval
+
+def UpdateControlDataPathInPluginConfFile(workspaceID):
+    # Check for presence of the plugin conf file
+    confFilePath = os.path.join(PREFIX_ETC, workspaceID, RPATH_PLUGIN_CONF, FNAME_PLUGIN_CONF)
+    if not os.path.exists(confFilePath):
+        return False
+
+    controlDataDirPath = os.path.join(PREFIX_ETC, workspaceID, RPATH_AGENT_CONF)
+    # Update the plugin conf file control data path variable
+    for line in FileInput(confFilePath, inplace=1):
+        if "%CONF_DIR_WS%" in line:
+            line = line.replace("%CONF_DIR_WS%", controlDataDirPath)
+        print line,
+    return True
 
 def CopyAllFiles(src, dest):
     try:
@@ -362,15 +466,16 @@ def DeleteAllFiles(src, dest):
         return False
     return True
 
-def PurgeSolution():
-    # remove plugin config file so that plugin does not start again
-    retval = DeleteAllFiles(RESOURCE_MODULE_PATH.__add__(DSC_PLUGIN_CONF_PATH), PLUGIN_CONF_PATH)
+def PurgeSolution(ConfigID):
+    retval = True
 
     # remove resource version file
     try:
-        os.remove(AGENT_RESOURCE_VERSION_PATH)
+        confFile = os.path.join(PREFIX_ETC, ConfigID, RPATH_PLUGIN_CONF, FNAME_PLUGIN_CONF)
+        if os.path.exists(confFile):
+            os.remove(confFile)
     except:
-        LOG_ACTION.log(LogType.Error, 'failed to remove version file')
+        LOG_ACTION.log(LogType.Error, 'Purge attempt failed')
         retval = False
 
     # notify ruby plugin to purge agent
@@ -381,21 +486,25 @@ def PurgeSolution():
 
 def NotifyServer(command):
     retval = 0
+    serverAddress = os.path.join(PATH_NPM_STATE, FNAME_UDS_SERVER)
     # Create a UDS socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    LG().Log(LogType.Info, 'connecting to ' +  SERVER_ADDRESS)
+    LG().Log(LogType.Info, 'connecting to ' +  serverAddress)
 
     try:
-        # Connect the socket to the port where the server is listening
-        sock.connect(SERVER_ADDRESS)
+        try:
+            # Connect the socket to the port where the server is listening
+            if not os.path.exists(serverAddress):
+                return retval
+            sock.connect(serverAddress)
 
-        # Send data
-        message = command
-        LG().Log(LogType.Info, 'sending ' + message)
-        sock.sendall(message)
-    except Exception, msg:
-        LG().Log(LogType.Error, str(msg))
-        retval = -1
+            # Send data
+            message = command
+            LG().Log(LogType.Info, 'sending ' + message)
+            sock.sendall(message)
+        except Exception, msg:
+            LG().Log(LogType.Error, str(msg))
+            retval = -1
     finally:
         LG().Log(LogType.Info, 'closing socket')
         sock.close()
@@ -421,4 +530,23 @@ def ReadFile(path):
     except IOError, error:
         LOG_ACTION.log(LogType.Error, "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
     return content
+
+def GetWorkspaceListFromDirectories():
+    listOfDirs = os.listdir(PREFIX_ETC)
+    return filter(IsUUID, listOfDirs)
+
+def GetWorkspaceRunningNPM():
+    listOfDirs = GetWorkspaceListFromDirectories()
+    for x in listOfDirs:
+        if os.path.exists(os.path.join(PREFIX_ETC, x, RPATH_PLUGIN_CONF, FNAME_PLUGIN_CONF)):
+            return x
+    return None
+
+def IsUUID(uuidStr):
+    try:
+        # Utilizing the regex pattern utilized by OMSAgent
+        uuidOut = re.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$', uuidStr, re.I)
+    except:
+        return False
+    return uuidOut is not None
 
