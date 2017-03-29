@@ -222,6 +222,9 @@ def GetFileInfo(fname, Links, MaxContentsReturnable, Checksum):
     If file is link and 'Links' == 'ignore' {} is returned.
     """
     d = {}
+    if fname.endswith("omsadmin.conf"):
+       return d
+
     if os.path.islink(fname):
         d['Type'] = 'link'
     else :

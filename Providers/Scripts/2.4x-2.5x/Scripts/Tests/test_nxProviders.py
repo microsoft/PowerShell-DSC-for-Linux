@@ -3923,6 +3923,8 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         os.makedirs(cls.basepath+'joedir0/joedir1/joedir2/')
         open(cls.basepath+'basedirfile1.txt','w+').write(\
             'Contents of basedirfile1.txt\n')
+        open(cls.basepath+'omsadmin.conf','w+').write(\
+            'Contents of omsadmin.conf\n')
         open(cls.basepath+'basedirfile2.txt','w+').write(\
             'Contents of basedirfile2.txt\n')
         open(cls.basepath+'basedirfile3.bin','wb+').write(\
@@ -4069,6 +4071,22 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallSingleFile')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallSingleFile_omsadminconf(self):
+        print('Using path:' + self.basepath + 'omsadmin.conf')
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath + 'omsadmin.conf', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0')
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallSingleFile',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallSingleFile')
+        self.assertFalse(g == l, repr(g) + '\n should be == to \n' + repr(l))
         for d in r[1]['__Inventory'].value:
             print d['DestinationPath'], d['Contents']
 
