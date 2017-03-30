@@ -253,7 +253,7 @@ def GetFileInfo(fname, Links, MaxContentsReturnable, Checksum):
     if stat_info.st_size == 0:
        d['Contents'] = ''
        if Checksum == 'md5' or Checksum == 'sha-256':
-        d['Checksum'] = 0
+        d['Checksum'] = ""
        elif Checksum == "ctime":
         d['Checksum']= str(int(stat_info.st_ctime))
        else : # Checksum == "mtime":
