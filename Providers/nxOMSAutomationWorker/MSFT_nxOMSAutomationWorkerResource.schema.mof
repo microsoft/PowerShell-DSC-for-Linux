@@ -1,7 +1,5 @@
-[ClassVersion("1.2.0")]
+[ClassVersion("1.4.0")]
 class MSFT_nxOMSAutomationWorkerResource : OMI_BaseResource
 {
-    [Key] string WorkspaceId;
-    [Write] boolean Enabled;
-    [Write] string AzureDnsAgentSvcZone;
+    [Key] string ResourceSettings;
 };
