@@ -14,6 +14,7 @@ import logging.handlers
 import pwd
 
 import imp
+
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
@@ -36,7 +37,7 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
     try:
         is_primary = is_oms_primary_workspace(WorkspaceId)
     except Exception, e:
-        log(ERROR, "Could not detect if workspace is primary\n %s" %(str(e)))
+        log(ERROR, "Could not detect if workspace is primary\n %s" % (str(e)))
         return [-1]
 
     if is_primary is False:
@@ -107,6 +108,12 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
 
             # Start the worker again
             if nxautomation_user_exists():
+                # set proper cert permissions
+
+                proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--initialize"])
+                if proc.wait() != 0:
+                    raise Exception("call to omsutil.py --initialize failed")
+
                 # With newer versions of OMS, worker should run as nxautomation user
                 start_daemon(["sudo", "-u", AUTOMATION_USER, "python", HYBRID_WORKER_START_PATH, WORKER_CONF_FILE_PATH,
                               WorkspaceId, read_resource_version_file()])
@@ -167,10 +174,12 @@ def Test_Marshall(WorkspaceId, Enabled, AzureDnsAgentSvcZone):
                     pid = verify_hybrid_worker()
                     if pid > 0:
                         if nxautomation_user_exists():
-                            proc = subprocess.Popen(["ps", "-p", str(pid), "-o", "user="],stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                            proc = subprocess.Popen(["ps", "-p", str(pid), "-o", "user="], stdin=subprocess.PIPE,
+                                                    stdout=subprocess.PIPE)
                             result, error = proc.communicate()
                             if proc.returncode != 0 or error:
-                                log(INFO, "nxautomation user was found but could not determine the user for runnning process")
+                                log(INFO,
+                                    "nxautomation user was found but could not determine the user for runnning process")
                                 return [-1]
                             result = str(result)
                             if AUTOMATION_USER in result:
@@ -251,10 +260,11 @@ OMS_CERT_KEY_PATH = "/etc/opt/microsoft/omsagent/certs/oms.key"
 WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run/automationworker"
 REGISTRATION_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/scripts/register_oms.py"
 HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
-PROXY_CONF_PATH_LEGACY="/etc/opt/microsoft/omsagent/conf/proxy.conf"
-PROXY_CONF_PATH_NEW="/etc/opt/microsoft/omsagent/proxy.conf"
-KEYRING_PATH="/etc/opt/omi/conf/omsconfig/keyring.gpg"
+PROXY_CONF_PATH_LEGACY = "/etc/opt/microsoft/omsagent/conf/proxy.conf"
+PROXY_CONF_PATH_NEW = "/etc/opt/microsoft/omsagent/proxy.conf"
+KEYRING_PATH = "/etc/opt/omi/conf/omsconfig/keyring.gpg"
 LOCAL_LOG_LOCATION = "/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log"
+OMS_UTIL_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/omsutil.py"
 
 # permission level rwx rwx ---
 # leading zero is necessary because this is an octal number
@@ -424,9 +434,9 @@ def nxautomation_user_exists():
         pwd.getpwnam(AUTOMATION_USER)
     except KeyError:
         # if the user was not found
-        log(INFO, "%s was NOT found on the system" %(AUTOMATION_USER))
+        log(INFO, "%s was NOT found on the system" % (AUTOMATION_USER))
         return False
-    log(INFO, "%s was found on the system" %(AUTOMATION_USER))
+    log(INFO, "%s was found on the system" % (AUTOMATION_USER))
     return True
 
 
@@ -472,16 +482,15 @@ class LocalLog:
     logger = None
     logfh = None
 
-
     def __init__(self):
         if LocalLog.logger is None or LocalLog.logfh is None:
             LocalLog.logger = logging.getLogger()
-            LocalLog.logfh = logging.handlers.RotatingFileHandler(LOCAL_LOG_LOCATION, mode='a', maxBytes=1048576, backupCount=20)
+            LocalLog.logfh = logging.handlers.RotatingFileHandler(LOCAL_LOG_LOCATION, mode='a', maxBytes=1048576,
+                                                                  backupCount=20)
             formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(message)s')
             LocalLog.logger.setLevel(DEBUG)
             LocalLog.logfh.setFormatter(formatter)
             LocalLog.logger.addHandler(LocalLog.logfh)
-
 
     def log(self, level, message):
         LocalLog.logger.log(level, message)

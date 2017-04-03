@@ -107,6 +107,12 @@ def set_marshall_helper(WorkspaceId, Enabled, AzureDnsAgentSvcZone, mock_worker_
 
             # Start the worker again
             if nxautomation_user_exists():
+                # set proper cert permissions
+
+                proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--initialize"])
+                if proc.wait() != 0:
+                    raise Exception("call to omsutil.py --initialize failed")
+
                 # With newer versions of OMS, worker should run as nxautomation user
                 start_daemon(["sudo", "-u", AUTOMATION_USER, "python", HYBRID_WORKER_START_PATH, WORKER_CONF_FILE_PATH,
                               WorkspaceId, read_resource_version_file()])
@@ -251,10 +257,11 @@ OMS_CERT_KEY_PATH = "/etc/opt/microsoft/omsagent/certs/oms.key"
 WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run/automationworker"
 REGISTRATION_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/scripts/register_oms.py"
 HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
-PROXY_CONF_PATH_LEGACY="/etc/opt/microsoft/omsagent/conf/proxy.conf"
-PROXY_CONF_PATH_NEW="/etc/opt/microsoft/omsagent/proxy.conf"
-KEYRING_PATH="/etc/opt/omi/conf/omsconfig/keyring.gpg"
+PROXY_CONF_PATH_LEGACY = "/etc/opt/microsoft/omsagent/conf/proxy.conf"
+PROXY_CONF_PATH_NEW = "/etc/opt/microsoft/omsagent/proxy.conf"
+KEYRING_PATH = "/etc/opt/omi/conf/omsconfig/keyring.gpg"
 LOCAL_LOG_LOCATION = "/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log"
+OMS_UTIL_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/omsutil.py"
 
 # permission level rwx rwx ---
 # leading zero is necessary because this is an octal number
