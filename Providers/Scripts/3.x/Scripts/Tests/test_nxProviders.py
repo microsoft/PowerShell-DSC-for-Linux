@@ -3720,11 +3720,7 @@ class nxOMSGenerateInventoryMofTestCases(unittest2.TestCase):
         d['Format'] = nxOMSGenerateInventoryMof.protocol.MI_String(Format)
         d['FilterType'] = nxOMSGenerateInventoryMof.protocol.MI_String(FilterType)
 
-        if Configuration is None:
-            Configuration = []
-        if Configuration is not None and len(Configuration):
-            d['Configuration'] = nxOMSGenerateInventoryMof.protocol.MI_StringA(Configuration)
-
+        d['Configuration'] = nxOMSGenerateInventoryMof.protocol.MI_StringA(Configuration)
         return retval, d
 
     def testSetOMSGenerateInventoryMof_multipleinstances(self):
@@ -3780,6 +3776,16 @@ class nxOMSGenerateInventoryMofTestCases(unittest2.TestCase):
 
     def testGetOMSGenerateInventoryMof_default(self):
         d = { 'FeatureName': 'generatedinventory', 'Enable': True, 'Instances': [{ 'InstanceName': 'FileInventory', 'ClassName': 'MSFT_nxFileInventoryResource', 'Properties': [ 'DestinationPath = "/etc/*.conf";', 'Recurse=true;' ] }, { 'InstanceName': 'RegistryInventory', 'ClassName':'MSFT_nxRegistryInventoryResource', 'Properties': [ 'RegistryName=hkeylocal;' ] } ], 'RunIntervalInSeconds':300, 'Tag': 'Test', 'Format':'tsv', 'FilterType':'filter', 'Configuration':['testname = value'] }
+        m=self.make_MI(0,**d)
+        g=nxOMSGenerateInventoryMof.Get_Marshall(**d)
+        print('GET '+ repr(g))
+        self.assertTrue(check_values(g, m)  ==  True, \
+        'Get('+repr(g)+' should return ==['+repr(m)+']')
+        self.assertFalse(os.path.isfile(self.mock_mof_path + 'generatedinventory' + '.mof'))
+
+
+    def testGetOMSGenerateInventoryMof_default_withoutProperties(self):
+        d = { 'FeatureName': 'generatedinventory', 'Enable': True, 'Instances': [{ 'InstanceName': 'FileInventory', 'ClassName': 'MSFT_nxFileInventoryResource', 'Properties': [ 'DestinationPath = "/etc/*.conf";', 'Recurse=true;' ] }, { 'InstanceName': 'RegistryInventory', 'ClassName':'MSFT_nxRegistryInventoryResource', 'Properties': [ 'RegistryName=hkeylocal;' ] } ], 'RunIntervalInSeconds':300, 'Tag': 'Test', 'Format':'tsv', 'FilterType':'filter', 'Configuration':[] }
         m=self.make_MI(0,**d)
         g=nxOMSGenerateInventoryMof.Get_Marshall(**d)
         print('GET '+ repr(g))
