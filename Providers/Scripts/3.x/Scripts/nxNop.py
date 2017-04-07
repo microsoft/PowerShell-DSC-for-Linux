@@ -98,7 +98,7 @@ def Set(Name, Value, Ensure):
     retval = -1
     try:
         p = Params(Name, Value, Ensure)
-    except Exception, e:
+    except Exception as e:
         LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
         return [retval]
 
@@ -119,7 +119,7 @@ def Test(Name, Value, Ensure):
     retval = -1
     try:
         p = Params(Name, Value, Ensure)
-    except Exception, e:
+    except Exception as e:
         LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
         return [retval]
 
@@ -133,7 +133,10 @@ def Get(Name, Value, Ensure):
     try:
         p = Params(Name, Value, Ensure)
         retval = 0       
-    except Exception, e:
+    except Exception as e:
         LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
 
     return [retval, Name, Value, Ensure]
+
+def Print(s, file=sys.stdout):
+    file.write(s + '\n')
