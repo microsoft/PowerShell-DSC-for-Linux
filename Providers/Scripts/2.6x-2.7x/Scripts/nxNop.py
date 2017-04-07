@@ -37,7 +37,6 @@ def init_vars(Name, Value, Ensure):
         Ensure = Ensure.encode('ascii', 'ignore').lower()
     else:
         Ensure = 'present'
-
     return Name, Value, Ensure
 
 def Set_Marshall(Name, Value, Ensure):
@@ -146,3 +145,6 @@ def Get(Name, Value, Ensure):
         LG().Log('ERROR', 'ERROR - Unable to initialize nxNopProvider. ' + str(e))
 
     return [retval, Name, Value, Ensure]
+
+def Print(s, file=sys.stdout):
+    file.write(s + '\n')
