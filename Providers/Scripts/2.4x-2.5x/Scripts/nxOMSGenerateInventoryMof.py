@@ -73,10 +73,7 @@ def Get_Marshall(FeatureName, Enable = False, Instances = None, RunIntervalInSec
     Format = protocol.MI_String(Format)
     FilterType = protocol.MI_String(FilterType)
 
-    if Configuration is None:
-        Configuration = []
-    if Configuration is not None and len(Configuration):
-        Configuration = protocol.MI_StringA(Configuration)
+    Configuration = protocol.MI_StringA(Configuration)
 
     retd = {}
     ld = locals()
