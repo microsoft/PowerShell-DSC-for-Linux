@@ -306,7 +306,7 @@ def read_settings_from_mof_json(json_serialized_string):
     try:
         json_serializer = serializerfactory.get_serializer(sys.version_info)
         settings = json_serializer.loads(json_serialized_string)
-        workspace_id = settings[0]["WorksapceId"].encode("ascii", "ignore")
+        workspace_id = settings[0]["WorkspaceId"].encode("ascii", "ignore")
         azure_dns_agent_svc_zone = settings[0]["AzureDnsAgentSvcZone"].encode("ascii", "ignore")
         updates_enabled = settings[0]["Solutions"]["Updates"]["Enabled"]
         diy_enabled = settings[0]["Solutions"]["AzureAutomation"]["Enabled"]
