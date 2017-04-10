@@ -1,4 +1,5 @@
 # PowerShell Desired State Configuration for Linux
+[![Build Status](https://travis-ci.org/Microsoft/PowerShell-DSC-for-Linux.svg?branch=master)](https://travis-ci.org/ericgable/PowerShell-DSC-for-Linux)
 
 *Copyright (c) Microsoft Corporation ver. 1.1.1*
 
