@@ -5,7 +5,6 @@
 import time
 import os
 import sys
-import hashlib
 import grp
 import imp
 import subprocess
@@ -16,8 +15,11 @@ import ctypes
 import re
 import inspect
 import copy
+import sha
 import fnmatch
+import md5
 import base64
+
 
 def opened_w_error(filename, mode="r"):
     """
@@ -31,7 +33,7 @@ def opened_w_error(filename, mode="r"):
 try:
     import unittest2
 except:
-    os.system('tar -zxvf ./unittest2-0.5.1.tar.gz')
+    os.system('tar -zxf ./unittest2-0.5.1.tar.gz')
     sys.path.append(os.path.realpath('./unittest2-0.5.1'))
     import unittest2
 
@@ -173,10 +175,10 @@ class nxUserTestCases(unittest2.TestCase):
         """
         Setup test resources
         """
-        if not os.system('grep jojoma /etc/passwd'):
-            os.system('userdel -r jojoma &> /dev/null')
-        if not os.system('grep jojoma /etc/group'):
-            os.system('groupdel jojoma &> /dev/null')
+        if not os.system('grep -q jojoma /etc/passwd'):
+            os.system('userdel -r jojoma 2> /dev/null')
+        if not os.system('grep -q jojoma /etc/group'):
+            os.system('groupdel jojoma 2> /dev/null')
         time.sleep(1)
         nxUser.SetShowMof(True)
         print self.id() + '\n'
@@ -185,10 +187,10 @@ class nxUserTestCases(unittest2.TestCase):
         """
         Remove test resources.
         """
-        if not os.system('grep jojoma /etc/passwd'):
-            os.system('userdel -r jojoma &> /dev/null')
-        if not os.system('grep jojoma /etc/group'):
-            os.system('groupdel jojoma &> /dev/null')
+        if not os.system('grep -q jojoma /etc/passwd'):
+            os.system('userdel -r jojoma 2> /dev/null')
+        if not os.system('grep -q jojoma /etc/group'):
+            os.system('groupdel jojoma 2> /dev/null')
         time.sleep(1)
 
     def pswd_hash(self,pswd):
@@ -210,7 +212,6 @@ class nxUserTestCases(unittest2.TestCase):
             if Description != None and len(Description) and not fnmatch.fnmatch(i['Description'].value,Description):
                 print 'Description:' + Description + ' != ' + i['Description'].value
                 return False
-            print 'Inventory Matched: ' + repr(i)
         return True
 
     def make_MI(self,retval,UserName, Ensure, FullName, Description, Password, Disabled, PasswordChangeRequired, HomeDirectory, GroupID, UserID):
@@ -411,7 +412,6 @@ class nxUserTestCases(unittest2.TestCase):
     def testUserInventoryMarshal(self):
         d=nxUser.Inventory_Marshall("", "", "", "", "", False, False, "", "" )
         self.assertTrue(d[0] == 0,'Inventory_Marshall("", "", "", "", "", False, False, "", "" ) should return == [0]')
-        print repr(d)
 
     def testInventoryMarshallUser(self):
         pswd=self.pswd_hash('jojoma')
@@ -477,10 +477,10 @@ class nxGroupTestCases(unittest2.TestCase):
         """
         Setup test resources
         """
-        if not os.system('grep jojomamas /etc/group &> /dev/null'):
-            os.system('groupdel jojomamas &> /dev/null')
-        if os.system('grep jojoma /etc/passwd'):
-            os.system('useradd -m jojoma &> /dev/null')
+        if not os.system('grep -q jojomamas /etc/group'):
+            os.system('groupdel jojomamas 2> /dev/null')
+        if os.system('grep -q jojoma /etc/passwd'):
+            os.system('useradd -m jojoma 2> /dev/null')
         time.sleep(1)
         nxGroup.SetShowMof(False)
         print self.id() + '\n'
@@ -489,8 +489,8 @@ class nxGroupTestCases(unittest2.TestCase):
         """
         Remove test resources.
         """
-        os.system('userdel -r jojoma &> /dev/null')
-        os.system('groupdel jojomamas &> /dev/null')
+        os.system('userdel -r jojoma 2> /dev/null')
+        os.system('groupdel jojomamas 2> /dev/null')
         time.sleep(1)
         nxGroup.SetShowMof(False)
         print self.id() + '\n'
@@ -508,7 +508,6 @@ class nxGroupTestCases(unittest2.TestCase):
             if GroupName != None and len(GroupName) and not fnmatch.fnmatch(i['GroupName'].value,GroupName):
                 print 'GroupName:' + GroupName + ' != ' + i['GroupName'].value
                 return False
-        print 'Inventory Matched: ' + repr(i)
         return True
 
     def make_MI(self,retval,GroupName, Ensure, Members, MembersToInclude, MembersToExclude, PreferredGroupID, GroupID):
@@ -615,7 +614,6 @@ class nxGroupTestCases(unittest2.TestCase):
 
     def testInventory_Marshall(self):
         d=nxGroup.Inventory_Marshall("*", "", "", "", "", "")
-        print repr(d)
 
     def testSetInventory_MarshallFilterGroup(self):
         self.assertTrue(nxGroup.Set_Marshall("jojomamas", "Present", "", "", "", "1101" ) ==
@@ -639,7 +637,7 @@ class nxScriptTestCases(unittest2.TestCase):
         """
         Setup test resources
         """
-        os.system('useradd -m jojoma ')
+        os.system('useradd -m jojoma 2> /dev/null')
         time.sleep(1)
         self.get_script='#!/bin/bash \ncat /tmp/testfile\n'
         self.test_script='#!/bin/bash \ngrep  "set script successfull" /tmp/testfile\n'
@@ -649,8 +647,8 @@ class nxScriptTestCases(unittest2.TestCase):
         """
         Remove test resources.
         """
-        os.system('userdel -r jojoma ')
-        os.system('rm /tmp/testfile')
+        os.system('userdel -r jojoma 2> /dev/null')
+        os.system('rm /tmp/testfile 2> /dev/null')
         time.sleep(1)
     
     def make_MI(self,retval,GetScript, SetScript, TestScript, User, Group, Result):
@@ -684,69 +682,57 @@ class nxScriptTestCases(unittest2.TestCase):
     def testGetScriptUser(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
         r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
-        print 'GET='+repr(r)
         self.assertTrue(check_values(r,self.make_MI(0,self.get_script,self.set_script,self.test_script, "jojoma", "", "set script successfull\n" )) == True,'nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testTestScriptUser(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
         r=nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
-        print 'TEST='+repr(r)
         self.assertTrue(r == [0],'nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testSetScriptUser(self):
         r=nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
-        print 'SET='+repr(r)
         self.assertTrue(r[0] == 0,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )[0] should return == 0')
 
     def testGetScriptGroup(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
         r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
-        print 'GET='+repr(r)
         self.assertTrue(check_values(r,self.make_MI(0,self.get_script,self.set_script,self.test_script, "", "mail", "set script successfull\n" )) == True,'nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
     def testTestScriptGroup(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
         r=nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
-        print 'TEST='+repr(r)
         self.assertTrue(r == [0],'nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
     def testSetScriptGroup(self):
         r=nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )
-        print 'SET='+repr(r)
         self.assertTrue(r[0] == 0,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "mail" )[0] should return == 0')
 
     def testGetScriptUserError(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
         r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )
-        print 'GET='+repr(r)
         self.assertTrue(check_values(r,self.make_MI(0,self.get_script,self.set_script,self.test_script, "ojoma", "", "set script successfull\n") ) == False,'nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testTestScriptUserError(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "jojoma", "" )
         r=nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )
-        print 'TEST='+repr(r)
         self.assertTrue(r == [-1],'nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testSetScriptUserError(self):
         r=nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )
-        print 'SET='+repr(r)
         self.assertTrue(r[0] == -1,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "ojoma", "" )[-1] should return == -1')
 
     def testGetScriptGroupError(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
         r=nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
-        print 'GET='+repr(r)
         self.assertTrue(check_values(r,self.make_MI(0,self.get_script,self.set_script,self.test_script, "", "ojoma" , "set script successfull\n")) == False,'nxScript.Get_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
     def testTestScriptGroupError(self):
         nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
         r=nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
-        print 'TEST='+repr(r)
         self.assertTrue(r == [-1],'nxScript.Test_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
     def testSetScriptGroupError(self):
         r=nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )
-        print 'SET='+repr(r)
         self.assertTrue(r[0] == -1,'nxScript.Set_Marshall(self.get_script,self.set_script,self.test_script, "", "ojoma" )[-1] should return == -1')
 
 
@@ -763,14 +749,14 @@ class nxPackageTestCases(unittest2.TestCase):
         if platform.dist()[0].lower() == 'suse':
             self.pkg = 'gvim'
         if os.system('which dpkg ') == 0 :
-            os.system('dpkg -r ' + self.pkg + ' &> /dev/null')
+            os.system('dpkg -r ' + self.pkg + ' 2> /dev/null')
             if os.path.exists('/usr/bin/dummy.sh'):
-                os.system('dpkg -r dummy &> /dev/null')
+                os.system('dpkg -r dummy 2> /dev/null')
             self.package_path='./Scripts/Tests/dummy-1.0.deb'
         else :
-            os.system('rpm -e ' + self.pkg + ' &> /dev/null')
+            os.system('rpm -e ' + self.pkg + ' 2> /dev/null')
             if os.path.exists('/usr/bin/dummy.sh'):
-                os.system('rpm -e dummy &> /dev/null')
+                os.system('rpm -e dummy 2> /dev/null')
             self.package_path='./Scripts/Tests/dummy-1.0-1.x86_64.rpm'
         time.sleep(3)
         print self.id() + '\n'
@@ -780,14 +766,14 @@ class nxPackageTestCases(unittest2.TestCase):
         Remove test resources.
         """
         time.sleep(4)
-        if os.system('which dpkg ') == 0 :
-            os.system('dpkg -r ' + self.pkg + ' &> /dev/null')
+        if os.system('which dpkg') == 0 :
+            os.system('dpkg -r ' + self.pkg + ' 2> /dev/null')
             if os.path.exists('/usr/bin/dummy.sh'):
-                os.system('dpkg -r dummy &> /dev/null')
+                os.system('dpkg -r dummy 2> /dev/null')
         else :
-            os.system('rpm -e ' + self.pkg + ' &> /dev/null')
+            os.system('rpm -e ' + self.pkg + ' 2> /dev/null')
             if os.path.exists('/usr/bin/dummy.sh'):
-                os.system('rpm -e dummy &> /dev/null')
+                os.system('rpm -e dummy 2> /dev/null')
         time.sleep(3)
 
     def CheckInventory(self, Name, Inventory):
@@ -797,7 +783,6 @@ class nxPackageTestCases(unittest2.TestCase):
             if Name != None and len(Name) and not fnmatch.fnmatch(i['Name'].value,Name):
                 print 'Name:' + Name + ' != ' + i['Name'].value
                 return False
-            print 'Inventory Matched: ' + repr(i)
         return True
 
     def make_MI(self, retval, Ensure, PackageManager, Name, FilePath, PackageGroup, Arguments,
@@ -911,7 +896,7 @@ class nxPackageTestCases(unittest2.TestCase):
         self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
                         [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
         r=nxPackage.Get_Marshall('Present','',self.pkg,'',False,'',0)
-        print 'GET:'+repr(r)
+
 
         self.assertTrue(check_values(r,self.make_MI(0,'present', None,self.pkg,'',False,'',0, None, None, None, None, None, None, None )) == True
                         ,"nxPackage.Get_Marshall('Present','','" + self.pkg + "','',False,'',0)[0] should return == 0")
@@ -919,7 +904,7 @@ class nxPackageTestCases(unittest2.TestCase):
     def testTestEnableNameDefaultProviderBadReturnCodeError(self):
         self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
                         [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
-        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','',self.pkg,'',False,'',6))
+
 
         self.assertTrue(nxPackage.Test_Marshall('Present','',self.pkg,'',False,'',6)==
                         [-1],"nxPackage.Test_Marshall('Present','','" + self.pkg + "','',False,'',True,6) should return == [-1]")
@@ -928,19 +913,19 @@ class nxPackageTestCases(unittest2.TestCase):
         self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
                         [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
         r=nxPackage.Get_Marshall('Present','',self.pkg,'',False,'',6)
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,'present', None,self.pkg,'',False,'',6, None, None, None, None, None, None, None )) == True
                         ,"nxPackage.Get_Marshall('Present','','" + self.pkg + "','',False,'',True,6)[0] should return == 0")
 
     def testTestEnableNameDefaultProvider(self):
         self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
                         [0],"nxPackage.Set_Marshall('Present','','" + self.pkg + "','',False,'',0) should return ==[0]")
-        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','',self.pkg,'',False,'',0))
+
 
         self.assertTrue(nxPackage.Test_Marshall('Present','',self.pkg,'',False,'',0)==
                         [0],"nxPackage.Test_Marshall('Present','','" + self.pkg + "','',False,'',0) should return == [0]")
 
-    @unittest2.skipUnless(os.system('which yum ') ==
+    @unittest2.skipUnless(os.system('which yum') ==
                           0,'groupmode is not implemented.')
     def testSetEnableGroupDefaultProvider(self):
         self.assertTrue(nxPackage.Set_Marshall('Present','','Remote Desktop Clients','',True,'',0)==
@@ -965,7 +950,7 @@ class nxPackageTestCases(unittest2.TestCase):
                         [0],"nxPackage.Set_Marshall('Absent','','" + self.pkg + "','',False,'',0) should return ==[0]")
         time.sleep(4)
         r=nxPackage.Get_Marshall('Absent','',self.pkg,'',False,'',0)
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,'absent', None,self.pkg,'',False,'',0, None, None, None, None, None, None, None )) == True
                         ,"nxPackage.Get_Marshall('Absent','','" + self.pkg + "','',False,'',0)[0] should return == 0")
 
@@ -976,12 +961,12 @@ class nxPackageTestCases(unittest2.TestCase):
         self.assertTrue(nxPackage.Set_Marshall('Absent','',self.pkg,'',False,'',0)==
                         [0],"nxPackage.Set_Marshall('Absent','','" + self.pkg + "','',False,'',0) should return ==[0]")
         time.sleep(4)
-        print 'TEST:'+repr(nxPackage.Test_Marshall('Absent','',self.pkg,'',False,'',0))
+
 
         self.assertTrue(nxPackage.Test_Marshall('Absent','',self.pkg,'',False,'',0)==
                         [0],"nxPackage.Test_Marshall('Absent','','" + self.pkg + "','',False,'',0) should return == [0]")
 
-    @unittest2.skipUnless(os.system('which yum ') ==
+    @unittest2.skipUnless(os.system('which yum') ==
                           0,'groupmode is not implemented.')
     def testSetDisableGroupDefaultProvider(self):
         self.assertTrue(nxPackage.Set_Marshall('Present','','Remote Desktop Clients','',True,'',0)==
@@ -1000,13 +985,11 @@ class nxPackageTestCases(unittest2.TestCase):
 
     def testGetEnableBadNameDefaultProvider(self):
         r=nxPackage.Get_Marshall('Present','','nanoo','',False,'',0)
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,'present', None,'nanoo','',False,'',0, None, None, None, None, None, None, None )) == True
                         ,"nxPackage.Get_Marshall('Present','','nanoo','',False,'',0)[-1] should return == 0")
 
     def testTestEnableBadNameDefaultProvider(self):
-        print 'TEST:'+repr(nxPackage.Test_Marshall('Present','','nanoo','',False,'',0))
-
         self.assertTrue(nxPackage.Test_Marshall('Present','','nanoo','',False,'',0)==
                         [-1],"nxPackage.Test_Marshall('Present','','nanoo','',False,'',0) should return == [-1]")
 
@@ -1020,13 +1003,11 @@ class nxPackageTestCases(unittest2.TestCase):
 
     def testGetDisableBadNameDefaultProvider(self):
         r=nxPackage.Get_Marshall('Absent','','nanoo','',False,'',0)
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,'absent', None,'nanoo','',False,'',0, None, None, None, None, None, None, None )) == True
                         ,"nxPackage.Get_Marshall('Absent','','nanoo','',False,'',0)[0] should return == 0")
 
     def testTestDisableBadNameDefaultProvider(self):
-        print 'TEST:'+repr(nxPackage.Test_Marshall('Absent','','nanoo','',False,'',0))
-
         self.assertTrue(nxPackage.Test_Marshall('Absent','','nanoo','',False,'',0)==
                         [0],"nxPackage.Test_Marshall('Absent','','nanoo','',False,'',0) should return == [0]")
 
@@ -1037,7 +1018,7 @@ class nxPackageTestCases(unittest2.TestCase):
     def testInventoryMarshall(self):
         r=nxPackage.Inventory_Marshall('','','*','',False,'',0)
         self.assertTrue(r[0] == 0,"Inventory_Marshall('','','*','',False,'',0)  should return == [0]")
-        print repr(r[1])
+
 
     def testInventoryMarshallFilterName(self):
         self.assertTrue(nxPackage.Set_Marshall('Present','',self.pkg,'',False,'',0)==
@@ -1065,7 +1046,7 @@ class nxPackageTestCases(unittest2.TestCase):
         r=nxPackageBroken.Inventory_Marshall('','','*','',False,'',0)
         os.system('rm /tmp/nxPackageBroken.py')
         self.assertTrue(len(r[1]['__Inventory'].value) == 0,"nxPackageBroken.Inventory_Marshall('','','*','',False,'',0)  should return empty MI_INSTANCEA.")
-        print repr(r[1])
+
 
 
 class nxFileTestCases(unittest2.TestCase):
@@ -1076,8 +1057,8 @@ class nxFileTestCases(unittest2.TestCase):
         """
         Setup test resources
         """
-        os.system('rm -rf /tmp/*pp*')
-        os.system('rm -rf /tmp/Python-2.4.6.tgz')
+        os.system('rm -rf /tmp/*pp* 2> /dev/null')
+        os.system('rm -rf /tmp/Python-2.4.6.tgz 2> /dev/null')
         nxFile.SetShowMof(False)
         print self.id() + '\n'
         
@@ -1085,8 +1066,8 @@ class nxFileTestCases(unittest2.TestCase):
         """
         Remove test resources.
         """
-        os.system('rm -rf /tmp/*pp*')
-        os.system('rm -rf /tmp/Python-2.4.6.tgz')
+        os.system('rm -rf /tmp/*pp* 2> /dev/null')
+        os.system('rm -rf /tmp/Python-2.4.6.tgz 2> /dev/null')
 
     def make_MI(self,retval,DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate):
         d=dict();
@@ -1883,7 +1864,7 @@ class nxServiceTestCases(unittest2.TestCase):
         dist=platform.dist()[0].lower()
         if os.path.exists('/etc/centos-release'):
             dist = 'centos'
-        if os.system('uname -a | grep -i ubuntu') == 0:
+        if os.system('uname -a | grep -qi ubuntu') == 0:
             dist='ubuntu'
         init_file=''
         if 'suse' in dist:
@@ -1912,7 +1893,7 @@ class nxServiceTestCases(unittest2.TestCase):
                 os.chmod('/usr/sbin/dummy_service.py',0744)
             except:
                 print repr(sys.exc_info())
-            os.system('systemctl --system daemon-reload &> /dev/null')
+            os.system('systemctl --system daemon-reload 2> /dev/null')
         elif nxService.UpstartExists():
             self.controller='upstart'
             try:
@@ -1943,22 +1924,22 @@ class nxServiceTestCases(unittest2.TestCase):
         """
         dist=platform.dist()[0].lower()
         if nxService.SystemdExists():
-            os.system('systemctl disable dummy_service &> /dev/null')
+            os.system('systemctl disable dummy_service 2> /dev/null')
             if 'ubuntu' in dist or 'debian' in dist  or 'cent' in dist:
                 os.system('rm /usr/sbin/dummy_service.py /lib/systemd/system/dummy_service.' + \
-                          'service /etc/systemd/system/multi-user.target.wants/dummy_service.service &> /dev/null')
+                          'service /etc/systemd/system/multi-user.target.wants/dummy_service.service 2> /dev/null')
             else:
-                os.system('rm /usr/sbin/dummy_service.py /etc/rc.d/dummy_service &> /dev/null')
-            os.system('systemctl --system daemon-reload &> /dev/null')
+                os.system('rm /usr/sbin/dummy_service.py /etc/rc.d/dummy_service 2> /dev/null')
+            os.system('systemctl --system daemon-reload 2> /dev/null')
         elif nxService.UpstartExists():
-            os.system('update-rc.d -f dummy_service remove &> /dev/null')
-            os.system('rm /usr/sbin/dummy_service.py /etc/init/dummy_service.conf /etc/init.d/dummy_service /etc/default/dummy_service &> /dev/null')
+            os.system('update-rc.d -f dummy_service remove 2> /dev/null')
+            os.system('rm /usr/sbin/dummy_service.py /etc/init/dummy_service.conf /etc/init.d/dummy_service /etc/default/dummy_service 2> /dev/null')
         elif nxService.InitExists():
-            os.system('chkconfig --del dummy_service &> /dev/null')
-            os.system('rm /usr/sbin/dummy_service.py /etc/init.d/dummy_service &> /dev/null')
+            os.system('chkconfig --del dummy_service 2> /dev/null')
+            os.system('rm /usr/sbin/dummy_service.py /etc/init.d/dummy_service 2> /dev/null')
             
         time.sleep(1)
-        os.system("ps -ef | grep -v grep | grep dummy_service | awk '{print $2}' | xargs -L1 kill &> /dev/null")
+        os.system("ps -ef | grep -v grep | grep dummy_service | awk '{print $2}' | xargs -L1 kill 2> /dev/null")
 
     def CheckInventory(self, Name, Controller, Enabled, State, Inventory):
         if len(Inventory['__Inventory'].value) < 1:
@@ -1973,7 +1954,6 @@ class nxServiceTestCases(unittest2.TestCase):
             if State != None and len(State) and not fnmatch.fnmatch(i['State'].value,State):
                 print 'State:' + State + ' != ' + i['State'].value
                 return False
-            print 'Inventory Matched: ' + repr(i)
         return True
 
     def make_MI(self,retval, Name, Controller, Enabled, State, Path, Description, Runlevels):
@@ -2035,7 +2015,7 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(nxService.Set_Marshall("dummy_service", controller, True, "running")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+controller+'", True, "running") should return ==[0]')
         r=nxService.Get_Marshall("dummy_service", controller, True, "running")
-        print repr(r[1])
+
         self.assertTrue(check_values(r,self.make_MI(0,"dummy_service", controller, True, "running",None,None,None)) == True
                         ,'nxService.Get_Marshall("dummy_service", "'+controller+'", True, "running") should return ==[0]')
 
@@ -2046,7 +2026,7 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(nxService.Set_Marshall("dummy_service", controller, False, "stopped")==
                         [0],'nxService.Set_Marshall("dummy_service", "'+controller+'", False, "stopped") should return ==[0]')
         r=nxService.Get_Marshall("dummy_service", controller, False, "stopped")
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,"dummy_service", controller, False, "stopped", None, None, None)) == True
                         ,'nxService.Get_Marshall("dummy_service", "'+controller+'", False, "stopped") should return ==[0,"dummy_service", controller, False, "stopped"]')
 
@@ -2055,7 +2035,7 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(nxService.Set_Marshall("yummyservice", controller, True, "running")==
                         [-1],'nxService.Set_Marshall("yummyservice", "'+controller+'", True, "running") should return ==[-1]')
         r=nxService.Get_Marshall("yummyservice", controller, True, "running")
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,"yummyservice", controller, True, "running", None, None, None)) == False
                         ,'nxService.Get_Marshall("yummyservice", "'+controller+'", True, "running")[0:5] should return ==[-1,"yummyservice", controller, True, "running"]')
 
@@ -2064,14 +2044,14 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(nxService.Set_Marshall("yummyservice", controller, False, "stopped")==
                         [-1],'nxService.Set_Marshall("yummyservice", "'+controller+'", False, "stopped") should return ==[-1]')
         r=nxService.Get_Marshall("yummyservice", controller, False, "stopped")
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,"yummyservice", controller, False, "stopped", None, None, None)) == False
                         ,'nxService.Get_Marshall("yummyservice", "'+controller+'", False, "stopped")[0:5] should return ==[-1,"yummyservice", controller, False, "stopped"]')
 
     def testInventoryMarshall(self):
         r=nxService.Inventory_Marshall('*', self.controller, None,'')
         self.assertTrue(r[0] == 0,"Inventory_Marshall('*', " + self.controller + ", None,'')  should return == 0")
-        print repr(r[1])
+
 
     def testInventoryMarshallCmdlineError(self):
         os.system('cp  ./Scripts/nxService.py /tmp/nxServiceBroken.py')
@@ -2083,19 +2063,19 @@ class nxServiceTestCases(unittest2.TestCase):
         r=nxServiceBroken.Inventory_Marshall('*', self.controller, None,'')
         os.system('rm /tmp/nxServiceBroken.py')
         self.assertTrue(r[0] == -1,"nxServiceBroken.Inventory_Marshall('*', " + self.controller + ", None,'')  should return == -1")
-        print repr(r[1])
+
 
     def testInventoryMarshallControllerWildcard(self):
         r=nxService.Inventory_Marshall('*', '*', None,'')
         self.assertTrue(r[0] == 0,"Inventory_Marshall('*', '*', None,'')  should return == 0")
-        print repr(r[1])
+
 
     def testInventoryMarshallControllerError(self):
         controllers = ['systemd', 'upstart', 'init']
         controllers.remove(self.controller)
         r=nxService.Inventory_Marshall('*', controllers[0], None,'')
         self.assertTrue(r[0] == -1,"Inventory_Marshall('*', " + self.controller + ", None,'')  should return == -1")
-        print repr(r[1])
+
 
     def testInventoryMarshallDummyService(self):
         self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
@@ -2177,7 +2157,7 @@ class nxSshAuthorizedKeysTestCases(unittest2.TestCase):
         Setup test resources
         """
         self.mykey='MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLXp6PkCtbpV+P1gwFQWH6Ez0U83uEmS8IGnpeI8Fk8rY/vHOZzZZaxRCw+loyc342qCDIQheMOCNm5Fkevz06q757/oooiLR3yryYGKiKG1IZIiplmtsC95oKrzUSKk60wuI1mbgpMUP5LKi/Tvxes5PmkUtXfimz2qgkeUcPpQIDAQAB'
-        if os.system('grep jojoma /etc/passwd'):
+        if os.system('grep -q jojoma /etc/passwd'):
             nxUser.Set_Marshall("jojoma", "Present", "JO JO MA", "JOJOMA", 'badpass', False, False, "/home/jojoma", "mail" )    
         path='/home/jojoma/.ssh/authorized_keys'
         if not os.path.isfile(path):
@@ -2191,7 +2171,7 @@ class nxSshAuthorizedKeysTestCases(unittest2.TestCase):
         Remove test resources.
         """
         path='/home/jojoma/.ssh/authorized_keys'
-        os.system('rm -rf ' + path)
+        os.system('rm -rf ' + path + ' 2> /dev/null')
 
     def make_MI(self,retval, KeyComment, Ensure, UserName, Key):
         d=dict();
@@ -2278,7 +2258,7 @@ class nxEnvironmentTestCases(unittest2.TestCase):
         """
         Setup test resources
         """
-        os.system('rm /tmp/environment /tmp/DSCEnvironment.sh')
+        os.system('rm /tmp/environment /tmp/DSCEnvironment.sh 2> /dev/null')
         path='/etc/environment'
         if os.path.isfile(path) :
             os.system('cp -p ' + path + ' /tmp/')
@@ -2293,11 +2273,6 @@ class nxEnvironmentTestCases(unittest2.TestCase):
         """
         Remove test resources.
         """
-        print "TEARDOWN"
-        os.system('echo "Contents of /etc/environment are: " 1>&2' )
-        os.system('cat /etc/environment 1>&2')
-        os.system('echo "Contents of /etc/profile.d/DSCEnvironment.sh are: " 1>&2')
-        os.system('cat /etc/profile.d/DSCEnvironment.sh 1>&2')
         path='/etc/environment'
         if os.path.isfile('/tmp/environment') :
             os.system('mv ' + ' /tmp/environment ' + path)
@@ -2367,7 +2342,7 @@ class nxEnvironmentTestCases(unittest2.TestCase):
         self.assertTrue(nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) ==
                         [0],"assert nxEnvironment.Set_Marshall('MYVAR','/tmp','Present',False) should == [0]")
         r=nxEnvironment.Get_Marshall('MYVAR','/tmp','Present',False)
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,'MYVAR','/tmp','present',False)) == True
                         ,"assert nxEnvironment.Get_Marshall('MYVAR','/tmp','Present',False)[0] should == [0]")
         
@@ -2410,13 +2385,13 @@ class nxEnvironmentTestCases(unittest2.TestCase):
         self.assertTrue(nxEnvironment.Set_Marshall('','/tmp','Present',True) ==
                         [0],"assert nxEnvironment.Set_Marshall('','/tmp','Present',True) should == [0]")
         r=nxEnvironment.Get_Marshall('','/tmp','Present',True)
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,'','/tmp','present',True)) == True
                         ,"assert nxEnvironment.Get_Marshall('','/tmp','Present',True) should == [0]")
         
     def testGetPathPresentError(self):
         r=nxEnvironment.Get_Marshall('','/tp','Present',True)
-        print 'GET:'+repr(r)
+
         self.assertTrue(check_values(r,self.make_MI(0,'','/tp','present',True)) == False
                         ,"assert nxEnvironment.Get_Marshall('','/tmp','Present',True)[0] should == [-1]")
 
@@ -2475,7 +2450,7 @@ def StartFirewall(firewall):
     t['ufw']='yes | ufw enable '
     t['SuSEfirewall2']='SuSEfirewall2 start'
     t['firewalld']='service firewalld start'
-    os.system(t[firewall])
+    os.system(t[firewall] + ' 2> /dev/null')
 
 def StopFirewall(firewall):
     if firewall == 'iptables':
@@ -2484,7 +2459,7 @@ def StopFirewall(firewall):
     t['ufw']='ufw disable'
     t['SuSEfirewall2']='SuSEfirewall2 stop'
     t['firewalld']='service firewalld stop'
-    os.system(t[firewall])
+    os.system(t[firewall] + ' 2> /dev/null')
 
 
 class nxFirewallTestCases(unittest2.TestCase):
@@ -2833,7 +2808,7 @@ class nxDNSServerAddressTestCases(unittest2.TestCase):
     def testGetDNSServerAddressPresent(self):
         d=ParseMOF('./Scripts/Tests/test_mofs/nxDNSServerAddress_add.mof')
         self.assertTrue(nxDNSServerAddress.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        print "HERE "+repr(nxDNSServerAddress.Get_Marshall(**d))
+
         self.assertTrue(check_values(nxDNSServerAddress.Get_Marshall(**d), \
         self.make_MI(0,**d))  ==  True, \
         'Get('+repr(d)+' should return [0,'+ repr(d) + ']')
@@ -2955,7 +2930,7 @@ class nxMySqlUserTestCases(unittest2.TestCase):
         cmd = "DROP USER " + Name + ";"
         cmd='mysql -u root -e "' + cmd + ' FLUSH PRIVILEGES;"'
         os.environ['MYSQL_PWD'] = 'root'
-        os.system(cmd)
+        os.system(cmd + ' 2> /dev/null')
         os.environ['MYSQL_PWD'] = ''
 
     def setUp(self):
@@ -3025,7 +3000,7 @@ class nxMySqlUserTestCases(unittest2.TestCase):
         self.make_MI(0,**d))  ==  True, \
         'Get('+repr(d)+' should return ==['+repr(d)+']')
 
-nxMySqlUserTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep mysqld') ==
+nxMySqlUserTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep -q mysqld') ==
                                             0,'Skipping nxMySqlUserTestCases.   mysqld is not running.' \
                                             )(nxMySqlUserTestCases)
 
@@ -3040,7 +3015,7 @@ class nxMySqlDatabaseTestCases(unittest2.TestCase):
         cmd = "DROP DATABASE " + Name + ";"
         cmd='mysql -u root -e "' + cmd + '"'
         os.environ['MYSQL_PWD'] = 'root'
-        os.system(cmd)
+        os.system(cmd + ' 2> /dev/null')
         os.environ['MYSQL_PWD'] = ''
 
     def setUp(self):
@@ -3094,7 +3069,7 @@ class nxMySqlDatabaseTestCases(unittest2.TestCase):
         self.make_MI(0,**d))  ==  True, \
         'Get('+repr(d)+' should return ==['+repr(d)+']')
 
-nxMySqlDatabaseTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep mysqld') ==
+nxMySqlDatabaseTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep -q mysqld') ==
                                                 0,'Skipping nxMySqlDatabaseTestCases.   mysqld is not running.' \
                                                 )(nxMySqlDatabaseTestCases)
 
@@ -3111,7 +3086,7 @@ class nxMySqlGrantTestCases(unittest2.TestCase):
         cmd = "REVOKE "+ PermissionType + " ON " + DatabaseName + ".* FROM '" + UserName+"'@'" + Host  + "';"
         cmd='mysql -u root -e "' + cmd + ' FLUSH PRIVILEGES;"'
         os.environ['MYSQL_PWD'] = 'root'
-        os.system(cmd)
+        os.system(cmd + ' 2> /dev/null')
         os.environ['MYSQL_PWD'] = ''
 
     def setUp(self):
@@ -3181,7 +3156,7 @@ class nxMySqlGrantTestCases(unittest2.TestCase):
         self.make_MI(0,**d))  ==  True, \
         'Get('+repr(d)+' should return ==['+repr(d)+']')
 
-nxMySqlGrantTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep mysqld') ==
+nxMySqlGrantTestCases = unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep -q mysqld') ==
                                              0,'Skipping nxMySqlGrantTestCases.   mysqld is not running.' \
                                              )(nxMySqlGrantTestCases)
     
@@ -3200,7 +3175,7 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         """
         cls.create_files = False
         cls.linkfarm = '/tmp/linkfarm/'
-        os.system('rm -rf ' + cls.linkfarm)
+        os.system('rm -rf ' + cls.linkfarm + ' 2> /dev/null')
         os.makedirs(cls.linkfarm+'joe')
         os.makedirs(cls.linkfarm+'bob')
         open(cls.linkfarm+'joe/linkfarmjoefile1.txt','w+').write(\
@@ -3212,7 +3187,7 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         open(cls.linkfarm+'bob/linkfarmbobfile2.txt','w+').write(\
             'Contents of linkfarmbobfile2.txt\n')
         cls.basepath = '/tmp/FileInventory/'
-        os.system('rm -rf ' + cls.basepath)
+        os.system('rm -rf ' + cls.basepath + ' 2> /dev/null')
         os.makedirs(cls.basepath+'joedir0/joedir1/joedir2/')
         open(cls.basepath+'basedirfile1.txt','w+').write(\
             'Contents of basedirfile1.txt\n')
@@ -3277,8 +3252,8 @@ class nxFileInventoryTestCases(unittest2.TestCase):
 
     @classmethod    
     def tearDownClass(cls):
-        os.system('rm -rf ' + cls.basepath)
-        os.system('rm -rf ' + cls.linkfarm)
+        os.system('rm -rf ' + cls.basepath + ' 2> /dev/null')
+        os.system('rm -rf ' + cls.linkfarm + ' 2> /dev/null')
     
     def setUp(self):
         """
@@ -3292,7 +3267,6 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         Remove test resources.
         """
         pass
-
 
     def SerializeInventoryObject(self, fname, ob):
         # Persist the results of correct results for future tests.
@@ -3321,7 +3295,6 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         return repr(l)
 
     def testFileInventoryInventory_MarshallDir(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3336,7 +3309,6 @@ class nxFileInventoryTestCases(unittest2.TestCase):
 
     
     def testFileInventoryInventory_MarshallFile(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3348,11 +3320,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFile')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#         for d in r[1]['__Inventory'].value:
+#             print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallSingleFile(self):
-        print('Using path:' + self.basepath + 'basedirfile1.txt') 
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3364,11 +3335,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallSingleFile')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#         for d in r[1]['__Inventory'].value:
+#             print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallSingleFile_omsadminconf(self):
-        print('Using path:' + self.basepath + 'omsadmin.conf')
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3380,11 +3350,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallSingleFile')
         self.assertFalse(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#         for d in r[1]['__Inventory'].value:
+#             print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallTypeWild(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3396,11 +3365,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWild')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#         for d in r[1]['__Inventory'].value:
+#             print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallDirRecurse(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3412,11 +3380,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirRecurse')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#         for d in r[1]['__Inventory'].value:
+#             print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallFileRecurse(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3428,11 +3395,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileRecurse')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#         for d in r[1]['__Inventory'].value:
+#             print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallTypeWildRecurse(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3444,11 +3410,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurse')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#         for d in r[1]['__Inventory'].value:
+#             print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildDir(self):
-        print 'Using path:' + self.basepath +'*dir*'
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3460,11 +3425,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDir')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#         for d in r[1]['__Inventory'].value:
+#             print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildFile(self):
-        print 'Using path:' + self.basepath +'*/*file*'
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3476,11 +3440,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFile')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildTypeWild(self):
-        print 'Using path:' + self.basepath +'*/*'
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3492,11 +3455,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWild')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildDirRecurse(self):
-        print 'Using path:' + self.basepath +'*/*dir*'
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3508,11 +3470,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurse')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildFileRecurse(self):
-        print 'Using path:' + self.basepath +'*/*file*'
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3524,11 +3485,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurse')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildTypeWildRecurse(self):
-        print 'Using path:' + self.basepath +'*/*'
         d = {'Links': u'ignore', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3540,11 +3500,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurse')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallDirFollowLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3556,11 +3515,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallFileFollowLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3572,11 +3530,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallTypeWildFollowLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3588,11 +3545,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallDirRecurseFollowLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3604,11 +3560,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirRecurseFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallFileRecurseFollowLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3620,11 +3575,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileRecurseFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallTypeWildRecurseFollowLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3636,11 +3590,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurseFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildDirFollowLink(self):
-        print 'Using path:' + self.basepath +'*dir*'
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3652,11 +3605,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildFileFollowLink(self):
-        print 'Using path:' + self.basepath +'*/*file*'
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3668,11 +3620,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildTypeWildFollowLink(self):
-        print 'Using path:' + self.basepath +'*/*'
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3684,11 +3635,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildDirRecurseFollowLink(self):
-        print 'Using path:' + self.basepath +'*/*dir*'
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3700,11 +3650,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurseFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildFileRecurseFollowLink(self):
-        print 'Using path:' + self.basepath +'*/*file*'
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3716,11 +3665,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurseFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildTypeWildRecurseFollowLink(self):
-        print 'Using path:' + self.basepath +'*/*'
         d = {'Links': u'follow', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3732,12 +3680,11 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurseFollowLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
 
     def testFileInventoryInventory_MarshallDirManageLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3749,11 +3696,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallFileManageLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3765,11 +3711,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallTypeWildManageLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3781,11 +3726,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallDirRecurseManageLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3797,11 +3741,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallDirRecurseManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallFileRecurseManageLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3813,11 +3756,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallFileRecurseManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallTypeWildRecurseManageLink(self):
-        print 'Using path:' + self.basepath 
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3829,11 +3771,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallTypeWildRecurseManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildDirManageLink(self):
-        print 'Using path:' + self.basepath +'*dir*'
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3845,11 +3786,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildFileManageLink(self):
-        print 'Using path:' + self.basepath +'*/*file*'
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3861,11 +3801,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildTypeWildManageLink(self):
-        print 'Using path:' + self.basepath +'*/*'
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': False, \
              'MaxContentsReturnable': None, \
@@ -3877,11 +3816,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildDirRecurseManageLink(self):
-        print 'Using path:' + self.basepath +'*/*dir*'
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3893,11 +3831,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildDirRecurseManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildFileRecurseManageLink(self):
-        print 'Using path:' + self.basepath +'*/*file*'
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3909,11 +3846,10 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildFileRecurseManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
     def testFileInventoryInventory_MarshallWildTypeWildRecurseManageLink(self):
-        print 'Using path:' + self.basepath +'*/*'
         d = {'Links': u'manage', 'MaxOutputSize': None, \
              'Checksum': u'md5', 'Recurse': True, \
              'MaxContentsReturnable': None, \
@@ -3925,8 +3861,8 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallWildTypeWildRecurseManageLink')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
-        for d in r[1]['__Inventory'].value:
-            print d['DestinationPath'], d['Contents']
+#        for d in r[1]['__Inventory'].value:
+#            print d['DestinationPath'], d['Contents']
 
 
 
@@ -3951,5 +3887,5 @@ if __name__ == '__main__':
     s17=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlGrantTestCases)
     s18=unittest2.TestLoader().loadTestsFromTestCase(nxFileInventoryTestCases)
     alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18])
-    if not unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests).wasSuccessful():
+    if not unittest2.TextTestRunner(stream=sys.stdout,verbosity=0).run(alltests).wasSuccessful():
         sys.exit(1)

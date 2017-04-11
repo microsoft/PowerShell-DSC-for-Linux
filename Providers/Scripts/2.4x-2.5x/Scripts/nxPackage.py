@@ -294,16 +294,16 @@ class Params:
         self.cmds['dpkg'][
             'absent'] = 'DEBIAN_FRONTEND=noninteractive dpkg % -r '
         self.cmds['dpkg'][
-            'stat'] = "dpkg-query -W -f='${{Description}}{0}${{Maintainer}}{0}'Unknown'{0}${{Installed-Size}}{0}${{Version}}{0}${{Status}}{0}${{Architecture}}\n' ".format(self.field_delimiter)
+            'stat'] = "dpkg-query -W -f='${Description}{0}${Maintainer}{0}'Unknown'{0}${Installed-Size}{0}${Version}{0}${Status}{0}${Architecture}\n' ".replace('{0}',self.field_delimiter)
         self.cmds['dpkg'][
-            'stat_all'] = "dpkg-query -W -f='${{Package}}{0}${{Description}}{0}${{Maintainer}}{0}'Unknown'{0}${{Installed-Size}}{0}${{Version}}{0}${{Status}}{0}${{Architecture}}\n{1}' ".format(self.field_delimiter, self.record_delimiter)
+            'stat_all'] = "dpkg-query -W -f='${Package}{0}${Description}{0}${Maintainer}{0}'Unknown'{0}${Installed-Size}{0}${Version}{0}${Status}{0}${Architecture}\n{1}'".replace('{0}',self.field_delimiter).replace('{1}',self.record_delimiter)
         self.cmds['dpkg']['stat_group'] = None
         self.cmds['rpm']['present'] = 'rpm % -i '
         self.cmds['rpm']['absent'] = 'rpm % -e '
         self.cmds['rpm'][
-            'stat'] = 'rpm -q --queryformat "%{{SUMMARY}}{0}%{{PACKAGER}}{0}%{{INSTALLTIME}}{0}%{{SIZE}}{0}%{{EPOCH}}:%{{VERSION}}-%{{RELEASE}}{0}installed{0}%{{ARCH}}\n" '.format(self.field_delimiter)
+            'stat'] = 'rpm -q --queryformat "%{SUMMARY}{0}%{PACKAGER}{0}%{INSTALLTIME}{0}%{SIZE}{0}%{EPOCH}:%{VERSION}-%{RELEASE}{0}installed{0}%{ARCH}\n" '.replace('{0}',self.field_delimiter)
         self.cmds['rpm'][
-            'stat_all'] = 'rpm -qa --queryformat "%{{NAME}}{0}%{{SUMMARY}}{0}%{{PACKAGER}}{0}%{{INSTALLTIME}}{0}%{{SIZE}}{0}%{{EPOCH}}:%{{VERSION}}-%{{RELEASE}}{0}installed{0}%{{ARCH}}\n{1}" | sed "s/(none)/0/g" '.format(self.field_delimiter, self.record_delimiter)
+            'stat_all'] = 'rpm -qa --queryformat "%{NAME}{0}%{SUMMARY}{0}%{PACKAGER}{0}%{INSTALLTIME}{0}%{SIZE}{0}%{EPOCH}:%{VERSION}-%{RELEASE}{0}installed{0}%{ARCH}\n{1}" | sed "s/(none)/0/g" '.replace('{0}',self.field_delimiter).replace('{1}',self.record_delimiter)
         self.cmds['rpm']['stat_group'] = None
         self.cmds['apt'][
             'present'] = 'DEBIAN_FRONTEND=noninteractive apt-get % install ^ --allow-unauthenticated --yes '
@@ -842,6 +842,13 @@ def MakeDirs(path):
         LG().Log('ERROR',  "Exception making dir" +
                  path + " Error: " + str(error))
     return error
+
+def opened_bin_w_error(filename, mode="rb"):
+    try:
+        f = open(filename, mode)
+    except IOError, err:
+        return None, err
+    return f, None
 
 def ReadFile(path):
     """
