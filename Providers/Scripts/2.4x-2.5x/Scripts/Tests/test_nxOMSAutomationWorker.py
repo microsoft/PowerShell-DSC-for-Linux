@@ -144,7 +144,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
             os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
         settings = nxOMSAutomationWorker.read_settings_from_mof_json(
             auto_enabled_manual_enabled)
-        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.updates_enabled,
+        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.auto_register_enabled,
                                                  settings.diy_enabled)
         self.assertTrue(self.config_files_are_equivalent(os.path.join(self.dummyFileLocation, "oms_conf_auto_manual.conf"),
                                     nxOMSAutomationWorker.OMS_CONF_FILE_PATH))
@@ -153,7 +153,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
             os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
         settings = nxOMSAutomationWorker.read_settings_from_mof_json(
             auto_disabled_manual_enabled)
-        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.updates_enabled,
+        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.auto_register_enabled,
                                                  settings.diy_enabled)
         self.assertTrue(self.config_files_are_equivalent(os.path.join(self.dummyFileLocation, "oms_conf_manual.conf"),
                                     nxOMSAutomationWorker.OMS_CONF_FILE_PATH))
@@ -162,7 +162,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
             os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
         settings = nxOMSAutomationWorker.read_settings_from_mof_json(
             auto_enabled_manual_disabled)
-        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.updates_enabled,
+        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.auto_register_enabled,
                                                  settings.diy_enabled)
         self.assertTrue(self.config_files_are_equivalent(os.path.join(self.dummyFileLocation, "oms_conf_auto.conf"),
                                     nxOMSAutomationWorker.OMS_CONF_FILE_PATH))
@@ -171,7 +171,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
             os.remove(nxOMSAutomationWorker.OMS_CONF_FILE_PATH)
         settings = nxOMSAutomationWorker.read_settings_from_mof_json(
             auto_disabled_manual_disabled)
-        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.updates_enabled,
+        nxOMSAutomationWorker.write_omsconf_file(settings.workspace_id, settings.auto_register_enabled,
                                                  settings.diy_enabled)
         self.assertTrue(self.config_files_are_equivalent(os.path.join(self.dummyFileLocation, "oms_conf_none.conf"),
                                     nxOMSAutomationWorker.OMS_CONF_FILE_PATH))
@@ -187,14 +187,14 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
                          dummy_oms_conf_filepaths[2]: [True, False],
                          dummy_oms_conf_filepaths[3]: [False, False],
                          }
-        for updates_enabled in [True, False]:
+        for auto_register_enabled in [True, False]:
             for diy_enabled in [True, False]:
                 for dummy_oms_conf_file_path in dummy_oms_conf_filepaths:
-                    result = nxOMSAutomationWorker.is_oms_config_consistent_with_mof(updates_enabled,
+                    result = nxOMSAutomationWorker.is_oms_config_consistent_with_mof(auto_register_enabled,
                                                                                      diy_enabled,
                                                                                      dummy_oms_conf_file_path)
                     updates_expected_value, diy_expected_value = valid_results[dummy_oms_conf_file_path]
-                    if updates_enabled == updates_expected_value and diy_enabled == diy_expected_value:
+                    if auto_register_enabled == updates_expected_value and diy_enabled == diy_expected_value:
                         self.assertTrue(result)
                     else:
                         self.assertFalse(result)
@@ -250,6 +250,12 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
             '1003 python %s /var/opt/microsoft/omsagent/state/automationworker/oms.conf rworkspace:cfd4ef08-4011-428a-8947-0c2f4605980f 1.5.0.0' % nxOMSAutomationWorker.WORKER_MANAGER_START_PATH,
             '']
         self.assertFalse(nxOMSAutomationWorker.is_any_1_4_process_running(processes, self.workspace_id))
+
+    def test_is_certificate_valid(self):
+        self.assertTrue(nxOMSAutomationWorker.is_certificate_valid(nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH, os.path.join(self.dummyFileLocation, "dummy_match.crt")))
+        self.assertFalse(nxOMSAutomationWorker.is_certificate_valid(nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH, os.path.join(self.dummyFileLocation, "dummy_notMatch.crt")))
+
+
 
 
 if __name__ == '__main__':

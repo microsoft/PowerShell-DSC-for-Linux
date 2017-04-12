@@ -18,6 +18,8 @@ import sys
 import time
 import traceback
 
+import util
+
 RESOURCE_VERSION_ARG_PREFIX = "rversion:"
 
 
@@ -36,13 +38,8 @@ def loop(func):
 
 
 def exit_on_error(message, exit_code=1):
-    print str(message)
-    try:
-        os.chdir(os.path.expanduser("~"))
-        open("worker_manager.log", "w").write(message)
-    except:
-        pass
-    sys.exit(exit_code)
+    crash_log_filename = "automation_workermanager_crash.log"
+    util.exit_on_error(filename=crash_log_filename, message=message, exit_code=exit_code)
 
 
 class WorkerManager:

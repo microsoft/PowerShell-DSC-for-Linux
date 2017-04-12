@@ -14,9 +14,9 @@ import time
 import traceback
 
 import configuration
+import util
 from httpclientfactory import HttpClientFactory
 from jrdsclient import JRDSClient
-import util
 
 jrds_client = None
 jrds_cert_path = None
@@ -170,7 +170,7 @@ def trace_generic_hybrid_worker_event(event_id, task_name, message, t_id, keywor
 
 @background_thread
 @safe_trace
-def trace_etw_event(event_id, message, activity_id, log_type, arg_array):
+def trace_etw_event(event_id, activity_id, log_type, arg_array):
     """Write the trace to STDOUT / log file (on disk) / to MDS (in the cloud).
 
     Note:
@@ -178,7 +178,6 @@ def trace_etw_event(event_id, message, activity_id, log_type, arg_array):
 
     Args:
         event_id    : int   , the event id. This event id doesn't have to map to an ETW event id in the cloud.
-        message     : string, the message.
         activity_id : string, the activiti id.
         log_type    : int   , the log type.
         arg_array   : string, the argument array.
@@ -191,17 +190,6 @@ def trace_etw_event(event_id, message, activity_id, log_type, arg_array):
 
     if jrds_client is None or default_logger is None:
         init()
-
-    if isinstance(message, dict):
-        message = dict_to_str(message)
-
-    # local trace
-    # we prioritize cloud traces, do not raise exception if local tracing raises an exception
-    try:
-        default_logger.info(message)
-    except Exception, e:
-        print str(e)
-        pass
 
     # MDS
     issue_jrds_trace(event_id, activity_id, log_type, arg_array)
@@ -291,8 +279,9 @@ def log_worker_starting(version):
     trace_generic_hybrid_worker_event(5000, inspect.stack()[0][3], message, 1, KEYWORD_STARTUP)
 
 
-def log_worker_general_telemetry(worker_version):
-    message = "Worker general telemetry. [workerVersion=" + str(worker_version) + "]"
+def log_worker_general_telemetry(worker_version, worker_type):
+    message = "Worker general telemetry. [workerVersion=" + str(worker_version) + "][workerType=" +\
+              str(worker_type) + "]"
     trace_generic_hybrid_worker_event(5001, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
@@ -362,12 +351,23 @@ def log_worker_stopped_tracking_sandbox(sandbox_id):
     trace_generic_hybrid_worker_event(5107, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
+def log_worker_safe_loop_non_terminal_exception(exception):
+    message = "Worker safe loop non terminal exception. [exception=" + str(exception) + "]"
+    trace_generic_hybrid_worker_event(5108, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+
+
+def log_worker_safe_loop_terminal_exception(exception):
+    message = "Worker safe loop terminal exception. [exception=" + str(exception) + "]"
+    trace_generic_hybrid_worker_event(5109, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+
+
 # sandbox specific traces
 # traces in this section are mainly for the sandbox component
 #
 # ** these trace rely on the sandbox_id env variable to be set **
-def log_sandbox_starting(pid):
-    message = "Sandbox process starting. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) + "]"
+def log_sandbox_starting(sandbox_id, pid, worker_type):
+    message = "Sandbox process starting. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) +\
+              "][workerType=" + str(worker_type) + "]"
     trace_generic_hybrid_worker_event(10000, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
@@ -496,6 +496,45 @@ def log_sandbox_configuration(sandbox_id, enforce_runbook_signature_validation, 
     trace_generic_hybrid_worker_event(10022, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
+def log_sandbox_safe_loop_terminal_exception(exception):
+    message = "Sandbox safe loop terminal exception. [sandboxId=" + str(sandbox_id) + "][exception=" + \
+              str(exception) + "]"
+    trace_generic_hybrid_worker_event(10023, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+
+
+# GenericHybridWorker event for ETW traces
+def log_job_status_changed_completed(message):
+    trace_generic_hybrid_worker_event(90000, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+
+
+def log_job_status_changed_failed(message):
+    trace_generic_hybrid_worker_event(90001, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+
+
+def log_job_status_changed_running(message):
+    trace_generic_hybrid_worker_event(90002, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+
+
+def log_job_status_changed_stopped(message):
+    trace_generic_hybrid_worker_event(90003, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+
+
+def log_job_status_changed_suspended_by_user(message):
+    trace_generic_hybrid_worker_event(90004, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+
+
+def log_job_status_changed_suspended_by_exception(message):
+    trace_generic_hybrid_worker_event(90005, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+
+
+def log_user_requested_start_or_resume(message):
+    trace_generic_hybrid_worker_event(90006, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+
+
+def log_job_duration(message):
+    trace_generic_hybrid_worker_event(90007, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+
+
 # etw specific traces
 # traces in the following block
 def log_etw_job_status_changed_completed(subscription_id, account_id, account_name, sandbox_id, job_id,
@@ -511,7 +550,8 @@ def log_etw_job_status_changed_completed(subscription_id, account_id, account_na
                     "][accountId=" + str(account_id) + "][accountName=" + str(account_name) + "][sandboxId=" + \
                     str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + \
                     str(runbook_definition_kind) + "][runbookName=" + str(runbook_name) + "]"
-    trace_etw_event(3181, local_message, u_activity_id, 0, cloud_trace_format)
+    trace_etw_event(3181, u_activity_id, 0, cloud_trace_format)
+    log_job_status_changed_completed(local_message)
 
 
 def log_etw_job_status_changed_failed(subscription_id, account_id, account_name, sandbox_id, job_id,
@@ -530,7 +570,8 @@ def log_etw_job_status_changed_failed(subscription_id, account_id, account_name,
                     "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + str(runbook_definition_kind) + \
                     "][runbookName=" + str(runbook_name) + "][runbookVersionId=" + str(runbook_version_id) + \
                     "][exception=" + str(exception) + "]"
-    trace_etw_event(3182, local_message, u_activity_id, 0, cloud_trace_format)
+    trace_etw_event(3182, u_activity_id, 0, cloud_trace_format)
+    log_job_status_changed_failed(local_message)
 
 
 def log_etw_job_status_changed_running(subscription_id, account_id, account_name, sandbox_id, job_id,
@@ -548,7 +589,8 @@ def log_etw_job_status_changed_running(subscription_id, account_id, account_name
                     "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + str(runbook_definition_kind) + \
                     "][runbookName=" + str(runbook_name) + "][timeTakenToStartRunningInSeconds=" + \
                     str(time_taken_to_start_running_in_seconds) + "]"
-    trace_etw_event(3183, local_message, u_activity_id, 0, cloud_trace_format)
+    trace_etw_event(3183, u_activity_id, 0, cloud_trace_format)
+    log_job_status_changed_running(local_message)
 
 
 def log_etw_job_status_changed_stopped(subscription_id, account_id, account_name, sandbox_id, job_id,
@@ -564,7 +606,8 @@ def log_etw_job_status_changed_stopped(subscription_id, account_id, account_name
                     str(account_id) + "][accountName=" + str(account_name) + "][sandboxId=" + str(sandbox_id) + \
                     "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + str(runbook_definition_kind) + \
                     "][runbookName=" + str(runbook_name) + "]"
-    trace_etw_event(3184, local_message, u_activity_id, 0, cloud_trace_format)
+    trace_etw_event(3184, u_activity_id, 0, cloud_trace_format)
+    log_job_status_changed_stopped(local_message)
 
 
 def log_etw_job_status_changed_suspended_by_user(account_id, sandbox_id, job_id, runbook_name, runbook_definition_kind,
@@ -579,7 +622,8 @@ def log_etw_job_status_changed_suspended_by_user(account_id, sandbox_id, job_id,
                     str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookName=" + str(runbook_name) + \
                     "][runbookDefinitionKind=" + str(runbook_definition_kind) + "][accountName=" + str(account_name) + \
                     "]"
-    trace_etw_event(3185, local_message, u_activity_id, 0, cloud_trace_format)
+    trace_etw_event(3185, u_activity_id, 0, cloud_trace_format)
+    log_job_status_changed_suspended_by_user(local_message)
 
 
 def log_etw_job_status_changed_suspended_by_exception(account_id, sandbox_id, job_id, runbook_name, exception,
@@ -593,7 +637,8 @@ def log_etw_job_status_changed_suspended_by_exception(account_id, sandbox_id, jo
     local_message = "Job state changed to suspended after an exception was encountered. [accountId=" + \
                     str(account_id) + "][sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookName=" + \
                     str(runbook_name) + "][exception=" + str(exception) + "]"
-    trace_etw_event(3186, local_message, u_activity_id, 0, cloud_trace_format)
+    trace_etw_event(3186, u_activity_id, 0, cloud_trace_format)
+    log_job_status_changed_suspended_by_exception(local_message)
 
 
 def log_etw_user_requested_start_or_resume(account_id, sandbox_id, job_id, runbook_name, account_name,
@@ -609,7 +654,8 @@ def log_etw_user_requested_start_or_resume(account_id, sandbox_id, job_id, runbo
                     "][sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookName=" + \
                     str(runbook_name) + "][timeTakenToStartRunningInSeconds=" + \
                     str(time_taken_to_start_running_in_seconds) + "][runbookType=" + str(runbook_definition_kind) + "]"
-    trace_etw_event(3732, local_message, u_activity_id, 0, cloud_trace_format)
+    trace_etw_event(3732, u_activity_id, 0, cloud_trace_format)
+    log_user_requested_start_or_resume(local_message)
 
 
 def log_etw_job_duration(subscription_id, account_id, sandbox_id, job_id, duration, duration_in_seconds, tier_name,
@@ -633,4 +679,5 @@ def log_etw_job_duration(subscription_id, account_id, sandbox_id, job_id, durati
                     "][jobTriggerSource=" + str(job_trigger_source) + "][runbookSource=" + str(runbook_source) + \
                     "][runbookType=" + str(runbook_type) + "][runbookName=" + str(runbook_name) + \
                     "][jobRunDestination=" + str(job_run_destination) + "]"
-    trace_etw_event(3453, local_message, u_activity_id, 0, cloud_trace_format)
+    trace_etw_event(3453, u_activity_id, 0, cloud_trace_format)
+    log_job_duration(local_message)

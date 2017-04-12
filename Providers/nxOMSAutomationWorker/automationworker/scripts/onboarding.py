@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import socket
+import subprocess
 import sys
 from optparse import OptionParser
 
@@ -26,6 +27,13 @@ configuration.clear_config()
 configuration.set_config({configuration.PROXY_CONFIGURATION_PATH: "/etc/opt/microsoft/omsagent/proxy.conf",
                           configuration.WORKER_VERSION: "LinuxDIYRegister",
                           configuration.WORKING_DIRECTORY_PATH: "/tmp"})
+
+
+def get_ip_address():
+    try:
+        return socket.gethostbyname(socket.gethostname())
+    except:
+        return "127.0.0.1"
 
 
 def set_permission_recursive(permission, path):
@@ -117,7 +125,7 @@ def generate_hmac(str_to_sign, secret):
 
 def create_worker_configuration_file(jrds_uri, automation_account_id, worker_group_name, machine_id,
                                      working_directory_path, state_directory_path, cert_path, key_path,
-                                     registration_endpoint, workspace_id, thumbprint, test_mode):
+                                     registration_endpoint, workspace_id, thumbprint, vm_id, is_azure_vm, test_mode):
     """Creates the automation hybrid worker configuration file.
 
     Args:
@@ -144,33 +152,40 @@ def create_worker_configuration_file(jrds_uri, automation_account_id, worker_gro
         config.read(worker_conf_path)
     conf_file = open(worker_conf_path, 'wb')
 
-    section = "worker-required"
-    if not config.has_section(section):
-        config.add_section(section)
-    config.set(section, "jrds_cert_path", cert_path)
-    config.set(section, "jrds_key_path", key_path)
-    config.set(section, "jrds_base_uri", jrds_uri)
-    config.set(section, "account_id", automation_account_id)
-    config.set(section, "machine_id", machine_id)
-    config.set(section, "hybrid_worker_group_name", worker_group_name)
-    config.set(section, "working_directory_path", working_directory_path)
+    worker_required_section = configuration.WORKER_REQUIRED_CONFIG_SECTION
+    if not config.has_section(worker_required_section):
+        config.add_section(worker_required_section)
+    config.set(worker_required_section, configuration.CERT_PATH, cert_path)
+    config.set(worker_required_section, configuration.KEY_PATH, key_path)
+    config.set(worker_required_section, configuration.BASE_URI, jrds_uri)
+    config.set(worker_required_section, configuration.ACCOUNT_ID, automation_account_id)
+    config.set(worker_required_section, configuration.MACHINE_ID, machine_id)
+    config.set(worker_required_section, configuration.HYBRID_WORKER_GROUP_NAME, worker_group_name)
+    config.set(worker_required_section, configuration.WORKING_DIRECTORY_PATH, working_directory_path)
 
-    section = "worker-optional"
-    if not config.has_section(section):
-        config.add_section(section)
-    config.set(section, "proxy_configuration_path", "/etc/opt/microsoft/omsagent/proxy.conf")
-    config.set(section, "state_directory_path", state_directory_path)
+    worker_optional_section = configuration.WORKER_OPTIONAL_CONFIG_SECTION
+    if not config.has_section(worker_optional_section):
+        config.add_section(worker_optional_section)
+    config.set(worker_optional_section, configuration.PROXY_CONFIGURATION_PATH,
+               "/etc/opt/microsoft/omsagent/proxy.conf")
+    config.set(worker_optional_section, configuration.STATE_DIRECTORY_PATH, state_directory_path)
+    config.set(worker_optional_section, configuration.WORKER_TYPE, "diy")
     if test_mode is True:
-        config.set(section, "bypass_certificate_verification", True)
-        config.set(section, "debug_traces", True)
+        config.set(worker_optional_section, configuration.BYPASS_CERTIFICATE_VERIFICATION, True)
+        config.set(worker_optional_section, configuration.DEBUG_TRACES, True)
 
-    section = "registration-metadata"
-    if not config.has_section(section):
-        config.add_section(section)
-    config.set(section, "registration_endpoint", registration_endpoint)
-    config.set(section, "workspace_id", workspace_id)
-    config.set(section, "oms_cert_thumbprint", thumbprint)
-    config.set(section, "worker_type", "diy")
+    metadata_section = configuration.METADATA_CONFIG_SECTION
+    if not config.has_section(metadata_section):
+        config.add_section(metadata_section)
+    config.set(metadata_section, configuration.IS_AZURE_VM, str(is_azure_vm))
+    config.set(metadata_section, configuration.VM_ID, vm_id)
+
+    registration_metadata_section = "registration-metadata"
+    if not config.has_section(registration_metadata_section):
+        config.add_section(registration_metadata_section)
+    config.set(registration_metadata_section, configuration.REGISTRATION_ENDPOINT, registration_endpoint)
+    config.set(registration_metadata_section, configuration.WORKSPACE_ID, workspace_id)
+    config.set(registration_metadata_section, configuration.CERTIFICATE_THUMBPRINT, thumbprint)
 
     config.write(conf_file)
     conf_file.close()
@@ -195,6 +210,15 @@ def extract_account_id_from_registration_endpoint(registration_endpoint):
     if len(account_id) != 1:
         raise Exception("Invalid registration endpoint format.")
     return account_id[0]
+
+
+def invoke_dmidecode():
+    """Gets the dmidecode output from the host."""
+    proc = subprocess.Popen(["su", "-", "root", "-c", "dmidecode"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    dmidecode, error = proc.communicate()
+    if proc.poll() != 0:
+        raise Exception("Unable to get dmidecode output : " + str(error))
+    return dmidecode
 
 
 def register(options):
@@ -237,13 +261,33 @@ def register(options):
     generate_self_signed_certificate(certificate_path=certificate_path, key_path=key_path)
     issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
 
+    # try to extract optional metadata
+    unknown = "Unknown"
+    asset_tag = unknown
+    vm_id = unknown
+    is_azure_vm = unknown
+    try:
+        dmidecode = invoke_dmidecode()
+        is_azure_vm = linuxutil.is_azure_vm(dmidecode)
+        if is_azure_vm:
+            asset_tag = linuxutil.get_azure_vm_asset_tag()
+        else:
+            asset_tag = False
+        vm_id = linuxutil.get_vm_unique_id_from_dmidecode(sys.byteorder, dmidecode)
+    except Exception, e:
+        print str(e)
+        pass
+
     # generate payload for registration request
     date = datetime.datetime.utcnow().isoformat() + "0-00:00"
     payload = {'RunbookWorkerGroup': hybrid_worker_group_name,
                "MachineName": socket.gethostname(),
-               "IpAddress": socket.gethostbyname(socket.gethostname()),
+               "IpAddress": get_ip_address(),
                "Thumbprint": thumbprint,
                "Issuer": issuer,
+               "OperatingSystem": 2,
+               "SMBIOSAssetTag": asset_tag,
+               "VirtualMachineId": vm_id,
                "Subject": subject}
 
     # the signature generation is based on agent service contract
@@ -271,7 +315,7 @@ def register(options):
     create_worker_configuration_file(registration_response["jobRuntimeDataServiceUri"], account_id,
                                      hybrid_worker_group_name, machine_id, diy_working_directory_base_path,
                                      diy_state_base_path, certificate_path, key_path, registration_endpoint,
-                                     workspace_id, thumbprint, options.test)
+                                     workspace_id, thumbprint, vm_id, is_azure_vm, options.test)
 
     # generate working directory path
     if os.path.isdir(diy_working_directory_base_path) is False:

@@ -12,6 +12,9 @@ import threading
 import time
 import traceback
 
+import util
+from workerexception import *
+
 sandboxes_root_folder_name = "sandboxes"
 
 
@@ -21,11 +24,12 @@ def safe_loop(func):
             try:
                 # ensure required file / cert exists
                 func(*args, **kwargs)
-            except SystemExit:
-                tracer.log_exception_trace(traceback.format_exc())
+            except (JrdsAuthorizationException, SystemExit):
+                tracer.log_worker_safe_loop_terminal_exception(traceback.format_exc())
+                time.sleep(1)  # allow the trace to make it to stdout (since traces are background threads)
                 sys.exit(-1)
             except Exception:
-                tracer.log_exception_trace(traceback.format_exc())
+                tracer.log_worker_safe_loop_non_terminal_exception(traceback.format_exc())
             time.sleep(configuration.get_jrds_get_sandbox_actions_polling_freq())
 
     return decorated_func
@@ -41,15 +45,8 @@ def background_thread(func):
 
 
 def exit_on_error(message, exit_code=1):
-    print str(message)
-    try:
-        os.chdir(os.path.expanduser("~"))
-        crash_log = open("automation_worker_crash.log", "w")
-        crash_log.write(message)
-        crash_log.close()
-    except:
-        pass
-    sys.exit(exit_code)
+    crash_log_filename = "automation_worker_crash.log"
+    util.exit_on_error(filename=crash_log_filename, message=message, exit_code=exit_code)
 
 
 def test_file_creation(path):
@@ -177,7 +174,9 @@ class Worker:
     @safe_loop
     def routine(self):
         # die if configuration was removed.
-        if os.path.exists(configuration.get_worker_configuration_file_path()) is False:
+        if os.path.exists(configuration.get_jrds_cert_path()) is False or \
+           os.path.exists(configuration.get_jrds_key_path()) is False or \
+           os.path.exists(configuration.get_worker_configuration_file_path()) is False:
             raise SystemExit()
 
         self.stop_tracking_terminated_sandbox()
@@ -249,7 +248,7 @@ class Worker:
     @background_thread
     def telemetry_routine(self):
         while True:
-            tracer.log_worker_general_telemetry(configuration.get_worker_version())
+            tracer.log_worker_general_telemetry(configuration.get_worker_version(), configuration.get_worker_type())
             tracer.log_worker_python_telemetry(platform.python_version(), platform.python_build(),
                                                platform.python_compiler())
             tracer.log_worker_system_telemetry(platform.system(), platform.node(), platform.version(),

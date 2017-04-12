@@ -12,6 +12,7 @@ from Queue import Queue, Empty
 
 import configuration
 import tracer
+import util
 from automationconstants import jobstatus
 from automationconstants import pendingactions
 from httpclientfactory import HttpClientFactory
@@ -23,14 +24,19 @@ routine_loop = True
 job_map = {}
 
 
+def exit_on_error(message, exit_code=1):
+    crash_log_filename = "automation_sandbox_crash_" + str(os.environ["sandbox_id"]) + ".log"
+    util.exit_on_error(filename=crash_log_filename, message=message, exit_code=exit_code)
+
+
 def safe_loop(func):
     def decorated_func(*args, **kwargs):
         global routine_loop
         while routine_loop:
             try:
                 func(*args, **kwargs)
-            except Exception:
-                tracer.log_exception_trace(traceback.format_exc())
+            except (JrdsAuthorizationException, JrdsSandboxTerminated, Exception):
+                tracer.log_sandbox_safe_loop_terminal_exception(traceback.format_exc())
                 time.sleep(1)  # allow the trace to make it to stdout (since traces are background threads)
 
                 # this will work as long as all threads are daemon
@@ -41,20 +47,11 @@ def safe_loop(func):
     return decorated_func
 
 
-def exit_on_error(message, exit_code=1):
-    print str(message)
-    try:
-        os.chdir(os.path.expanduser("~"))
-        open("automation_sandbox_crash_" + str(os.environ["sandbox_id"]) + ".log", "w").write(message)
-    except:
-        pass
-    sys.exit(exit_code)
-
-
 class Sandbox:
     def __init__(self):
         self.sandbox_id = os.environ["sandbox_id"]
-        tracer.log_sandbox_starting(os.getpid())
+        tracer.log_sandbox_starting(sandbox_id=self.sandbox_id, pid=os.getpid(),
+                                    worker_type=configuration.get_worker_type())
         tracer.log_sandbox_configuration(sandbox_id=self.sandbox_id,
                                          enforce_runbook_signature_validation=configuration.get_enforce_runbook_signature_validation(),
                                          gpg_public_keyring_paths=configuration.get_gpg_public_keyrings_path(),

@@ -13,6 +13,7 @@ json = serializerfactory.get_serializer(sys.version_info)
 CONFIG_ENV_KEY = "WORKERCONF"
 WORKER_REQUIRED_CONFIG_SECTION = "worker-required"
 WORKER_OPTIONAL_CONFIG_SECTION = "worker-optional"
+METADATA_CONFIG_SECTION = "metadata"
 
 # manually set configuration values
 SOURCE_DIRECTORY_PATH = "source_directory_path"
@@ -36,6 +37,11 @@ GPG_PUBLIC_KEYRING_PATH = "gpg_public_keyring_path"
 STATE_DIRECTORY_PATH = "state_directory_path"
 JRDS_POLLING_FREQUENCY = "jrds_polling_frequency"
 PROXY_CONFIGURATION_PATH = "proxy_configuration_path"
+WORKER_TYPE = "worker_type"
+
+# optional metadata configuration keys
+VM_ID = "vm_id"
+IS_AZURE_VM = "is_azure_vm"
 
 # optional configuration default values
 DEFAULT_EMPTY = ""
@@ -45,8 +51,11 @@ DEFAULT_ENFORCE_RUNBOOK_SIGNATURE_VALIDATION = "true"
 DEFAULT_GPG_PUBLIC_KEYRING_PATH = DEFAULT_EMPTY
 DEFAULT_STATE_DIRECTORY_PATH = DEFAULT_EMPTY
 DEFAULT_PROXY_CONFIGURATION_PATH = DEFAULT_EMPTY
-DEFAULT_COMPONENT = "Unknown"
-DEFAULT_WORKER_VERSION = "1.5.0.0"
+DEFAULT_UNKNOWN = "Unknown"
+DEFAULT_VM_ID = DEFAULT_UNKNOWN
+DEFAULT_WORKER_TYPE = DEFAULT_UNKNOWN
+DEFAULT_COMPONENT = DEFAULT_UNKNOWN
+DEFAULT_WORKER_VERSION = "1.5.1.0"
 DEFAULT_JRDS_POLLING_FREQUENCY = "30"
 
 # state configuration keys
@@ -54,6 +63,12 @@ STATE_PID = "pid"
 STATE_RESOURCE_VERSION = "resource_version"
 STATE_WORKSPACE_ID = "workspace_id"
 STATE_WORKER_VERSION = "worker_version"
+
+# other configuration keys (optional and most likely not used by the worker)
+AGENT_ID = "agent_id"
+WORKSPACE_ID = "workspace_id"
+REGISTRATION_ENDPOINT = "registration_endpoint"
+CERTIFICATE_THUMBPRINT = "jrds_cert_thumbprint"
 
 worker_configuration_file_path = DEFAULT_EMPTY
 
@@ -84,7 +99,10 @@ def read_and_set_configuration(configuration_file_path):
                                             GPG_PUBLIC_KEYRING_PATH: DEFAULT_GPG_PUBLIC_KEYRING_PATH,
                                             STATE_DIRECTORY_PATH: DEFAULT_STATE_DIRECTORY_PATH,
                                             JRDS_POLLING_FREQUENCY: DEFAULT_JRDS_POLLING_FREQUENCY,
-                                            PROXY_CONFIGURATION_PATH : DEFAULT_PROXY_CONFIGURATION_PATH})
+                                            PROXY_CONFIGURATION_PATH: DEFAULT_PROXY_CONFIGURATION_PATH,
+                                            WORKER_TYPE: DEFAULT_WORKER_TYPE,
+                                            VM_ID: DEFAULT_VM_ID,
+                                            IS_AZURE_VM: "False"})
 
     # load the worker configuration file
     config.read(configuration_file_path)
@@ -112,7 +130,11 @@ def read_and_set_configuration(configuration_file_path):
                           GPG_PUBLIC_KEYRING_PATH: config.get(WORKER_OPTIONAL_CONFIG_SECTION, GPG_PUBLIC_KEYRING_PATH),
                           STATE_DIRECTORY_PATH: config.get(WORKER_OPTIONAL_CONFIG_SECTION, STATE_DIRECTORY_PATH),
                           JRDS_POLLING_FREQUENCY: config.getint(WORKER_OPTIONAL_CONFIG_SECTION, JRDS_POLLING_FREQUENCY),
-                          PROXY_CONFIGURATION_PATH: config.get(WORKER_OPTIONAL_CONFIG_SECTION, PROXY_CONFIGURATION_PATH)})
+                          PROXY_CONFIGURATION_PATH: config.get(WORKER_OPTIONAL_CONFIG_SECTION,
+                                                               PROXY_CONFIGURATION_PATH),
+                          WORKER_TYPE: config.get(WORKER_OPTIONAL_CONFIG_SECTION, WORKER_TYPE),
+                          VM_ID: config.get(METADATA_CONFIG_SECTION, VM_ID),
+                          IS_AZURE_VM: config.getboolean(METADATA_CONFIG_SECTION, IS_AZURE_VM)})
 
     # set the worker conf to env var
     set_config(configuration)
@@ -242,3 +264,7 @@ def get_temporary_request_directory_path():
 
 def get_proxy_configuration_path():
     return get_value(PROXY_CONFIGURATION_PATH)
+
+
+def get_worker_type():
+    return get_value(WORKER_TYPE)

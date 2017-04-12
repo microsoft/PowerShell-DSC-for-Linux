@@ -1,10 +1,24 @@
 import random
 import sys
+import tempfile
+import os
 import linuxutil
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
 PY_MICRO_VERSION = 2
+
+
+def exit_on_error(filename, message, exit_code=-1):
+    """Generates a crash log on disk in the temp directory then kills the current process."""
+    print str(message)
+    try:
+        crash_log = open(os.path.join(tempfile.gettempdir(), filename), "w")
+        crash_log.write(message)
+        crash_log.close()
+    except:
+        pass
+    sys.exit(exit_code)
 
 
 def generate_uuid():
