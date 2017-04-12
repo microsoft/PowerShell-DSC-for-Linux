@@ -13,6 +13,14 @@ class JrdsSandboxTerminated(Exception):
             self.message = msg
 
 
+class JrdsAuthorizationException(Exception):
+    def __init___(self, msg=None):
+        if msg is None:
+            self.message = "JRDS authorization exception."
+        else:
+            self.message = msg
+
+
 class SandboxRuntimeException(Exception):
     def __init__(self, msg=None):
         if msg is None:

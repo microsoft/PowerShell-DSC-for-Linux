@@ -3,9 +3,10 @@
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
 import os
-import random
 import subprocess
 import sys
+import re
+import codecs
 
 # workaround when unexpected environment variables are present
 # sets COLUMNS wide enough so that output of ps does not get truncated
@@ -24,6 +25,7 @@ PS_FJH_HEADER = ["UID", "PID", "PPID", "PGID", "SID", "C", "STIME", "TTY", "TIME
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
 PY_MICRO_VERSION = 2
+
 
 def posix_only(func):
     """Decorator to prevent linux specific methods to run on other OS."""
@@ -68,6 +70,72 @@ def is_posix_host():
         bool, True if the host is posix else False.
     """
     return os.name.lower() == "posix"
+
+@posix_only
+def invoke_dmidecode():
+    """Gets the dmidecode output from the host."""
+    proc = subprocess.Popen(["sudo", "dmidecode"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    dmidecode, error = proc.communicate()
+    if proc.poll() != 0:
+        raise Exception("Unable to get dmidecode output : " + str(error))
+    return dmidecode
+
+
+def get_azure_vm_asset_tag():
+    """Return the azure vm asset tag."""
+    return "7783-7084-3265-9085-8269-3286-77"
+
+
+def is_azure_vm(dmidecode_output):
+    """Detects azure vm from dmidecode output.
+
+    Note : is an asset tag "7783-7084-3265-9085-8269-3286-77" is present then this is an azure vm.
+
+    Returns:
+        bool, true if the host is an azure vm.
+    """
+    asset_tags = re.findall(get_azure_vm_asset_tag(), dmidecode_output)
+
+    for tag in asset_tags:
+        if get_azure_vm_asset_tag() in tag:
+            return True
+
+    return False
+
+
+def get_vm_unique_id_from_dmidecode(byteorder, dmidecode_output):
+    """Extract the host UUID from dmidecode output.
+
+    Returns:
+        string, the host UUID.
+    """
+    uuid_prefix = "UUID: "
+    uuids = re.findall(uuid_prefix + "[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}",
+                       dmidecode_output.upper())
+    if len(uuids) < 1:
+        raise Exception("No host UUID found.")
+
+    # if multiple UUIDs are found take the first one
+    uuid = uuids[0].split(uuid_prefix)[1].strip()
+
+    # azure uuids are big endian
+    if byteorder == "big":
+        return uuid
+
+    uuid_part = uuid.split("-")
+    big_endian_uuid = "-".join([convert_to_big_endian(uuid_part[0]),
+                                convert_to_big_endian(uuid_part[1]),
+                                convert_to_big_endian(uuid_part[2]),
+                                uuid_part[3],
+                                uuid_part[4]]).upper()
+    return big_endian_uuid
+
+
+def convert_to_big_endian(little_endian_value):
+    """Converts the little endian representation of the value into a big endian representation of the value"""
+    hex = little_endian_value.decode('hex')
+    reordered_hex = hex[::-1]
+    return reordered_hex.encode('hex')
 
 
 @posix_only

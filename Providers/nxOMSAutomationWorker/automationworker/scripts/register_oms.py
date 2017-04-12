@@ -22,12 +22,41 @@ from worker import linuxutil
 REGISTER = "register"
 DEREGISTER = "deregister"
 
-CONFIGURATION_SECTION_WORKER_REQUIRED = "worker-required"
-CONFIGURATION_SECTION_WORKER_OPTIONAL = "worker-optional"
-CONFIGURATION_SECTION_OMS_METADATA = "oms-metadata"
+
+def get_hybrid_worker_group_name(agent_id):
+    """Generates the hybrid worker group name.
+
+    Notes:
+        The format as to match the OMSAgent computer_agentid format.
+        The OMSAgent doesn't use FQDN for the computer name.
+
+        See : https://github.com/Microsoft/OMS-Agent-for-Linux/blob/master/source/code/plugins/oms_common.rb#L600
+
+    Returns:
+        String, hybrid worker group name
+    """
+    # following same format as OMSAgent (get_hostname())
+    # see : https://github.com/Microsoft/OMS-Agent-for-Linux/blob/master/source/code/plugins/oms_common.rb#L600
+    return socket.gethostname().split(".")[0] + "_" + agent_id
 
 
-def get_headers_and_payload(worker_group_name, certificate_path):
+def get_ip_address():
+    """Gets the host ip address.
+
+    Notes:
+        Defaulting to 127.0.01 for host that are not configured properly. This field is only informational
+        for AgentService.
+
+    Returns:
+        String, IpAddress
+    """
+    try:
+        return socket.gethostbyname(socket.gethostname())
+    except:
+        return "127.0.0.1"
+
+
+def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, certificate_path):
     """Formats the required headers and payload for the registration and deregitration requests.
 
     Returns:
@@ -38,23 +67,30 @@ def get_headers_and_payload(worker_group_name, certificate_path):
                'x-ms-date': datetime.datetime.utcnow().isoformat() + "0-00:00",
                "Content-Type": "application/json"}
 
+    asset_tag = "Unknown"
+    if is_azure_vm:
+        asset_tag = linuxutil.get_azure_vm_asset_tag()
+
     payload = {'RunbookWorkerGroup': worker_group_name,
                "MachineName": socket.gethostname(),
-               "IpAddress": socket.gethostbyname(socket.gethostname()),
+               "IpAddress": get_ip_address(),
                "Thumbprint": thumbprint,
                "Issuer": issuer,
+               "OperatingSystem": 2,
+               "SMBIOSAssetTag": asset_tag,
+               "VirtualMachineId": vm_id,
                "Subject": subject}
 
     return headers, payload
 
 
-def register(registration_endpoint, worker_group_name, machine_id, cert_path, key_path, test_mode):
+def register(registration_endpoint, worker_group_name, machine_id, cert_path, key_path, is_azure_vm, vm_id, test_mode):
     """Registers the worker through the automation linked account with the Agent Service.
 
     Returns:
         The deserialized response from the Agent Service.
     """
-    headers, payload = get_headers_and_payload(worker_group_name, cert_path)
+    headers, payload = get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, cert_path)
     url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
 
     http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode)
@@ -91,7 +127,7 @@ def deregister(registration_endpoint, worker_group_name, machine_id, cert_path, 
 def create_worker_configuration_file(working_directory, jrds_uri, registration_endpoint, workspace_id,
                                      automation_account_id, worker_group_name, machine_id, oms_cert_path, oms_key_path,
                                      state_directory, gpg_keyring_path, proxy_configuration_path, test_mode,
-                                     cert_info):
+                                     cert_info, is_azure_vm, vm_id):
     """Creates the automation hybrid worker configuration file.
 
     Note:
@@ -106,30 +142,40 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
         config.read(worker_conf_path)
     conf_file = open(worker_conf_path, 'wb')
 
-    if not config.has_section(CONFIGURATION_SECTION_WORKER_REQUIRED):
-        config.add_section(CONFIGURATION_SECTION_WORKER_REQUIRED)
-    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "jrds_cert_path", oms_cert_path)
-    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "jrds_key_path", oms_key_path)
-    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "jrds_base_uri", jrds_uri)
-    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "account_id", automation_account_id)
-    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "machine_id", machine_id)
-    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "hybrid_worker_group_name", worker_group_name)
-    config.set(CONFIGURATION_SECTION_WORKER_REQUIRED, "working_directory_path", working_directory)
+    worker_required_section = configuration.WORKER_REQUIRED_CONFIG_SECTION
+    if not config.has_section(worker_required_section):
+        config.add_section(worker_required_section)
+    config.set(worker_required_section, configuration.CERT_PATH, oms_cert_path)
+    config.set(worker_required_section, configuration.KEY_PATH, oms_key_path)
+    config.set(worker_required_section, configuration.BASE_URI, jrds_uri)
+    config.set(worker_required_section, configuration.ACCOUNT_ID, automation_account_id)
+    config.set(worker_required_section, configuration.MACHINE_ID, machine_id)
+    config.set(worker_required_section, configuration.HYBRID_WORKER_GROUP_NAME, worker_group_name)
+    config.set(worker_required_section, configuration.WORKING_DIRECTORY_PATH, working_directory)
 
-    if not config.has_section(CONFIGURATION_SECTION_WORKER_OPTIONAL):
-        config.add_section(CONFIGURATION_SECTION_WORKER_OPTIONAL)
-    config.set(CONFIGURATION_SECTION_WORKER_OPTIONAL, "gpg_public_keyring_path", gpg_keyring_path)
-    config.set(CONFIGURATION_SECTION_WORKER_OPTIONAL, "proxy_configuration_path", proxy_configuration_path)
-    config.set(CONFIGURATION_SECTION_WORKER_OPTIONAL, "state_directory_path", state_directory)
+    worker_optional_section = configuration.WORKER_OPTIONAL_CONFIG_SECTION
+    if not config.has_section(worker_optional_section):
+        config.add_section(worker_optional_section)
+    config.set(worker_optional_section, configuration.GPG_PUBLIC_KEYRING_PATH, gpg_keyring_path)
+    config.set(worker_optional_section, configuration.PROXY_CONFIGURATION_PATH, proxy_configuration_path)
+    config.set(worker_optional_section, configuration.STATE_DIRECTORY_PATH, state_directory)
+    config.set(worker_optional_section, configuration.WORKER_TYPE, "autoregistered")
     if test_mode is True:
-        config.set(CONFIGURATION_SECTION_WORKER_OPTIONAL, "bypass_certificate_verification", True)
+        config.set(worker_optional_section, configuration.BYPASS_CERTIFICATE_VERIFICATION, True)
 
-    if not config.has_section(CONFIGURATION_SECTION_OMS_METADATA):
-        config.add_section(CONFIGURATION_SECTION_OMS_METADATA)
-    config.set(CONFIGURATION_SECTION_OMS_METADATA, "agent_id", machine_id)
-    config.set(CONFIGURATION_SECTION_OMS_METADATA, "workspace_id", workspace_id)
-    config.set(CONFIGURATION_SECTION_OMS_METADATA, "registration_endpoint", registration_endpoint)
-    config.set(CONFIGURATION_SECTION_OMS_METADATA, "oms_cert_thumbprint", thumbprint)
+    metadata_section = configuration.METADATA_CONFIG_SECTION
+    if not config.has_section(metadata_section):
+        config.add_section(metadata_section)
+    config.set(metadata_section, configuration.IS_AZURE_VM, str(is_azure_vm))
+    config.set(metadata_section, configuration.VM_ID, vm_id)
+
+    oms_metadata_section = "oms-metadata"
+    if not config.has_section(oms_metadata_section):
+        config.add_section(oms_metadata_section)
+    config.set(oms_metadata_section, configuration.AGENT_ID, machine_id)
+    config.set(oms_metadata_section, configuration.WORKSPACE_ID, workspace_id)
+    config.set(oms_metadata_section, configuration.REGISTRATION_ENDPOINT, registration_endpoint)
+    config.set(oms_metadata_section, configuration.CERTIFICATE_THUMBPRINT, thumbprint)
 
     config.write(conf_file)
     conf_file.close()
@@ -137,6 +183,8 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
 
 def main(argv):
     agent_id = None
+    is_azure_vm = False
+    vm_id = None
     oms_cert_path = None
     oms_key_path = None
     endpoint = None
@@ -152,20 +200,20 @@ def main(argv):
 
     # parse cmd line args
     try:
-        opts, args = getopt.getopt(argv, "hrdw:a:c:k:e:f:s:p:g:y:t",
+        opts, args = getopt.getopt(argv, "hrdw:a:c:k:e:f:s:p:g:y:i:zt",
                                    ["help", "register", "deregister", "workspaceid=", "agentid=", "certpath=",
                                     "keypath=", "endpoint=", "workingdirpath=", "statepath=", "proxyconfpath=",
-                                    "gpgkeyringpath=", "diyaccountid=", "mock_powershelldsc_test="])
+                                    "gpgkeyringpath=", "diyaccountid=", "mock_powershelldsc_test=", "vmid="])
     except getopt.GetoptError:
         print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
                          "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
-                         "-y <diyaccountid>"
+                         "-y <diyaccountid> -i <vmid>"
         sys.exit(2)
     for opt, arg in opts:
         if opt == ("-h", "--help"):
             print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
                              "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
-                             "-y <diyaccountid>"
+                             "-y <diyaccountid> -i <vmid>"
             sys.exit()
         elif opt in ("-r", "--register"):
             operation = REGISTER
@@ -191,6 +239,10 @@ def main(argv):
             gpg_keyring_path = arg.strip()
         elif opt in ("-y", "--diyaccountid"):
             diy_account_id = arg.strip()
+        elif opt in ("-z", "--azurevm"):
+            is_azure_vm = True
+        elif opt in ("-i", "--vmid"):
+            vm_id = arg.strip()
         elif opt in ("-t", "--test"):
             test_mode = True
         elif opt == "--mock_powershelldsc_test":
@@ -200,7 +252,7 @@ def main(argv):
 
     if workspace_id is None or agent_id is None or oms_cert_path is None or oms_key_path is None \
             or endpoint is None or gpg_keyring_path is None or proxy_configuration_path is None \
-            or working_directory is None or state_directory is None:
+            or working_directory is None or state_directory is None or vm_id is None:
         print "Missing mandatory arguments."
         print "Use -h or --help for usage."
         sys.exit(1)
@@ -228,7 +280,7 @@ def main(argv):
 
         # rename to match oms concepts to automation
         machine_id = agent_id
-        worker_group_name = socket.gethostname() + "_" + agent_id
+        worker_group_name = get_hybrid_worker_group_name(agent_id=agent_id)
 
         # action
         if operation == REGISTER:
@@ -241,7 +293,7 @@ def main(argv):
                 cert_info = ['', '', '959GG850526XC5JT35E269CZ69A55E1C7E1256JH']
             else:
                 registration_response = register(registration_endpoint, worker_group_name, machine_id, oms_cert_path,
-                                                 oms_key_path, test_mode)
+                                                 oms_key_path, is_azure_vm, vm_id, test_mode)
                 cert_info = linuxutil.get_cert_info(oms_cert_path)
                 account_id = registration_response["AccountId"]
 
@@ -254,7 +306,7 @@ def main(argv):
                                                  registration_endpoint, workspace_id, account_id,
                                                  worker_group_name, machine_id, oms_cert_path, oms_key_path,
                                                  state_directory, gpg_keyring_path, proxy_configuration_path, test_mode,
-                                                 cert_info)
+                                                 cert_info, is_azure_vm, vm_id)
         elif operation == DEREGISTER:
             deregister(registration_endpoint, worker_group_name, machine_id, oms_cert_path, oms_key_path, test_mode)
         else:

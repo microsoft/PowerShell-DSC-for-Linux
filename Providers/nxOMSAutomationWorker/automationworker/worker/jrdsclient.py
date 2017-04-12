@@ -19,6 +19,14 @@ class JRDSClient:
         self.HybridWorkerGroupName = configuration.get_hybrid_worker_name()
         self.machine_id = configuration.get_machine_id()
 
+    @staticmethod
+    def issue_request(request_function):
+        """Invokes request_funtion."""
+        response = request_function
+        if response.status_code == 401:
+            raise JrdsAuthorizationException()
+        return response
+
     def get_sandbox_actions(self):
         """Gets any pending sandbox actions.
 
@@ -40,11 +48,12 @@ class JRDSClient:
         url = self.base_uri + "/automationAccounts/" + self.account_id + \
               "/Sandboxes/GetSandboxActions?HybridWorkerGroupName=" + self.HybridWorkerGroupName + \
               "&api-version=" + self.protocol_version
-        request = self.httpClient.get(url)
+        response = self.issue_request(self.httpClient.get(url))
 
-        if request.status_code == 200:
-            return request.deserialized_data["value"]
-        raise Exception("Unable to get sandbox actions. [status=" + str(request.status_code) + "]")
+        if response.status_code == 200:
+            return response.deserialized_data["value"]
+
+        raise Exception("Unable to get sandbox actions. [status=" + str(response.status_code) + "]")
 
     def get_job_actions(self, sandbox_id):
         """Gets any pending job action for the given sandbox id.
@@ -71,19 +80,20 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/Sandboxes/" + sandbox_id + \
               "/jobs/getJobActions?api-version=" + self.protocol_version
-        request = self.httpClient.get(url)
 
-        # Stale sandbox
-        if request.status_code == 401:
+        try:
+            response = self.issue_request(self.httpClient.get(url))
+        except JrdsAuthorizationException:
             raise JrdsSandboxTerminated()
 
-        if request.status_code == 200:
-            job_actions = request.deserialized_data["value"]
+        if response.status_code == 200:
+            job_actions = response.deserialized_data["value"]
             if len(job_actions) != 0:
                 message_metadatas = [action["MessageMetadata"] for action in job_actions]
                 self.acknowledge_job_action(sandbox_id, message_metadatas)
             return job_actions
-        raise Exception("Unable to get job actions. [status=" + str(request.status_code) + "]")
+
+        raise Exception("Unable to get job actions. [status=" + str(response.status_code) + "]")
 
     def get_job_data(self, job_id):
         """Get the job details for the given id.
@@ -150,11 +160,12 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/jobs/" + job_id + "?api-version=" + \
               self.protocol_version
-        request = self.httpClient.get(url)
+        response = self.issue_request(self.httpClient.get(url))
 
-        if request.status_code == 200:
-            return JobData(request.deserialized_data)
-        raise Exception("Unable to get job. [status=" + str(request.status_code) + "]")
+        if response.status_code == 200:
+            return JobData(response.deserialized_data)
+
+        raise Exception("Unable to get job. [status=" + str(response.status_code) + "]")
 
     def get_job_updatable_data(self, job_id):
         """Gets the job updatable data for the given id.
@@ -195,11 +206,12 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/jobs/" + job_id + \
               "/getUpdatableData?api-version=" + self.protocol_version
-        request = self.httpClient.get(url)
+        response = self.issue_request(self.httpClient.get(url))
 
-        if request.status_code == 200:
-            return JobUpdatableData(request.deserialized_data)
-        raise Exception("Unable to get job. [status=" + str(request.status_code) + "]")
+        if response.status_code == 200:
+            return JobUpdatableData(response.deserialized_data)
+
+        raise Exception("Unable to get job. [status=" + str(response.status_code) + "]")
 
     def get_runbook_data(self, runbook_version_id):
         """Gets the runbook definition of the given runbook_version_id.
@@ -225,11 +237,12 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/runbooks/" + runbook_version_id + \
               "?api-version=" + self.protocol_version
-        request = self.httpClient.get(url)
+        response = self.issue_request(self.httpClient.get(url))
 
-        if request.status_code == 200:
-            return RunbookData(request.deserialized_data)
-        raise Exception("Unable to get runbook. [status=" + str(request.status_code) + "]")
+        if response.status_code == 200:
+            return RunbookData(response.deserialized_data)
+
+        raise Exception("Unable to get runbook. [status=" + str(response.status_code) + "]")
 
     def acknowledge_job_action(self, sandbox_id, message_metadatas):
         """Acknowledges the job action.
@@ -242,11 +255,12 @@ class JRDSClient:
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/Sandboxes/" + sandbox_id + \
               "/jobs/AcknowledgeJobActions?api-version=" + self.protocol_version
-        request = self.httpClient.post(url, headers=headers, data=payload)
+        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
 
-        if request.status_code == 200:
+        if response.status_code == 200:
             return
-        raise Exception("Unable to acknowledge job action. [status=" + str(request.status_code) + "]")
+
+        raise Exception("Unable to acknowledge job action. [status=" + str(response.status_code) + "]")
 
     def set_job_status(self, sandbox_id, job_id, job_status, is_terminal, exception=None):
         """Set the job status of the given job id (and exception if needed).
@@ -264,11 +278,12 @@ class JRDSClient:
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/Sandboxes/" + sandbox_id + "/jobs/" + \
               job_id + "/changeStatus?api-version=" + self.protocol_version
-        request = self.httpClient.post(url, headers=headers, data=payload)
+        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
 
-        if request.status_code == 200:
+        if response.status_code == 200:
             return
-        raise Exception("Unable to set job status. [status=" + str(request.status_code) + "]")
+
+        raise Exception("Unable to set job status. [status=" + str(response.status_code) + "]")
 
     def set_stream(self, job_id, runbook_version_id, stream_text, stream_type, sequence_number):
         """Set the streams for the given job id.
@@ -291,11 +306,12 @@ class JRDSClient:
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/jobs/" + job_id + \
               "/postJobStream?api-version=" + self.protocol_version
-        request = self.httpClient.post(url, headers=headers, data=payload)
+        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
 
-        if request.status_code == 200:
+        if response.status_code == 200:
             return
-        raise Exception("Unable to set streams. [status=" + str(request.status_code) + "]")
+
+        raise Exception("Unable to set streams. [status=" + str(response.status_code) + "]")
 
     def set_log(self, event_id, activity_id, log_type, args):
         """Set the log (generate a corresponding ETW trace on the JRDS worker).
@@ -312,11 +328,12 @@ class JRDSClient:
                    'logtype': log_type}
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/logs?api-version=" + self.protocol_version
-        request = self.httpClient.post(url, headers=headers, data=payload)
+        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
 
-        if request.status_code == 200:
+        if response.status_code == 200:
             return
-        raise Exception("Unable to set log. [status=" + str(request.status_code) + "]")
+
+        raise Exception("Unable to set log. [status=" + str(response.status_code) + "]")
 
     def unload_job(self, subscription_id, sandbox_id, job_id, is_test, start_time, execution_time):
         """Unloads the job for the given job id.
@@ -336,11 +353,12 @@ class JRDSClient:
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/Sandboxes/" + sandbox_id + "/jobs/" + \
               job_id + "/unload?api-version=" + self.protocol_version
-        request = self.httpClient.post(url, headers=headers, data=payload)
+        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
 
-        if request.status_code == 200:
+        if response.status_code == 200:
             return
-        raise Exception("Unable to unload job. [status=" + str(request.status_code) + "]")
+
+        raise Exception("Unable to unload job. [status=" + str(response.status_code) + "]")
 
     def get_variable_asset(self, name):
         """Gets the requested automation variable asset.
@@ -358,12 +376,13 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/variables/" + name + "?api-version=" \
               + self.protocol_version
-        request = self.httpClient.get(url)
+        response = self.issue_request(self.httpClient.get(url))
 
-        if request.status_code == 200:
-            return request.deserialized_data
-        elif request.status_code == 404:
+        if response.status_code == 200:
+            return response.deserialized_data
+        elif response.status_code == 404:
             raise AutomationAssetNotFound()
+
         raise Exception("An unknown error occurred. Unable to get the requested variable asset.")
 
     def set_variable_asset(self, name, value, isEncrypted):
@@ -387,12 +406,13 @@ class JRDSClient:
                    'isEncrypted': isEncrypted}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/variables/" + name + "?api-version=" \
               + self.protocol_version
-        request = self.httpClient.post(url, data=payload)
+        response = self.issue_request(self.httpClient.post(url, data=payload))
 
-        if request.status_code == 200:
-            return request.deserialized_data
-        elif request.status_code == 404:
+        if response.status_code == 200:
+            return response.deserialized_data
+        elif response.status_code == 404:
             raise AutomationAssetNotFound()
+
         raise Exception("An unknown error occurred. Unable to set the value of the specified variable asset.")
 
     def get_credential_asset(self, name):
@@ -412,12 +432,13 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/credentials/" + name + "?api-version=" \
               + self.protocol_version
-        request = self.httpClient.get(url)
+        response = self.issue_request(self.httpClient.get(url))
 
-        if request.status_code == 200:
-            return request.deserialized_data
-        elif request.status_code == 404:
+        if response.status_code == 200:
+            return response.deserialized_data
+        elif response.status_code == 404:
             raise AutomationAssetNotFound()
+
         raise Exception("An unknown error occurred. Unable to get the requested credential asset.")
 
     def get_certificate_asset(self, name):
@@ -437,12 +458,13 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/certificates/" + name + "?api-version=" \
               + self.protocol_version
-        request = self.httpClient.get(url)
+        response = self.issue_request(self.httpClient.get(url))
 
-        if request.status_code == 200:
-            return request.deserialized_data
-        elif request.status_code == 404:
+        if response.status_code == 200:
+            return response.deserialized_data
+        elif response.status_code == 404:
             raise AutomationAssetNotFound()
+
         raise Exception("An unknown error occurred. Unable to get the requested certificate asset.")
 
     def get_connection_asset(self, name):
@@ -460,17 +482,19 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/connections/" + name + "?api-version=" \
               + self.protocol_version
-        request = self.httpClient.get(url)
+        response = self.issue_request(self.httpClient.get(url))
 
-        if request.status_code == 200:
-            return request.deserialized_data
-        elif request.status_code == 404:
+        if response.status_code == 200:
+            return response.deserialized_data
+        elif response.status_code == 404:
             raise AutomationAssetNotFound()
+
         raise AutomationAssetException("An unknown error occurred. Unable to get the requested connection asset.")
 
 
 class JobData:
     """JRDS JobData model."""
+
     def __init__(self, deserialized_response):
         self.creation_time = deserialized_response["creationTime"]
         self.end_time = deserialized_response["endTime"]
@@ -510,6 +534,7 @@ class JobData:
 
 class JobUpdatableData:
     """JRDS JobUpdatableData model."""
+
     def __init__(self, deserialized_response):
         self.log_activity_trace = deserialized_response["logActivityTrace"]
         self.trigger_source = deserialized_response["triggerSource"]
@@ -538,6 +563,7 @@ class JobUpdatableData:
 
 class RunbookData:
     """JRDS RunbookData model."""
+
     def __init__(self, deserialized_response):
         self.name = deserialized_response["name"]
         self.account_id = deserialized_response["accountId"]

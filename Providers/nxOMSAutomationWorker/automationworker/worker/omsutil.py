@@ -80,10 +80,16 @@ def initialize():
         print "Successfully set owners of certificate folder."
 
 
+def dmidecode():
+    """Returns the content of dmidecode."""
+    print linuxutil.invoke_dmidecode()
+
+
 def main():
-    parser = OptionParser(usage="usage: %prog --initialize",
+    parser = OptionParser(usage="usage: %prog [--initialize, --dmidecode]",
                           version="%prog " + str(configuration.get_worker_version()))
     parser.add_option("--initialize", action="store_true", dest="initialize", default=False)
+    parser.add_option("--dmidecode", action="store_true", dest="dmidecode", default=False)
     (options, args) = parser.parse_args()
 
     nxautomation_uid = int(pwd.getpwnam("nxautomation").pw_uid)
@@ -92,6 +98,8 @@ def main():
 
     if options.initialize is True:
         initialize()
+    elif options.dmidecode is True:
+        dmidecode()
     else:
         raise Exception("No option specified.")
 

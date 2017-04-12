@@ -25,6 +25,13 @@ except:
     # this is the path when running tests
     serializerfactory = imp.load_source('serializerfactory',
                                         '../../nxOMSAutomationWorker/automationworker/worker/serializerfactory.py')
+
+try:
+    linuxutil = imp.load_source('linuxutil',
+                                        '../../modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/linuxutil.py')
+except:
+    linuxutil = imp.load_source('linuxutil',
+                                        '../../nxOMSAutomationWorker/automationworker/worker/linuxutil.py')
 LG = nxDSCLog.DSCLog
 
 
@@ -73,6 +80,7 @@ def Set_Marshall(ResourceSettings):
             # bitwise AND with PERMISSION_LEVEL_0777 will give true permission level
             os.chmod(WORKER_STATE_DIR, PERMISSION_LEVEL_0770)
 
+        # set cert permissions
         proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--initialize"])
         if proc.wait() != 0:
             raise Exception("call to omsutil.py --initialize failed")
@@ -83,7 +91,7 @@ def Set_Marshall(ResourceSettings):
 
     try:
         # Create the configuration object
-        write_omsconf_file(settings.workspace_id, settings.updates_enabled, settings.diy_enabled)
+        write_omsconf_file(settings.workspace_id, settings.auto_register_enabled, settings.diy_enabled)
         os.chmod(OMS_CONF_FILE_PATH, PERMISSION_LEVEL_0770)
         log(DEBUG, "oms.conf file was written")
     except Exception, e:
@@ -92,7 +100,7 @@ def Set_Marshall(ResourceSettings):
 
     try:
         # register the auto worker if required
-        if settings.updates_enabled:
+        if settings.auto_register_enabled:
             # Write worker.conf file
             oms_workspace_id, agent_id = read_oms_primary_workspace_config_file()
             # If both proxy files exist use the new one
@@ -101,42 +109,50 @@ def Set_Marshall(ResourceSettings):
             proxy_conf_path = PROXY_CONF_PATH_NEW
             if not os.path.isfile(PROXY_CONF_PATH_NEW) and os.path.isfile(PROXY_CONF_PATH_LEGACY):
                 proxy_conf_path = PROXY_CONF_PATH_LEGACY
+
+            args = ["python", REGISTRATION_FILE_PATH, "--register", "-w", settings.workspace_id, "-a", agent_id,
+                    "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
+                    WORKER_STATE_DIR, "-e", settings.azure_dns_agent_svc_zone, "-p", proxy_conf_path, "-g",
+                    KEYRING_PATH]
+
             diy_account_id = get_diy_account_id()
             if diy_account_id:
-                args = ["python", REGISTRATION_FILE_PATH, "--register", "-w", settings.workspace_id, "-a", agent_id,
-                        "-c",
-                        OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
-                        WORKER_STATE_DIR,
-                        "-e", settings.azure_dns_agent_svc_zone, "-p", proxy_conf_path, "-g", KEYRING_PATH, "-y",
-                        diy_account_id]
-            else:
-                args = ["python", REGISTRATION_FILE_PATH, "--register", "-w", settings.workspace_id, "-a", agent_id,
-                        "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
-                        WORKER_STATE_DIR, "-e", settings.azure_dns_agent_svc_zone, "-p", proxy_conf_path, "-g",
-                        KEYRING_PATH]
+                args.append("-y")
+                args.append(diy_account_id)
+
+            asset_tag, is_azure_vm, vm_id = get_optional_metadata()
+            args.append("-i")
+            args.append(vm_id)
+
+            if is_azure_vm:
+                args.append("-z")
+
             proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             # log(DEBUG, "Trying to register Linux hybrid worker with args: %s" % str(args))
-            if proc.returncode != 0:
-                log(ERROR, "Linux Hybrid Worker registration failed: Return code %s :" % str(proc.returncode)
+            if proc.returncode == -5:
+                log(ERROR, "Linux Hybrid Worker registration failed: DIY and auto-register account ids do not match")
+                log(INFO, "Worker manager with be started without auto registered worker")
+            elif proc.returncode != 0:
+                raise Exception("Linux Hybrid Worker registration failed: Return code %s :" % str(proc.returncode)
                     + stderr + "\n" + stdout)
-                if proc.returncode == -5:
-                    log(ERROR, "Linux Hybrid Worker registration failed: DIY and auto-register agent ids do not match")
-                    log(INFO, "Worker manager with be started without auto registered worker")
+
             elif not os.path.isfile(AUTO_REGISTERED_WORKER_CONF_PATH):
-                log(ERROR, "Linux Hybrid Worker registration file could not be created")
+                raise Exception("Linux Hybrid Worker registration file could not be created")
             else:
                 os.chmod(AUTO_REGISTERED_WORKER_CONF_PATH, PERMISSION_LEVEL_0770)
-    except:
-        pass
+
+    except Exception, e:
+        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % str(e))
+        return [-1]
 
     try:
         # start the worker manager proc
-        if (settings.updates_enabled or settings.diy_enabled) and start_worker_manager_process(
+        if (settings.auto_register_enabled or settings.diy_enabled) and start_worker_manager_process(
                 settings.workspace_id) < 0:
             log(ERROR, "Worker manager process could not be started. Set_Marshall returned [-1]")
             return [-1]
-        elif not settings.updates_enabled and not settings.diy_enabled:
+        elif not settings.auto_register_enabled and not settings.diy_enabled:
             log(DEBUG,
                 "No solutions requiring linux hybrid worker are enabled. Terminating the hybrid worker processes")
             # Kill all workers and managers
@@ -176,19 +192,28 @@ def Test_Marshall(ResourceSettings):
         if is_any_1_4_process_running(get_nxautomation_ps_output(), settings.workspace_id):
             log(INFO, "Test_Marshall returned [-1]: an older version of Hybrid Worker was found")
             return [-1]
-        if (settings.updates_enabled or settings.diy_enabled) and not is_worker_manager_running_latest_version(
+        if (settings.auto_register_enabled or settings.diy_enabled) and not is_worker_manager_running_latest_version(
                 settings.workspace_id):
             # Either the worker manager is not running, or its not latest
             log(INFO, "Test_Marshall returned [-1]: worker manager isn't running or is not latest")
             return [-1]
-        if not settings.updates_enabled and not settings.diy_enabled and is_hybrid_worker_or_manager_running(
+        if not settings.auto_register_enabled and not settings.diy_enabled and is_hybrid_worker_or_manager_running(
                 settings.workspace_id):
             log(INFO, "Test_Marshall returned [-1]: worker or manager is running when no solution is enabled")
             return [-1]
-        if not is_oms_config_consistent_with_mof(settings.updates_enabled, settings.diy_enabled):
+        if not is_oms_config_consistent_with_mof(settings.auto_register_enabled, settings.diy_enabled):
             # Current oms.conf is inconsistent with the mof
             log(INFO, "Test_Marshall returned [-1]: oms.conf differs from configuration mof")
             return [-1]
+        if settings.auto_register_enabled:
+            if not os.path.isfile(AUTO_REGISTERED_WORKER_CONF_PATH):
+                log(INFO, "Test_Marshall returned [-1]: auto register is enabled but registration file is absent")
+                return [-1]
+            elif not is_certificate_valid(AUTO_REGISTERED_WORKER_CONF_PATH, OMS_CERTIFICATE_PATH):
+                #worker.conf file is present, check if the certificates are most recent
+                log(INFO, "Test_Marshall returned [-1]: certificate mismatch for auto registered worker")
+                return [-1]
+
     except Exception, e:
         log(INFO, "Test_Marshall returned [-1]: %s" % str(e))
         return [-1]
@@ -203,7 +228,7 @@ def Get_Marshall(ResourceSettings):
     retd = dict()
     retd['WorkspaceId'] = protocol.MI_String(settings.workspace_id)
     retd['AzureDnsAgentSvcZone'] = protocol.MI_String(settings.azure_dns_agent_svc_zone)
-    retd['UpdatesEnabled'] = protocol.MI_Boolean(settings.updates_enabled)
+    retd['UpdatesEnabled'] = protocol.MI_Boolean(settings.auto_register_enabled)
     retd['DiyEnabled'] = protocol.MI_Boolean(settings.diy_enabled)
     return retval, retd
 
@@ -231,6 +256,7 @@ OPTION_HYBRID_WORKER_PATH = "hybrid_worker_path"
 OPTION_DISABLE_WORKER_CREATION = "disable_worker_creation"
 
 SECTION_OMS_METADATA = "oms-metadata"
+OPTION_JRDS_CERT_THUMBPRINT = "jrds_cert_thumbprint"
 
 SECTION_WORKER_REQUIRED = "worker-required"
 OPTION_ACCOUNT_ID = "account_id"
@@ -279,21 +305,65 @@ def get_diy_account_id():
     except:
         return None
 
+def get_optional_metadata():
+    unknown = "Unknown"
+    asset_tag = unknown
+    vm_id = unknown
+    is_azure_vm = False
+    try:
+        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--dmidecode"],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        dmidecode, error = proc.communicate()
+        if proc.returncode != 0 or not dmidecode:
+            raise Exception("Unable to invoke omsutil.py --dmidecode: %s" % error)
+        is_azure_vm = linuxutil.is_azure_vm(dmidecode)
+        if is_azure_vm:
+            asset_tag = linuxutil.get_azure_vm_asset_tag()
+        vm_id = linuxutil.get_vm_unique_id_from_dmidecode(sys.byteorder, dmidecode)
+    except Exception, e:
+        log(INFO, "unable to get_optional_metadata: %s" % str(e))
+
+    return asset_tag, is_azure_vm, vm_id
+
 
 def get_manually_registered_worker_conf_path(workspace_id):
     return "/var/opt/microsoft/omsagent/%s/state/automationworker/diy/worker.conf" % workspace_id
 
 
+def is_certificate_valid(worker_conf_path, certificate_path):
+    """
+    certificate is vaild when thumbprints match
+    worker.conf stores the certificate thumbprint that was used to register linux hybrid worker for updates and take
+    action solution (auto registered)
+    if the thumbprint doesn't match with the certificate in the certificate_path, then certificates have been rotated
+    and re-registration is required
+    :param worker_conf_path:
+    :param certificate_path:
+    :return: True if thumbprints match, false otherwise.
+    """
+    try:
+        worker_conf = ConfigParser.ConfigParser()
+        worker_conf.read(worker_conf_path)
+        worker_certificate_thumbprint = worker_conf.get(SECTION_OMS_METADATA, OPTION_JRDS_CERT_THUMBPRINT)
+
+        issuer, subject, omsagent_certificate_thumbprint = linuxutil.get_cert_info(certificate_path)
+
+        if worker_certificate_thumbprint == omsagent_certificate_thumbprint:
+            return True
+    except:
+        pass
+    return False
+
 class Settings:
     workspace_id = ""
     azure_dns_agent_svc_zone = ""
-    updates_enabled = ""
+    auto_register_enabled = ""
     diy_enabled = ""
 
     def __init__(self, workpsace_id, azure_dns_agent_svc_zone, updates_enabled, diy_enabled):
         self.workspace_id = workpsace_id
         self.azure_dns_agent_svc_zone = azure_dns_agent_svc_zone
-        self.updates_enabled = updates_enabled
+        self.auto_register_enabled = updates_enabled
         self.diy_enabled = diy_enabled
 
 
