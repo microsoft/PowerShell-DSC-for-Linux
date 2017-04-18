@@ -55,7 +55,7 @@ DEFAULT_UNKNOWN = "Unknown"
 DEFAULT_VM_ID = DEFAULT_UNKNOWN
 DEFAULT_WORKER_TYPE = DEFAULT_UNKNOWN
 DEFAULT_COMPONENT = DEFAULT_UNKNOWN
-DEFAULT_WORKER_VERSION = "1.5.1.0"
+DEFAULT_WORKER_VERSION = "1.5.2.0"
 DEFAULT_JRDS_POLLING_FREQUENCY = "30"
 
 # state configuration keys
@@ -132,7 +132,7 @@ def read_and_set_configuration(configuration_file_path):
                           JRDS_POLLING_FREQUENCY: config.getint(WORKER_OPTIONAL_CONFIG_SECTION, JRDS_POLLING_FREQUENCY),
                           PROXY_CONFIGURATION_PATH: config.get(WORKER_OPTIONAL_CONFIG_SECTION,
                                                                PROXY_CONFIGURATION_PATH),
-                          WORKER_TYPE: config.get(WORKER_OPTIONAL_CONFIG_SECTION, WORKER_TYPE),
+                          WORKER_TYPE: config.get(METADATA_CONFIG_SECTION, WORKER_TYPE),
                           VM_ID: config.get(METADATA_CONFIG_SECTION, VM_ID),
                           IS_AZURE_VM: config.getboolean(METADATA_CONFIG_SECTION, IS_AZURE_VM)})
 

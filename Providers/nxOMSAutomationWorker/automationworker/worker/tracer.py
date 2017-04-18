@@ -308,6 +308,11 @@ def log_worker_lsb_release_telemetry(distributor_id, description, release, coden
     trace_generic_hybrid_worker_event(5005, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
+def log_worker_telemetry(worker_type):
+    message = "Worker telemetry. [workerType=" + str(worker_type) + "]"
+    trace_generic_hybrid_worker_event(5006, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
+
+
 def log_worker_sandbox_action_found(sandbox_actions):
     message = "Get sandbox actions found " + str(sandbox_actions) + " new action(s)."
     trace_generic_hybrid_worker_event(5100, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)

@@ -20,8 +20,9 @@ import traceback
 
 import util
 
+NXAUTOMATION_USERNAME = "nxautomation"
 RESOURCE_VERSION_ARG_PREFIX = "rversion:"
-
+OMSUTIL_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "omsutil.py")
 
 def loop(func):
     def decorated_func(*args, **kwargs):
@@ -239,6 +240,14 @@ class WorkerManager:
             valid_configuration_paths=valid_configuration_paths)
 
         print "worker to be started " + str(len(configuration_path_to_be_started))
+
+        if len(configuration_path_to_be_started) > 0 and linuxutil.get_current_username() == NXAUTOMATION_USERNAME:
+            proc = subprocess.Popen(["sudo", "-u", NXAUTOMATION_USERNAME, "python", OMSUTIL_FILE_PATH, "--initialize"],
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            output, error = proc.communicate()
+            if proc.returncode != 0:
+                raise Exception("Initialization failed (omsutil.py --initialize). Error : " + str(error))
+
         for configuration_path in configuration_path_to_be_started:
             start_worker_for_path = True
             running_workers = self.get_worker_processes(linuxutil.get_current_user_processes())

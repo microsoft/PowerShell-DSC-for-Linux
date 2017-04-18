@@ -173,7 +173,7 @@ class Worker:
 
     @safe_loop
     def routine(self):
-        # die if configuration was removed.
+        # die if pre-reqs are not met
         if os.path.exists(configuration.get_jrds_cert_path()) is False or \
            os.path.exists(configuration.get_jrds_key_path()) is False or \
            os.path.exists(configuration.get_worker_configuration_file_path()) is False:
@@ -254,6 +254,7 @@ class Worker:
             tracer.log_worker_system_telemetry(platform.system(), platform.node(), platform.version(),
                                                platform.machine(), platform.processor())
             tracer.log_worker_user_telemetry(linuxutil.get_current_username())
+            tracer.log_worker_telemetry(configuration.get_worker_type())
 
             try:
                 distributor_id, description, release, codename = linuxutil.get_lsb_release()
