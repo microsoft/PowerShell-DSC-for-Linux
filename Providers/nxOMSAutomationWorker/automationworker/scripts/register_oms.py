@@ -56,22 +56,22 @@ def get_ip_address():
         return "127.0.0.1"
 
 
-def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, certificate_path):
+def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, certificate_path):
     """Formats the required headers and payload for the registration and deregitration requests.
 
     Returns:
         A tuple containing a dictionary for the request headers and a dictionary for the payload (request body).
     """
     issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
-    headers = {'ProtocolVersion': "2.0",
-               'x-ms-date': datetime.datetime.utcnow().isoformat() + "0-00:00",
+    headers = {"ProtocolVersion": "2.0",
+               "x-ms-date": datetime.datetime.utcnow().isoformat() + "0-00:00",
                "Content-Type": "application/json"}
 
     asset_tag = "Unknown"
     if is_azure_vm:
         asset_tag = linuxutil.get_azure_vm_asset_tag()
 
-    payload = {'RunbookWorkerGroup': worker_group_name,
+    payload = {"RunbookWorkerGroup": worker_group_name,
                "MachineName": socket.gethostname(),
                "IpAddress": get_ip_address(),
                "Thumbprint": thumbprint,
@@ -81,16 +81,20 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, certificate_p
                "VirtualMachineId": vm_id,
                "Subject": subject}
 
+    if azure_resource_id is not None:
+        payload["AzureResourceId"] = azure_resource_id
+
     return headers, payload
 
 
-def register(registration_endpoint, worker_group_name, machine_id, cert_path, key_path, is_azure_vm, vm_id, test_mode):
+def register(registration_endpoint, worker_group_name, machine_id, cert_path, key_path, is_azure_vm, vm_id,
+             azure_resource_id, test_mode):
     """Registers the worker through the automation linked account with the Agent Service.
 
     Returns:
         The deserialized response from the Agent Service.
     """
-    headers, payload = get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, cert_path)
+    headers, payload = get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, cert_path)
     url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
 
     http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode)
@@ -159,7 +163,6 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
     config.set(worker_optional_section, configuration.GPG_PUBLIC_KEYRING_PATH, gpg_keyring_path)
     config.set(worker_optional_section, configuration.PROXY_CONFIGURATION_PATH, proxy_configuration_path)
     config.set(worker_optional_section, configuration.STATE_DIRECTORY_PATH, state_directory)
-    config.set(worker_optional_section, configuration.WORKER_TYPE, "autoregistered")
     if test_mode is True:
         config.set(worker_optional_section, configuration.BYPASS_CERTIFICATE_VERIFICATION, True)
 
@@ -172,6 +175,7 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
     oms_metadata_section = "oms-metadata"
     if not config.has_section(oms_metadata_section):
         config.add_section(oms_metadata_section)
+    config.set(oms_metadata_section, configuration.WORKER_TYPE, "auto-registered")
     config.set(oms_metadata_section, configuration.AGENT_ID, machine_id)
     config.set(oms_metadata_section, configuration.WORKSPACE_ID, workspace_id)
     config.set(oms_metadata_section, configuration.REGISTRATION_ENDPOINT, registration_endpoint)
@@ -197,13 +201,15 @@ def main(argv):
     workspace_id = None
     mock_powershelldsc_test = False
     diy_account_id = None
+    azure_resource_id = None
 
     # parse cmd line args
     try:
-        opts, args = getopt.getopt(argv, "hrdw:a:c:k:e:f:s:p:g:y:i:zt",
+        opts, args = getopt.getopt(argv, "hrdw:a:c:k:e:f:s:p:g:y:i:v:zt",
                                    ["help", "register", "deregister", "workspaceid=", "agentid=", "certpath=",
                                     "keypath=", "endpoint=", "workingdirpath=", "statepath=", "proxyconfpath=",
-                                    "gpgkeyringpath=", "diyaccountid=", "mock_powershelldsc_test=", "vmid="])
+                                    "gpgkeyringpath=", "diyaccountid=", "mock_powershelldsc_test=", "vmid=",
+                                    "azureresourceid="])
     except getopt.GetoptError:
         print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
                          "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
@@ -241,6 +247,8 @@ def main(argv):
             diy_account_id = arg.strip()
         elif opt in ("-z", "--azurevm"):
             is_azure_vm = True
+        elif opt in ("-v", "--azureresourceid"):
+            azure_resource_id = arg.strip()
         elif opt in ("-i", "--vmid"):
             vm_id = arg.strip()
         elif opt in ("-t", "--test"):
@@ -293,7 +301,7 @@ def main(argv):
                 cert_info = ['', '', '959GG850526XC5JT35E269CZ69A55E1C7E1256JH']
             else:
                 registration_response = register(registration_endpoint, worker_group_name, machine_id, oms_cert_path,
-                                                 oms_key_path, is_azure_vm, vm_id, test_mode)
+                                                 oms_key_path, is_azure_vm, vm_id, azure_resource_id, test_mode)
                 cert_info = linuxutil.get_cert_info(oms_cert_path)
                 account_id = registration_response["AccountId"]
 

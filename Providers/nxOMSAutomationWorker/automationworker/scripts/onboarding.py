@@ -169,7 +169,6 @@ def create_worker_configuration_file(jrds_uri, automation_account_id, worker_gro
     config.set(worker_optional_section, configuration.PROXY_CONFIGURATION_PATH,
                "/etc/opt/microsoft/omsagent/proxy.conf")
     config.set(worker_optional_section, configuration.STATE_DIRECTORY_PATH, state_directory_path)
-    config.set(worker_optional_section, configuration.WORKER_TYPE, "diy")
     if test_mode is True:
         config.set(worker_optional_section, configuration.BYPASS_CERTIFICATE_VERIFICATION, True)
         config.set(worker_optional_section, configuration.DEBUG_TRACES, True)
@@ -177,6 +176,7 @@ def create_worker_configuration_file(jrds_uri, automation_account_id, worker_gro
     metadata_section = configuration.METADATA_CONFIG_SECTION
     if not config.has_section(metadata_section):
         config.add_section(metadata_section)
+    config.set(metadata_section, configuration.WORKER_TYPE, "diy")
     config.set(metadata_section, configuration.IS_AZURE_VM, str(is_azure_vm))
     config.set(metadata_section, configuration.VM_ID, vm_id)
 
@@ -248,7 +248,7 @@ def register(options):
     worker_conf_path = os.path.join(diy_state_base_path, "worker.conf")
 
     if os.path.isfile(worker_conf_path) is True:
-        raise Exception("Unable to register, an existing worker was found. Please deregister any exiting worker and "
+        raise Exception("Unable to register, an existing worker was found. Please deregister any existing worker and "
                         "try again.")
 
     certificate_path = os.path.join(diy_state_base_path, "worker_diy.crt")
@@ -281,7 +281,7 @@ def register(options):
     # generate payload for registration request
     date = datetime.datetime.utcnow().isoformat() + "0-00:00"
     payload = {'RunbookWorkerGroup': hybrid_worker_group_name,
-               "MachineName": socket.gethostname(),
+               "MachineName": socket.gethostname().split(".")[0],
                "IpAddress": get_ip_address(),
                "Thumbprint": thumbprint,
                "Issuer": issuer,
@@ -440,7 +440,7 @@ def environment_prerequisite_validation():
 
 
 def get_options_and_arguments():
-    parser = OptionParser(usage="usage: %prog -e endpoint -k key -g groupname",
+    parser = OptionParser(usage="usage: %prog [--register, --deregister] -e endpoint -k key -g groupname -w workspaceid",
                           version="%prog " + str(configuration.get_worker_version()))
     parser.add_option("-e", "--endpoint", dest="registration_endpoint", help="Agent service registration endpoint.")
     parser.add_option("-k", "--key", dest="automation_account_key", help="Automation account primary/secondary key.")
@@ -461,14 +461,17 @@ def get_options_and_arguments():
                                      and options.workspace_id is not None) is False:
         parser.print_help()
         sys.exit(-1)
-
     # --deregister requirements
-    if options.deregister is True and (options.registration_endpoint is not None
+    elif options.deregister is True and (options.registration_endpoint is not None
                                        and options.automation_account_key is not None
                                        and options.hybrid_worker_group_name is not None
                                        and options.workspace_id is not None) is False:
         parser.print_help()
         sys.exit(-1)
+    elif options.register is False and options.deregister is False:
+        parser.print_help()
+        sys.exit(-1)
+
     return options, args
 
 

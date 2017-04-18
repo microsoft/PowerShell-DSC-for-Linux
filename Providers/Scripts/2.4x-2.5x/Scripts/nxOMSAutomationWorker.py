@@ -127,6 +127,11 @@ def Set_Marshall(ResourceSettings):
             if is_azure_vm:
                 args.append("-z")
 
+            azure_resource_id = get_azure_resource_id_from_oms_config()
+            if azure_resource_id:
+                args.append("-v")
+                args.append(azure_resource_id)
+
             proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             # log(DEBUG, "Trying to register Linux hybrid worker with args: %s" % str(args))
@@ -244,6 +249,7 @@ INFO = logging.INFO
 
 OPTION_OMS_WORKSPACE_ID = "WORKSPACE_ID"
 OPTION_AGENT_ID = "AGENT_GUID"
+OPTION_AZURE_RESOURCE_ID = "AZURE_RESOURCE_ID"
 
 SECTION_OMS_GLOBAL = "oms-global"
 OPTION_AUTO_REGISTERED_WORKER_CONF_PATH = "auto_registered_worker_conf_path"
@@ -460,25 +466,34 @@ def is_oms_primary_workspace(workspace_id):
     else:
         return False
 
-
-def get_workspaceid_agentid_from_oms_config():
-    # Reads the oms config file
-    # Returns: AgentID config value
+def read_omsconfig_file():
     if os.path.isfile(OMS_ADMIN_CONFIG_FILE):
         # the above path always points to the oms configuration file of the primary workspace
-        try:
-            keyvals = config_file_to_kv_pair(OMS_ADMIN_CONFIG_FILE)
-            return keyvals[OPTION_OMS_WORKSPACE_ID].strip(), keyvals[OPTION_AGENT_ID].strip()
-        except ConfigParser.NoSectionError, exception:
-            log(DEBUG, str(exception))
-            raise ConfigParser.Error(str(exception))
-        except ConfigParser.NoOptionError, exception:
-            log(DEBUG, str(exception))
-            raise ConfigParser.Error(str(exception))
+        keyvals = config_file_to_kv_pair(OMS_ADMIN_CONFIG_FILE)
+        return keyvals
     else:
         error_string = "could not find file " + OMS_ADMIN_CONFIG_FILE
         log(DEBUG, error_string)
         raise ConfigParser.Error(error_string)
+
+def get_azure_resource_id_from_oms_config():
+    keyvals = read_omsconfig_file()
+    try:
+        return keyvals[OPTION_AZURE_RESOURCE_ID].strip()
+    except KeyError:
+        log(DEBUG, "Azure resource id was not specified in omsadmin config file")
+        return ""
+
+def get_workspaceid_agentid_from_oms_config():
+    # Reads the oms config file
+    # Returns: AgentID config value
+
+    keyvals = read_omsconfig_file()
+    try:
+        return keyvals[OPTION_OMS_WORKSPACE_ID].strip(), keyvals[OPTION_AGENT_ID].strip()
+    except KeyError, exception:
+        log(DEBUG, str(exception))
+        raise ConfigParser.Error(str(exception))
 
 
 def config_file_to_kv_pair(filename):

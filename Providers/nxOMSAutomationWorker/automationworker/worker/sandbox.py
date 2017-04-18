@@ -83,6 +83,12 @@ class Sandbox:
 
     @safe_loop
     def routine(self):
+        # die if pre-reqs are not met
+        if os.path.exists(configuration.get_jrds_cert_path()) is False or \
+           os.path.exists(configuration.get_jrds_key_path()) is False or \
+           os.path.exists(configuration.get_worker_configuration_file_path()) is False:
+            raise SystemExit()
+
         # clean up finished jobs
         self.stop_tracking_terminated_jobs()
 
