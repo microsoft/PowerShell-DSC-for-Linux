@@ -3,18 +3,18 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # See license.txt for license information.
 # ====================================
-import os
-import sys
 import ConfigParser
-import subprocess
-import time
+import imp
 import logging
 import logging.handlers
-import pwd
+import os
 import re
 import signal
+import subprocess
+import sys
+import time
 
-import imp
+import pwd
 
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
@@ -28,22 +28,26 @@ except:
 
 try:
     linuxutil = imp.load_source('linuxutil',
-                                        '../../modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/linuxutil.py')
+                                '../../modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/linuxutil.py')
 except:
     linuxutil = imp.load_source('linuxutil',
-                                        '../../nxOMSAutomationWorker/automationworker/worker/linuxutil.py')
+                                '../../nxOMSAutomationWorker/automationworker/worker/linuxutil.py')
 LG = nxDSCLog.DSCLog
 
 
 def Set_Marshall(ResourceSettings):
-    settings = read_settings_from_mof_json(ResourceSettings)
-    if not is_oms_primary_workspace(settings.workspace_id):
-        # not primary workspace
-        # return unconditional [0] for a NOOP on non-primary workspace
-        log(DEBUG, "Set_Marshall skipped: non primary workspace. Set marshall returned [0]")
-        return [0]
-
     try:
+        settings = read_settings_from_mof_json(ResourceSettings)
+        if not is_oms_primary_workspace(settings.workspace_id):
+            # not primary workspace
+            # return unconditional [0] for a NOOP on non-primary workspace
+            log(DEBUG, "Set_Marshall skipped: non primary workspace. Set marshall returned [0]")
+            return [0]
+
+        if not nxautomation_user_exists():
+            log(ERROR, "Set_Marshall skipped: please update omsagent to the latest version")
+            return [0]
+
         # compatibility from 1.4 remove state.conf file
         if os.path.isfile(STATE_CONF_FILE_PATH):
             os.remove(STATE_CONF_FILE_PATH)
@@ -53,6 +57,12 @@ def Set_Marshall(ResourceSettings):
         if is_any_1_4_process_running(get_nxautomation_ps_output(), settings.workspace_id):
             log(DEBUG, "Hybrid worker 1.4 detected, attempting to kill")
             kill_process_by_pattern_string(settings.workspace_id)
+
+        try:
+            kill_any_worker_running_as_omsagent()
+        except:
+            log(INFO, "Unable to kill old omsagent worker")
+            pass
 
             # Kill worker managers that might already be running
         log(DEBUG, "Killing the instance of worker manager already running")
@@ -140,7 +150,7 @@ def Set_Marshall(ResourceSettings):
                 log(INFO, "Worker manager with be started without auto registered worker")
             elif proc.returncode != 0:
                 raise Exception("Linux Hybrid Worker registration failed: Return code %s :" % str(proc.returncode)
-                    + stderr + "\n" + stdout)
+                                + stderr + "\n" + stdout)
 
             elif not os.path.isfile(AUTO_REGISTERED_WORKER_CONF_PATH):
                 raise Exception("Linux Hybrid Worker registration file could not be created")
@@ -188,6 +198,11 @@ def Test_Marshall(ResourceSettings):
             # return unconditional [0] for a NOOP on non-primary workspace
             log(DEBUG, "Test_Marshall skipped: non primary workspace. Test_Marshall returned [0]")
             return [0]
+
+        if not nxautomation_user_exists():
+            log(ERROR, "Test_Marshall skipped: please update omsagent to the latest version")
+            return [0]
+
         if get_stray_worker_and_manager_wsids(get_nxautomation_ps_output(), settings.workspace_id):
             log(INFO, "Test_Marshall returned [-1]: process started by other workspaces detected")
             return [-1]
@@ -215,7 +230,7 @@ def Test_Marshall(ResourceSettings):
                 log(INFO, "Test_Marshall returned [-1]: auto register is enabled but registration file is absent")
                 return [-1]
             elif not is_certificate_valid(AUTO_REGISTERED_WORKER_CONF_PATH, OMS_CERTIFICATE_PATH):
-                #worker.conf file is present, check if the certificates are most recent
+                # worker.conf file is present, check if the certificates are most recent
                 log(INFO, "Test_Marshall returned [-1]: certificate mismatch for auto registered worker")
                 return [-1]
 
@@ -311,6 +326,7 @@ def get_diy_account_id():
     except:
         return None
 
+
 def get_optional_metadata():
     unknown = "Unknown"
     asset_tag = unknown
@@ -359,6 +375,7 @@ def is_certificate_valid(worker_conf_path, certificate_path):
     except:
         pass
     return False
+
 
 class Settings:
     workspace_id = ""
@@ -466,6 +483,7 @@ def is_oms_primary_workspace(workspace_id):
     else:
         return False
 
+
 def read_omsconfig_file():
     if os.path.isfile(OMS_ADMIN_CONFIG_FILE):
         # the above path always points to the oms configuration file of the primary workspace
@@ -476,6 +494,7 @@ def read_omsconfig_file():
         log(DEBUG, error_string)
         raise ConfigParser.Error(error_string)
 
+
 def get_azure_resource_id_from_oms_config():
     keyvals = read_omsconfig_file()
     try:
@@ -483,6 +502,7 @@ def get_azure_resource_id_from_oms_config():
     except KeyError:
         log(DEBUG, "Azure resource id was not specified in omsadmin config file")
         return ""
+
 
 def get_workspaceid_agentid_from_oms_config():
     # Reads the oms config file
@@ -657,6 +677,20 @@ def kill_process_by_pattern_string(pattern_match_string):
         log(DEBUG, "No process to terminate")
     # the above code is for logging only, we don't use its output to determine which process to kill
     return subprocess.call(["sudo", "pkill", "-u", AUTOMATION_USER, "-f", pattern_match_string])
+
+
+def kill_any_worker_running_as_omsagent():
+    pattern = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
+    proc = subprocess.Popen(["pgrep", "-f", pattern], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result, error = proc.communicate()
+    result = str(result)
+    result = result.replace('\n', ' ')
+    if proc.returncode == 0:
+        log(DEBUG, "The following old worker processes will be terminated: %s" % result)
+    else:
+        log(DEBUG, "No old worker process to terminate")
+    # the above code is for logging only, we don't use its output to determine which process to kill
+    subprocess.call(["pkill", "-f", pattern])
 
 
 def run_pgrep_command(pattern_match_string):

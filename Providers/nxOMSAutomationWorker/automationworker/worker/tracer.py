@@ -279,9 +279,9 @@ def log_worker_starting(version):
     trace_generic_hybrid_worker_event(5000, inspect.stack()[0][3], message, 1, KEYWORD_STARTUP)
 
 
-def log_worker_general_telemetry(worker_version, worker_type):
+def log_worker_general_telemetry(worker_version, worker_type, username):
     message = "Worker general telemetry. [workerVersion=" + str(worker_version) + "][workerType=" +\
-              str(worker_type) + "]"
+              str(worker_type) + "][username=" + str(username) + "]"
     trace_generic_hybrid_worker_event(5001, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
@@ -297,20 +297,10 @@ def log_worker_system_telemetry(system, node, version, machine, processor):
     trace_generic_hybrid_worker_event(5003, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
-def log_worker_user_telemetry(username):
-    message = "Worker user context telemetry. [username=" + str(username) + "]"
-    trace_generic_hybrid_worker_event(5004, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
-
-
 def log_worker_lsb_release_telemetry(distributor_id, description, release, codename):
     message = "Worker lsb_release telemetry. [distributor_id=" + str(distributor_id) + "][description=" + \
               str(description) + "][release=" + str(release) + "][codename=" + str(codename) + "]"
     trace_generic_hybrid_worker_event(5005, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
-
-
-def log_worker_telemetry(worker_type):
-    message = "Worker telemetry. [workerType=" + str(worker_type) + "]"
-    trace_generic_hybrid_worker_event(5006, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
 def log_worker_sandbox_action_found(sandbox_actions):

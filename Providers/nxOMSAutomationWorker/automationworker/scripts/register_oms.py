@@ -171,11 +171,11 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
         config.add_section(metadata_section)
     config.set(metadata_section, configuration.IS_AZURE_VM, str(is_azure_vm))
     config.set(metadata_section, configuration.VM_ID, vm_id)
+    config.set(metadata_section, configuration.WORKER_TYPE, "auto-registered")
 
     oms_metadata_section = "oms-metadata"
     if not config.has_section(oms_metadata_section):
         config.add_section(oms_metadata_section)
-    config.set(oms_metadata_section, configuration.WORKER_TYPE, "auto-registered")
     config.set(oms_metadata_section, configuration.AGENT_ID, machine_id)
     config.set(oms_metadata_section, configuration.WORKSPACE_ID, workspace_id)
     config.set(oms_metadata_section, configuration.REGISTRATION_ENDPOINT, registration_endpoint)

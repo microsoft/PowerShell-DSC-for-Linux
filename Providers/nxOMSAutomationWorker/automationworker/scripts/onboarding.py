@@ -240,7 +240,8 @@ def register(options):
                         "primary worksapce?")
 
     diy_account_id = extract_account_id_from_registration_endpoint(registration_endpoint)
-    if get_autoregistered_worker_account_id() != diy_account_id:
+    auto_registered_account_id = get_autoregistered_worker_account_id()
+    if auto_registered_account_id != None and auto_registered_account_id != diy_account_id:
         raise Exception("Cannot register, conflicting worker already registered.")
 
     diy_state_base_path = os.path.join(state_base_path, os.path.join("automationworker", "diy"))
@@ -417,11 +418,6 @@ def deregister(options):
 
 def environment_prerequisite_validation():
     """Validates that basic environment requirements are met for the onboarding operations."""
-
-    # is running as root
-    if os.getuid() != 0:
-        raise Exception("You need to run this script as root to register a new automation worker.")
-
     nxautomation_username = "nxautomation"
     if linuxutil.is_existing_user(nxautomation_username) is False:
         raise Exception("Missing user : " + nxautomation_username + ". Are you running the lastest OMSAgent version?")
@@ -486,4 +482,15 @@ def main():
 
 
 if __name__ == "__main__":
+    # is running as root
+    if os.getuid() != 0:
+        raise Exception("You need to run this script as root to register a new automation worker.")
+
+    # requied for cases where the diy registration is trigger before the worker manager start (.pyc will be owned by root in that case and have to be owned by omsagent:omiusers)
+    proc = subprocess.Popen(["find", "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/",
+                     "-type",  "f", "-name", "*.pyc", "-exec", "rm", "{}", "+"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = proc.communicate()
+    if proc.returncode != 0:
+        raise Exception("Unable to remove root-owned .pyc")
+
     main()
