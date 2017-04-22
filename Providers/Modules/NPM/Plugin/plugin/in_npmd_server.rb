@@ -58,23 +58,8 @@ module Fluent
         def configure(conf)
             super
 
-            unless @omsadmin_conf_path
-                raise ConfigError, "'omsadmin_conf_path' is needed to get the agent id"
-            end
             if !File.exist?(@omsadmin_conf_path)
                 raise ConfigError, "no file #{@omsadmin_conf_path} exists"
-            end
-
-            unless @location_unix_endpoint
-                raise ConfigError, "'location_unix_endpoint' is needed for agent communication"
-            end
-
-            unless @location_control_data
-                raise ConfigError, "'location_control_data' is needed to send config to agent"
-            end
-
-            unless @location_agent_binary
-                raise ConfigError, "'location_agent_binary' is needed to invoke the agent"
             end
         end
 
@@ -106,6 +91,7 @@ module Fluent
             upload_pending_stderrors()
             check_and_update_binaries()
             check_agent_capability() unless !@do_capability_check
+            @is_shutdown = false
             setup_endpoint()
             @server_thread = Thread.new(&method(:server_run))
             @npmdIntendedStop = false
@@ -127,27 +113,49 @@ module Fluent
 
         def shutdown
             Logger::logInfo "Received shutdown notification"
-
-            # Stopping the npmd_agent
-            stop_npmd()
-
-            # Cleanup agent related communication and instances
-            kill_all_agent_instances()
-            @npmdClientSock.close() unless @npmdClientSock.nil?
-            @npmdClientSock = nil
+            @is_shutdown = true
 
             # Stop recovery
             Thread.kill(@watch_dog_thread) if @watch_dog_thread.is_a?(Thread)
 
+            # Stopping the npmd_agent
+            stop_npmd()
+
+            # Set the npmd client socket as nil as npmd_reader might not do so in time
+            @npmdClientSock.close() if !@npmdClientSock.nil?
+            @npmdClientSock = nil
+
             # Stop server
-            Thread.kill(@server_thread)
+            stop_server()
+
+            # Kill stale agents if any
+            kill_all_agent_instances()
 
             # Cleanup filesystem resources
             File.unlink(@location_unix_endpoint) if File.exist?@location_unix_endpoint
-            if !@do_purge.nil? and @do_purge
+            if !@do_purge.nil? and @do_purge == true
                 File.unlink(@location_agent_binary) if File.exist?@location_agent_binary
                 delete_state_directory()
                 @is_purged = true unless @is_purged.nil?
+            end
+
+            Logger::logInfo "Shutdown completed"
+        end
+
+        def stop_server
+            if @server_thread.is_a?(Thread)
+                if File.exist?@location_unix_endpoint
+                    begin
+                        # Connect to the server to return from accept
+                        UNIXSocket.open(@location_unix_endpoint) do |c|
+                            c.puts ""
+                            c.flush
+                        end
+                    rescue => e
+                    end
+                else
+                    Thread.kill(@server_thread)
+                end
             end
         end
 
@@ -642,6 +650,7 @@ module Fluent
                 Logger::logInfo "Got FQDN as #{@fqdn} and AgentID as #{@agentId}"
                 loop do
                     _client = @server_obj.accept
+                    return if @is_shutdown == true
                     _clientTriage = triage_conn(_client)
                     if _clientTriage == CONN_AGENT
                         Logger::logInfo "NPMD Agent connected"
