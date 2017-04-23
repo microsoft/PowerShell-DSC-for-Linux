@@ -59,7 +59,8 @@ def Set_Marshall(ResourceSettings):
             kill_process_by_pattern_string(settings.workspace_id)
 
         try:
-            kill_any_worker_running_as_omsagent()
+            kill_any_worker_running_as_omsagent(
+                worker_pgrep_pattern="/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py")
         except:
             log(INFO, "Unable to kill old omsagent worker")
             pass
@@ -309,6 +310,7 @@ PERMISSION_LEVEL_0770 = 0770
 PERMISSION_LEVEL_0777 = 0777
 
 AUTOMATION_USER = "nxautomation"
+OMSAGENT_USER = "omsagent"
 
 LOCAL_LOG_LOCATION = "/var/opt/microsoft/omsagent/log/nxOMSAutomationWorker.log"
 LOG_LOCALLY = False
@@ -679,9 +681,8 @@ def kill_process_by_pattern_string(pattern_match_string):
     return subprocess.call(["sudo", "pkill", "-u", AUTOMATION_USER, "-f", pattern_match_string])
 
 
-def kill_any_worker_running_as_omsagent():
-    pattern = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
-    proc = subprocess.Popen(["pgrep", "-f", pattern], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def kill_any_worker_running_as_omsagent(worker_pgrep_pattern):
+    proc = subprocess.Popen(["pgrep", "-u", OMSAGENT_USER, "-f", worker_pgrep_pattern], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     result, error = proc.communicate()
     result = str(result)
     result = result.replace('\n', ' ')
@@ -690,7 +691,7 @@ def kill_any_worker_running_as_omsagent():
     else:
         log(DEBUG, "No old worker process to terminate")
     # the above code is for logging only, we don't use its output to determine which process to kill
-    subprocess.call(["pkill", "-f", pattern])
+    subprocess.call(["pkill", "-u", OMSAGENT_USER,"-f", worker_pgrep_pattern])
 
 
 def run_pgrep_command(pattern_match_string):

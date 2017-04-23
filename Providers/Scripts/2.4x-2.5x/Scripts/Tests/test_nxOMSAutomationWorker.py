@@ -15,6 +15,7 @@ import subprocess
 import pwd
 import shutil
 import ConfigParser
+import time
 
 try:
     import unittest2
@@ -255,7 +256,16 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
         self.assertTrue(nxOMSAutomationWorker.is_certificate_valid(nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH, os.path.join(self.dummyFileLocation, "dummy_match.crt")))
         self.assertFalse(nxOMSAutomationWorker.is_certificate_valid(nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH, os.path.join(self.dummyFileLocation, "dummy_notMatch.crt")))
 
-
+    def test_kill_any_worker_running_as_omsagent(self):
+        proc = subprocess.Popen(["sudo", "-u", "omsagent", "python", nxOMSAutomationWorker.WORKER_MANAGER_START_PATH])
+        ret_code = proc.poll()
+        # make sure process is running
+        self.assertTrue(ret_code is None)
+        nxOMSAutomationWorker.kill_any_worker_running_as_omsagent(nxOMSAutomationWorker.WORKER_MANAGER_START_PATH)
+        time.sleep(3)
+        ret_code = proc.poll()
+        # make sure process was terminated
+        self.assertTrue(ret_code == 0)
 
 
 if __name__ == '__main__':
