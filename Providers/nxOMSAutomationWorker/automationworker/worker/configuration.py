@@ -37,11 +37,11 @@ GPG_PUBLIC_KEYRING_PATH = "gpg_public_keyring_path"
 STATE_DIRECTORY_PATH = "state_directory_path"
 JRDS_POLLING_FREQUENCY = "jrds_polling_frequency"
 PROXY_CONFIGURATION_PATH = "proxy_configuration_path"
-WORKER_TYPE = "worker_type"
 
 # optional metadata configuration keys
 VM_ID = "vm_id"
 IS_AZURE_VM = "is_azure_vm"
+WORKER_TYPE = "worker_type"
 
 # optional configuration default values
 DEFAULT_EMPTY = ""
@@ -55,8 +55,8 @@ DEFAULT_UNKNOWN = "Unknown"
 DEFAULT_VM_ID = DEFAULT_UNKNOWN
 DEFAULT_WORKER_TYPE = DEFAULT_UNKNOWN
 DEFAULT_COMPONENT = DEFAULT_UNKNOWN
-DEFAULT_WORKER_VERSION = "1.5.3.0"
-DEFAULT_JRDS_POLLING_FREQUENCY = "30"
+DEFAULT_WORKER_VERSION = "1.5.4.0"
+DEFAULT_JRDS_POLLING_FREQUENCY = "15"
 
 # state configuration keys
 STATE_PID = "pid"

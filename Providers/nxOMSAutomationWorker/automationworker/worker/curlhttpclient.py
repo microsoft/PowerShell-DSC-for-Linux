@@ -5,19 +5,14 @@
 """Curl CLI wrapper."""
 
 import base64
-import os
 import random
 import subprocess
-import sys
 import time
 import traceback
 
-import configuration
 import iohelper
-import serializerfactory
 import subprocessfactory
-from httpclient import HttpClient
-from requestresponse import RequestResponse
+from httpclient import *
 
 json = serializerfactory.get_serializer(sys.version_info)
 

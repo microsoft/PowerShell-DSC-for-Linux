@@ -1,19 +1,21 @@
-import worker.configuration
-import worker.tracer
-from worker import serializerfactory
-from worker import subprocessfactory
-from worker.curlhttpclient import CurlHttpClient
-from worker.httpclient import HttpClient
-from worker.httpclientfactory import HttpClientFactory
+#!/usr/bin/env python2
+#
+# Copyright (C) Microsoft Corporation, All rights reserved.
+
+from worker import *
+from worker.configuration import *
+from worker.curlhttpclient import *
+from worker.httpclient import *
+from worker.httpclientfactory import *
+from worker.hybridworker import *
 from worker.iohelper import *
-from worker.job import Job
-from worker.jrdsclient import JRDSClient
-from worker import worker
-from worker.main import WorkerManager
-from worker.linuxutil import ProcessModel
-from worker.hybridworker import Worker
-from worker.requestresponse import RequestResponse
-from worker.streamhandler import StreamHandler
-from worker.urllib2httpclient import Urllib2HttpClient
-from worker.workerexception import *
+from worker.job import *
+from worker.jrdsclient import *
+from worker.linuxutil import *
+from worker.main import *
+from worker.streamhandler import *
+from worker.tracer import *
+from worker.urllib2httpclient import *
 from worker.util import *
+from worker.workerexception import *
+

@@ -1,3 +1,7 @@
+#!/usr/bin/env python2
+#
+# Copyright (C) Microsoft Corporation, All rights reserved.
+
 import random
 import sys
 import tempfile
