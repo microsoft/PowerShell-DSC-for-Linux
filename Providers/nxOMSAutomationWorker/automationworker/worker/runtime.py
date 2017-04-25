@@ -122,8 +122,7 @@ class Python2Runtime(Runtime):
         Runtime.__init__(self, job_data, runbook)
         self.execution_alias = "python2"
 
-        # to allow testing on windows
-        if os.name.lower() == "nt":
+        if get_default_python_interpreter_major_version() == 2:
             self.execution_alias = "python"
 
         self.base_cmd = [self.execution_alias]
@@ -136,8 +135,7 @@ class Python3Runtime(Runtime):
         Runtime.__init__(self, job_data, runbook)
         self.execution_alias = "python3"
 
-        # to allow testing on windows
-        if os.name.lower() == "nt":
+        if get_default_python_interpreter_major_version() == 3:
             self.execution_alias = "python"
 
         self.base_cmd = [self.execution_alias]
@@ -151,3 +149,19 @@ class BashRuntime(Runtime):
         self.execution_alias = "bash"
 
         self.base_cmd = [self.execution_alias]
+
+
+def get_default_python_interpreter_major_version():
+    """Return the default "python" alias interpreter version.
+
+    Returns:
+        int, the interpreter major version
+        None, if the default interpreter version cannot be detected
+    """
+    cmd = ["python", "-c", "import sys;print(sys.version[0])"]  # need to use print() for python3 compatibility
+    p = subprocessfactory.create_subprocess(cmd=cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    default_interpreter_version, error = p.communicate()
+    if p.returncode == 0:
+        return int(default_interpreter_version.strip())
+    else:
+        return None

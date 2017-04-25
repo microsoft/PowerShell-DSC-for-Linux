@@ -266,7 +266,7 @@ def register(options):
     unknown = "Unknown"
     asset_tag = unknown
     vm_id = unknown
-    is_azure_vm = unknown
+    is_azure_vm = False
     try:
         dmidecode = invoke_dmidecode()
         is_azure_vm = linuxutil.is_azure_vm(dmidecode)

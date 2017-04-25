@@ -6,11 +6,9 @@
 
 import httplib
 import socket
-import sys
 import urllib2
 
-from httpclient import HttpClient
-from requestresponse import RequestResponse
+from httpclient import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
