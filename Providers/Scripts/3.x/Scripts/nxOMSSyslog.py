@@ -233,6 +233,12 @@ def UpdateSyslogNGConf(SyslogSource):
     facility_re = re.compile(facility_search, re.M | re.S)
     txt = facility_re.sub('', txt)
     txt += '\n\n#OMS_Destination\ndestination d_oms { udp("127.0.0.1" port(25224)); };\n'
+    source_search = r'^source (.*?src).*$'
+    source_re = re.compile(source_search, re.M)
+    source_result = source_re.search(txt)
+    source_expr = 'src'
+    if source_result:
+        source_expr = source_result.group(1)
     for d in SyslogSource:
         if 'Severities' not in d.keys() or d['Severities'] is None or len(d['Severities']) is 0:
             facility_txt = ''
@@ -243,7 +249,7 @@ def UpdateSyslogNGConf(SyslogSource):
                 d['Facility'] + \
                 '_oms { level(' + sevs + ') and facility(' + d[
                     'Facility'] + '); };\n'
-            facility_txt += 'log { source(src); filter(f_' + d[
+            facility_txt += 'log { source(' + source_expr + '); filter(f_' + d[
                 'Facility'] + '_oms); destination(d_oms); };\n'
             txt += facility_txt
     try:
