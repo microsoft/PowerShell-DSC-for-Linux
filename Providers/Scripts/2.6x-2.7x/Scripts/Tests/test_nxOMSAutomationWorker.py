@@ -50,13 +50,44 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
     nxOMSAutomationWorker.DIY_WORKER_CONF_PATH = nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH
 
     automation_user = "nxautomation"
+    omsagent_user = "omsagent"
+    omiusers_groups = "omiusers"
 
-    def create_nxautomation_user_and_group(self):
+    def create_required_users_and_groups(self):
+        try:
+            grp.getgrnam(self.omiusers_groups)
+        except KeyError:
+            retval = subprocess.call(["groupadd", "-r", self.omiusers_groups])
+            if retval !=0:
+                raise OSError("could not create %s group" % self.omiusers_groups)
+
+        try:
+            grp.getgrnam(self.omsagent_user)
+        except KeyError:
+            retval = subprocess.call(["groupadd", "-r", self.omsagent_user])
+            if retval != 0:
+                raise OSError("could not create %s group" % self.omsagent_user )
+
+        try:
+            pwd.getpwnam(self.omsagent_user)
+        except KeyError:
+            retval = subprocess.call(["useradd", "-r", "-c", "OMS agent", "-d", "/var/opt/microsoft/omsagent/run", "-g",
+                     self.omsagent_user, "-s", "/bin/bash", self.omsagent_user])
+            if retval != 0:
+                raise OSError("could not create %s user" % self.omsagent_user)
+
+            retval = subprocess.call(
+                ["/usr/sbin/usermod", "-g", self.omiusers_groups, self.omsagent_user])
+            if retval != 0:
+                raise OSError("could not add %s to %s group" % (self.omsagent_user, self.omiusers_groups))
+
         try:
             grp.getgrnam(self.automation_user)
         except KeyError:
             # group nxautomation not found, create one
-            subprocess.call(["groupadd", "-r", self.automation_user])
+            retval = subprocess.call(["groupadd", "-r", self.automation_user])
+            if retval != 0:
+                raise OSError("could not create %s user" % self.automation_user)
         try:
             pwd.getpwnam(self.automation_user)
         except KeyError:
@@ -72,8 +103,24 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
             if subprocess.call(["chmod", "-R", "0777", self.dummyFileLocation]) != 0:
                 raise OSError("could not change permissions for dummy file")
 
-    def remove_nxautomation_user_and_group(self):
+    def remove_users_and_groups(self):
         subprocess.call(["userdel", self.automation_user])
+        try:
+            grp.getgrnam(self.automation_user)
+            subprocess.call(["groupdel", self.automation_user])
+        except KeyError:
+            pass
+        subprocess.call(["userdel", self.omsagent_user])
+        try:
+            grp.getgrnam(self.omsagent_user)
+            subprocess.call(["groupdel", self.omsagent_user])
+        except KeyError:
+            pass
+        try:
+            grp.getgrnam(self.omiusers_groups)
+            subprocess.call(["groupdel", self.omiusers_groups])
+        except KeyError:
+            pass
 
     def config_files_are_equivalent(self, config_orig_file, config_other_file):
 
@@ -107,7 +154,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
         if not os.path.isdir(self.temp_run_dir):
             os.mkdir(self.temp_run_dir, 0777)
         # create nxautomation user on the machine
-        self.create_nxautomation_user_and_group()
+        self.create_required_users_and_groups()
         subprocess.call(["sudo", "pkill", "-u", self.automation_user])
         shutil.copyfile(os.path.join(self.dummyFileLocation, "worker.conf"),
                         nxOMSAutomationWorker.AUTO_REGISTERED_WORKER_CONF_PATH)
@@ -118,7 +165,7 @@ class nxOMSAutomationWorkerTestCases(unittest2.TestCase):
         """
         subprocess.call(["sudo", "pkill", "-u", self.automation_user])
         shutil.rmtree(self.temp_run_dir, ignore_errors=True)
-        self.remove_nxautomation_user_and_group()
+        self.remove_users_and_groups()
 
     def test_can_start_verify_kill_worker_manager(self):
         shutil.copyfile(os.path.join(self.dummyFileLocation, "oms_conf_auto_manual.conf"),

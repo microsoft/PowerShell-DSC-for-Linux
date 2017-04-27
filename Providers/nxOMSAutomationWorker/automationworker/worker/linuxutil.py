@@ -227,6 +227,28 @@ def get_lsb_release():
 
 
 @posix_only
+def get_oms_agent_id():
+    """Gets the oms agent id.
+
+    Returns:
+        string, the agent id
+        None,   if no agent id can be fouud
+    """
+    omsadmin_filepath = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
+    agent_guid_delimiter = "AGENT_GUID="
+    agent_id = None
+    try:
+        file = open(omsadmin_filepath, "r")
+        for line in file.readlines():
+            if agent_guid_delimiter in line:
+                agent_id = line.split(agent_guid_delimiter)[1].strip()
+        file.close()
+    except:
+        pass
+    return agent_id
+
+
+@posix_only
 def kill_current_user_process(pid):
     """Kills the process specified by the pid argument.
 
