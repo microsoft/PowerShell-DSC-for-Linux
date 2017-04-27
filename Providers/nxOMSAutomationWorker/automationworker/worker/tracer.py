@@ -279,9 +279,9 @@ def log_worker_starting(version):
     trace_generic_hybrid_worker_event(5000, inspect.stack()[0][3], message, 1, KEYWORD_STARTUP)
 
 
-def log_worker_general_telemetry(worker_version, worker_type, username):
+def log_worker_general_telemetry(worker_version, worker_type, username, oms_agent_id):
     message = "Worker general telemetry. [workerVersion=" + str(worker_version) + "][workerType=" +\
-              str(worker_type) + "][username=" + str(username) + "]"
+              str(worker_type) + "][username=" + str(username) + "][oms_agent_id=" + str(oms_agent_id) + "]"
     trace_generic_hybrid_worker_event(5001, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 

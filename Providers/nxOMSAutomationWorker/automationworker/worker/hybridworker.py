@@ -12,8 +12,7 @@ import threading
 import time
 import traceback
 
-import util
-from workerexception import *
+# import worker module after linuxutil.daemonize() call
 
 sandboxes_root_folder_name = "sandboxes"
 
@@ -175,8 +174,8 @@ class Worker:
     def routine(self):
         # die if pre-reqs are not met
         if os.path.exists(configuration.get_jrds_cert_path()) is False or \
-           os.path.exists(configuration.get_jrds_key_path()) is False or \
-           os.path.exists(configuration.get_worker_configuration_file_path()) is False:
+                        os.path.exists(configuration.get_jrds_key_path()) is False or \
+                        os.path.exists(configuration.get_worker_configuration_file_path()) is False:
             raise SystemExit()
 
         self.stop_tracking_terminated_sandbox()
@@ -249,7 +248,7 @@ class Worker:
     def telemetry_routine(self):
         while True:
             tracer.log_worker_general_telemetry(configuration.get_worker_version(), configuration.get_worker_type(),
-                                                linuxutil.get_current_username())
+                                                linuxutil.get_current_username(), linuxutil.get_oms_agent_id())
             tracer.log_worker_python_telemetry(platform.python_version(), platform.python_build(),
                                                platform.python_compiler())
             tracer.log_worker_system_telemetry(platform.system(), platform.node(), platform.version(),
@@ -316,7 +315,9 @@ if __name__ == "__main__":
     import iohelper
     import subprocessfactory
     import tracer
+    import util
     from httpclientfactory import HttpClientFactory
     from jrdsclient import JRDSClient
+    from workerexception import *
 
     main()

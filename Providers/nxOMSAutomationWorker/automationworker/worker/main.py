@@ -18,11 +18,12 @@ import sys
 import time
 import traceback
 
-import util
+# import worker module after linuxutil.daemonize() call
 
 NXAUTOMATION_USERNAME = "nxautomation"
 RESOURCE_VERSION_ARG_PREFIX = "rversion:"
 OMSUTIL_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "omsutil.py")
+
 
 def loop(func):
     def decorated_func(*args, **kwargs):
@@ -365,4 +366,6 @@ if __name__ == "__main__":
     import linuxutil
 
     linuxutil.daemonize()
+
+    import util
     main()
