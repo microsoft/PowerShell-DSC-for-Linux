@@ -51,40 +51,24 @@ if not os.path.isdir(modulePath):
 print("Removing module " + moduleName)
 
 # special section for nxOMSAutomationWorker module
-# the Linux Hybrid worker needs to be killed before the module is removed
-# also a good idea to remove the state.conf file
-# manually invoking RemoveModule.py will preserve worker.conf file in case the user wants to keep their settings
-# an uninstall or purge operation of the OMS agent installer will get rid of worker.conf file
+# the Linux Hybrid worker and manager needs to be killed before the module is removed
+# also a good idea to remove the state and working directory
 if moduleName == "nxOMSAutomationWorker":
-    registration_file_path = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/scripts/register_oms.py"
-    state_conf_location = "/var/opt/microsoft/omsagent/state/automationworker/state.conf"
-    config_state_section = "state"
-    config_pid_key = "pid"
-    workspace_id_key = "workspace_id"
+    state_dir_path = "/var/opt/microsoft/omsagent/state/automationworker"
+    working_dir_path = "/var/opt/microsoft/omsagent/run/automationworker"
     automation_user = "nxautomation"
-    try:
-        import ConfigParser
-    except ImportError:
-        # ConfigParser is named configparser in python 3x
-        import configparser as ConfigParser
 
     # invoke deregister when it becomes available
+    # Kill all processes running as nxautomation
+    # In some cases, there might be no processes to kill, and the return code of the following command might be non-zero.
+    # We make a best attempt to terminate the processes and don't care about its return code
+    subprocess.call(["sudo", "pkill", "-u", automation_user, ".*"])
 
-    if os.path.isfile(state_conf_location):
-        state_conf = ConfigParser.ConfigParser()
-        try:
-            # Kill all processes running as nxautomation
-            subprocess.call(["sudo", "pkill", "-u", automation_user, ".*"])
-        except ConfigParser.NoSectionError:
-            pass
-        except ConfigParser.NoOptionError:
-            pass
-        except OSError:
-            pass
-        try:
-            os.remove(state_conf_location)
-        except:
-            pass
+    # remove directories
+    shutil.rmtree(state_dir_path, ignore_errors=True)
+    shutil.rmtree(working_dir_path, ignore_errors=True)
+
+
 
 resourcelist = os.listdir(modulePath + "/DSCResources")
 for resource in resourcelist:
