@@ -57,7 +57,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_1.1.zip; release/nxOMSPerfCounter_1.1.zip; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/module_packages/nxOMSSyslog_1.1.zip; release/nxOMSSyslog_1.1.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSSyslog_1.0.zip; release/nxOMSSyslog_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip; release/nxOMSKeyMgmt_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_1.0.zip; release/nxOMSSudoCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
@@ -263,7 +263,7 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 # Set up the modules
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_1.1.zip 0"
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_1.1.zip 0"
+su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_1.0.zip 0"
