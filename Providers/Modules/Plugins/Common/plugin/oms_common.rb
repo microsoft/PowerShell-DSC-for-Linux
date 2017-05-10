@@ -885,6 +885,9 @@ module OMS
     def capitalize
         self
     end
+    def to_s
+        self
+    end
   end
 
 end # module OMS
