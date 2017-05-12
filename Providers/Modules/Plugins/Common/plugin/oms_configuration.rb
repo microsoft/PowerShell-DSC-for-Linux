@@ -13,6 +13,7 @@ module OMS
 
     @@AgentId = nil
     @@ODSEndpoint = nil
+    @@DiagnosticEndpoint = nil
     @@GetBlobODSEndpoint = nil
     @@NotifyBlobODSEndpoint = nil
     @@OmsCloudId = nil
@@ -37,6 +38,11 @@ module OMS
       end
 
       def get_proxy_config(proxy_conf_path)
+        old_proxy_conf_path = '/etc/opt/microsoft/omsagent/conf/proxy.conf'
+        if !File.exist?(proxy_conf_path) and File.exist?(old_proxy_conf_path)
+          proxy_conf_path = old_proxy_conf_path
+        end
+
         begin
           proxy_config = parse_proxy_config(File.read(proxy_conf_path))
         rescue SystemCallError # Error::ENOENT
@@ -91,6 +97,24 @@ module OMS
           @@NotifyBlobODSEndpoint.path = '/ContainerService.svc/PostBlobUploadNotification'
         rescue => e
           Log.error_once("Error parsing endpoint url. #{e}")
+          return false
+        end
+
+        begin
+          diagnostic_endpoint_lines = IO.readlines(conf_path).select{ |line| line.start_with?("DIAGNOSTIC_ENDPOINT=")}
+          if diagnostic_endpoint_lines.size == 0
+            # Endpoint to be inferred from @@ODSEndpoint
+            @@DiagnosticEndpoint = @@ODSEndpoint.clone
+            @@DiagnosticEndpoint.path = '/DiagnosticsDataService.svc/PostJsonDataItems'
+          else
+            if diagnostic_endpoint_lines.size > 1
+              Log.warn_once("Found more than one DIAGNOSTIC_ENDPOINT setting in #{conf_path}, will use the first one.")
+            end
+            diagnostic_endpoint_url = diagnostic_endpoint_lines[0].split("=")[1].strip
+            @@DiagnosticEndpoint = URI.parse( diagnostic_endpoint_url )
+          end
+        rescue => e
+          Log.error_once("Error obtaining diagnostic endpoint url. #{e}")
           return false
         end
 
@@ -151,6 +175,10 @@ module OMS
         @@ODSEndpoint
       end # getter ods_endpoint
 
+      def diagnostic_endpoint
+        @@DiagnosticEndpoint
+      end # getter diagnostic_endpoint
+
       def get_blob_ods_endpoint
         @@GetBlobODSEndpoint
       end # getter get_blob_ods_endpoint
@@ -169,7 +197,7 @@ module OMS
 
       def uuid
         @@UUID
-      end #getter for VM uuid
+      end # getter for VM uuid
 
     end # Class methods
         
