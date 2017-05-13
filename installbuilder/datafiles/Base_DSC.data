@@ -270,6 +270,8 @@ su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microso
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.3.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.1.zip 0"
 
+chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
+
 #else
 /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
 #endif
