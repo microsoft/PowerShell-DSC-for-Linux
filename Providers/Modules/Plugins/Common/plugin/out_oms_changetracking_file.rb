@@ -19,6 +19,7 @@ module Fluent
       require 'securerandom'
       require 'socket'
       require 'uri'
+      require 'cgi'
       require_relative 'omslog'
       require_relative 'oms_configuration'
       require_relative 'oms_common'
@@ -77,14 +78,16 @@ module Fluent
 
       super
       if !@PrimaryContentLocation.nil? and !@PrimaryContentLocation.empty? and @PrimaryContentLocation.include? "http" or @PrimaryContentLocation.include? "https"
-         urlDetails = @PrimaryContentLocation.split('?')
+         decodedUri = CGI::unescapeHTML(@PrimaryContentLocation)
+         urlDetails = decodedUri.split('?')
          if !urlDetails.nil? and urlDetails.length == 2
             @@ContentlocationUri = urlDetails[0].strip
             @@PrimaryContentLocationAccessToken = urlDetails[1]
          end
       end
       if !@SecondryContentLocation.nil? and !@SecondryContentLocation.empty? and @SecondryContentLocation.include? "http" or @SecondryContentLocation.include? "https"
-         urlDetails = @SecondryContentLocation.split('?')
+         decodedUri = CGI::unescapeHTML(@SecondryContentLocation)
+         urlDetails = decodedUri.split('?')
          if !urlDetails.nil? and urlDetails.length == 2
             @@SecondryContentLocationAccessToken = urlDetails[1].strip
          end
