@@ -160,28 +160,13 @@ fi
 #endif
 
 %Preinstall_200
-tmpfile=`mktemp`
 echo "Checking for ctypes python module..."
-cat <<EOF > $tmpfile
-#!/usr/bin/python
-import ctypes
-EOF
-
-chmod u+x $tmpfile
-$tmpfile 1> /dev/null 2> /dev/null
-tmpfile_ctypes=$?
-rm $tmpfile
-
 python -c "import ctypes" 1> /dev/null 2> /dev/null
 cmdline_ctypes=$?
-if [ $cmdline_ctypes -eq 0 -a $tmpfile_ctypes -ne 0 ]; then
-    echo "Warning: The ctypes python module was found, but it appears that /tmp may be mounted as noexec. This may affect some DSC functionality."
-elsif [ $cmdline_ctypes -ne 0 -a $tmpfile_ctypes -ne 0 ]; then
+if [ $cmdline_ctypes -ne 0 ]; then    
     echo "Error: Python does not support ctypes on this system.  Please install the ctypes module for Python or upgrade to a newer version of python that comes with the ctypes module."
     echo "Please remove the omi package and try again after installing the ctypes module or upgrading Python.  You can check if the ctypes module is installed by starting python and running the command: 'import ctypes'"
     exit 1
-else
-    echo "The ctypes python module was found."
 fi
 
 %Postinstall_10
