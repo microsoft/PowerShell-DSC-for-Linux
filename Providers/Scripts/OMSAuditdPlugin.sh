@@ -7,32 +7,61 @@ AUDISP_DIR=/etc/audisp/plugins.d
 AUDISP_CONF=$AUDISP_DIR/auoms.conf
 
 AUOMS_BIN=/opt/microsoft/auoms/bin/auoms
-AUOMS_DATA=/var/opt/microsoft/auoms/data
+AUOMS_OUTCONF_DIR=/etc/opt/microsoft/auoms/outconf.d
 
 AUDIT_RULES_FILE=/etc/audit/audit.rules
-DSC_AUDIT_RULES_DIR=/opt/microsoft/omsconfig/modules/nxOMSAuditdPlugin/DSCResources/MSFT_nxOMSAuditdPluginResource/rules
-
-OMS_AUDIT_V1_RULES_FILE=oms-security-audit-v1.rules
-OMS_AUDIT_V2_RULES_FILE=oms-security-audit-v2.rules
-
 OMS_AUDIT_RULES_PATH=/etc/audit/rules.d/oms-security-audit.rules
 
 umask 027
-
-AUDIT_VERSION=$(/sbin/auditctl -v | sed 's/^[^0-9]*\([0-9]\.[0-9]\).*$/\1/')
-ARCH=$(uname -m)
-
-if [ $(expr $AUDIT_VERSION "<" 1.8) == "1" ]; then
-    DSC_AUDIT_RULES_FILE=${DSC_AUDIT_RULES_DIR}/${OMS_AUDIT_V1_RULES_FILE}
-else
-    DSC_AUDIT_RULES_FILE=${DSC_AUDIT_RULES_DIR}/${OMS_AUDIT_V2_RULES_FILE}
-fi
 
 get_plugin_state () {
     if [ ! -e $AUDISP_CONF ]; then
         echo None
     fi
     echo "$(grep '^ *active *= *' $AUDISP_CONF | tr -d ' ' | cut -d'=' -f2)"
+}
+
+set_plugin_state () {
+    # Edit the conf file
+    sed -i "s/^\( *active *= *\)[enosy]*/\1$1/" $AUDISP_CONF
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+
+    # Notify auditd of changes
+    service auditd reload
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+
+    # Give auoms a chance to start or stop
+    sleep 5
+
+    if [ $1 = "yes" ]; then
+        # Make sure auoms started
+        pgrep -f $AUOMS_BIN 2>&1 >/dev/null
+        if [ $? -ne 0 ]; then
+            # Sometimes a reload isn't enough, do a restart
+            service auditd restart
+            sleep 3
+            # On CentOS/RHEL 7 the restart may fail to start auditd
+            # So, double check and start the service if restart failed
+            pgrep -x auditd >/dev/null 2>&1
+            if [ $? -ne 0 ]; then
+                service auditd start
+            fi
+        fi
+        pgrep -f $AUOMS_BIN 2>&1 >/dev/null
+        if [ $? -ne 0 ]; then
+            return 2
+        fi
+    else
+        # make sure auoms stopped
+        pgrep -f $AUOMS_BIN 2>&1 >/dev/null
+        if [ $? -eq 0 ]; then
+            pkill -KILL -f $AUOMS_BIN
+        fi
+    fi
 }
 
 use_augenrules () {
@@ -68,14 +97,6 @@ get_actual_rules () {
             if (start_found != 1 || end_found != 1) { exit 1; }
         }'
         return $?
-    fi
-}
-
-get_expected_rules () {
-    if [ "$ARCH" == "x86_64" ]; then
-        cat $DSC_AUDIT_RULES_FILE
-    else
-        grep -v "arch=b64" $DSC_AUDIT_RULES_FILE
     fi
 }
 
@@ -126,7 +147,7 @@ remove_rules () {
 
 set_rules () {
     if use_augenrules; then
-        get_expected_rules > $OMS_AUDIT_RULES_PATH
+        cp $1 $OMS_AUDIT_RULES_PATH
         if [ $? -ne 0 ]; then
             echo "Failed to create $OMS_AUDIT_RULES_PATH" >&2
             return 1
@@ -150,10 +171,8 @@ set_rules () {
             return 1
         fi
     else
-        TmpInFile=$(mktemp /tmp/OMSAUditdPlugin.XXXXXXXX)
         TmpOutFile=$(mktemp /tmp/OMSAUditdPlugin.XXXXXXXX)
-        get_expected_rules > $TmpInFile
-        cat $AUDIT_RULES_FILE | awk -v DSC_AUDIT_RULES_FILE=$TmpInFile '\
+        cat $AUDIT_RULES_FILE | awk -v DSC_AUDIT_RULES_FILE=$1 '\
         BEGIN {
             emit = 1;
             start_found = 0;
@@ -176,7 +195,6 @@ set_rules () {
             print "#### END OF OMS AUDIT RULES ####"
             for (i = idx; i < count; i++) { printf "%s\n", lines[i]; }
         }' > $TmpOutFile
-        rm -f $TmpInFile
         if [ $? -ne 0 ]; then
             echo "Failed to add/replace OMS audit rules to $AUDIT_RULES_FILE" >&2
             rm -f $TmpOutFile
@@ -192,118 +210,78 @@ set_rules () {
     fi
 }
 
-get_rules_state () {
-    actual=$(get_actual_rules)
-    expected=$(get_expected_rules)
-    if [ "$actual" == "$expected" ]; then
-        echo yes
-    fi
-    echo no
-}
-
-get_state () {
-    plugin_state=$(get_plugin_state)
-    rules_state=$(get_rules_state)
-    if [ "$plugin_state" == "None" ]; then
-        echo None
-    fi
-
-    if [ "$plugin_state" == "yes" -a "$rules_state" == "yes" ]; then
-        echo yes
-    fi
-
-    echo no
-}
-
-test_state () {
-    state=$(get_state)
-    case $state in
-        yes)
-            exit 0
-            ;;
-        no)
-            exit 1
-            ;;
-        *)
-            exit 2
-            ;;
-    esac
-}
-
-set_state () {
-    # Restart omsagent (/etc/opt/microsoft/omsagent/conf/omsagent.d/auoms.conf has been added or removed)
-    /opt/microsoft/omsagent/bin/service_control restart
-    if [ $? -ne 0 ]; then
-        exit 1
-    fi
-
-    plugin_state=$(get_plugin_state)
-    rules_state=$(get_rules_state)
-    # Exit success if the desired state is already set
-    if [ "$plugin_state" == "$1" -a "$rules_state" == "$1" ]; then
-        exit 0
-    fi
-
-    if [ "$plugin_state" != "$1" ]; then
-        # Edit the conf file
-        sed -i "s/^\( *active *= *\)[enosy]*/\1$1/" $AUDISP_CONF
-        if [ $? -ne 0 ]; then
-            exit 1
-        fi
-
-        # Notify auditd of changes
-        service auditd reload
-        if [ $? -ne 0 ]; then
-            exit 1
-        fi
-    fi
-
-    if [ "$rules_state" != "$1" ]; then
-        if [ "$1" == "yes" ]; then
-            set_rules
-            if [ $? -ne 0 ]; then
-                exit 1
-            fi
-        else
-            remove_rules
-            if [ $? -ne 0 ]; then
-                exit 1
-            fi
-        fi
-
-        /sbin/auditctl -R $AUDIT_RULES_FILE
-        if [ $? -ne 0 ]; then
-            echo "Failed to load audit rules file $AUDIT_RULES_FILE" >&2
-            exit 1
-        fi
-    fi
-
-    if [ "$1" = "no" ]; then
-        # Make sure auoms has exited
-        pgrep -f ${AUOMS_BIN} 2>&1 >/dev/null
-        if [ $? -eq 0 ]; then
-            # Kill it if it didn't exit
-            pkill -KILL -f ${AUOMS_BIN}
-        fi
-
-        # Make sure that if we re-enable the plugin, we start fresh
-        # Remove all auoms data (queues, etc...)
-        rm -f ${AUOMS_DATA}/*
-    fi
-}
-
 case $1 in
-    test)
-        test_state
+    get)
+        AUDIT_VERSION=$(/sbin/auditctl -v | sed 's/^[^0-9]*\([0-9]\.[0-9]\).*$/\1/')
+        if [ $? -ne 0 ]; then
+            echo "Failed to determine auditctl version"
+            exit 2
+        fi
+        # $2 tmp dir
+        get_plugin_state > $2/auditd_plugin.state
+        if [ $? -ne 0 ]; then
+            rm $2/auditd_plugin.state
+            exit 3
+        else
+            chown omsagent.omiusers $2/auditd_plugin.state
+        fi
+        get_actual_rules > $2/auditd_plugin.rules
+        if [ $? -ne 0 ]; then
+            rm $2/auditd_plugin.rules
+            exit 4
+        else
+            chown omsagent.omiusers $2/auditd_plugin.rules
+        fi
+        echo $AUDIT_VERSION
         ;;
-    enable)
-        set_state "yes"
-        ;;
-    disable)
-        set_state "no"
+    set)
+        # $2 restart or ""
+        # $3 plugin state (or "" if it doesn't need to change)
+        # $4 rules file path (or "" if it doesn't need to change)
+        # $5 dest auoms outconf file name (or "" if it doesn't need to change)
+        # $6 source auoms outconf file (only if $4 is not empty)
+        if [ "$2" == "restart" ]; then
+            /opt/microsoft/omsagent/bin/service_control restart
+            if [ $? -ne 0 ]; then
+                exit 2
+            fi
+        fi
+        if [ -n "$3" ]; then
+            set_plugin_state $3
+            RET = $?
+            if [ $RET -ne 0 ]; then
+                if [ $RET -eq 2 ]; then
+                    exit 6
+                else
+                    exit 3
+                fi
+            fi
+        fi
+
+        if [ -n "$4" ]; then
+            if [ "$4" == "remove" ]; then
+                remove_rules
+            else
+                set_rules $4
+            fi
+            if [ $? -ne 0 ]; then
+                exit 4
+            fi
+        fi
+
+        if [ -n "$5" ]; then
+            cp $6 ${AUOMS_OUTCONF_DIR}/$5
+            if [ $? -ne 0 ]; then
+                exit 5
+            fi
+            chmod 644 ${AUOMS_OUTCONF_DIR}/$5
+            if [ $? -ne 0 ]; then
+                exit 5
+            fi
+        fi
         ;;
     *)
         echo "Invalid command '$1'"
-        exit 3
+        exit 1
         ;;
 esac
