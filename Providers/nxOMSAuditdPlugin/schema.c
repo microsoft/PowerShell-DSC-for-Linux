@@ -809,14 +809,36 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean MSFT_nxOMSAuditdPluginResource_Ensure_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSAuditdPluginResource_WorkspaceId_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSAuditdPluginResource_Ensure_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSAuditdPluginResource_WorkspaceId_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSAuditdPluginResource_Ensure_Key_qual_value
+    &MSFT_nxOMSAuditdPluginResource_WorkspaceId_Key_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAuditdPluginResource_WorkspaceId_quals[] =
+{
+    &MSFT_nxOMSAuditdPluginResource_WorkspaceId_Key_qual,
+};
+
+/* property MSFT_nxOMSAuditdPluginResource.WorkspaceId */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSAuditdPluginResource_WorkspaceId_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
+    0x0077640B, /* code */
+    MI_T("WorkspaceId"), /* name */
+    MSFT_nxOMSAuditdPluginResource_WorkspaceId_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSAuditdPluginResource_WorkspaceId_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxOMSAuditdPluginResource, WorkspaceId), /* offset */
+    MI_T("MSFT_nxOMSAuditdPluginResource"), /* origin */
+    MI_T("MSFT_nxOMSAuditdPluginResource"), /* propagator */
+    NULL,
 };
 
 static MI_CONST MI_Boolean MSFT_nxOMSAuditdPluginResource_Ensure_Write_qual_value = 1;
@@ -871,7 +893,6 @@ static MI_CONST MI_Qualifier MSFT_nxOMSAuditdPluginResource_Ensure_Values_qual =
 
 static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAuditdPluginResource_Ensure_quals[] =
 {
-    &MSFT_nxOMSAuditdPluginResource_Ensure_Key_qual,
     &MSFT_nxOMSAuditdPluginResource_Ensure_Write_qual,
     &MSFT_nxOMSAuditdPluginResource_Ensure_ValueMap_qual,
     &MSFT_nxOMSAuditdPluginResource_Ensure_Values_qual,
@@ -880,7 +901,7 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSAuditdPluginResource_Ensure_qua
 /* property MSFT_nxOMSAuditdPluginResource.Ensure */
 static MI_CONST MI_PropertyDecl MSFT_nxOMSAuditdPluginResource_Ensure_prop =
 {
-    MI_FLAG_PROPERTY|MI_FLAG_KEY, /* flags */
+    MI_FLAG_PROPERTY, /* flags */
     0x00656506, /* code */
     MI_T("Ensure"), /* name */
     MSFT_nxOMSAuditdPluginResource_Ensure_quals, /* qualifiers */
@@ -896,6 +917,7 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSAuditdPluginResource_Ensure_prop =
 
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSAuditdPluginResource_props[] =
 {
+    &MSFT_nxOMSAuditdPluginResource_WorkspaceId_prop,
     &MSFT_nxOMSAuditdPluginResource_Ensure_prop,
 };
 
@@ -1740,3 +1762,4 @@ MI_Result MI_CALL MI_Server_GetSystemName(
 {
     return __mi_server->serverFT->GetSystemName(systemName);
 }
+

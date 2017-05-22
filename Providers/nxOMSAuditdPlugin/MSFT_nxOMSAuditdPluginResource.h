@@ -19,7 +19,7 @@
 ** MSFT_nxOMSAuditdPluginResource [MSFT_nxOMSAuditdPluginResource]
 **
 ** Keys:
-**    Ensure
+**    WorkspaceId
 **
 **==============================================================================
 */
@@ -29,7 +29,8 @@ typedef struct _MSFT_nxOMSAuditdPluginResource /* extends OMI_BaseResource */
     MI_Instance __instance;
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSAuditdPluginResource properties */
-    /*KEY*/ MI_ConstStringField Ensure;
+    /*KEY*/ MI_ConstStringField WorkspaceId;
+    MI_ConstStringField Ensure;
 }
 MSFT_nxOMSAuditdPluginResource;
 
@@ -121,7 +122,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_Post(
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_Set_Ensure(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_Set_WorkspaceId(
     _Inout_ MSFT_nxOMSAuditdPluginResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -133,7 +134,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_Set_Ensure(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_SetPtr_Ensure(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_SetPtr_WorkspaceId(
     _Inout_ MSFT_nxOMSAuditdPluginResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -145,12 +146,44 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_SetPtr_Ensure(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_Clear_Ensure(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_Clear_WorkspaceId(
     _Inout_ MSFT_nxOMSAuditdPluginResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_Set_Ensure(
+    _Inout_ MSFT_nxOMSAuditdPluginResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_SetPtr_Ensure(
+    _Inout_ MSFT_nxOMSAuditdPluginResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSAuditdPluginResource_Clear_Ensure(
+    _Inout_ MSFT_nxOMSAuditdPluginResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        1);
 }
 
 /*
