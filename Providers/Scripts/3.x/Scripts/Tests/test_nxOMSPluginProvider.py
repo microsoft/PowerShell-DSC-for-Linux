@@ -6,6 +6,8 @@ import os
 import sys
 import imp
 import ctypes
+import uuid
+import shutil
 
 try:
     import unittest2
@@ -27,7 +29,12 @@ class nxOMSPluginTestCases(unittest2.TestCase):
         nxOMSPlugin.PLUGIN_MODULE_PATH = '/var/tmp/Plugins'
         nxOMSPlugin.PLUGIN_PATH = '/var/tmp/opt/microsoft/omsagent/plugin/'
         nxOMSPlugin.CONF_PATH = '/var/tmp/etc/opt/microsoft/omsagent/conf/omsagent.d/'
+        nxOMSPlugin.CONF_PREFIX = '/var/tmp/etc/opt/microsoft/omsagent'
+        nxOMSPlugin.CONF_ROOT = '/var/tmp/etc'
+        nxOMSPlugin.STATE_ROOT = '/var/tmp/var'
+        nxOMSPlugin.DIAG_PLUGINS = ['diag_plugin_placeholder.rb']
         nxOMSPlugin.OMS_ACTION = nxOMSPlugin.TestOMSAgent()
+        nxOMSPlugin.DIAG_ACTION = nxOMSPlugin.TestDiagLog()
         # remove files from directory
         os.system('rm -rf /var/tmp/Plugins;' +
             'rm -rf /var/tmp/etc;'
@@ -209,6 +216,113 @@ class nxOMSPluginTestCases(unittest2.TestCase):
         # validate latest plugin applied
         self.assertTrue(nxOMSPlugin.Test_Marshall(**d) == [0],'Test('+repr(d)+') should return == [0]')
         
+    def testTestDiag_setup(self):
+        nxOMSPlugin.DIAG_ACTION = nxOMSPlugin.DiagLogUtil()
+        # setup
+        # 1. copy required plugin files in plugin directory
+        # 2. few workspace conf directories containing omsagent conf not having diag
+        # 3. few workspace conf directories containing omsagent conf having diag
+        # 4. few workspace conf directories not having omsagent.conf file itself
+        # call test and check result
+        copy_common_plugin_files()
+        copy_diag_plugin_files()
+        for x in range(1,5):
+            setup_conf_directories_without_diag()
+            setup_conf_directories_with_diag()
+            setup_conf_directories_without_conf_file()
+
+        d={'Name': 'testPlugin', 'Plugins': [{'PluginName': 'Common','Ensure': 'Present'}] }
+        self.assertTrue(nxOMSPlugin.Test_Marshall(**d) == [-1], 'Test('+repr(d)+') should return == [-1] for diag setup')
+
+    def testTestDiag_nosetup(self):
+        nxOMSPlugin.DIAG_ACTION = nxOMSPlugin.DiagLogUtil()
+        # setup
+        # 1. copy required plugin files in plugin directory
+        # 2. few workspace conf directories containing omsagent conf having diag
+        # 3. few workspace conf directories not having omsagent.conf file itself
+        # call test and check result
+        copy_common_plugin_files()
+        copy_diag_plugin_files()
+        for x in range(1,5):
+            setup_conf_directories_with_diag()
+            setup_conf_directories_without_conf_file()
+
+        d={'Name': 'testPlugin', 'Plugins': [{'PluginName': 'Common','Ensure': 'Present'}] }
+        self.assertTrue(nxOMSPlugin.Test_Marshall(**d) == [0], 'Test('+repr(d)+') should return == [0] as diag well setup')
+
+    def testTestDiag_nofiles(self):
+        nxOMSPlugin.DIAG_ACTION = nxOMSPlugin.DiagLogUtil()
+        # setup
+        # 1. miss plugin files that are checked in plugin directory
+        # 2. few workspace conf directories containing omsagent conf having diag
+        # 3. few workspace conf directories not having omsagent.conf file itself
+        # call test and check result
+        copy_common_plugin_files()
+        for x in range(1,5):
+            setup_conf_directories_with_diag()
+            setup_conf_directories_without_conf_file()
+
+        d={'Name': 'testPlugin', 'Plugins': [{'PluginName': 'Common','Ensure': 'Present'}] }
+        self.assertTrue(nxOMSPlugin.Test_Marshall(**d) == [0], 'Test('+repr(d)+') should return == [0] as diag plugin files not present')
+
+    def testSetDiag_setup(self):
+        # setup
+        # 1. copy required plugin files in plugin directory
+        # 2. few workspace conf directories containing omsagent conf not having diag
+        # 3. few workspace conf directories containing omsagent conf having diag
+        # 4. few workspace conf directories not having omsagent.conf file itself
+        # call test and check result
+        copy_common_plugin_files()
+        copy_diag_plugin_files()
+        for x in range(1,5):
+            setup_conf_directories_without_diag()
+            setup_conf_directories_with_diag()
+            setup_conf_directories_without_conf_file()
+
+        d={'Name': 'testPlugin', 'Plugins': [{'PluginName': 'Common','Ensure': 'Present'}] }
+        self.assertTrue(nxOMSPlugin.Set_Marshall(**d) == [0], 'Set('+repr(d)+') should return == [0] as diag correctly setup')
+
+        # verify if setup updated files correctly
+        self.assertTrue(nxOMSPlugin.DIAG_ACTION.is_diag_enabled() == True, 'Set should have setup diag config files correctly')
+
+def copy_common_plugin_files():
+    plugin_files = os.listdir(os.path.join(nxOMSPlugin.PLUGIN_MODULE_PATH, 'Common/plugin'))
+    for f in plugin_files:
+        file_path = os.path.join(nxOMSPlugin.PLUGIN_MODULE_PATH, 'Common/plugin', f)
+        if os.path.isfile(file_path):
+            shutil.copy(file_path, nxOMSPlugin.PLUGIN_PATH)
+
+def copy_diag_plugin_files():
+    for x in nxOMSPlugin.DIAG_PLUGINS:
+        file_path = os.path.join(nxOMSPlugin.PLUGIN_PATH, x)
+        contents = 'placeholder file'
+        nxOMSPlugin.append_file(file_path, contents)
+
+def setup_conf_directories_without_conf_file():
+    # Setup conf directory and return ws_path
+    ws_path = os.path.join(nxOMSPlugin.CONF_PREFIX, get_uuid())
+    os.makedirs(os.path.join(ws_path, 'conf'))
+    return ws_path
+
+def setup_conf_directories_without_diag():
+    ws_path = setup_conf_directories_without_conf_file()
+    # Setup conf file with config for out_oms
+    file_contents = nxOMSPlugin.DIAG_ACTION.generate_diag_conf_contents(ws_path)
+    file_contents_without_diag = file_contents.replace('diag', '')
+    nxOMSPlugin.append_file(os.path.join(ws_path, nxOMSPlugin.WS_OMSAGENT_CONF_SUFFIX), file_contents_without_diag)
+    return ws_path
+
+def setup_conf_directories_with_diag():
+    ws_path = setup_conf_directories_without_diag()
+    # Generate and append config for diag
+    file_contents = nxOMSPlugin.DIAG_ACTION.generate_diag_conf_contents(ws_path)
+    nxOMSPlugin.append_file(os.path.join(ws_path, nxOMSPlugin.WS_OMSAGENT_CONF_SUFFIX), file_contents)
+    return ws_path
+
+def get_uuid():
+    uuidstr = str(uuid.uuid4())
+    return uuidstr
+
 def check_values(s,d):
     if s is None and d is None:
         return True

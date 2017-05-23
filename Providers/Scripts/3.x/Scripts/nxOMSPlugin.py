@@ -12,6 +12,7 @@ import re
 import codecs
 import shutil
 import pdb
+import uuid
 
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
@@ -57,8 +58,151 @@ class TestOMSAgent(IOMSAgent):
         
 PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
 CONF_PATH = '/etc/opt/microsoft/omsagent/conf/omsagent.d/'
+CONF_PREFIX = '/etc/opt/microsoft/omsagent'
+CONF_ROOT = '/etc'
+STATE_ROOT = '/var'
+WS_OMSAGENT_CONF_SUFFIX = 'conf/omsagent.conf'
 PLUGIN_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSPlugin/DSCResources/MSFT_nxOMSPluginResource/Plugins'
+DIAG_PLUGINS = ['out_oms_diag.rb', 'oms_diag_lib.rb', 'oms_configuration.rb']
 OMS_ACTION = OMSAgentUtil()
+
+class IDiagLog:
+    def is_diag_enabled(self):
+        pass
+    def are_diag_plugins_copied(self):
+        pass
+    def update_diag_in_conf(self):
+        pass
+    def generate_diag_conf_contents(self, ws_path):
+        pass
+
+class TestDiagLog(IDiagLog):
+    def is_diag_enabled(self):
+        return True
+    def are_diag_plugins_copied(self):
+        return False
+    def update_diag_in_conf(self):
+        return True
+    def generate_diag_conf_contents(self, ws_path):
+        return ''
+
+class DiagLogUtil(IDiagLog):
+    def is_diag_enabled(self):
+        ws_conf_path = ''
+        # Check if all workspace conf path omsagent.conf have diag present
+        try:
+            # Single/default workspace scenario
+            ws_conf_path = os.path.join(CONF_PREFIX, WS_OMSAGENT_CONF_SUFFIX)
+            if os.path.isfile(ws_conf_path) and (not self.is_diag_conf_present(ws_conf_path)):
+                return False
+
+            # Checking multiple workspace scenario
+            ws_list = get_workspace_list()
+            for ws in ws_list:
+                ws_conf_path = os.path.join(CONF_PREFIX, ws, WS_OMSAGENT_CONF_SUFFIX)
+                if os.path.isfile(ws_conf_path) and (not self.is_diag_conf_present(ws_conf_path)):
+                    return False
+            return True
+        except IOError as error:
+            LG().Log('ERROR', "Exception: "+ error.strerror + " checking diagnostic config presence for path: " + ws_conf_path)
+        # Do not process further if there is an error in checking diag presence
+        return True
+
+    def are_diag_plugins_copied(self):
+        try:
+            for p in DIAG_PLUGINS:
+                file_path = os.path.join(PLUGIN_PATH, p)
+                if not os.path.isfile(file_path):
+                    return False
+            return True
+        except:
+            LG().Log('ERROR', "Exception checking presence of diag plugin files")
+        return False
+
+    def update_diag_in_conf(self):
+        ws_conf_path = ''
+        try:
+            # Check and update omsagent.conf for default/single workspace scenario
+            ws_conf_path = os.path.join(CONF_PREFIX, WS_OMSAGENT_CONF_SUFFIX)
+            if os.path.isfile(ws_conf_path) and not self.is_diag_conf_present(ws_conf_path):
+                if not self.update_diag_in_conf_path(ws_conf_path):
+                    return False
+
+            # Check and update omsagent.conf for multiple workspace scenario
+            ws_list = get_workspace_list()
+            for ws in ws_list:
+                ws_conf_path = os.path.join(CONF_PREFIX, ws, WS_OMSAGENT_CONF_SUFFIX)
+                if os.path.isfile(ws_conf_path) and not self.is_diag_conf_present(ws_conf_path):
+                    if not self.update_diag_in_conf_path(ws_conf_path):
+                        return False
+
+            return True
+        except IOError as error:
+            LG().Log('ERROR', 'Exception: '+ error.strerror+' while checking/updating omsagent.conf files')
+        return False
+
+    def is_diag_conf_present(self, full_path):
+        conf_content = read_file(full_path)
+
+        if conf_content is None:
+            return False
+
+        if 'out_oms_diag' in conf_content:
+            return True
+
+        return False
+
+    def update_diag_in_conf_path(self, full_path):
+        conf_content = read_file(full_path)
+
+        if conf_content is None:
+            return False
+
+        # Getting the ws directory in conf path
+        conf_ws_path = os.path.normpath(os.path.join(full_path, os.pardir, os.pardir))
+
+        # Generating contents
+        file_contents = self.generate_diag_conf_contents(conf_ws_path)
+
+        # Append to omsagent.conf
+        if append_file(full_path, file_contents) != 0:
+            return False
+        return True
+
+    def generate_diag_conf_contents(self, conf_ws_path):
+        # Getting %CONF_DIR_WS%
+        conf_dir_ws = os.path.join(conf_ws_path, 'conf')
+        # Getting %CERT_DIR_WS%
+        cert_dir_ws = os.path.join(conf_ws_path, 'certs')
+        # Getting %STATE_DIR_WS%
+        temp_path = os.path.relpath(conf_ws_path, CONF_ROOT)
+        state_dir_ws = os.path.join(STATE_ROOT, temp_path, 'state')
+
+        file_contents = ("\n"
+            "<match diag.oms diag.oms.**>\n"
+            "  type out_oms_diag\n"
+            "  log_level info\n"
+            "  num_threads 5\n"
+            "\n"
+            "  omsadmin_conf_path " + conf_dir_ws +"/omsadmin.conf\n"
+            "  cert_path " + cert_dir_ws + "/oms.crt\n"
+            "  key_path " + cert_dir_ws + "/oms.key\n"
+            "\n"
+            "  buffer_chunk_limit 1m\n"
+            "  buffer_type file\n"
+            "  buffer_path " + state_dir_ws + "/out_oms_diag*.buffer\n"
+            "\n"
+            "  buffer_queue_limit 50\n"
+            "  buffer_queue_full_action drop_oldest_chunk\n"
+            "  flush_interval 10s\n"
+            "  retry_limit 10\n"
+            "  retry_wait 30s\n"
+            "  max_retry_wait 9m\n"
+            "</match>\n"
+            "\n")
+        return file_contents
+
+DIAG_ACTION = DiagLogUtil()
 
 def init_vars(Plugins):
     if Plugins is not None:
@@ -126,6 +270,10 @@ def Set(Plugins):
             if plugin['Ensure'] == 'Present':
                 # copy all files under plugin
                 copy_all_files(plugin_dir, PLUGIN_PATH)
+                if (DIAG_ACTION.are_diag_plugins_copied() and not DIAG_ACTION.is_diag_enabled()):
+                    LG().Log('INFO', "Diagnostic logging plugin files present but not enabled in config, updating config")
+                    if not DIAG_ACTION.update_diag_in_conf():
+                        return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # NO-OP as we do *NOT* remove common plugins
                 pass
@@ -188,6 +336,9 @@ def Test(Plugins):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
                 if (not check_all_files(plugin_dir, PLUGIN_PATH)):
+                    return [-1]
+                if (DIAG_ACTION.are_diag_plugins_copied() and not DIAG_ACTION.is_diag_enabled()):
+                    LG().Log('INFO', "Diagnostic logging files present but not enabled in config, Set to update")
                     return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # NO-OP as we do *NOT* test for the absence of common plugins
@@ -372,3 +523,36 @@ def opened_bin_w_error(filename, mode="rb"):
             yield f, None
         finally:
             f.close()
+
+def get_workspace_list():
+    listOfDirs = os.listdir(CONF_PREFIX)
+    return filter(is_uuid, listOfDirs)
+
+def is_uuid(uuidStr):
+    try:
+        uuidOut = uuid.UUID(uuidStr)
+    except:
+        return False
+    return str(uuidOut).encode('utf-8') == str(uuidStr).encode('utf-8')
+
+def append_file(path, contents):
+    retval = 0
+    try:
+        with open(path, 'a') as dFile:
+            dFile.write(contents)
+    except IOError as error:
+        errno, strerror = error.args
+        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+        retval = -1
+    return retval
+
+def read_file(path):
+    content = None
+    try:
+        with codecs.open (path, encoding = 'utf8', mode = "r") as dFile:
+            content = dFile.read()
+    except IOError as error:
+        errno, strerror = error.args
+        LG().Log('ERROR', "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror)
+    return content
+

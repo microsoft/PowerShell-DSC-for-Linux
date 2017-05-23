@@ -13,6 +13,7 @@ module OMS
 
     @@AgentId = nil
     @@ODSEndpoint = nil
+    @@DiagnosticEndpoint = nil
     @@GetBlobODSEndpoint = nil
     @@NotifyBlobODSEndpoint = nil
     @@OmsCloudId = nil
@@ -94,6 +95,24 @@ module OMS
           return false
         end
 
+        begin
+          diagnostic_endpoint_lines = IO.readlines(conf_path).select{ |line| line.start_with?("DIAGNOSTIC_ENDPOINT=")}
+          if diagnostic_endpoint_lines.size == 0
+            # Endpoint to be inferred from @@ODSEndpoint
+            @@DiagnosticEndpoint = @@ODSEndpoint.clone
+            @@DiagnosticEndpoint.path = '/DiagnosticsDataService.svc/PostJsonDataItems'
+          else
+            if diagnostic_endpoint_lines.size > 1
+              Log.warn_once("Found more than one DIAGNOSTIC_ENDPOINT setting in #{conf_path}, will use the first one.")
+            end
+            diagnostic_endpoint_url = diagnostic_endpoint_lines[0].split("=")[1].strip
+            @@DiagnosticEndpoint = URI.parse( diagnostic_endpoint_url )
+          end
+        rescue => e
+          Log.error_once("Error obtaining diagnostic endpoint url. #{e}")
+          return false
+        end
+
         agentid_lines = IO.readlines(conf_path).select{ |line| line.start_with?("AGENT_GUID")}
         if agentid_lines.size == 0
           Log.error_once("Could not find AGENT_GUID setting in #{conf_path}")
@@ -151,6 +170,10 @@ module OMS
         @@ODSEndpoint
       end # getter ods_endpoint
 
+      def diagnostic_endpoint
+        @@DiagnosticEndpoint
+      end # getter diagnostic_endpoint
+
       def get_blob_ods_endpoint
         @@GetBlobODSEndpoint
       end # getter get_blob_ods_endpoint
@@ -169,7 +192,7 @@ module OMS
 
       def uuid
         @@UUID
-      end #getter for VM uuid
+      end # getter for VM uuid
 
     end # Class methods
         
