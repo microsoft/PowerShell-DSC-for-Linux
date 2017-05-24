@@ -16,7 +16,7 @@ import runbook
 import runtime
 import runtimefactory
 import tracer
-from automationconstants import pendingactions, jobstatus
+from automationconstants import pendingactions, jobstatus, jobtriggersource
 from streamhandler import StreamHandler
 from workerexception import *
 
@@ -88,7 +88,6 @@ class Job(Thread):
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
         except InvalidRunbookSignature, e:
-            tracer.log_sandbox_job_invalid_signature(self.job_id)
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
         except Exception:
@@ -168,8 +167,8 @@ class Job(Thread):
                             duration_td.seconds + duration_td.days * 24 * 3600) * 10 ** 6) / 10 ** 6
         tracer.log_etw_job_duration(self.job_data.subscription_id, self.job_data.account_id, self.sandbox_id,
                                     self.job_id, str(duration_td), duration_seconds, self.job_data.tier_name,
-                                    self.job_data.account_name, self.job_data.trigger_source, "Unknown",
-                                    # TODO(dalbe): fix runbook source
+                                    self.job_data.account_name, jobtriggersource.mapping[self.job_data.trigger_source],
+                                    "Unknown",  # TODO(dalbe): fix runbook source
                                     self.runbook.definition_kind_str, self.runbook_data.name, self.job_data.run_on)
         tracer.log_sandbox_job_unloaded(self.job_id)
 

@@ -49,7 +49,7 @@ def safe_trace(func):
 
 def background_thread(func):
     def decorated_func(*args, **kwargs):
-        t = threading.Thread(target=func, args=args)
+        t = threading.Thread(target=func, args=args, kwargs=kwargs)
         t.daemon = True
         t.start()
 
@@ -58,7 +58,7 @@ def background_thread(func):
 
 def init():
     """Initializes all required variable for the tracer."""
-    global default_logger, sandbox_stdout, jrds_client, jrds_cert_path, jrds_key_path, jrds_base_uri, subscription_id, \
+    global jrds_client, jrds_cert_path, jrds_key_path, jrds_base_uri, subscription_id, \
         account_id, machine_id, hybrid_worker_group_name, worker_version, activity_id, sandbox_id
 
     # Create the http client
@@ -82,6 +82,14 @@ def init():
         sandbox_id = os.environ["sandbox_id"]
     except KeyError:
         pass
+
+    # initialize the loggers for for all components except runbook
+    if configuration.get_component() != "runbook":
+        init_logger()
+
+
+def init_logger():
+    global default_logger, sandbox_stdout, sandbox_id
 
     if sandbox_id is not None:
         log_file_name = configuration.get_component() + sandbox_id
@@ -123,8 +131,8 @@ def init():
 
 @background_thread
 @safe_trace
-def trace_generic_hybrid_worker_event(event_id, task_name, message, t_id, keyword, debug=False):
-    """Write the trace to STDOUT / log file (on disk) / to MDS (in the cloud).
+def trace_generic_hybrid_worker_event_async(event_id, task_name, message, t_id, keyword, activity_id=None, debug=False):
+    """Invokes trace_generic_hybrid_worker_event in an asynchronously.
 
     Note:
         This method run in a background thread.
@@ -135,6 +143,23 @@ def trace_generic_hybrid_worker_event(event_id, task_name, message, t_id, keywor
         message     : string, the message.
         t_id        : int   , the thread id.
         keyword     : string, the keyword.
+        activity_id : string, the activity id.
+        debug       : boolean, the debug flag
+    """
+    trace_generic_hybrid_worker_event(event_id, task_name, message, t_id, keyword, activity_id=activity_id, debug=debug)
+
+
+def trace_generic_hybrid_worker_event(event_id, task_name, message, t_id, keyword, activity_id=None, debug=False):
+    """Write the trace to STDOUT / log file (on disk) / to MDS (in the cloud).
+
+    Args:
+        event_id    : int   , the event id. This event id doesn't have to map to an ETW event id in the cloud.
+        task_name   : string, the task name.
+        message     : string, the message.
+        t_id        : int   , the thread id.
+        keyword     : string, the keyword.
+        activity_id : string, the activity id.
+        debug       : boolean, the debug flag
     """
     # # # # # # # # # # # # # # # # # # # #
     # for tests, disregard tracer
@@ -155,17 +180,21 @@ def trace_generic_hybrid_worker_event(event_id, task_name, message, t_id, keywor
     if isinstance(message, dict):
         message = dict_to_str(message)
 
+    if activity_id is None:
+        activity_id = u_activity_id
+
     # local trace
     # we prioritize cloud traces, do not raise exception if local tracing raises an exception
     try:
-        default_logger.info(message)
+        if default_logger is not None:
+            default_logger.info(message)
     except Exception, e:
         print str(e)
         pass
 
     # MDS
     if not debug:
-        format_and_issue_generic_hybrid_worker_trace(event_id, task_name, message, t_id, keyword)
+        format_and_issue_generic_hybrid_worker_trace(event_id, task_name, message, t_id, keyword, activity_id)
 
 
 @background_thread
@@ -195,7 +224,7 @@ def trace_etw_event(event_id, activity_id, log_type, arg_array):
     issue_jrds_trace(event_id, activity_id, log_type, arg_array)
 
 
-def format_and_issue_generic_hybrid_worker_trace(event_id, task_name, message, t_id, keyword):
+def format_and_issue_generic_hybrid_worker_trace(event_id, task_name, message, t_id, keyword, activity_id):
     """Send the trace to MDS (in the cloud) using the JRDS api.
 
     Args:
@@ -218,10 +247,10 @@ def format_and_issue_generic_hybrid_worker_trace(event_id, task_name, message, t
                           keyword,
                           t_id,
                           os.getpid(),
-                          u_activity_id,
+                          activity_id,
                           worker_version,
                           message]
-    issue_jrds_trace(16000, u_activity_id, 0, cloud_trace_format)
+    issue_jrds_trace(16000, activity_id, 0, cloud_trace_format)
 
 
 def issue_jrds_trace(event_id, activity_id, log_type, arg_array):
@@ -248,6 +277,7 @@ KEYWORD_STARTUP = "Startup"
 KEYWORD_ROUTINE = "Routine"
 KEYWORD_JOB = "Job"
 KEYWORD_RUNTIME = "Runtime"
+KEYWORD_RUNBOOK = "Runbook"
 KEYWORD_CONFIGURATION = "Configuration"
 KEYWORD_TELEMETRY = "Telemetry"
 
@@ -256,16 +286,16 @@ KEYWORD_TELEMETRY = "Telemetry"
 # traces in this section may be used in all worker components (worker, sandbox, etc)
 def log_debug_trace(message):
     message = "[DEBUG] " + message
-    trace_generic_hybrid_worker_event(1, inspect.stack()[0][3], message, 1, KEYWORD_DEBUG, True)
+    trace_generic_hybrid_worker_event_async(1, inspect.stack()[0][3], message, 1, KEYWORD_DEBUG, debug=True)
 
 
 def log_informational_trace(message):
-    trace_generic_hybrid_worker_event(2, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(2, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_exception_trace(stacktrace):
     message = "Exception encountered. \n" + stacktrace
-    trace_generic_hybrid_worker_event(3, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event_async(3, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
 # worker specific traces
@@ -276,84 +306,84 @@ def log_sandbox_stdout(trace_content):
 
 def log_worker_starting(version):
     message = "Worker starting. [workerVersion=" + str(version) + "]"
-    trace_generic_hybrid_worker_event(5000, inspect.stack()[0][3], message, 1, KEYWORD_STARTUP)
+    trace_generic_hybrid_worker_event_async(5000, inspect.stack()[0][3], message, 1, KEYWORD_STARTUP)
 
 
 def log_worker_general_telemetry(worker_version, worker_type, username, oms_agent_id):
-    message = "Worker general telemetry. [workerVersion=" + str(worker_version) + "][workerType=" +\
+    message = "Worker general telemetry. [workerVersion=" + str(worker_version) + "][workerType=" + \
               str(worker_type) + "][username=" + str(username) + "][oms_agent_id=" + str(oms_agent_id) + "]"
-    trace_generic_hybrid_worker_event(5001, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
+    trace_generic_hybrid_worker_event_async(5001, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
 def log_worker_python_telemetry(version, build, compiler):
     message = "Worker python telemetry. [version=" + str(version) + "][build=" + str(' '.join(map(str, build))) + \
               "][compiler=" + str(compiler) + "]"
-    trace_generic_hybrid_worker_event(5002, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
+    trace_generic_hybrid_worker_event_async(5002, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
 def log_worker_system_telemetry(system, node, version, machine, processor):
     message = "Worker system telemetry. [system=" + str(system) + "][node=" + str(node) + \
               "][version=" + str(version) + "][machine=" + str(machine) + "][processor=" + str(processor) + "]"
-    trace_generic_hybrid_worker_event(5003, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
+    trace_generic_hybrid_worker_event_async(5003, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
 def log_worker_lsb_release_telemetry(distributor_id, description, release, codename):
     message = "Worker lsb_release telemetry. [distributor_id=" + str(distributor_id) + "][description=" + \
               str(description) + "][release=" + str(release) + "][codename=" + str(codename) + "]"
-    trace_generic_hybrid_worker_event(5005, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
+    trace_generic_hybrid_worker_event_async(5005, inspect.stack()[0][3], message, 1, KEYWORD_TELEMETRY)
 
 
 def log_worker_sandbox_action_found(sandbox_actions):
     message = "Get sandbox actions found " + str(sandbox_actions) + " new action(s)."
-    trace_generic_hybrid_worker_event(5100, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
+    trace_generic_hybrid_worker_event_async(5100, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
 
 
 def log_worker_starting_sandbox(sandbox_id):
     message = "Starting sandbox process. [sandboxId=" + str(sandbox_id) + "]"
-    trace_generic_hybrid_worker_event(5101, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
+    trace_generic_hybrid_worker_event_async(5101, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
 
 
 def log_worker_sandbox_process_started(sandbox_id, pid):
     message = "Sandbox process started. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) + "]"
-    trace_generic_hybrid_worker_event(5102, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
+    trace_generic_hybrid_worker_event_async(5102, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
 
 
 def log_worker_sandbox_process_exited(sandbox_id, pid, exit_code):
     message = "Sandbox process exited. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) + "][exitCode=" + \
               str(exit_code) + "]"
-    trace_generic_hybrid_worker_event(5103, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(5103, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_worker_sandbox_process_crashed(sandbox_id, pid, exit_code, exception):
     message = "Sandbox process crashed. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) + "][exitCode=" + \
               str(exit_code) + "][exception=" + str(exception) + "]"
-    trace_generic_hybrid_worker_event(5104, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event_async(5104, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
 def log_worker_failed_to_create_sandbox_root_folder(sandbox_id, exception):
     message = "Failed to create sandbox root folder. [sandboxId=" + str(sandbox_id) + "][exception=" + \
               str(exception) + "]"
-    trace_generic_hybrid_worker_event(5105, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+    trace_generic_hybrid_worker_event_async(5105, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 def log_worker_started_tracking_sandbox(sandbox_id):
     message = "Worker started tracking sandbox. [sandboxId=" + str(sandbox_id) + "]"
-    trace_generic_hybrid_worker_event(5106, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(5106, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_worker_stopped_tracking_sandbox(sandbox_id):
     message = "Worker stopped tracking sandbox. [sandboxId=" + str(sandbox_id) + "]"
-    trace_generic_hybrid_worker_event(5107, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(5107, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_worker_safe_loop_non_terminal_exception(exception):
     message = "Worker safe loop non terminal exception. [exception=" + str(exception) + "]"
-    trace_generic_hybrid_worker_event(5108, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+    trace_generic_hybrid_worker_event_async(5108, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 def log_worker_safe_loop_terminal_exception(exception):
     message = "Worker safe loop terminal exception. [exception=" + str(exception) + "]"
-    trace_generic_hybrid_worker_event(5109, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event_async(5109, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
 # sandbox specific traces
@@ -361,173 +391,174 @@ def log_worker_safe_loop_terminal_exception(exception):
 #
 # ** these trace rely on the sandbox_id env variable to be set **
 def log_sandbox_starting(sandbox_id, pid, worker_type):
-    message = "Sandbox process starting. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) +\
+    message = "Sandbox process starting. [sandboxId=" + str(sandbox_id) + "][pId=" + str(pid) + \
               "][workerType=" + str(worker_type) + "]"
-    trace_generic_hybrid_worker_event(10000, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10000, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_get_job_actions(job_actions):
     message = "Get job actions. Found " + str(job_actions) + " new action(s)."
-    trace_generic_hybrid_worker_event(10001, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
+    trace_generic_hybrid_worker_event_async(10001, inspect.stack()[0][3], message, 1, KEYWORD_ROUTINE)
 
 
 def log_sandbox_stopped_tracking_job(job_id):
     message = "Sandbox stopped tracking job. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
-    trace_generic_hybrid_worker_event(10002, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10002, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_started_tracking_job(job_id):
     message = "Sandbox started tracking job. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
-    trace_generic_hybrid_worker_event(10003, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10003, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_jrds_closure_request():
     message = "Sandbox closure request received from JRDS. [sandboxId=" + str(sandbox_id) + "]"
-    trace_generic_hybrid_worker_event(10004, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10004, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_pending_action_activate_detected(job_id, job_status, pending_action):
     message = "Sandbox pending action activate detected. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + \
               "][jobStatus=" + str(job_status) + "][pendingAction=" + str(pending_action) + "]"
-    trace_generic_hybrid_worker_event(10005, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10005, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_pending_action_stop_detected(job_id, job_status, pending_action):
     message = "Sandbox pending action stop detected. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + \
               "][jobStatus=" + str(job_status) + "][pendingAction=" + str(pending_action) + "]"
-    trace_generic_hybrid_worker_event(10006, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10006, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_no_pending_action_detected(job_id, job_status):
     message = "Sandbox no pending action detected. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + \
               "][jobStatus=" + str(job_status) + "]"
-    trace_generic_hybrid_worker_event(10007, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10007, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_unsupported_pending_action_detected(job_id, job_status, pending_action):
     message = "Sandbox unsupported pending action detected. [sandboxId=" + str(sandbox_id) + "][jobId=" + \
               str(job_id) + "][jobStatus=" + str(job_status) + "][pendingAction=" + str(pending_action) + "]"
-    trace_generic_hybrid_worker_event(10008, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event_async(10008, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
 def log_sandbox_job_created(job_id):
     message = "Job created. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
-    trace_generic_hybrid_worker_event(10009, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10009, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_job_loaded(job_id):
     message = "Job loaded. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
-    trace_generic_hybrid_worker_event(10010, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10010, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_job_started(job_id, runbook_definition_kind, runbook_name, runbook_version_id):
-    message = "Job started. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookDefinitionKind=" +\
-              str(runbook_definition_kind) + "][runbookName=" + str(runbook_name) + "][runbookVersionId=" +\
+    message = "Job started. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookDefinitionKind=" + \
+              str(runbook_definition_kind) + "][runbookName=" + str(runbook_name) + "][runbookVersionId=" + \
               str(runbook_version_id) + "]"
-    trace_generic_hybrid_worker_event(10011, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10011, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_job_pending_action_detected(job_id, pending_action):
     message = "Job pending action detected. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + \
               "][pendingAction=" + str(pending_action) + "]"
-    trace_generic_hybrid_worker_event(10012, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10012, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_job_unloaded(job_id):
     message = "Job unloaded. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
-    trace_generic_hybrid_worker_event(10013, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10013, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_job_unsupported_runbook_type(job_id, exception):
     message = "Unsupported runbook type. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + \
               "][exception=" + str(exception) + "]"
-    trace_generic_hybrid_worker_event(10014, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
-
-
-def log_sandbox_job_invalid_signature(job_id):
-    message = "Invalid runbook signature. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
-    trace_generic_hybrid_worker_event(10015, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event_async(10014, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
 def log_sandbox_job_unhandled_exception(job_id, stacktrace):
     message = "Job unhandled exception. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + \
               "][stacktrace=" + str(stacktrace) + "]"
-    trace_generic_hybrid_worker_event(10016, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event_async(10016, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
 def log_sandbox_job_streamhandler_unhandled_exception(job_id, exception):
     message = "Job stream handler unhandled exception. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + \
               "][stacktrace=" + str(exception) + "]"
-    trace_generic_hybrid_worker_event(10017, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event_async(10017, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
 
 def log_sandbox_job_streamhandler_processing_complete(job_id):
     message = "Job stream handler processing complete. [sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "]"
-    trace_generic_hybrid_worker_event(10018, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10018, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_job_runbook_signature_validation_failed(keyring_path, exception):
     message = "Runbook signature validation failed. [sandboxId=" + str(sandbox_id) + "][gpgException=" + \
               str(exception) + "]" + "[keyring_path=" + str(keyring_path) + "]"
-    trace_generic_hybrid_worker_event(10019, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+    trace_generic_hybrid_worker_event_async(10019, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 def log_sandbox_job_runbook_signature_validation_succeeded(keyring_path):
     message = "Runbook signature validation succeeded. [sandboxId=" + str(sandbox_id) + "]" + \
               "[keyring_path=" + str(keyring_path) + "]"
-    trace_generic_hybrid_worker_event(10020, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+    trace_generic_hybrid_worker_event_async(10020, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 def log_sandbox_job_runbook_signature_invalid():
     message = "Runbook signature validation is invalid. [sandboxId=" + str(sandbox_id) + "]"
-    trace_generic_hybrid_worker_event(10021, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+    trace_generic_hybrid_worker_event_async(10021, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 def log_sandbox_configuration(sandbox_id, enforce_runbook_signature_validation, gpg_public_keyring_paths,
                               working_directory):
-    message = "Sandbox configuration. [sandboxId=" + str(sandbox_id) + "][enforceRunbookSignatureValidation=" +\
-              str(enforce_runbook_signature_validation) + "][gpgPublicKeyringPaths=" + str(gpg_public_keyring_paths) +\
+    message = "Sandbox configuration. [sandboxId=" + str(sandbox_id) + "][enforceRunbookSignatureValidation=" + \
+              str(enforce_runbook_signature_validation) + "][gpgPublicKeyringPaths=" + str(gpg_public_keyring_paths) + \
               "][workingDirectory=" + str(working_directory) + "]"
-    trace_generic_hybrid_worker_event(10022, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
+    trace_generic_hybrid_worker_event_async(10022, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
 
 
 def log_sandbox_safe_loop_terminal_exception(exception):
     message = "Sandbox safe loop terminal exception. [sandboxId=" + str(sandbox_id) + "][exception=" + \
               str(exception) + "]"
-    trace_generic_hybrid_worker_event(10023, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+    trace_generic_hybrid_worker_event_async(10023, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
+
+
+def log_runbook_runtime_trace(trace, activity_id):
+    message = "Runbook runtime trace: " + str(trace)
+    trace_generic_hybrid_worker_event(89000, inspect.stack()[0][3], message, 1, KEYWORD_RUNBOOK,
+                                      activity_id=activity_id)
 
 
 # GenericHybridWorker event for ETW traces
 def log_job_status_changed_completed(message):
-    trace_generic_hybrid_worker_event(90000, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+    trace_generic_hybrid_worker_event_async(90000, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
 
 
 def log_job_status_changed_failed(message):
-    trace_generic_hybrid_worker_event(90001, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+    trace_generic_hybrid_worker_event_async(90001, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
 
 
 def log_job_status_changed_running(message):
-    trace_generic_hybrid_worker_event(90002, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+    trace_generic_hybrid_worker_event_async(90002, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
 
 
 def log_job_status_changed_stopped(message):
-    trace_generic_hybrid_worker_event(90003, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+    trace_generic_hybrid_worker_event_async(90003, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
 
 
 def log_job_status_changed_suspended_by_user(message):
-    trace_generic_hybrid_worker_event(90004, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+    trace_generic_hybrid_worker_event_async(90004, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
 
 
 def log_job_status_changed_suspended_by_exception(message):
-    trace_generic_hybrid_worker_event(90005, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+    trace_generic_hybrid_worker_event_async(90005, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
 
 
 def log_user_requested_start_or_resume(message):
-    trace_generic_hybrid_worker_event(90006, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+    trace_generic_hybrid_worker_event_async(90006, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
 
 
 def log_job_duration(message):
-    trace_generic_hybrid_worker_event(90007, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
+    trace_generic_hybrid_worker_event_async(90007, inspect.stack()[0][3], message, 1, KEYWORD_JOB)
 
 
 # etw specific traces

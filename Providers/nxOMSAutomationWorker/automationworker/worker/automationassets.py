@@ -4,6 +4,7 @@
 
 import sys
 
+import binascii
 import configuration
 import serializerfactory
 from httpclientfactory import HttpClientFactory
@@ -33,7 +34,7 @@ def set_automation_variable(name, value):
 
 def get_automation_credential(name):
     credential = jrds_client.get_credential_asset(name)
-    return CredentialModelV1(credential[KEY_USERNAME], credential[KEY_VALUE])
+    return {"username": credential[KEY_USERNAME], "password": credential[KEY_VALUE]}
 
 
 def get_automation_connection(name):
@@ -41,10 +42,9 @@ def get_automation_connection(name):
     return connection[KEY_CONNECTION_FIELDS]
 
 
-class CredentialModelV1:
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
+def get_automation_certificate(name):
+    certificate = jrds_client.get_certificate_asset(name)
+    return binascii.a2b_base64(certificate[KEY_VALUE])
 
 
 configuration.set_config({configuration.COMPONENT: "assets"})

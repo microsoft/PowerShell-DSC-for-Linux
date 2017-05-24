@@ -12,6 +12,7 @@ from distutils.spawn import find_executable
 
 import serializerfactory
 import subprocessfactory
+import tracer
 from runbook import *
 from workerexception import *
 
@@ -52,6 +53,7 @@ class Runtime:
         # Do not copy current process env var to the sandbox process
         env = os.environ.copy()
         env.update({"AUTOMATION_JOB_ID": str(self.job_data.job_id),
+                    "AUTOMATION_ACTIVITY_ID": str(tracer.u_activity_id),
                     "PYTHONPATH": str(
                         configuration.get_source_directory_path())})  # windows env have to be str (not unicode)
         self.runbook_subprocess = subprocessfactory.create_subprocess(cmd=cmd,

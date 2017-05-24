@@ -450,10 +450,11 @@ class JRDSClient:
         Note:
             The JRDS response body is of the following format:
             {
-                "userName": "myusername",
-                "name": "testcred",
-                "value": "mypassword",
-                "description": "None"
+                "name": "",
+                "thumbprint": "",
+                "isExportable": "",
+                "value": "",
+                "expiryTime": ""
             }
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/certificates/" + name + "?api-version=" \
