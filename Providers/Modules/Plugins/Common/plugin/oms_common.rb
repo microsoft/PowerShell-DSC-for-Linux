@@ -22,6 +22,7 @@ module OMS
     @@OSName = nil
     @@OSVersion = nil
     @@Hostname = nil
+    @@HostnameFilePath = '/var/opt/microsoft/docker-cimprov/state/containerhostname'
     @@FQDN = nil
     @@InstalledDate = nil
     @@AgentVersion = nil
@@ -526,7 +527,7 @@ module OMS
             end
           }
         rescue => error
-          Log.error_once("Unable to get the current time zone: #{error}")
+          OMS::Log.error_once("Unable to get the current time zone: #{error}")
         end
 
         # assign the tzID if the corresponding Windows Time Zone is not found
@@ -577,10 +578,28 @@ module OMS
       def get_hostname
         return @@Hostname if !@@Hostname.nil?
 
+        # Issue:
+        #   When omsagent runs inside a container, gethostname returns the hostname of the container (random name)
+        #   not the actual machine hostname.
+        #   One way to solve this problem is to set the container hostname same as machine name, but this is not
+        #   possible when host-machine is a private VM inside a cluster.
+        # Solution:
+        #   Share/mount ‘/etc/hostname’ as '/var/opt/microsoft/omsagent/state/containername' with container and
+        #   omsagent will read hostname from shared file.
+
+        begin
+          if File.exist?(@@HostnameFilePath) && File.readable?(@@HostnameFilePath)
+            @@Hostname = File.read(@@HostnameFilePath).strip
+            return @@Hostname
+          end
+        rescue => error
+          OMS::Log.warn_once("Unable to read the hostname from #{@@HostnameFilePath}: #{error}")
+        end
+
         begin
           hostname = Socket.gethostname.split(".")[0]
         rescue => error
-          Log.error_once("Unable to get the Host Name: #{error}")
+          OMS::Log.error_once("Unable to get the Host Name: #{error}")
         else
           @@Hostname = hostname
         end
@@ -593,7 +612,7 @@ module OMS
         begin
           fqdn = Socket.gethostbyname(Socket.gethostname)[0]
         rescue => error
-          Log.error_once("Unable to get the FQDN: #{error}")
+          OMS::Log.error_once("Unable to get the FQDN: #{error}")
         else
           @@FQDN = fqdn
         end
@@ -610,7 +629,7 @@ module OMS
             begin
               Time.parse(installed_date)
             rescue ArgumentError
-              Log.error_once("Invalid install date: #{installed_date}")
+              OMS::Log.error_once("Invalid install date: #{installed_date}")
             else
               @@InstalledDate = installed_date
             end
@@ -737,7 +756,7 @@ module OMS
             # at this point we've given up up, we don't recognize
             # the encode, so return nil and log_warning for the 
             # record
-            Log.warn_once("Skipping due to failed encoding for #{record}: #{error}")
+            OMS::Log.warn_once("Skipping due to failed encoding for #{record}: #{error}")
           end
         end
         return msg
@@ -754,7 +773,7 @@ module OMS
         begin
           msg = JSON.dump(records)
         rescue JSON::GeneratorError => error
-          Log.warn_once("Unable to dump to JSON string. #{error}")
+          OMS::Log.warn_once("Unable to dump to JSON string. #{error}")
           begin
             # failed to dump, encode to utf-8, iso-8859-1 and try again
             # records is an array of hash
@@ -773,12 +792,12 @@ module OMS
           rescue => error
             # at this point we've given up, we don't recognize the encode,
             # so return nil and log_warning for the record
-            Log.warn_once("Skipping due to failed encoding for #{records}: #{error}")
+            OMS::Log.warn_once("Skipping due to failed encoding for #{records}: #{error}")
           end
         rescue => error
           # unexpected error when dumpping the records into JSON string
           # skip here and return nil
-          Log.warn_once("Skipping due to unexpected error for #{records}: #{error}")
+          OMS::Log.warn_once("Skipping due to unexpected error for #{records}: #{error}")
         end
 
         return msg
@@ -822,7 +841,7 @@ module OMS
           if res.code != "200"
             # Retry all failure error codes...
             res_summary = "(request-id=#{req["X-Request-ID"]}; class=#{res.class.name}; code=#{res.code}; message=#{res.message}; body=#{res.body};)"
-            Log.error_once("HTTP Error: #{res_summary}")
+            OMS::Log.error_once("HTTP Error: #{res_summary}")
             raise RetryRequestException, "HTTP error: #{res_summary}"
           end
 
@@ -860,7 +879,7 @@ module OMS
       begin
         addrinfos = Socket::getaddrinfo(hostname, "echo", Socket::AF_UNSPEC)
       rescue => error
-        Log.error_once("Unable to resolve the IP of '#{hostname}': #{error}")
+        OMS::Log.error_once("Unable to resolve the IP of '#{hostname}': #{error}")
         return nil
       end
 

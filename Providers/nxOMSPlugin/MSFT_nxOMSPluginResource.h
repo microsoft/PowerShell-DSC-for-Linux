@@ -21,6 +21,7 @@
 **
 ** Keys:
 **    Name
+**    WorkspaceID
 **
 **==============================================================================
 */
@@ -31,6 +32,7 @@ typedef struct _MSFT_nxOMSPluginResource /* extends OMI_BaseResource */
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSPluginResource properties */
     /*KEY*/ MI_ConstStringField Name;
+    /*KEY*/ MI_ConstStringField WorkspaceID;
     MSFT_nxOMSPlugin_ConstArrayRef Plugins;
 }
 MSFT_nxOMSPluginResource;
@@ -155,6 +157,38 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPluginResource_Clear_Name(
         0);
 }
 
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPluginResource_Set_WorkspaceID(
+    _Inout_ MSFT_nxOMSPluginResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPluginResource_SetPtr_WorkspaceID(
+    _Inout_ MSFT_nxOMSPluginResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSPluginResource_Clear_WorkspaceID(
+    _Inout_ MSFT_nxOMSPluginResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        1);
+}
+
 MI_INLINE MI_Result MI_CALL MSFT_nxOMSPluginResource_Set_Plugins(
     _Inout_ MSFT_nxOMSPluginResource* self,
     _In_reads_opt_(size) const MSFT_nxOMSPlugin * const * data,
@@ -165,7 +199,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPluginResource_Set_Plugins(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        1,
+        2,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         0);
@@ -181,7 +215,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPluginResource_SetPtr_Plugins(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        1,
+        2,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         MI_FLAG_BORROW);
@@ -192,7 +226,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPluginResource_Clear_Plugins(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        1);
+        2);
 }
 
 /*

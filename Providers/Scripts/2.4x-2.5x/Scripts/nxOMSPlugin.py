@@ -21,43 +21,45 @@ except ImportError:
     import md5
     md5const = md5.md5
 
-BLOCK_SIZE = 8192
 
-# [ClassVersion("1.0.0"), FriendlyName("nxOMSPlugin")]
-# class MSFT_nxOMSPlugin
-# {
-    # [Key] string PluginName;
-    # [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure; 
-# };
- 
-# [ClassVersion("1.0.0")] 
-# class MSFT_nxOMSPluginResource : OMI_BaseResource
-# {
-    # [key, EmbeddedInstance("MSFT_nxOMSPlugin") : ToSubclass] string Plugins[];
-# };
-    
 class IOMSAgent:
     def restart_oms_agent(self):
         pass
+
     
 class OMSAgentUtil(IOMSAgent):
-    def restart_oms_agent(self):
-        if os.system('sudo /opt/microsoft/omsagent/bin/service_control restart') == 0:
+    def restart_oms_agent(self, workspace_id_to_add):
+        cmd = 'sudo /opt/microsoft/omsagent/bin/service_control restart'
+        process_to_restart = 'omsagent'
+        if workspace_id_to_add is not None:
+            cmd += ' ' + workspace_id_to_add
+            process_to_restart += '-' + workspace_id_to_add
+        if os.system(cmd) is 0:
             return True
         else:
-            LG().Log('ERROR', 'Error restarting omsagent.')
+            LG().Log('ERROR', 'Error restarting ' + process_to_restart + '.')
             return False
+
 
 class TestOMSAgent(IOMSAgent):
     def restart_oms_agent(self):
         return True
-        
+
+
+BLOCK_SIZE = 8192        
 PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
-CONF_PATH = '/etc/opt/microsoft/omsagent/conf/omsagent.d/'
+ETC_OMSAGENT_DIR = '/etc/opt/microsoft/omsagent/'
+CONF_PATH_SUFFIX = 'conf/omsagent.d/'
+CONF_PATH = ETC_OMSAGENT_DIR + CONF_PATH_SUFFIX
 PLUGIN_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSPlugin/DSCResources/MSFT_nxOMSPluginResource/Plugins'
 OMS_ACTION = OMSAgentUtil()
+MULTI_HOMED = None
 
-def init_vars(Plugins):
+
+def init_vars(Plugins, WorkspaceID):
+    """
+    Initialize global variables for this resource
+    """
     if Plugins is not None:
         for plugin in Plugins:
             if 'value' in dir(plugin['PluginName']):
@@ -66,24 +68,40 @@ def init_vars(Plugins):
             if 'value' in dir(plugin['Ensure']):
                 plugin['Ensure'] = plugin['Ensure'].value
             plugin['Ensure'] = plugin['Ensure'].encode('ascii', 'ignore')
+    if WorkspaceID is not None:
+         WorkspaceID = WorkspaceID.encode('ascii', 'ignore')
+    else:
+         WorkspaceID = ''
 
-def Set_Marshall(Name, Plugins):
-    init_vars(Plugins)
-    return Set(Plugins)
+    global MULTI_HOMED
+    global CONF_PATH
+    mh_conf_dir = ETC_OMSAGENT_DIR + WorkspaceID + CONF_PATH_SUFFIX
+    MULTI_HOMED = os.path.isdir(mh_conf_dir)
+    if MULTI_HOMED and WorkspaceID: # only log this if WorkspaceID is not None or empty
+        LG().Log('INFO', 'OMSAgent is multi-homed and resource is updating workspace ' + WorkspaceID)
+        CONF_PATH = mh_conf_dir
 
-def Test_Marshall(Name, Plugins):
-    init_vars(Plugins)
+
+def Set_Marshall(Name, WorkspaceID, Plugins):
+    init_vars(Plugins, WorkspaceID)
+    return Set(WorkspaceID, Plugins)
+
+
+def Test_Marshall(Name, WorkspaceID, Plugins):
+    init_vars(Plugins, WorkspaceID)
     return Test(Plugins)
 
-def Get_Marshall(Name, Plugins):
+
+def Get_Marshall(Name, WorkspaceID, Plugins):
     arg_names = list(locals().keys())
-    init_vars(Plugins)
+    init_vars(Plugins, WorkspaceID)
     retval = 0
     local_plugins = Get(Plugins)
     for plugin in local_plugins:
         plugin['PluginName'] = protocol.MI_String(plugin['PluginName'])
         plugin['Ensure'] = protocol.MI_String(plugin['Ensure'])
     Plugins = protocol.MI_InstanceA(local_plugins)
+    WorkspaceID = protocol.MI_String(WorkspaceID)
     Name = protocol.MI_String(Name) 
     retd = {}
     ld = locals()
@@ -91,19 +109,23 @@ def Get_Marshall(Name, Plugins):
         retd[k] = ld[k]
     return retval, retd
 
-# for each plugin name plugin module directory
-# copy the plugin(s) and conf file  
-def Set(Plugins):
+
+def Set(WorkspaceID, Plugins):
+    """
+    For each plugin name plugin module directory, copy the plugin(s) and conf
+    files to the directory that the directory that omsagent uses to run
+    (PLUGIN_PATH and CONF_PATH)
+    """
     for plugin in Plugins:
         # test for the existence of plugin and conf subfolders in the current plugin
-        plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], "plugin")
-        conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], "conf")
+        plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], 'plugin')
+        conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], 'conf')
         # 4 cases here:
-        # Case 1: The IP has both plugin and conf directories (i.e. BlueStripe, ChangeTracking)
-        # Case 2: The IP has only plugin(s) (i.e. Common)
-        # Case 3: The IP has only conf (i.e. CustomLog)
+        # Case 1: The IP has both plugin and conf directories
+        # Case 2: The IP has only plugin(s)
+        # Case 3: The IP has only conf
         # Case 4: The IP does not have either plugin or conf directory - this is invalid!
-        if (os.path.isdir(plugin_dir) and os.path.isdir(conf_dir)):
+        if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # copy all files under conf and plugin
                 copy_all_files(plugin_dir, PLUGIN_PATH)
@@ -113,9 +135,9 @@ def Set(Plugins):
                 delete_all_files(conf_dir, CONF_PATH)
             else:
                 # log error Ensure value not expected
-                LG().Log('ERROR', "Ensure value: " + plugin['Ensure'] + " not expected")
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
-        elif (os.path.isdir(plugin_dir)):
+        elif os.path.isdir(plugin_dir):
             if plugin['Ensure'] == 'Present':
                 # copy all files under plugin
                 copy_all_files(plugin_dir, PLUGIN_PATH)
@@ -124,9 +146,9 @@ def Set(Plugins):
                 pass
             else:
                 # log error Ensure value not expected
-                LG().Log('ERROR', "Ensure value: " + plugin['Ensure'] + " not expected")
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
-        elif (os.path.isdir(conf_dir)):
+        elif os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # copy all file under conf
                 copy_all_files(conf_dir, CONF_PATH)
@@ -135,99 +157,114 @@ def Set(Plugins):
                 delete_all_files(conf_dir, CONF_PATH)
             else:
                 # log error Ensure value not expected
-                LG().Log('ERROR', "Ensure value: " + plugin['Ensure'] + " not expected")
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
         else:
             # log error - neither conf nor plugin directory was found in IP to set
-            LG().Log('ERROR', plugin['PluginName'] + " does not contain neither plugin nor conf")
+            LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
             return [-1]
         
-    # restart oms agent
-    if OMS_ACTION.restart_oms_agent():
+    # restart omsagent process to pick up new plugins and conf
+    if MULTI_HOMED:
+        workspace_id_to_add = WorkspaceID
+    else:
+        workspace_id_to_add = None
+    if OMS_ACTION.restart_oms_agent(workspace_id_to_add):
         return [0]
     else:
         return [-1]
 
-# for each IP plugin inside the plugin module directory
-# test for the existence of plugin(s) and conf file
+
 def Test(Plugins):
+    """
+    For each IP plugin inside the plugin module directory, test for the
+    existence of plugin(s) and conf files in the directory that omsagent
+    uses to run (PLUGIN_PATH and CONF_PATH)
+    """
     for plugin in Plugins:
         # test for the existence of plugin and conf subfolders in the current plugin
-        plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], "plugin")
-        conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], "conf")
+        plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], 'plugin')
+        conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], 'conf')
         # 4 cases here:
-        # Case 1: The IP has both plugin and conf directories (i.e. BlueStripe, ChangeTracking)
-        # Case 2: The IP has only plugin(s) (i.e. Common)
-        # Case 3: The IP has only conf (i.e. CustomLog)
+        # Case 1: The IP has both plugin and conf directories
+        # Case 2: The IP has only plugin(s)
+        # Case 3: The IP has only conf
         # Case 4: The IP does not have either plugin or conf directory - this is invalid!
-        if (os.path.isdir(plugin_dir) and os.path.isdir(conf_dir)):
+        if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
-                if (not check_all_files(plugin_dir, PLUGIN_PATH) or not check_all_files(conf_dir, CONF_PATH)):
+                if (not check_all_files(plugin_dir, PLUGIN_PATH)
+                        or not check_all_files(conf_dir, CONF_PATH)):
                     return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # check all conf files do NOT exist under conf directory
-                if (check_all_files(conf_dir, CONF_PATH)):
+                if check_all_files(conf_dir, CONF_PATH):
                     return [-1];
             else:
                 # log error Ensure value not expected
-                LG().Log('ERROR', "Ensure value: " + plugin['Ensure'] + " not expected")
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
-        elif (os.path.isdir(plugin_dir)):
+        elif os.path.isdir(plugin_dir):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
-                if (not check_all_files(plugin_dir, PLUGIN_PATH)):
+                if not check_all_files(plugin_dir, PLUGIN_PATH):
                     return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # NO-OP as we do *NOT* test for the absence of common plugins
                 pass
             else:
                 # log error Ensure value not expected
-                LG().Log('ERROR', "Ensure value: " + plugin['Ensure'] + " not expected")
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
-        elif (os.path.isdir(conf_dir)):
+        elif os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
-                if (not check_all_files(conf_dir, PLUGIN_PATH)):
+                if not check_all_files(conf_dir, PLUGIN_PATH):
                     return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # check all conf files do NOT exist under conf directory
-                if (check_all_files(conf_dir, CONF_PATH)):
+                if check_all_files(conf_dir, CONF_PATH):
                     return [-1];
             else:
                 # log error Ensure value not expected
-                LG().Log('ERROR', "Ensure value: " + plugin['Ensure'] + " not expected")
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
         else:
             # log error - neither conf nor plugin directory was found in IP
-            LG().Log('ERROR', plugin['PluginName'] + " does not contain neither plugin nor conf")
+            LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
             return [-1]
         
     # files are all present and hash matches
     return [0]
 
-# for each plugin and conf in the module, check for the existence of those 
-# plugins and conf with what exists in PLUGIN_PATH and CONF_PATH
+
 def Get(Plugins):
+    """
+    For each plugin and conf in the module, check for its existence against
+    what exists in the directory that omsagent uses to run (PLUGIN_PATH and
+    CONF_PATH)
+    """
     disk_plugins = []
     module_plugins = get_immediate_subdirectories(PLUGIN_MODULE_PATH)
     for plugin_name in module_plugins:
-        plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin_name, "plugin")
-        conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin_name, "conf")
-        if (os.path.isdir(plugin_dir) and os.path.isdir(conf_dir)):
+        plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin_name, 'plugin')
+        conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin_name, 'conf')
+        if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             # Test for the existence of BOTH the plugin(s) and conf files
-            if (check_all_files(plugin_dir, PLUGIN_PATH) and check_all_files(conf_dir, CONF_PATH)):
+            if (check_all_files(plugin_dir, PLUGIN_PATH)
+                    and check_all_files(conf_dir, CONF_PATH)):
                 disk_plugins.append({'PluginName': plugin_name, 'Ensure': 'Present'})
-        elif (os.path.isdir(plugin_dir)):
+        elif os.path.isdir(plugin_dir):
             # Test for the existence of ONLY the plugin(s)
-            if (check_all_files(plugin_dir, PLUGIN_PATH)):
+            if check_all_files(plugin_dir, PLUGIN_PATH):
                 disk_plugins.append({'PluginName': plugin_name, 'Ensure': 'Present'})
-        elif (os.path.isdir(conf_dir)):
+        elif os.path.isdir(conf_dir):
             # Test for the existence of ONLY the conf
-            if (check_all_files(conf_dir, CONF_PATH)):
+            if check_all_files(conf_dir, CONF_PATH):
                 disk_plugins.append({'PluginName': plugin_name, 'Ensure': 'Present'})
     disk_plugins.sort()
     return disk_plugins
+
     
 def get_immediate_subdirectories(a_dir):
     try:
@@ -235,30 +272,36 @@ def get_immediate_subdirectories(a_dir):
                 if os.path.isdir(os.path.join(a_dir, name))]
         return subdirectories
     except:
-        LG().Log('ERROR', 'get_immediate_subdirectories failed for ' + a_dir)
+        LG().Log('ERROR', 'get_immediate_subdirectories failed for ' + a_dir
+                          + ' with error ' + str(sys.exc_info()[0]))
         return []
+
             
 def copy_all_files(src, dest):
     try:
         src_files = os.listdir(src)
         for file_name in src_files:
             full_file_name = os.path.join(src, file_name)
-            if (os.path.isfile(full_file_name)):
+            if os.path.isfile(full_file_name):
                 shutil.copy(full_file_name, dest)
     except:
-        LG().Log('ERROR', 'copy_all_files failed for src: ' + src + ' dest: ' + dest)
+        LG().Log('ERROR', 'copy_all_files failed for src: ' + src + ' dest: '
+                          + dest + ' with error ' + str(sys.exc_info()[0]))
         return False
+
             
 def delete_all_files(src, dest):
     try:
         src_files = os.listdir(src)
         for file_name in src_files:
             full_file_name = os.path.join(dest, file_name)
-            if (os.path.isfile(full_file_name)):
+            if os.path.isfile(full_file_name):
                 os.remove(full_file_name)
     except:
-        LG().Log('ERROR', 'delete_all_files failed for src: ' + src + ' dest: ' + dest)
+        LG().Log('ERROR', 'delete_all_files failed for src: ' + src + ' dest: '
+                          + dest + ' with error ' + str(sys.exc_info()[0]))
         return False
+
 
 def check_all_files(src, dest):
     try:
@@ -267,14 +310,16 @@ def check_all_files(src, dest):
             full_src_file = os.path.join(src, file_name)
             full_dest_file = os.path.join(dest, file_name)
             if os.path.isfile(full_dest_file):
-                if CompareFiles(full_dest_file, full_src_file, "md5") == -1:
+                if CompareFiles(full_dest_file, full_src_file, 'md5') == -1:
                     return False
             else:
                 return False
         return True
     except:
-        LG().Log('ERROR', 'check_all_files failed for src: ' + src + ' dest: ' + dest)
+        LG().Log('ERROR', 'check_all_files failed for src: ' + src + ' dest: '
+                          + dest + ' with error ' + str(sys.exc_info()[0]))
         return False
+
 
 def CompareFiles(DestinationPath, SourcePath, Checksum):
     """
@@ -288,22 +333,22 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
     stat_src = StatFile(SourcePath)
     if stat_src.st_size != stat_dest.st_size:
         return -1
-    if Checksum == "md5":
+    if Checksum == 'md5':
         src_error = None
         dest_error = None
         src_hash = md5const()
         dest_hash = md5const()
         src_block = 'loopme'
         dest_block = 'loopme'
-        src_file,src_error = opened_bin_w_error(SourcePath, 'rb')
+        src_file, src_error = opened_bin_w_error(SourcePath, 'rb')
         if src_error:
-            Print("Exception opening source file " + SourcePath + " Error : " + str(src_error), file=sys.stderr)
-            LG().Log('ERROR', "Exception opening source file " + SourcePath + " Error : " + str(src_error))
+            print_error('Exception opening source file ' + SourcePath
+                        + ' Error : ' + str(src_error))
             return -1
         dest_file, dest_error = opened_bin_w_error(DestinationPath, 'rb')
         if dest_error:
-            Print("Exception opening destination file " + DestinationPath + " Error : " + str(dest_error), file=sys.stderr)
-            LG().Log('ERROR', "Exception opening destination file " + DestinationPath + " Error : " + str(dest_error))
+            print_error('Exception opening destination file ' + DestinationPath
+                        + ' Error : ' + str(dest_error))
             src_file.close()
             return -1
         while src_block != '' and dest_block != '':
@@ -319,16 +364,17 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
             src_file.close()
             dest_file.close()
             return 0  
-    elif Checksum == "ctime":
+    elif Checksum == 'ctime':
         if stat_src.st_ctime != stat_dest.st_ctime:
             return -1
         else:
             return 0
-    elif Checksum == "mtime":
+    elif Checksum == 'mtime':
         if stat_src.st_mtime != stat_dest.st_mtime:
             return -1
         else:
             return 0
+
 
 def StatFile(path):
     """
@@ -339,19 +385,31 @@ def StatFile(path):
     try:
         d = os.stat(path)
     except OSError, error:
-        Print("Exception stating file " + path  + " Error: " + str(error), file=sys.stderr)
-        LG().Log('ERROR', "Exception stating file " + path  + " Error: " + str(error))
+        print_error('Exception stating file ' + path  + ' Error: '
+                    + str(error))
     except IOError, error:
-        Print("Exception stating file " + path  + " Error: " + str(error), file=sys.stderr)
-        LG().Log('ERROR', "Exception stating file " + path  + " Error: " + str(error))
+        print_error('Exception stating file ' + path  + ' Error: '
+                    + str(error))
     return d
-    
-def opened_bin_w_error(filename, mode="rb"):
+
+
+def print_error(message):
+    """
+    Print the message in both the DSC debugging file and the DSC LG Log
+    """
+    try:
+        Print(message, file=sys.stderr)
+        LG().Log('ERROR', message)
+    except:
+        pass
+
+
+def opened_bin_w_error(filename, mode='rb'):
     """
     This context ensures the file is closed.
     """
     try:
         f = open(filename, mode)
-    except IOError, err:
-        return None, err
+    except IOError, error:
+        return None, error
     return f, None
