@@ -67,7 +67,7 @@ if optionsValid == False:
 
 omi_bindir = "<CONFIG_BINDIR>"
 omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
-dsc_sysconfdir = omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>"
+dsc_sysconfdir = omi_sysconfdir + "<CONFIG_SYSCONFDIR_DSC>"
 dsc_reportdir = dsc_sysconfdir + "/InventoryReports"
 omicli_path = omi_bindir + "/omicli"
 temp_report_path = dsc_sysconfdir + "/configuration/Inventory.xml.temp"
@@ -99,10 +99,13 @@ if len(dsc_sysconfdir) < 10:
     sys.exit(1)
 
 # Acquire inventory file lock
-inventory_lock = open(dsc_sysconfdir + "/inventory_lock", "w+")
+filehandle = os.open(dsc_sysconfdir + "/inventory_lock", os.O_WRONLY | os.O_CREAT , 0o644)
+inventory_lock = os.fdopen(filehandle, 'w')
+
+
+# inventory_lock = open(dsc_sysconfdir + "/inventory_lock", "w+", 0o600)
 fcntl.flock(inventory_lock, fcntl.LOCK_EX)
 
-os.system("touch " + temp_report_path)
 os.system("rm -f " + dsc_reportdir + "/*")
 
 p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -126,9 +129,9 @@ for f in reportFiles:
 
 final_xml_report = final_xml_report + "".join(values) + "</VALUE.ARRAY></PROPERTY.ARRAY></INSTANCE>"
 
-f = open(temp_report_path, "w")
-f.write(final_xml_report)
-f.close()
+with os.fdopen(os.open(temp_report_path, os.O_WRONLY | os.O_CREAT, 0o644), 'w') as filehandle:
+  filehandle.write(final_xml_report)
+
 os.system("rm -f " + dsc_reportdir + "/*")
 shutil.move(temp_report_path, report_path)
 
