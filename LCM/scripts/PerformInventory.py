@@ -65,9 +65,9 @@ if optionsValid == False:
    usage()
    sys.exit(1)
 
-omi_bindir = "/opt/omi/bin"
-omi_sysconfdir = "/etc/opt/omi/conf"
-dsc_sysconfdir = omi_sysconfdir + "/dsc"
+omi_bindir = "<CONFIG_BINDIR>"
+omi_sysconfdir = "<CONFIG_SYSCONFIGDIR>"
+dsc_sysconfdir = omi_sysconfdir + "CONFIG_SYSCONFIGDIR_DSC"
 dsc_reportdir = dsc_sysconfdir + "/InventoryReports"
 omicli_path = omi_bindir + "/omicli"
 temp_report_path = dsc_sysconfdir + "/configuration/Inventory.xml.temp"
@@ -79,7 +79,7 @@ if "outxml" in Variables:
 parameters = []
 parameters.append(omicli_path)
 parameters.append("iv")
-parameters.append("root/Microsoft/DesiredStateConfiguration")
+parameters.append("<DSC_NAMESAPCE>")
 parameters.append("{")
 parameters.append("MSFT_DSCLocalConfigurationManager")
 parameters.append("}")
