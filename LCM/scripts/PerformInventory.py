@@ -101,9 +101,6 @@ if len(dsc_sysconfdir) < 10:
 # Acquire inventory file lock
 filehandle = os.open(dsc_sysconfdir + "/inventory_lock", os.O_WRONLY | os.O_CREAT , 0o644)
 inventory_lock = os.fdopen(filehandle, 'w')
-
-
-# inventory_lock = open(dsc_sysconfdir + "/inventory_lock", "w+", 0o600)
 fcntl.flock(inventory_lock, fcntl.LOCK_EX)
 
 os.system("rm -f " + dsc_reportdir + "/*")
