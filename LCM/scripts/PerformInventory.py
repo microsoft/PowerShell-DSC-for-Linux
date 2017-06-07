@@ -67,7 +67,7 @@ if optionsValid == False:
 
 omi_bindir = "<CONFIG_BINDIR>"
 omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
-dsc_sysconfdir = omi_sysconfdir + "<CONFIG_SYSCONFDIR_DSC>"
+dsc_sysconfdir = omi_sysconfdir + "/<CONFIG_SYSCONFDIR_DSC>"
 dsc_reportdir = dsc_sysconfdir + "/InventoryReports"
 omicli_path = omi_bindir + "/omicli"
 temp_report_path = dsc_sysconfdir + "/configuration/Inventory.xml.temp"
