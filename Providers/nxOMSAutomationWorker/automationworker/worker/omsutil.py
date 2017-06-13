@@ -79,6 +79,16 @@ def initialize():
     else:
         print "Successfully set owners of certificate folder."
 
+    proxy_paths = ["/etc/opt/microsoft/omsagent/conf/proxy.conf", "/etc/opt/microsoft/omsagent/proxy.conf"]
+    for path in proxy_paths:
+        if os.path.exists(path):
+            process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+r", path])
+
+            if process.returncode != 0:
+                raise Exception("Unable set read permission to proxy configuration file. Error: " + str(error))
+            else:
+                print "Successfully set read permission to proxy configuration file."
+
 
 def dmidecode():
     """Returns the content of dmidecode."""
