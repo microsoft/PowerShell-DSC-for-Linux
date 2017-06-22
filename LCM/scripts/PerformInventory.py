@@ -100,9 +100,15 @@ if len(dsc_sysconfdir) < 10:
     print("Error: Something has gone horribly wrong with the directory paths.")
     sys.exit(1)
 
+# If inventory lock files already exists update its permissions.  
+if os.path.isfile(inventorylock_path):
+    os.chmod(inventorylock_path , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+
+# open the inventory lock file, this also creates a file if it does not exist so we are using 644 permissions 
+filehandle = os.open(dsc_sysconfdir + "/inventory_lock", os.O_WRONLY | os.O_CREAT , 0o644)
+inventory_lock = os.fdopen(filehandle, 'w')
+
 # Acquire inventory file lock
-inventory_lock = open(inventorylock_path, "w+")
-os.chmod(inventorylock_path , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 fcntl.flock(inventory_lock, fcntl.LOCK_EX)
 
 os.system("rm -f " + dsc_reportdir + "/*")
