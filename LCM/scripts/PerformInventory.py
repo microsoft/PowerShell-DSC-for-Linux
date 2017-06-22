@@ -105,7 +105,7 @@ if os.path.isfile(inventorylock_path):
     os.chmod(inventorylock_path , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
 # open the inventory lock file, this also creates a file if it does not exist so we are using 644 permissions 
-filehandle = os.open(dsc_sysconfdir + "/inventory_lock", os.O_WRONLY | os.O_CREAT , 0o644)
+filehandle = os.open(inventorylock_path, os.O_WRONLY | os.O_CREAT , 0o644)
 inventory_lock = os.fdopen(filehandle, 'w')
 
 # Acquire inventory file lock
