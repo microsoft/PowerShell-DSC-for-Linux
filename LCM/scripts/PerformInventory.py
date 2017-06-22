@@ -3,6 +3,7 @@ import fileinput
 import sys
 import subprocess
 import os
+import stat
 import fcntl
 import shutil
 from xml.dom.minidom import parse
@@ -72,6 +73,7 @@ dsc_reportdir = dsc_sysconfdir + "/InventoryReports"
 omicli_path = omi_bindir + "/omicli"
 temp_report_path = dsc_sysconfdir + "/configuration/Inventory.xml.temp"
 report_path = dsc_sysconfdir + "/configuration/Inventory.xml"
+inventorylock_path = dsc_sysconfdir + "/inventory_lock"
 
 if "outxml" in Variables:
     report_path = Variables["outxml"]
@@ -99,8 +101,8 @@ if len(dsc_sysconfdir) < 10:
     sys.exit(1)
 
 # Acquire inventory file lock
-filehandle = os.open(dsc_sysconfdir + "/inventory_lock", os.O_WRONLY | os.O_CREAT , 0o644)
-inventory_lock = os.fdopen(filehandle, 'w')
+inventory_lock = open(inventorylock_path, "w+")
+os.chmod(inventorylock_path , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 fcntl.flock(inventory_lock, fcntl.LOCK_EX)
 
 os.system("rm -f " + dsc_reportdir + "/*")
@@ -134,5 +136,6 @@ shutil.move(temp_report_path, report_path)
 
 # Release inventory file lock
 fcntl.flock(inventory_lock, fcntl.LOCK_UN)
+inventory_lock.close()
 
 sys.exit(retval)
