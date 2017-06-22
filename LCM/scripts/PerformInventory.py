@@ -3,9 +3,9 @@ import fileinput
 import sys
 import subprocess
 import os
-import stat
 import fcntl
 import shutil
+import stat
 from xml.dom.minidom import parse
 
 def usage():
