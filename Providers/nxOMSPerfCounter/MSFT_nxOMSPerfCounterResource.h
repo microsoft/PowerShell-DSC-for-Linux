@@ -21,7 +21,6 @@
 **
 ** Keys:
 **    Name
-**    WorkspaceID
 **
 **==============================================================================
 */
@@ -32,7 +31,6 @@ typedef struct _MSFT_nxOMSPerfCounterResource /* extends OMI_BaseResource */
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSPerfCounterResource properties */
     /*KEY*/ MI_ConstStringField Name;
-    /*KEY*/ MI_ConstStringField WorkspaceID;
     MI_ConstUint16Field HeartbeatIntervalSeconds;
     MSFT_nxOMSPerfCounterObject_ConstArrayRef PerfCounterObject;
 }
@@ -158,38 +156,6 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Clear_Name(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_WorkspaceID(
-    _Inout_ MSFT_nxOMSPerfCounterResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_SetPtr_WorkspaceID(
-    _Inout_ MSFT_nxOMSPerfCounterResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Clear_WorkspaceID(
-    _Inout_ MSFT_nxOMSPerfCounterResource* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        1);
-}
-
 MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_HeartbeatIntervalSeconds(
     _Inout_ MSFT_nxOMSPerfCounterResource* self,
     _In_ MI_Uint16 x)
@@ -216,7 +182,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Set_PerfCounterObject(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        3,
+        2,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         0);
@@ -232,7 +198,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_SetPtr_PerfCounterObje
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        3,
+        2,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         MI_FLAG_BORROW);
@@ -243,7 +209,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSPerfCounterResource_Clear_PerfCounterObjec
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        3);
+        2);
 }
 
 /*
