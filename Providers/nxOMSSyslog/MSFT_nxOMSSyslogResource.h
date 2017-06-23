@@ -21,7 +21,6 @@
 **
 ** Keys:
 **    SyslogSource
-**    WorkspaceID
 **
 **==============================================================================
 */
@@ -32,7 +31,6 @@ typedef struct _MSFT_nxOMSSyslogResource /* extends OMI_BaseResource */
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSSyslogResource properties */
     /*KEY*/ MSFT_nxOMSSyslogSource_ConstArrayRef SyslogSource;
-    /*KEY*/ MI_ConstStringField WorkspaceID;
 }
 MSFT_nxOMSSyslogResource;
 
@@ -162,38 +160,6 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSSyslogResource_Clear_SyslogSource(
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSSyslogResource_Set_WorkspaceID(
-    _Inout_ MSFT_nxOMSSyslogResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSSyslogResource_SetPtr_WorkspaceID(
-    _Inout_ MSFT_nxOMSSyslogResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSSyslogResource_Clear_WorkspaceID(
-    _Inout_ MSFT_nxOMSSyslogResource* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        1);
 }
 
 /*
