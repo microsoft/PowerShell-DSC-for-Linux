@@ -248,6 +248,8 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
 chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
 chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
+
+# If this is ever changed/removed, coordinate with nxOMSAuditdPlugin author/maintainer(s)
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 
 # Set up the modules
