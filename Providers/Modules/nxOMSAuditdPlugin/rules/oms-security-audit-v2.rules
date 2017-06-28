@@ -3,11 +3,11 @@
 
 # Some file and directory watches
 -w /var/log/audit/ -p wxa -k audittampering
--w /etc/audit/ -p xwa -k audittampering
+-w /etc/audit/ -p wxa -k audittampering
 -w /etc/passwd -p wxa -k usergroup
 -w /etc/group -p wxa -k usergroup
 -w /etc/pam.d/ -p wxa -k pam
 
 # Monitor certain syscalls.
--a exit,always -F arch=b32 -S execve
--a exit,always -F arch=b64 -S execve
+-a always,exit -F arch=b32 -S execve
+-a always,exit -F arch=b64 -S execve
