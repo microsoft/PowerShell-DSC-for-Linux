@@ -202,7 +202,7 @@ endif
 
 nxOMSAutomationWorker:
 	rm -rf output/staging; \
-	VERSION="1.5.6.0"; \
+	VERSION="1.5.7.0"; \
 	PROVIDERS="nxOMSAutomationWorker"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
