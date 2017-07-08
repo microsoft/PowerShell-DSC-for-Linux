@@ -41,11 +41,20 @@ def initialize():
     if os.getuid() == nxautomation_uid:
         omsagent_group = grp.getgrnam(GROUPNAME_OMSAGENT)
         if USERNAME_NXAUTOMATION not in omsagent_group.gr_mem:
+            print_success_message = False
             process, output, error = linuxutil.popen_communicate(["sudo", "/usr/sbin/usermod", "-g", "nxautomation",
                                                                   "-a", "-G", "omsagent,omiusers", "nxautomation"])
             if process.returncode != 0:
-                raise Exception("Unable to add nxautomation to omsagent group. Error: " + str(error))
+                # try again with -A instead of -a for SUSE Linux
+                process, output, error = linuxutil.popen_communicate(["sudo", "/usr/sbin/usermod", "-g", "nxautomation",
+                                                                      "-A", "omsagent,omiusers", "nxautomation"])
+                if process.returncode != 0:
+                    raise Exception("Unable to add nxautomation to omsagent group. Error: " + str(error))
+                else:
+                    print_success_message = True
             else:
+                print_success_message = True
+            if print_success_message:
                 print "Successfully added omsagent secondary group to nxautomation user."
 
     # change permissions for the keyring.gpg
