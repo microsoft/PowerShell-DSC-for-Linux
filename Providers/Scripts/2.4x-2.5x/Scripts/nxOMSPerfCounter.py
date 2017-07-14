@@ -249,9 +249,9 @@ def UpdateOMSAgentConf(WorkspaceID, HeartbeatIntervalSeconds, PerfCounterObject)
     global oms_restart_cmd
     process_to_restart = 'omsagent'
     if multi_homed:
-        restart_cmd += ' ' + WorkspaceID
+        oms_restart_cmd += ' ' + WorkspaceID
         process_to_restart += '-' + WorkspaceID
-    if os.system(restart_cmd) == 0:
+    if os.system(oms_restart_cmd) == 0:
         LG().Log('INFO', 'Successfully restarted ' + process_to_restart + '.')
     else:
         LG().Log('ERROR', 'Error restarting ' + process_to_restart + '.')
