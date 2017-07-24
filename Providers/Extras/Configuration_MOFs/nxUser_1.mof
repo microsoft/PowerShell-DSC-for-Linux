@@ -11,7 +11,7 @@ instance of MSFT_nxUserResource
 	FullName = "Dr. Test User";
 	
 	ResourceId = "[MSFT_nxUserResource]Test";
-	ModuleName = "PSDesiredStateConfiguration";
+	ModuleName = "nx";
 	ModuleVersion = "1.0";
 	
 	
