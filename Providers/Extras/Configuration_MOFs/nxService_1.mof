@@ -6,7 +6,7 @@ instance of MSFT_nxServiceResource
 	State = "Stopped";
 	
 	ResourceId = "[MSFT_nxServiceResource]TestService";
-	ModuleName = "PSDesiredStateConfiguration";
+	ModuleName = "nx";
 	ModuleVersion = "1.0";
 
 };

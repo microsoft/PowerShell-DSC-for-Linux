@@ -12,7 +12,7 @@ instance of MSFT_nxScriptResource
 	User = "johnkord";
 	Group = "johnkord";
 	ResourceId = "[MSFT_nxScriptResource]Script1";
-	ModuleName = "PSDesiredStateConfiguration";
+	ModuleName = "nx";
 	ModuleVersion = "1.0";
 	
 };

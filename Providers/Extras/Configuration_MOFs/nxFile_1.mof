@@ -8,7 +8,7 @@ instance of MSFT_nxFileResource
 	Group = "root";
 	Mode = "644";
 	ResourceId = "[MSFT_nxFileResource]File1";
-	ModuleName = "PSDesiredStateConfiguration";
+	ModuleName = "nx";
 	ModuleVersion = "1.0";
 	
 	
@@ -20,7 +20,7 @@ instance of MSFT_nxFileResource
 	Ensure = "Present";
 	Type = "Directory";
 	ResourceId = "[MSFT_nxFileResource]Dir1";
-	ModuleName = "PSDesiredStateConfiguration";
+	ModuleName = "nx";
 	ModuleVersion = "1.0";
 	
 	
@@ -37,7 +37,7 @@ instance of MSFT_nxFileResource
 	Mode = "744";
 	Recurse = True;
 	ResourceId = "[MSFT_nxFileResource]Dir2";
-	ModuleName = "PSDesiredStateConfiguration";
+	ModuleName = "nx";
 	ModuleVersion = "1.0";
 	
 	

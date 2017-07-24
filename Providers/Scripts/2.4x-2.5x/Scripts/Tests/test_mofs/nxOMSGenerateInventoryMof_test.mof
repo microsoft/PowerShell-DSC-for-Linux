@@ -12,7 +12,7 @@ instance of MSFT_nxOMSGenerateInventoryMofInstance as $MSFT_nxOMSGenerateInvento
      "MaxContentsReturnable=0",
      "MaxOutputSize = 5000000",
      "ResourceId = \"[MSFT_nxFileInventoryResource]Inventory\"",
-     "ModuleName = \"PSDesiredStateConfiguration\"",
+     "ModuleName = \"nxFileInventory\"",
      "ModuleVersion = \"1.0\""
   };
 };
