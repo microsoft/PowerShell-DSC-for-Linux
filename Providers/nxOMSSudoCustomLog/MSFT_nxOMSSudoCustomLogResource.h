@@ -21,6 +21,7 @@
 **
 ** Keys:
 **    Name
+**    WorkspaceID
 **
 **==============================================================================
 */
@@ -31,6 +32,7 @@ typedef struct _MSFT_nxOMSSudoCustomLogResource /* extends OMI_BaseResource */
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSSudoCustomLogResource properties */
     /*KEY*/ MI_ConstStringField Name;
+    /*KEY*/ MI_ConstStringField WorkspaceID;
     MI_ConstBooleanField EnableCustomLogConfiguration;
     MI_ConstStringField Ensure;
     MSFT_nxOMSSudoCustomLogObject_ConstArrayRef CustomLogObjects;
@@ -157,6 +159,38 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Clear_Name(
         0);
 }
 
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Set_WorkspaceID(
+    _Inout_ MSFT_nxOMSSudoCustomLogResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_SetPtr_WorkspaceID(
+    _Inout_ MSFT_nxOMSSudoCustomLogResource* self,
+    _In_z_ const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        1,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Clear_WorkspaceID(
+    _Inout_ MSFT_nxOMSSudoCustomLogResource* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        1);
+}
+
 MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Set_EnableCustomLogConfiguration(
     _Inout_ MSFT_nxOMSSudoCustomLogResource* self,
     _In_ MI_Boolean x)
@@ -179,7 +213,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Set_Ensure(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        2,
+        3,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -191,7 +225,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_SetPtr_Ensure(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        2,
+        3,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -202,7 +236,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Clear_Ensure(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        2);
+        3);
 }
 
 MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Set_CustomLogObjects(
@@ -215,7 +249,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Set_CustomLogObjects
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        3,
+        4,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         0);
@@ -231,7 +265,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_SetPtr_CustomLogObje
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        3,
+        4,
         (MI_Value*)&arr,
         MI_INSTANCEA,
         MI_FLAG_BORROW);
@@ -242,7 +276,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSSudoCustomLogResource_Clear_CustomLogObjec
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        3);
+        4);
 }
 
 /*

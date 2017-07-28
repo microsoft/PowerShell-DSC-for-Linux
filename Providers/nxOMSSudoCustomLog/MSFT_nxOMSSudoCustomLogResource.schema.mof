@@ -9,6 +9,7 @@ class MSFT_nxOMSSudoCustomLogObject
 class MSFT_nxOMSSudoCustomLogResource : OMI_BaseResource
 {
     [key] string Name;
+    [key] string WorkspaceID;
     [write] boolean EnableCustomLogConfiguration;
     [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure; 
     [write, EmbeddedInstance("MSFT_nxOMSSudoCustomLogObject") : ToSubclass] string CustomLogObjects[];

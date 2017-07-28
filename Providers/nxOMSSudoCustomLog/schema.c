@@ -954,6 +954,38 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSSudoCustomLogResource_Name_prop =
     NULL,
 };
 
+static MI_CONST MI_Boolean MSFT_nxOMSSudoCustomLogResource_WorkspaceID_Key_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxOMSSudoCustomLogResource_WorkspaceID_Key_qual =
+{
+    MI_T("Key"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxOMSSudoCustomLogResource_WorkspaceID_Key_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSSudoCustomLogResource_WorkspaceID_quals[] =
+{
+    &MSFT_nxOMSSudoCustomLogResource_WorkspaceID_Key_qual,
+};
+
+/* property MSFT_nxOMSSudoCustomLogResource.WorkspaceID */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSSudoCustomLogResource_WorkspaceID_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
+    0x0077640B, /* code */
+    MI_T("WorkspaceID"), /* name */
+    MSFT_nxOMSSudoCustomLogResource_WorkspaceID_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSSudoCustomLogResource_WorkspaceID_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxOMSSudoCustomLogResource, WorkspaceID), /* offset */
+    MI_T("MSFT_nxOMSSudoCustomLogResource"), /* origin */
+    MI_T("MSFT_nxOMSSudoCustomLogResource"), /* propagator */
+    NULL,
+};
+
 static MI_CONST MI_Boolean MSFT_nxOMSSudoCustomLogResource_EnableCustomLogConfiguration_Write_qual_value = 1;
 
 static MI_CONST MI_Qualifier MSFT_nxOMSSudoCustomLogResource_EnableCustomLogConfiguration_Write_qual =
@@ -1106,6 +1138,7 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSSudoCustomLogResource_CustomLogObjects
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSSudoCustomLogResource_props[] =
 {
     &MSFT_nxOMSSudoCustomLogResource_Name_prop,
+    &MSFT_nxOMSSudoCustomLogResource_WorkspaceID_prop,
     &MSFT_nxOMSSudoCustomLogResource_EnableCustomLogConfiguration_prop,
     &MSFT_nxOMSSudoCustomLogResource_Ensure_prop,
     &MSFT_nxOMSSudoCustomLogResource_CustomLogObjects_prop,
