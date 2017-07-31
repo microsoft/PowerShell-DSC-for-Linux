@@ -35,13 +35,20 @@ def safe_loop(func):
         while routine_loop:
             try:
                 func(*args, **kwargs)
-            except (JrdsAuthorizationException, JrdsSandboxTerminated, Exception):
-                tracer.log_sandbox_safe_loop_terminal_exception(traceback.format_exc())
+            except (JrdsAuthorizationException,
+                    JrdsSandboxTerminated,
+                    InvalidFilePermissionException,
+                    FileNotFoundException,
+                    Exception):
+                stack = traceback.format_exc()
+                tracer.log_sandbox_safe_loop_terminal_exception(stack)
+                sys.stderr.write(stack) # writing exception to stderr to be traced by the worker
+                sys.stderr.flush()
                 time.sleep(1)  # allow the trace to make it to stdout (since traces are background threads)
-
                 # this will work as long as all threads are daemon
                 # daemon threads are only supported in 2.6+
                 sys.exit(1)
+
             time.sleep(configuration.get_jrds_get_job_actions_polling_freq())
 
     return decorated_func
@@ -61,6 +68,25 @@ class Sandbox:
                                                 configuration.get_verify_certificates())
         http_client = http_client_factory.create_http_client(sys.version_info)
         self.jrds_client = JRDSClient(http_client)
+
+    @staticmethod
+    def assert_environment_prerequisite():
+        jrds_cert_path = configuration.get_jrds_cert_path()
+        if util.assert_file_read_permission(jrds_cert_path) is False:
+            raise InvalidFilePermissionException(jrds_cert_path)
+
+        jrds_key_path = configuration.get_jrds_key_path()
+        if util.assert_file_read_permission(jrds_key_path) is False:
+            raise InvalidFilePermissionException(jrds_key_path)
+
+        worker_conf_path = configuration.get_worker_configuration_file_path()
+        if util.assert_file_read_permission(worker_conf_path) is False:
+            raise InvalidFilePermissionException(worker_conf_path)
+
+        proxy_conf_path = configuration.get_proxy_configuration_path()
+        if proxy_conf_path != configuration.DEFAULT_PROXY_CONFIGURATION_PATH and os.path.isfile(proxy_conf_path):
+            if util.assert_file_read_permission(proxy_conf_path) is False:
+                raise InvalidFilePermissionException(proxy_conf_path)
 
     @staticmethod
     def stop_tracking_terminated_jobs():
@@ -83,11 +109,7 @@ class Sandbox:
 
     @safe_loop
     def routine(self):
-        # die if pre-reqs are not met
-        if os.path.exists(configuration.get_jrds_cert_path()) is False or \
-           os.path.exists(configuration.get_jrds_key_path()) is False or \
-           os.path.exists(configuration.get_worker_configuration_file_path()) is False:
-            raise SystemExit()
+        self.assert_environment_prerequisite()
 
         # clean up finished jobs
         self.stop_tracking_terminated_jobs()

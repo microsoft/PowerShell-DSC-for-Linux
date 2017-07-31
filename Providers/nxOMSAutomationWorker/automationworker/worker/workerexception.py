@@ -2,7 +2,18 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-"""Worker exceptions."""
+"""Worker specific exceptions.
+
+For backward compatibility, do not use super(CustomException, self).__init__() when instantiating custom exception.
+This is not supported in 2.4 with 'old style' classes (not inheriting 'object').
+
+Model to follow :
+
+class CustomException(Exception):
+    def __init__(self, path):
+        Exception.__init__(self, "Custom exception messsage. [path=" + str(path) + "]")
+
+"""
 
 
 class JrdsSandboxTerminated(Exception):
@@ -53,6 +64,11 @@ class InvalidRunbookSignature(Exception):
             self.message = msg
 
 
+class GPGKeyringNotConfigured(Exception):
+    def __init__(self):
+        self.message = "Signature validation failed. No GPG keyring was found in the configuration."
+
+
 class AutomationAssetNotFound(Exception):
     def __init__(self, msg=None):
         if msg is None:
@@ -67,3 +83,13 @@ class AutomationAssetException(Exception):
             self.message = "An unknown error occurred while performing the operation."
         else:
             self.message = msg
+
+
+class InvalidFilePermissionException(Exception):
+    def __init__(self, path):
+        Exception.__init__(self, "Invalid permission. [path=" + str(path) + "]")
+
+
+class FileNotFoundException(Exception):
+    def __init__(self, path):
+        Exception.__init__(self, "File not found. [path=" + str(path) + "]")

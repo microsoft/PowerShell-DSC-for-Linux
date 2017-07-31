@@ -15,6 +15,7 @@ import sys
 import time
 
 import pwd
+import traceback
 
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
@@ -82,11 +83,6 @@ def Set_Marshall(ResourceSettings):
             os.makedirs(WORKING_DIRECTORY_PATH, PERMISSION_LEVEL_0770)
 
         # if the directory does not have permision level 770, reset the permission level
-        if os.stat(WORKING_DIRECTORY_PATH).st_mode & PERMISSION_LEVEL_0777 != PERMISSION_LEVEL_0770:
-            # bitwise AND with PERMISSION_LEVEL_0777 will give true permission level
-            os.chmod(WORKING_DIRECTORY_PATH, PERMISSION_LEVEL_0770)
-
-        # if the directory does not have permision level 770, reset the permission level
         if os.stat(WORKER_STATE_DIR).st_mode & PERMISSION_LEVEL_0777 != PERMISSION_LEVEL_0770:
             # bitwise AND with PERMISSION_LEVEL_0777 will give true permission level
             os.chmod(WORKER_STATE_DIR, PERMISSION_LEVEL_0770)
@@ -96,8 +92,8 @@ def Set_Marshall(ResourceSettings):
         if proc.wait() != 0:
             raise Exception("call to omsutil.py --initialize failed")
 
-    except Exception, e:
-        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % str(e))
+    except Exception:
+        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % traceback.format_exc())
         return [-1]
 
     try:
@@ -105,15 +101,15 @@ def Set_Marshall(ResourceSettings):
         write_omsconf_file(settings.workspace_id, settings.auto_register_enabled, settings.diy_enabled)
         os.chmod(OMS_CONF_FILE_PATH, PERMISSION_LEVEL_0770)
         log(DEBUG, "oms.conf file was written")
-    except Exception, e:
-        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % str(e))
+    except Exception:
+        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % traceback.format_exc())
         return [-1]
 
     try:
         # register the auto worker if required
         if settings.auto_register_enabled:
             # Write worker.conf file
-            oms_workspace_id, agent_id = read_oms_primary_workspace_config_file()
+            oms_workspace_id, agent_id = get_workspaceid_agentid_from_oms_config()
             # If both proxy files exist use the new one
             # If neither exist use the new path, path will have no file in it, but no file means no proxy set up
             # If one of them exists, use that
@@ -158,8 +154,8 @@ def Set_Marshall(ResourceSettings):
             else:
                 os.chmod(AUTO_REGISTERED_WORKER_CONF_PATH, PERMISSION_LEVEL_0770)
 
-    except Exception, e:
-        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % str(e))
+    except Exception:
+        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % traceback.format_exc())
         return [-1]
 
     try:
@@ -178,8 +174,8 @@ def Set_Marshall(ResourceSettings):
         log(INFO, "Set_Marshall returned [0]. Exited successfully")
         return [0]
 
-    except Exception, e:
-        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % str(e))
+    except Exception:
+        log(ERROR, "Set_Marshall returned [-1] with following error: %s" % traceback.format_exc())
         return [-1]
 
 
@@ -235,8 +231,8 @@ def Test_Marshall(ResourceSettings):
                 log(INFO, "Test_Marshall returned [-1]: certificate mismatch for auto registered worker")
                 return [-1]
 
-    except Exception, e:
-        log(INFO, "Test_Marshall returned [-1]: %s" % str(e))
+    except Exception:
+        log(INFO, "Test_Marshall returned [-1]: %s" % traceback.format_exc())
         return [-1]
     # All went well
     log(DEBUG, "Test_Marshall returned [0]")
@@ -292,6 +288,7 @@ STATE_CONF_FILE_PATH = os.path.join(WORKER_STATE_DIR, "state.conf")
 
 DSC_RESOURCE_VERSION_FILE = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/VERSION"
 OMS_ADMIN_CONFIG_FILE = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
+OMS_AGENTID_FILE= "/etc/opt/microsoft/omsagent/agentid"
 WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run/automationworker"
 WORKER_MANAGER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
 HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py"
@@ -490,6 +487,12 @@ def read_omsconfig_file():
     if os.path.isfile(OMS_ADMIN_CONFIG_FILE):
         # the above path always points to the oms configuration file of the primary workspace
         keyvals = config_file_to_kv_pair(OMS_ADMIN_CONFIG_FILE)
+        if os.path.isfile(OMS_AGENTID_FILE):
+            # OMS_AGENTID_FILE is a new addition to the omsagent. If the file is not present, the agentid is supposed to be present in the OMS_ADMIN_CONFIG_FILE
+            agentid_file = open(OMS_AGENTID_FILE, "r")
+            agent_id = agentid_file.read().strip()
+            agentid_file.close()
+            keyvals[OPTION_AGENT_ID] = agent_id
         return keyvals
     else:
         error_string = "could not find file " + OMS_ADMIN_CONFIG_FILE
@@ -728,26 +731,6 @@ def nxautomation_user_exists():
         return False
     log(INFO, "%s was found on the system" % (AUTOMATION_USER))
     return True
-
-
-def read_oms_primary_workspace_config_file():
-    # Reads the oms config file
-    # Returns: AgentID config value
-    if os.path.isfile(OMS_ADMIN_CONFIG_FILE):
-        # the above path always points to the oms configuration file of the primary workspace
-        try:
-            keyvals = config_file_to_kv_pair(OMS_ADMIN_CONFIG_FILE)
-            return keyvals[OPTION_OMS_WORKSPACE_ID].strip(), keyvals[OPTION_AGENT_ID].strip()
-        except ConfigParser.NoSectionError, exception:
-            log(DEBUG, str(exception))
-            raise ConfigParser.Error(str(exception))
-        except ConfigParser.NoOptionError, exception:
-            log(DEBUG, str(exception))
-            raise ConfigParser.Error(str(exception))
-    else:
-        error_string = "could not find file " + OMS_ADMIN_CONFIG_FILE
-        log(DEBUG, error_string)
-        raise ConfigParser.Error(error_string)
 
 
 def config_file_to_kv_pair(filename):

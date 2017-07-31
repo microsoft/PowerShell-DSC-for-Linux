@@ -10,6 +10,7 @@ import subprocess
 import configuration
 import subprocessfactory
 import tracer
+from workerexception import *
 
 GPG = "gpg"
 GPG_BATCH_OPTION = "--batch"
@@ -28,6 +29,9 @@ def verify_signature(signed_file_path, output_file_path):
         False   : If the signature is invalid.
     """
     keyrings = configuration.get_gpg_public_keyrings_path()
+
+    if (len(keyrings) == 0) or (len(keyrings) == 1 and keyrings[0] == configuration.DEFAULT_GPG_PUBLIC_KEYRING_PATH):
+        raise GPGKeyringNotConfigured()
 
     for keyring_path in keyrings:
         # do not rely on default user keyring

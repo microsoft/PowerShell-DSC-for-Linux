@@ -235,16 +235,25 @@ def get_oms_agent_id():
         None,   if no agent id can be fouud
     """
     omsadmin_filepath = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
+    agentid_filepath = "/etc/opt/microsoft/omsagent/agentid"
     agent_guid_delimiter = "AGENT_GUID="
     agent_id = None
-    try:
-        file = open(omsadmin_filepath, "r")
-        for line in file.readlines():
-            if agent_guid_delimiter in line:
-                agent_id = line.split(agent_guid_delimiter)[1].strip()
-        file.close()
-    except:
-        pass
+    if os.path.isfile(agentid_filepath):
+        try:
+            file = open(agentid_filepath, "r")
+            agent_id = file.read().strip()
+            file.close()
+        except:
+            pass
+    else:
+        try:
+            file = open(omsadmin_filepath, "r")
+            for line in file.readlines():
+                if agent_guid_delimiter in line:
+                    agent_id = line.split(agent_guid_delimiter)[1].strip()
+            file.close()
+        except:
+            pass
     return agent_id
 
 

@@ -367,5 +367,9 @@ if __name__ == "__main__":
 
     linuxutil.daemonize()
 
-    import util
-    main()
+    try:
+        import util
+
+        main()
+    except:
+        exit_on_error(traceback.format_exc())

@@ -2,11 +2,14 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+import errno
+import os
 import random
 import sys
 import tempfile
-import os
+
 import linuxutil
+from workerexception import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
@@ -45,3 +48,23 @@ def generate_uuid():
                 random.randint(100000000000, 999999999999)]
         uuid = '-'.join(map(str, uuid))
     return uuid
+
+
+def assert_file_read_permission(file_path):
+    """ Asserts that the specified file exists and can be read.
+
+        Returns: bool, True if the file can be read, False otherwise
+    """
+    if os.path.isfile(file_path) is False:
+        raise FileNotFoundException(file_path)
+
+    try:
+        f = open(file_path)
+        f.close()
+        return True
+    except IOError, e:
+        if e.errno == errno.EACCES:
+            return False
+        raise
+    except:
+        raise
