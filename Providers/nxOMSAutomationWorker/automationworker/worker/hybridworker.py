@@ -23,7 +23,10 @@ def safe_loop(func):
             try:
                 # ensure required file / cert exists
                 func(*args, **kwargs)
-            except (JrdsAuthorizationException, SystemExit):
+            except (JrdsAuthorizationException,
+                    InvalidFilePermissionException,
+                    FileNotFoundException,
+                    SystemExit):
                 tracer.log_worker_safe_loop_terminal_exception(traceback.format_exc())
                 time.sleep(1)  # allow the trace to make it to stdout (since traces are background threads)
                 sys.exit(-1)
@@ -73,12 +76,6 @@ def validate_and_setup_path():
     file_creation = test_file_creation(os.path.join(working_directory_path, test_file_name))
     if file_creation is False:
         exit_on_error("Invalid working directory permission (read/write permissions are required).")
-
-    # test keyring paths
-    keyrings = configuration.get_gpg_public_keyrings_path()
-    for keyring_path in keyrings:
-        if keyring_path != configuration.DEFAULT_GPG_PUBLIC_KEYRING_PATH and not os.path.isfile(keyring_path):
-            exit_on_error("Invalid gpg public keyring path (absolute path is required).")
 
     # test state file path
     if configuration.get_state_directory_path() != configuration.DEFAULT_STATE_DIRECTORY_PATH:
@@ -170,14 +167,28 @@ class Worker:
         self.jrds_client = JRDSClient(http_client)
         self.running_sandboxes = {}
 
+    @staticmethod
+    def assert_environment_prerequisite():
+        jrds_cert_path = configuration.get_jrds_cert_path()
+        if util.assert_file_read_permission(jrds_cert_path) is False:
+            raise InvalidFilePermissionException(jrds_cert_path)
+
+        jrds_key_path = configuration.get_jrds_key_path()
+        if util.assert_file_read_permission(jrds_key_path) is False:
+            raise InvalidFilePermissionException(jrds_key_path)
+
+        worker_conf_path = configuration.get_worker_configuration_file_path()
+        if util.assert_file_read_permission(worker_conf_path) is False:
+            raise InvalidFilePermissionException(worker_conf_path)
+
+        proxy_conf_path = configuration.get_proxy_configuration_path()
+        if proxy_conf_path != configuration.DEFAULT_PROXY_CONFIGURATION_PATH and os.path.isfile(proxy_conf_path):
+            if util.assert_file_read_permission(proxy_conf_path) is False:
+                raise InvalidFilePermissionException(proxy_conf_path)
+
     @safe_loop
     def routine(self):
-        # die if pre-reqs are not met
-        if os.path.exists(configuration.get_jrds_cert_path()) is False or \
-                        os.path.exists(configuration.get_jrds_key_path()) is False or \
-                        os.path.exists(configuration.get_worker_configuration_file_path()) is False:
-            raise SystemExit()
-
+        self.assert_environment_prerequisite()
         self.stop_tracking_terminated_sandbox()
 
         sandbox_actions = self.jrds_client.get_sandbox_actions()
@@ -199,7 +210,7 @@ class Worker:
                 iohelper.assert_or_create_path(sandbox_working_dir)
             except OSError, exception:
                 tracer.log_worker_failed_to_create_sandbox_root_folder(sandbox_id, exception)
-                pass
+                raise SystemExit("Sandbox folder creation failed.")
 
             # copy current process env variable (contains configuration) and add the sanbox_id key
             process_env_variables = os.environ.copy()
@@ -311,13 +322,15 @@ if __name__ == "__main__":
 
     linuxutil.daemonize()
 
-    import configuration
-    import iohelper
-    import subprocessfactory
-    import tracer
-    import util
-    from httpclientfactory import HttpClientFactory
-    from jrdsclient import JRDSClient
-    from workerexception import *
-
-    main()
+    try:
+        import configuration
+        import iohelper
+        import subprocessfactory
+        import tracer
+        import util
+        from httpclientfactory import HttpClientFactory
+        from jrdsclient import JRDSClient
+        from workerexception import *
+        main()
+    except:
+        exit_on_error(traceback.format_exc())

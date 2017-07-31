@@ -2,11 +2,12 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-from optparse import OptionParser
-import sys
 import os
-import pwd
+import sys
+from optparse import OptionParser
+
 import grp
+import pwd
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -77,16 +78,25 @@ def initialize():
     process, output, error = linuxutil.popen_communicate(["sudo", "chown", "nxautomation:omiusers", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
-        raise Exception("Unable set group owner to certificate folder. Error: " + str(error))
+        raise Exception("Unable set group owner on working directory. Error: " + str(error))
     else:
-        print "Successfully set group permissions to certificate folder."
+        print "Successfully set group permissions on working directory."
 
-    process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+rx", "-R",
+    # change permission for the worker working directory
+    process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "gu=rwx", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
-        raise Exception("Unable set owners of certificate folder. Error: " + str(error))
+        raise Exception("Unable set permissions on working directory. Error: " + str(error))
     else:
-        print "Successfully set owners of certificate folder."
+        print "Successfully set permissions on working directory."
+
+    # explicitly prevent others from accessing the worker working directory
+    process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "o=", "-R",
+                                                          "/var/opt/microsoft/omsagent/run/automationworker"])
+    if process.returncode != 0:
+        raise Exception("Unable set permissions on working directory. Error: " + str(error))
+    else:
+        print "Successfully set permissions on working directory."
 
     proxy_paths = ["/etc/opt/microsoft/omsagent/conf/proxy.conf", "/etc/opt/microsoft/omsagent/proxy.conf"]
     for path in proxy_paths:

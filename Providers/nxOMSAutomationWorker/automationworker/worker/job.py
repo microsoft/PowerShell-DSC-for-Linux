@@ -87,7 +87,7 @@ class Job(Thread):
             tracer.log_sandbox_job_unsupported_runbook_type(self.job_id, e.message)
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
-        except InvalidRunbookSignature, e:
+        except (InvalidRunbookSignature, GPGKeyringNotConfigured), e:
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
         except Exception:

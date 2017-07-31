@@ -5,8 +5,10 @@
 import os
 
 import configuration
+import util
 from curlhttpclient import CurlHttpClient
 from urllib2httpclient import Urllib2HttpClient
+from workerexception import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
@@ -32,13 +34,16 @@ class HttpClientFactory:
 
         # set proxy if valid proxy_configuration path is detected
         proxy_conf_path = configuration.get_proxy_configuration_path()
-        if configuration.get_proxy_configuration_path() != configuration.DEFAULT_PROXY_CONFIGURATION_PATH \
+        if proxy_conf_path != configuration.DEFAULT_PROXY_CONFIGURATION_PATH \
                 and os.path.isfile(proxy_conf_path):
-            proxy_conf_file = open(configuration.get_proxy_configuration_path(), "r")
-            proxy_configuration = proxy_conf_file.readline().strip()
-            if proxy_configuration != "":
-                self.proxy_configuration = proxy_configuration
-            proxy_conf_file.close()
+            if util.assert_file_read_permission(configuration.get_proxy_configuration_path()) is False:
+                raise InvalidFilePermissionException(configuration.get_proxy_configuration_path())
+            else:
+                proxy_conf_file = open(configuration.get_proxy_configuration_path(), "r")
+                proxy_configuration = proxy_conf_file.readline().strip()
+                if proxy_configuration != "":
+                    self.proxy_configuration = proxy_configuration
+                proxy_conf_file.close()
 
     def create_http_client(self, version_info):
         """Create a new instance of the appropriate HttpClient.
