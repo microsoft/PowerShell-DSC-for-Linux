@@ -847,12 +847,18 @@ MI_Result CallSetConfiguration(
 {
     MI_Result r = MI_RESULT_OK;
     LCMProviderContext lcmContext = {0};
+
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,dwFlags,lcmContext.executionMode);
 
 
     lcmContext.executionMode = (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE);
     lcmContext.context = (void*)context;
+
+    // We tell user that LCM is running in MonitorOnly mode and will be testing only
+    if (ShouldMonitorOnly(config
+
+
     if (dwFlags & LCM_SETFLAGS_ENABLEWHATIF)
     {
         lcmContext.executionMode |= LCM_SETFLAGS_ENABLEWHATIF;
