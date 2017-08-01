@@ -843,20 +843,33 @@ MI_Result CallSetConfiguration(
     MI_Uint32 dwFlags,
     MI_Boolean force,
     _In_ MI_Context* context,
+    _In_ MI_Instance *metaConfigInstance,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result r = MI_RESULT_OK;
+    MI_Value configModeValue;
+
     LCMProviderContext lcmContext = {0};
 
     //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,dwFlags,lcmContext.executionMode);
 
-
     lcmContext.executionMode = (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE);
     lcmContext.context = (void*)context;
 
+    configModeValue = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, &flags, NULL);
+
     // We tell user that LCM is running in MonitorOnly mode and will be testing only
-    if (ShouldMonitorOnly(config
+	if (ShouldMonitorOnly(configModeValue.string) && !(dwFlags & LCM_SET_METACONFIG))
+	{
+		LCM_BuildMessage(lcmContext, ID_LCM_MONITORONLY_CONFIGURATIONMODE, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+	}
+	else
+	{
+		//log method start in verbose
+		SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_SET, lcmContext);
+		LCM_BuildMessage(lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+	}
 
 
     if (dwFlags & LCM_SETFLAGS_ENABLEWHATIF)
@@ -867,6 +880,14 @@ MI_Result CallSetConfiguration(
     SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_SET,&lcmContext);
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
     r =  SetConfiguration(ConfigData, dataSize, force, &lcmContext, dwFlags, cimErrorDetails);
+
+    EH_UNWIND
+    // No need to output set End when LCM is running in 'MonitorOnly' Mode.
+    if (!ShouldMonitorOnly(configModeValue.string))
+    {
+        SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_SET, lcmContext);
+        LCM_BuildMessage(lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    }
 
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
@@ -1003,28 +1024,22 @@ MI_Result CallConsistencyEngine(
         result = ApplyPendingConfig(&lcmContext, moduleManager, 0, &resultStatus, cimErrorDetails);
         if (result == MI_RESULT_OK && (resultStatus & DSC_RESTART_SYSTEM_FLAG))
         {
-                        SetLCMStatusReboot();                   
-#if defined(_MSC_VER)
-            result = RegisterRebootTaskIfNeeded(metaConfigInstance, moduleManager, cimErrorDetails);
-#endif
+            SetLCMStatusReboot();
         }        
     }
     else if (File_ExistT(GetCurrentConfigFileName()) != -1)
     {
-        if(ShouldAutoCorrect(configModeValue.string))
+        if (ShouldAutoCorrect(configModeValue.string))
         {
             LCM_BuildMessage(&lcmContext, ID_LCM_WRITEMESSAGE_CONSISTENCY_CURRENTEXIST, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);     
             result = ApplyCurrentConfig(&lcmContext, moduleManager, 0, &resultStatus, cimErrorDetails);
             if (result == MI_RESULT_OK && (resultStatus & DSC_RESTART_SYSTEM_FLAG))
             {
-                                SetLCMStatusReboot();                           
-#if defined(_MSC_VER)
-                result = RegisterRebootTaskIfNeeded(metaConfigInstance, moduleManager, cimErrorDetails);
-#endif
+                SetLCMStatusReboot();
             }
 
         }
-        else if(ShouldMonitor(configModeValue.string))
+        else if (ShouldMonitor(configModeValue.string) || ShouldMonitorOnly(configModeValue.string))
         {
             MI_Char* messageEvent=NULL;
             MI_Char* newLine=MI_T("\n");
@@ -1076,6 +1091,15 @@ MI_Boolean ShouldMonitor(_In_z_ MI_Char* configurationMode)
         return MI_TRUE;
     }
     return MI_FALSE;
+}
+
+MI_Boolean ShouldMonitorOnly(_In_z_ MI_Char* configurationMode)
+{
+	if (Tcscasecmp(configurationMode, DSC_CONFIGURATIONMODE_MONITORONLY) == 0)
+	{
+		return MI_TRUE;
+	}
+	return MI_FALSE;
 }
 
 MI_Result ValidateConfigurationDirectory(
@@ -2105,6 +2129,13 @@ MI_Result ApplyPendingConfig(
         RetryDeleteFile(GetPendingConfigFileName());
         return result;
     }
+
+    // We only move pending to current when not in MonitorOnlyMode. 
+	if (!ShouldMonitorOnly(configModeValue.string))
+	{
+		result = RenameConfigurationFile(lcmContext, GetPendingConfigFileName(), GetCurrentConfigFileName(), cimErrorDetails);
+	}
+
     return MoveConfigurationFiles(cimErrorDetails);
 }
 
@@ -2641,6 +2672,7 @@ MI_Result ApplyConfig(
     MI_Instance *documentIns = NULL;
     MI_Uint32 applyConfigFlags = 0;
     MI_Instance *metaConfigInstance = NULL;
+    MI_Value configModeValue;
 
     //Debug Log 
     DSC_EventWriteMessageApplyingConfig(configFileLocation);
@@ -2665,6 +2697,18 @@ MI_Result ApplyConfig(
         return GetCimMIError(r, cimErrorDetails, ID_LCMHELPER_LOAD_PENDING_ERROR);
     }
 
+    r = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, NULL, NULL);
+	EH_CheckResult(r);
+	
+	// Before applying the configuration check if we are in MonitorOnly Mode and not applying meta configuration And LCM is not disbaled.
+	// In these cases we are applying some new or same configuration again and want to run in test only mode. 
+	if (ShouldMonitorOnly(configModeValue.string))
+	{
+		if (!(flags & LCM_SET_METACONFIG) && !(flags & LCM_EXECUTE_SETONLY))
+		{	
+			flags |= LCM_EXECUTE_TESTONLY;
+		}		
+	}
 
     if (ShouldUsePartialConfigurations(metaConfigInstance, MI_TRUE) &&
         !(flags & VALIDATE_METACONFIG_INSTANCE) &&

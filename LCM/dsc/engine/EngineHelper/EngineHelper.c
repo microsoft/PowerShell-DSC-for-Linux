@@ -1328,3 +1328,59 @@ void Destroy_StatusReport_RNIDS(StatusReport_ResourceNotInDesiredState* ptr)
         DSC_free(ptr->InDesiredState);
 
 }
+
+MI_Result RenameConfigurationFile(
+	_In_ LCMProviderContext* lcmContext,
+	_In_z_ const MI_Char *fileFrom,
+	_In_z_ const MI_Char *fileTo,
+	_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+	MI_Result result = MI_RESULT_OK;
+	MI_Char *fileTempFull = NULL, *fileTempExpand = NULL;
+
+	if (cimErrorDetails == NULL)
+	{
+		return MI_RESULT_INVALID_PARAMETER;
+	}
+	*cimErrorDetails = NULL;
+
+	if (GetFullPath(lcmContext, GetConfigPath(lcmContext), CONFIGURATION_LOCATION_TEMPFILE_PREFIX, &fileTempFull, cimErrorDetails) != MI_RESULT_OK)
+	{
+		result = GetCimMIError(lcmContext, MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_GETTEMPFILENAME_ERROR);
+		EH_CheckResult(result);
+	}
+	if (ExpandPath(lcmContext, fileTempFull, &fileTempExpand, cimErrorDetails) != MI_RESULT_OK)
+	{
+		result = GetCimMIError(lcmContext, MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_GETTEMPFILENAME_ERROR);
+		EH_CheckResult(result);
+	}
+	DSC_EventWriteMessageCopyingConfig(lcmContext->configurationDetails.jobGuidString, fileFrom, fileTempExpand);
+	if (File_CopyT(fileFrom, fileTempExpand) != 0)
+	{
+		result = GetCimMIError(lcmContext, MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+		EH_CheckResult(result);
+	}
+	DSC_EventWriteMessageDeletingFile(lcmContext->configurationDetails.jobGuidString, fileFrom);
+	if (RetryDeleteFile(lcmContext, fileFrom) != 0)
+	{
+		result = GetCimMIError(lcmContext, result, cimErrorDetails, ID_LCMHELPER_DELETEFILE_ERROR);
+		EH_CheckResult(result);
+	}
+	DSC_EventWriteMessageCopyingConfig(lcmContext->configurationDetails.jobGuidString, fileTempExpand, fileTo);
+	if (File_CopyT(fileTempExpand, fileTo) != 0)
+	{
+		result = GetCimMIError(lcmContext, MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+		EH_CheckResult(result);
+	}
+	DSC_EventWriteMessageDeletingFile(lcmContext->configurationDetails.jobGuidString, fileTempExpand);
+	if (RetryDeleteFile(lcmContext, fileTempExpand) != 0)
+	{
+		result = GetCimMIError(lcmContext, result, cimErrorDetails, ID_LCMHELPER_DELETEFILE_ERROR);
+		EH_CheckResult(result);
+	}
+
+	EH_UNWIND
+		DSC_free(fileTempExpand);
+	DSC_free(fileTempFull);
+	return result;
+}
