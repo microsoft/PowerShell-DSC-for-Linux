@@ -335,15 +335,17 @@
 #define DSC_RESTART_SYSTEM_FLAG         1
 
 #define LCM_SETFLAGS_DEFAULT            0
-#define LCM_SETFLAGS_SAVETOPENDINGONLY  (1 << 0 )
+#define LCM_EXECUTE_SETONLY             (1 << 15)
+#define LCM_SETFLAGS_SAVETOPENDINGONLY  (1 << 0)
 #define LCM_SET_METACONFIG              (1 << 1)
 #define LCM_SETFLAGS_ENABLEWHATIF       (1 << 2)
-#define VALIDATE_REGISTRATION_INSTANCE  (1 << 3 )
+#define VALIDATE_REGISTRATION_INSTANCE  (1 << 3)
 #define VALIDATE_DOCUMENT_INSTANCE      (1 << 4)
 #define VALIDATE_METACONFIG_INSTANCE    (1 << 5)
 #define LCM_EXECUTIONMODE_OFFLINE       (1 << 6)
 #define LCM_EXECUTIONMODE_ONLINE        (1 << 7)
 #define LCM_EXECUTE_TESTONLY            (1 << 8)
+#define LCM_EXECUTE_APPLYNEWCONFIG      (1 << 27)
 
 #define MODULEHANDLER_NOTLOADED     0
 #define MODULEHANDLER_LOADED     1
@@ -508,7 +510,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
     constants used by LCM
     ******************************** ***/
 
-    
+#define CONFIGURATION_LOCATION_TEMPFILE_PREFIX MI_T("tmp")    
 #define CONFIGURATION_LOCATION_PENDINGTMP MI_T("Pending.mof.tmp")
 #define CONFIGURATION_LOCATION_PENDING MI_T("Pending.mof")
 #define CONFIGURATION_LOCATION_PARTIALBASEDOCUMENT MI_T("PartialConfigBaseDocumentInstances.mof")

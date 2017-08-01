@@ -515,6 +515,8 @@ extern "C"
 
     MI_Boolean ShouldMonitor(_In_z_ MI_Char* configurationMode);
 
+    MI_Boolean ShouldMonitorOnly(_In_z_ MI_Char* configurationMode);
+
     void GetFullMessageWithTokens(_In_z_ const MI_Char * deviceName, _In_z_ const MI_Char * resourceId,
                      _In_z_ const MI_Char * message, _In_ LCMProviderContext *lcmContext, Intlstr *intlstr);
 

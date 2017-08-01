@@ -843,10 +843,10 @@ MI_Result CallSetConfiguration(
     MI_Uint32 dwFlags,
     MI_Boolean force,
     _In_ MI_Context* context,
-    _In_ MI_Instance *metaConfigInstance,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result r = MI_RESULT_OK;
+    MI_Instance *metaConfigInstance = NULL;
     MI_Value configModeValue;
 
     LCMProviderContext lcmContext = {0};
@@ -857,20 +857,23 @@ MI_Result CallSetConfiguration(
     lcmContext.executionMode = (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE);
     lcmContext.context = (void*)context;
 
-    configModeValue = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, &flags, NULL);
+    r = GetMetaConfig(&metaConfigInstance);
+	EH_CheckResult(r);
+
+    r = DSC_MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, NULL, NULL);
+	EH_CheckResult(r);
 
     // We tell user that LCM is running in MonitorOnly mode and will be testing only
 	if (ShouldMonitorOnly(configModeValue.string) && !(dwFlags & LCM_SET_METACONFIG))
 	{
-		LCM_BuildMessage(lcmContext, ID_LCM_MONITORONLY_CONFIGURATIONMODE, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+		LCM_BuildMessage(&lcmContext, ID_LCM_MONITORONLY_CONFIGURATIONMODE, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 	}
 	else
 	{
 		//log method start in verbose
-		SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_SET, lcmContext);
-		LCM_BuildMessage(lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+		SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_SET, &lcmContext);
+		LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 	}
-
 
     if (dwFlags & LCM_SETFLAGS_ENABLEWHATIF)
     {
@@ -881,12 +884,12 @@ MI_Result CallSetConfiguration(
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
     r =  SetConfiguration(ConfigData, dataSize, force, &lcmContext, dwFlags, cimErrorDetails);
 
-    EH_UNWIND
+EH_UNWIND:
     // No need to output set End when LCM is running in 'MonitorOnly' Mode.
     if (!ShouldMonitorOnly(configModeValue.string))
     {
-        SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_SET, lcmContext);
-        LCM_BuildMessage(lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+        SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_SET, &lcmContext);
+        LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
     }
 
     //Debug Log 
@@ -2084,59 +2087,60 @@ Cleanup:
 
 MI_Result ApplyPendingConfig(
     _In_ LCMProviderContext *lcmContext,
-    _In_ ModuleManager *moduleManager, 
+    _In_ ModuleManager *moduleManager,
     _In_ MI_Uint32 flags,
-    _Inout_ MI_Uint32 *resultStatus,    
+    _Inout_ MI_Uint32 *resultStatus,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result result = MI_RESULT_OK;
+	MI_Instance *metaConfigInstance = NULL;
+	MI_Value configModeValue;
 
     if (cimErrorDetails == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
+    {
+        return MI_RESULT_INVALID_PARAMETER;
     }
-    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
+    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
 
     //clear cache for built-in providers
     result = ClearBuiltinProvCache(BUILTIN_PROVIDER_CACHE, cimErrorDetails);
     if (result == MI_RESULT_OK)
     {
-        //clear cache for package provider
-        result = ClearBuiltinProvCache(PACKAGE_PROVIDER_CACHE, cimErrorDetails);
-        if (result == MI_RESULT_OK)
-        {
-            result = ApplyConfig(lcmContext, GetPendingConfigFileName(), moduleManager, flags, resultStatus, cimErrorDetails);
-        }
+        flags |= LCM_EXECUTE_APPLYNEWCONFIG;
+        result = ApplyConfig(lcmContext, GetPendingConfigFileName(), moduleManager, flags, resultStatus, cimErrorDetails);
     }
 
-
-    if (result != MI_RESULT_OK)
-    {
-	// Attempt to save a Failed configuration file
-	CopyConfigurationFile(CONFIGURATION_LOCATION_PENDING, CONFIGURATION_LOCATION_FAILED, MI_TRUE, cimErrorDetails);
-        RetryDeleteFile(GetPendingConfigFileName());
-        File_RemoveT(GetConfigChecksumFileName());
-        return result;
-    }
-
-    if (DSC_RESTART_SYSTEM_FLAG & *resultStatus)
+    //If application failed, restart requested or test flag is set, do not move to current.mof, and do not delete the pending mof file.
+    if (result != MI_RESULT_OK || DSC_RESTART_SYSTEM_FLAG & *resultStatus || flags & LCM_EXECUTE_TESTONLY)
     {
         return result;
     }
+
     //If whatif flag is set, do not move to current.mof, just delete the pending mof file.
-    if(lcmContext->executionMode & LCM_SETFLAGS_ENABLEWHATIF)
+    if (lcmContext->executionMode & LCM_SETFLAGS_ENABLEWHATIF)
     {
         RetryDeleteFile(GetPendingConfigFileName());
         return result;
     }
 
-    // We only move pending to current when not in MonitorOnlyMode. 
+	result = GetMetaConfig(&metaConfigInstance);
+	EH_CheckResult(result);
+
+	result = DSC_MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, NULL, NULL);
+	EH_CheckResult(result);	
+	
+	// We only move pending to current when not in MonitorOnlyMode. 
 	if (!ShouldMonitorOnly(configModeValue.string))
 	{
 		result = RenameConfigurationFile(lcmContext, GetPendingConfigFileName(), GetCurrentConfigFileName(), cimErrorDetails);
 	}
 
-    return MoveConfigurationFiles(cimErrorDetails);
+EH_UNWIND:
+	if (metaConfigInstance != NULL)
+	{
+		MI_Instance_Delete(metaConfigInstance);
+	}	
+    return result;
 }
 
 MI_Result ApplyCurrentConfig(

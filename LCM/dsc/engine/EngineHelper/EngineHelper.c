@@ -1336,7 +1336,8 @@ MI_Result RenameConfigurationFile(
 	_Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
 	MI_Result result = MI_RESULT_OK;
-	MI_Char *fileTempFull = NULL, *fileTempExpand = NULL;
+	MI_Char *fileTempFull = NULL;
+    MI_Char *fileTempExpand = NULL;
 
 	if (cimErrorDetails == NULL)
 	{
@@ -1346,40 +1347,40 @@ MI_Result RenameConfigurationFile(
 
 	if (GetFullPath(lcmContext, GetConfigPath(lcmContext), CONFIGURATION_LOCATION_TEMPFILE_PREFIX, &fileTempFull, cimErrorDetails) != MI_RESULT_OK)
 	{
-		result = GetCimMIError(lcmContext, MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_GETTEMPFILENAME_ERROR);
+		result = GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_GETTEMPFILENAME_ERROR);
 		EH_CheckResult(result);
 	}
-	if (ExpandPath(lcmContext, fileTempFull, &fileTempExpand, cimErrorDetails) != MI_RESULT_OK)
+	if (ExpandPath(fileTempFull, &fileTempExpand, cimErrorDetails) != MI_RESULT_OK)
 	{
-		result = GetCimMIError(lcmContext, MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_GETTEMPFILENAME_ERROR);
+		result = GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_GETTEMPFILENAME_ERROR);
 		EH_CheckResult(result);
 	}
-	DSC_EventWriteMessageCopyingConfig(lcmContext->configurationDetails.jobGuidString, fileFrom, fileTempExpand);
+	DSC_EventWriteMessageCopyingConfig(fileFrom, fileTempExpand);
 	if (File_CopyT(fileFrom, fileTempExpand) != 0)
 	{
-		result = GetCimMIError(lcmContext, MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+		result = GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
 		EH_CheckResult(result);
 	}
-	DSC_EventWriteMessageDeletingFile(lcmContext->configurationDetails.jobGuidString, fileFrom);
+	DSC_EventWriteMessageDeletingFile(fileFrom);
 	if (RetryDeleteFile(lcmContext, fileFrom) != 0)
 	{
-		result = GetCimMIError(lcmContext, result, cimErrorDetails, ID_LCMHELPER_DELETEFILE_ERROR);
+		result = GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_DELETEFILE_ERROR);
 		EH_CheckResult(result);
 	}
-	DSC_EventWriteMessageCopyingConfig(lcmContext->configurationDetails.jobGuidString, fileTempExpand, fileTo);
+	DSC_EventWriteMessageCopyingConfig(fileTempExpand, fileTo);
 	if (File_CopyT(fileTempExpand, fileTo) != 0)
 	{
-		result = GetCimMIError(lcmContext, MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+		result = GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
 		EH_CheckResult(result);
 	}
-	DSC_EventWriteMessageDeletingFile(lcmContext->configurationDetails.jobGuidString, fileTempExpand);
+	DSC_EventWriteMessageDeletingFile(fileTempExpand);
 	if (RetryDeleteFile(lcmContext, fileTempExpand) != 0)
 	{
-		result = GetCimMIError(lcmContext, result, cimErrorDetails, ID_LCMHELPER_DELETEFILE_ERROR);
+		result = GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_DELETEFILE_ERROR);
 		EH_CheckResult(result);
 	}
 
-	EH_UNWIND
+EH_UNWIND:
 		DSC_free(fileTempExpand);
 	DSC_free(fileTempFull);
 	return result;
