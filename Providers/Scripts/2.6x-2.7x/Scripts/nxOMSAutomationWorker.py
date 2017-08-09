@@ -286,13 +286,14 @@ AUTO_REGISTERED_WORKER_CONF_PATH = os.path.join(WORKER_STATE_DIR, "worker.conf")
 DIY_WORKER_CONF_PATH = os.path.join(DIY_WORKER_STATE_DIR, "worker.conf")
 STATE_CONF_FILE_PATH = os.path.join(WORKER_STATE_DIR, "state.conf")
 
+OMS_PRIMARY_WORKSPACE_CONF_DIR = "/etc/opt/microsoft/omsagent/conf"
 DSC_RESOURCE_VERSION_FILE = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/VERSION"
-OMS_ADMIN_CONFIG_FILE = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
+OMS_ADMIN_CONFIG_FILE = os.path.join(OMS_PRIMARY_WORKSPACE_CONF_DIR, "omsadmin.conf")
 OMS_AGENTID_FILE= "/etc/opt/microsoft/omsagent/agentid"
 WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run/automationworker"
 WORKER_MANAGER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
 HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py"
-PROXY_CONF_PATH_LEGACY = "/etc/opt/microsoft/omsagent/conf/proxy.conf"
+PROXY_CONF_PATH_LEGACY = os.path.join(OMS_PRIMARY_WORKSPACE_CONF_DIR, "proxy.conf")
 PROXY_CONF_PATH_NEW = "/etc/opt/microsoft/omsagent/proxy.conf"
 REGISTRATION_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/scripts/register_oms.py"
 OMS_CERTIFICATE_PATH = "/etc/opt/microsoft/omsagent/certs/oms.crt"
@@ -476,6 +477,9 @@ def is_oms_primary_workspace(workspace_id):
     workspace id found in the oms config file in the old style path
     :return: True, if the given workspace id belongs to the primary OMS workspace, False otherwise
     """
+    if not os.path.exists(OMS_PRIMARY_WORKSPACE_CONF_DIR):
+        log(INFO, "Primary workspace conf directory not found")
+        return False
     oms_workspace_id, agent_id = get_workspaceid_agentid_from_oms_config()
     if oms_workspace_id == workspace_id:
         return True
