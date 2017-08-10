@@ -54,6 +54,15 @@ void GetResourceString3Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
 void GetResourceString4Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char * param1, 
                _In_z_ const MI_Char * param2, _In_z_ const MI_Char * param3,  _In_z_ const MI_Char * param4, _Inout_ Intlstr *resStr);
 
+// Helper method for warnings
+void DSC_WriteWarningHelper(
+	_In_ LCMProviderContext* lcmContext,
+	_In_ Intlstr);
+
+//Function to write a warning with message id that requires no parameter
+void DSC_WriteWarning(
+	_In_ LCMProviderContext* lcmContext,
+	_In_ MI_Uint32 messageID);
 
 //Function to write a warning with message iD that requires 1 parameter of type string
 void DSC_WriteWarning1Param(_In_ MI_Context* context,

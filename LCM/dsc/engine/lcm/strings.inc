@@ -596,6 +596,12 @@ INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVSCHEMA_SHOULD_BE_INVENTORY_2, I
 
 INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY, ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY , "Error creating serializedInstance using MI_NewDynamicInstance")
 INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , "Error adding instance array to serializedInstance")
-INTERNAL_Intlstr_Define0( ID_LCM_MONITORONLY_CONFIGURATIONMODE , ID_LCM_MONITORONLY_CONFIGURATIONMODE , "LCM is running in MonitorOnly mode and will only test the configuration.")
 
+INTERNAL_Intlstr_Define0(ID_LCM_MONITORONLY_CONFIGURATIONMODE , ID_LCM_MONITORONLY_CONFIGURATIONMODE , "LCM is running in MonitorOnly mode and will only test the configuration.")
+INTERNAL_Intlstr_Define0(ID_LCMHELPER_GET_OPERATION_AGAINST_PENDING ,
+                         ID_LCMHELPER_GET_OPERATION_AGAINST_PENDING ,
+                         "The GET operation will be carried against a pending configuration since the latest configuration has not converged yet.")
+INTERNAL_Intlstr_Define0(ID_LCMHELPER_TEST_OPERATION_AGAINST_PENDING ,
+                         ID_LCMHELPER_TEST_OPERATION_AGAINST_PENDING ,
+                         "The TEST operation will be carried against a pending configuration since the latest configuration has not converged yet.")
  

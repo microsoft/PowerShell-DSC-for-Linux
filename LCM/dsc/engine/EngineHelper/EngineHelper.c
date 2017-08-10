@@ -928,6 +928,28 @@ void SQMLogResourceCountData(_In_z_ const MI_Char* providerName,_In_ MI_Uint32 r
 #endif
 }
 
+// Method also frees memory of pTempStr
+void DSC_WriteWarningHelper(
+	_In_ LCMProviderContext* lcmContext,
+	_In_ Intlstr pTempStr)
+{
+	if (pTempStr.str == NULL) return;
+
+	LCM_WriteMessage_Internal_Tokenized(lcmContext, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_WARNING, pTempStr.str, MI_FALSE);
+	DSC_EventWriteCUMethodWarning(pTempStr.str);
+	Intlstr_Free(pTempStr);
+}
+
+void DSC_WriteWarning(
+	_In_ LCMProviderContext* lcmContext,
+	_In_ MI_Uint32 messageID)
+{
+	Intlstr pTempStr = Intlstr_Null;
+	GetResourceString(messageID, &pTempStr);
+
+	DSC_WriteWarningHelper(lcmContext, pTempStr);
+}
+
 void DSC_WriteWarning1Param(_In_ MI_Context* context,
                       _In_ MI_Uint32 messageID,
                       _In_z_ MI_Char* param1)

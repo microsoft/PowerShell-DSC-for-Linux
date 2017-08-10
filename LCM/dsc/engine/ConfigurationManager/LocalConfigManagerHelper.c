@@ -651,7 +651,7 @@ MI_Result CallTestConfiguration(
     *testStatus = MI_FALSE;
 
     //If the current configuration file is not found, function ends with a corresponding error message
-    if (File_ExistT(GetCurrentConfigFileName()) == -1)
+    if (File_ExistT(GetCurrentConfigFileName()) == -1 && File_ExistT(GetPendingConfigFileName()) == -1)
     {
         SetLCMStatusReady();
         return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
@@ -674,7 +674,17 @@ MI_Result CallTestConfiguration(
 
     SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_TEST,&lcmContext);
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
-    result = ApplyCurrentConfig(&lcmContext, moduleManager, LCM_EXECUTE_TESTONLY, &resultStatus, cimErrorDetails);
+    
+    if (File_ExistT(GetCurrentConfigFileName()) != -1)
+    {
+        result = ApplyCurrentConfig(&lcmContext, moduleManager, LCM_EXECUTE_TESTONLY, &resultStatus, cimErrorDetails);
+    }
+
+    if (File_ExistT(GetPendingConfigFileName()) != -1)
+    {
+        DSC_WriteWarning(&lcmContext, ID_LCMHELPER_TEST_OPERATION_AGAINST_PENDING);
+        result = ApplyPendingConfig(&lcmContext, moduleManager, LCM_EXECUTE_TESTONLY, &resultStatus, cimErrorDetails);
+    }
 
     moduleManager->ft->Close(moduleManager, NULL);
     if (result == MI_RESULT_OK)
@@ -741,6 +751,7 @@ MI_Result CallGetConfiguration(
         return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_VALIDATE_CONFGDIR_FAILED);
     }
 
+    // Get.mof
     if (File_ExistT(GetGetConfigFileName()) != -1)
     {
         fResult = File_RemoveT(GetGetConfigFileName());
@@ -751,15 +762,44 @@ MI_Result CallGetConfiguration(
         } 
     }
 
-    result = SaveFile(GetGetConfigFileName(), ConfigData, dataSize, cimErrorDetails);
-
-    if (result != MI_RESULT_OK )
+    if (dataSize == 0 && ConfigData == NULL)
     {
-        SetLCMStatusReady();
-        if (cimErrorDetails && *cimErrorDetails)
-            return result;
+        // If the current configuration file does not exist, output a corresponding error message and return
+        if (File_ExistT(GetCurrentConfigFileName()) == -1 && File_ExistT(GetPendingConfigFileName()) == -1)
+        {
+            return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
+        }
 
-        return GetCimMIError(MI_RESULT_ALREADY_EXISTS, cimErrorDetails, ID_LCMHELPER_SAVE_GETCONF_FAILED);
+        // Copy file contents from the current or pending configuration file to Get.mof
+        if (File_ExistT(GetCurrentConfigFileName()) == 0)
+        {
+            result = File_CopyT(GetCurrentConfigFileName(), GetGetConfigFileName());
+        }
+        else
+        {
+            DSC_WriteWarning(&lcmContext, ID_LCMHELPER_GET_OPERATION_AGAINST_PENDING);
+            result = File_CopyT(GetPendingConfigFileName(), GetGetConfigFileName());
+        }
+
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+    }
+    else
+    {
+        result = SaveFile(GetGetConfigFileName(), ConfigData, dataSize, cimErrorDetails);
+
+        if (result != MI_RESULT_OK )
+        {
+            SetLCMStatusReady();
+            if (cimErrorDetails && *cimErrorDetails)
+            {
+                return result;
+            }
+
+            return GetCimMIError(MI_RESULT_ALREADY_EXISTS, cimErrorDetails, ID_LCMHELPER_SAVE_GETCONF_FAILED);
+        }
     }
 
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
