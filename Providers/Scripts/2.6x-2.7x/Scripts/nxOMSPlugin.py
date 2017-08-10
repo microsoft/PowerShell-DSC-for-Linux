@@ -50,7 +50,7 @@ BLOCK_SIZE = 8192
 PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
 ETC_OMSAGENT_DIR = '/etc/opt/microsoft/omsagent/'
 CONF_PATH_SUFFIX = 'conf/omsagent.d/'
-CONF_PATH = ETC_OMSAGENT_DIR + CONF_PATH_SUFFIX
+CONF_PATH = os.path.join(ETC_OMSAGENT_DIR, CONF_PATH_SUFFIX)
 PLUGIN_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSPlugin/DSCResources/MSFT_nxOMSPluginResource/Plugins'
 OMS_ACTION = OMSAgentUtil()
 MULTI_HOMED = None
@@ -75,7 +75,7 @@ def init_vars(Plugins, WorkspaceID):
 
     global MULTI_HOMED
     global CONF_PATH
-    mh_conf_dir = ETC_OMSAGENT_DIR + WorkspaceID + CONF_PATH_SUFFIX
+    mh_conf_dir = os.path.join(ETC_OMSAGENT_DIR, WorkspaceID, CONF_PATH_SUFFIX)
     MULTI_HOMED = os.path.isdir(mh_conf_dir)
     if MULTI_HOMED and WorkspaceID: # only log this if WorkspaceID is not None or empty
         LG().Log('INFO', 'OMSAgent is multi-homed and resource is updating workspace ' + WorkspaceID)
