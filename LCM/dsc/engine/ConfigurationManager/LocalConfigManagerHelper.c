@@ -752,21 +752,12 @@ MI_Result CallGetConfiguration(
     }
 
     // Get.mof
-    if (File_ExistT(GetGetConfigFileName()) != -1)
-    {
-        fResult = File_RemoveT(GetGetConfigFileName());
-        if (fResult || NitsShouldFault(NitsHere(), NitsAutomatic))
-        {
-            SetLCMStatusReady();
-            return GetCimWin32Error(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_GETFILEBEFORE_FAILED);
-        } 
-    }
-
     if (dataSize == 0 && ConfigData == NULL)
     {
         // If the current configuration file does not exist, output a corresponding error message and return
         if (File_ExistT(GetCurrentConfigFileName()) == -1 && File_ExistT(GetPendingConfigFileName()) == -1)
         {
+            SetLCMStatusReady();
             return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
         }
 
