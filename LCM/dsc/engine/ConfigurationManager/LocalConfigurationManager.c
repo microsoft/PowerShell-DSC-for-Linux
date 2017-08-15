@@ -484,17 +484,28 @@ void Invoke_GetConfiguration(
     // If the configuration file has not been passed in the parameters        
     if (!in || !in->configurationData.exists)
     {
-        // If the current configuration file does not exist, output a corresponding error message and return
+        // If the current and pending configuration files do not exist, output a corresponding error message and return
         if (File_ExistT(GetCurrentConfigFileName())== -1)
         {
-            GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
-            SetThreadToken(NULL, m_clientThreadToken);
-            CloseHandle(m_clientThreadToken);
-            goto ExitWithError;
+            if (File_ExistT(GetPendingConfigFileName()) == -1)
+            {
+                GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
+                SetThreadToken(NULL, m_clientThreadToken);
+                CloseHandle(m_clientThreadToken);
+                goto ExitWithError;
+            }
+            else
+            {
+                // Read file contents from the pending configuration file into dataValue
+                miResult = ReadFileContent(GetPendingConfigFileName(), &dataValue.data, &dataValue.size, &cimErrorDetails);
+            }
+        }
+        else
+        {
+            // Read file contents from the current configuration file into dataValue
+            miResult = ReadFileContent(GetCurrentConfigFileName(), &dataValue.data, &dataValue.size, &cimErrorDetails);
         }
         
-        // Read file contents from the current configuration file into dataValue
-        miResult = ReadFileContent(GetCurrentConfigFileName(), &dataValue.data, &dataValue.size, &cimErrorDetails);
         if (miResult != MI_RESULT_OK)
         {
             SetThreadToken(NULL, m_clientThreadToken);
@@ -1784,15 +1795,26 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     // If the configuration file has not been passed in the parameters        
     if (!args->dataExist)
     {
-        // If the current configuration file does not exist, output a corresponding error message and return
+        // If the current and pending configuration files do not exist, output a corresponding error message and return
         if (File_ExistT(GetCurrentConfigFileName())== -1)
         {
-            GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
-            goto ExitWithError;
+            if (File_ExistT(GetPendingConfigFileName()) == -1)
+            {
+                GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_LCMHELPER_CURRENT_NOTFOUND);
+                goto ExitWithError;
+            }
+            else
+            {
+                // Read file contents from the pending configuration file into dataValue
+                miResult = ReadFileContent(GetPendingConfigFileName(), &dataValue.data, &dataValue.size, &cimErrorDetails);
+            }
         }
-        
-        // Read file contents from the current configuration file into dataValue
-        miResult = ReadFileContent(GetCurrentConfigFileName(), &dataValue.data, &dataValue.size, &cimErrorDetails);
+        else
+        {
+            // Read file contents from the current configuration file into dataValue
+            miResult = ReadFileContent(GetCurrentConfigFileName(), &dataValue.data, &dataValue.size, &cimErrorDetails);
+        }
+
         if (miResult != MI_RESULT_OK)
         {
             goto ExitWithError;
