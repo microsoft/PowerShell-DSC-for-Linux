@@ -1,4 +1,4 @@
-SHELL=/bin/bash
+	SHELL=/bin/bash
 
 # -*- mode: Makefile; -*- 
 #-------------------------------------------------------------------------------
@@ -79,6 +79,7 @@ PROVIDERS+=nxFileInventory
 PROVIDERS+=nxOMSAutomationWorker
 PROVIDERS+=nxOMSAgentNPMConfig
 PROVIDERS+=nxOMSAuditdPlugin
+PROVIDERS+=nxOMSContainers
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript
