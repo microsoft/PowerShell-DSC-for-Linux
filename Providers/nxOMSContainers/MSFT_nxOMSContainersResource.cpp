@@ -1,5 +1,5 @@
 /* @migen@ */
-#include "MSFT_nxOMSDummyResource.h"
+#include "MSFT_nxOMSContainersResource.h"
 
 
 #include "debug_tags.hpp"
@@ -10,29 +10,29 @@
 #include <cstdlib>
 
 
-typedef struct _MSFT_nxOMSDummyResource_Self : public scx::PythonProvider
+typedef struct _MSFT_nxOMSContainersResource_Self : public scx::PythonProvider
 {
-    /*ctor*/ _MSFT_nxOMSDummyResource_Self ()
-        : scx::PythonProvider ("nxOMSDummy")
+    /*ctor*/ _MSFT_nxOMSContainersResource_Self ()
+        : scx::PythonProvider ("nxOMSContainers")
     {
         // empty
     }
-} MSFT_nxOMSDummyResource_Self;
+} MSFT_nxOMSContainersResource_Self;
 
 
-void MI_CALL MSFT_nxOMSDummyResource_Load(
-    _Outptr_result_maybenull_ MSFT_nxOMSDummyResource_Self** self,
+void MI_CALL MSFT_nxOMSContainersResource_Load(
+    _Outptr_result_maybenull_ MSFT_nxOMSContainersResource_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
-    SCX_BOOKEND_EX ("Load", " name=\"nxOMSDummy\"");
+    SCX_BOOKEND_EX ("Load", " name=\"nxOMSContainers\"");
     MI_UNREFERENCED_PARAMETER(selfModule);
     MI_Result res = MI_RESULT_OK;
     if (0 != self)
     {
         if (0 == *self)
         {
-            *self = new MSFT_nxOMSDummyResource_Self;
+            *self = new MSFT_nxOMSContainersResource_Self;
             if (EXIT_SUCCESS != (*self)->init ())
             {
                 delete *self;
@@ -48,11 +48,11 @@ void MI_CALL MSFT_nxOMSDummyResource_Load(
     MI_Context_PostResult(context, res);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_Unload(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_Unload(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context)
 {
-    SCX_BOOKEND_EX ("Unload", " name=\"nxOMSDummy\"");
+    SCX_BOOKEND_EX ("Unload", " name=\"nxOMSContainers\"");
     if (self)
     {
         delete self;
@@ -60,8 +60,8 @@ void MI_CALL MSFT_nxOMSDummyResource_Unload(
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_EnumerateInstances(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_EnumerateInstances(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
@@ -79,12 +79,12 @@ void MI_CALL MSFT_nxOMSDummyResource_EnumerateInstances(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_GetInstance(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_GetInstance(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxOMSDummyResource* instanceName,
+    _In_ const MSFT_nxOMSContainersResource* instanceName,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -96,12 +96,12 @@ void MI_CALL MSFT_nxOMSDummyResource_GetInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_CreateInstance(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_CreateInstance(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxOMSDummyResource* newInstance)
+    _In_ const MSFT_nxOMSContainersResource* newInstance)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -111,12 +111,12 @@ void MI_CALL MSFT_nxOMSDummyResource_CreateInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_ModifyInstance(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_ModifyInstance(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxOMSDummyResource* modifiedInstance,
+    _In_ const MSFT_nxOMSContainersResource* modifiedInstance,
     _In_opt_ const MI_PropertySet* propertySet)
 {
     MI_UNREFERENCED_PARAMETER(self);
@@ -128,12 +128,12 @@ void MI_CALL MSFT_nxOMSDummyResource_ModifyInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_DeleteInstance(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_DeleteInstance(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
-    _In_ const MSFT_nxOMSDummyResource* instanceName)
+    _In_ const MSFT_nxOMSContainersResource* instanceName)
 {
     MI_UNREFERENCED_PARAMETER(self);
     MI_UNREFERENCED_PARAMETER(nameSpace);
@@ -143,16 +143,16 @@ void MI_CALL MSFT_nxOMSDummyResource_DeleteInstance(
     MI_Context_PostResult(context, MI_RESULT_NOT_SUPPORTED);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_Invoke_GetTargetResource(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_Invoke_GetTargetResource(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxOMSDummyResource* instanceName,
-    _In_opt_ const MSFT_nxOMSDummyResource_GetTargetResource* in)
+    _In_ const MSFT_nxOMSContainersResource* instanceName,
+    _In_opt_ const MSFT_nxOMSContainersResource_GetTargetResource* in)
 {
-    SCX_BOOKEND_EX ("Get", " name=\"nxOMSDummy\"");
+    SCX_BOOKEND_EX ("Get", " name=\"nxOMSContainers\"");
     MI_Result result = MI_RESULT_FAILED;
     if (self)
     {
@@ -163,19 +163,19 @@ void MI_CALL MSFT_nxOMSDummyResource_Invoke_GetTargetResource(
         if (MI_RESULT_OK == result)
         {
             SCX_BOOKEND_PRINT ("packing succeeded!");
-            MSFT_nxOMSDummyResource_GetTargetResource out;
-            MSFT_nxOMSDummyResource_GetTargetResource_Construct (&out, context);
-            MSFT_nxOMSDummyResource_GetTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxOMSContainersResource_GetTargetResource out;
+            MSFT_nxOMSContainersResource_GetTargetResource_Construct (&out, context);
+            MSFT_nxOMSContainersResource_GetTargetResource_Set_MIReturn (&out, 0);
             MI_Value value;
             value.instance = retInstance;
             MI_Instance_SetElement (&out.__instance, "OutputResource", &value,
                                     MI_INSTANCE, 0);
-            result = MSFT_nxOMSDummyResource_GetTargetResource_Post (&out, context);
+            result = MSFT_nxOMSContainersResource_GetTargetResource_Post (&out, context);
             if (MI_RESULT_OK != result)
             {
                 SCX_BOOKEND_PRINT ("post Failed");
             }
-            MSFT_nxOMSDummyResource_GetTargetResource_Destruct (&out);
+            MSFT_nxOMSContainersResource_GetTargetResource_Destruct (&out);
         }
         else
         {
@@ -186,14 +186,14 @@ void MI_CALL MSFT_nxOMSDummyResource_Invoke_GetTargetResource(
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_Invoke_TestTargetResource(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_Invoke_TestTargetResource(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxOMSDummyResource* instanceName,
-    _In_opt_ const MSFT_nxOMSDummyResource_TestTargetResource* in)
+    _In_ const MSFT_nxOMSContainersResource* instanceName,
+    _In_opt_ const MSFT_nxOMSContainersResource_TestTargetResource* in)
 {
     MI_Result result = MI_RESULT_FAILED;
     if (self)
@@ -202,26 +202,26 @@ void MI_CALL MSFT_nxOMSDummyResource_Invoke_TestTargetResource(
         result = self->test (in->InputResource.value->__instance, &testResult);
         if (MI_RESULT_OK == result)
         {
-            MSFT_nxOMSDummyResource_TestTargetResource out;
-            MSFT_nxOMSDummyResource_TestTargetResource_Construct (&out, context);
-            MSFT_nxOMSDummyResource_TestTargetResource_Set_Result (
+            MSFT_nxOMSContainersResource_TestTargetResource out;
+            MSFT_nxOMSContainersResource_TestTargetResource_Construct (&out, context);
+            MSFT_nxOMSContainersResource_TestTargetResource_Set_Result (
                 &out, testResult);
-            MSFT_nxOMSDummyResource_TestTargetResource_Set_MIReturn (&out, 0);
-            MSFT_nxOMSDummyResource_TestTargetResource_Post (&out, context);
-            MSFT_nxOMSDummyResource_TestTargetResource_Destruct (&out);
+            MSFT_nxOMSContainersResource_TestTargetResource_Set_MIReturn (&out, 0);
+            MSFT_nxOMSContainersResource_TestTargetResource_Post (&out, context);
+            MSFT_nxOMSContainersResource_TestTargetResource_Destruct (&out);
         }
     }
     MI_Context_PostResult (context, result);
 }
 
-void MI_CALL MSFT_nxOMSDummyResource_Invoke_SetTargetResource(
-    _In_opt_ MSFT_nxOMSDummyResource_Self* self,
+void MI_CALL MSFT_nxOMSContainersResource_Invoke_SetTargetResource(
+    _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
     _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
-    _In_ const MSFT_nxOMSDummyResource* instanceName,
-    _In_opt_ const MSFT_nxOMSDummyResource_SetTargetResource* in)
+    _In_ const MSFT_nxOMSContainersResource* instanceName,
+    _In_opt_ const MSFT_nxOMSContainersResource_SetTargetResource* in)
 {
     MI_Result result = MI_RESULT_FAILED;
     if (self)
@@ -231,12 +231,12 @@ void MI_CALL MSFT_nxOMSDummyResource_Invoke_SetTargetResource(
         if (MI_RESULT_OK == result)
         {
             result = setResult;
-            MSFT_nxOMSDummyResource_SetTargetResource out;
-            MSFT_nxOMSDummyResource_SetTargetResource_Construct (&out, context);
-            MSFT_nxOMSDummyResource_SetTargetResource_Set_MIReturn (
+            MSFT_nxOMSContainersResource_SetTargetResource out;
+            MSFT_nxOMSContainersResource_SetTargetResource_Construct (&out, context);
+            MSFT_nxOMSContainersResource_SetTargetResource_Set_MIReturn (
                 &out, setResult);
-            MSFT_nxOMSDummyResource_SetTargetResource_Post (&out, context);
-            MSFT_nxOMSDummyResource_SetTargetResource_Destruct (&out);
+            MSFT_nxOMSContainersResource_SetTargetResource_Post (&out, context);
+            MSFT_nxOMSContainersResource_SetTargetResource_Destruct (&out);
         }
     }
     MI_Context_PostResult (context, result);
