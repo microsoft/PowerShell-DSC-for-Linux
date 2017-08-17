@@ -502,7 +502,7 @@ nxOMSAuditdPlugin:
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
 
-nxOMSDummy:
+nxOMSContainers:
 	rm -rf output/staging; \
 	VERSION="1.0"; \
 	PROVIDERS="nxOMSContainers"; \
