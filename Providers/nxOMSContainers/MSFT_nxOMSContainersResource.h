@@ -11,7 +11,6 @@
 
 #include <MI.h>
 #include "OMI_BaseResource.h"
-#include "MSFT_nxOMSContainersProperty.h"
 #include "MSFT_nxOMSContainersResource.h"
 
 /*
@@ -20,7 +19,7 @@
 ** MSFT_nxOMSContainersResource [MSFT_nxOMSContainersResource]
 **
 ** Keys:
-**    Name
+**    WorkspaceId
 **
 **==============================================================================
 */
@@ -30,8 +29,8 @@ typedef struct _MSFT_nxOMSContainersResource /* extends OMI_BaseResource */
     MI_Instance __instance;
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSContainersResource properties */
-    /*KEY*/ MI_ConstStringField Name;
-    MSFT_nxOMSContainersProperty_ConstArrayRef Properties;
+    /*KEY*/ MI_ConstStringField WorkspaceId;
+    MI_ConstStringField Ensure;
 }
 MSFT_nxOMSContainersResource;
 
@@ -123,7 +122,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Post(
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_Name(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_WorkspaceId(
     _Inout_ MSFT_nxOMSContainersResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -135,7 +134,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_Name(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_Name(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_WorkspaceId(
     _Inout_ MSFT_nxOMSContainersResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -147,7 +146,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_Name(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Clear_Name(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Clear_WorkspaceId(
     _Inout_ MSFT_nxOMSContainersResource* self)
 {
     return self->__instance.ft->ClearElementAt(
@@ -155,39 +154,31 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Clear_Name(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_Properties(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_Ensure(
     _Inout_ MSFT_nxOMSContainersResource* self,
-    _In_reads_opt_(size) const MSFT_nxOMSContainersProperty * const * data,
-    _In_ MI_Uint32 size)
+    _In_z_ const MI_Char* str)
 {
-    MI_Array arr;
-    arr.data = (void*)data;
-    arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
         1,
-        (MI_Value*)&arr,
-        MI_INSTANCEA,
+        (MI_Value*)&str,
+        MI_STRING,
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_Properties(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_Ensure(
     _Inout_ MSFT_nxOMSContainersResource* self,
-    _In_reads_opt_(size) const MSFT_nxOMSContainersProperty * const * data,
-    _In_ MI_Uint32 size)
+    _In_z_ const MI_Char* str)
 {
-    MI_Array arr;
-    arr.data = (void*)data;
-    arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
         1,
-        (MI_Value*)&arr,
-        MI_INSTANCEA,
+        (MI_Value*)&str,
+        MI_STRING,
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Clear_Properties(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Clear_Ensure(
     _Inout_ MSFT_nxOMSContainersResource* self)
 {
     return self->__instance.ft->ClearElementAt(
