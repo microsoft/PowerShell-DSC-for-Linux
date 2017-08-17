@@ -1969,7 +1969,8 @@ MI_Result SetConfiguration(
             return GetCimMIError(MI_RESULT_ALREADY_EXISTS, cimErrorDetails, ID_LCMHELPER_SAVE_METATMP_ERROR);
         }
 
-        result = ApplyMetaConfig(lcmContext, moduleManager, VALIDATE_METACONFIG_INSTANCE, &resultStatus, cimErrorDetails);
+        dwFlags |= VALIDATE_METACONFIG_INSTANCE;
+        result = ApplyMetaConfig(lcmContext, moduleManager, dwFlags, &resultStatus, cimErrorDetails);
         moduleManager->ft->Close(moduleManager, NULL);
         deleteResult = RetryDeleteFile(GetMetaConfigTmpFileName());
         if (result != MI_RESULT_OK)
