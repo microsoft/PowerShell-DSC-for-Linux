@@ -2,19 +2,20 @@
 import os
 import sys
 import glob
+import re
 
-conf_path = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf" # TODO shouldn't use
 omsagent_path = "/etc/opt/microsoft/omsagent/"
 oms_agentid_path = "/etc/opt/microsoft/omsagent/agentid"
 conf_path2 = "/etc/opt/microsoft/omsagent/*/conf/omsadmin.conf"
-conf_files = glob.glob(conf_path2) 
+conf_path_template = "/etc/opt/microsoft/omsagent/{0}/conf/omsadmin.conf"
+conf_files = glob.glob(conf_path_template.format("*"))
 
 metamof_path = "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof"
 agentid_path = "/etc/opt/omi/conf/omsconfig/agentid"
 omshelper_disable_path = "/etc/opt/omi/conf/omsconfig/omshelper_disable" # TODO do I need to change this file?
 
 # TODO IDEA to guard against circular logic, copy list_workspaces here to check for active workspaces
-guid_regex = '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+guid_regex = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
 
 def generate_webdownloadmgr_mof(val, serverurl):
     return """
@@ -188,6 +189,11 @@ if not os.path.isfile(omshelper_disable_path): # TODO is this file still shipped
 
     # loop through every omsadmin conf file and get the key/value pairs
     for index, conf_path in enumerate(conf_files):
+        # use guid_regex
+        oms_workspace_path_regex = conf_path_template.format(guid_regex)
+        if not re.match(oms_workspace_path_regex, conf_path):
+            # TODO if I skip an invalid workspace folder, it may leave a gap in the indecies. Will this make a difference?
+            continue
         keyvals = source_file(conf_path)
 
         # If machine-wide agentid file is available, then read agent guid from there
@@ -201,7 +207,16 @@ if not os.path.isfile(omshelper_disable_path): # TODO is this file still shipped
         # Looking for DSC_ENDPOINT and AGENT_GUID
         if "DSC_ENDPOINT" not in keyvals or "AGENT_GUID" not in keyvals or "WORKSPACE_ID" not in keyvals:
             print("Error: Unable to find needed key/value pairs in " + conf_path)
-            sys.exit(1)
+            continue #TODO determine if I should continue at this point
+            # sys.exit(1) # TODO check other places where we may exit prematurely
+
+        # TODO use subprocess to get exit code of is_running
+        try:
+            # TODO With Xeno's change to cut down functionality of is_omsagent_running, we shouldn't have to verify permissions before just calling that small method. Otherwise, here we we not be able to call it because this script is run as omsagent from omsadmin.sh
+            subprocess.call(""
+        except:
+            print("Error checking if workspace {0} is running; will not add it to meta configuration".format(keyvals["WORKSPACE_ID"]))
+            continue
 
         DSC_ENDPOINT = keyvals["DSC_ENDPOINT"].strip()
 
