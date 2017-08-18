@@ -14,6 +14,7 @@ def generate_partial_config(serverurls):
     """
     serverurls: An array of strings, each a server URL
     TODO
+    TODO partial configurations must be available through AMS first
     """
     return """
 instance of MSFT_WebDownloadManager as $MSFT_WebDownloadManager1ref
@@ -157,6 +158,7 @@ if disable_flag == True:
 if not os.path.isfile(omshelper_disable_path):
     # source the omsadmin conf file and get the key/value pairs
     # TODO source all valid omsadmin.conf files (use regex? or uuid?)
+    # remember: valid omsadmin.conf files only apply when the omsagent process for that workspace is running
     # If any version of python may be running, then I should use regex
     keyvals = source_file(conf_path)
     # If machine-wide agentid file is available, then read agent guid from there
