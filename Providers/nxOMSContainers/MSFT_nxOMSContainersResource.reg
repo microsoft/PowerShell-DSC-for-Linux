@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSContainersResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSContainersResource:OMI_BaseResource
