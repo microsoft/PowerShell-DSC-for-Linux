@@ -2148,12 +2148,26 @@ MI_Result ApplyPendingConfig(
     result = ClearBuiltinProvCache(BUILTIN_PROVIDER_CACHE, cimErrorDetails);
     if (result == MI_RESULT_OK)
     {
-        flags |= LCM_EXECUTE_APPLYNEWCONFIG;
-        result = ApplyConfig(lcmContext, GetPendingConfigFileName(), moduleManager, flags, resultStatus, cimErrorDetails);
+        //clear cache for package provider
+        result = ClearBuiltinProvCache(PACKAGE_PROVIDER_CACHE, cimErrorDetails);
+        if (result == MI_RESULT_OK)
+        {
+            flags |= LCM_EXECUTE_APPLYNEWCONFIG;
+            result = ApplyConfig(lcmContext, GetPendingConfigFileName(), moduleManager, flags, resultStatus, cimErrorDetails);
+        }
     }
 
-    //If application failed, restart requested or test flag is set, do not move to current.mof, and do not delete the pending mof file.
-    if (result != MI_RESULT_OK || DSC_RESTART_SYSTEM_FLAG & *resultStatus || flags & LCM_EXECUTE_TESTONLY)
+    if (result != MI_RESULT_OK)
+    {
+	    // Attempt to save a Failed configuration file
+	    CopyConfigurationFile(CONFIGURATION_LOCATION_PENDING, CONFIGURATION_LOCATION_FAILED, MI_TRUE, cimErrorDetails);
+        RetryDeleteFile(GetPendingConfigFileName());
+        File_RemoveT(GetConfigChecksumFileName());
+        return result;
+    }
+
+    //If restart requested or test flag is set, do not move to current.mof, and do not delete the pending mof file.
+    if (DSC_RESTART_SYSTEM_FLAG & *resultStatus || flags & LCM_EXECUTE_TESTONLY)
     {
         return result;
     }
@@ -2174,7 +2188,7 @@ MI_Result ApplyPendingConfig(
 	// We only move pending to current when not in MonitorOnlyMode. 
 	if (!ShouldMonitorOnly(configModeValue.string))
 	{
-		result = RenameConfigurationFile(lcmContext, GetPendingConfigFileName(), GetCurrentConfigFileName(), cimErrorDetails);
+		result = MoveConfigurationFiles(cimErrorDetails);
 	}
 
 EH_UNWIND:

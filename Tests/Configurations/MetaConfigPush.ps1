@@ -31,7 +31,3 @@ Configuration MetaConfigPush
 
 
 MetaConfigPush -targetClient $targetClient -Output "$env:temp\MetaConfigPush"
-<<<<<<< 5f0e7c7352445c0c113885df4c177c63ea932600
-
-=======
->>>>>>> Addressed CR Comments.
