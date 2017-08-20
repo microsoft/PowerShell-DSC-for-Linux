@@ -809,107 +809,33 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean MSFT_nxOMSContainersResource_WorkspaceId_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSContainersResource_ResourceSettings_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_WorkspaceId_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_ResourceSettings_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSContainersResource_WorkspaceId_Key_qual_value
+    &MSFT_nxOMSContainersResource_ResourceSettings_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSContainersResource_WorkspaceId_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSContainersResource_ResourceSettings_quals[] =
 {
-    &MSFT_nxOMSContainersResource_WorkspaceId_Key_qual,
+    &MSFT_nxOMSContainersResource_ResourceSettings_Key_qual,
 };
 
-/* property MSFT_nxOMSContainersResource.WorkspaceId */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSContainersResource_WorkspaceId_prop =
+/* property MSFT_nxOMSContainersResource.ResourceSettings */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSContainersResource_ResourceSettings_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
-    0x0077640B, /* code */
-    MI_T("WorkspaceId"), /* name */
-    MSFT_nxOMSContainersResource_WorkspaceId_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSContainersResource_WorkspaceId_quals), /* numQualifiers */
+    0x00727310, /* code */
+    MI_T("ResourceSettings"), /* name */
+    MSFT_nxOMSContainersResource_ResourceSettings_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSContainersResource_ResourceSettings_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSContainersResource, WorkspaceId), /* offset */
-    MI_T("MSFT_nxOMSContainersResource"), /* origin */
-    MI_T("MSFT_nxOMSContainersResource"), /* propagator */
-    NULL,
-};
-
-static MI_CONST MI_Boolean MSFT_nxOMSContainersResource_Ensure_Write_qual_value = 1;
-
-static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_Ensure_Write_qual =
-{
-    MI_T("Write"),
-    MI_BOOLEAN,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSContainersResource_Ensure_Write_qual_value
-};
-
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_Ensure_ValueMap_qual_data_value[] =
-{
-    MI_T("present"),
-    MI_T("absent"),
-};
-
-static MI_CONST MI_ConstStringA MSFT_nxOMSContainersResource_Ensure_ValueMap_qual_value =
-{
-    MSFT_nxOMSContainersResource_Ensure_ValueMap_qual_data_value,
-    MI_COUNT(MSFT_nxOMSContainersResource_Ensure_ValueMap_qual_data_value),
-};
-
-static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_Ensure_ValueMap_qual =
-{
-    MI_T("ValueMap"),
-    MI_STRINGA,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSContainersResource_Ensure_ValueMap_qual_value
-};
-
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_Ensure_Values_qual_data_value[] =
-{
-    MI_T("2"),
-    MI_T("3"),
-};
-
-static MI_CONST MI_ConstStringA MSFT_nxOMSContainersResource_Ensure_Values_qual_value =
-{
-    MSFT_nxOMSContainersResource_Ensure_Values_qual_data_value,
-    MI_COUNT(MSFT_nxOMSContainersResource_Ensure_Values_qual_data_value),
-};
-
-static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_Ensure_Values_qual =
-{
-    MI_T("Values"),
-    MI_STRINGA,
-    MI_FLAG_ENABLEOVERRIDE|MI_FLAG_TOSUBCLASS|MI_FLAG_TRANSLATABLE,
-    &MSFT_nxOMSContainersResource_Ensure_Values_qual_value
-};
-
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSContainersResource_Ensure_quals[] =
-{
-    &MSFT_nxOMSContainersResource_Ensure_Write_qual,
-    &MSFT_nxOMSContainersResource_Ensure_ValueMap_qual,
-    &MSFT_nxOMSContainersResource_Ensure_Values_qual,
-};
-
-/* property MSFT_nxOMSContainersResource.Ensure */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSContainersResource_Ensure_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00656506, /* code */
-    MI_T("Ensure"), /* name */
-    MSFT_nxOMSContainersResource_Ensure_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSContainersResource_Ensure_quals), /* numQualifiers */
-    MI_STRING, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(MSFT_nxOMSContainersResource, Ensure), /* offset */
+    offsetof(MSFT_nxOMSContainersResource, ResourceSettings), /* offset */
     MI_T("MSFT_nxOMSContainersResource"), /* origin */
     MI_T("MSFT_nxOMSContainersResource"), /* propagator */
     NULL,
@@ -917,8 +843,7 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSContainersResource_Ensure_prop =
 
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSContainersResource_props[] =
 {
-    &MSFT_nxOMSContainersResource_WorkspaceId_prop,
-    &MSFT_nxOMSContainersResource_Ensure_prop,
+    &MSFT_nxOMSContainersResource_ResourceSettings_prop,
 };
 
 static MI_CONST MI_Boolean MSFT_nxOMSContainersResource_GetTargetResource_Static_qual_value = 1;
@@ -931,7 +856,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_Stat
     &MSFT_nxOMSContainersResource_GetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_Description_qual_value = MI_T("2");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_Description_qual =
 {
@@ -967,7 +892,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_Inpu
     &MSFT_nxOMSContainersResource_GetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_InputResource_Description_qual_value = MI_T("5");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_InputResource_Description_qual_value = MI_T("3");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_InputResource_Description_qual =
 {
@@ -1008,7 +933,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_Flag
     &MSFT_nxOMSContainersResource_GetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_Flags_Description_qual_value = MI_T("6");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_Flags_Description_qual_value = MI_T("4");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_Flags_Description_qual =
 {
@@ -1058,7 +983,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_Outp
     &MSFT_nxOMSContainersResource_GetTargetResource_OutputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("7");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_OutputResource_Description_qual_value = MI_T("5");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_OutputResource_Description_qual =
 {
@@ -1099,7 +1024,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_MIRe
     &MSFT_nxOMSContainersResource_GetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("4");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_GetTargetResource_MIReturn_Description_qual_value = MI_T("2");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_GetTargetResource_MIReturn_Description_qual =
 {
@@ -1165,7 +1090,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_Sta
     &MSFT_nxOMSContainersResource_TestTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_Description_qual_value = MI_T("6");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_Description_qual =
 {
@@ -1201,7 +1126,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_Inp
     &MSFT_nxOMSContainersResource_TestTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_InputResource_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_InputResource_Description_qual_value = MI_T("7");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_InputResource_Description_qual =
 {
@@ -1242,7 +1167,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_Fla
     &MSFT_nxOMSContainersResource_TestTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_Flags_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_Flags_Description_qual_value = MI_T("8");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_Flags_Description_qual =
 {
@@ -1282,7 +1207,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_Res
     &MSFT_nxOMSContainersResource_TestTargetResource_Result_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_Result_Description_qual_value = MI_T("11");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_Result_Description_qual_value = MI_T("9");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_Result_Description_qual =
 {
@@ -1322,7 +1247,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_Pro
     &MSFT_nxOMSContainersResource_TestTargetResource_ProviderContext_Out_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("12");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_ProviderContext_Description_qual_value = MI_T("10");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_ProviderContext_Description_qual =
 {
@@ -1362,7 +1287,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_MIR
     &MSFT_nxOMSContainersResource_TestTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("8");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_TestTargetResource_MIReturn_Description_qual_value = MI_T("6");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_TestTargetResource_MIReturn_Description_qual =
 {
@@ -1429,7 +1354,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_Stat
     &MSFT_nxOMSContainersResource_SetTargetResource_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_Description_qual_value = MI_T("11");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_Description_qual =
 {
@@ -1465,7 +1390,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_Inpu
     &MSFT_nxOMSContainersResource_SetTargetResource_InputResource_EmbeddedInstance_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_InputResource_Description_qual_value = MI_T("9");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_InputResource_Description_qual_value = MI_T("7");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_InputResource_Description_qual =
 {
@@ -1506,7 +1431,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_Prov
     &MSFT_nxOMSContainersResource_SetTargetResource_ProviderContext_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("14");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_ProviderContext_Description_qual_value = MI_T("12");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_ProviderContext_Description_qual =
 {
@@ -1546,7 +1471,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_Flag
     &MSFT_nxOMSContainersResource_SetTargetResource_Flags_In_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_Flags_Description_qual_value = MI_T("10");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_Flags_Description_qual_value = MI_T("8");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_Flags_Description_qual =
 {
@@ -1586,7 +1511,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_MIRe
     &MSFT_nxOMSContainersResource_SetTargetResource_MIReturn_Static_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("13");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_SetTargetResource_MIReturn_Description_qual_value = MI_T("11");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_SetTargetResource_MIReturn_Description_qual =
 {
@@ -1677,7 +1602,7 @@ static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_Description_qual =
     &MSFT_nxOMSContainersResource_Description_qual_value
 };
 
-static MI_CONST MI_Char* MSFT_nxOMSContainersResource_ClassVersion_qual_value = MI_T("1.0.0");
+static MI_CONST MI_Char* MSFT_nxOMSContainersResource_ClassVersion_qual_value = MI_T("1.5.0");
 
 static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_ClassVersion_qual =
 {
@@ -1697,7 +1622,7 @@ static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSContainersResource_quals[] =
 MI_CONST MI_ClassDecl MSFT_nxOMSContainersResource_rtti =
 {
     MI_FLAG_CLASS, /* flags */
-    0x006D651E, /* code */
+    0x006D6522, /* code */
     MI_T("MSFT_nxOMSContainersResource"), /* name */
     MSFT_nxOMSContainersResource_quals, /* qualifiers */
     MI_COUNT(MSFT_nxOMSContainersResource_quals), /* numQualifiers */

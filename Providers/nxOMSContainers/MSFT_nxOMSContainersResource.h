@@ -19,7 +19,7 @@
 ** MSFT_nxOMSContainersResource [MSFT_nxOMSContainersResource]
 **
 ** Keys:
-**    WorkspaceId
+**    ResourceSettings
 **
 **==============================================================================
 */
@@ -29,8 +29,7 @@ typedef struct _MSFT_nxOMSContainersResource /* extends OMI_BaseResource */
     MI_Instance __instance;
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSContainersResource properties */
-    /*KEY*/ MI_ConstStringField WorkspaceId;
-    MI_ConstStringField Ensure;
+    /*KEY*/ MI_ConstStringField ResourceSettings;
 }
 MSFT_nxOMSContainersResource;
 
@@ -122,7 +121,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Post(
     return MI_Context_PostInstance(context, &self->__instance);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_WorkspaceId(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_ResourceSettings(
     _Inout_ MSFT_nxOMSContainersResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -134,7 +133,7 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_WorkspaceId(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_WorkspaceId(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_ResourceSettings(
     _Inout_ MSFT_nxOMSContainersResource* self,
     _In_z_ const MI_Char* str)
 {
@@ -146,44 +145,12 @@ MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_WorkspaceId(
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Clear_WorkspaceId(
+MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Clear_ResourceSettings(
     _Inout_ MSFT_nxOMSContainersResource* self)
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
         0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Set_Ensure(
-    _Inout_ MSFT_nxOMSContainersResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&str,
-        MI_STRING,
-        0);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_SetPtr_Ensure(
-    _Inout_ MSFT_nxOMSContainersResource* self,
-    _In_z_ const MI_Char* str)
-{
-    return self->__instance.ft->SetElementAt(
-        (MI_Instance*)&self->__instance,
-        1,
-        (MI_Value*)&str,
-        MI_STRING,
-        MI_FLAG_BORROW);
-}
-
-MI_INLINE MI_Result MI_CALL MSFT_nxOMSContainersResource_Clear_Ensure(
-    _Inout_ MSFT_nxOMSContainersResource* self)
-{
-    return self->__instance.ft->ClearElementAt(
-        (MI_Instance*)&self->__instance,
-        1);
 }
 
 /*

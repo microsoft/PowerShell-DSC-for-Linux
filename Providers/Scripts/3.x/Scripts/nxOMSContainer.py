@@ -41,21 +41,27 @@ class TestOMSAgent(IOMSAgent):
 
 OMS_ACTION = OMSAgentUtil()
 
-def Set_Marshall(WorkspaceId, Ensure):
+def Set_Marshall(ResourceSettings):
+    WorkspaceId = "Test Workspace"
+    Ensure = ResourceSettings
     LG().Log('DEBUG', "3 SET MARSHAL  - - - - - - - - - - - - ")
     LG().Log('DEBUG', "PARAMS " + WorkspaceId + " " + Ensure + "  - - - - - - - - - - - - ")
     WorkspaceId = WorkspaceId.encode('ascii', 'ignore')
     Ensure = Ensure.encode('ascii', 'ignore')
     return Set(WorkspaceId, Ensure)
 
-def Test_Marshall(WorkspaceId, Ensure):
+def Test_Marshall(ResourceSettings):
+    WorkspaceId = "Test Workspace"
+    Ensure = ResourceSettings
     LG().Log('DEBUG', "3 TEST MARSHAL  - - - - - - - - - - - - ")
     LG().Log('DEBUG', "PARAMS " + WorkspaceId + " " + Ensure + "  - - - - - - - - - - - - ")
     WorkspaceId = WorkspaceId.encode('ascii', 'ignore')
     Ensure = Ensure.encode('ascii', 'ignore')
     return Test(WorkspaceId, Ensure)
 
-def Get_Marshall(WorkspaceId, Ensure):
+def Get_Marshall(ResourceSettings):
+    WorkspaceId = "Test Workspace"
+    Ensure = ResourceSettings
     LG().Log('DEBUG', "3 GET MARSHAL  - - - - - - - - - - - - ")
     LG().Log('DEBUG', "PARAMS " + WorkspaceId + " " + Ensure + "  - - - - - - - - - - - - ")
     WorkspaceId = WorkspaceId.encode('ascii', 'ignore')

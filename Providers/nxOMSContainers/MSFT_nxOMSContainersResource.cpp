@@ -1,7 +1,6 @@
 /* @migen@ */
 #include "MSFT_nxOMSContainersResource.h"
 
-
 #include "debug_tags.hpp"
 #include "MI.h"
 #include "PythonProvider.hpp"
@@ -189,7 +188,7 @@ void MI_CALL MSFT_nxOMSContainersResource_Invoke_GetTargetResource(
 void MI_CALL MSFT_nxOMSContainersResource_Invoke_TestTargetResource(
     _In_opt_ MSFT_nxOMSContainersResource_Self* self,
     _In_ MI_Context* context,
-    _In_opt_z_ const MI_Char* nameSpace,
+   _In_opt_z_ const MI_Char* nameSpace,
     _In_opt_z_ const MI_Char* className,
     _In_opt_z_ const MI_Char* methodName,
     _In_ const MSFT_nxOMSContainersResource* instanceName,

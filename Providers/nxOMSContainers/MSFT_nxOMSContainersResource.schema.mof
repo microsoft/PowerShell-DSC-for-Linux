@@ -1,6 +1,5 @@
-[ClassVersion("1.0.0")]
+[ClassVersion("1.5.0")]
 class MSFT_nxOMSContainersResource : OMI_BaseResource
 {
-    [key] string WorkspaceId;
-    [write,ValueMap{"present", "absent"},Values{"Present", "Absent"}] string Ensure;
+    [Key] string ResourceSettings;
 };
