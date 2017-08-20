@@ -114,11 +114,11 @@ def Set(WorkspaceId,Ensure):
         LG().Log('ERROR', "Ensure value: " + Ensure + " not expected")
         return [-1]
     
-# restart oms agent
-if OMS_ACTION.restart_oms_agent():
-    return [0]
-else:
-    return [-1]
+    # restart oms agent
+    if OMS_ACTION.restart_oms_agent():
+        return [0]
+    else:
+        return [-1]
 
 def Get(WorkspaceId):
     LG().Log('DEBUG', "GET ENSURE MARSHAL  - - - - - - - - - - - - ")
