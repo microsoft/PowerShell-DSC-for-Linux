@@ -1,9 +1,9 @@
 @{
 # Version number of this module.
-ModuleVersion = '<MODULE_VERSION>'
+ModuleVersion = '1.5.8.0'
 
 # ID used to uniquely identify this module
-GUID = '94fd53da-0482-4604-a533-f2bfd70c917f'
+GUID = '2148254d-0c32-4143-94ab-6cf631b23c10'
 
 # Author of this module
 Author = 'Microsoft Corporation'
