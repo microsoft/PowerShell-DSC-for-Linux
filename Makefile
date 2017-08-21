@@ -504,20 +504,22 @@ nxOMSAuditdPlugin:
 
 nxOMSContainers:
 	rm -rf output/staging; \
-	VERSION="1.0"; \
+	VERSION="1.5.8.0"; \
 	PROVIDERS="nxOMSContainers"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
+		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/automationworker; \
 		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
+		cp -r Providers/$${current}/automationworker/* $$STAGINGDIR/MSFT_$${current}Resource/automationworker; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
 		cp Providers/Scripts/2.4x-2.5x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.4x-2.5x/Scripts; \
 		cp Providers/Scripts/2.6x-2.7x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.6x-2.7x/Scripts; \
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
-	done;\
+	done; \
 	cd output/staging; \
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
