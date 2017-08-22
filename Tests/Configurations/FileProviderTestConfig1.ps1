@@ -1,45 +1,82 @@
-# Simple File provider Test 
-
+<#
+    .SYNOPSIS
+        Simple test configuration with one nxFile resource.
+#>
 param
 (
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [string] $targetClient,
+    [String]
+    $TargetClient,
 
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [string] $Ensure
+    [String]
+    $Output,
+
+    [Parameter()]
+    [ValidateSet('Present', 'Absent')]
+    [String]
+    $Ensure,
+
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [String]
+    $Type,
+
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [String]
+    $DestinationPath,
+
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [String]
+    $Contents
 )
 
 Configuration FileProviderTestConfig1
 {
- param
- (
-    [Parameter(Mandatory=$true)]
-    [ValidateNotNullOrEmpty()]
-    [string] $targetClient,
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $TargetClient,
 
- 	[Parameter(Mandatory=$true)]
- 	[ValidateNotNullOrEmpty()]
- 	[string] $Ensure
- )
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present',
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Type = 'File',
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $DestinationPath = '/tmp/dsctest1',
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Contents = 'Linux DSC Test1!'
+    )
 
     Import-DSCResource -Module nx
 
-    Node $targetClient
+    Node $TargetClient
     {
         nxFile myTestFile
         {
             Ensure = $Ensure
-            Type = "File"
-            DestinationPath = "/tmp/dsctest1"
-            Contents="Linux DSC Test1!"
+            Type = $Type
+            DestinationPath = $DestinationPath
+            Contents = $Contents
         }
     }
 }
 
-
-FileProviderTestConfig1 -targetClient $targetClient -Ensure $Ensure -Output "$env:temp\FileProviderTestConfig1"
-
-
-
+FileProviderTestConfig1 @PSBoundParameters
