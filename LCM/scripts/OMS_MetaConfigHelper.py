@@ -4,7 +4,6 @@ import sys
 
 conf_path = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
 metamof_path = "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof"
-oms_agentid_path = "/etc/opt/microsoft/omsagent/agentid"
 agentid_path = "/etc/opt/omi/conf/omsconfig/agentid"
 omshelper_disable_path = "/etc/opt/omi/conf/omsconfig/omshelper_disable"
 
@@ -148,12 +147,6 @@ if disable_flag == True:
 if not os.path.isfile(omshelper_disable_path):
     # source the omsadmin conf file and get the key/value pairs
     keyvals = source_file(conf_path)
-    # If machine-wide agentid file is available, then read agent guid from there
-    if os.path.isfile(oms_agentid_path):
-        f = open(oms_agentid_path, "r")
-        contents = f.read().strip()
-        f.close()
-        keyvals["AGENT_GUID"] = contents
     
     # Looking for DSC_ENDPOINT and AGENT_GUID
 
