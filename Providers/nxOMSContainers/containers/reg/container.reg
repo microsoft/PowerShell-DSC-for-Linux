@@ -1,0 +1,10 @@
+# omireg libcontainer.so
+LIBRARY=container
+HOSTING=root
+CLASS=Container_ContainerInventory:CIM_ManagedElement
+CLASS=Container_ContainerStatistics:CIM_StatisticalData:CIM_ManagedElement
+CLASS=Container_DaemonEvent:CIM_ManagedElement
+CLASS=Container_ImageInventory:CIM_ManagedElement
+CLASS=Container_ContainerLog:CIM_ManagedElement
+CLASS=Container_HostInventory:CIM_ManagedElement
+CLASS=Container_Process:CIM_ManagedElement
