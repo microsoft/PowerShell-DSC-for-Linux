@@ -1094,11 +1094,23 @@ MI_Result CallConsistencyEngine(
                 GetResourceString(ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FALSE,&intlstr);   
                 ConcatStrings(&messageEvent,10,newLine, (MI_Char*)intlstr.str);
     
-                //Output event stating it resulted in false.
-                DSC_EventWriteMessageFromEngineConsistency(messageEvent);
+
+                
+                if (messageEvent != NULL)
+                {
+                    //Output event stating it resulted in false.
+                    DSC_EventWriteMessageFromEngineConsistency(messageEvent);
+                    DSC_free(messageEvent);
+                }
+
                 if(intlstr.str)
                     Intlstr_Free(intlstr);
-                result =  GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FALSE);
+
+                // This is a difference between Windows DSC and Linux DSC in ApplyAndMonitor mode. Not sure why.
+                if (ShouldMonitor(configModeValue.string))
+                {
+                    result =  GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCM_WRITEMESSAGE_ENDTESTPROCESSING_FALSE);
+                }
             }
         }
     }
