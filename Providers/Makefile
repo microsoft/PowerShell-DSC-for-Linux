@@ -79,6 +79,7 @@ PROVIDERS+=nxFileInventory
 PROVIDERS+=nxOMSAutomationWorker
 PROVIDERS+=nxOMSAgentNPMConfig
 PROVIDERS+=nxOMSAuditdPlugin
+PROVIDERS+=nxOMSContainers
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript
@@ -100,6 +101,7 @@ PROVIDERS+=nxMySqlUser
 PROVIDERS+=nxAvailableUpdates
 PROVIDERS+=nxFileInventory
 PROVIDERS+=nxOMSAutomationWorker
+PROVIDERS+=nxOMSContainers
 endif
 
 # this is used to enable the printing of xml style tags for help in debugging
