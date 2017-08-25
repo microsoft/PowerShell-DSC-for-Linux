@@ -46,6 +46,10 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
         $script:testConfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'FileProviderTestConfig1.ps1'
     }
 
+    AfterAll {
+        $null = Remove-CimSession -CimSession $script:session
+    }
+
 	It 'Verify we can set and get the metaconfiguration' {        
         $metaconfigurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPush'
         $lcmSettings = @{
@@ -53,7 +57,7 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
             ConfigurationModeFrequencyMins = 60
         }
 
-        & $script:testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $metaconfigurationOutputPath @lcmSettings
+        $null = & $script:testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $metaconfigurationOutputPath @lcmSettings
         Set-DscLocalConfigurationManager -Path $metaconfigurationOutputPath -CimSession $script:session
         
         $metaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
@@ -70,8 +74,8 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
             Contents = 'DSC test contents 1'
         }
 
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
-        Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait 
+        $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
+        Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force
         
         # Verify Get-DscConfiguration
         $dscConfig = Get-DscConfiguration -CimSession $script:session
@@ -86,8 +90,8 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
         # Use DSC to cleanup by deleting the file created above
         $nxFileParameters.Ensure = 'Absent'
 
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
-        Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait 
+        $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
+        Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force
                    
         $dscConfig = Get-DscConfiguration -CimSession $script:session
         $dscConfig.Ensure | Should Be $nxFileParameters.Ensure
@@ -103,10 +107,10 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
             Contents = 'DSC test contents 1'
         }
 
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
+        $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
 
         Publish-DscConfiguration -Path $configurationOutputPath -CimSession $script:session
-        Start-DscConfiguration -UseExisting -CimSession $script:session -Wait 
+        Start-DscConfiguration -UseExisting -CimSession $script:session -Wait -Force
 
         $dscConfig = Get-DscConfiguration -CimSession $script:session
         $dscConfig.Ensure | Should Be $nxFileParameters.Ensure
@@ -122,7 +126,7 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
             Contents = 'DSC test contents 1'
         }
 
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
+        $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
         Update-DscConfiguration -Wait -CimSession $script:session
 
         $dscConfig = Get-DscConfiguration -CimSession $script:session

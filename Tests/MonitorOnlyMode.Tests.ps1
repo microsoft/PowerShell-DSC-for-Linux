@@ -42,50 +42,67 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
 
         # Set up file path script variables
         $configurationFolderPath = Join-Path -Path $PSScriptRoot -ChildPath 'Configurations'
-        $script:testMetaconfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'MetaConfigPush.ps1'
-        $script:testConfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'FileProviderTestConfig1.ps1'
+        $testMetaconfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'MetaConfigPush.ps1'
+        $testConfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'FileProviderTestConfig1.ps1'
+
+        # Generate metaconfiguration with ApplyAndMonitor mode
+        $script:lcmSettingsApplyAndMonitor = @{
+            RefreshMode = 'PUSH'
+            ConfigurationMode = 'ApplyAndMonitor'
+        }
+        $script:metaconfigurationApplyAndMonitorOutput = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPushApplyAndMonitor'
+        $null = & $testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $script:metaconfigurationApplyAndMonitorOutput @lcmSettingsApplyAndMonitor
+
+        # Generate metaconfiguration with MonitorOnly mode
+        $script:lcmSettingsMonitorOnly = @{
+            RefreshMode = 'PUSH'
+            ConfigurationMode = 'MonitorOnly'
+        }
+        $script:metaconfigurationMonitorOnlyOutput = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPushMonitorOnly'
+        $null = & $testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $script:metaconfigurationMonitorOnlyOutput @lcmSettingsMonitorOnly
+
+        # Generate configuartion with file absent
+        $script:fileAbsentParameters = @{
+            Ensure = 'Absent'
+            Type = 'File'
+            DestinationPath = '/tmp/dsctestfile'
+            Contents = 'DSC test contents'
+        }
+        $script:configurationFileAbsentOutput = Join-Path -Path $TestDrive -ChildPath 'TestFileAbsentConfig'
+        $null = & $testConfigurationFilePath -TargetClient $script:linuxClientName -Output $script:configurationFileAbsentOutput @fileAbsentParameters
+
+        # Generate configuartion with file present
+        $script:filePresentParameters = @{
+            Ensure = 'Present'
+            Type = 'File'
+            DestinationPath = '/tmp/dsctestfile'
+            Contents = 'DSC test contents'
+        }
+        $script:configurationFilePresentOutput = Join-Path -Path $TestDrive -ChildPath 'TestFilePresentConfig'
+        $null = & $testConfigurationFilePath -TargetClient $script:linuxClientName -Output $script:configurationFilePresentOutput @filePresentParameters
     }
 
     AfterAll {
         $null = Remove-CimSession -CimSession $script:session
     }
 
-    Context 'Set up using DSC' {
-        # Generate metaconfig mof with ApplyAndMonitor mode
-        $metaconfigurationApplyOutputPath = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPushApply'
-        $lcmSettings = @{
-            RefreshMode = 'PUSH'
-            ConfigurationMode = 'ApplyAndMonitor'
-        }
-
-        & $script:testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $metaconfigurationApplyOutputPath @lcmSettings
-
+    Context 'ApplyAndMonitor Mode - Ensure set to Absent and unsure if file exists or not' {
         # Send metaconfig
         It 'Should set LCM ConfigurationMode to ApplyAndMonitor without throwing' {
-            { Set-DscLocalConfigurationManager -Path $metaconfigurationApplyOutputPath -CimSession $script:session } | Should Not Throw
+            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyAndMonitorOutput -CimSession $script:session } | Should Not Throw
         }
 
         # Validate metaconfig
         It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of ApplyAndMonitor' {
             $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
             $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode.ToLower() | Should Be $lcmSettings.RefreshMode.ToLower()
-            $currentMetaConfig.ConfigurationMode.ToLower() | Should Be $lcmSettings.ConfigurationMode.ToLower()
+            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApplyAndMonitor.RefreshMode
+            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApplyAndMonitor.ConfigurationMode
         }
 
         # Push configuration
-        $configurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'FileProviderTestConfig2'
-        $nxFileParameters = @{
-            Ensure = 'Absent'
-            Type = 'File'
-            DestinationPath = '/tmp/dsctestfile'
-            Contents = 'DSC test contents'
-        }
-
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
-
         It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
+            { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
         }
 
         # Verify Get-DscConfiguration
@@ -93,8 +110,8 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $dscConfig = Get-DscConfiguration -CimSession $script:session
             $dscConfig | Should Not Be $null
             $dscConfig.Ensure | Should Be 'Absent'
-            $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
-            $dscConfig.Contents | Should Be $nxFileParameters.Contents
+            $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
+            $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
         }
 
         # Verify Test-DscConfiguration
@@ -104,50 +121,22 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
         }
     }
 
-    <#
-        Summary: Verify in MonitorOnly Mode in Push Refresh we do not apply new configurations 
-        Action: Apply metaconfig with Refresh Mode as Push and Configuration Mode as MonitorOnly  
-                Start some configuration. Verify it is executed in Test Only Mode  
-                Apply metaconfig with Configuration mode as ApplyAndMonitor 
-                Run Start-DSC with -UseExisting Verfiy now configuraion is applied  
-        Expected Result: Verify configuration application results for each mode 
-    #>
-    Context 'RefreshMode is PUSH' {
-        # Generate metaconfig mof        
-        $metaconfigurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPush'
-        $lcmSettings = @{
-            RefreshMode = 'PUSH'
-            ConfigurationMode = 'MonitorOnly'
-        }
-
-        & $script:testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $metaconfigurationOutputPath @lcmSettings
-	
+    Context 'MonitorOnly Mode - Ensure set to Absent and file does not exist' {
         # Send metaconfig
         It 'Should set LCM ConfigurationMode to MonitorOnly without throwing' {
-            { Set-DscLocalConfigurationManager -Path $metaconfigurationOutputPath -CimSession $script:session } | Should Not Throw
+            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationMonitorOnlyOutput -CimSession $script:session } | Should Not Throw
         }
 
         # Validate metaconfig
         It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of MonitorOnly' {
             $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
             $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode.ToLower() | Should Be $lcmSettings.RefreshMode.ToLower()
-            $currentMetaConfig.ConfigurationMode.ToLower() | Should Be $lcmSettings.ConfigurationMode.ToLower()
+            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsMonitorOnly.RefreshMode
+            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsMonitorOnly.ConfigurationMode
         }
-
-        # Push configuration
-        $configurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'FileProviderTestConfig2'
-        $nxFileParameters = @{
-            Ensure = 'Absent'
-            Type = 'File'
-            DestinationPath = '/tmp/dsctestfile'
-            Contents = 'DSC test contents'
-        }
-
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
 
         It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
+            { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
         }
         
         # Verify Get-DscConfiguration
@@ -155,8 +144,8 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $dscConfig = Get-DscConfiguration -CimSession $script:session
             $dscConfig | Should Not Be $null
             $dscConfig.Ensure | Should Be 'Absent'
-            $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
-            $dscConfig.Contents | Should Be $nxFileParameters.Contents
+            $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
+            $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
         }
 
         # Verify Test-DscConfiguration
@@ -164,12 +153,11 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
             $testDscConfig.InDesiredState | Should Be $true
         }
+    }
 
-        $nxFileParameters.Ensure = 'Present'
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
-       
+    Context 'MonitorOnly Mode - Ensure set to Present and file does not exist' {
         It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
+            { Start-DscConfiguration -Path $script:configurationFilePresentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
         }
                    
         # Verify Get-DscConfiguration
@@ -177,8 +165,8 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $dscConfig = Get-DscConfiguration -CimSession $script:session
             $dscConfig | Should Not Be $null
             $dscConfig.Ensure | Should Be 'Absent'
-            $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
-            $dscConfig.Contents | Should Be $nxFileParameters.Contents
+            $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
+            $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
         }
 
         # Verify Test-DscConfiguration
@@ -186,27 +174,20 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
             $testDscConfig.InDesiredState | Should Be $false
         }
+    }
 
-        # Generate metaconfig mof with ApplyAndMonitor mode
-        $metaconfigurationApplyOutputPath = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPushApply'
-        $lcmSettings = @{
-            RefreshMode = 'PUSH'
-            ConfigurationMode = 'ApplyAndMonitor'
-        }
-
-        & $script:testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $metaconfigurationApplyOutputPath @lcmSettings
-
+    Context 'ApplyAndMonitor Mode - Ensure set to Present and file does not exist' {
         # Send metaconfig
         It 'Should set LCM ConfigurationMode to ApplyAndMonitor without throwing' {
-            { Set-DscLocalConfigurationManager -Path $metaconfigurationApplyOutputPath -CimSession $script:session } | Should Not Throw
+            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyAndMonitorOutput -CimSession $script:session } | Should Not Throw
         }
 
         # Validate metaconfig
         It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of ApplyAndMonitor' {
             $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
             $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode.ToLower() | Should Be $lcmSettings.RefreshMode.ToLower()
-            $currentMetaConfig.ConfigurationMode.ToLower() | Should Be $lcmSettings.ConfigurationMode.ToLower()
+            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApplyAndMonitor.RefreshMode
+            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApplyAndMonitor.ConfigurationMode
         }
 
         # Send command to start existing config
@@ -219,8 +200,8 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $dscConfig = Get-DscConfiguration -CimSession $script:session
             $dscConfig | Should Not Be $null
             $dscConfig.Ensure | Should Be 'Present'
-            $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
-            $dscConfig.Contents | Should Be $nxFileParameters.Contents
+            $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
+            $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
         }
 
         # Verify Test-DscConfiguration
@@ -228,19 +209,20 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
             $testDscConfig.InDesiredState | Should Be $true
         }
+    }
 
+    Context 'MonitorOnly Mode - Ensure set to Present and file exists' {
         # Send metaconfig with MonitorOnly
-        $lcmSettings.ConfigurationMode = 'MonitorOnly'
         It 'Should set LCM ConfigurationMode to MonitorOnly without throwing' {
-            { Set-DscLocalConfigurationManager -Path $metaconfigurationOutputPath -CimSession $script:session } | Should Not Throw
+            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationMonitorOnlyOutput -CimSession $script:session } | Should Not Throw
         }
 
         # Validate metaconfig
         It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of MonitorOnly' {
             $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
             $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode.ToLower() | Should Be $lcmSettings.RefreshMode.ToLower()
-            $currentMetaConfig.ConfigurationMode.ToLower() | Should Be $lcmSettings.ConfigurationMode.ToLower()
+            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsMonitorOnly.RefreshMode
+            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsMonitorOnly.ConfigurationMode
         }
 
         # Verify Get-DscConfiguration
@@ -248,8 +230,8 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $dscConfig = Get-DscConfiguration -CimSession $script:session
             $dscConfig | Should Not Be $null
             $dscConfig.Ensure | Should Be 'Present'
-            $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
-            $dscConfig.Contents | Should Be $nxFileParameters.Contents
+            $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
+            $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
         }
 
         # Verify Test-DscConfiguration
@@ -257,13 +239,11 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
             $testDscConfig.InDesiredState | Should Be $true
         }
+    }
 
-        $nxFileParameters.Ensure = 'Absent'
-
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
-       
+    Context 'MonitorOnly Mode - Ensure set to Absent and file exists' {
         It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
+            { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
         }
                    
         # Verify Get-DscConfiguration
@@ -271,8 +251,8 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $dscConfig = Get-DscConfiguration -CimSession $script:session
             $dscConfig | Should Not Be $null
             $dscConfig.Ensure | Should Be 'Present'
-            $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
-            $dscConfig.Contents | Should Be $nxFileParameters.Contents
+            $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
+            $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
         }
 
         # Verify Test-DscConfiguration
@@ -282,42 +262,22 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
         }
     }
 
-    Context 'Clean up using DSC' {
-        # Generate metaconfig mof with ApplyAndMonitor mode
-        $metaconfigurationApplyOutputPath = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPushApply'
-        $lcmSettings = @{
-            RefreshMode = 'PUSH'
-            ConfigurationMode = 'ApplyAndMonitor'
-        }
-
-        & $script:testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $metaconfigurationApplyOutputPath @lcmSettings
-
+    Context 'ApplyAndMonitor Mode - Ensure set to Absent and file exists' {
         # Send metaconfig
         It 'Should set LCM ConfigurationMode to ApplyAndMonitor without throwing' {
-            { Set-DscLocalConfigurationManager -Path $metaconfigurationApplyOutputPath -CimSession $script:session } | Should Not Throw
+            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyAndMonitorOutput -CimSession $script:session } | Should Not Throw
         }
 
         # Validate metaconfig
         It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of ApplyAndMonitor' {
             $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
             $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode.ToLower() | Should Be $lcmSettings.RefreshMode.ToLower()
-            $currentMetaConfig.ConfigurationMode.ToLower() | Should Be $lcmSettings.ConfigurationMode.ToLower()
+            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApplyAndMonitor.RefreshMode
+            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApplyAndMonitor.ConfigurationMode
         }
-
-        # Push configuration
-        $configurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'FileProviderTestConfig2'
-        $nxFileParameters = @{
-            Ensure = 'Absent'
-            Type = 'File'
-            DestinationPath = '/tmp/dsctestfile'
-            Contents = 'DSC test contents'
-        }
-
-        & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
 
         It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
+            { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
         }
 
         # Verify Get-DscConfiguration
@@ -325,8 +285,8 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
             $dscConfig = Get-DscConfiguration -CimSession $script:session
             $dscConfig | Should Not Be $null
             $dscConfig.Ensure | Should Be 'Absent'
-            $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
-            $dscConfig.Contents | Should Be $nxFileParameters.Contents
+            $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
+            $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
         }
 
         # Verify Test-DscConfiguration
