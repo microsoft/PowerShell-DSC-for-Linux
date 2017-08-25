@@ -909,12 +909,6 @@ MI_Result StripBracesFromGuid(
 
 MI_Datetime PalDatetimeToMiDatetime(_In_ PAL_Datetime inDatetime);
 
-MI_Result RenameConfigurationFile(
-	_In_ LCMProviderContext* lcmContext,
-	_In_z_ const MI_Char *fileFrom,
-	_In_z_ const MI_Char *fileTo,
-	_Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-
 extern char g_currentError[5001];
 extern StatusReport_ResourceNotInDesiredState * g_rnids;
 extern MSFT_DSCMetaConfiguration *g_metaConfig;
