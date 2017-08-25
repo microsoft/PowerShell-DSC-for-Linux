@@ -2,6 +2,10 @@ language: c
 dist: trusty   # Travis build machine is Ubuntu Trusty 14.04 x64
 sudo: required # A sudo enabled, full VM is used for building instead of a docker container
 
+branches:
+  only:
+    - master
+
 addons:
   apt:
     packages:
@@ -23,7 +27,7 @@ addons:
 script:
   - # Fetch the Build-PowerShell-DSC-for-Linux repository for dependencies to build from
   - git config --global 'url.https://github.com/.insteadOf' 'git@github.com:'
-  - git clone --recursive 'https://github.com/kwirkykat/Build-PowerShell-DSC-for-Linux.git' ../bld-dsc
+  - git clone --recursive 'https://github.com/Microsoft/Build-PowerShell-DSC-for-Linux.git' ../bld-dsc
   -
   - # Master branch for all submodules
   - cd ../bld-dsc
@@ -39,12 +43,15 @@ script:
   - sudo make install
   - cd ../
   - sudo make reg
+  -
   - # Python tests for 2.6x-2.7x
   - cd /opt/omi-*/share/dsc/Scripts/2.6x-2.7x/Scripts/Tests/
   - sudo python ./test_nxProviders.py 2> /dev/null
+  -
   - # Python tests for 3.x
   - cd /opt/omi-*/share/dsc/Scripts/3.x/Scripts/Tests/
   - sudo python3 ./test_nxProviders.py 2> /dev/null
+  -
   - # Python tests for 2.4x-2.5x
   - cd /tmp
   - wget -q https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz
