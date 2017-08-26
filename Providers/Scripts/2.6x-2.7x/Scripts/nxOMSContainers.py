@@ -22,21 +22,25 @@ LG = nxDSCLog.DSCLog
 MODULE_RESOURCE_DIR ='/opt/microsoft/omsconfig/modules/nxOMSContainers/DSCResources/MSFT_nxOMSContainersResource/containers'
 
 PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
-CONF_PATH = '/etc/opt/microsoft/omsagent/<WorkspaceId>/conf/omsagent.d'
+CONF_PATH = '/etc/opt/microsoft/omsagent/<WorkspaceID>/conf/omsagent.d'
 REG_PATH = '/etc/opt/omi/conf/omiregister/root-cimv2'
 LIB_PATH = '/opt/microsoft/docker-cimprov/lib'
 YAML_PATH = '/var/opt/microsoft/docker-cimprov/state'
+STATE_DIR_PATH = '/var/opt/microsoft/omsagent/<WorkspaceID>/state'
 
 class IOMSAgent:
     def restart_oms_agent(self):
         pass
     
 class OMSAgentUtil(IOMSAgent):
-    def restart_oms_agent(self):
-        if os.system('sudo /opt/microsoft/omsagent/bin/service_control restart') == 0:
+    def restart_oms_agent(self, WorkspaceID):
+        wsId = WorkspaceID
+        if wsId is None:
+            wsId = ''
+        if os.system('sudo /opt/microsoft/omsagent/bin/service_control restart %s' %(wsId)) == 0:
             return True
         else:
-            LG().Log('ERROR', 'Error restarting omsagent.')
+            LOG_ACTION.log(LogType.Error, 'Error restarting omsagent for workspace ' + wsId)
             return False
 
 class TestOMSAgent(IOMSAgent):
@@ -45,34 +49,31 @@ class TestOMSAgent(IOMSAgent):
 
 OMS_ACTION = OMSAgentUtil()
 
-def Set_Marshall(ResourceSettings):
+def Set_Marshall(WorkspaceID,Ensure):
     global CONF_PATH
-    WorkspaceId,Ensure = ResourceSettings.split(":")
-    WorkspaceId = WorkspaceId.encode('ascii', 'ignore')
-    CONF_PATH = CONF_PATH.replace('<WorkspaceId>',WorkspaceId)
+    WorkspaceID = WorkspaceID.encode('ascii', 'ignore')
+    CONF_PATH = CONF_PATH.replace('<WorkspaceID>',WorkspaceID)
     Ensure = Ensure.encode('ascii', 'ignore')
-    return Set(WorkspaceId, Ensure)
+    return Set(WorkspaceID, Ensure)
 
-def Test_Marshall(ResourceSettings):
+def Test_Marshall(WorkspaceID,Ensure):
     global CONF_PATH
-    WorkspaceId,Ensure = ResourceSettings.split(":")
-    WorkspaceId = WorkspaceId.encode('ascii', 'ignore')
+    WorkspaceID = WorkspaceID.encode('ascii', 'ignore')
     Ensure = Ensure.encode('ascii', 'ignore')
-    CONF_PATH = CONF_PATH.replace('<WorkspaceId>',WorkspaceId)
-    return Test(WorkspaceId, Ensure)
+    CONF_PATH = CONF_PATH.replace('<WorkspaceID>',WorkspaceID)
+    return Test(WorkspaceID, Ensure)
 
-def Get_Marshall(ResourceSettings):
-    WorkspaceId,Ensure = ResourceSettings.split(":")
-    WorkspaceId = WorkspaceId.encode('ascii', 'ignore')
+def Get_Marshall(WorkspaceID,Ensure):
+    WorkspaceID = WorkspaceID.encode('ascii', 'ignore')
     Ensure = Ensure.encode('ascii', 'ignore')
 
     retval = 0
     retd = dict()
-    retd['WorkspaceId'] = WorkspaceId
+    retd['WorkspaceID'] = WorkspaceID
     retd['Ensure'] = Ensure
     return retval, retd
  
-def Set(WorkspaceId,Ensure):
+def Set(WorkspaceID,Ensure):
     plugin_dir = os.path.join(MODULE_RESOURCE_DIR, "plugin")
     conf_dir = os.path.join(MODULE_RESOURCE_DIR, "conf")
     lib_dir = os.path.join(MODULE_RESOURCE_DIR, "lib")
@@ -81,8 +82,9 @@ def Set(WorkspaceId,Ensure):
 
     if Ensure == 'Present':
         # copy all the required files to the client machine
-        copy_all_files(plugin_dir, PLUGIN_PATH)
         copy_all_files(conf_dir, CONF_PATH)
+        update_state_dir_path(os.path.join(CONF_PATH, "container.conf"), WorkspaceID)
+        copy_all_files(plugin_dir, PLUGIN_PATH)
         copy_all_files(lib_dir, LIB_PATH)
         copy_all_files(reg_dir, REG_PATH)
         check_and_create_yaml(yaml_dir, YAML_PATH)
@@ -95,12 +97,12 @@ def Set(WorkspaceId,Ensure):
         return [-1]
     
     # restart oms agent
-    if OMS_ACTION.restart_oms_agent():
+    if OMS_ACTION.restart_oms_agent(WorkspaceID):
         return [0]
     else:
         return [-1]
 
-def Test(WorkspaceId, Ensure):
+def Test(WorkspaceID, Ensure):
     """
     Test method for the DSC resoruce
     If it returns [0] no further action is taken
@@ -124,6 +126,15 @@ def Test(WorkspaceId, Ensure):
         # log error Ensure value not expected
         LG().Log('ERROR', "Ensure value: " + Ensure + " not expected")
         return [-1]
+
+def update_state_dir_path(dest, WorkspaceID):
+    replace_text = STATE_DIR_PATH.replace('<WorkspaceID>',WorkspaceID)
+    with open(dest) as f:
+        s = f.read()
+
+    with open(dest, 'w') as f:
+        s = s.replace('%STATE_DIR_WS%', replace_text)
+        f.write(s)
 
 def copy_all_files(src, dest):
     try:

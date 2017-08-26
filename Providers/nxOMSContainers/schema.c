@@ -809,33 +809,65 @@ MI_CONST MI_ClassDecl OMI_BaseResource_rtti =
 **==============================================================================
 */
 
-static MI_CONST MI_Boolean MSFT_nxOMSContainersResource_ResourceSettings_Key_qual_value = 1;
+static MI_CONST MI_Boolean MSFT_nxOMSContainersResource_WorkspaceID_Key_qual_value = 1;
 
-static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_ResourceSettings_Key_qual =
+static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_WorkspaceID_Key_qual =
 {
     MI_T("Key"),
     MI_BOOLEAN,
     MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
-    &MSFT_nxOMSContainersResource_ResourceSettings_Key_qual_value
+    &MSFT_nxOMSContainersResource_WorkspaceID_Key_qual_value
 };
 
-static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSContainersResource_ResourceSettings_quals[] =
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSContainersResource_WorkspaceID_quals[] =
 {
-    &MSFT_nxOMSContainersResource_ResourceSettings_Key_qual,
+    &MSFT_nxOMSContainersResource_WorkspaceID_Key_qual,
 };
 
-/* property MSFT_nxOMSContainersResource.ResourceSettings */
-static MI_CONST MI_PropertyDecl MSFT_nxOMSContainersResource_ResourceSettings_prop =
+/* property MSFT_nxOMSContainersResource.WorkspaceID */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSContainersResource_WorkspaceID_prop =
 {
     MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
-    0x00727310, /* code */
-    MI_T("ResourceSettings"), /* name */
-    MSFT_nxOMSContainersResource_ResourceSettings_quals, /* qualifiers */
-    MI_COUNT(MSFT_nxOMSContainersResource_ResourceSettings_quals), /* numQualifiers */
+    0x0077640B, /* code */
+    MI_T("WorkspaceID"), /* name */
+    MSFT_nxOMSContainersResource_WorkspaceID_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSContainersResource_WorkspaceID_quals), /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(MSFT_nxOMSContainersResource, ResourceSettings), /* offset */
+    offsetof(MSFT_nxOMSContainersResource, WorkspaceID), /* offset */
+    MI_T("MSFT_nxOMSContainersResource"), /* origin */
+    MI_T("MSFT_nxOMSContainersResource"), /* propagator */
+    NULL,
+};
+
+static MI_CONST MI_Boolean MSFT_nxOMSContainersResource_Ensure_Key_qual_value = 1;
+
+static MI_CONST MI_Qualifier MSFT_nxOMSContainersResource_Ensure_Key_qual =
+{
+    MI_T("Key"),
+    MI_BOOLEAN,
+    MI_FLAG_DISABLEOVERRIDE|MI_FLAG_TOSUBCLASS,
+    &MSFT_nxOMSContainersResource_Ensure_Key_qual_value
+};
+
+static MI_Qualifier MI_CONST* MI_CONST MSFT_nxOMSContainersResource_Ensure_quals[] =
+{
+    &MSFT_nxOMSContainersResource_Ensure_Key_qual,
+};
+
+/* property MSFT_nxOMSContainersResource.Ensure */
+static MI_CONST MI_PropertyDecl MSFT_nxOMSContainersResource_Ensure_prop =
+{
+    MI_FLAG_PROPERTY|MI_FLAG_KEY|MI_FLAG_READONLY, /* flags */
+    0x00656506, /* code */
+    MI_T("Ensure"), /* name */
+    MSFT_nxOMSContainersResource_Ensure_quals, /* qualifiers */
+    MI_COUNT(MSFT_nxOMSContainersResource_Ensure_quals), /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(MSFT_nxOMSContainersResource, Ensure), /* offset */
     MI_T("MSFT_nxOMSContainersResource"), /* origin */
     MI_T("MSFT_nxOMSContainersResource"), /* propagator */
     NULL,
@@ -843,7 +875,8 @@ static MI_CONST MI_PropertyDecl MSFT_nxOMSContainersResource_ResourceSettings_pr
 
 static MI_PropertyDecl MI_CONST* MI_CONST MSFT_nxOMSContainersResource_props[] =
 {
-    &MSFT_nxOMSContainersResource_ResourceSettings_prop,
+    &MSFT_nxOMSContainersResource_WorkspaceID_prop,
+    &MSFT_nxOMSContainersResource_Ensure_prop,
 };
 
 static MI_CONST MI_Boolean MSFT_nxOMSContainersResource_GetTargetResource_Static_qual_value = 1;
