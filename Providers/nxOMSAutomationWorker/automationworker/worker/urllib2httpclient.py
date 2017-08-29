@@ -6,9 +6,12 @@
 
 import httplib
 import socket
+import time
+import traceback
 import urllib2
 
 from httpclient import *
+from workerexception import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
@@ -64,6 +67,24 @@ class HttpsClientHandler(urllib2.HTTPSHandler):
                                            context=context)
 
 
+def request_retry_handler(func):
+    def decorated_func(*args, **kwargs):
+        max_retry_count = 3
+        for iteration in range(0, max_retry_count, 1):
+            try:
+                ret = func(*args, **kwargs)
+                return ret
+            except Exception, exception:
+                if iteration >= max_retry_count - 1:
+                    raise RetryAttemptExceededException(traceback.format_exc())
+                elif SSL_MODULE_NAME in sys.modules:
+                    if type(exception).__name__ == 'SSLError':
+                        time.sleep(5 + iteration)
+                        continue
+                raise exception
+    return decorated_func
+
+
 class Urllib2HttpClient(HttpClient):
     """Urllib2 http client. Inherits from HttpClient.
 
@@ -78,6 +99,7 @@ class Urllib2HttpClient(HttpClient):
     def __init__(self, cert_path, key_path, insecure=False, proxy_configuration=None):
         HttpClient.__init__(self, cert_path, key_path, insecure, proxy_configuration)
 
+    @request_retry_handler
     def issue_request(self, url, headers, method=None, data=None):
         """Issues a GET request to the provided url and using the provided headers.
 
