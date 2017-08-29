@@ -1,13 +1,13 @@
 ## Table of Contents
-- [Set up DSC and OMI Repo](#setup-repo)
+- [Setup DSC and OMI Repo](#setup-dsc-and-omi-repo)
 - [Build OMI](#build-omi)
 - [Build DSC](#build-dsc)
 - [Run OMI Server](#run-omi-server)
-- [Test basic DSC functionality](#ensure-dsc-functionality)
+- [Test basic DSC functionality](#test-basic-dsc-functionality)
 - [Update DSC and rebuild](#update-dsc-and-rebuild)
 
 
-##Set up DSC and OMI Repo -
+##Set up DSC and OMI Repo
 
 1. Clone the repo. 
    - git clone https://github.com/Microsoft/PowerShell-DSC-for-Linux.git 
