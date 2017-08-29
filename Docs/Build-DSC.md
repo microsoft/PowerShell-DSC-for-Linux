@@ -7,7 +7,7 @@
 - [Update DSC and rebuild](#update-dsc-and-rebuild)
 
 
-##Setup DSC and OMI Repo
+## Setup DSC and OMI Repo
 
 1. Clone the repo. 
    - git clone https://github.com/Microsoft/PowerShell-DSC-for-Linux.git 
