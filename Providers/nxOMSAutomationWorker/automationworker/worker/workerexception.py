@@ -93,3 +93,8 @@ class InvalidFilePermissionException(Exception):
 class FileNotFoundException(Exception):
     def __init__(self, path):
         Exception.__init__(self, "File not found. [path=" + str(path) + "]")
+
+
+class RetryAttemptExceededException(Exception):
+    def __init__(self, exception):
+        Exception.__init__(self, "Retry attempt exceeded. [exception=" + str(exception) + "]")
