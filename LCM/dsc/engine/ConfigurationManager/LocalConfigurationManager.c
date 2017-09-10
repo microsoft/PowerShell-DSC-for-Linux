@@ -63,11 +63,84 @@ static LCMTaskNode * g_TaskHead = NULL;
 static pthread_mutex_t g_TaskQueueMutex;
 static int g_TaskQueueShutdown = 0;
 static int g_TaskQueueExists = 0;
+static MI_Char g_CurrentRunningMethodName[LCM_MAX_PATH] = {0};
+
+// This method is to verify if a task node can be added in the operation queue or not.
+// Task is not allowed to add in queue in following conditions.
+//     1. Incoming dsc task request is ‘PerformRequiredConfigurationChecks’
+//          and
+//            a. Consistency Check is already running.
+//            b. Consistency Check is already queued to run later.
+MI_Boolean TaskAllowedToAddInQueue(LCMTaskNode * node)
+{
+    LCMTaskNode* current;
+    MI_Boolean result = MI_TRUE;
+
+    if(node == NULL)
+    {
+        return result;
+    }
+
+    Context_Invoke_Basic *nodeArgs = (Context_Invoke_Basic *)node->params;
+    if(nodeArgs == NULL || nodeArgs->methodName == NULL)
+    {
+        return result;
+    }
+
+    pthread_mutex_lock(&g_TaskQueueMutex);
+
+    // if incoming request is consistency request.
+    if(Tcscasecmp(nodeArgs->methodName, MSFT_DSCLocalConfigManager_PerformRequiredConfigurationChecks) == 0)
+    {
+        // verify if consistency operation is already queued.
+        current = g_TaskHead;
+        while (current != NULL)
+        {
+            Context_Invoke_Basic *currentNodeArgs = current->params;
+            if(currentNodeArgs == NULL || currentNodeArgs->methodName == NULL)
+            {
+                current = current->next;
+                continue;
+            }
+
+            // Only one consistency operation can be queued.
+            if(Tcscasecmp(currentNodeArgs->methodName, MSFT_DSCLocalConfigManager_PerformRequiredConfigurationChecks) == 0)
+            {
+                DSC_EventWriteMessageDscOperationAlreadyQueued(currentNodeArgs->methodName);
+                result = MI_FALSE;
+                goto Cleanup;
+            }
+
+            current = current->next;
+        }
+
+        // verify if consistency operation is already running.
+        if(Tcscasecmp(g_CurrentRunningMethodName, MSFT_DSCLocalConfigManager_PerformRequiredConfigurationChecks) == 0)
+        {
+            DSC_EventWriteMessageDscOperationAlreadyRunning(nodeArgs->methodName);
+            result = MI_FALSE;
+            goto Cleanup;
+        }
+    }
+
+Cleanup:
+    pthread_mutex_unlock(&g_TaskQueueMutex);
+    return result;
+}
 
 void AddToTaskQueue(LCMTaskNode * node)
 {
     LCMTaskNode* current;
+    if(!TaskAllowedToAddInQueue(node))
+    {
+        Context_Invoke_Basic *args = (Context_Invoke_Basic *)node->params;
+        MI_Context_PostResult(args->context, MI_RESULT_OK);
+        DSC_free(node);
+        return;
+    }
+
     pthread_mutex_lock(&g_TaskQueueMutex);
+
     if (g_TaskHead == NULL)
     {
 	g_TaskHead = node;
@@ -102,28 +175,50 @@ void TaskQueueLoop()
     
     while (shouldShutdown == 0)
     {
-	pthread_mutex_lock(&g_TaskQueueMutex);
+    pthread_mutex_lock(&g_TaskQueueMutex);
 	if (g_TaskHead != NULL)
 	{
 	    Thread t;
-	    PAL_Uint32 ret;
+        PAL_Uint32 ret;
+        ptrdiff_t start,finish;
+        MI_Real64 duration;
+        MI_Char wcTime[DURATION_SIZE] = {0}; 
 
 	    currentTask = g_TaskHead;
 	    g_TaskHead = currentTask->next;
-	    pthread_mutex_unlock(&g_TaskQueueMutex);
+        
+        Context_Invoke_Basic *nodeArgs = (Context_Invoke_Basic *)currentTask->params;
+        if(nodeArgs != NULL && nodeArgs->methodName != NULL)
+        {
+            Tcslcpy(g_CurrentRunningMethodName, nodeArgs->methodName, LCM_MAX_PATH);
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
+        
+        DSC_EventWriteMessageStartingDscOperation(g_CurrentRunningMethodName);
+
+        // Capture timestamp when operation started.
+        start=CPU_GetTimeStamp();
 
 	    Thread_CreateJoinable(&t, currentTask->task, NULL, currentTask->params);
 	    Thread_Join(&t, &ret);
 	    Thread_Destroy(&t);
-	    DSC_free(currentTask);
-	}
+        DSC_free(currentTask);
+
+        // Operation is completed.
+        finish=CPU_GetTimeStamp();
+        duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+        Stprintf(wcTime, DURATION_SIZE, MI_T("%0.4f"), duration);
+
+        DSC_EventWriteMessageDscOperationCompleted(g_CurrentRunningMethodName, wcTime);
+        g_CurrentRunningMethodName[0] = '\0';
+    }
 	else
 	{
 	    currentTask = NULL;
 	    pthread_mutex_unlock(&g_TaskQueueMutex);
 	}
 
-	usleep(10000);
+    usleep(10000);
 
 	pthread_mutex_lock(&g_TaskQueueMutex);
 	shouldShutdown = g_TaskQueueShutdown;
