@@ -868,3 +868,27 @@ FILE_EVENT3(4327, WebDownloadManagerDoActionGetUrlVersion2_Impl, LOG_INFO, PAL_T
 #define WebDownloadManagerDoActionGetCallVersion2(a0, a1, a2) WebDownloadManagerDoActionGetCallVersion2_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
 #endif
 FILE_EVENT3(4328, WebDownloadManagerDoActionGetCallVersion2_Impl, LOG_INFO, PAL_T("Job %s : \nWebDownloadManager for AgentId %s Do-DscAction command, GET call result: %s."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define MessageDscOperationAlreadyQueued(a0, a1) MessageDscOperationAlreadyQueued_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define MessageDscOperationAlreadyQueued(a0, a1) MessageDscOperationAlreadyQueued_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4329, MessageDscOperationAlreadyQueued_Impl, LOG_WARNING, PAL_T("Job %s : DSC Operation %s is already queued, ignoring the request."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define MessageDscOperationAlreadyRunning(a0, a1) MessageDscOperationAlreadyRunning_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define MessageDscOperationAlreadyRunning(a0, a1) MessageDscOperationAlreadyRunning_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4330, MessageDscOperationAlreadyRunning_Impl, LOG_WARNING, PAL_T("Job %s : DSC Operation %s is already running, ignoring the request."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define MessageStartingDscOperation(a0, a1) MessageStartingDscOperation_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1))
+#else
+#define MessageStartingDscOperation(a0, a1) MessageStartingDscOperation_Impl(0, 0, tcs(a0), tcs(a1))
+#endif
+FILE_EVENT2(4331, MessageStartingDscOperation_Impl, LOG_WARNING, PAL_T("Job %s : Starting %s DSC operation."), const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define MessageDscOperationCompleted(a0, a1, a2) MessageDscOperationCompleted_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define MessageDscOperationCompleted(a0, a1, a2) MessageDscOperationCompleted_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4332, MessageDscOperationCompleted_Impl, LOG_WARNING, PAL_T("Job %s : %s DSC operation completed in %s seconds."), const TChar*, const TChar*, const TChar*)

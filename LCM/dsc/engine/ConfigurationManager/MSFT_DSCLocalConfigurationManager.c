@@ -29,9 +29,22 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Load(
     _In_opt_ MI_Module_Self* selfModule,
     _In_ MI_Context* context)
 {
+    MI_Result miResult;
+    MI_Instance *cimErrorDetails = NULL;
     MI_UNREFERENCED_PARAMETER(selfModule);
 
     *self = NULL;
+
+    //load will not be called by multiple threads
+    miResult = InitHandler(MI_T("MSFT_DSCLocalConfigurationManager_Load"), &cimErrorDetails);
+
+    if(miResult != MI_RESULT_OK)
+    {
+        MI_PostCimError(context, cimErrorDetails);
+        MI_Instance_Delete(cimErrorDetails);        
+        return;
+    }
+
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 

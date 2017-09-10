@@ -339,6 +339,18 @@ void DSCFilePutLog(
 #define DSC_EventWriteDeleteFileFailed(AttemptNumber, FilePath, lastError, errorMessage) \
     ExpandEvent(DeleteFileFailed( g_ConfigurationDetails.jobGuidString, AttemptNumber, FilePath, lastError, errorMessage))
 
+#define DSC_EventWriteMessageDscOperationAlreadyQueued(dscOperationName) \
+    ExpandEvent(MessageDscOperationAlreadyQueued( g_ConfigurationDetails.jobGuidString, dscOperationName))
+
+#define DSC_EventWriteMessageDscOperationAlreadyRunning(dscOperationName) \
+    ExpandEvent(MessageDscOperationAlreadyRunning( g_ConfigurationDetails.jobGuidString, dscOperationName))
+    
+#define DSC_EventWriteMessageStartingDscOperation(dscOperationName) \
+    ExpandEvent(MessageStartingDscOperation( g_ConfigurationDetails.jobGuidString, dscOperationName))
+
+#define DSC_EventWriteMessageDscOperationCompleted(dscOperationName, totalExecutionTimeInSec) \
+    ExpandEvent(MessageDscOperationCompleted( g_ConfigurationDetails.jobGuidString, dscOperationName, totalExecutionTimeInSec))
+
 //Messages output in the operational channel
 #define DSC_EventWriteMessageScheduleTaskAfterReboot() \
     ExpandEvent(MessageScheduleTaskAfterReboot( g_ConfigurationDetails.jobGuidString))
