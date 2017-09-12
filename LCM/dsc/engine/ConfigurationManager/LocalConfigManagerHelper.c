@@ -1479,6 +1479,19 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
                 File_RemoveT(GetPartialConfigBaseDocumentInstanceFileName());
         }
 
+        // If Current.mof exists, move Current.mof to Previous.mof
+        if (File_ExistT(GetCurrentConfigFileName()) == 0)
+        {
+            result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
+
+            if (result != MI_RESULT_OK)
+            {
+                MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
+                moduleManager->ft->Close(moduleManager, NULL);
+                return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
+            }
+        }
+
         File_CopyT(GetPendingConfigTmpFileName(), GetPendingConfigFileName());
         File_CopyT(GetPartialConfigBaseDocumentInstanceTmpFileName(), GetPartialConfigBaseDocumentInstanceFileName());
 
@@ -2033,7 +2046,20 @@ Cleanup:
         }
         else //Only in the case of no partial configuration should you save it in pending.mof and do pushdependency check.
         {
+            // If Current.mof exists, move Current.mof to Previous.mof
+            if (File_ExistT(GetCurrentConfigFileName()) == 0)
+            {
+                result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
 
+                if (result != MI_RESULT_OK)
+                {
+                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
+                    moduleManager->ft->Close(moduleManager, NULL);
+                    return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
+                }
+            }
+
+            // If Pending.mof exists, throw an error if Force was not specified
             if (File_ExistT(GetPendingConfigFileName()) != -1)
             {
                 if (force == MI_TRUE)
@@ -2054,6 +2080,7 @@ Cleanup:
                 }
             }
             
+            // Save the new configuration to Pending.mof
             result = SaveFile(GetPendingConfigFileName(), ConfigData, dataSize, cimErrorDetails);
             if ( result != MI_RESULT_OK)
             {
@@ -2968,20 +2995,16 @@ MI_Result MoveConfigurationFiles(
     }
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
 
-    result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
+    result = CopyConfigurationFile(CONFIGURATION_LOCATION_PENDING, CONFIGURATION_LOCATION_CURRENT, MI_TRUE, cimErrorDetails);    
     if (result == MI_RESULT_OK)
     {
-        result = CopyConfigurationFile(CONFIGURATION_LOCATION_PENDING, CONFIGURATION_LOCATION_CURRENT, MI_TRUE, cimErrorDetails);    
-        if (result == MI_RESULT_OK)
+        fResult = File_RemoveT(GetPendingConfigFileName());
+        if (fResult)
         {
-            fResult = File_RemoveT(GetPendingConfigFileName());
-            if (fResult)
-            {
-                return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_PENDINGFILEAFTER_FAILED);
-            }  
+            return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_PENDINGFILEAFTER_FAILED);
+        }  
 
-            return MI_RESULT_OK;
-        }
+        return MI_RESULT_OK;
     }
 
     fResult = File_RemoveT(GetPendingConfigFileName());
@@ -6317,21 +6340,26 @@ MI_Result MI_CALL LCM_Pull_Execute(
             // If everything is good we will apply the configuration here.
             if (result == MI_RESULT_OK)
             {
+                // If Current.mof exists, move Current.mof to Previous.mof
                 if (File_ExistT(GetCurrentConfigFileName()) == 0)
                 {
-                    if (File_RemoveT(GetCurrentConfigFileName()) != 0)
+                    result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
+
+                    if (result != MI_RESULT_OK)
                     {
-                        DSC_EventWriteDeleteCurrentConfigFailed();
+                        MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
+                        moduleManager->ft->Close(moduleManager, NULL);
+                        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
                     }
                 }
 
                 if (numModulesInstalled > 0)
                 {
-		    result = ModuleManager_Update(moduleManager, cimErrorDetails);
-		    if (result != MI_RESULT_OK)
-		    {
-			return result;
-		    }
+		            result = ModuleManager_Update(moduleManager, cimErrorDetails);
+		            if (result != MI_RESULT_OK)
+		            {
+			            return result;
+		            }
                     system(OMI_RELOAD_COMMAND);
                 }
 
@@ -6459,86 +6487,24 @@ MI_Result LCM_Pull_GetConfiguration(
         _Out_ MI_Uint32 *getActionStatusCode,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
-        MI_Char* mofFileName = NULL;
-        MI_Result result = MI_RESULT_OK;
-        MI_Char *targetMofPath = NULL;
-        MI_Char *targetMofChecksumPath = NULL;
-        MI_Char *resultStatus = NULL;
-        MI_Char * directoryName = NULL;
-        char command[1024];
+    MI_Char* mofFileName = NULL;
+    MI_Result result = MI_RESULT_OK;
+    MI_Char *targetMofPath = NULL;
+    MI_Char *targetMofChecksumPath = NULL;
+    MI_Char *resultStatus = NULL;
+    MI_Char * directoryName = NULL;
+    char command[1024];
 
-        if (cimErrorDetails == NULL)
-        {
-                return MI_RESULT_INVALID_PARAMETER;
-        }
+    if (cimErrorDetails == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
 
-        *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
+    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
 
-        result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, assignedConfiguration, &mofFileName, &directoryName, numModulesInstalled, &resultStatus, getActionStatusCode, cimErrorDetails);
-        if (result != MI_RESULT_OK)
-        {
-            if (directoryName != NULL)
-            {
-                snprintf(command, 1024, "rm -rf %s", directoryName);
-                system(command);
-                free(directoryName);
-            }
-            return result;
-        }
-
-        if (resultStatus == NULL)
-        {
-                EH_Check((result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_PULL_GETCONF_NORESULTSTATUS)) == MI_RESULT_OK);
-        }
-
-        if (Tcscasecmp(resultStatus, PULL_STATUSCODE_OK) == 0)
-        {
-                if (partialConfigName != NULL)
-                {
-                        result = GetPartialConfigurationPath(partialConfigName, &targetMofPath, cimErrorDetails);
-                        EH_Check(result == MI_RESULT_OK);
-
-                        result = GetPartialConfigurationPathCheckSum(partialConfigName, &targetMofChecksumPath, cimErrorDetails);
-                        EH_Check(result == MI_RESULT_OK);
-
-                        result = ValidatePartialConfiguration(moduleManager, mofFileName, metaConfigInstance, cimErrorDetails);
-                        EH_Check(result == MI_RESULT_OK);
-
-                }
-                else
-                {
-                        targetMofPath = (MI_Char*) GetPendingConfigFileName();
-                        targetMofChecksumPath = (MI_Char*) GetConfigChecksumFileName();
-                }
-                result = CopyConfigurationFileFromTemp(mofFileName, targetMofPath, cimErrorDetails);
-                if (result == MI_RESULT_OK)
-                {
-                        result = CopyConfigurationChecksum(mofFileName, targetMofChecksumPath, cimErrorDetails);
-                }
-                EH_Check(result == MI_RESULT_OK);
-
-
-        }
-        else if (Tcscasecmp(resultStatus, PULL_STATUSCODE_RETRY) != 0)
-        {
-                //Uknown status code return error.
-                result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_PULL_GETCONF_UNEXPECTEDRESULTSTATUS);
-                EH_Check(result == MI_RESULT_OK);
-        }
-EH_UNWIND:
-                DSCFREE_IF_NOT_NULL(resultStatus);
-        if (mofFileName != NULL)
-        {
-                CleanupTempDirectory(mofFileName);
-                DSC_free(mofFileName);
-        }
-        if (partialConfigName != NULL)//In this case targetmof path were dynamically assigned
-        {
-                DSCFREE_IF_NOT_NULL(targetMofPath);
-                DSCFREE_IF_NOT_NULL(targetMofChecksumPath);
-        }
-
-        // Delete temp directory if exists
+    result = Pull_GetConfigurationWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, assignedConfiguration, &mofFileName, &directoryName, numModulesInstalled, &resultStatus, getActionStatusCode, cimErrorDetails);
+    if (result != MI_RESULT_OK)
+    {
         if (directoryName != NULL)
         {
             snprintf(command, 1024, "rm -rf %s", directoryName);
@@ -6546,6 +6512,79 @@ EH_UNWIND:
             free(directoryName);
         }
         return result;
+    }
+
+    if (resultStatus == NULL)
+    {
+        EH_Check((result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_PULL_GETCONF_NORESULTSTATUS)) == MI_RESULT_OK);
+    }
+
+    if (Tcscasecmp(resultStatus, PULL_STATUSCODE_OK) == 0)
+    {
+        if (partialConfigName != NULL)
+        {
+            result = GetPartialConfigurationPath(partialConfigName, &targetMofPath, cimErrorDetails);
+            EH_Check(result == MI_RESULT_OK);
+
+            result = GetPartialConfigurationPathCheckSum(partialConfigName, &targetMofChecksumPath, cimErrorDetails);
+            EH_Check(result == MI_RESULT_OK);
+
+            result = ValidatePartialConfiguration(moduleManager, mofFileName, metaConfigInstance, cimErrorDetails);
+            EH_Check(result == MI_RESULT_OK);
+        }
+        else
+        {
+            // If Current.mof exists, move Current.mof to Previous.mof
+            if (File_ExistT(GetCurrentConfigFileName()) == 0)
+            {
+                result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
+
+                if (result != MI_RESULT_OK)
+                {
+                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
+                    moduleManager->ft->Close(moduleManager, NULL);
+                    return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
+                }
+            }
+
+            targetMofPath = (MI_Char*) GetPendingConfigFileName();
+            targetMofChecksumPath = (MI_Char*) GetConfigChecksumFileName();
+        }
+
+        result = CopyConfigurationFileFromTemp(mofFileName, targetMofPath, cimErrorDetails);
+        if (result == MI_RESULT_OK)
+        {
+            result = CopyConfigurationChecksum(mofFileName, targetMofChecksumPath, cimErrorDetails);
+        }
+        EH_Check(result == MI_RESULT_OK);
+    }
+    else if (Tcscasecmp(resultStatus, PULL_STATUSCODE_RETRY) != 0)
+    {
+        //Uknown status code return error.
+        result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_PULL_GETCONF_UNEXPECTEDRESULTSTATUS);
+        EH_Check(result == MI_RESULT_OK);
+    }
+EH_UNWIND:
+    DSCFREE_IF_NOT_NULL(resultStatus);
+    if (mofFileName != NULL)
+    {
+        CleanupTempDirectory(mofFileName);
+        DSC_free(mofFileName);
+    }
+    if (partialConfigName != NULL)//In this case targetmof path were dynamically assigned
+    {
+        DSCFREE_IF_NOT_NULL(targetMofPath);
+        DSCFREE_IF_NOT_NULL(targetMofChecksumPath);
+    }
+
+    // Delete temp directory if exists
+    if (directoryName != NULL)
+    {
+        snprintf(command, 1024, "rm -rf %s", directoryName);
+        system(command);
+        free(directoryName);
+    }
+    return result;
 }
 
 MI_Result ClearBuiltinProvCache(

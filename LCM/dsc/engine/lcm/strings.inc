@@ -598,6 +598,7 @@ INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY
 INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , "Error adding instance array to serializedInstance")
 
 INTERNAL_Intlstr_Define0(ID_LCM_MONITORONLY_CONFIGURATIONMODE , ID_LCM_MONITORONLY_CONFIGURATIONMODE , "LCM is running in MonitorOnly mode and will only test the configuration.")
+INTERNAL_Intlstr_Define0(ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR , ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR , "DSC engine could not copy Current.mof to Previous.mof.")
 INTERNAL_Intlstr_Define0(ID_LCMHELPER_GET_OPERATION_AGAINST_PENDING ,
                          ID_LCMHELPER_GET_OPERATION_AGAINST_PENDING ,
                          "The GET operation will be carried against a pending configuration since the latest configuration has not converged yet.")
