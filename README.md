@@ -194,7 +194,7 @@ Additional configuration options:
 - --ConfigurationName: the name of the configuration to apply
 - --RefreshFrequencyMins: Specifies how often (in minutes) LCM attempts to obtain the configuration from the pull server. If configuration on the pull server differs from the current one on the target node, it is copied to the pending store and applied.
 - --ConfigurationModeFrequencyMins: Specifies how often (in minutes) LCM ensures that the configuration is in the desired state.
-- --ConfigurationMode: Specifies how LCM should apply the configuration. Valid values are: ApplyOnly, ApplyAndMonitor, ApplyAndAutoCorrect
+- --ConfigurationMode: Specifies how LCM should apply the configuration. Valid values are: ApplyOnly, ApplyAndMonitor, ApplyAndAutoCorrect, MonitorOnly
 
 **To configure Azure Automation as a DSC Pull Server with a metaconfiguration MOF:**
 - Open the PowerShell console or PowerShell ISE as an administrator on a Windows machine in your local environment. This machine must have the latest version of WMF 5 installed

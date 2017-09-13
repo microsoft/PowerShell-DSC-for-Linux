@@ -13,7 +13,7 @@ OPTIONS (case insensitive):
  --ConfigurationName NAME
  --RefreshFrequencyMins NUM                                          default=30
  --ConfigurationModeFrequencyMins NUM                                default=15
- --ConfigurationMode (ApplyAndMonitor,ApplyAndAutoCorrect,ApplyOnly) default=ApplyAndMonitor
+ --ConfigurationMode (ApplyAndMonitor, ApplyAndAutoCorrect, ApplyOnly, MonitorOnly) default=ApplyAndMonitor
  --RefreshMode (Pull|Push)                                           default=Pull
  --Help
 """)

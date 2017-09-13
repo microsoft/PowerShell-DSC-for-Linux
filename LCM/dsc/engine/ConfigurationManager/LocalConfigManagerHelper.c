@@ -72,7 +72,6 @@ ExpandedSystemPath g_ExpandedSystemPath[] =
     {CONFIGURATION_LOCATION_PENDING, NULL},
     {CONFIGURATION_LOCATION_PENDINGTMP, NULL},
     {CONFIGURATION_LOCATION_CURRENT, NULL},
-    {CONFIGURATION_LOCATION_FAILED, NULL},
     {CONFIGURATION_LOCATION_GET, NULL},
     {CONFIGURATION_LOCATION_METACONFIG, NULL},
     {CONFIGURATION_LOCATION_METACONFIG_TMP, NULL},
@@ -263,7 +262,6 @@ MI_Result InitHandler(
     g_PendingConfigFileName = NULL;
     g_PendingConfigTmpFileName = NULL;
     g_CurrentConfigFileName = NULL;
-    g_FailedConfigFileName = NULL;
     g_PreviousConfigFileName = NULL;
     g_GetConfigFileName = NULL;
     g_InventoryFileName = NULL;
@@ -283,7 +281,6 @@ MI_Result InitHandler(
         DSC_EventUnRegister();
         DSC_free(g_PendingConfigFileName);
         DSC_free(g_CurrentConfigFileName);
-        DSC_free(g_FailedConfigFileName);
         DSC_free(g_PreviousConfigFileName);
         DSC_free(g_GetConfigFileName);
         DSC_free(g_InventoryFileName);
@@ -296,7 +293,6 @@ MI_Result InitHandler(
 
         g_PendingConfigFileName = NULL;
         g_CurrentConfigFileName = NULL;
-	g_FailedConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
         g_InventoryFileName = NULL;
@@ -330,7 +326,6 @@ MI_Result InitHandler(
         DSC_EventUnRegister();
         DSC_free(g_PendingConfigFileName);
         DSC_free(g_CurrentConfigFileName);
-        DSC_free(g_FailedConfigFileName);
         DSC_free(g_PreviousConfigFileName);
         DSC_free(g_GetConfigFileName);
         DSC_free(g_InventoryFileName);
@@ -343,11 +338,10 @@ MI_Result InitHandler(
 
         g_PendingConfigFileName = NULL;
         g_CurrentConfigFileName = NULL;
-	g_FailedConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
-	g_InventoryFileName = NULL;
-	g_InventoryReportFileName = NULL;
+    g_InventoryFileName = NULL;
+    g_InventoryReportFileName = NULL;
         g_MetaConfigFileName = NULL;
         g_MetaConfigTmpFileName = NULL;
         g_ConfigChecksumFileName = NULL;
@@ -407,11 +401,6 @@ MI_Result InitPath(
         else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_CURRENT) == 0)
         {
             g_ExpandedSystemPath[count].expandedPath = &g_CurrentConfigFileName;
-            initCount++;
-        }
-        else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_FAILED) == 0)
-        {
-            g_ExpandedSystemPath[count].expandedPath = &g_FailedConfigFileName;
             initCount++;
         }
         else if (Tcscasecmp(g_ExpandedSystemPath[count].dscSystemFile, CONFIGURATION_LOCATION_GET) == 0)
@@ -526,12 +515,6 @@ MI_Result UnInitHandler(
     {
         DSC_free(g_CurrentConfigFileName);
         g_CurrentConfigFileName = NULL;
-    }
-
-    if (g_FailedConfigFileName != NULL)
-    {
-        DSC_free(g_FailedConfigFileName);
-        g_FailedConfigFileName = NULL;
     }
 
     if(g_PreviousConfigFileName != NULL)
@@ -899,22 +882,22 @@ MI_Result CallSetConfiguration(
     lcmContext.context = (void*)context;
 
     r = GetMetaConfig(&metaConfigInstance);
-	EH_CheckResult(r);
+    EH_CheckResult(r);
 
     r = DSC_MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, NULL, NULL);
-	EH_CheckResult(r);
+    EH_CheckResult(r);
 
     // We tell user that LCM is running in MonitorOnly mode and will be testing only
-	if (ShouldMonitorOnly(configModeValue.string) && !(dwFlags & LCM_SET_METACONFIG))
-	{
-		LCM_BuildMessage(&lcmContext, ID_LCM_MONITORONLY_CONFIGURATIONMODE, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
-	}
-	else
-	{
-		//log method start in verbose
-		SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_SET, &lcmContext);
-		LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
-	}
+    if (ShouldMonitorOnly(configModeValue.string) && !(dwFlags & LCM_SET_METACONFIG))
+    {
+        LCM_BuildMessage(&lcmContext, ID_LCM_MONITORONLY_CONFIGURATIONMODE, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    }
+    else
+    {
+        //log method start in verbose
+        SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_SET, &lcmContext);
+        LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    }
 
     if (dwFlags & LCM_SETFLAGS_ENABLEWHATIF)
     {
@@ -1151,11 +1134,11 @@ MI_Boolean ShouldMonitor(_In_z_ MI_Char* configurationMode)
 
 MI_Boolean ShouldMonitorOnly(_In_z_ MI_Char* configurationMode)
 {
-	if (Tcscasecmp(configurationMode, DSC_CONFIGURATIONMODE_MONITORONLY) == 0)
-	{
-		return MI_TRUE;
-	}
-	return MI_FALSE;
+    if (Tcscasecmp(configurationMode, DSC_CONFIGURATIONMODE_MONITORONLY) == 0)
+    {
+        return MI_TRUE;
+    }
+    return MI_FALSE;
 }
 
 MI_Result ValidateConfigurationDirectory(
@@ -1366,7 +1349,7 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
                                 DSCFREE_IF_NOT_NULL(partialConfigFilePath);
                                 DSCFREE_IF_NOT_NULL(checksumFile);
                                                                 
-				result = MI_RESULT_OK;
+                result = MI_RESULT_OK;
                                 errorOccured = MI_TRUE;
                                 continue; //Carry on to the next file
                         }
@@ -2174,8 +2157,8 @@ MI_Result ApplyPendingConfig(
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result result = MI_RESULT_OK;
-	MI_Instance *metaConfigInstance = NULL;
-	MI_Value configModeValue;
+    MI_Instance *metaConfigInstance = NULL;
+    MI_Value configModeValue;
 
     if (cimErrorDetails == NULL)
     {
@@ -2196,45 +2179,36 @@ MI_Result ApplyPendingConfig(
         }
     }
 
-    if (result != MI_RESULT_OK)
-    {
-	    // Attempt to save a Failed configuration file
-	    CopyConfigurationFile(CONFIGURATION_LOCATION_PENDING, CONFIGURATION_LOCATION_FAILED, MI_TRUE, cimErrorDetails);
-        RetryDeleteFile(GetPendingConfigFileName());
-        File_RemoveT(GetConfigChecksumFileName());
-        return result;
-    }
-
-    //If restart requested or test flag is set, do not move to current.mof, and do not delete the pending mof file.
-    if (DSC_RESTART_SYSTEM_FLAG & *resultStatus || flags & LCM_EXECUTE_TESTONLY)
+    // If application failed, restart requested or test flag is set, do not move to Current.mof, and do not delete the Pending.mof file.
+    if (result != MI_RESULT_OK || DSC_RESTART_SYSTEM_FLAG & *resultStatus || flags & LCM_EXECUTE_TESTONLY)
     {
         return result;
     }
 
-    //If whatif flag is set, do not move to current.mof, just delete the pending mof file.
+    //If whatif flag is set, do not move to Current.mof, just delete the pending mof file.
     if (lcmContext->executionMode & LCM_SETFLAGS_ENABLEWHATIF)
     {
         RetryDeleteFile(GetPendingConfigFileName());
         return result;
     }
 
-	result = GetMetaConfig(&metaConfigInstance);
-	EH_CheckResult(result);
+    result = GetMetaConfig(&metaConfigInstance);
+    EH_CheckResult(result);
 
-	result = DSC_MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, NULL, NULL);
-	EH_CheckResult(result);	
-	
-	// We only move pending to current when not in MonitorOnlyMode. 
-	if (!ShouldMonitorOnly(configModeValue.string))
-	{
-		result = MoveConfigurationFiles(cimErrorDetails);
-	}
+    result = DSC_MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, NULL, NULL);
+    EH_CheckResult(result); 
+    
+    // We only move pending to current when not in MonitorOnlyMode. 
+    if (!ShouldMonitorOnly(configModeValue.string))
+    {
+        result = MoveConfigurationFiles(cimErrorDetails);
+    }
 
 EH_UNWIND:
-	if (metaConfigInstance != NULL)
-	{
-		MI_Instance_Delete(metaConfigInstance);
-	}	
+    if (metaConfigInstance != NULL)
+    {
+        MI_Instance_Delete(metaConfigInstance);
+    }   
     return result;
 }
 
@@ -2797,17 +2771,17 @@ MI_Result ApplyConfig(
     }
 
     r = MI_Instance_GetElement(metaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationMode, &configModeValue, NULL, NULL, NULL);
-	EH_CheckResult(r);
-	
-	// Before applying the configuration check if we are in MonitorOnly Mode and not applying meta configuration And LCM is not disbaled.
-	// In these cases we are applying some new or same configuration again and want to run in test only mode. 
-	if (ShouldMonitorOnly(configModeValue.string))
-	{
-		if (!(flags & LCM_SET_METACONFIG) && !(flags & LCM_EXECUTE_SETONLY))
-		{	
-			flags |= LCM_EXECUTE_TESTONLY;
-		}		
-	}
+    EH_CheckResult(r);
+    
+    // Before applying the configuration check if we are in MonitorOnly Mode and not applying meta configuration And LCM is not disbaled.
+    // In these cases we are applying some new or same configuration again and want to run in test only mode. 
+    if (ShouldMonitorOnly(configModeValue.string))
+    {
+        if (!(flags & LCM_SET_METACONFIG) && !(flags & LCM_EXECUTE_SETONLY))
+        {   
+            flags |= LCM_EXECUTE_TESTONLY;
+        }       
+    }
 
     if (ShouldUsePartialConfigurations(metaConfigInstance, MI_TRUE) &&
         !(flags & VALIDATE_METACONFIG_INSTANCE) &&
@@ -2920,11 +2894,6 @@ const MI_Char * GetInventoryReportFileName()
 const MI_Char *GetCurrentConfigFileName()
 {
     return g_CurrentConfigFileName;
-}
-
-const MI_Char *GetFailedConfigFileName()
-{
-    return g_FailedConfigFileName;
 }
 
 const MI_Char *GetMetaConfigTmpFileName()
@@ -4177,25 +4146,25 @@ MI_Result DoRegistration(
         }
 
 #if defined(BUILD_OMS)
-	// Check if RegistrationKey is specified.  If so, allow registration for OMS. Otherwise, do not attempt to register.
-	result = MI_Instance_GetElement(registrationRequest->registrationData, MSFT_RegistrationKey_Name, &value, NULL, NULL, NULL);
-	if (result == MI_RESULT_OK)
-	{
-	    result = RegistrationManager_RunRequest(registrationManager, registrationRequest, cimErrorDetails);
-	    EH_CheckResult(result);
-	    
-	    result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
-	    EH_CheckResult(result);
-	}
+    // Check if RegistrationKey is specified.  If so, allow registration for OMS. Otherwise, do not attempt to register.
+    result = MI_Instance_GetElement(registrationRequest->registrationData, MSFT_RegistrationKey_Name, &value, NULL, NULL, NULL);
+    if (result == MI_RESULT_OK)
+    {
+        result = RegistrationManager_RunRequest(registrationManager, registrationRequest, cimErrorDetails);
+        EH_CheckResult(result);
+        
+        result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
+        EH_CheckResult(result);
+    }
 #else
-	result = RegistrationManager_RunRequest(registrationManager, registrationRequest, cimErrorDetails);
-	EH_CheckResult(result);
-	
-	result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
-	EH_CheckResult(result);
+    result = RegistrationManager_RunRequest(registrationManager, registrationRequest, cimErrorDetails);
+    EH_CheckResult(result);
+    
+    result = DeleteRegistrationKeyFromManagerInstance(lcmContext, &managerInstances->data[i], typeOfDownloadManagerInstance, cimErrorDetails);
+    EH_CheckResult(result);
 #endif
 
-	// TODO, insivara : Write events
+    // TODO, insivara : Write events
         result = UpdateMetaConfigWithAgentId(registrationManager->agentId, (MI_Instance*)g_metaConfig);
         EH_CheckResult(result);    
 
@@ -5156,7 +5125,7 @@ MI_Result InitDSCInternalCache(
     r = UpdateDSCCacheInstance(moduleLoader->application, DSCInternalCache, NULL, NULL, NULL, NULL, cimErrorDetails);
     if (r != MI_RESULT_OK)
     {
-	return r;
+    return r;
     }
 
     return MI_RESULT_OK;
@@ -6355,11 +6324,11 @@ MI_Result MI_CALL LCM_Pull_Execute(
 
                 if (numModulesInstalled > 0)
                 {
-		            result = ModuleManager_Update(moduleManager, cimErrorDetails);
-		            if (result != MI_RESULT_OK)
-		            {
-			            return result;
-		            }
+                    result = ModuleManager_Update(moduleManager, cimErrorDetails);
+                    if (result != MI_RESULT_OK)
+                    {
+                        return result;
+                    }
                     system(OMI_RELOAD_COMMAND);
                 }
 
@@ -6977,8 +6946,8 @@ MI_Result CallPerformInventory(
 
     if (File_ExistT(InMOF) != 0)
     {
-	SetLCMStatusReady();
-	return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);
+    SetLCMStatusReady();
+    return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);
     }
 
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
@@ -7034,10 +7003,10 @@ MI_Result CallPerformInventory(
     CleanUpInstanceCache(&inventoryInstances);
     if (result != MI_RESULT_OK)
     {
-	SetLCMStatusReady();
-	if (cimErrorDetails && *cimErrorDetails)
+    SetLCMStatusReady();
+    if (cimErrorDetails && *cimErrorDetails)
             return result;
-	
+    
         return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_INVENTORY_CONF_FAILED);
     }
 
