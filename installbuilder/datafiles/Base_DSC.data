@@ -331,7 +331,6 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $CONFIG_DATADIR/${{SHORT_NAME}}/
     rm -rf $OMI_LIB/Scripts
     rm -rf /opt/microsoft/${{SHORT_NAME}}/
-    rm -f /etc/cron.d/dsc
 #if BUILD_OMS == 1
     rm -rf $OMI_REGISTER_DIR/root-oms
     rm -f $OMI_HOME/bin/OMSConsistencyInvoker
@@ -341,6 +340,8 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
     rm -f $OMI_HOME/bin/ConsistencyInvoker
     rm -f $OMI_LIB/libdsccore.so    
+    # Only to be removed for standalone DSC case 
+    rm -f /etc/cron.d/dsc
 #endif
     for prov in ${{PROVIDERS}}; do
         rm -f $OMI_LIB/libMSFT_nx${prov}Resource.so
