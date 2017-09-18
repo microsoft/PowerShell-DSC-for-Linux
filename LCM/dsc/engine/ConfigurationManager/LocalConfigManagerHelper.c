@@ -3075,6 +3075,13 @@ MI_Result CopyConfigurationFile(
             return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
         }
     }
+    else
+    {
+        DSC_free(filePathFrom);
+        DSC_free(filePathTo);            
+        DSC_free(fileBackup);
+        return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+    }
 
     DSC_free(filePathFrom);
     DSC_free(filePathTo);
