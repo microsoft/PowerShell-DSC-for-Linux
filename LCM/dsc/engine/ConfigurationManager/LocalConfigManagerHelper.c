@@ -1465,13 +1465,20 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
         // If Current.mof exists, move Current.mof to Previous.mof
         if (File_ExistT(GetCurrentConfigFileName()) == 0)
         {
-            result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
-
+            result = CopyConfigurationFile(GetCurrentConfigFileName(), GetPreviousConfigFileName(), MI_TRUE, cimErrorDetails);
             if (result != MI_RESULT_OK)
             {
                 MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
                 moduleManager->ft->Close(moduleManager, NULL);
                 return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
+            }
+
+            result = File_RemoveT(GetCurrentConfigFileName());
+            if (result != MI_RESULT_OK)
+            {
+                MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
+                moduleManager->ft->Close(moduleManager, NULL);
+                return GetCimMIError1Param(result, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, GetCurrentConfigFileName());
             }
         }
 
@@ -2032,13 +2039,20 @@ Cleanup:
             // If Current.mof exists, move Current.mof to Previous.mof
             if (File_ExistT(GetCurrentConfigFileName()) == 0)
             {
-                result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
-
+                result = CopyConfigurationFile(GetCurrentConfigFileName(), GetPreviousConfigFileName(), MI_TRUE, cimErrorDetails);
                 if (result != MI_RESULT_OK)
                 {
                     MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
                     moduleManager->ft->Close(moduleManager, NULL);
                     return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
+                }
+
+                result = File_RemoveT(GetCurrentConfigFileName());
+                if (result != MI_RESULT_OK)
+                {
+                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
+                    moduleManager->ft->Close(moduleManager, NULL);
+                    return GetCimMIError1Param(result, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, GetCurrentConfigFileName());
                 }
             }
 
@@ -6312,13 +6326,20 @@ MI_Result MI_CALL LCM_Pull_Execute(
                 // If Current.mof exists, move Current.mof to Previous.mof
                 if (File_ExistT(GetCurrentConfigFileName()) == 0)
                 {
-                    result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
-
+                    result = CopyConfigurationFile(GetCurrentConfigFileName(), GetPreviousConfigFileName(), MI_TRUE, cimErrorDetails);
                     if (result != MI_RESULT_OK)
                     {
                         MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
                         moduleManager->ft->Close(moduleManager, NULL);
                         return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
+                    }
+
+                    result = File_RemoveT(GetCurrentConfigFileName());
+                    if (result != MI_RESULT_OK)
+                    {
+                        MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
+                        moduleManager->ft->Close(moduleManager, NULL);
+                        return GetCimMIError1Param(result, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, GetCurrentConfigFileName());
                     }
                 }
 
@@ -6506,13 +6527,20 @@ MI_Result LCM_Pull_GetConfiguration(
             // If Current.mof exists, move Current.mof to Previous.mof
             if (File_ExistT(GetCurrentConfigFileName()) == 0)
             {
-                result = CopyConfigurationFile(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, MI_TRUE, cimErrorDetails);
-
+                result = CopyConfigurationFile(GetCurrentConfigFileName(), GetPreviousConfigFileName(), MI_TRUE, cimErrorDetails);
                 if (result != MI_RESULT_OK)
                 {
                     MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
                     moduleManager->ft->Close(moduleManager, NULL);
                     return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
+                }
+
+                result = File_RemoveT(GetCurrentConfigFileName());
+                if (result != MI_RESULT_OK)
+                {
+                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
+                    moduleManager->ft->Close(moduleManager, NULL);
+                    return GetCimMIError1Param(result, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, GetCurrentConfigFileName());
                 }
             }
 
