@@ -2970,7 +2970,6 @@ MI_Result MoveConfigurationFiles(
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
     MI_Result result = MI_RESULT_OK;
-    BOOL fResult;
 
     if (cimErrorDetails == NULL)
     {        
@@ -2978,25 +2977,18 @@ MI_Result MoveConfigurationFiles(
     }
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
 
-    result = CopyConfigurationFile(CONFIGURATION_LOCATION_PENDING, CONFIGURATION_LOCATION_CURRENT, MI_TRUE, cimErrorDetails);    
+    result = CopyConfigurationFile(GetPendingConfigFileName(), GetCurrentConfigFileName(), MI_TRUE, cimErrorDetails);
+
     if (result == MI_RESULT_OK)
     {
-        fResult = File_RemoveT(GetPendingConfigFileName());
-        if (fResult)
+        result = File_RemoveT(GetPendingConfigFileName());
+        if (result != MI_RESULT_OK)
         {
             return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_PENDINGFILEAFTER_FAILED);
-        }  
-
-        return MI_RESULT_OK;
+        }
     }
 
-    fResult = File_RemoveT(GetPendingConfigFileName());
-    if (fResult)
-    {
-        return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_PENDINGFILEAFTER_FAILED);
-    } 
-
-    return MI_RESULT_FAILED;
+    return result;
 }
 
 MI_Result CopyConfigurationFile(
