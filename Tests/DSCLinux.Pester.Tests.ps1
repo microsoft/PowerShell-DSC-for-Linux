@@ -4,6 +4,8 @@
         Copyright (c) Microsoft Corporation, 2017
 #>
 
+$ErrorActionPreference = 'Stop'
+
 Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
     BeforeAll {
         $dscLinuxTestHelperPath = Join-Path -Path $PSScriptRoot -ChildPath 'Dsclinux.Tests.Helper.psm1'
@@ -58,7 +60,7 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
         }
 
         $null = & $script:testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $metaconfigurationOutputPath @lcmSettings
-        Set-DscLocalConfigurationManager -Path $metaconfigurationOutputPath -CimSession $script:session
+        { Set-DscLocalConfigurationManager -Path $metaconfigurationOutputPath -CimSession $script:session } | Should Not Throw
         
         $metaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
         $metaConfig.RefreshMode.ToUpper() | Should Be $lcmSettings.RefreshMode.ToUpper()
@@ -75,7 +77,7 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
         }
 
         $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
-        Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force
+        { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
         
         # Verify Get-DscConfiguration
         $dscConfig = Get-DscConfiguration -CimSession $script:session
@@ -91,7 +93,7 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
         $nxFileParameters.Ensure = 'Absent'
 
         $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
-        Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force
+        { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
                    
         $dscConfig = Get-DscConfiguration -CimSession $script:session
         $dscConfig.Ensure | Should Be $nxFileParameters.Ensure
@@ -109,8 +111,8 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
 
         $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
 
-        Publish-DscConfiguration -Path $configurationOutputPath -CimSession $script:session
-        Start-DscConfiguration -UseExisting -CimSession $script:session -Wait -Force
+        { Publish-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Force } | Should Not Throw
+        { Start-DscConfiguration -UseExisting -CimSession $script:session -Wait -Force } | Should Not Throw
 
         $dscConfig = Get-DscConfiguration -CimSession $script:session
         $dscConfig.Ensure | Should Be $nxFileParameters.Ensure
@@ -127,7 +129,7 @@ Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
         }
 
         $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
-        Update-DscConfiguration -Wait -CimSession $script:session
+        { Update-DscConfiguration -Wait -CimSession $script:session } | Should Not Throw
 
         $dscConfig = Get-DscConfiguration -CimSession $script:session
         $dscConfig.Ensure | Should Be $nxFileParameters.Ensure

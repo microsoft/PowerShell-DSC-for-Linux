@@ -196,7 +196,9 @@ extern "C"
         MI_Boolean backUpNeeded,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-    MI_Result MoveConfigurationFiles(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+    MI_Result CopyConfigAndRemoveSource(_In_z_ const MI_Char *sourceConfigFileName,
+        _In_z_ const MI_Char *destinationConfigFileName,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result GetFullPath(_In_z_ const MI_Char* directoryName,
         _In_z_ const MI_Char *fileName,

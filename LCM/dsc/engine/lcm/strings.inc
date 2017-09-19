@@ -49,7 +49,10 @@
     INTERNAL_Intlstr_Define0( ID_LCMHELPER_LOAD_PENDING_ERROR , ID_LCMHELPER_LOAD_PENDING_ERROR ,"Loading the instance document from the pending location did not succeed.")
     INTERNAL_Intlstr_Define0( ID_LCMHELPER_SENDCONFIGAPPLY_ERROR , ID_LCMHELPER_SENDCONFIGAPPLY_ERROR ,"The SendConfigurationApply function did not succeed.")
     INTERNAL_Intlstr_Define0( ID_LCMHELPER_DEL_PENDINGFILEAFTER_FAILED , ID_LCMHELPER_DEL_PENDINGFILEAFTER_FAILED ,"Deleting the pending file after moving it did not succeed.")
-    INTERNAL_Intlstr_Define0( ID_LCMHELPER_COPY_FAILED , ID_LCMHELPER_COPY_FAILED ,"Could not copy file.")
+    INTERNAL_Intlstr_Define2( ID_LCMHELPER_COPY_FAILED , ID_LCMHELPER_COPY_FAILED ,
+                 _In_z_ const PAL_Char*, firstString,
+                 _In_z_ const PAL_Char*, secondString,
+                 "File copy from '" Intlstr_tstr(1) "' to '" Intlstr_tstr(2) "' failed.")
     INTERNAL_Intlstr_Define0( ID_LCMHELPER_CONVERT_SECDESC_FAILED , ID_LCMHELPER_CONVERT_SECDESC_FAILED ,"Unable to create configuration MOF file because converting security descriptor for administrators failed.")
     INTERNAL_Intlstr_Define0( ID_LCMHELPER_CREATE_CONF_FAILED , ID_LCMHELPER_CREATE_CONF_FAILED ,"Could not create the configuration MOF file. Check the Analytic event log to investigate why the MOF file could not be created at this path.")
     INTERNAL_Intlstr_Define0( ID_LCM_CREATE_PULL_RUN_LOG_FILE , ID_LCM_CREATE_PULL_RUN_LOG_FILE ,"Could not create the pull run log file. Check the Analytic event log to investigate why the file could not be created at this path.")
@@ -598,7 +601,6 @@ INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY
 INTERNAL_Intlstr_Define0( ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY , "Error adding instance array to serializedInstance")
 
 INTERNAL_Intlstr_Define0(ID_LCM_MONITORONLY_CONFIGURATIONMODE , ID_LCM_MONITORONLY_CONFIGURATIONMODE , "LCM is running in MonitorOnly mode and will only test the configuration.")
-INTERNAL_Intlstr_Define0(ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR , ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR , "DSC engine could not copy Current.mof to Previous.mof.")
 INTERNAL_Intlstr_Define0(ID_LCMHELPER_GET_OPERATION_AGAINST_PENDING ,
                          ID_LCMHELPER_GET_OPERATION_AGAINST_PENDING ,
                          "The GET operation will be carried against a pending configuration since the latest configuration has not converged yet.")

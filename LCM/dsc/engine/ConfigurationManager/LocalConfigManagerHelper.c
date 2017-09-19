@@ -1465,21 +1465,8 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
         // If Current.mof exists, move Current.mof to Previous.mof
         if (File_ExistT(GetCurrentConfigFileName()) == 0)
         {
-            result = CopyConfigurationFile(GetCurrentConfigFileName(), GetPreviousConfigFileName(), MI_TRUE, cimErrorDetails);
-            if (result != MI_RESULT_OK)
-            {
-                MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
-                moduleManager->ft->Close(moduleManager, NULL);
-                return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
-            }
-
-            result = File_RemoveT(GetCurrentConfigFileName());
-            if (result != MI_RESULT_OK)
-            {
-                MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
-                moduleManager->ft->Close(moduleManager, NULL);
-                return GetCimMIError1Param(result, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, GetCurrentConfigFileName());
-            }
+            result = CopyConfigAndRemoveSource(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, cimErrorDetails);
+            GOTO_CLEANUP_IF_FAILED(result, Exit);
         }
 
         File_CopyT(GetPendingConfigTmpFileName(), GetPendingConfigFileName());
@@ -2039,20 +2026,12 @@ Cleanup:
             // If Current.mof exists, move Current.mof to Previous.mof
             if (File_ExistT(GetCurrentConfigFileName()) == 0)
             {
-                result = CopyConfigurationFile(GetCurrentConfigFileName(), GetPreviousConfigFileName(), MI_TRUE, cimErrorDetails);
+                result = CopyConfigAndRemoveSource(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, cimErrorDetails);
                 if (result != MI_RESULT_OK)
                 {
                     MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
                     moduleManager->ft->Close(moduleManager, NULL);
-                    return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
-                }
-
-                result = File_RemoveT(GetCurrentConfigFileName());
-                if (result != MI_RESULT_OK)
-                {
-                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
-                    moduleManager->ft->Close(moduleManager, NULL);
-                    return GetCimMIError1Param(result, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, GetCurrentConfigFileName());
+                    return result;
                 }
             }
 
@@ -2215,7 +2194,8 @@ MI_Result ApplyPendingConfig(
     // We only move pending to current when not in MonitorOnlyMode. 
     if (!ShouldMonitorOnly(configModeValue.string))
     {
-        result = MoveConfigurationFiles(cimErrorDetails);
+        result = CopyConfigAndRemoveSource(CONFIGURATION_LOCATION_PENDING, CONFIGURATION_LOCATION_CURRENT, cimErrorDetails);
+        EH_CheckResult(result);
     }
 
 EH_UNWIND:
@@ -2966,93 +2946,48 @@ const MI_Char*GetPartialConfigSuffix()
         return PARTIALCONFIG_SUFFIX;
 }
 
-MI_Result MoveConfigurationFiles(
-    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
-{
-    MI_Result result = MI_RESULT_OK;
-
-    if (cimErrorDetails == NULL)
-    {        
-        return MI_RESULT_INVALID_PARAMETER; 
-    }
-    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
-
-    result = CopyConfigurationFile(GetPendingConfigFileName(), GetCurrentConfigFileName(), MI_TRUE, cimErrorDetails);
-
-    if (result == MI_RESULT_OK)
-    {
-        result = File_RemoveT(GetPendingConfigFileName());
-        if (result != MI_RESULT_OK)
-        {
-            return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_PENDINGFILEAFTER_FAILED);
-        }
-    }
-
-    return result;
-}
-
 MI_Result CopyConfigurationFile(
     _In_z_ const MI_Char *locationFrom,
     _In_z_ const MI_Char *locationTo,
     MI_Boolean backUpNeeded,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
 {
-    MI_Char *fileFullFrom;
-    MI_Char *fileFullTo;
-    MI_Char *filePathFrom;
-    MI_Char *filePathTo; 
-    MI_Char *fileBackup = NULL;
-    MI_Boolean backupSuccess = MI_FALSE;
     MI_Result result = MI_RESULT_OK;
 
-    DSC_EventWriteMessageCopyingConfig(locationFrom,locationTo);
+    MI_Boolean backupSuccess = MI_FALSE;
+
+    MI_Char *fileFullFrom = NULL;
+    MI_Char *fileFullTo = NULL;
+    MI_Char *filePathFrom = NULL;
+    MI_Char *filePathTo = NULL; 
+    MI_Char *fileBackup = NULL;
+    
+    DSC_EventWriteMessageCopyingConfig(locationFrom, locationTo);
     
     if (cimErrorDetails == NULL)
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
-    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
+
+    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
+    *cimErrorDetails = NULL;
 
     result = GetFullPath(GetConfigPath(), locationFrom, &fileFullFrom, cimErrorDetails);
-    if (result != MI_RESULT_OK)
-    {
-        return result;
-    }
+    EH_CheckResult(result);
 
     result = ExpandPath(fileFullFrom, &filePathFrom, cimErrorDetails);
-    DSC_free(fileFullFrom);    
-
-
-    if (result != MI_RESULT_OK)
-    {
-        return result;
-    }
+    EH_CheckResult(result);
 
     result = GetFullPath(GetConfigPath(), locationTo, &fileFullTo, cimErrorDetails);
-    if (result != MI_RESULT_OK)
-    {
-        DSC_free(filePathFrom);
-        return result;
-    }
+    EH_CheckResult(result);
 
     result = ExpandPath(fileFullTo, &filePathTo, cimErrorDetails);
-    DSC_free(fileFullTo);
-
-    if (result != MI_RESULT_OK)
-    {
-        DSC_free(filePathFrom);
-        return result;
-    }   
+    EH_CheckResult(result); 
 
     if (backUpNeeded)
     {
         result = ExpandPath(CONFIGURATION_LOCATION_BACKUP, &fileBackup, cimErrorDetails);
-        if (result != MI_RESULT_OK)
-        {
-            DSC_free(filePathFrom);
-            DSC_free(filePathTo);
-            return result;
-        }   
+        EH_CheckResult(result); 
 
         if (File_CopyT(filePathFrom, fileBackup) == 0)
         {
@@ -3069,24 +3004,63 @@ MI_Result CopyConfigurationFile(
                 File_CopyT(fileBackup, filePathTo);
             }
 
-            DSC_free(filePathFrom);
-            DSC_free(filePathTo);            
-            DSC_free(fileBackup);
-            return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+            result = GetCimMIError2Params(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED, locationFrom, locationTo);
+            EH_Fail();
         }
     }
     else
     {
-        DSC_free(filePathFrom);
-        DSC_free(filePathTo);            
-        DSC_free(fileBackup);
-        return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+        result = GetCimMIError2Params(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED, locationFrom, locationTo);
+        EH_Fail();
     }
 
+EH_UNWIND:
+    DSC_free(fileFullFrom);
+    DSC_free(fileFullTo);
     DSC_free(filePathFrom);
     DSC_free(filePathTo);
     DSC_free(fileBackup);
-    return MI_RESULT_OK;
+
+    return result;
+}
+
+MI_Result CopyConfigAndRemoveSource(
+    _In_z_ const MI_Char *sourceConfigFileName,
+    _In_z_ const MI_Char *destinationConfigFileName,
+    _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
+{
+    MI_Result result;
+
+    MI_Char *sourceConfigFullPath = NULL;
+    MI_Char *sourceConfigExpandedPath = NULL;
+
+    if (cimErrorDetails == NULL)
+    {        
+        return MI_RESULT_INVALID_PARAMETER; 
+    }
+
+    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
+    *cimErrorDetails = NULL;    
+
+    result = GetFullPath(GetConfigPath(), sourceConfigFileName, &sourceConfigFullPath, cimErrorDetails);
+    EH_CheckResult(result);
+
+    result = ExpandPath(sourceConfigFullPath, &sourceConfigExpandedPath, cimErrorDetails);
+    EH_CheckResult(result);    
+
+    result = CopyConfigurationFile(sourceConfigFileName, destinationConfigFileName, MI_TRUE, cimErrorDetails);
+    EH_CheckResult(result);
+
+    if (File_RemoveT(sourceConfigExpandedPath) != 0)
+    {
+        result = GetCimMIError1Param(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, sourceConfigFileName);
+    }
+
+EH_UNWIND:
+    DSC_free(sourceConfigFullPath);
+    DSC_free(sourceConfigExpandedPath);
+
+    return result;
 }
 
 MI_Result SaveFile(
@@ -5795,18 +5769,20 @@ MI_Result CopyConfigurationFileFromTemp(
     {        
         return MI_RESULT_INVALID_PARAMETER; 
     }
-    *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
+
+    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once.
+    *cimErrorDetails = NULL;     
 
     if (File_ExistT(locationFrom) != -1)
     {
         if (File_CopyT(locationFrom, locationTo) != 0)
         {
-            return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+            return GetCimMIError2Params(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED, locationFrom, locationTo);
         }
     }
     else
     {
-        return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED);
+        return GetCimMIError2Params(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_COPY_FAILED, locationFrom, locationTo);
     }
 
     return result;
@@ -6325,21 +6301,8 @@ MI_Result MI_CALL LCM_Pull_Execute(
                 // If Current.mof exists, move Current.mof to Previous.mof
                 if (File_ExistT(GetCurrentConfigFileName()) == 0)
                 {
-                    result = CopyConfigurationFile(GetCurrentConfigFileName(), GetPreviousConfigFileName(), MI_TRUE, cimErrorDetails);
-                    if (result != MI_RESULT_OK)
-                    {
-                        MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
-                        moduleManager->ft->Close(moduleManager, NULL);
-                        return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
-                    }
-
-                    result = File_RemoveT(GetCurrentConfigFileName());
-                    if (result != MI_RESULT_OK)
-                    {
-                        MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
-                        moduleManager->ft->Close(moduleManager, NULL);
-                        return GetCimMIError1Param(result, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, GetCurrentConfigFileName());
-                    }
+                    result = CopyConfigAndRemoveSource(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, cimErrorDetails);
+                    EH_CheckResult(result);
                 }
 
                 if (numModulesInstalled > 0)
@@ -6526,21 +6489,8 @@ MI_Result LCM_Pull_GetConfiguration(
             // If Current.mof exists, move Current.mof to Previous.mof
             if (File_ExistT(GetCurrentConfigFileName()) == 0)
             {
-                result = CopyConfigurationFile(GetCurrentConfigFileName(), GetPreviousConfigFileName(), MI_TRUE, cimErrorDetails);
-                if (result != MI_RESULT_OK)
-                {
-                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
-                    moduleManager->ft->Close(moduleManager, NULL);
-                    return GetCimMIError(result, cimErrorDetails, ID_LCMHELPER_COPY_CURRENT_TO_PREVIOUS_ERROR);
-                }
-
-                result = File_RemoveT(GetCurrentConfigFileName());
-                if (result != MI_RESULT_OK)
-                {
-                    MI_Instance_Delete((MI_Instance *)metaConfigInstance);            
-                    moduleManager->ft->Close(moduleManager, NULL);
-                    return GetCimMIError1Param(result, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, GetCurrentConfigFileName());
-                }
+                result = CopyConfigAndRemoveSource(CONFIGURATION_LOCATION_CURRENT, CONFIGURATION_LOCATION_PREVIOUS, cimErrorDetails);
+                EH_CheckResult(result);
             }
 
             targetMofPath = (MI_Char*) GetPendingConfigFileName();
