@@ -253,7 +253,10 @@ Applies a Meta Configuration MOF file to the computer. Similar to the Windows Po
 
 **StartDscConfiguration.py** 
 Applies a configuration MOF file to the computer. Similar to the Windows PowerShell cmdlet: StartDscConfiguration. Requires the path to the configuration MOF to apply. 
-`sudo ./StartDscConfiguration.py –configurationmof /tmp/localhost.mof`
+`sudo ./StartDscConfiguration.py –-configurationmof /tmp/localhost.mof`
+
+You can also supply the force parameter to forcibly remove any current pending configuration before applying the new configuration.
+`sudo ./StartDscConfiguration.py –-configurationmof /tmp/localhost.mof --force`
 
 **TestDscConfiguration.py** 
 Tests the current system configuration for compliance desired state.  Similar to the Windows PowerShell cmdlet: Test-DscConfiguration.  
