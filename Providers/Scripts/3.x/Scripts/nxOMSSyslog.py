@@ -174,10 +174,9 @@ def ReadSyslogConf(SyslogSource, WorkspaceID):
     Read syslog conf file in rsyslog format for specified workspace and
     return the relevant facilities and severities
     """
+    # Check for the current conf even if it should be set to collect nothing
     out = []
     txt = ''
-    if len(SyslogSource) is 0:
-        return out
 
     # Read text from syslog conf file
     src_conf_path = GetSyslogConfPath()
@@ -190,7 +189,7 @@ def ReadSyslogConf(SyslogSource, WorkspaceID):
 
     # Find all lines sending to this workspace's port
     port = ExtractPortFromFluentDConf(WorkspaceID)
-    facility_search = r'^[^#](.*?)@.*?' + port + '$'
+    facility_search = r'^([^#].*?)@.*?' + port + '$'
     facility_re = re.compile(facility_search, re.M)
     for line in facility_re.findall(txt):
         l = line.replace('=', '')
@@ -276,6 +275,8 @@ def ReadSyslogNGConf(SyslogSource, WorkspaceID):
     """
     out = []
     txt = ''
+
+    # Read text from syslog conf file
     try:
         txt = codecs.open(syslog_ng_conf_path, 'r', 'utf8').read()
         LG().Log('INFO', 'Successfully read ' + syslog_ng_conf_path + '.')
