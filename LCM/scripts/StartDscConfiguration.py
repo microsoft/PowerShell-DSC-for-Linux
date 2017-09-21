@@ -34,6 +34,24 @@ def main(argv):
         }
     }
 
+    # Parse -configurationmof on its own for backwards compatibility
+    configmofArgument = None
+    if '-configurationmof' in argv:
+        configmofIndex = argv.index('-configurationmof')
+
+        try:
+            configmofArgument = argv[configmofIndex + 1]
+        except:
+            print 'StartDscConfiguration.py: error: Please provide a valid path argument for -configurationmof'
+            exit(1)
+
+        # Set the configuration mof parameter to no longer be required so it doesn't error in the arugment parser
+        parameters['configurationmof']['required'] = False 
+
+        # Remove -configurationmof and its argument from the list so it doesn't error in the arugment parser
+        argv.pop(configmofIndex)
+        argv.pop(configmofIndex)
+
     # Parse arguments
     if (useArgParse):
         # Used by Python 2.7+
@@ -43,7 +61,7 @@ def main(argv):
             parameterInfo = parameters[parameter]
             parser.add_argument('-' + parameterInfo['shortForm'], '--' + parameter, required = parameterInfo['required'], help = parameterInfo['helpText'], action = parameterInfo['action'])
 
-        parsedArguments = parser.parse_args()
+        parsedArguments = parser.parse_args(argv)
     else:
         # Used by Python 2.4-2.6
         parser = OptionParser(description = description)
@@ -52,13 +70,21 @@ def main(argv):
             parameterInfo = parameters[parameter]
             parser.add_argument('-' + parameterInfo['shortForm'], '--' + parameter, help = parameterInfo['helpText'], action = parameterInfo['action'])
 
-        (parsedArguments, extraArguments) = parser.parse_args()
+        (parsedArguments, extraArguments) = parser.parse_args(argv)
 
         for parameter in parameters.keys():
             if parameters[parameter]['required']:
                 if not parsedArguments[parameter]:
                     print 'StartDscConfiguration.py: error: argument -' + parameters[parameter]['shortForm'] + '/--' + parameter + ' is required.'
                     exit(1)
+
+    # Check that we don't have two configuration mofs defined
+    if configmofArgument and parsedArguments.configurationmof:
+        print 'StartDscConfiguration.py: error: Two configuration mof arguments were found. Please provide only one.'
+        exit(1)
+    
+    if configmofArgument:
+        parsedArguments.configurationmof = configmofArgument
 
     # Read the configuration mof
     try:
