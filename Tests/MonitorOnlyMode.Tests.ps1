@@ -45,14 +45,6 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
         $testMetaconfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'MetaConfigPush.ps1'
         $testConfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'FileProviderTestConfig1.ps1'
 
-        # Generate metaconfiguration with ApplyAndMonitor mode
-        $script:lcmSettingsApplyAndMonitor = @{
-            RefreshMode = 'PUSH'
-            ConfigurationMode = 'ApplyAndMonitor'
-        }
-        $script:metaconfigurationApplyAndMonitorOutput = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPushApplyAndMonitor'
-        $null = & $testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $script:metaconfigurationApplyAndMonitorOutput @lcmSettingsApplyAndMonitor
-
         # Generate metaconfiguration with MonitorOnly mode
         $script:lcmSettingsMonitorOnly = @{
             RefreshMode = 'PUSH'
@@ -86,213 +78,226 @@ Describe 'MonitorOnly Configuration Mode' -Tags @('BVT') {
         $null = Remove-CimSession -CimSession $script:session
     }
 
-    Context 'ApplyAndMonitor Mode - Ensure set to Absent and unsure if file exists or not' {
-        # Send metaconfig
-        It 'Should set LCM ConfigurationMode to ApplyAndMonitor without throwing' {
-            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyAndMonitorOutput -CimSession $script:session } | Should Not Throw
+    $applyConfigurationModes = @('ApplyOnly', 'ApplyAndMonitor', 'ApplyAndAutocorrect')
+
+    foreach ($configurationMode in $applyConfigurationModes)
+    {
+        # Generate metaconfiguration with specified apply configuration mode
+        $script:lcmSettingsApply = @{
+            RefreshMode = 'PUSH'
+            ConfigurationMode = $configurationMode
+        }
+        $script:metaconfigurationApplyOutput = Join-Path -Path $TestDrive -ChildPath ('MetaConfigPush' + $configurationMode)
+        $null = & $testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $script:metaconfigurationApplyOutput @lcmSettingsApply
+
+        Context "$configurationMode Mode - Ensure set to Absent and unsure if file exists or not" {
+            # Send metaconfig
+            It "Should set LCM ConfigurationMode to $configurationMode without throwing" {
+                { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyOutput -CimSession $script:session } | Should Not Throw
+            }
+
+            # Validate metaconfig
+            It "Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of $configurationMode" {
+                $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
+                $currentMetaConfig | Should Not Be $null
+                $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApply.RefreshMode
+                $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApply.ConfigurationMode
+            }
+
+            # Push configuration
+            It 'Should push a configuration without throwing' {
+                { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
+            }
+
+            # Verify Get-DscConfiguration
+            It 'Should retrieve DSC configuration with Ensure property as Absent' {
+                $dscConfig = Get-DscConfiguration -CimSession $script:session
+                $dscConfig | Should Not Be $null
+                $dscConfig.Ensure | Should Be 'Absent'
+                $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
+                $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
+            }
+
+            # Verify Test-DscConfiguration
+            It 'Should test DSC configuration and return InDesiredState as true' {
+                $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+                $testDscConfig.InDesiredState | Should Be $true
+            }
         }
 
-        # Validate metaconfig
-        It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of ApplyAndMonitor' {
-            $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
-            $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApplyAndMonitor.RefreshMode
-            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApplyAndMonitor.ConfigurationMode
+        Context 'MonitorOnly Mode - Ensure set to Absent and file does not exist' {
+            # Send metaconfig
+            It 'Should set LCM ConfigurationMode to MonitorOnly without throwing' {
+                { Set-DscLocalConfigurationManager -Path $script:metaconfigurationMonitorOnlyOutput -CimSession $script:session } | Should Not Throw
+            }
+
+            # Validate metaconfig
+            It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of MonitorOnly' {
+                $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
+                $currentMetaConfig | Should Not Be $null
+                $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsMonitorOnly.RefreshMode
+                $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsMonitorOnly.ConfigurationMode
+            }
+
+            It 'Should push a configuration without throwing' {
+                { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
+            }
+            
+            # Verify Get-DscConfiguration
+            It 'Should retrieve DSC configuration with Ensure property as Absent' {
+                $dscConfig = Get-DscConfiguration -CimSession $script:session
+                $dscConfig | Should Not Be $null
+                $dscConfig.Ensure | Should Be 'Absent'
+                $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
+                $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
+            }
+
+            # Verify Test-DscConfiguration
+            It 'Should test DSC configuration and return InDesiredState as true' {
+                $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+                $testDscConfig.InDesiredState | Should Be $true
+            }
         }
 
-        # Push configuration
-        It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
+        Context 'MonitorOnly Mode - Ensure set to Present and file does not exist' {
+            It 'Should push a configuration without throwing' {
+                { Start-DscConfiguration -Path $script:configurationFilePresentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
+            }
+                    
+            # Verify Get-DscConfiguration
+            It 'Should retrieve DSC configuration with Ensure property as Absent' {
+                $dscConfig = Get-DscConfiguration -CimSession $script:session
+                $dscConfig | Should Not Be $null
+                $dscConfig.Ensure | Should Be 'Absent'
+                $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
+                $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
+            }
+
+            # Verify Test-DscConfiguration
+            It 'Should test DSC configuration and return InDesiredState as false' {
+                $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+                $testDscConfig.InDesiredState | Should Be $false
+            }
         }
 
-        # Verify Get-DscConfiguration
-        It 'Should retrieve DSC configuration with Ensure property as Absent' {
-            $dscConfig = Get-DscConfiguration -CimSession $script:session
-            $dscConfig | Should Not Be $null
-            $dscConfig.Ensure | Should Be 'Absent'
-            $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
-            $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
+        Context "$configurationMode Mode - Ensure set to Present and file does not exist" {
+            # Send metaconfig
+            It "Should set LCM ConfigurationMode to $configurationMode without throwing" {
+                { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyOutput -CimSession $script:session } | Should Not Throw
+            }
+
+            # Validate metaconfig
+            It "Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of $configurationMode" {
+                $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
+                $currentMetaConfig | Should Not Be $null
+                $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApply.RefreshMode
+                $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApply.ConfigurationMode
+            }
+
+            # Send command to start existing config
+            It 'Should start existing configuration without throwing' {
+                { Start-DscConfiguration -UseExisting -CimSession $script:session -Wait -Force } | Should Not Throw
+            }
+
+            # Verify Get-DscConfiguration
+            It 'Should retrieve DSC configuration with Ensure property as Present' {
+                $dscConfig = Get-DscConfiguration -CimSession $script:session
+                $dscConfig | Should Not Be $null
+                $dscConfig.Ensure | Should Be 'Present'
+                $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
+                $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
+            }
+
+            # Verify Test-DscConfiguration
+            It 'Should test DSC configuration and return InDesiredState as true' {
+                $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+                $testDscConfig.InDesiredState | Should Be $true
+            }
         }
 
-        # Verify Test-DscConfiguration
-        It 'Should test DSC configuration and return InDesiredState as true' {
-            $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
-            $testDscConfig.InDesiredState | Should Be $true
-        }
-    }
+        Context 'MonitorOnly Mode - Ensure set to Present and file exists' {
+            # Send metaconfig with MonitorOnly
+            It 'Should set LCM ConfigurationMode to MonitorOnly without throwing' {
+                { Set-DscLocalConfigurationManager -Path $script:metaconfigurationMonitorOnlyOutput -CimSession $script:session } | Should Not Throw
+            }
 
-    Context 'MonitorOnly Mode - Ensure set to Absent and file does not exist' {
-        # Send metaconfig
-        It 'Should set LCM ConfigurationMode to MonitorOnly without throwing' {
-            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationMonitorOnlyOutput -CimSession $script:session } | Should Not Throw
-        }
+            # Validate metaconfig
+            It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of MonitorOnly' {
+                $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
+                $currentMetaConfig | Should Not Be $null
+                $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsMonitorOnly.RefreshMode
+                $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsMonitorOnly.ConfigurationMode
+            }
 
-        # Validate metaconfig
-        It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of MonitorOnly' {
-            $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
-            $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsMonitorOnly.RefreshMode
-            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsMonitorOnly.ConfigurationMode
-        }
+            # Verify Get-DscConfiguration
+            It 'Should retrieve DSC configuration with Ensure property as Present' {
+                $dscConfig = Get-DscConfiguration -CimSession $script:session
+                $dscConfig | Should Not Be $null
+                $dscConfig.Ensure | Should Be 'Present'
+                $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
+                $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
+            }
 
-        It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
-        }
-        
-        # Verify Get-DscConfiguration
-        It 'Should retrieve DSC configuration with Ensure property as Absent' {
-            $dscConfig = Get-DscConfiguration -CimSession $script:session
-            $dscConfig | Should Not Be $null
-            $dscConfig.Ensure | Should Be 'Absent'
-            $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
-            $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
+            # Verify Test-DscConfiguration
+            It 'Should test DSC configuration and return InDesiredState as true' {
+                $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+                $testDscConfig.InDesiredState | Should Be $true
+            }
         }
 
-        # Verify Test-DscConfiguration
-        It 'Should test DSC configuration and return InDesiredState as true' {
-            $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
-            $testDscConfig.InDesiredState | Should Be $true
-        }
-    }
+        Context 'MonitorOnly Mode - Ensure set to Absent and file exists' {
+            It 'Should push a configuration without throwing' {
+                { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
+            }
+                    
+            # Verify Get-DscConfiguration
+            It 'Should retrieve DSC configuration with Ensure property as Present' {
+                $dscConfig = Get-DscConfiguration -CimSession $script:session
+                $dscConfig | Should Not Be $null
+                $dscConfig.Ensure | Should Be 'Present'
+                $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
+                $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
+            }
 
-    Context 'MonitorOnly Mode - Ensure set to Present and file does not exist' {
-        It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $script:configurationFilePresentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
-        }
-                   
-        # Verify Get-DscConfiguration
-        It 'Should retrieve DSC configuration with Ensure property as Absent' {
-            $dscConfig = Get-DscConfiguration -CimSession $script:session
-            $dscConfig | Should Not Be $null
-            $dscConfig.Ensure | Should Be 'Absent'
-            $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
-            $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
-        }
-
-        # Verify Test-DscConfiguration
-        It 'Should test DSC configuration and return InDesiredState as false' {
-            $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
-            $testDscConfig.InDesiredState | Should Be $false
-        }
-    }
-
-    Context 'ApplyAndMonitor Mode - Ensure set to Present and file does not exist' {
-        # Send metaconfig
-        It 'Should set LCM ConfigurationMode to ApplyAndMonitor without throwing' {
-            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyAndMonitorOutput -CimSession $script:session } | Should Not Throw
+            # Verify Test-DscConfiguration
+            It 'Should test DSC configuration and return InDesiredState as false' {
+                $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+                $testDscConfig.InDesiredState | Should Be $false
+            }
         }
 
-        # Validate metaconfig
-        It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of ApplyAndMonitor' {
-            $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
-            $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApplyAndMonitor.RefreshMode
-            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApplyAndMonitor.ConfigurationMode
-        }
+        Context "$configurationMode Mode - Ensure set to Absent and file exists" {
+            # Send metaconfig
+            It "Should set LCM ConfigurationMode to $configurationMode without throwing" {
+                { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyOutput -CimSession $script:session } | Should Not Throw
+            }
 
-        # Send command to start existing config
-        It 'Should start existing configuration without throwing' {
-            { Start-DscConfiguration -UseExisting -CimSession $script:session -Wait -Force } | Should Not Throw
-        }
+            # Validate metaconfig
+            It "Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of $configurationMode" {
+                $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
+                $currentMetaConfig | Should Not Be $null
+                $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApply.RefreshMode
+                $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApply.ConfigurationMode
+            }
 
-        # Verify Get-DscConfiguration
-        It 'Should retrieve DSC configuration with Ensure property as Present' {
-            $dscConfig = Get-DscConfiguration -CimSession $script:session
-            $dscConfig | Should Not Be $null
-            $dscConfig.Ensure | Should Be 'Present'
-            $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
-            $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
-        }
+            It 'Should push a configuration without throwing' {
+                { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
+            }
 
-        # Verify Test-DscConfiguration
-        It 'Should test DSC configuration and return InDesiredState as true' {
-            $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
-            $testDscConfig.InDesiredState | Should Be $true
-        }
-    }
+            # Verify Get-DscConfiguration
+            It 'Should retrieve DSC configuration with Ensure property as Absent' {
+                $dscConfig = Get-DscConfiguration -CimSession $script:session
+                $dscConfig | Should Not Be $null
+                $dscConfig.Ensure | Should Be 'Absent'
+                $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
+                $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
+            }
 
-    Context 'MonitorOnly Mode - Ensure set to Present and file exists' {
-        # Send metaconfig with MonitorOnly
-        It 'Should set LCM ConfigurationMode to MonitorOnly without throwing' {
-            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationMonitorOnlyOutput -CimSession $script:session } | Should Not Throw
-        }
-
-        # Validate metaconfig
-        It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of MonitorOnly' {
-            $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
-            $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsMonitorOnly.RefreshMode
-            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsMonitorOnly.ConfigurationMode
-        }
-
-        # Verify Get-DscConfiguration
-        It 'Should retrieve DSC configuration with Ensure property as Present' {
-            $dscConfig = Get-DscConfiguration -CimSession $script:session
-            $dscConfig | Should Not Be $null
-            $dscConfig.Ensure | Should Be 'Present'
-            $dscConfig.DestinationPath | Should Be $script:filePresentParameters.DestinationPath
-            $dscConfig.Contents | Should Be $script:filePresentParameters.Contents
-        }
-
-        # Verify Test-DscConfiguration
-        It 'Should test DSC configuration and return InDesiredState as true' {
-            $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
-            $testDscConfig.InDesiredState | Should Be $true
-        }
-    }
-
-    Context 'MonitorOnly Mode - Ensure set to Absent and file exists' {
-        It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
-        }
-                   
-        # Verify Get-DscConfiguration
-        It 'Should retrieve DSC configuration with Ensure property as Present' {
-            $dscConfig = Get-DscConfiguration -CimSession $script:session
-            $dscConfig | Should Not Be $null
-            $dscConfig.Ensure | Should Be 'Present'
-            $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
-            $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
-        }
-
-        # Verify Test-DscConfiguration
-        It 'Should test DSC configuration and return InDesiredState as false' {
-            $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
-            $testDscConfig.InDesiredState | Should Be $false
-        }
-    }
-
-    Context 'ApplyAndMonitor Mode - Ensure set to Absent and file exists' {
-        # Send metaconfig
-        It 'Should set LCM ConfigurationMode to ApplyAndMonitor without throwing' {
-            { Set-DscLocalConfigurationManager -Path $script:metaconfigurationApplyAndMonitorOutput -CimSession $script:session } | Should Not Throw
-        }
-
-        # Validate metaconfig
-        It 'Should retrieve the LCM settings with expected RefreshMode of PUSH and ConfigurationMode of ApplyAndMonitor' {
-            $currentMetaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
-            $currentMetaConfig | Should Not Be $null
-            $currentMetaConfig.RefreshMode | Should Be $script:lcmSettingsApplyAndMonitor.RefreshMode
-            $currentMetaConfig.ConfigurationMode | Should Be $script:lcmSettingsApplyAndMonitor.ConfigurationMode
-        }
-
-        It 'Should push a configuration without throwing' {
-            { Start-DscConfiguration -Path $script:configurationFileAbsentOutput -CimSession $script:session -Wait -Force } | Should Not Throw
-        }
-
-        # Verify Get-DscConfiguration
-        It 'Should retrieve DSC configuration with Ensure property as Absent' {
-            $dscConfig = Get-DscConfiguration -CimSession $script:session
-            $dscConfig | Should Not Be $null
-            $dscConfig.Ensure | Should Be 'Absent'
-            $dscConfig.DestinationPath | Should Be $script:fileAbsentParameters.DestinationPath
-            $dscConfig.Contents | Should Be $script:fileAbsentParameters.Contents
-        }
-
-        # Verify Test-DscConfiguration
-        It 'Should test DSC configuration and return InDesiredState as true' {
-            $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
-            $testDscConfig.InDesiredState | Should Be $true
+            # Verify Test-DscConfiguration
+            It 'Should test DSC configuration and return InDesiredState as true' {
+                $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+                $testDscConfig.InDesiredState | Should Be $true
+            }
         }
     }
 }
