@@ -54,7 +54,7 @@ do
 	    ;;
 	--no-ssl-100)
 	    BUILD_SSL_100=0
-	
+		;;
 	--no-ssl-110)
 	    BUILD_SSL_110=0
 	    ;;
@@ -112,7 +112,7 @@ if [ -d "/usr/local_ssl_0.9.8" -a -d "/usr/local_ssl_1.0.0" -a -d "/usr/local_ss
         x86_64 )
             openssl098_libdir=/usr/local_ssl_0.9.8/lib
             openssl100_libdir=/usr/local_ssl_1.0.0/lib64
-			openssl110_libdir=/usr/local_ssl_1.1.0/lib64
+			openssl110_libdir=/usr/local_ssl_1.1.0/lib
             ;;
 	
         * )
@@ -125,8 +125,8 @@ if [ -d "/usr/local_ssl_0.9.8" -a -d "/usr/local_ssl_1.0.0" -a -d "/usr/local_ss
     openssl098_libs=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --libs openssl`
     openssl100_cflags=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --cflags openssl`
     openssl100_libs=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --libs openssl`
-	openssl110_cflags=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --cflags openssl`
-    openssl110_libs=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --libs openssl`
+	openssl110_cflags=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --cflags libssl`
+    openssl110_libs=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --libs libssl`
 fi
 
 cat <<EOF > config.mak
