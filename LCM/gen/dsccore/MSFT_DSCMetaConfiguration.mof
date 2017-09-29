@@ -11,8 +11,8 @@ class MSFT_DSCMetaConfiguration
    boolean RebootNodeIfNeeded;
 
    [Description ("The configuration apply mode for the server."),
-   ValueMap {"ApplyOnly","ApplyAndMonitor","ApplyAndAutoCorrect"},
-   Values {"ApplyOnly","ApplyAndMonitor","ApplyAndAutoCorrect"}]
+   ValueMap {"ApplyOnly","ApplyAndMonitor","ApplyAndAutoCorrect", "MonitorOnly"},
+   Values {"ApplyOnly","ApplyAndMonitor","ApplyAndAutoCorrect", "MonitorOnly"}]
    string ConfigurationMode;
 
    [EmbeddedInstance("MSFT_Credential"),

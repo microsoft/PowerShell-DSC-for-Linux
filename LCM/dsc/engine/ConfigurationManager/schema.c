@@ -1346,6 +1346,7 @@ static MI_CONST MI_Char* MSFT_DSCMetaConfiguration_ConfigurationMode_ValueMap_qu
     MI_T("ApplyOnly"),
     MI_T("ApplyAndMonitor"),
     MI_T("ApplyAndAutoCorrect"),
+    MI_T("MonitorOnly")
 };
 
 static MI_CONST MI_ConstStringA MSFT_DSCMetaConfiguration_ConfigurationMode_ValueMap_qual_value =
