@@ -194,7 +194,7 @@ Additional configuration options:
 - --ConfigurationName: the name of the configuration to apply
 - --RefreshFrequencyMins: Specifies how often (in minutes) LCM attempts to obtain the configuration from the pull server. If configuration on the pull server differs from the current one on the target node, it is copied to the pending store and applied.
 - --ConfigurationModeFrequencyMins: Specifies how often (in minutes) LCM ensures that the configuration is in the desired state.
-- --ConfigurationMode: Specifies how LCM should apply the configuration. Valid values are: ApplyOnly, ApplyAndMonitor, ApplyAndAutoCorrect
+- --ConfigurationMode: Specifies how LCM should apply the configuration. Valid values are: ApplyOnly, ApplyAndMonitor, ApplyAndAutoCorrect, MonitorOnly
 
 **To configure Azure Automation as a DSC Pull Server with a metaconfiguration MOF:**
 - Open the PowerShell console or PowerShell ISE as an administrator on a Windows machine in your local environment. This machine must have the latest version of WMF 5 installed
@@ -253,7 +253,10 @@ Applies a Meta Configuration MOF file to the computer. Similar to the Windows Po
 
 **StartDscConfiguration.py** 
 Applies a configuration MOF file to the computer. Similar to the Windows PowerShell cmdlet: StartDscConfiguration. Requires the path to the configuration MOF to apply. 
-`sudo ./StartDscConfiguration.py –configurationmof /tmp/localhost.mof`
+`sudo ./StartDscConfiguration.py –-configurationmof /tmp/localhost.mof`
+
+You can also supply the force parameter to forcibly remove any current pending configuration before applying the new configuration.
+`sudo ./StartDscConfiguration.py –-configurationmof /tmp/localhost.mof --force`
 
 **TestDscConfiguration.py** 
 Tests the current system configuration for compliance desired state.  Similar to the Windows PowerShell cmdlet: Test-DscConfiguration.  

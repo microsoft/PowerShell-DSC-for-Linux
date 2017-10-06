@@ -25,8 +25,10 @@ ConfigurationDetails g_ConfigurationDetails = { 0, 0, MI_FALSE };
 #else
 #include <pal/cpu.h>
 ConfigurationDetails g_ConfigurationDetails;
-static FILE *_DSCos;
-static Log_Level _DSClevel = OMI_WARNING;
+static FILE *_DSCLogFile;
+static FILE *_DSCDetailedLogFile;
+static Log_Level _DSCLogLevel = OMI_WARNING;
+static Log_Level _DSCDetailedLogLevel = OMI_VERBOSE;
 #define FMTSIZE 1024
 #endif 
 
@@ -97,23 +99,25 @@ static void _PutDSCHeader(
 
 
 int DSCLog_VPut(
+    FILE * logFile,
     Log_Level level,
+    Log_Level maxLevel,
     const char* file,
     MI_Uint32 line,
     const ZChar* format,
     va_list ap)
 {
-    if (!_DSCos || level > _DSClevel)
+    if (!logFile || level > maxLevel)
         return 0;
 
     file = scs(file);
 
-    _PutDSCHeader(_DSCos, file, line, level);
+    _PutDSCHeader(logFile, file, line, level);
 
-    Vftprintf(_DSCos, format, ap);
+    Vftprintf(logFile, format, ap);
 
-    Ftprintf(_DSCos,ZT("\n"));
-    fflush(_DSCos);
+    Ftprintf(logFile,ZT("\n"));
+    fflush(logFile);
     return 1;
 }
 
@@ -128,7 +132,7 @@ void DSCFilePutLog(
     if ((unsigned int)priority > OMI_VERBOSE)
         return;
 
-    if (priority <= _DSClevel)
+    if (priority <= _DSCDetailedLogLevel)
     {
         TChar fmt[FMTSIZE];
         va_list ap;
@@ -137,7 +141,13 @@ void DSCFilePutLog(
         Tcslcat(fmt, format, FMTSIZE);
                 
         va_start(ap, format);
-        DSCLog_VPut((Log_Level)priority, file, line, fmt, ap);
+        // Write warning and error level logs
+        DSCLog_VPut(_DSCLogFile, (Log_Level)priority, _DSCLogLevel, file, line, fmt, ap);
+        va_end(ap);        
+
+        va_start(ap, format);
+        // Write all the logs
+        DSCLog_VPut(_DSCDetailedLogFile, (Log_Level)priority, _DSCDetailedLogLevel, file, line, fmt, ap);
         va_end(ap);        
     }    
 }
@@ -145,26 +155,31 @@ void DSCFilePutLog(
 
 void DSCLog_Close()
 {
-    if (_DSCos && _DSCos != stderr)
+    if (_DSCLogFile && _DSCLogFile != stderr)
     {
-        fclose(_DSCos);
-        _DSCos = NULL;
+        fclose(_DSCLogFile);
+        _DSCLogFile = NULL;
+    }
+
+    if (_DSCDetailedLogFile && _DSCDetailedLogFile != stderr)
+    {
+        fclose(_DSCDetailedLogFile);
+        _DSCDetailedLogFile = NULL;
     }
 }
 
 MI_Result DSCLog_Open(
     const ZChar* path,
-    Log_Level level)
+    FILE ** logFile)
 {
-    if (!path || _DSCos)
+    if (!path || logFile == NULL || *logFile)
         return MI_RESULT_FAILED;
 
-    _DSClevel = level;    
 #if (MI_CHAR_TYPE == 1)
     {
-        _DSCos = fopen(path, "a");
+        *logFile = fopen(path, "a");
 
-        if (!_DSCos)
+        if (*logFile == NULL)
             return MI_RESULT_FAILED;
 
         return MI_RESULT_OK;
@@ -175,9 +190,9 @@ MI_Result DSCLog_Open(
         if (StrWcslcpy(path7, path, PAL_MAX_PATH_SIZE) >= PAL_MAX_PATH_SIZE)
             return MI_RESULT_FAILED;
         
-        _DSCos = fopen(path7, "a");
+        *logFile = fopen(path7, "a");
 
-        if (!_DSCos)
+        if (*logFile == NULL)
         {
             return MI_RESULT_FAILED;
         }
@@ -190,17 +205,24 @@ MI_Result DSCLog_Open(
 
 unsigned long DSC_EventRegister()
 {
-    char logpath[PAL_MAX_PATH_SIZE];
+    char logPath[PAL_MAX_PATH_SIZE];
+    char detailedLogPath[PAL_MAX_PATH_SIZE];
+
 #if defined(BUILD_OMS)
-    Strlcpy(logpath, "/var/opt/microsoft/omsconfig", PAL_MAX_PATH_SIZE);
-    Strlcat(logpath, "/", PAL_MAX_PATH_SIZE);
-    Strlcat(logpath, "omsconfig.log", PAL_MAX_PATH_SIZE);
+    Strlcpy(logPath, "/var/opt/microsoft/omsconfig", PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
+    Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "omsconfig.log", PAL_MAX_PATH_SIZE);
+    Strlcat(detailedLogPath, "omsconfigdetailed.log", PAL_MAX_PATH_SIZE);
 #else
-    Strlcpy(logpath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
-    Strlcat(logpath, "/", PAL_MAX_PATH_SIZE);
-    Strlcat(logpath, "dsc.log", PAL_MAX_PATH_SIZE);
+    Strlcpy(logPath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
+    Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "dsc.log", PAL_MAX_PATH_SIZE);
+    Strlcat(detailedLogPath, "dscdetailed.log", PAL_MAX_PATH_SIZE);
 #endif
-    DSCLog_Open(logpath, OMI_WARNING);
+    DSCLog_Open(logPath, &_DSCLogFile);
+    DSCLog_Open(detailedLogPath, &_DSCDetailedLogFile);
     return 0;
 }
 

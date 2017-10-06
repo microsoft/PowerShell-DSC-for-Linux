@@ -1,0 +1,6 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSContainersResource : OMI_BaseResource
+{
+    [key] string WorkspaceID;
+    [key] string Ensure;
+};

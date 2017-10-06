@@ -1,101 +1,138 @@
-#
-# This is a Pester test suite for validating DSC on Linux 
-#
-# Copyright (c) Microsoft Corporation, 2017
-#
+<#
+    .SYNOPSIS
+        Test suite for validating basic DSC functionality on Linux. 
+        Copyright (c) Microsoft Corporation, 2017
+#>
 
+$ErrorActionPreference = 'Stop'
 
-Import-Module ".\Dsclinux.Tests.Helper.psm1" -force -DisableNameChecking
+Describe 'DSC Linux Sanity Tests' -Tags @('Feature') {
+    BeforeAll {
+        $dscLinuxTestHelperPath = Join-Path -Path $PSScriptRoot -ChildPath 'Dsclinux.Tests.Helper.psm1'
+        Import-Module -Name $dscLinuxTestHelperPath -DisableNameChecking -Force
 
-Describe "DSC Linux Sanity Tests" -Tags @('Feature') {
+        # Install Modules needed for compliation on Windows machine 
+        $modulesNeeded = @('nx')
+        $modulesToInstall = @()
 
-    BeforeAll {               
+        foreach ($moduleName in $modulesNeeded)
+        {
+            $moduleNeeded = Get-Module -Name $moduleName -ListAvailable -ErrorAction 'SilentlyContinue'
+            $moduleInstalled = $null -ne $moduleNeeded
 
-        #Install Modules needed for compliation on Windows machine 
-        Install-Module nx, nxComputerManagement, nxNetworking
+            if (-not $moduleInstalled)
+            {
+                $modulesToInstall += $moduleName
+            }
+        }
+
+        if ($modulesToInstall.Count -gt 0)
+        {
+            Install-Module -Name $modulesToInstall
+        }
 
         # Create a Cim session to Client Linux machine on which that we are testing DSC Functionality 
-        $cfg = Get-TestConfiguration
+        $connectionConfiguration = Get-TestConfiguration
         
-        $script:linuxClientName  = $cfg.LinuxClient.Name
-        $rootUser = $cfg.LinuxClient.UserName
-        $rootPassword = $cfg.LinuxClient.Password
+        $script:linuxClientName = $connectionConfiguration.LinuxClient.Name
+        $rootUser = $connectionConfiguration.LinuxClient.UserName
+        $rootPassword = $connectionConfiguration.LinuxClient.Password
 
+        $secureRootPassword = ConvertTo-SecureString -String $rootPassword -AsPlainText -Force
+        $rootCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @($rootUser, $secureRootPassword)
+        $script:session = CreateCimSession -Credential $rootCredential -Server $linuxClientName
 
-        $rootUserPassword = ConvertTo-SecureString -String $rootPassword -AsPlainText -Force
-        $rootCredentials = New-Object -TypeName "System.Management.Automation.PSCredential" -ArgumentList $rootUser, $rootUserPassword
-        $script:session  = CreateCimSession -credential $rootCredentials  -server $linuxClientName         
-    
+        # Set up file path script variables
+        $configurationFolderPath = Join-Path -Path $PSScriptRoot -ChildPath 'Configurations'
+        $script:testMetaconfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'MetaConfigPush.ps1'
+        $script:testConfigurationFilePath = Join-Path -Path $configurationFolderPath -ChildPath 'FileProviderTestConfig1.ps1'
     }
 
-    AfterAll {      
-    }
-    
-    BeforeEach {
-      
+    AfterAll {
+        $null = Remove-CimSession -CimSession $script:session
     }
 
-    AfterEach {
-      
-    }
-	
-	It "Verify we can Set and get Meta Configuration" {
-            
-           & "$PWD\Configurations\MetaConfigPush.ps1" -targetClient $script:linuxClientName 
-           Set-DscLocalConfigurationManager -Path "$env:temp\MetaConfigPush"  -Verbose -CimSession $script:session
-           
-           $metaConfig = Get-DscLocalConfigurationManager -Verbose -CimSession $script:session
-           $metaConfig.RefreshMode | Should Be "Push" 
-           $metaConfig.ConfigurationModeFrequencyMins | Should Be "60"           
+	It 'Verify we can set and get the metaconfiguration' {        
+        $metaconfigurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'MetaConfigPush'
+        $lcmSettings = @{
+            RefreshMode = 'PUSH'
+            ConfigurationModeFrequencyMins = 60
+        }
+
+        $null = & $script:testMetaconfigurationFilePath -TargetClient $script:linuxClientName -Output $metaconfigurationOutputPath @lcmSettings
+        { Set-DscLocalConfigurationManager -Path $metaconfigurationOutputPath -CimSession $script:session } | Should Not Throw
+        
+        $metaConfig = Get-DscLocalConfigurationManager -CimSession $script:session
+        $metaConfig.RefreshMode.ToUpper() | Should Be $lcmSettings.RefreshMode.ToUpper()
+        $metaConfig.ConfigurationModeFrequencyMins | Should Be $lcmSettings.ConfigurationModeFrequencyMins
 	}
-
 	
-	It "Verify we can do Start DSC Configuration And Get Dsc Configuration" {
-           
-           & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Present"
-           Start-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession $script:session -wait 
-           
-           #Verify Get Dsc 
-           $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
-           $dscConfig.Ensure | Should Be "Present" 
-           $dscConfig.DestinationPath | Should Be "/tmp/dsctest1" 
-           $dscConfig.Contents | Should Be "Linux DSC Test1!" 
+	It 'Verify we can start, test, and retrieve a DSC configuration' {
+        $configurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'FileProviderTestConfig1'
+        $nxFileParameters = @{
+            Ensure = 'Present'
+            Type = 'File'
+            DestinationPath = '/tmp/dsctestfile1'
+            Contents = 'DSC test contents 1'
+        }
 
-           #Verify Test Dsc 
-           $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
-           $testDscConfig.InDesiredState | Should Be "True" 
+        $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
+        { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
+        
+        # Verify Get-DscConfiguration
+        $dscConfig = Get-DscConfiguration -CimSession $script:session
+        $dscConfig.Ensure | Should Be $nxFileParameters.Ensure
+        $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
+        $dscConfig.Contents | Should Be $nxFileParameters.Contents
 
+        # Verify Test-DscConfiguration
+        $testDscConfig = Test-DscConfiguration -CimSession $script:session -Detailed                      
+        $testDscConfig.InDesiredState | Should Be $true
 
-           # Use Dsc to cleanup by deleting the file created above            
-            & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Absent"
-           Start-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession $script:session -wait            
-           
-           # Use Dsc to cleanup by deleting the file created above            
-            & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Absent"
-           Start-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession $script:session -wait            
-           $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
-           $dscConfig.Ensure | Should Be "Absent" 
-           $dscConfig.DestinationPath | Should Be "/tmp/dsctest1"            
+        # Use DSC to cleanup by deleting the file created above
+        $nxFileParameters.Ensure = 'Absent'
+
+        $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
+        { Start-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Wait -Force } | Should Not Throw
+                   
+        $dscConfig = Get-DscConfiguration -CimSession $script:session
+        $dscConfig.Ensure | Should Be $nxFileParameters.Ensure
+        $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
 	}
-	      
+      
+    It 'Verify we can publish a DSC configuration and start an existing DSC configuration' {
+        $configurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'FileProviderTestConfig1'
+        $nxFileParameters = @{
+            Ensure = 'Present'
+            Type = 'File'
+            DestinationPath = '/tmp/dsctestfile1'
+            Contents = 'DSC test contents 1'
+        }
 
-    It "Verify we can do Publish and Start DSC -Useexisting " {
-            
-            & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Present"
-           Publish-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession $script:session                 
-           Start-DscConfiguration -UseExisting  -Verbose -CimSession $script:session -wait   
-           $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
-           $dscConfig.Ensure | Should Be "Present" 
-           $dscConfig.DestinationPath | Should Be "/tmp/dsctest1"            
+        $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
+
+        { Publish-DscConfiguration -Path $configurationOutputPath -CimSession $script:session -Force } | Should Not Throw
+        { Start-DscConfiguration -UseExisting -CimSession $script:session -Wait -Force } | Should Not Throw
+
+        $dscConfig = Get-DscConfiguration -CimSession $script:session
+        $dscConfig.Ensure | Should Be $nxFileParameters.Ensure
+        $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
 	}	
 
-    It "Verify we can do Update Dsc Configuration " {
-       
-           & "$PWD\Configurations\FileProviderTestConfig1.ps1" -targetClient $script:linuxClientName -Ensure "Absent"
-           Publish-DscConfiguration -Path "$env:temp\FileProviderTestConfig1" -Verbose -CimSession            Update-DscConfiguration -wait -Verbose -CimSession $script:session 
-           $dscConfig = Get-DscConfiguration -Verbose -CimSession $script:session
-           $dscConfig.Ensure | Should Be "Absent" 
-           $dscConfig.DestinationPath | Should Be "/tmp/dsctest1"    
-	}	
+    It 'Verify we can update a DSC configuration' {
+        $configurationOutputPath = Join-Path -Path $TestDrive -ChildPath 'FileProviderTestConfig1'
+        $nxFileParameters = @{
+            Ensure = 'Present'
+            Type = 'File'
+            DestinationPath = '/tmp/dsctestfile1'
+            Contents = 'DSC test contents 1'
+        }
 
+        $null = & $script:testConfigurationFilePath -TargetClient $script:linuxClientName -Output $configurationOutputPath @nxFileParameters
+        { Update-DscConfiguration -Wait -CimSession $script:session } | Should Not Throw
+
+        $dscConfig = Get-DscConfiguration -CimSession $script:session
+        $dscConfig.Ensure | Should Be $nxFileParameters.Ensure
+        $dscConfig.DestinationPath | Should Be $nxFileParameters.DestinationPath
+	}
 }

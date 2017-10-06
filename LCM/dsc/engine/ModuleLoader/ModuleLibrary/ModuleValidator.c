@@ -210,7 +210,8 @@ MI_Result ValidateInfrastructureSchema(_In_ MI_ClassA *miClassArray,
     if( extendedError )
         *extendedError = NULL;
     SetJobId();
-    DSC_EventWriteValidatingInfrastructureSchema(miClassArray->size);
+    // This Event does not produce any useful information and increasing log file size, disabling it. 
+    // DSC_EventWriteValidatingInfrastructureSchema(miClassArray->size);
     //Validate various infrastructure classes
     for( xCount = 0 ; xCount < miClassArray->size ; xCount++)
     {
@@ -255,7 +256,8 @@ MI_Result ValidateProviderRegistrationAgainstSchema(_In_ MI_ClassA *miClassArray
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
-    DSC_EventWriteValidatingProviderRegistration(miClassArray->size,miRegistrationArray->size);
+    // This Event does not produce any useful information and increasing log file size, disabling it. 
+    // DSC_EventWriteValidatingProviderRegistration(miClassArray->size,miRegistrationArray->size);
 
     //Test1 : only 1 registration per class
     //Test2 : no class left out without registration(except for meta config), also validates that registration not targeting more than 1 class.
@@ -344,7 +346,8 @@ MI_Result ValidateSchema(_In_ MI_ClassA *miClassArray,
     }
 
     classToCheck = miClassArray->data[classIndex]->classDecl;
-    DSC_EventWriteValidatingSchema(classToCheck->name,classIndex,miClassArray->size);
+    // This Event does not produce any useful information and increasing log file size, disabling it. 
+    // DSC_EventWriteValidatingSchema(classToCheck->name,classIndex,miClassArray->size);
 
     /*Test7*/
     if( classToCheck->numMethods != 0  || NitsShouldFault(NitsHere(), NitsAutomatic))
@@ -476,7 +479,8 @@ MI_Result ValidateDSCProviderSchema(_In_ MI_ClassA *miClassArray,
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NORES);
     }
 
-    DSC_EventWriteValidatingDSCProviderSchema(miClassArray->size);
+    // This Event does not produce any useful information and increasing log file size, disabling it. 
+    // DSC_EventWriteValidatingDSCProviderSchema(miClassArray->size);
 
     bResourceVisited = (MI_Boolean*)DSC_malloc(sizeof(MI_Boolean) * miClassArray->size, NitsHere());
     if (bResourceVisited == NULL )
@@ -544,7 +548,8 @@ MI_Result ValidateDSCDocumentInstance(_In_ MI_InstanceA *miInstanceArray,
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_VALIDATE_PROVSCHEMA_NORES);
     }
-    DSC_EventWriteValidatingDSCDocInstance(miInstanceArray->size,flags);
+    // This Event does not produce any useful information and increasing log file size, disabling it. 
+    // DSC_EventWriteValidatingDSCDocInstance(miInstanceArray->size,flags);
     for( xCount = 0; xCount < miInstanceArray->size; xCount++)
     {
         instanceToCheck = miInstanceArray->data[xCount];
@@ -641,7 +646,8 @@ MI_Result ValidateDSCProviderRegistrationInstance(_In_ MI_InstanceA *miInstanceA
     {
         return GetCimMIError(r, extendedError, ID_MODMAN_VALIDATE_PROVREGINS_CLASSNAME);
     }
-    DSC_EventWriteValidatingDSCProviderRegistrationInstance(className);
+    // This Event does not produce any useful information and increasing log file size, disabling it. 
+    // DSC_EventWriteValidatingDSCProviderRegistrationInstance(className);
     if( Tcscasecmp(className, BASE_REGISTRATION_WMIV2PROVIDER) == 0 )
     {
         bWMIv2ProviderRegistration = MI_TRUE;
@@ -712,7 +718,8 @@ MI_Result ValidateClassProperties(_In_ MI_Class *classInfo,
     {
         const TChar *propName = properties[count].wszPropName;
         const TChar *className = classInfo->classDecl->name;
-        DSC_EventWriteValidatingClassProperty(propName,className);
+        // This Event does not produce any useful information and increasing log file size, disabling it. 
+        // DSC_EventWriteValidatingClassProperty(propName,className);
         r = DSC_MI_Class_GetElement(classInfo, propName, NULL, NULL, &type, NULL, NULL, NULL, NULL);
         if( r != MI_RESULT_OK )
         {

@@ -48,7 +48,6 @@ MI_Char *g_GetConfigFileName;
 MI_Char *g_InventoryFileName;
 MI_Char *g_InventoryReportFileName;
 MI_Char *g_CurrentConfigFileName;
-MI_Char *g_FailedConfigFileName;
 MI_Char *g_PreviousConfigFileName;
 MI_Char *g_MetaConfigFileName;
 MI_Char *g_MetaConfigTmpFileName;
@@ -197,7 +196,9 @@ extern "C"
         MI_Boolean backUpNeeded,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-    MI_Result MoveConfigurationFiles(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+    MI_Result CopyConfigAndRemoveSource(_In_z_ const MI_Char *sourceConfigFileName,
+        _In_z_ const MI_Char *destinationConfigFileName,
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result GetFullPath(_In_z_ const MI_Char* directoryName,
         _In_z_ const MI_Char *fileName,
@@ -354,8 +355,6 @@ extern "C"
     const MI_Char * GetConfigChecksumFileName();
 
     const MI_Char *GetCurrentConfigFileName();
-
-    const MI_Char *GetFailedConfigFileName();
 
     const MI_Char *GetPreviousConfigFileName();
 
@@ -514,6 +513,8 @@ extern "C"
     MI_Boolean ShouldAutoCorrect(_In_z_ MI_Char* configurationMode);
 
     MI_Boolean ShouldMonitor(_In_z_ MI_Char* configurationMode);
+
+    MI_Boolean ShouldMonitorOnly(_In_z_ MI_Char* configurationMode);
 
     void GetFullMessageWithTokens(_In_z_ const MI_Char * deviceName, _In_z_ const MI_Char * resourceId,
                      _In_z_ const MI_Char * message, _In_ LCMProviderContext *lcmContext, Intlstr *intlstr);
