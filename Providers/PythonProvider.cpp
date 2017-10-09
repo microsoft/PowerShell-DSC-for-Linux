@@ -31,7 +31,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <sys/wait.h>
-
+#include <signal.h>
 
 namespace
 {
@@ -81,7 +81,6 @@ get_script_path ()
     strcat (fullPath.get (), PY_EXTENSION);
     return fullPath.move ();
 }
-
 
 class PropertyFinder
 {
@@ -198,7 +197,7 @@ namespace scx
 
 
 /*static*/ unsigned char const PythonProvider::MI_NULL_FLAG = 64;
-
+/*static*/ MI_Boolean PythonProvider::CHILD_SIGNAL_REGISTERED = MI_FALSE;
 
 template<typename T>
 /*static*/ int
@@ -266,11 +265,29 @@ PythonProvider::~PythonProvider ()
     }
 }
 
+void PythonProvider::handleChildSignal(int sig) {
+    int saved_errno = errno;
+    // Child process is complete, release the process.
+    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+    errno = saved_errno;
+}
 
 int
 PythonProvider::init ()
 {
     int rval = EXIT_SUCCESS;
+
+    // Register child process signal handler
+    if(CHILD_SIGNAL_REGISTERED == MI_FALSE)
+    {
+        struct sigaction sa;
+        sa.sa_handler = &handleChildSignal;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+        sigaction(SIGCHLD, &sa, 0);
+        CHILD_SIGNAL_REGISTERED == MI_TRUE;
+    }
+
 #if (PRINT_BOOKENDS)
     std::ostringstream strm;
     strm << "name: \"" << m_Name << '\"';

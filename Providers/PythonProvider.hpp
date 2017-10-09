@@ -75,6 +75,7 @@ private:
 
     int verifySocketState ();
     void handleSocketClosed ();
+    static void handleChildSignal(int sig);
 
     template<typename T>
     int send (T const& val);
@@ -144,6 +145,7 @@ private:
     static unsigned char const SET = 1;
     static unsigned char const GET = 2;
     static unsigned char const INVENTORY = 3;
+    static MI_Boolean CHILD_SIGNAL_REGISTERED;
 
     std::string const m_Name;
     int m_FD;
