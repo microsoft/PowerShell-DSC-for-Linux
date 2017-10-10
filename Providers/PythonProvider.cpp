@@ -265,9 +265,21 @@ PythonProvider::~PythonProvider ()
     }
 }
 
+/* PythonProvider::init() creates a child process (referenced by m_pid) to execute dsc python resources using client.py script.
+   When execution of python resource (child process) is completed, it doesn’t disappear completely.
+   Instead it becomes Zombie which is not capable to execute anything.
+   Any further call to client.py (via socket) will fail.
+
+   The Zombie processes can be simply removed by registering for SIGCHLD signal and calling waitpid API from handler.
+
+   This method is a SIGCHLD handler, which is raised when a child process is terminated.
+*/
 void PythonProvider::handleChildSignal(int sig) {
     int saved_errno = errno;
-    // Child process is complete, release the process.
+
+    // Obtain information about the child whose state has changed, and release it.
+    // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
+    // several zombie processes during one invocation of the handler function.
     while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
     errno = saved_errno;
 }
@@ -285,7 +297,7 @@ PythonProvider::init ()
         sigemptyset(&sa.sa_mask);
         sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
         sigaction(SIGCHLD, &sa, 0);
-        CHILD_SIGNAL_REGISTERED == MI_TRUE;
+        CHILD_SIGNAL_REGISTERED = MI_TRUE;
     }
 
 #if (PRINT_BOOKENDS)
