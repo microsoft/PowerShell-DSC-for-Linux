@@ -280,6 +280,20 @@ chown -R omsagent /opt/microsoft/${{SHORT_NAME}}/Scripts
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py"
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc keymgmtring.gpg"
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc keyring.gpg"
+
+
+# Set up a dsc cron job to run the ConsistencyInvoker every 30 minutes which is default freq, this is to fix dsc github issue no 322. 
+# It is a temporary workaround to create dsc DYI cron job as omsconfig upgrade removes dsc cron job. 
+
+# check if dsc consistency invoker is present on the machine 
+if [ -f /opt/omi/bin/ConsistencyInvoker ]; then 
+
+  # check if we do not have dsc cron file on the box then create one. 
+  if [ ! -f /etc/cron.d/dsc ]; then
+           	echo "*/30 * * * * root /opt/omi/bin/ConsistencyInvoker" > /etc/cron.d/dsc
+  fi
+fi
+
 #else
 /opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py
 
