@@ -258,16 +258,24 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
 
     if (proxyFileLocationToUse != NULL)
     {
-	text = InhaleTextFile(proxyFileLocationToUse);
-	valueLength = strlen(text);
-	if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
-	{
-	    DSC_free(text);
-	    return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_PROXYTOOLONG);
-	}
-	memcpy(g_sslOptions.Proxy, text, valueLength);
-	g_sslOptions.Proxy[valueLength] = '\0';
-	DSC_free(text);
+        char *posNewline;
+        text = InhaleTextFile(proxyFileLocationToUse);
+
+        // User may add newline by mistake while creating proxy file manualy.
+        // which can cause web request failures, remove new line from the end of string.
+        if ((posNewline=strchr(text, '\n')) != NULL)
+            *posNewline = '\0';
+            
+        valueLength = strlen(text);
+        if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
+        {
+            DSC_free(text);
+            return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_PULL_PROXYTOOLONG);
+        }
+
+        memcpy(g_sslOptions.Proxy, text, valueLength);
+        g_sslOptions.Proxy[valueLength] = '\0';
+        DSC_free(text);
     }
 #endif
 
