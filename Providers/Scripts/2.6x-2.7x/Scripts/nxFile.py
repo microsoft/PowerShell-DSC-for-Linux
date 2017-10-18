@@ -999,7 +999,6 @@ def Get(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
         ModifiedDate = 0
         return [0, DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode, ModifiedDate]
 
-    Ensure = "present"
     stat_info = os.lstat(DestinationPath)
 
     Owner = pwd.getpwuid(stat_info.st_uid)[0]

@@ -1,95 +1,37 @@
-﻿<#
-    .SYNOPSIS
-        Meta Configuration for Push DSC 
-
-    .PARAMETER TargetClient
-        The target machine for which to compile the metaconfiguration.
-    
-    .PARAMETER Output
-        The file path at which to output the compiled mof.
-#>
+﻿# Meta Configuration for Push DSC 
+ 
 param 
 ( 
-    [Parameter(Mandatory = $true)] 
+    [Parameter(Mandatory=$true)] 
     [ValidateNotNullOrEmpty()] 
-    [String]
-    $TargetClient,
-
-    [Parameter(Mandatory = $true)] 
-    [ValidateNotNullOrEmpty()] 
-    [String]
-    $Output,
-
-    [Parameter()] 
-    [ValidateNotNullOrEmpty()] 
-    [String]
-    $RefreshMode,
-
-    [Parameter()]
-    [Boolean]
-    $RebootNodeIfNeeded,
-
-    [Parameter()]
-    [ValidateRange(1, [Int]::MaxValue)]
-    [Int]
-    $RefreshFrequencyMins,
-
-    [Parameter()]
-    [ValidateRange(1, [Int]::MaxValue)]
-    [Int]
-    $ConfigurationModeFrequencyMins,
-
-    [Parameter()] 
-    [ValidateNotNullOrEmpty()] 
-    [String]
-    $ConfigurationMode
+    [string] $targetClient
 )
 
 Configuration MetaConfigPush
 {    
-    param 
+   param 
     ( 
-        [Parameter(Mandatory = $true)] 
+        [Parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()] 
-        [String]
-        $TargetClient,
-
-        [Parameter()] 
-        [ValidateNotNullOrEmpty()] 
-        [String]
-        $RefreshMode = 'PUSH',
-
-        [Parameter()]
-        [Boolean]
-        $RebootNodeIfNeeded = $true,
-
-        [Parameter()]
-        [ValidateRange(1, [Int]::MaxValue)]
-        [Int]
-        $RefreshFrequencyMins = 30,
-
-        [Parameter()]
-        [ValidateRange(1, [Int]::MaxValue)]
-        [Int]
-        $ConfigurationModeFrequencyMins = 60,
-
-        [Parameter()] 
-        [ValidateNotNullOrEmpty()] 
-        [String]
-        $ConfigurationMode = 'ApplyAndAutoCorrect' 
+        [string] $targetClient 
     ) 
 
-    Node $TargetClient
+    Node $targetClient
     {
         LocalConfigurationManager
         {
-            RefreshMode = $RefreshMode
-            RebootNodeIfNeeded = $RebootNodeIfNeeded
-            RefreshFrequencyMins = $RefreshFrequencyMins
-            ConfigurationModeFrequencyMins = $ConfigurationModeFrequencyMins
-            ConfigurationMode = $ConfigurationMode
+            RefreshMode = "PUSH";
+            RebootNodeIfNeeded = $true;
+            RefreshFrequencyMins = 30;
+            ConfigurationModeFrequencyMins = 60;
+            ConfigurationMode = "ApplyAndAutoCorrect";
         }
     }
 }
 
-MetaConfigPush @PSBoundParameters
+
+MetaConfigPush -targetClient $targetClient -Output "$env:temp\MetaConfigPush"
+<<<<<<< 5f0e7c7352445c0c113885df4c177c63ea932600
+
+=======
+>>>>>>> Addressed CR Comments.

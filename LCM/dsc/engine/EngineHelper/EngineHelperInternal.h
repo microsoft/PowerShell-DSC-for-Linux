@@ -335,17 +335,15 @@
 #define DSC_RESTART_SYSTEM_FLAG         1
 
 #define LCM_SETFLAGS_DEFAULT            0
-#define LCM_EXECUTE_SETONLY             (1 << 15)
-#define LCM_SETFLAGS_SAVETOPENDINGONLY  (1 << 0)
+#define LCM_SETFLAGS_SAVETOPENDINGONLY  (1 << 0 )
 #define LCM_SET_METACONFIG              (1 << 1)
 #define LCM_SETFLAGS_ENABLEWHATIF       (1 << 2)
-#define VALIDATE_REGISTRATION_INSTANCE  (1 << 3)
+#define VALIDATE_REGISTRATION_INSTANCE  (1 << 3 )
 #define VALIDATE_DOCUMENT_INSTANCE      (1 << 4)
 #define VALIDATE_METACONFIG_INSTANCE    (1 << 5)
 #define LCM_EXECUTIONMODE_OFFLINE       (1 << 6)
 #define LCM_EXECUTIONMODE_ONLINE        (1 << 7)
 #define LCM_EXECUTE_TESTONLY            (1 << 8)
-#define LCM_EXECUTE_APPLYNEWCONFIG      (1 << 27)
 
 #define MODULEHANDLER_NOTLOADED     0
 #define MODULEHANDLER_LOADED     1
@@ -366,7 +364,6 @@
 #define DSC_CONFIGURATIONMODE_APPLYONLY MI_T("ApplyOnly")
 #define DSC_CONFIGURATIONMODE_APPLYANDMONITOR MI_T("ApplyAndMonitor")
 #define DSC_CONFIGURATIONMODE_APPLYANDAUTOCORRECT MI_T("ApplyAndAutoCorrect")
-#define DSC_CONFIGURATIONMODE_MONITORONLY MI_T("MonitorOnly")
 #define DEFAULT_RebootNodeIfNeeded MI_FALSE
 #define DEFAULT_AllowModuleOverwrite MI_FALSE
 #define DEFAULT_RefreshMode MI_T("PUSH")
@@ -510,7 +507,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
     constants used by LCM
     ******************************** ***/
 
-#define CONFIGURATION_LOCATION_TEMPFILE_PREFIX MI_T("tmp")    
+    
 #define CONFIGURATION_LOCATION_PENDINGTMP MI_T("Pending.mof.tmp")
 #define CONFIGURATION_LOCATION_PENDING MI_T("Pending.mof")
 #define CONFIGURATION_LOCATION_PARTIALBASEDOCUMENT MI_T("PartialConfigBaseDocumentInstances.mof")
@@ -520,6 +517,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define CONFIGURATION_LOCATION_INVENTORY MI_T("Inventory.mof")
 #define CONFIGURATION_LOCATION_INVENTORY_REPORT MI_T("Inventory.xml")
 #define CONFIGURATION_LOCATION_CURRENT MI_T("Current.mof")
+#define CONFIGURATION_LOCATION_FAILED MI_T("Failed.mof")
 #define CONFIGURATION_LOCATION_CURRENTCHECKSUM MI_T("Current.mof.checksum")
 #define CONFIGURATION_LOCATION_PREVIOUS MI_T("Previous.mof")
 #define CONFIGURATION_LOCATION_METACONFIG MI_T("MetaConfig.mof")
