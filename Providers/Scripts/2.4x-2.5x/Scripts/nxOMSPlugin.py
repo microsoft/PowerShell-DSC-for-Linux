@@ -9,6 +9,7 @@ import imp
 import re
 import codecs
 import shutil
+import platform
 
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
@@ -45,13 +46,20 @@ class TestOMSAgent(IOMSAgent):
     def restart_oms_agent(self):
         return True
 
+def pf_arch():
+    if platform.processor() == "x86_64":
+        return "x64"
+    else:
+        return "x86"
 
 BLOCK_SIZE = 8192        
 PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
 ETC_OMSAGENT_DIR = '/etc/opt/microsoft/omsagent/'
 CONF_PATH_SUFFIX = 'conf/omsagent.d/'
 CONF_PATH = os.path.join(ETC_OMSAGENT_DIR, CONF_PATH_SUFFIX)
-PLUGIN_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSPlugin/DSCResources/MSFT_nxOMSPluginResource/Plugins'
+MODULE_RESOURCE_DIR = '/opt/microsoft/omsconfig/modules/nxOMSPlugin/DSCResources/MSFT_nxOMSPluginResource'
+PLUGIN_MODULE_PATH = os.path.join(MODULE_RESOURCE_DIR, "Plugins")
+PLUGIN_ARCH_MODULE_PATH = os.path.join(MODULE_RESOURCE_DIR, pf_arch(), "Plugins")
 OMS_ACTION = OMSAgentUtil()
 MULTI_HOMED = None
 
@@ -119,6 +127,7 @@ def Set(WorkspaceID, Plugins):
     for plugin in Plugins:
         # test for the existence of plugin and conf subfolders in the current plugin
         plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], 'plugin')
+        plugin_arch_dir = os.path.join(PLUGIN_ARCH_MODULE_PATH, plugin['PluginName'], 'plugin')
         conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], 'conf')
         # 4 cases here:
         # Case 1: The IP has both plugin and conf directories
@@ -128,8 +137,8 @@ def Set(WorkspaceID, Plugins):
         if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # copy all files under conf and plugin
-                copy_all_files(plugin_dir, PLUGIN_PATH)
-                copy_all_files(conf_dir, CONF_PATH)
+                copy_all_files(plugin_dir, PLUGIN_PATH, False)
+                copy_all_files(conf_dir, CONF_PATH, False)
             elif plugin['Ensure'] == 'Absent':
                 # and delete all CONF files in the directory
                 delete_all_files(conf_dir, CONF_PATH)
@@ -140,7 +149,7 @@ def Set(WorkspaceID, Plugins):
         elif os.path.isdir(plugin_dir):
             if plugin['Ensure'] == 'Present':
                 # copy all files under plugin
-                copy_all_files(plugin_dir, PLUGIN_PATH)
+                copy_all_files(plugin_dir, PLUGIN_PATH, False)
             elif plugin['Ensure'] == 'Absent':
                 # NO-OP as we do *NOT* remove common plugins
                 pass
@@ -151,7 +160,7 @@ def Set(WorkspaceID, Plugins):
         elif os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # copy all file under conf
-                copy_all_files(conf_dir, CONF_PATH)
+                copy_all_files(conf_dir, CONF_PATH, False)
             elif plugin['Ensure'] == 'Absent':
                 # remove the conf
                 delete_all_files(conf_dir, CONF_PATH)
@@ -163,6 +172,19 @@ def Set(WorkspaceID, Plugins):
             # log error - neither conf nor plugin directory was found in IP to set
             LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
             return [-1]
+
+        # Some Plugins (e.g. Security Baseline) have arch specific files
+        if os.path.isdir(plugin_arch_dir):
+            if plugin['Ensure'] == 'Present':
+                # copy all files under plugin
+                copy_all_files(plugin_arch_dir, PLUGIN_PATH, True)
+            elif plugin['Ensure'] == 'Absent':
+                # NO-OP as we do *NOT* remove common plugins
+                pass
+            else:
+                # log error Ensure value not expected
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
+                return [-1]
         
     # restart omsagent process to pick up new plugins and conf
     if MULTI_HOMED:
@@ -184,6 +206,7 @@ def Test(Plugins):
     for plugin in Plugins:
         # test for the existence of plugin and conf subfolders in the current plugin
         plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], 'plugin')
+        plugin_arch_dir = os.path.join(PLUGIN_ARCH_MODULE_PATH, plugin['PluginName'], 'plugin')
         conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin['PluginName'], 'conf')
         # 4 cases here:
         # Case 1: The IP has both plugin and conf directories
@@ -193,12 +216,12 @@ def Test(Plugins):
         if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
-                if (not check_all_files(plugin_dir, PLUGIN_PATH)
-                        or not check_all_files(conf_dir, CONF_PATH)):
+                if (not check_all_files(plugin_dir, PLUGIN_PATH, False)
+                        or not check_all_files(conf_dir, CONF_PATH, False)):
                     return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # check all conf files do NOT exist under conf directory
-                if check_all_files(conf_dir, CONF_PATH):
+                if check_all_files(conf_dir, CONF_PATH, False):
                     return [-1];
             else:
                 # log error Ensure value not expected
@@ -207,7 +230,7 @@ def Test(Plugins):
         elif os.path.isdir(plugin_dir):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
-                if not check_all_files(plugin_dir, PLUGIN_PATH):
+                if not check_all_files(plugin_dir, PLUGIN_PATH, False):
                     return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # NO-OP as we do *NOT* test for the absence of common plugins
@@ -219,11 +242,11 @@ def Test(Plugins):
         elif os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
-                if not check_all_files(conf_dir, PLUGIN_PATH):
+                if not check_all_files(conf_dir, PLUGIN_PATH, False):
                     return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # check all conf files do NOT exist under conf directory
-                if check_all_files(conf_dir, CONF_PATH):
+                if check_all_files(conf_dir, CONF_PATH, False):
                     return [-1];
             else:
                 # log error Ensure value not expected
@@ -233,6 +256,20 @@ def Test(Plugins):
             # log error - neither conf nor plugin directory was found in IP
             LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
             return [-1]
+
+        # Some Plugins (e.g. Security Baseline) have arch specific files
+        if os.path.isdir(plugin_arch_dir):
+            if plugin['Ensure'] == 'Present':
+                # check all files exist under conf and dir
+                if not check_all_files(plugin_arch_dir, PLUGIN_PATH, True):
+                    return [-1]
+            elif plugin['Ensure'] == 'Absent':
+                # NO-OP as we do *NOT* test for the absence of common plugins
+                pass
+            else:
+                # log error Ensure value not expected
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
+                return [-1]
         
     # files are all present and hash matches
     return [0]
@@ -248,19 +285,26 @@ def Get(Plugins):
     module_plugins = get_immediate_subdirectories(PLUGIN_MODULE_PATH)
     for plugin_name in module_plugins:
         plugin_dir = os.path.join(PLUGIN_MODULE_PATH, plugin_name, 'plugin')
+        plugin_arch_dir = os.path.join(PLUGIN_ARCH_MODULE_PATH, plugin_name, 'plugin')
         conf_dir = os.path.join(PLUGIN_MODULE_PATH, plugin_name, 'conf')
-        if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
+        if os.path.isdir(plugin_dir) and os.path.isdir(plugin_arch_dir) and os.path.isdir(conf_dir):
+            # Test for the existence of the plugin(s) arch specific plugin files and conf files
+            if (check_all_files(plugin_dir, PLUGIN_PATH, False)
+                    and check_all_files(plugin_arch_dir, PLUGIN_PATH, True)
+                    and check_all_files(conf_dir, CONF_PATH, False)):
+                disk_plugins.append({'PluginName': plugin_name, 'Ensure': 'Present'})
+        elif os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             # Test for the existence of BOTH the plugin(s) and conf files
-            if (check_all_files(plugin_dir, PLUGIN_PATH)
-                    and check_all_files(conf_dir, CONF_PATH)):
+            if (check_all_files(plugin_dir, PLUGIN_PATH, False)
+                    and check_all_files(conf_dir, CONF_PATH, False)):
                 disk_plugins.append({'PluginName': plugin_name, 'Ensure': 'Present'})
         elif os.path.isdir(plugin_dir):
             # Test for the existence of ONLY the plugin(s)
-            if check_all_files(plugin_dir, PLUGIN_PATH):
+            if check_all_files(plugin_dir, PLUGIN_PATH, False):
                 disk_plugins.append({'PluginName': plugin_name, 'Ensure': 'Present'})
         elif os.path.isdir(conf_dir):
             # Test for the existence of ONLY the conf
-            if check_all_files(conf_dir, CONF_PATH):
+            if check_all_files(conf_dir, CONF_PATH, False):
                 disk_plugins.append({'PluginName': plugin_name, 'Ensure': 'Present'})
     disk_plugins.sort()
     return disk_plugins
@@ -276,14 +320,22 @@ def get_immediate_subdirectories(a_dir):
                           + ' with error ' + str(sys.exc_info()[0]))
         return []
 
-            
-def copy_all_files(src, dest):
+# If is_exec is True, the files will be made executable (e.g. chmod ugo+x).
+# Some of the files being copied might not need to be executable but it
+# doesn't cause any harm to make it true for all files being copied from
+# a source dir.
+def copy_all_files(src, dest, is_exec):
     try:
         src_files = os.listdir(src)
         for file_name in src_files:
-            full_file_name = os.path.join(src, file_name)
-            if os.path.isfile(full_file_name):
-                shutil.copy(full_file_name, dest)
+            full_src_file = os.path.join(src, file_name)
+            full_dest_file = os.path.join(dest, file_name)
+            if os.path.isfile(full_src_file):
+                shutil.copy(full_src_file, dest)
+                if is_exec:
+                    mode = os.stat(full_dest_file).st_mode
+                    mode |= 0555
+                    os.chmod(full_dest_file, mode)
     except:
         LG().Log('ERROR', 'copy_all_files failed for src: ' + src + ' dest: '
                           + dest + ' with error ' + str(sys.exc_info()[0]))
@@ -303,7 +355,7 @@ def delete_all_files(src, dest):
         return False
 
 
-def check_all_files(src, dest):
+def check_all_files(src, dest, is_exec):
     try:
         src_files = os.listdir(src)
         for file_name in src_files:
@@ -312,6 +364,10 @@ def check_all_files(src, dest):
             if os.path.isfile(full_dest_file):
                 if CompareFiles(full_dest_file, full_src_file, 'md5') == -1:
                     return False
+                if is_exec:
+                    mode = os.stat(full_dest_file).st_mode
+                    if mode & 0555 != 0555:
+                        return False
             else:
                 return False
         return True
