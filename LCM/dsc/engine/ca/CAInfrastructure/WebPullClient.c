@@ -1283,6 +1283,12 @@ MI_Result SetGeneralCurlOptions(CURL* curl,
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30);
+    /*
+        Default curl operation timeout is infinite.
+        If curl operation hangs for some reason, it should not block LCM forever.
+        Setting operation timeout to 10 minutes.
+    */
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 600);
     
     if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
     {
