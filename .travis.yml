@@ -2,6 +2,10 @@ language: c
 dist: trusty   # Travis build machine is Ubuntu Trusty 14.04 x64
 sudo: required # A sudo enabled, full VM is used for building instead of a docker container
 
+branches:
+  only:
+    - master
+
 addons:
   apt:
     packages:
@@ -23,7 +27,7 @@ addons:
 script:
   - # Fetch the Build-PowerShell-DSC-for-Linux repository for dependencies to build from
   - git config --global 'url.https://github.com/.insteadOf' 'git@github.com:'
-  - git clone --recursive 'https://github.com/kwirkykat/Build-PowerShell-DSC-for-Linux.git' ../bld-dsc
+  - git clone --recursive 'https://github.com/Microsoft/Build-PowerShell-DSC-for-Linux.git' ../bld-dsc
   -
   - # Master branch for all submodules
   - cd ../bld-dsc

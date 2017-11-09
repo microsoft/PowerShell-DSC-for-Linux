@@ -68,13 +68,13 @@ def main(argv):
 
         for parameter in parameters.keys():
             parameterInfo = parameters[parameter]
-            parser.add_argument('-' + parameterInfo['shortForm'], '--' + parameter, help = parameterInfo['helpText'], action = parameterInfo['action'])
+            parser.add_option('-' + parameterInfo['shortForm'], '--' + parameter, help = parameterInfo['helpText'], action = parameterInfo['action'])
 
         (parsedArguments, extraArguments) = parser.parse_args(argv)
 
         for parameter in parameters.keys():
             if parameters[parameter]['required']:
-                if not parsedArguments[parameter]:
+                if not getattr(parsedArguments, parameter):
                     print 'StartDscConfiguration.py: error: argument -' + parameters[parameter]['shortForm'] + '/--' + parameter + ' is required.'
                     exit(1)
 
