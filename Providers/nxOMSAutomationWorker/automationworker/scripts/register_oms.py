@@ -8,6 +8,7 @@ import getopt
 import os
 import socket
 import sys
+import re
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -21,6 +22,35 @@ from worker import linuxutil
 
 REGISTER = "register"
 DEREGISTER = "deregister"
+
+
+def is_ipv4(hostname):
+    match = re.match('^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3}).(\\d{1,3})$', hostname)
+    if not match:
+        return False
+    for i in range(1, 5):
+        num = int(match.group(i))
+        if num < 0 or num > 255:
+            return False
+    return True
+
+
+def get_hostname():
+    oms_agent_hostname_command = ['/opt/microsoft/omsagent/ruby/bin/ruby', '-r', '/opt/microsoft/omsagent/plugin/oms_common.rb', '-e', 'puts OMS::Common.get_hostname']
+    # Use the ruby util OMS agent uses to get hostname
+    try:
+        process, output, error = linuxutil.popen_communicate(oms_agent_hostname_command)
+        if process.returncode == 0 and not error:
+            return output.strip()
+    except OSError:
+        pass
+    # Unable to use ruby util, falling back on socket to get hostname
+    hostname = socket.gethostname()
+    if is_ipv4(hostname):
+        return hostname
+    else:
+        return hostname.split(".")[0]
+
 
 
 def get_hybrid_worker_group_name(agent_id):
@@ -37,7 +67,7 @@ def get_hybrid_worker_group_name(agent_id):
     """
     # following same format as OMSAgent (get_hostname())
     # see : https://github.com/Microsoft/OMS-Agent-for-Linux/blob/master/source/code/plugins/oms_common.rb#L600
-    return socket.gethostname().split(".")[0] + "_" + agent_id
+    return get_hostname() + "_" + agent_id
 
 
 def get_ip_address():
@@ -72,7 +102,7 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resourc
         asset_tag = linuxutil.get_azure_vm_asset_tag()
 
     payload = {"RunbookWorkerGroup": worker_group_name,
-               "MachineName": socket.gethostname(),
+               "MachineName": get_hostname(),
                "IpAddress": get_ip_address(),
                "Thumbprint": thumbprint,
                "Issuer": issuer,
