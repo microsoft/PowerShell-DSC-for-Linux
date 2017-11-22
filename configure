@@ -2,9 +2,6 @@
 
 BUILD_RPM=1
 BUILD_DPKG=1
-BUILD_SSL_098=1
-BUILD_SSL_100=1
-BUILD_SSL_SYSTEM=0
 BUILD_DEBUG=0
 BUILD_OMS=
 DEBUG_FLAGS=""
@@ -48,12 +45,6 @@ do
 	    DSC_SCRIPT_PATH="\$(CONFIG_DATADIR)/dsc/Scripts"
 	    ;;
 	
-	--no-ssl-098)
-	    BUILD_SSL_098=0
-	    ;;
-	--no-ssl-100)
-	    BUILD_SSL_100=0
-	    ;;
 	--oms)
 	    if [ "$BUILD_LOCAL" = "1" ]; then
 		echo "Error: options --oms and --local conflict."
@@ -123,8 +114,6 @@ fi
 cat <<EOF > config.mak
 BUILD_RPM=$BUILD_RPM
 BUILD_DPKG=$BUILD_DPKG
-BUILD_SSL_098=$BUILD_SSL_098
-BUILD_SSL_100=$BUILD_SSL_100
 BUILD_LOCAL=$BUILD_LOCAL
 BUILD_OMS=$BUILD_OMS
 DSC_MODULES_PATH=$DSC_MODULES_PATH
