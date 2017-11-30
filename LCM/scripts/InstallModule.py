@@ -180,7 +180,7 @@ for resource in resourcelist:
         sys.exit(1)
 
     os.rename(libdirPath, modulePath + "/DSCResources/" + resource + "/lib")
-    retval = subprocess.call(["cp " +  modulePath + "/DSCResources/" + resource + "/lib/*.* "  + omi_libdir + "/"], shell=True)
+    retval = subprocess.call(["cp --remove-destination " +  modulePath + "/DSCResources/" + resource + "/lib/*.* "  + omi_libdir + "/"], shell=True)
     if retval != 0:
         os.rename(modulePath + "/DSCResources/" + resource + "/lib", libdirPath)
         print("Error: Failed to install module " + moduleName + " on resource " + resource)

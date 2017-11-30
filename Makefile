@@ -253,7 +253,7 @@ endif
 
 nxOMSAutomationWorker:
 	rm -rf output/staging; \
-	VERSION="1.6.0.0"; \
+	VERSION="1.6.1.0"; \
 	PROVIDERS="nxOMSAutomationWorker"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -360,7 +360,7 @@ nxOMSPerfCounter:
 
 nxOMSSyslog:
 	rm -rf output/staging; \
-        VERSION="2.1"; \
+        VERSION="2.2"; \
         PROVIDERS="nxOMSSyslog"; \
         STAGINGDIR="output/staging/$@/DSCResources"; \
         cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -468,14 +468,16 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.1"; \
+	VERSION="3.4"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
 		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
-                cp -r Providers/Modules/Plugins/ $$STAGINGDIR/MSFT_$${current}Resource/; \
+		cp -r Providers/Modules/Plugins/ $$STAGINGDIR/MSFT_$${current}Resource; \
+		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Plugins; \
+		cp -r Providers/Modules/Plugins_$(PF_ARCH)/* $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Plugins; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \

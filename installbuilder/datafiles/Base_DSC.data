@@ -57,7 +57,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip; release/nxOMSPerfCounter_2.2.zip; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.1.zip; release/nxOMSSyslog_2.1.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.2.zip; release/nxOMSSyslog_2.2.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip; release/nxOMSKeyMgmt_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc; LCM/keys/dscgpgkey.asc; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc; LCM/keys/msgpgkey.asc; 644; ${{RUN_AS_USER}}; root
@@ -234,12 +234,6 @@ chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema
 chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/baseregistration
 chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration
 
-for f in /opt/omi/lib/libMSFT_*; do
-    if [ -L $f ]; then
-        rm $f
-    fi
-done
-
 #if BUILD_OMS == 1
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
 chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
@@ -252,7 +246,7 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 # Set up the modules
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip 0"
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.1.zip 0"
+su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.2.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.1.zip 0"
 
@@ -280,6 +274,20 @@ chown -R omsagent /opt/microsoft/${{SHORT_NAME}}/Scripts
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py"
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc keymgmtring.gpg"
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc keyring.gpg"
+
+
+# Set up a dsc cron job to run the ConsistencyInvoker every 30 minutes which is default freq, this is to fix dsc github issue no 322. 
+# It is a temporary workaround to create dsc DYI cron job as omsconfig upgrade removes dsc cron job. 
+
+# check if dsc consistency invoker is present on the machine 
+if [ -f /opt/omi/bin/ConsistencyInvoker ]; then 
+
+  # check if we do not have dsc cron file on the box then create one. 
+  if [ ! -f /etc/cron.d/dsc ]; then
+           	echo "*/30 * * * * root /opt/omi/bin/ConsistencyInvoker" > /etc/cron.d/dsc
+  fi
+fi
+
 #else
 /opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py
 

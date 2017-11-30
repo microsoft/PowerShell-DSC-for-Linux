@@ -12,7 +12,6 @@
 #include <MI.h>
 #include "OMI_BaseResource.h"
 #include "MSFT_nxOMSSyslogSource.h"
-#include "MSFT_nxOMSSyslogResource.h"
 
 /*
 **==============================================================================
@@ -20,7 +19,6 @@
 ** MSFT_nxOMSSyslogResource [MSFT_nxOMSSyslogResource]
 **
 ** Keys:
-**    SyslogSource
 **    WorkspaceID
 **
 **==============================================================================
@@ -31,7 +29,7 @@ typedef struct _MSFT_nxOMSSyslogResource /* extends OMI_BaseResource */
     MI_Instance __instance;
     /* OMI_BaseResource properties */
     /* MSFT_nxOMSSyslogResource properties */
-    /*KEY*/ MSFT_nxOMSSyslogSource_ConstArrayRef SyslogSource;
+    MSFT_nxOMSSyslogSource_ConstArrayRef SyslogSource;
     /*KEY*/ MI_ConstStringField WorkspaceID;
 }
 MSFT_nxOMSSyslogResource;
