@@ -189,6 +189,8 @@ if os.path.exists('./Scripts/nxAvailableUpdates.py'):
     nxAvailableUpdates=imp.load_source('nxAvailableUpdates','./Scripts/nxAvailableUpdates.py') 
 if os.path.exists('./Scripts/nxOMSAgentNPMConfig.py'):
     nxNPMD=imp.load_source('nxNPMD','./Scripts/nxOMSAgentNPMConfig.py')
+if os.path.exists('./Scripts/nxOMSWLI.py'):
+    nxWLI=imp.load_source('nxWLI','./Scripts/nxOMSWLI.py')
 
 nxUserTestCases = None
 if nxUser != None:
@@ -2263,6 +2265,190 @@ if nxNPMD != None:
             read_data = self.readFile(agent_conf_file_ws02)
             self.assertTrue(test_content03_str != read_data, 'Valid agent config update should not happen for ws02 as it used ensure_absent')
 
+nxOMSWLITestCases = None
+if nxWLI != None:
+    class nxOMSWLITestCases(unittest2.TestCase):
+
+        class TestOMSAgentUtil(nxWLI.IOMSAgent):
+            def restart_oms_agent(self, workspaceId):
+                return True
+
+        class TestLOG(object):
+            def Log(self, log_type, msg):
+                pass
+
+        def assignDirectories(self):
+            self.dir_test_staging = 'tmp'
+
+            nxWLI.RESOURCE_MODULE_PATH = os.path.join(self.dir_test_staging, 'dsc/WLI/')
+            nxWLI.PLUGIN_RPATH = 'plugins/'
+            nxWLI.CONF_RPATH = 'conf/'
+
+            nxWLI.PLUGIN_DEST_PATH = os.path.join(self.dir_test_staging, 'plugin/')
+            nxWLI.CONF_DEST_PATH_PREFIX = os.path.join(self.dir_test_staging, 'conf/')
+            nxWLI.CONF_DEST_PATH_SUFFIX = '/omsagent.d/'
+
+            common_plugin_rpath = nxWLI.PLUGIN_RPATH + 'common/'
+            baseos_conf_rpath = nxWLI.CONF_RPATH + 'baseOS/'
+            self.dsc_common_plugin_path = os.path.join(nxWLI.RESOURCE_MODULE_PATH, common_plugin_rpath)
+            self.dsc_baseos_conf_path = os.path.join(nxWLI.RESOURCE_MODULE_PATH, baseos_conf_rpath)
+
+            self.workspace_id_01 = str(uuid.uuid4())
+            self.workspace_id_02 = str(uuid.uuid4())
+
+        def removeDirectories(self):
+            if os.path.exists(self.dir_test_staging):
+                shutil.rmtree(self.dir_test_staging)
+
+        def createDirectories(self):
+            os.makedirs(nxWLI.PLUGIN_DEST_PATH)
+            os.makedirs(os.path.join(nxWLI.CONF_DEST_PATH_PREFIX, self.workspace_id_01 + nxWLI.CONF_DEST_PATH_SUFFIX))
+            os.makedirs(os.path.join(nxWLI.CONF_DEST_PATH_PREFIX, self.workspace_id_02 + nxWLI.CONF_DEST_PATH_SUFFIX))
+
+            os.makedirs(self.dsc_common_plugin_path)
+            os.makedirs(self.dsc_baseos_conf_path)
+
+        def setupFiles(self):
+            fake_plugin_path = os.path.join(self.dsc_common_plugin_path, 'fake_plugin.rb')
+            self.writeFile(fake_plugin_path, 'This is a fake plugin')
+
+            fake_conf_path = os.path.join(self.dsc_baseos_conf_path, 'fake_conf.conf')
+            self.writeFile(fake_conf_path, 'This a fake config')
+
+        def writeFile(self, path, content):
+            f = open(path, 'w+')
+            f.write(content)
+            f.close()
+
+        def make_MI(self, retval, WorkspaceId, Configuration):
+            d=dict();
+            if WorkspaceId == None :
+                d['WorkspaceId'] = None
+            else :
+                d['WorkspaceId'] = nxNPMD.protocol.MI_String(WorkspaceId)
+            if Configuration == None :
+                d['Configuration'] = None
+            else :
+                d['Configuration'] = nxNPMD.protocol.MI_String(Configuration)
+            return retval,d
+
+        def setUp(self):
+            try:
+                self.assignDirectories()
+                self.removeDirectories()
+                self.createDirectories()
+                self.setupFiles()
+            except Exception, msg:
+                # raise error if setup itself failed
+                self.assertTrue(False, "Setting filesystem for test cases failed!:" + str(msg))
+
+            nxWLI.OMS_ACTION = nxOMSAgentNPMConfigTestCases.TestOMSAgentUtil()
+            nxWLI.LG = nxOMSWLITestCases.TestLOG
+
+            self.enable_config = '{\"WLIConfiguration\":[{\"WorkloadName\":\"baseOS\",\"Ensure\":\"Present\",\"Plugin\":\"common\"}]}'
+            self.disable_config = '{\"WLIConfiguration\":[{\"WorkloadName\":\"baseOS\",\"Ensure\":\"Absent\",\"Plugin\":\"common\"}]}'
+
+        def tearDown(self):
+            """
+            Remove test resources.
+            """
+            try:
+                self.removeDirectories()
+            except Exception, msg:
+                self.assertTrue(False, "Cleanup of filesystem in tear down failed!" + str(msg))
+
+        def testTestMarshall(self):
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [-1], 'Test Failed')
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.disable_config)
+            self.assertTrue(r == [0], 'Test Failed')
+
+        def testSetMarshall(self):
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [-1], 'Test Failed')
+            r = nxWLI.Set_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [0], 'Test Failed')
+
+        def testFiles(self):
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [-1], 'Test Failed')
+            r = nxWLI.Set_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+
+            self.assertTrue(os.path.isfile(os.path.join(nxWLI.PLUGIN_DEST_PATH, 'fake_plugin.rb')), 'Plugin file should be present')
+            self.assertTrue(os.path.isfile(os.path.join(nxWLI.CONF_DEST_PATH_PREFIX, self.workspace_id_01 + nxWLI.CONF_DEST_PATH_SUFFIX, 'fake_conf.conf')), 'Conf file should be present')
+
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [0], 'Test Failed')
+
+            r = nxWLI.Set_Marshall(self.workspace_id_01, self.disable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+
+            self.assertTrue(not os.path.isfile(os.path.join(nxWLI.CONF_DEST_PATH_PREFIX, self.workspace_id_01 + nxWLI.CONF_DEST_PATH_SUFFIX, 'fake_conf.conf')), 'Conf file should not be present')
+
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.disable_config)
+            self.assertTrue(r == [0], 'Test Failed')
+
+        def testGetMarshall(self):
+            enable_get_config = '[{\'WorkloadName\': \'baseOS\', \'Ensure\': \'Present\'}]'
+            disable_get_config = '[{\'WorkloadName\': \'baseOS\', \'Ensure\': \'Absent\'}]'
+
+            r = nxWLI.Get_Marshall(self.workspace_id_01, self.disable_config)
+            self.assertTrue(check_values(r, self.make_MI(0, self.workspace_id_01, disable_get_config)))
+
+            r = nxWLI.Set_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+
+            r = nxWLI.Get_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(check_values(r, self.make_MI(0, self.workspace_id_01, enable_get_config)))
+
+            r = nxWLI.Set_Marshall(self.workspace_id_01, self.disable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+
+            r = nxWLI.Get_Marshall(self.workspace_id_01, self.disable_config)
+            self.assertTrue(check_values(r, self.make_MI(0, self.workspace_id_01, disable_get_config)))
+
+        def testMultipleWorkspaces(self):
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [-1], 'Test Failed')
+            r = nxWLI.Set_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+
+            r = nxWLI.Test_Marshall(self.workspace_id_02, self.enable_config)
+            self.assertTrue(r == [-1], 'Test Failed')
+            r = nxWLI.Set_Marshall(self.workspace_id_02, self.enable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+
+            self.assertTrue(os.path.isfile(os.path.join(nxWLI.PLUGIN_DEST_PATH, 'fake_plugin.rb')), 'Plugin file should be present')
+            self.assertTrue(os.path.isfile(os.path.join(nxWLI.CONF_DEST_PATH_PREFIX, self.workspace_id_01 + nxWLI.CONF_DEST_PATH_SUFFIX, 'fake_conf.conf')), 'Conf file should be present')
+
+            self.assertTrue(os.path.isfile(os.path.join(nxWLI.PLUGIN_DEST_PATH, 'fake_plugin.rb')), 'Plugin file should be present')
+            self.assertTrue(os.path.isfile(os.path.join(nxWLI.CONF_DEST_PATH_PREFIX, self.workspace_id_02 + nxWLI.CONF_DEST_PATH_SUFFIX, 'fake_conf.conf')), 'Conf file should be present')
+
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.enable_config)
+            self.assertTrue(r == [0], 'Test Failed')
+
+            r = nxWLI.Test_Marshall(self.workspace_id_02, self.enable_config)
+            self.assertTrue(r == [0], 'Test Failed')
+
+            r = nxWLI.Set_Marshall(self.workspace_id_01, self.disable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+
+            r = nxWLI.Set_Marshall(self.workspace_id_02, self.disable_config)
+            self.assertTrue(r == [0], 'Set Failed')
+
+            self.assertTrue(not os.path.isfile(os.path.join(nxWLI.CONF_DEST_PATH_PREFIX, self.workspace_id_01 + nxWLI.CONF_DEST_PATH_SUFFIX, 'fake_conf.conf')), 'Conf file should not be present')
+
+            self.assertTrue(not os.path.isfile(os.path.join(nxWLI.CONF_DEST_PATH_PREFIX, self.workspace_id_02 + nxWLI.CONF_DEST_PATH_SUFFIX, 'fake_conf.conf')), 'Conf file should not be present')
+
+            r = nxWLI.Test_Marshall(self.workspace_id_01, self.disable_config)
+            self.assertTrue(r == [0], 'Test Failed')
+
+            r = nxWLI.Test_Marshall(self.workspace_id_02, self.disable_config)
+            self.assertTrue(r == [0], 'Test Failed')
+
 ######################################
 if __name__ == '__main__':
     tests = []
@@ -2284,5 +2470,7 @@ if __name__ == '__main__':
         tests.append(unittest2.TestLoader().loadTestsFromTestCase(nxOMSKeyMgmtTestCases))
     if nxFileInventoryTestCases != None :
         tests.append(unittest2.TestLoader().loadTestsFromTestCase(nxFileInventoryTestCases))
+    if nxOMSWLITestCases != None:
+        tests.append(unittest2.TestLoader().loadTestsFromTestCase(nxOMSWLITestCases))    
     alltests = unittest2.TestSuite(tests)
     unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)

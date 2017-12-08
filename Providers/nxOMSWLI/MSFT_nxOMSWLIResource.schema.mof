@@ -1,0 +1,6 @@
+[ClassVersion("1.0.0")]
+class MSFT_nxOMSWLIResource : OMI_BaseResource
+{
+	[key] string WorkspaceId;
+	[write] string Configuration;
+};
