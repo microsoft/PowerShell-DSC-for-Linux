@@ -113,7 +113,7 @@ class PowerShellRuntime(Runtime):
 
     def __init__(self, job_data, runbook):
         Runtime.__init__(self, job_data, runbook)
-        self.execution_alias = "powershell"
+        self.execution_alias = "pwsh"
         self.base_cmd = [self.execution_alias, "-File"]
 
 
