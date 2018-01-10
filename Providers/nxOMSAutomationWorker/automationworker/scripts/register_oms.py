@@ -36,7 +36,8 @@ def is_ipv4(hostname):
 
 
 def get_hostname():
-    oms_agent_hostname_command = ['/opt/microsoft/omsagent/ruby/bin/ruby', '-r', '/opt/microsoft/omsagent/plugin/oms_common.rb', '-e', 'puts OMS::Common.get_hostname']
+    oms_agent_hostname_command = ['/opt/microsoft/omsagent/ruby/bin/ruby', '-r',
+                                  '/opt/microsoft/omsagent/plugin/oms_common.rb', '-e', 'puts OMS::Common.get_hostname']
     # Use the ruby util OMS agent uses to get hostname
     try:
         process, output, error = linuxutil.popen_communicate(oms_agent_hostname_command)
@@ -50,7 +51,6 @@ def get_hostname():
         return hostname
     else:
         return hostname.split(".")[0]
-
 
 
 def get_hybrid_worker_group_name(agent_id):
@@ -86,7 +86,67 @@ def get_ip_address():
         return "127.0.0.1"
 
 
-def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, certificate_path):
+def get_metadata_from_imds(http_client):
+    """
+    Tries to get azurevm metadata from IMDS
+    :return: a dictionary of the following format
+    {
+        "compute": {
+            "location": "some-location",
+            "name": "some-computer",
+            "offer": "some-offer",
+            "osType": "Linux",
+            "placementGroupId": "",
+            "platformFaultDomain": "0",
+            "platformUpdateDomain": "0",
+            "publisher": "some-publisher",
+            "resourceGroupName": "rome-resourceGroup",
+            "sku": "some-sku",
+            "subscriptionId": "aaaa0000-aa00-aa00-aa00-aaaaaa000000",
+            "tags": "",
+            "version": "1.1.10",
+            "vmId": "bbbb0000-bb00-bb00-bb00-bbbbbb000000",
+            "vmSize": "Standard_D1"
+        },
+        "network": {
+            "interface": [
+                {
+                    "ipv4": {
+                        "ipAddress": [
+                            {
+                                "privateIpAddress": "0.0.0.0",
+                                "publicIpAddress": "0.0.0.0"
+                            }
+                        ],
+                        "subnet": [
+                            {
+                                "address": "10.0.0.0",
+                                "prefix": "24"
+                            }
+                        ]
+                    },
+                    "ipv6": {
+                        "ipAddress": []
+                    },
+                    "macAddress": "000AAABBB11"
+                }
+            ]
+        }
+    }
+    """
+    try:
+        mdUrl = "http://169.254.169.254/metadata/instance?api-version=2017-08-01"
+        header = {'Metadata': 'True'}
+        response = http_client.get(mdUrl, headers=header)
+        jsonObj = json.loads(response.raw_data)
+        return jsonObj
+
+    except:
+        return None
+
+
+def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, certificate_path,
+                            platform_update_domain, tags):
     """Formats the required headers and payload for the registration and deregitration requests.
 
     Returns:
@@ -109,7 +169,9 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resourc
                "OperatingSystem": 2,
                "SMBIOSAssetTag": asset_tag,
                "VirtualMachineId": vm_id,
-               "Subject": subject}
+               "Subject": subject,
+               "platformUpdateDomain": platform_update_domain,
+               "tags": tags}
 
     if azure_resource_id is not None:
         payload["AzureResourceId"] = azure_resource_id
@@ -117,18 +179,23 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resourc
     return headers, payload
 
 
+# TODO: add test-register code to test changes in payload, change cadence to increase polling time period
+
 def register(registration_endpoint, worker_group_name, machine_id, cert_path, key_path, is_azure_vm, vm_id,
-             azure_resource_id, test_mode):
+             azure_resource_id, test_mode, platform_update_domain, tags):
     """Registers the worker through the automation linked account with the Agent Service.
 
     Returns:
         The deserialized response from the Agent Service.
     """
-    headers, payload = get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, cert_path)
-    url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
-
     http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode)
     http_client = http_client_factory.create_http_client(sys.version_info)
+
+
+    headers, payload = get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, cert_path,
+                                               platform_update_domain, tags)
+    url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
+
     response = http_client.put(url, headers=headers, data=payload)
 
     if response.status_code != 200:
@@ -278,9 +345,9 @@ def main(argv):
         elif opt in ("-z", "--azurevm"):
             is_azure_vm = True
         elif opt in ("-v", "--azureresourceid"):
-            azure_resource_id = arg.strip()
+            azure_resource_id = arg.strip()  # Use the Resource ID from DSC resource as a backup. Overwrite it with metadata from IMDS when available
         elif opt in ("-i", "--vmid"):
-            vm_id = arg.strip()
+            vm_id = arg.strip()  # Use the VM ID from DSC resource as a backup. Overwrite it with metadata from IMDS when available
         elif opt in ("-t", "--test"):
             test_mode = True
         elif opt == "--mock_powershelldsc_test":
@@ -330,8 +397,33 @@ def main(argv):
                      'AccountId': '23216587-8f56-428c-9006-4c2f28c036f5'}
                 cert_info = ['', '', '959GG850526XC5JT35E269CZ69A55E1C7E1256JH']
             else:
-                registration_response = register(registration_endpoint, worker_group_name, machine_id, oms_cert_path,
-                                                 oms_key_path, is_azure_vm, vm_id, azure_resource_id, test_mode)
+                # Update the metadata if possible
+                platform_update_domain = ""
+                tags = ""
+                try:
+                    http_client_factory = httpclientfactory.HttpClientFactory(oms_cert_path, oms_key_path, test_mode)
+                    http_client = http_client_factory.create_http_client(sys.version_info)
+                    metadata = get_metadata_from_imds(http_client)
+                    if metadata is not None:
+                        try:
+                            vm_id = metadata["compute"]["vmId"]
+                            sub_id = metadata["compute"]["subscriptionId"]
+                            resource_group = metadata["compute"]["resourceGroupName"]
+                            vm_name = metadata["compute"]["name"]
+                            azure_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Compute/virtualMachines/{2}".format(
+                                sub_id, resource_group, vm_name)
+                            platform_update_domain = metadata["compute"]["platformUpdateDomain"]
+                            tags = metadata["compute"]["tags"]
+
+                        except KeyError:
+                            pass
+                except:
+                    pass
+
+
+                registration_response = register(registration_endpoint, worker_group_name, machine_id,
+                                                          oms_cert_path, oms_key_path, is_azure_vm, vm_id,
+                                                          azure_resource_id, test_mode, platform_update_domain, tags)
                 cert_info = linuxutil.get_cert_info(oms_cert_path)
                 account_id = registration_response["AccountId"]
 
