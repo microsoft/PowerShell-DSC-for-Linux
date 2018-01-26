@@ -171,7 +171,7 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resourc
                "VirtualMachineId": vm_id,
                "Subject": subject,
                "platformUpdateDomain": platform_update_domain,
-               "tags": tags}
+               "VirtualMachineTags": tags}
 
     if azure_resource_id is not None:
         payload["AzureResourceId"] = azure_resource_id
