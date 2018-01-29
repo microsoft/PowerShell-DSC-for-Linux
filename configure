@@ -4,6 +4,7 @@ BUILD_RPM=1
 BUILD_DPKG=1
 BUILD_SSL_098=1
 BUILD_SSL_100=1
+BUILD_SSL_110=1
 BUILD_SSL_SYSTEM=0
 BUILD_DEBUG=0
 BUILD_OMS=
@@ -53,6 +54,9 @@ do
 	    ;;
 	--no-ssl-100)
 	    BUILD_SSL_100=0
+		;;
+	--no-ssl-110)
+	    BUILD_SSL_110=0
 	    ;;
 	--oms)
 	    if [ "$BUILD_LOCAL" = "1" ]; then
@@ -93,6 +97,7 @@ OPTIONS:
     --no-dpkg                   Do not build a DEB package
     --no-ssl-098                Do not build for OpenSSL 0.9.8x
     --no-ssl-100                Do not build for OpenSSL 1.0.x
+	--no-ssl-110                Do not build for OpenSSL 1.1.x
 
     --local                     Build without packages and for the OpenSSL installed to the system.
 EOF
@@ -102,22 +107,26 @@ fi
 
 pkgconfig=`which pkg-config`
 
-if [ -d "/usr/local_ssl_0.9.8" -a -d "/usr/local_ssl_1.0.0" ]; then
+if [ -d "/usr/local_ssl_0.9.8" -a -d "/usr/local_ssl_1.0.0" -a -d "/usr/local_ssl_1.1.0" ]; then
     case "`uname -m`" in
         x86_64 )
             openssl098_libdir=/usr/local_ssl_0.9.8/lib
             openssl100_libdir=/usr/local_ssl_1.0.0/lib64
+			openssl110_libdir=/usr/local_ssl_1.1.0/lib
             ;;
 	
         * )
             openssl098_libdir=/usr/local_ssl_0.9.8/lib
             openssl100_libdir=/usr/local_ssl_1.0.0/lib
+			
             ;;
     esac
     openssl098_cflags=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --cflags openssl`
     openssl098_libs=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --libs openssl`
     openssl100_cflags=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --cflags openssl`
     openssl100_libs=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --libs openssl`
+	openssl110_cflags=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --cflags openssl`
+    openssl110_libs=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --libs openssl`
 fi
 
 cat <<EOF > config.mak
@@ -125,6 +134,7 @@ BUILD_RPM=$BUILD_RPM
 BUILD_DPKG=$BUILD_DPKG
 BUILD_SSL_098=$BUILD_SSL_098
 BUILD_SSL_100=$BUILD_SSL_100
+BUILD_SSL_110=$BUILD_SSL_110
 BUILD_LOCAL=$BUILD_LOCAL
 BUILD_OMS=$BUILD_OMS
 DSC_MODULES_PATH=$DSC_MODULES_PATH
@@ -141,6 +151,10 @@ openssl098_libdir=$openssl098_libdir
 openssl100_cflags=$openssl100_cflags
 openssl100_libs=$openssl100_libs
 openssl100_libdir=$openssl100_libdir
+openssl110_cflags=$openssl110_cflags
+openssl110_libs=$openssl110_libs
+openssl110_libdir=$openssl110_libdir
+
 EOF
 
 cat <<EOF > dsc_config.h
