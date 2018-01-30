@@ -16,19 +16,31 @@ umask 027
 
 get_plugin_state () {
     if [ ! -e $AUDISP_CONF ]; then
-        echo None
+        echo no
     fi
     echo "$(grep '^ *active *= *' $AUDISP_CONF | tr -d ' ' | cut -d'=' -f2)"
 }
 
 set_plugin_state () {
     # Edit the conf file
-    sed -i "s/^\( *active *= *\)[enosy]*/\1$1/" $AUDISP_CONF
+    if [ -e $AUDISP_CONF ]; then
+        sed -i "s/^\( *active *= *\)[enosy]*/\1$1/" $AUDISP_CONF
+    else
+        cat <<EOF > $AUDISP_CONF
+# Created by OMSAuditdPlugin.sh
+active = $1
+direction = out
+path = $AUOMS_BIN
+type = always
+format = string
+EOF
+    fi
+
     if [ $? -ne 0 ]; then
         return 1
     fi
 
-    # While a reload would be better, it cane be unreliable on some systems
+    # While a reload would be better, it can be unreliable on some systems
     # so we always do a restart
     service auditd restart
     if [ $? -ne 0 ]; then
