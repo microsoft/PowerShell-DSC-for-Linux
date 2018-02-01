@@ -107,26 +107,41 @@ fi
 
 pkgconfig=`which pkg-config`
 
-if [ -d "/usr/local_ssl_0.9.8" -a -d "/usr/local_ssl_1.0.0" -a -d "/usr/local_ssl_1.1.0" ]; then
-    case "`uname -m`" in
-        x86_64 )
+if [ -d "/usr/local_ssl_0.9.8" ] || [ -d "/usr/local_ssl_1.0.0" ] || [ -d "/usr/local_ssl_1.1.0" ]; then
+    if [ -d "/usr/local_ssl_0.9.8" ]; then
+        if [ "`uname -m`" == "x86_64" ]; then
             openssl098_libdir=/usr/local_ssl_0.9.8/lib
+        else
+            openssl098_libdir=/usr/local_ssl_0.9.8/lib
+        fi
+        openssl098_cflags=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --cflags openssl`
+        openssl098_libs=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --libs openssl`
+    else
+        echo -e "\e[33mYellow SSL version 0.9.8 is not found at path /usr/local_ssl_0.9.8. Skipping build for SSL 0.9.8.\e[0m"
+        BUILD_SSL_098=0
+    fi
+    if [ -d "/usr/local_ssl_1.0.0" ]; then
+        if [ "`uname -m`" == "x86_64" ]; then
             openssl100_libdir=/usr/local_ssl_1.0.0/lib64
-			openssl110_libdir=/usr/local_ssl_1.1.0/lib
-            ;;
-	
-        * )
-            openssl098_libdir=/usr/local_ssl_0.9.8/lib
+        else
             openssl100_libdir=/usr/local_ssl_1.0.0/lib
-			
-            ;;
-    esac
-    openssl098_cflags=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --cflags openssl`
-    openssl098_libs=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --libs openssl`
-    openssl100_cflags=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --cflags openssl`
-    openssl100_libs=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --libs openssl`
-	openssl110_cflags=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --cflags openssl`
-    openssl110_libs=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --libs openssl`
+        fi
+        openssl100_cflags=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --cflags openssl`
+        openssl100_libs=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --libs openssl`
+    else
+        echo -e "\e[33mYellow SSL version 1.0.0 is not found at path /usr/local_ssl_1.0.0. Skipping build for SSL 1.0.0.\e[0m"
+        BUILD_SSL_100=0
+    fi
+    if [ -d "/usr/local_ssl_1.1.0" ]; then
+        if [ "`uname -m`" == "x86_64" ]; then
+            openssl110_libdir=/usr/local_ssl_1.1.0/lib
+        fi
+        openssl110_cflags=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --cflags openssl`
+        openssl110_libs=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --libs openssl`
+    else
+        echo -e "\e[33mYellow SSL version 1.1.0 is not found at path /usr/local_ssl_1.1.0. Skipping build for SSL 1.1.0.\e[0m"
+        BUILD_SSL_110=0
+    fi
 fi
 
 cat <<EOF > config.mak
