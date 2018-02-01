@@ -170,21 +170,21 @@ omi098:
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_0.9.8 omi-1.0.8/output
 	$(MAKE) -C omi-1.0.8
-	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=098 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) SSL_BUILD=0.9.8
 
 omi100:
 	$(MAKE) configureomi100
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_1.0.0 omi-1.0.8/output
 	$(MAKE) -C omi-1.0.8
-	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) SSL_BUILD=1.0.0
 
 omi110:
 	$(MAKE) configureomi110
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_1.1.0 omi-1.0.8/output
 	$(MAKE) -C omi-1.0.8
-	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=110 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG)
+	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=110 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) SSL_BUILD=1.1.0
 
 configureomi098:
 	(cd omi-1.0.8; ./configure $(DEBUG_FLAGS) --enable-preexec --prefix=/opt/omi --outputdirname=output_openssl_0.9.8 --localstatedir=/var/opt/omi --sysconfdir=/etc/opt/omi/conf --certsdir=/etc/opt/omi/ssl --opensslcflags="$(openssl098_cflags)" --openssllibs="-L$(current_dir)/ext/curl/current_platform/lib $(openssl098_libs)" --openssllibdir="$(openssl098_libdir)")
