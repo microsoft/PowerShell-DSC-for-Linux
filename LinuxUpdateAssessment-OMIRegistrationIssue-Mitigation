@@ -1,0 +1,13 @@
+Mitigation Steps
+------------------
+
+Either
+
+Restart your Linux VM
+
+(OR)
+
+Stop and Start OMIServer
+--------------------------
+sudo /opt/omi/bin/omiserver -s
+sudo /opt/omi/bin/omiserver -d
