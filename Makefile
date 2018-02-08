@@ -59,7 +59,7 @@ endif
 
 
 ifeq ($(BUILD_OMS),BUILD_OMS)
-dsckit098: nx nxOMSPerfCounter nxOMSSyslog nxOMSKeyMgmt nxOMSPlugin nxOMSCustomLog nxOMSSudoCustomLog nxFileInventory nxOMSGenerateInventoryMof nxOMSAgentNPMConfig nxOMSAutomationWorker nxOMSAuditdPlugin nxOMSContainers
+dsckit098: nx nxOMSPerfCounter nxOMSSyslog nxOMSKeyMgmt nxOMSPlugin nxOMSCustomLog nxOMSSudoCustomLog nxFileInventory nxOMSGenerateInventoryMof nxOMSAgentNPMConfig nxOMSAutomationWorker nxOMSAuditdPlugin nxOMSContainers nxOMSWLI
 else
 dsckit098: nx nxNetworking nxComputerManagement nxMySQL
 endif
@@ -69,7 +69,7 @@ endif
 	cp omi-1.0.8/output_openssl_0.9.8/release/*.{rpm,deb} output/release/*.{rpm,deb} release/
 
 ifeq ($(BUILD_OMS),BUILD_OMS)
-dsckit100: nx nxOMSPerfCounter nxOMSSyslog nxOMSKeyMgmt nxOMSPlugin nxOMSCustomLog nxOMSSudoCustomLog nxFileInventory nxOMSGenerateInventoryMof nxOMSAgentNPMConfig nxOMSAutomationWorker nxOMSAuditdPlugin nxOMSContainers
+dsckit100: nx nxOMSPerfCounter nxOMSSyslog nxOMSKeyMgmt nxOMSPlugin nxOMSCustomLog nxOMSSudoCustomLog nxFileInventory nxOMSGenerateInventoryMof nxOMSAgentNPMConfig nxOMSAutomationWorker nxOMSAuditdPlugin nxOMSContainers nxOMSWLI
 else
 dsckit100: nx nxNetworking nxComputerManagement nxMySQL
 endif
@@ -417,14 +417,16 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.3"; \
+	VERSION="3.4"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
 	for current in $$PROVIDERS; do \
 		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
 		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
-                cp -r Providers/Modules/Plugins/ $$STAGINGDIR/MSFT_$${current}Resource/; \
+		cp -r Providers/Modules/Plugins/ $$STAGINGDIR/MSFT_$${current}Resource; \
+		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Plugins; \
+		cp -r Providers/Modules/Plugins_$(PF_ARCH)/* $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Plugins; \
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
@@ -515,6 +517,28 @@ nxOMSContainers:
 		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp -r Providers/$${current}/containers/* $$STAGINGDIR/MSFT_$${current}Resource/containers; \
+		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
+		cp Providers/Scripts/2.4x-2.5x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.4x-2.5x/Scripts; \
+		cp Providers/Scripts/2.6x-2.7x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.6x-2.7x/Scripts; \
+		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
+	done; \
+	cd output/staging; \
+	zip -r $@_$${VERSION}.zip $@; \
+	mkdir -p ../../release; \
+	mv $@_$${VERSION}.zip ../../release/
+
+nxOMSWLI:
+	rm -rf output/staging; \
+	VERSION="1.0"; \
+	PROVIDERS="nxOMSWLI"; \
+	STAGINGDIR="output/staging/$@/DSCResources"; \
+	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
+	for current in $$PROVIDERS; do \
+		mkdir -p $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/{2.4x-2.5x,2.6x-2.7x,3.x}/Scripts; \
+		cp intermediate/Modules/$@.psd1 output/staging/$@/; \
+                cp -r Providers/Modules/WLI $$STAGINGDIR/MSFT_$${current}Resource/; \
+		cp Providers/$${current}/MSFT_$${current}Resource.schema.mof $$STAGINGDIR/MSFT_$${current}Resource/; \
+		cp Providers/$${current}/MSFT_$${current}Resource.reg $$STAGINGDIR/MSFT_$${current}Resource/; \
 		cp Providers/bin/libMSFT_$${current}Resource.so $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH); \
 		cp Providers/Scripts/2.4x-2.5x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.4x-2.5x/Scripts; \
 		cp Providers/Scripts/2.6x-2.7x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/2.6x-2.7x/Scripts; \

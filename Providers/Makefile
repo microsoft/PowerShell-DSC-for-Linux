@@ -80,6 +80,7 @@ PROVIDERS+=nxOMSAutomationWorker
 PROVIDERS+=nxOMSAgentNPMConfig
 PROVIDERS+=nxOMSAuditdPlugin
 PROVIDERS+=nxOMSContainers
+PROVIDERS+=nxOMSWLI
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript
