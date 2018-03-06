@@ -39,7 +39,7 @@ SHLIB_EXT: 'so'
 
 #if BUILD_OMS == 1
 
-/opt/microsoft/omsconfig/etc/logrotate.conf; Providers/Extras/Scripts/omsconfig_logrotate.conf; 644; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/etc/logrotate.conf; Providers/Extras/Scripts/omsconfig_logrotate.conf; 644; root; root
 /opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/etc/Inventory.mof; LCM/Base_Inventory.mof; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; ${{RUN_AS_USER}}; root
