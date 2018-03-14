@@ -9,5 +9,5 @@
 -w /etc/pam.d/ -p wxa -k pam
 
 # Monitor certain syscalls.
--a always,exit -F arch=b32 -S execve
--a always,exit -F arch=b64 -S execve
+-a always,exit -F arch=b32 -S execve,execveat
+-a always,exit -F arch=b64 -S execve,execveat

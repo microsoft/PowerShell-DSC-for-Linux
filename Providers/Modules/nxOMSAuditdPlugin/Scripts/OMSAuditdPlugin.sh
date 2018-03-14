@@ -7,6 +7,7 @@ AUDISP_DIR=/etc/audisp/plugins.d
 AUDISP_CONF=$AUDISP_DIR/auoms.conf
 
 AUOMS_BIN=/opt/microsoft/auoms/bin/auoms
+AUOMS_CONF_FILE=/etc/opt/microsoft/auoms/auoms.conf
 AUOMS_OUTCONF_DIR=/etc/opt/microsoft/auoms/outconf.d
 
 AUDIT_RULES_FILE=/etc/audit/audit.rules
@@ -266,6 +267,7 @@ case $1 in
         # $5 dest auoms outconf file name
         # $6 source auoms outconf file ("" if no change, or "remove" to remove file)
         # $7 rules to pass to auditctl -R
+        # $8 source auoms conf file ("" if no change)
         if [ -n "$2" ]; then
             /opt/microsoft/omsagent/bin/service_control restart $2
             if [ $? -ne 0 ]; then
@@ -285,6 +287,17 @@ case $1 in
         fi
 
         AUDITD_RELOAD=0
+        if [ -n "$8" ]; then
+            cp $8 ${AUOMS_CONF_FILE}
+            if [ $? -ne 0 ]; then
+                exit 9
+            fi
+            chmod 644 ${AUOMS_CONF_FILE}
+            if [ $? -ne 0 ]; then
+                exit 9
+            fi
+            AUDITD_RELOAD=1
+        fi
         if [ -n "$6" ]; then
             if [ "$6" == "remove" ]; then
                 rm ${AUOMS_OUTCONF_DIR}/$5
