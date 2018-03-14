@@ -24,12 +24,16 @@ LOG_DEBUG = 'DEBUG'
 WORKSPACE_ID_TMPL_STR = "%WORKSPACE_ID%"
 AGENT_ETC_ROOT = '/etc/opt/microsoft/omsagent'
 AGENT_VAR_ROOT = '/var/opt/microsoft/omsagent'
+AUOMS_CONF_FILE = '/etc/opt/microsoft/auoms/auoms.conf'
 AUOMS_OUTCONF_DIR = '/etc/opt/microsoft/auoms/outconf.d'
 AUOMS_PLUGIN_CONF = '/etc/audisp/plugins.d/auoms.conf'
 SUDO_SCRIPT = '/opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh'
 MODULE_RESOURCE_DIR = '/opt/microsoft/omsconfig/modules/nxOMSAuditdPlugin/DSCResources/MSFT_nxOMSAuditdPluginResource'
 RESOURCE_OMSAGENT_CONF = MODULE_RESOURCE_DIR + '/conf/auditd_plugin.conf'
-RESOURCE_AUOMS_CONF = MODULE_RESOURCE_DIR + '/conf/auoms.conf'
+RESOURCE_AUOMS_V1_CONF = MODULE_RESOURCE_DIR + '/conf/auoms_v1.conf'
+RESOURCE_AUOMS_V2_CONF = MODULE_RESOURCE_DIR + '/conf/auoms_v2.conf'
+RESOURCE_OUTPUT_V1_CONF = MODULE_RESOURCE_DIR + '/conf/output_v1.conf'
+RESOURCE_OUTPUT_V2_CONF = MODULE_RESOURCE_DIR + '/conf/output_v2.conf'
 RESOURCE_AUDIT_RULES_V1 = MODULE_RESOURCE_DIR + '/rules/oms-security-audit-v1.rules'
 RESOURCE_AUDIT_RULES_V2 = MODULE_RESOURCE_DIR + '/rules/oms-security-audit-v2.rules'
 RESOURCE_SUDO_SCRIPT = MODULE_RESOURCE_DIR + '/Scripts/OMSAuditdPlugin.sh'
@@ -92,8 +96,11 @@ def GetOMSAgentConfPath(WorkspaceId):
 def GetOMSAgentPidFilePath(WorkspaceId):
     return os.path.join(GetAgentRunDir(WorkspaceId), "omsagent.pid")
 
-def GetTmpAuomsOutputConfPath(WorkspaceId):
+def GetTmpAuomsConfPath(WorkspaceId):
     return os.path.join(GetTmpDir(WorkspaceId), "auoms.conf")
+
+def GetTmpAuomsOutputConfPath(WorkspaceId):
+    return os.path.join(GetTmpDir(WorkspaceId), "output.conf")
 
 def GetAuomOutputConfPath(WorkspaceId):
     return os.path.join(AUOMS_OUTCONF_DIR, WorkspaceId + ".conf")
@@ -116,12 +123,12 @@ def Set(WorkspaceId, Ensure):
             LG().Log(LOG_FATAL, "Failed to update " + SUDO_SCRIPT)
             return [1]
 
-    (audit_version, plugin_state, actual_audit_rules,
+    (audit_version, plugin_state, actual_audit_rules, actual_conf,
      actual_outconf, actual_plugin_conf, loaded_audit_rules) = GetState(WorkspaceId)
     if audit_version is None:
         return [1]
 
-    (desired_plugin_state, desired_rules, desired_outconf,
+    (desired_plugin_state, desired_rules, desired_conf, desired_outconf,
      desired_plugin_conf) = GetDesiredState(WorkspaceId, Ensure, audit_version, plugin_state)
     if desired_plugin_state is None:
         return [1]
@@ -150,6 +157,12 @@ def Set(WorkspaceId, Ensure):
             LG().Log(LOG_INFO, "Actual auditd rules differ from desired auditd rules")
             rules_file_path = GetTmpAuditRulesPath(WorkspaceId)
             WriteFile(rules_file_path, desired_rules)
+
+    conf_path = ""
+    if IsTextDifferent(actual_conf, desired_conf):
+        LG().Log(LOG_INFO, "Actual auoms conf differs from desired conf")
+        conf_path = GetTmpAuomsConfPath(WorkspaceId)
+        WriteFile(conf_path, desired_conf)
 
     outconf_name = ""
     outconf_path = ""
@@ -192,6 +205,7 @@ def Set(WorkspaceId, Ensure):
     args.append(outconf_name)
     args.append(outconf_path)
     args.append(rules_diff_path)
+    args.append(conf_path)
     proc = subprocess.Popen(args, -1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     exit_code = proc.wait()
     if exit_code != 0:
@@ -223,9 +237,12 @@ def Set(WorkspaceId, Ensure):
             LG().Log(LOG_FATAL, "Failed to change loaded OMS auditd rules")
         elif exit_code == 8:
             LG().Log(LOG_FATAL, "Failed to trigger auditd service reload")
+        elif exit_code == 9:
+            LG().Log(LOG_FATAL, "Failed to change OMS Auditd Plugin config")
         else:
             LG().Log(LOG_FATAL, "Unknown error while trying to apply desired OMS Auditd Plugin changes")
 
+    RemoveFile(GetTmpAuomsConfPath(WorkspaceId))
     RemoveFile(GetTmpAuomsOutputConfPath(WorkspaceId))
     RemoveFile(GetTmpAuditRulesPath(WorkspaceId))
     RemoveFile(GetTmpAuditLoadedRulesPath(WorkspaceId))
@@ -256,13 +273,13 @@ def Test(WorkspaceId, DesiredEnsure):
         LG().Log(LOG_INFO, "omsagent needs restart")
         return [-1]
 
-    (audit_version, plugin_state, actual_audit_rules,
+    (audit_version, plugin_state, actual_audit_rules, actual_conf,
      actual_outconf, actual_plugin_conf, loaded_audit_rules) = GetState(WorkspaceId)
     if audit_version is None:
         # Failed to get state, return fake success
         return [0]
 
-    (desired_plugin_state, desired_rules, desired_outconf,
+    (desired_plugin_state, desired_rules, desired_conf, desired_outconf,
      desired_plugin_conf) = GetDesiredState(WorkspaceId, DesiredEnsure, audit_version, plugin_state)
     if desired_plugin_state is None:
         # Failed to get desired state, return fake success
@@ -276,12 +293,16 @@ def Test(WorkspaceId, DesiredEnsure):
         LG().Log(LOG_INFO, "Audit Rules do not match desired rules")
         return [-1]
 
+    if IsTextDifferent(desired_conf, actual_conf):
+        LG().Log(LOG_INFO, "auoms conf does not match desired conf")
+        return [-1]
+
     if IsTextDifferent(desired_outconf, actual_outconf):
-        LG().Log(LOG_INFO, "auoms outconf do not match desired conf")
+        LG().Log(LOG_INFO, "auoms outconf does not match desired conf")
         return [-1]
 
     if IsTextDifferent(desired_plugin_conf, actual_plugin_conf):
-        LG().Log(LOG_INFO, "Plugin Conf do not match desired conf")
+        LG().Log(LOG_INFO, "Plugin Conf does not match desired conf")
         return [-1]
 
     rules_diff = DiffAuditRules(desired_rules, loaded_audit_rules)
@@ -319,11 +340,26 @@ def GetOtherOutconfCounts(WorkspaceId):
                     wcount += 1
     return (tcount, wcount)
 
+def HasExecveat():
+    args = []
+    args.append("/usr/bin/ausyscall")
+    args.append("execveat")
+    proc = subprocess.Popen(args, -1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    exit_code = proc.wait()
+    if exit_code == 0:
+        return True
+    else:
+        return False
+    
+
 def GetDesiredAuditRules(AuditVersion):
     if AuditVersion == 1:
         desired_rules = ReadFile(RESOURCE_AUDIT_RULES_V1)
     else:
         desired_rules = ReadFile(RESOURCE_AUDIT_RULES_V2)
+        if not HasExecveat():
+            # This assumes that the rule is "-S execve,execveat"
+            desired_rules = re.sub(r",execveat", r"", desired_rules)
 
     if platform.machine() != "x86_64" and desired_rules != None:
         lines = desired_rules.splitlines()
@@ -333,6 +369,64 @@ def GetDesiredAuditRules(AuditVersion):
                 new_lines.append(line)
         desired_rules = "\n".join(lines) + "\n"
     return desired_rules
+
+def GetAuomsVersion():
+    deb_ver = None
+    rpm_ver = None
+    if os.path.isfile("/usr/bin/dpkg-query"):
+        args = []
+        args.append("/usr/bin/dpkg-query")
+        args.append("-f")
+        args.append("${Version}")
+        args.append("-W")
+        args.append("auoms")
+        proc = subprocess.Popen(args, -1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        exit_code = proc.wait()
+        out_txt = proc.stdout.read().decode('utf8', 'replace').encode('utf8', 'replace')
+        if exit_code == 0:
+            deb_ver = out_txt
+        else:
+            err_txt = proc.stderr.read().decode('utf8', 'replace').encode('utf8', 'replace')
+            LG().Log(LOG_ERROR, "Command failed: " + " ".join(args))
+            LG().Log(LOG_INFO, "stdout: " + out_txt)
+            LG().Log(LOG_INFO, "stderr: " + err_txt)
+
+    if os.path.isfile("/bin/rpm"):
+        args = []
+        args.append("/bin/rpm")
+        args.append("-q")
+        args.append("-a")
+        args.append("--qf")
+        args.append("%{VERSION}.%{RELEASE}")
+        args.append("auoms")
+        proc = subprocess.Popen(args, -1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        exit_code = proc.wait()
+        out_txt = proc.stdout.read().decode('utf8', 'replace').encode('utf8', 'replace')
+        if exit_code == 0:
+            rpm_ver = out_txt
+        else:
+            err_txt = proc.stderr.read().decode('utf8', 'replace').encode('utf8', 'replace')
+            LG().Log(LOG_ERROR, "Command failed: " + " ".join(args))
+            LG().Log(LOG_INFO, "stdout: " + out_txt)
+            LG().Log(LOG_INFO, "stderr: " + err_txt)
+
+    if deb_ver is None:
+        return rpm_ver
+    return deb_ver
+
+def GetDesiredAuomsConf():
+    conf_path = RESOURCE_AUOMS_V1_CONF
+    outconf_path = RESOURCE_OUTPUT_V1_CONF
+    auoms_ver = GetAuomsVersion()
+    if auoms_ver is not None:
+        ver_a = auoms_ver.split(".")
+        if len(ver_a) >= 2:
+            if ver_a[0] > 1 or ver_a[1] > 1:
+                conf_path = RESOURCE_AUOMS_V2_CONF
+                outconf_path = RESOURCE_OUTPUT_V2_CONF
+    conf_txt = ReadFile(conf_path)
+    outconf_txt = ReadFile(outconf_path)
+    return (conf_txt, outconf_txt)
 
 def GetDesiredState(WorkspaceId, Ensure, AuditVersion, CurrentPluginState):
     desired_plugin_state = "no"
@@ -345,23 +439,32 @@ def GetDesiredState(WorkspaceId, Ensure, AuditVersion, CurrentPluginState):
     if Ensure == "Present":
         desired_plugin_state = "yes"
         desired_rules = GetDesiredAuditRules(AuditVersion)
-        desired_outconf = ReadFile(RESOURCE_AUOMS_CONF)
+        (desired_conf, desired_outconf) = GetDesiredAuomsConf()
         desired_plugin_conf = ReadFile(RESOURCE_OMSAGENT_CONF)
 
         if desired_rules is None:
             LG().Log(LOG_FATAL, "Failed to determine desired audit rules")
-            return (None, None, None, None)
+            return (None, None, None, None, None)
+
+        if desired_conf is None:
+            LG().Log(LOG_FATAL, "Failed to determine desired auoms conf")
+            return (None, None, None, None, None)
 
         if desired_outconf is None:
             LG().Log(LOG_FATAL, "Failed to determine desired output conf")
-            return (None, None, None, None)
+            return (None, None, None, None, None)
 
         if desired_plugin_conf is None:
             LG().Log(LOG_FATAL, "Failed to determine desired plugin conf")
-            return (None, None, None, None)
+            return (None, None, None, None, None)
 
         desired_outconf = desired_outconf.replace(WORKSPACE_ID_TMPL_STR, WorkspaceId)
         desired_plugin_conf = desired_plugin_conf.replace(WORKSPACE_ID_TMPL_STR, WorkspaceId)
+
+        if other_conf_count > 0 and other_conf_count > other_ws_conf_count:
+            # There are non-OMS outconf present. This likely means AzSecPack is present
+            # So, don't touch the auoms conf file.
+            desired_conf = ReadFile(AUOMS_CONF_FILE)
     else:
         if other_conf_count > 0:
             if other_ws_conf_count > 0:
@@ -377,9 +480,9 @@ def GetDesiredState(WorkspaceId, Ensure, AuditVersion, CurrentPluginState):
             desired_rules = GetDesiredAuditRules(AuditVersion)
             if desired_rules is None:
                 LG().Log(LOG_FATAL, "Failed to determine desired audit rules")
-                return (None, None, None, None)
+                return (None, None, None, None, None)
 
-    return (desired_plugin_state, desired_rules, desired_outconf, desired_plugin_conf)
+    return (desired_plugin_state, desired_rules, desired_conf, desired_outconf, desired_plugin_conf)
 
 def GetState(WorkspaceId):
     args = []
@@ -405,7 +508,7 @@ def GetState(WorkspaceId):
             LG().Log(LOG_FATAL, "Failed to obtain current state of loaded auditd rules")
         else:
             LG().Log(LOG_FATAL, "Unknown error while trying to determine OMSAuditdPlugin state")
-        return (None, None, None, None, None)
+        return (None, None, None, None, None, None)
 
     audit_version = 2
     parts = out_txt.strip().split(".")
@@ -414,7 +517,7 @@ def GetState(WorkspaceId):
             audit_version = 1
     else:
         LG().Log(LOG_FATAL, "Could not determine auditd version: Invalid version string returned from 'OMSAuditdPlugin.sh get'")
-        return (None, None, None, None, None, None)
+        return (None, None, None, None, None, None, None)
 
     state_file = os.path.join(GetTmpDir(WorkspaceId), "auditd_plugin.state")
     rules_file = os.path.join(GetTmpDir(WorkspaceId), "auditd_plugin.rules")
@@ -431,15 +534,16 @@ def GetState(WorkspaceId):
 
     if plugin_state != "no" and plugin_state != "yes":
         LG().Log(LOG_FATAL, "OMS-Auditd-Plugin configuration is missing or invalid")
-        return (None, None, None, None, None, None)
+        return (None, None, None, None, None, None, None)
 
     if audit_rules is not None and audit_rules.strip() == "":
         audit_rules = None
 
+    actual_conf = ReadFile(AUOMS_CONF_FILE)
     actual_outconf = ReadFile(GetAuomOutputConfPath(WorkspaceId))
     actual_plugin_conf = ReadFile(GetOMSAgentConfPath(WorkspaceId))
 
-    return (audit_version, plugin_state, audit_rules, actual_outconf, actual_plugin_conf, loaded_audit_rules)
+    return (audit_version, plugin_state, audit_rules, actual_conf, actual_outconf, actual_plugin_conf, loaded_audit_rules)
 
 def CanonicalizeAuditRule(txt):
     rule = txt.strip()
@@ -468,8 +572,6 @@ def CanonicalizeAuditRule(txt):
     return rule
 
 def DiffAuditRules(DesiredRules, LoadedRules):
-    # Some older versions of auditctl return rules in an old format that doesn't
-    # match the input rule format. In that case just report no difference.
     if LoadedRules is None or DesiredRules is None:
         return None
 
