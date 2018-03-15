@@ -238,6 +238,18 @@ su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microso
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.1.zip 0"
 
+# Set up a built-in resource module for DIY DSC that was removed during OMS Agent update
+# This is a temporary workaround to prevent DIY DSC from breaking after the OMS Agent is updated from version 1.4.4-210 or below
+# This section can be removed when telemetry shows that customers no longer need to update from version 1.4.4-210 or below
+
+# Check if DIY DSC install module script is present on the machine 
+if [ -f /opt/microsoft/dsc/Scripts/InstallModule.py ]; then
+  # Check if nx module package is available in DIY DSC
+  if [ -f /opt/microsoft/dsc/module_packages/nx_1.0.zip ]; then
+    /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
+  fi
+fi
+
 #else
 
 # Set up built-in resource module for DIY DSC
