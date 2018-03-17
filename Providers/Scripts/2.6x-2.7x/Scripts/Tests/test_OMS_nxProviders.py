@@ -1979,7 +1979,6 @@ if nxNPMD != None:
             if os.path.exists(nxNPMD.AGENT_RESOURCE_VERSION_PATH):
                 self.assertTrue(False, 'agent resource version file exists')
     
-
 nxOMSWLITestCases = None
 if nxWLI != None:
     class nxOMSWLITestCases(unittest2.TestCase):
