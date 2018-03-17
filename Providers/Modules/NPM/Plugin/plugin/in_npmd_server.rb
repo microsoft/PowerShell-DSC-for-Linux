@@ -15,8 +15,16 @@ module Fluent
             require 'securerandom'
             require 'etc'
             require 'enumerator'
+            require 'pathname'
 
             require_relative 'npmd_config_lib'
+            require_relative 'oms_common'
+            @diagEnabled = false
+            begin
+                require_relative 'oms_diag_lib'
+                @diagEnabled = OMS::Diag.IsDiagSupported()
+            rescue LoadError
+            end
         end
 
         CMD_START         = "StartNPM"
@@ -31,7 +39,7 @@ module Fluent
 
         NPMD_CONN_CONFIRM = "NPMDAgent Connected!"
 
-        NPM_DIAG          = "NPMDiagLnx"
+        NPM_DIAG          = "ErrorLog"
 
         STOP_SIGNAL       = "SIGKILL"
 
@@ -48,6 +56,22 @@ module Fluent
         NPMD_AGENT_CAPABILITY = "cap_net_raw+ep"
         NPMD_STATE_DIR = "/var/opt/microsoft/omsagent/npm_state"
         NPMD_VERSION_FILE_NAME = "npm_version"
+        NPMD_LEGACY_VERSION_FILE = "/var/opt/microsoft/omsagent/state/npm_version"
+
+        OMS_AGENTGUID_FILE = "/etc/opt/microsoft/omsagent/agentid"
+        OMS_ADMIN_CONF_PATH_COMP_TOTAL = 8
+        OMS_ADMIN_CONF_PATH_COMP_WS_IDX = 5
+        GUID_LEN = 36
+
+        DIAG_TAG = "diag.oms.npmd"
+        DIAG_IPNAME = "NetworkMonitoring"
+        DIAG_LOG_SRC_AGENT = "NpmdAgent"
+        DIAG_LOG_SRC_PLUGIN = "InNPMPlugin"
+        DIAG_LOG_SRC_DSC = "NpmDSC"
+        DIAG_LOG_PROP_STD_ERR_TYPE = "StdErrorType"
+        DIAG_LOG_STD_ERR = "Current"
+        DIAG_LOG_PREV_STD_ERR = "Previous"
+        DIAG_DEFAULT_PROPERTIES = {"Platform"=>"Linux"}
 
         config_param :omsadmin_conf_path,     :string, :default => "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
         config_param :location_unix_endpoint, :string, :default => "#{NPMD_STATE_DIR}/npmdagent.sock"
@@ -73,6 +97,7 @@ module Fluent
         attr_accessor :omsagentUID
         attr_accessor :do_capability_check
         attr_accessor :npmd_state_dir
+        attr_accessor :dsc_resource_version
 
         def start
             # Fetch parameters related to instance
@@ -85,6 +110,9 @@ module Fluent
             @binary_invocation_cmd = @location_agent_binary if @binary_invocation_cmd.nil?
             @npmd_state_dir = NPMD_STATE_DIR if @npmd_state_dir.nil?
             @do_capability_check = true unless !@do_capability_check
+
+            # Setup diagnostic based variables
+            setup_diagnostic_params() if @dsc_resource_version.nil?
 
             # Setup steps for npmd_agent environment
             kill_all_agent_instances()
@@ -142,6 +170,22 @@ module Fluent
             Logger::logInfo "Shutdown completed"
         end
 
+        def setup_diagnostic_params
+            @dsc_resource_version = "Unknown"
+            _version_file_path = "#{@npmd_state_dir}/#{NPMD_VERSION_FILE_NAME}"
+            if File.exist?_version_file_path
+                _f = File.open(_version_file_path, 'r')
+                _data = _f.read()
+                @dsc_resource_version = _data.chomp if _data != ""
+                _f.close()
+            elsif File.exist?NPMD_LEGACY_VERSION_FILE
+                _f = File.open(NPMD_LEGACY_VERSION_FILE, 'r')
+                _data = _f.read()
+                @dsc_resource_version = _data.chomp if _data != ""
+                _f.close()
+            end
+        end
+
         def stop_server
             if @server_thread.is_a?(Thread)
                 if File.exist?@location_unix_endpoint
@@ -170,29 +214,19 @@ module Fluent
                     File.unlink(@location_unix_endpoint)
                 end
                 @server_obj = UNIXServer.new(@location_unix_endpoint)
+
+                if File.exist?(@location_unix_endpoint)
+                    FileUtils.chmod(0600, @location_unix_endpoint)
+                end
             rescue StandardError => e
                 log_error "Got error #{e}", Logger::resc
             end
         end
 
         def get_fqdn
-            _ip = nil
-            _name = nil
-            Socket.ip_address_list.each do |addrinfo|
-                next unless addrinfo.ip?
-                if addrinfo.ipv4?
-                    next if addrinfo.ipv4_loopback? or
-                        addrinfo.ipv4_multicast?
-                else
-                    next if addrinfo.ipv6_linklocal? or
-                        addrinfo.ipv6_loopback? or
-                        addrinfo.ipv6_multicast?
-                end
-                _ip = addrinfo.ip_address
-                _name = addrinfo.getnameinfo.first
-                break if _ip != _name
-            end
-            _name
+            _fqdn = OMS::Common.get_fully_qualified_domain_name()
+            _fqdn = OMS::Common.get_hostname() if _fqdn.nil?
+            _fqdn
         end
 
         def check_and_get_json(text)
@@ -207,7 +241,7 @@ module Fluent
 
         def log_error(msg, depth=0)
             Logger::logError(msg, depth + 1)
-            package_and_send_diag_log(msg)
+            send_diag_log(msg, DIAG_LOG_SRC_PLUGIN)
         end
 
         def kill_all_agent_instances
@@ -259,8 +293,8 @@ module Fluent
                         unless _json.key?("DataItems") and !_json["DataItems"].nil? and _json["DataItems"] != ""
                             Logger::logWarn "No valid data items found in sent json #{_json}", Logger::loop
                         else
-                            _uploadData = _json["DataItems"].reject {|x| x["SubType"] == "ErrorLog"}
-                            _diagLogs   = _json["DataItems"].select {|x| x["SubType"] == "ErrorLog"}
+                            _uploadData = _json["DataItems"].reject {|x| x["SubType"] == NPM_DIAG}
+                            _diagLogs   = _json["DataItems"].select {|x| x["SubType"] == NPM_DIAG}
                             _validUploadDataItems = Array.new
                             _batchTime = Time.now.utc.strftime("%Y-%m-%d %H:%M:%SZ")
                             _uploadData.each do |item|
@@ -279,9 +313,8 @@ module Fluent
                                     end
                                 end
                             end
-                            _diagLogs.each { |d| d["SubType"] = NPM_DIAG}
                             emit_upload_data_dataitems(_validUploadDataItems) if !_validUploadDataItems.nil? and !_validUploadDataItems.empty?
-                            emit_diag_log_dataitems(_diagLogs) if !_diagLogs.nil? and !_diagLogs.empty?
+                            emit_diag_log_dataitems_of_agent(_diagLogs) if !_diagLogs.nil? and !_diagLogs.empty?
                         end
                     end
                 rescue StandardError => e
@@ -320,26 +353,32 @@ module Fluent
             end
         end
 
-        def make_diag_log_msg_hash(msg)
-            _h = Hash.new
-            _h["Message"] = msg
-            _h["SubType"] = NPM_DIAG
-            _h
+        def send_diag_log(msg, logSource, properties = Hash.new)
+            # Send to diagnostic channel if supported
+            if @diagEnabled
+                properties.merge!(DIAG_DEFAULT_PROPERTIES)
+                properties['Component'] = logSource
+                properties['Version'] = @dsc_resource_version
+                properties['LogTag'] = "NPMDiagLnx"
+                OMS::Diag.LogDiag(msg, DIAG_TAG, DIAG_IPNAME, properties)
+            else
+                _dataitem = Hash.new
+                _dataitem["Component"] = logSource
+                _dataitem["Version"] = @dsc_resource_version
+                _dataitem["Message"] = msg
+                _dataitem["LogTag"] = "NPMDiagLnx"
+                _record = Hash.new
+                _record["DataType"] = "HEALTH_ASSESSMENT_BLOB"
+                _record["IPName"] = "LogManagement"
+                _record["DataItems"] = _dataitem
+                router.emit(@tag, Engine.now, _record)
+            end
         end
 
-        def package_and_send_diag_log(msg)
-            _dataItems = Array.new
-            _dataItems << make_diag_log_msg_hash(msg)
-            emit_diag_log_dataitems(_dataItems)
-        end
-
-        def emit_diag_log_dataitems(dataitems)
-            _validItems = dataitems.select {|x| is_valid_dataitem(x)}
-            _record = Hash.new
-            _record["DataType"] = "HEALTH_ASSESSMENT_BLOB"
-            _record["IPName"]   = "LogManagement"
-            _record["DataItems"] = _validItems
-            router.emit(@tag, Engine.now, _record)
+        def emit_diag_log_dataitems_of_agent(dataitems)
+            dataitems.each  do |d|
+                send_diag_log(d["Message"], DIAG_LOG_SRC_AGENT) if is_valid_dataitem(d)
+            end
         end
 
         def emit_upload_data_dataitems(dataitems)
@@ -421,6 +460,22 @@ module Fluent
 
         end
 
+        def get_workspace_id()
+            if !@omsadmin_conf_path.nil?
+                path = nil
+                begin
+                    path = Pathname.new(@omsadmin_conf_path).cleanpath
+                rescue
+                    return nil
+                end
+                _arr = "#{path}".split('/')
+                if (_arr.length == OMS_ADMIN_CONF_PATH_COMP_TOTAL and _arr[OMS_ADMIN_CONF_PATH_COMP_WS_IDX].length == GUID_LEN)
+                    return _arr[OMS_ADMIN_CONF_PATH_COMP_WS_IDX]
+                end
+            end
+            nil
+        end
+
         def get_agent_id
             agentid_lines = IO.readlines(@omsadmin_conf_path).select { |line| line.start_with?("AGENT_GUID=")}
             if agentid_lines.size == 0
@@ -452,7 +507,8 @@ module Fluent
                 _ind = _req.index(":")
                 _msg = _req[_ind+1..-1]
                 unless _ind.nil? or _ind + 1 >= _req.length
-                    log_error "dsc:#{_msg}"
+                    Logger::logInfo "dsc:#{_msg}"
+                    send_diag_log(_msg, DIAG_LOG_SRC_DSC)
                 end
             else
                 log_error "Unknown command #{cmd} received from DSC resource provider"
@@ -476,18 +532,21 @@ module Fluent
         end
 
         def upload_pending_stderrors
-            _arr = Array.new
+            _logProperties = Hash.new
+            _logProperties[DIAG_LOG_PROP_STD_ERR_TYPE] = DIAG_LOG_PREV_STD_ERR
             begin
                 _globPrefix = "#{@npmd_state_dir}/stderror_"
                 _fileList = Dir["#{_globPrefix}*"]
                 _fileList.each do |x|
+                    _msg = ""
                     File.readlines(x).each do |line|
                         Logger::logInfo "Prev STDERR: #{line}", 2*Logger::loop
-                        _arr << make_diag_log_msg_hash("Previous Stderror:#{line}")
+                        _msg += "#{line} "
                     end
                     File.unlink(x)
+                    # Sending one diag log per file
+                    send_diag_log(_msg, DIAG_LOG_SRC_PLUGIN, _logProperties)
                 end
-                emit_diag_log_dataitems(_arr) unless _arr.empty?
             rescue => e
                 Logger::logInfo "Got error while uploading pending stderrors: #{e}"
             end
@@ -495,16 +554,20 @@ module Fluent
 
         def handle_exit(_processId)
             _exitRes = Process.waitpid2(_processId)
-            _arr = Array.new
+            _logProperties = Hash.new
+            _logProperties[DIAG_LOG_PROP_STD_ERR_TYPE] = DIAG_LOG_STD_ERR
 
             @stop_sync.synchronize do
                 @stderrFileNameHash.each do |procId, fileName|
                     begin
                         if File.exist?(fileName)
+                            _msg = ""
                             File.readlines(fileName).each do |line|
                                 Logger::logInfo "STDERR for PID:#{procId}:#{line}"
-                                _arr << make_diag_log_msg_hash("STDERR PID:#{procId}:#{line}")
+                                _msg += "#{line} "
                             end
+                            _logProperties["PID"] = procId
+                            send_diag_log(_msg, DIAG_LOG_SRC_PLUGIN, _logProperties)
                             File.unlink(fileName)
                             @npmdProcessId = nil if @npmdProcessId == procId
                         end
@@ -514,7 +577,6 @@ module Fluent
                 end
                 @stderrFileNameHash.clear()
             end
-            emit_diag_log_dataitems(_arr) unless _arr.empty?
 
             # Checking if NPMD exited as planned
             if @npmdIntendedStop
