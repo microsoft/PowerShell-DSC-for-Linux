@@ -355,7 +355,7 @@ def SetConfigUpdate(ConfigID, Contents):
         if retval == 0:
             LOG_ACTION.log(LogType.Info, 'Updated agent config file for workspace ' + ConfigID)
             if ConfigID == GetWorkspaceRunningNPM():
-                NotifyServer(Commands.Config)
+                retval = NotifyServer(Commands.Config)
         elif retval != 0:
             LOG_ACTION.log(LogType.Error, 'Updating agent config file failed for workspace ' + ConfigID)
     return retval
@@ -479,11 +479,13 @@ def PurgeSolution(ConfigID):
         retval = False
 
     # notify ruby plugin to purge agent
-    NotifyServer(Commands.Purge)
+    if NotifyServer(Commands.Purge) != 0:
+        retval = False;
 
     return retval
 
 def NotifyServer(command):
+    retval = 0
     serverAddress = os.path.join(PATH_NPM_STATE, FNAME_UDS_SERVER)
     # Create a UDS socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -501,14 +503,11 @@ def NotifyServer(command):
         sock.sendall(message)
     except Exception as msg:
         LG().Log(LogType.Error, str(msg))
-        # restart omsagent if command was config update and sock conn failed
-        if (command == Commands.Config):
-            currentWsRunningNPM = GetWorkspaceRunningNPM()
-            if (currentWsRunningNPM != None):
-                OMS_ACTION.restart_oms_agent(currentWsRunningNPM)
+        retval = -1
     finally:
         LG().Log(LogType.Info, 'closing socket')
         sock.close()
+    return retval
 
 def WriteFile(path, contents):
     retval = 0
