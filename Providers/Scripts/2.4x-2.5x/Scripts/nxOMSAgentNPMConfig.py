@@ -285,7 +285,7 @@ def SetConfigUpdate(Contents):
         retval = WriteFile(destFileFullPath, Contents)
         if retval == 0 and os.path.exists(AGENT_RESOURCE_VERSION_PATH): #notify server only if plugin is present
             LG().Log(LogType.Info, 'Updated the file, going to notify server')
-            retval = NotifyServer(Commands.Config)
+            NotifyServer(Commands.Config)
     return retval
 
 def SetFilesUpdate(newVersion):
@@ -374,13 +374,11 @@ def PurgeSolution():
         retval = False
 
     # notify ruby plugin to purge agent
-    if NotifyServer(Commands.Purge) != 0:
-        retval = False;
+    NotifyServer(Commands.Purge)
 
     return retval
 
 def NotifyServer(command):
-    retval = 0
     # Create a UDS socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     LG().Log(LogType.Info, 'connecting to ' +  SERVER_ADDRESS)
@@ -395,11 +393,12 @@ def NotifyServer(command):
         sock.sendall(message)
     except Exception, msg:
         LG().Log(LogType.Error, str(msg))
-        retval = -1
+        # restart omsagent if command was config update and sock conn failed
+        if (command == Commands.Config):
+            OMS_ACTION.restart_oms_agent()
     finally:
         LG().Log(LogType.Info, 'closing socket')
         sock.close()
-    return retval
 
 def WriteFile(path, contents):
     retval = 0
