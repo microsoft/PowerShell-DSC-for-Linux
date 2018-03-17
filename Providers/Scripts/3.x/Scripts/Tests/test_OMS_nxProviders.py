@@ -1642,7 +1642,7 @@ if nxNPMD != None:
             """
             #time.sleep(1)
             nxNPMD.CONFIG_PATH = '/var/tmp/etc/opt/microsoft/omsagent/conf/'
-            nxNPMD.SERVER_ADDRESS = '/var/tmp/run/npmdagent.sock'
+            nxNPMD.SERVER_ADDRESS = '/var/tmp/npm_state/npmdagent.sock'
             nxNPMD.DSC_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
             nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/AGENTVERSION'
             nxNPMD.PLUGIN_PATH = '/var/tmp/opt/microsoft/omsagent/plugin/'

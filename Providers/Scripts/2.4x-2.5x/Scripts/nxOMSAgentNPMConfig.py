@@ -19,13 +19,13 @@ LG = nxDSCLog.DSCLog
 
 # Paths
 CONFIG_PATH = '/etc/opt/microsoft/omsagent/conf/'
-SERVER_ADDRESS = '/var/opt/microsoft/omsagent/run/npmdagent.sock'
+SERVER_ADDRESS = '/var/opt/microsoft/omsagent/npm_state/npmdagent.sock'
 DEST_FILE_NAME = 'npmd_agent_config.xml'
 PLUGIN_PATH = '/opt/microsoft/omsagent/plugin/'
 PLUGIN_CONF_PATH = '/etc/opt/microsoft/omsagent/conf/omsagent.d/'
 RESOURCE_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSAgentNPMConfig/DSCResources/MSFT_nxOMSAgentNPMConfigResource/NPM/'
 DSC_RESOURCE_VERSION_PATH = '/opt/microsoft/omsconfig/modules/nxOMSAgentNPMConfig/VERSION'
-AGENT_RESOURCE_VERSION_PATH = '/var/opt/microsoft/omsagent/state/npm_version'
+AGENT_RESOURCE_VERSION_PATH = '/var/opt/microsoft/omsagent/npm_state/npm_version'
 DSC_X64_AGENT_PATH = 'Agent/64/'
 DSC_X86_AGENT_PATH = 'Agent/32/'
 DSC_PLUGIN_PATH = 'Plugin/plugin/'
