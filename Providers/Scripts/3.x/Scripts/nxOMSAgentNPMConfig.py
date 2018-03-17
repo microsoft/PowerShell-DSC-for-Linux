@@ -15,8 +15,8 @@ import base64
 import platform
 import shutil
 import uuid
-from fileinput import FileInput
 from distutils.version import LooseVersion
+from fileinput import FileInput
 
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
@@ -36,9 +36,10 @@ FNAME_NPM_VERSION = 'npm_version'
 FNAME_PLUGIN_CONF = 'npmd.conf'
 
 PATH_NPM_PLUGIN = '/opt/microsoft/omsagent/plugin/'
-PATH_NPM_STATE = os.path.join(PREFIX_VAR, 'npm_state')
+PATH_NPM_STATE = '/var/opt/microsoft/omsagent/npm_state/'
 PATH_AGENT_BINARY = '/opt/microsoft/omsagent/plugin/'
 PATH_SETCAP_SCRIPT = '/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh'
+PATH_INSTALL_INFO = '/etc/opt/microsoft/omsagent/sysconf/installinfo.txt'
 
 RESOURCE_MODULE_PATH = '/opt/microsoft/omsconfig/modules/nxOMSAgentNPMConfig/DSCResources/MSFT_nxOMSAgentNPMConfigResource/NPM/'
 DSC_RESOURCE_VERSION_PATH = '/opt/microsoft/omsconfig/modules/nxOMSAgentNPMConfig/VERSION'
@@ -218,13 +219,13 @@ def Set(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
         # incorrect config id
         LG().Log(LogType.Error, 'Received nonexistant workspace id ' + ConfigID)
         return [-1]
-    if ConfigType != 'UpdatedAgentConfig':
-        LG().Log(LogType.Error, 'Config type did not match, exiting set for workspace ' + ConfigID)
-        return [-1]
     if SetMultiHoming(ConfigID, Ensure) != 0:
         LG().Log(LogType.Error, 'Set failed for ' + ConfigID + ' and Ensure=' + Ensure)
         retval = -1
         return [retval]
+    if ConfigType != 'UpdatedAgentConfig':
+        LG().Log(LogType.Error, 'Config type did not match, exiting set for workspace ' + ConfigID)
+        return [-1]
 
     if Ensure == 'Present':
         if TestConfigUpdate(ConfigID, Contents) != 0:
@@ -245,11 +246,11 @@ def Test(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     if not os.path.exists(PATH_SETCAP_SCRIPT):
         LOG_ACTION.log(LogType.Error, 'npmd set cap script does not exist, exiting test')
         return [retval]
-    if ConfigType != 'UpdatedAgentConfig':
-        LOG_ACTION.log(LogType.Error, 'Config type did not match, exiting test for workspace ' + ConfigID)
-        return [retval]
     if TestMultiHoming(ConfigID, Ensure) != 0:
         retval = -1
+        return [retval]
+    if ConfigType != 'UpdatedAgentConfig':
+        LOG_ACTION.log(LogType.Error, 'Config type did not match, exiting test for workspace ' + ConfigID)
         return [retval]
     # check for config update or resource version only if ensure is present
     if Ensure == 'Present' and (TestResourceVersion() != 0 or TestConfigUpdate(ConfigID, Contents) != 0):
@@ -337,7 +338,6 @@ def SetMultiHoming(ConfigID, Ensure):
     if wsRunningNPM == ConfigID and Ensure == 'Absent':
         LG().Log(LogType.Info, 'Purging NPM solution')
         if not PurgeSolution(ConfigID):
-            LG().Log(LogType.Error, 'Purging NPM solution failed')
             retval = -1
 
     return retval
