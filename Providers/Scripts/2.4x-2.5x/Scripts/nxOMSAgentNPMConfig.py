@@ -50,13 +50,14 @@ class NPMDiagnosticLogUtil(INPMDiagnosticLog):
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
         try:
-            # Connect the socket to the port where the server is listening
-            sock.connect(SERVER_ADDRESS)
-            # Send data
-            message = Commands.LogNPM + ':' + '[' + logType + ']' + logString
-            sock.sendall(message)
-        except Exception, msg:
-            LG().Log(LogType.Error, str(msg))
+            try:
+                # Connect the socket to the port where the server is listening
+                sock.connect(SERVER_ADDRESS)
+                # Send data
+                message = Commands.LogNPM + ':' + '[' + logType + ']' + logString
+                sock.sendall(message)
+            except Exception, msg:
+                LG().Log(LogType.Error, str(msg))
         finally:
             sock.close()
 
@@ -384,18 +385,19 @@ def NotifyServer(command):
     LG().Log(LogType.Info, 'connecting to ' +  SERVER_ADDRESS)
 
     try:
-        # Connect the socket to the port where the server is listening
-        sock.connect(SERVER_ADDRESS)
+        try:
+            # Connect the socket to the port where the server is listening
+            sock.connect(SERVER_ADDRESS)
 
-        # Send data
-        message = command
-        LG().Log(LogType.Info, 'sending ' + message)
-        sock.sendall(message)
-    except Exception, msg:
-        LG().Log(LogType.Error, str(msg))
-        # restart omsagent if command was config update and sock conn failed
-        if (command == Commands.Config):
-            OMS_ACTION.restart_oms_agent()
+            # Send data
+            message = command
+            LG().Log(LogType.Info, 'sending ' + message)
+            sock.sendall(message)
+        except Exception, msg:
+            LG().Log(LogType.Error, str(msg))
+            # restart omsagent if command was config update and sock conn failed
+            if (command == Commands.Config):
+                OMS_ACTION.restart_oms_agent()
     finally:
         LG().Log(LogType.Info, 'closing socket')
         sock.close()
