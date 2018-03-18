@@ -1671,12 +1671,12 @@ if nxNPMD != None:
             dscConfPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_PLUGIN_CONF_PATH)
             
             # remove files from directory
-            os.system('rm -rf /var/tmp/run;' +
+            os.system('rm -rf /var/tmp/npm_state;' +
                 'rm -rf /var/tmp/etc;'
                 'rm -rf /var/tmp/opt;'
             )
             os.system('mkdir -p ' + nxNPMD.CONFIG_PATH + ';'
-                'mkdir -p ' + '/var/tmp/run/' + ';'
+                'mkdir -p ' + '/var/tmp/npm_state/' + ';'
                 'mkdir -p ' + nxNPMD.PLUGIN_PATH + ';'
                 'mkdir -p ' + nxNPMD.PLUGIN_CONF_PATH + ';'
                 'mkdir -p ' + x64binaryPath + ';'
@@ -1704,7 +1704,7 @@ if nxNPMD != None:
             Remove test resources.
             """
             # remove files from directory
-            os.system('rm -rf /var/tmp/run;' +
+            os.system('rm -rf /var/tmp/npm_state;' +
                 'rm -rf /var/tmp/etc;'
             )
             #time.sleep(1)
@@ -1746,7 +1746,8 @@ if nxNPMD != None:
         def createUDSServer(self):
             # Make sure the socket does not already exist
             try:
-                os.unlink(self.server_address)
+                if os.path.exists(self.server_address):
+                    os.unlink(self.server_address)
             except OSError:
                 if os.path.exists(self.server_address):
                     raise
