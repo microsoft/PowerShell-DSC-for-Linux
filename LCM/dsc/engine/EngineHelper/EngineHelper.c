@@ -32,6 +32,7 @@ extern MI_Uint32 g_LocMappingTableSize;
 void *g_registrationManager;
 char g_currentError[5001];
 StatusReport_ResourceNotInDesiredState * g_rnids = NULL;
+static pthread_mutex_t g_JobIdMutex;
 
 
 BaseResourceConfiguration g_BaseResourceConfiguration[] =
@@ -393,20 +394,27 @@ MI_Result ResolvePath(_Outptr_opt_result_maybenull_z_ MI_Char **envResolvedPath,
 void SetJobId()
 {
     MI_Char *palUuid;
+
     if(g_ConfigurationDetails.hasSetDetail==MI_TRUE)
     {
         return; //Which means details were set before.
     }
 
+    pthread_mutex_lock(&g_JobIdMutex);
+
     palUuid = Generate_UUID(  NitsMakeCallSite(-3, NULL, NULL, 0) );
     if(palUuid == NULL)
     {
-        return;
+       goto Cleanup;
     }
     memcpy(g_ConfigurationDetails.jobGuidString, palUuid, JOB_UUID_LENGTH);
     g_ConfigurationDetails.jobGuidString[36] = '\0';
     PAL_Free(palUuid);
     g_ConfigurationDetails.hasSetDetail=MI_TRUE;
+
+Cleanup:
+    pthread_mutex_unlock(&g_JobIdMutex);
+
 }
 void ResetJobId()
 {
