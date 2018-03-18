@@ -2092,7 +2092,8 @@ MI_Char* RunCommand(const MI_Char* command)
         return NULL;
     }
 
-    fctnl(fp, F_SETFD, FD_CLOEXEC);
+   // fctnl(fp, F_SETFD, FD_CLOEXEC);
+    
     while (fgets(curBuffer, 5000, fp) != NULL)
     {
         count = strlen(curBuffer);
