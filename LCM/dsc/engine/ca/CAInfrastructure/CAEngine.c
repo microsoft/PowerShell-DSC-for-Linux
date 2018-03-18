@@ -2082,6 +2082,7 @@ MI_Char* RunCommand(const MI_Char* command)
     size_t cur_loc = 0;
     size_t count = 0;
     int status;
+    int testcount=0;
 
     curBuffer[bufferSize] = '\0';
     memset(curBuffer,0,bufferSize);
@@ -2096,7 +2097,9 @@ MI_Char* RunCommand(const MI_Char* command)
     
     while (fgets(curBuffer, 5000, fp) != NULL)
     {
-        count = strlen(curBuffer);
+	testcount++;        
+	count = strlen(curBuffer);
+	testcount++;        
         if (count + cur_loc > bufferSize * 10)
           {
             // Too much data printed to stdout of the command.  Let's just cut it short here.
@@ -2114,7 +2117,7 @@ MI_Char* RunCommand(const MI_Char* command)
     pclose(fp);
     result = (MI_Char*)DSC_malloc((cur_loc + 1) * sizeof(MI_Char*), NitsHere());
     memcpy(result, buffer, cur_loc + 1);
-
+    cur_loc = testcount;
     return result;
 }
 
