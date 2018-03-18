@@ -2084,7 +2084,8 @@ MI_Char* RunCommand(const MI_Char* command)
     int status;
 
     curBuffer[bufferSize] = '\0';
-    
+    memset(curBuffer,0,bufferSize);
+
     fp = popen(command, "r");
     if (fp == NULL)
     {
