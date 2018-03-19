@@ -18,8 +18,6 @@ import hashlib
 import cPickle as pickle
 from contextlib import contextmanager
 import time
-import uuid
-import shutil
 
 @contextmanager
 def opened_w_error(filename, mode="r"):
@@ -117,7 +115,7 @@ def check_values(s,d):
                 print k+': '+str(sd[k].value.value)+' != '+str(dd[k].value.value)+'\n'
                 return False
             continue
-        if not deep_compare(sd[k].value, dd[k].value):
+        if not deep_compare(sd[k].value, dd[k].value):  
             print k+': '+str(sd[k].value)+' != '+str(dd[k].value)+'\n'
             return False
     return True
@@ -131,7 +129,7 @@ def deep_compare(obj1, obj2):
     t2 = type(obj2)
     if t1 != t2:
         return False
-
+    
     if t1 == list and len(obj1) == len(obj2):
         for i in range(len(obj1)):
             if not deep_compare(obj1[i], obj2[i]):
@@ -1635,164 +1633,88 @@ if nxNPMD != None:
         """
         Test cases for nxOMSAgentNPMConfig.py
         """
-
+    
         class TestOMSAgentUtil(nxNPMD.IOMSAgent):
-            def restart_oms_agent(self, workspaceId):
+            def restart_oms_agent(self):
                 return True
-
+    
         class TestNPMAgentUtil(nxNPMD.IOMSAgent):
             def binary_setcap(self, binaryPath):
                 return True
-
-        class TestNPMDiagnosticLogUtil(nxNPMD.INPMDiagnosticLog):
-            def log(self, log_type, msg):
-                #print '\nServerLog:' + str(log_type) + ':' + str(msg)
-                pass
-
-        class TestLOG(object):
-            def Log(self, log_type, msg):
-                #print '\n' + str(log_type) + ':' + str(msg)
-                pass
-
-        def TestNotifyServer(self, cmd):
-            # nxNPMD.NotifyServer returns 0 or -1
-            return 0
-
-        def assignDirectories(self):
-            fname_plugin = 'plugin'
-            fname_binary = 'binary'
-
-            self.dir_test_staging = 'tmp'
-            self.dir_setcap_scripts = os.path.join(self.dir_test_staging, 'scripts')
-            self.name_setcap_file = 'test_setcap.sh'
-
-            nxNPMD.PREFIX_ETC = os.path.join(self.dir_test_staging, 'etc')
-            nxNPMD.PREFIX_VAR = os.path.join(self.dir_test_staging, 'var')
-
-            nxNPMD.PATH_NPM_PLUGIN = os.path.join(self.dir_test_staging, 'plugin')
-            nxNPMD.PATH_NPM_STATE  = os.path.join(self.dir_test_staging, 'npm_state')
-            nxNPMD.PATH_AGENT_BINARY = os.path.join(self.dir_test_staging, 'plugin')
-            nxNPMD.PATH_SETCAP_SCRIPT = os.path.join(self.dir_setcap_scripts, self.name_setcap_file)
-
-            nxNPMD.RESOURCE_MODULE_PATH = os.path.join(self.dir_test_staging, 'dsc/NPM/')
-            nxNPMD.DSC_RESOURCE_VERSION_PATH = os.path.join(self.dir_test_staging, 'dsc/VERSION')
-
-            # Helper assignments of dsc to prevent more path join calls
-            self.dsc_plugin_path = os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_PLUGIN_PATH)
-            self.dsc_plugin_file = os.path.join(self.dsc_plugin_path, fname_plugin)
-
-            self.dsc_plugin_conf_path = os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_PLUGIN_CONF_PATH)
-            self.dsc_plugin_conf_file = os.path.join(self.dsc_plugin_conf_path, nxNPMD.FNAME_PLUGIN_CONF)
-
-            self.dsc_x64_agent_path = os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_X64_AGENT_PATH)
-            self.dsc_x64_agent_file = os.path.join(self.dsc_x64_agent_path, fname_binary)
-
-            self.dsc_x86_agent_path = os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_X86_AGENT_PATH)
-            self.dsc_x86_agent_file = os.path.join(self.dsc_x86_agent_path, fname_binary)
-
-            # Helper assignments of binary and plugin to prevent more path join calls
-            self.oms_plugin_file = os.path.join(nxNPMD.PATH_NPM_PLUGIN, fname_plugin)
-            self.oms_binary_file = os.path.join(nxNPMD.PATH_AGENT_BINARY, fname_binary)
-
-            # Other file paths used frequently
-            self.server_address = os.path.join(nxNPMD.PATH_NPM_STATE, nxNPMD.FNAME_UDS_SERVER)
-            self.agent_version_file = os.path.join(nxNPMD.PATH_NPM_STATE, nxNPMD.FNAME_NPM_VERSION)
-
-        def removeDirectories(self):
-            if os.path.exists(self.dir_test_staging):
-                shutil.rmtree(self.dir_test_staging)
-
-        def createDirectories(self):
-            # Creating workspace directories for conf with longest paths
-            conf_prefix = nxNPMD.PREFIX_ETC
-            conf_suffix = nxNPMD.RPATH_PLUGIN_CONF
-            os.makedirs(os.path.join(conf_prefix, self.workspace_id_01, conf_suffix))
-            os.makedirs(os.path.join(conf_prefix, self.workspace_id_02, conf_suffix))
-            os.makedirs(os.path.join(conf_prefix, self.workspace_id_03, conf_suffix))
-
-            # Creating plugin directories for holding plugins and binaries of omsagent
-            os.makedirs(nxNPMD.PATH_NPM_PLUGIN)
-            if nxNPMD.PATH_NPM_PLUGIN != nxNPMD.PATH_AGENT_BINARY:
-                os.makedirs(nxNPMD.PATH_AGENT_BINARY)
-
-            # Creating directories related to setcap script
-            os.makedirs(self.dir_setcap_scripts)
-
-            # Creating directories related to dsc with longest paths
-            os.makedirs(os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_X64_AGENT_PATH))
-            os.makedirs(os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_X86_AGENT_PATH))
-            os.makedirs(os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_PLUGIN_PATH))
-            os.makedirs(os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_PLUGIN_CONF_PATH))
-
-        def setupFiles(self):
-            # Creating fake file
-            fake_file_path = os.path.join(self.dir_test_staging, 'testfile')
-            self.fake_file_content = 'Just a test file'
-
-            self.writeFile(fake_file_path, self.fake_file_content)
-
-            # Copying to create fake DSC resource binaries
-            shutil.copyfile(fake_file_path, os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_X64_AGENT_PATH, 'binary'))
-            shutil.copyfile(fake_file_path, os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_X86_AGENT_PATH, 'binary'))
-
-            # Copying to create fake DSC resource plugin and conf
-            shutil.copyfile(fake_file_path, os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_PLUGIN_PATH, 'plugin'))
-            shutil.copyfile(fake_file_path, os.path.join(nxNPMD.RESOURCE_MODULE_PATH, nxNPMD.DSC_PLUGIN_CONF_PATH, nxNPMD.FNAME_PLUGIN_CONF))
-
-            # Copying to fake setcap script
-            shutil.copyfile(fake_file_path, nxNPMD.PATH_SETCAP_SCRIPT)
-
-            # Removing the fake file
-            os.unlink(fake_file_path)
-
-            # Write values to version file of DSC
-            self.writeFile(nxNPMD.DSC_RESOURCE_VERSION_PATH, '1.0')
-
+    
         def setUp(self):
             """
             Setup test resources
             """
+            #time.sleep(1)
+            nxNPMD.CONFIG_PATH = '/var/tmp/etc/opt/microsoft/omsagent/conf/'
+            nxNPMD.SERVER_ADDRESS = '/var/tmp/npm_state/npmdagent.sock'
+            nxNPMD.DSC_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+            nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/AGENTVERSION'
+            nxNPMD.PLUGIN_PATH = '/var/tmp/opt/microsoft/omsagent/plugin/'
+            nxNPMD.PLUGIN_CONF_PATH = '/var/tmp/etc/opt/microsoft/omsagent/conf/omsagent.d/'
+            nxNPMD.AGENT_BINARY_PATH = '/var/tmp/opt/microsoft/omsagent/'
+            nxNPMD.RESOURCE_MODULE_PATH = '/var/tmp/opt/microsoft/omsconfig/modules/NPM/'
+            nxNPMD.AGENT_SCRIPT_PATH = '/var/tmp/etc/opt/microsoft/omsagent/scipt.sh'
+    
             self.config_type = 'UpdatedAgentConfig'
+            self.config_id = '12345'
             self.contents = base64.b64encode('<Configuration></Configuration>')
             self.content_checksum = hashlib.md5(self.contents).hexdigest().upper()
             self.ensure_present = 'Present'
             self.ensure_absent = 'Absent'
-            self.server_address = os.path.join(nxNPMD.PATH_NPM_STATE, nxNPMD.FNAME_UDS_SERVER)
+            self.out_file = nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME)
+            self.server_address = nxNPMD.SERVER_ADDRESS
             self.server_read_data = ''
             self.server_bound = False
             self.server_read_retries = 5
             self.server_bound_retries = 5
-            self.workspace_id_01 = str(uuid.uuid4())
-            self.workspace_id_02 = str(uuid.uuid4())
-            self.workspace_id_03 = str(uuid.uuid4())
-            self.config_id = self.workspace_id_01
-
-            # setup file system for test cases
-            try:
-                self.assignDirectories()
-                self.removeDirectories()
-                self.createDirectories()
-                self.setupFiles()
-            except Exception, msg:
-                # raise error if setup itself failed
-                self.assertTrue(False, "Setting filesystem for test cases failed!:" + str(msg))
-
+    
+            x64binaryPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_X64_AGENT_PATH)
+            x86binaryPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_X86_AGENT_PATH)
+            dscPluginPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_PLUGIN_PATH)
+            dscConfPath = nxNPMD.RESOURCE_MODULE_PATH.__add__(nxNPMD.DSC_PLUGIN_CONF_PATH)
+            
+            # remove files from directory
+            os.system('rm -rf /var/tmp/npm_state;' +
+                'rm -rf /var/tmp/etc;'
+                'rm -rf /var/tmp/opt;'
+            )
+            os.system('mkdir -p ' + nxNPMD.CONFIG_PATH + ';'
+                'mkdir -p ' + '/var/tmp/npm_state/' + ';'
+                'mkdir -p ' + nxNPMD.PLUGIN_PATH + ';'
+                'mkdir -p ' + nxNPMD.PLUGIN_CONF_PATH + ';'
+                'mkdir -p ' + x64binaryPath + ';'
+                'mkdir -p ' + x86binaryPath + ';'
+                'mkdir -p ' + dscPluginPath + ';'
+                'mkdir -p ' + dscConfPath + ';'
+                'echo testfile >> ' + x64binaryPath + 'binary;'
+                'echo testfile >> ' + x86binaryPath + 'binary;'
+                'echo testfile >> ' + dscPluginPath + 'plugin;'
+                'echo testfile >> ' + dscConfPath + 'config;'
+                'echo testfile >> ' + nxNPMD.AGENT_SCRIPT_PATH + ';'
+            )
+            
+            with open(nxNPMD.DSC_RESOURCE_VERSION_PATH, 'w+') as dFile:
+                dFile.write('1.0')
+            with open(nxNPMD.AGENT_RESOURCE_VERSION_PATH, 'w+') as dFile:
+                dFile.write('1.0')
+    
             nxNPMD.OMS_ACTION = nxOMSAgentNPMConfigTestCases.TestOMSAgentUtil()
             nxNPMD.NPM_ACTION = nxOMSAgentNPMConfigTestCases.TestNPMAgentUtil()
-            nxNPMD.LOG_ACTION = nxOMSAgentNPMConfigTestCases.TestNPMDiagnosticLogUtil()
-            nxNPMD.LG = nxOMSAgentNPMConfigTestCases.TestLOG
-
-            nxNPMD.NotifyServer = self.TestNotifyServer
-
+    
+            thread.start_new_thread(self.createUDSServer, ())
         def tearDown(self):
             """
             Remove test resources.
             """
-            try:
-                self.removeDirectories()
-            except Exception, msg:
-                self.assertTrue(False, "Cleanup of filesystem in tear down failed!" + str(msg))
-
+            # remove files from directory
+            os.system('rm -rf /var/tmp/npm_state;' +
+                'rm -rf /var/tmp/etc;'
+            )
+            #time.sleep(1)
+    
+        
         def make_MI(self, retval, ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
             d=dict();
             if ConfigType == None :
@@ -1816,7 +1738,7 @@ if nxNPMD != None:
             else :
                 d['ContentChecksum'] = nxNPMD.protocol.MI_String(ContentChecksum)
             return retval,d
-
+    
         def readFile(self, path):
             content = None
             try:
@@ -1825,40 +1747,28 @@ if nxNPMD != None:
             except IOError, error:
                 print "Exception opening file " + path + " Error Code: " + str(error.errno) + " Error: " + error.message + error.strerror
             return content
-
-        def writeFile(self, path, text):
-            with open(path, 'w+') as dFile:
-                dFile.write(text)
-
-        def setupNPMWithConfigFile(self, workspaceId):
-            # SetupNPM call will create all but the agent config file
-            nxNPMD.SetupNPM(workspaceId)
-            # Setup the agent config file
-            agent_conf_file = os.path.join(nxNPMD.PREFIX_ETC, workspaceId, nxNPMD.RPATH_AGENT_CONF, nxNPMD.FNAME_AGENT_CONF)
-            # Write default contents because test resource version cases can fail when they shouldn't because of config mismatch
-            file_contents = base64.b64decode(self.contents)
-            self.writeFile(agent_conf_file, file_contents)
-
+    
         def createUDSServer(self):
             # Make sure the socket does not already exist
             try:
-                os.unlink(self.server_address)
+                if os.path.exists(self.server_address):
+                    os.unlink(self.server_address)
             except OSError:
                 if os.path.exists(self.server_address):
                     raise
-
+    
             # Reset the socket read data
             self.server_read_data = ''
             # Create a UDS socket
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-
+    
             # Bind the socket to the port
             sock.bind(self.server_address)
-
+    
             # Listen for incoming connections
             sock.listen(socket.SOMAXCONN)
             self.server_bound = True
-
+    
             while True:
                 connection, client_address = sock.accept()
                 try:
@@ -1872,43 +1782,30 @@ if nxNPMD != None:
                 finally:
                     # Clean up the connection
                     connection.close()
-
-        def verifyFileContents(self, text, workspaceId, checkConf):
-            content = self.readFile(self.oms_binary_file)
-            self.assertTrue(content == text, 'Contents written to binary file do not match')
-            content = self.readFile(self.oms_plugin_file)
-            self.assertTrue(content == text, 'Contents written to plugin file do not match')
-            if checkConf == True:
-                conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, workspaceId, nxNPMD.RPATH_PLUGIN_CONF, nxNPMD.FNAME_PLUGIN_CONF)
-                content = self.readFile(conf_file_path)
-                self.assertTrue(content == text, 'Contents written to plugin conf file do not match')
-
-        def verifyFileContentsMismatch(self, text, workspaceId, checkConf):
-            content = self.readFile(self.oms_binary_file)
-            self.assertTrue(content != text, 'Contents written to binary file should not match')
-            content = self.readFile(self.oms_plugin_file)
-            self.assertTrue(content != text, 'Contents written to plugin file should not match')
-            if checkConf == True:
-                conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, workspaceId, nxNPMD.RPATH_PLUGIN_CONF, nxNPMD.FNAME_PLUGIN_CONF)
-                content = self.readFile(conf_file_path)
-                self.assertTrue(content != text, 'Contents written to plugin conf file should not match')
-
+    
+        def verifyFileContents(self, text):
+            content = self.readFile(nxNPMD.AGENT_BINARY_PATH.__add__('binary'))
+            print content, text
+            self.assertTrue(content == text, 'Contents written to file do not match')
+            content = self.readFile(nxNPMD.PLUGIN_PATH.__add__('plugin'))
+            self.assertTrue(content == text, 'Contents written to file do not match')
+            content = self.readFile(nxNPMD.PLUGIN_CONF_PATH.__add__('config'))
+            self.assertTrue(content == text, 'Contents written to file do not match')
+    
         def verifySocketRead(self, text):
             if text in self.server_read_data:
                 return True
             return False
-
-        def updateFileContents(self, text, workspaceId, doConf):
-            if doConf == True:
-                self.writeFile(self.dsc_plugin_conf_file, text)
-            self.writeFile(self.dsc_x64_agent_file, text)
-            self.writeFile(self.dsc_x86_agent_file, text)
-            self.writeFile(self.dsc_plugin_file, text)
-
+    
+        def updateFileContents(self, text):
+            with open(nxNPMD.AGENT_BINARY_PATH.__add__('binary'), 'w+') as dFile:
+                dFile.write(text)
+            with open(nxNPMD.PLUGIN_PATH.__add__('plugin'), 'w+') as dFile:
+                dFile.write(text)
+            with open(nxNPMD.PLUGIN_CONF_PATH.__add__('config'), 'w+') as dFile:
+                dFile.write(text)
+    
         def testSendDiagnosticLog(self):
-            # Setup omsagent simulation in directories and unix server
-            self.setupNPMWithConfigFile(self.config_id)
-            thread.start_new_thread(self.createUDSServer, ())
             #check that the UDS server is bound
             retry = 0
             while not self.server_bound and retry < self.server_bound_retries:
@@ -1917,9 +1814,7 @@ if nxNPMD != None:
             self.assertTrue(retry <= self.server_bound_retries,
                     'Server at ' + self.server_address + ' should be bound')
 
-            # create the diagnostic logging util object
-            # This works as we did not override the Util class but
-            # just overrided the object for nxNPMD
+            #create the diagnostic logging util object
             DLOG = nxNPMD.NPMDiagnosticLogUtil()
             testStr = 'This is a test log string'
 
@@ -1937,334 +1832,154 @@ if nxNPMD != None:
             #check that test log is part of emit
             self.assertTrue(self.verifySocketRead(testStr),
                     'Given test string should have been emitted to UDS server')
-
-        # check that setupNPM is working as that is used extensively in testing
-        def testSetupNPM(self):
-            # setting up NPM for ws01
-            self.config_id = self.workspace_id_01
-            self.setupNPMWithConfigFile(self.config_id)
-            # Check that npm_state directory now exists
-            self.assertTrue(os.path.exists(nxNPMD.PATH_NPM_STATE) == True, 'nxNPMD.PATH_NPM_STATE should exist as ws was setup to run NPM successfully')
-            # Check the agent version file exists
-            self.assertTrue(os.path.exists(self.agent_version_file) == True, 'Agent version file should exists as NPM was setup successfully')
-            # Check that agent version matches DSC version
-            self.assertTrue(nxNPMD.TestResourceVersion() == 0, 'Agent version should match DSC version')
-            # Check that agent plugin file was copied
-            self.assertTrue(os.path.exists(self.oms_plugin_file) == True, 'Plugin file should have been copied successfully')
-            # Check that binary file was copied
-            self.assertTrue(os.path.exists(self.oms_binary_file) == True, 'Binary file should have been copied successfully')
-            # Check that plugin config file was copied
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.config_id, nxNPMD.RPATH_PLUGIN_CONF, nxNPMD.FNAME_PLUGIN_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == True, 'Plugin configuration file should have been copied successfully')
-            # Check that agent config file was copied
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.config_id, nxNPMD.RPATH_AGENT_CONF, nxNPMD.FNAME_AGENT_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == True, 'Agent configuration file should have been copied successfully')
-
-        # matching the get_marshall response
+   
         def testGetUpdateAgentConfig(self):
             r=nxNPMD.Get_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+            print r
+            print self.make_MI([0], self.config_type, self.config_id, base64.b64decode(self.contents), self.ensure_present, self.content_checksum)
             self.assertTrue(check_values(r,self.make_MI([0], self.config_type, self.config_id, base64.b64decode(self.contents), self.ensure_present, self.content_checksum)) == True,'nxNPMD.Get_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)[0] should return == 0')
-
-        # if config checksum mismatch occurs we return 0 to drop further processing
+    
+    
+        def testTestNewAgentConfig(self):
+            # disables check for binary update
+            nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+            r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+            print r
+            self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+    
         def testTestUpdateConfigChecksumMismatch(self):
+            # disables check for binary update
+            nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+            nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
             r=nxNPMD.Test_Marshall(self.config_type, self.config_id, base64.b64encode('New config string'), self.ensure_present, self.content_checksum)
+            print r
             self.assertTrue(r == [0],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-
-        # if config_id does not have an /etc/ path or is null then we return 0 to drop further processing
-        def testTestInvalidConfigIDCases(self):
-            invalid_config_id = 'abcde'
-            r=nxNPMD.Test_Marshall(self.config_type, invalid_config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Test_Marshall(self.config_type, invalid_config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-            null_config_id = None
-            r=nxNPMD.Test_Marshall(self.config_type, null_config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Test_Marshall(self.config_type, null_config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-
-        # if setcap script is missing then we return 0 to drop further processing
-        def testTestSetcapScriptMissing(self):
-            # Change the path of SETCAP script to something different
-            nxNPMD.PATH_SETCAP_SCRIPT = os.path.join(self.dir_test_staging, str(uuid.uuid4()))
+    
+        def testTestUpdateNewConfig(self):
+            # disables check for binary update
+            nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+            nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+            newContent = 'New config string'
+            newChecksum = hashlib.md5(base64.b64encode(newContent)).hexdigest().upper()
+            r=nxNPMD.Test_Marshall(self.config_type, self.config_id, base64.b64encode(newContent), self.ensure_present, newChecksum)
+            print r
+            self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+    
+        def testTestSolutionEnable(self):
+            # disable config update
+            with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+                dFile.write(base64.b64decode(self.contents))
+            # remove agent resource version file
+            os.unlink(nxNPMD.AGENT_RESOURCE_VERSION_PATH)
             r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-
-        # if config type is invalid then we should return 0 and drop further
-        def testTestInvalidConfigTypeCases(self):
-            # config type is something invalid
-            invalid_config_type = 'invalid_config_type'
-            r=nxNPMD.Test_Marshall(invalid_config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Test_Marshall(invalid_config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-
-        # if npm is not setup and state directory exists then we return -1 to let set clear it up
-        def testTestMultiHomingNoNPMAndStateDirExists(self):
-            # By Default we do not have NPM running and create NPM state directory
-            os.makedirs(nxNPMD.PATH_NPM_STATE)
+            self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+    
+        def testTestBinaryUpdate(self):
+            # disable config update
+            with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+                dFile.write(base64.b64decode(self.contents))
+            # update dsc resource version file
+            with open(nxNPMD.DSC_RESOURCE_VERSION_PATH, 'w+') as dFile:
+                dFile.write('1.1')
             r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-
-        # if npm is not setup (state dir either present/absent) and ensure is present then we return -1 to allow set to setup for this ws
-        def testTestMultiHomingNoNPMSoSetupNPMForCurrentWS(self):
-            # By default we do not have NPM running, no state directory
+            self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+    
+        def testTestNoChange(self):
+            # disable config update
+            with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+                dFile.write(base64.b64decode(self.contents))
+            # disables check for binary update
+            nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
             r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-            # Similar case as above with state directory present is taken care as previous test case
-
-        # if npm is setup and state dir is absent then we return -1 (regardless of ensure) (config_id should be any valid one) to setup npm back
-        def testTestMultiHomingNPMRunningAndNoStateDir(self):
-            # Setting up NPM for ws01
-            self.config_id = self.workspace_id_01
-            self.setupNPMWithConfigFile(self.config_id)
-            # deleting the NPM State directory
-            shutil.rmtree(nxNPMD.PATH_NPM_STATE)
-            # checking ensure == present case
-            r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-            # checking ensure == absent case
+            self.assertTrue(r == [0],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+    
+        def testTestEnsureAbsentNoAgent(self):
+            # remove agent resource version file
+            os.unlink(nxNPMD.AGENT_RESOURCE_VERSION_PATH)
             r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum) should return == -1')
-            # checking ensure == present case with different config_id
-            r=nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-            # checking ensure == absent case with different config_id
-            r=nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_absent, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_absent, self.content_checksum) should return == -1')
-
-        # if npm is setup for ws1 and current is ws1 and absent arrives return -1 for disabling
-        # if npm is setup for ws1 and current is ws2 and absent arrives return 0 as no need for disabling
-        def testTestMultiHomingNPMRunningDisableForWS(self):
-            # Setting up NPM for ws1
-            self.config_id = self.workspace_id_01
-            self.setupNPMWithConfigFile(self.config_id)
-            # checking case when ws1 is running NPM and absent arrives with current config_id as ws1
+            self.assertTrue(r == [0],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+    
+        def testTestEnsureAbsentSolutionPurge(self):
             r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum) should return == -1')
-            # checking case when ws1 is running NPM and absent arrives with current config_id as ws2
-            r=nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_absent, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_absent, self.content_checksum) should return == 0')
-
-        # check cases of resource version
-        def testTestResourceVersionCases(self):
-            # Setup NPM with default config_id and send ensure present with same to skip test multihoming cases
-            self.setupNPMWithConfigFile(self.config_id)
-            # checking resource version case when dsc version is same as agent version
-            self.writeFile(self.agent_version_file, '10.0')
-            self.writeFile(nxNPMD.DSC_RESOURCE_VERSION_PATH, '10.0')
-            # the following has to return 0 as setupNPMWithConfigFile would write self.contents itself to config file preventing that to return -1
-            r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-            # checking resource version case when dsc version is different from agent version
-            self.writeFile(self.agent_version_file, '10.0')
-            self.writeFile(nxNPMD.DSC_RESOURCE_VERSION_PATH, '10.2')
-            r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-            # checking resource version case when agent version file is missing
-            os.unlink(self.agent_version_file)
-            r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-
-        # check cases of config update
-        def testTestConfigUpdateCases(self):
-            # generate test data
-            test_content01 = base64.b64encode('<Configuration>Test1</Configuration>')
-            test_content01_checksum = hashlib.md5(test_content01).hexdigest().upper()
-            test_content02 = base64.b64encode('<Configuration>Test2</Configuration>')
-            test_content02_checksum = hashlib.md5(test_content02).hexdigest().upper()
-            test_content03 = base64.b64encode('<Configuration>Test3</Configuration>')
-            test_content03_checksum = hashlib.md5(test_content03).hexdigest().upper()
-            # Setup NPM for config_id
-            self.config_id = self.workspace_id_01
-            self.setupNPMWithConfigFile(self.config_id)
-            # Check for case when config file is missing
-            os.unlink(os.path.join(nxNPMD.PREFIX_ETC, self.config_id, nxNPMD.RPATH_AGENT_CONF, nxNPMD.FNAME_AGENT_CONF))
-            r=nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-            # Check for current config_id of config update when ensure is present (can't do absent as that removes solution)
-            r=nxNPMD.Test_Marshall(self.config_type, self.config_id, test_content01, self.ensure_present, test_content01_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, test_content01, self.ensure_present, test_content01_checksum) should return == -1')
-            # Check other config_id case for config update when file is absent
-            conf_file_location = os.path.join(nxNPMD.PREFIX_ETC, self.workspace_id_02, nxNPMD.RPATH_AGENT_CONF, nxNPMD.FNAME_AGENT_CONF)
-            if os.path.exists(conf_file_location):
-                os.unlink(conf_file_location)
-            r=nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-            # Check other config_id case for config update when ensure is present
-            r=nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, test_content02, self.ensure_present, test_content02_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, test_content02, self.ensure_present, test_content02_checksum) should return == -1')
-            # Check other config_id case for config update when ensure is absent (should not happen)
-            r=nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, test_content03, self.ensure_absent, test_content03_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Test_Marshall(self.config_type, self.workspace_id_02, test_content03, self.ensure_absent, test_content03_checksum) should return == 0')
-
-        # check case when checksum of contents does not match checsum in set
-        def testSetChecksumMismatchCase(self):
-            test_content = base64.b64encode('SomeRandomValue')
-            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, test_content, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Set_Marshall(self.config_type, self.config_id, test_content, self.ensure_present, self.content_checksum) should return == -1')
-
-        # if config_id does not have an /etc/ path or is null then we return -1
-        def testSetInvalidConfigIDCases(self):
-            invalid_config_id = 'abcde'
-            r=nxNPMD.Set_Marshall(self.config_type, invalid_config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Set_Marshall(self.config_type, invalid_config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-            null_config_id = None
-            r=nxNPMD.Set_Marshall(self.config_type, null_config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Set_Marshall(self.config_type, null_config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-
-        # if config type is invalid then we should return -1
-        def testSetInvalidConfigTypeCases(self):
-            # config type is something invalid
-            invalid_config_type = 'invalid_config_type'
-            r=nxNPMD.Set_Marshall(invalid_config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [-1], 'nxNPMD.Set_Marshall(invalid_config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
-
-        # if no one is running NPM and state directory exists then clean it up
-        def testSetMultiHomingNoNPMAndStateDirExists(self):
-            # By Default we do not have NPM running and create NPM state directory
-            os.makedirs(nxNPMD.PATH_NPM_STATE)
-            # Send ensure absent to remove the path
-            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum) should return == 0')
-            self.assertTrue(os.path.exists(nxNPMD.PATH_NPM_STATE) == False, 'nxNPMD.PATH_NPM_STATE should not exist as no ws is running NPM and set was successful')
-
-        # Checking cases where NPM is setup
-        def testSetSolutionEnableCases(self):
-            # by default no workspace is running NPM
-            self.config_id = self.workspace_id_01
-            # Send ensure == present to setup NPM for workspace id 01
+            self.assertTrue(r == [-1],'nxNPMD.Test_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+    
+    
+        def testSetNewAgentConfig(self):
+            # disables check for binary update
+            nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
             r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-            # Check that npm_state directory now exists
-            self.assertTrue(os.path.exists(nxNPMD.PATH_NPM_STATE) == True, 'nxNPMD.PATH_NPM_STATE should exist as ws was setup to run NPM successfully')
-            # Check the agent version file exists
-            self.assertTrue(os.path.exists(self.agent_version_file) == True, 'Agent version file should exists as NPM was setup successfully')
-            # Check that agent version matches DSC version
-            self.assertTrue(nxNPMD.TestResourceVersion() == 0, 'Agent version should match DSC version')
-            # Check that agent plugin file was copied
-            self.assertTrue(os.path.exists(self.oms_plugin_file) == True, 'Plugin file should have been copied successfully')
-            # Check that binary file was copied
-            self.assertTrue(os.path.exists(self.oms_binary_file) == True, 'Binary file should have been copied successfully')
-            # Check that plugin config file was copied
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.config_id, nxNPMD.RPATH_PLUGIN_CONF, nxNPMD.FNAME_PLUGIN_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == True, 'Plugin configuration file should have been copied successfully')
-            # Check that agent config file was copied
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.config_id, nxNPMD.RPATH_AGENT_CONF, nxNPMD.FNAME_AGENT_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == True, 'Agent configuration file should have been copied successfully')
-            # Check that agent config file contents are as intended
-            conf_file_checksum = hashlib.md5(base64.b64encode(self.readFile(conf_file_path))).hexdigest().upper()
-            self.assertTrue(conf_file_checksum == self.content_checksum, 'The checksum of the configuration content should be same')
-            # now an enable for workspace 02 should not fail in set
-            r=nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-            # however the plugin conf file should not be copied to this workspace 02
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.workspace_id_02, nxNPMD.RPATH_PLUGIN_CONF, nxNPMD.FNAME_PLUGIN_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == False, 'Plugin configuration file for ws02 should not be copied as ws01 is running NPM')
-            # however the agent configuration file should be copied as ensure present was sent
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.workspace_id_02, nxNPMD.RPATH_AGENT_CONF, nxNPMD.FNAME_AGENT_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == True, 'Agent configuration file should have been copied successfully even for ws02')
-            # Check that agent config file contents are as intended
-            conf_file_checksum = hashlib.md5(base64.b64encode(self.readFile(conf_file_path))).hexdigest().upper()
-            self.assertTrue(conf_file_checksum == self.content_checksum, 'The checksum of the configuration content should be same even for ws02')
-            # Now delete the npm_state directory and send ensure == present for ws02
-            shutil.rmtree(nxNPMD.PATH_NPM_STATE)
-            r=nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-            # Check that npm_state directory is created
-            self.assertTrue(os.path.exists(nxNPMD.PATH_NPM_STATE) == True, 'nxNPMD.PATH_NPM_STATE should exist as ws01 was running without it and a set should recreate it')
-            # Check that ws02 is not running NPM as in the plugin conf file does not exist for it
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.workspace_id_02, nxNPMD.RPATH_PLUGIN_CONF, nxNPMD.FNAME_PLUGIN_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == False, 'Plugin configuration file for ws02 should be absent as ws01 was running NPM initially')
-            # Check that plugin config file was copied
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.config_id, nxNPMD.RPATH_PLUGIN_CONF, nxNPMD.FNAME_PLUGIN_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == True, 'Plugin configuration file should have be present as set recreated it')
-
-        # Checking cases where NPM is removed
-        def testSetSolutionDisableCases(self):
-            # by default no workspace is running NPM so setup ws01 as running NPM
-            self.config_id = self.workspace_id_01
-            self.setupNPMWithConfigFile(self.config_id)
-            # Check that ensure == absent for workspace 02 will return 0
-            r=nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_absent, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_absent, self.content_checksum) should return == 0')
-            # Check that npm_state directory is not deleted
-            self.assertTrue(os.path.exists(nxNPMD.PATH_NPM_STATE) == True, 'nxNPMD.PATH_NPM_STATE should exist as ws01 was setup to run NPM and ws02 disable does not count')
-            # Check that ensure == absent for configred ws will return 0
-            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum) should return == 0')
-            # We do not check that npm_state directory is deleted as that is left to the plugin to fathom
-            # Check that plugin conf file is removed for ws01
-            conf_file_path = os.path.join(nxNPMD.PREFIX_ETC, self.config_id, nxNPMD.RPATH_PLUGIN_CONF, nxNPMD.FNAME_PLUGIN_CONF)
-            self.assertTrue(os.path.exists(conf_file_path) == False, 'Plugin configuration file should not be present as ws01 was disabled')
-
-        # Checking cases where module update occurs
-        def testSetModuleUpdateCases(self):
-            # setup NPM for workspace 01
-            self.config_id = self.workspace_id_01
-            self.setupNPMWithConfigFile(self.config_id)
-            # Update the module with ws01 steps
-            test_content = str(uuid.uuid4())
-            self.updateFileContents(test_content, self.config_id, True)
-            self.writeFile(self.agent_version_file, '10.0')
-            self.writeFile(nxNPMD.DSC_RESOURCE_VERSION_PATH, '10.2')
-            # Run set to update
+            print r
+            self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+            content = self.readFile(self.out_file)
+            self.assertTrue(content == base64.b64decode(self.contents), 'Contents written to file do not match')
+    
+        def testSetUpdateConfigChecksumMismatch(self):
+            # disables check for binary update
+            nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+            newStr = 'New config string'
+            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, base64.b64encode(newStr), self.ensure_present, self.content_checksum)
+            print r
+            self.assertTrue(r == [-1],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == -1')
+            content = self.readFile(self.out_file)
+            print content
+            self.assertTrue(content != newStr, 'Contents written to file do not match')
+    
+        def testSetUpdateNewConfig(self):
+            # disables check for binary update
+            nxNPMD.AGENT_RESOURCE_VERSION_PATH = '/var/tmp/etc/opt/microsoft/omsagent/VERSION'
+            nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+            newContent = 'New config string'
+            newChecksum = hashlib.md5(base64.b64encode(newContent)).hexdigest().upper()
+            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, base64.b64encode(newContent), self.ensure_present, newChecksum)
+            print r
+            self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+            content = self.readFile(self.out_file)
+            self.assertTrue(newContent == content, 'Contents written to file do not match')
+    
+        def testSetSolutionEnable(self):
+            # disable config update
+            with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+                dFile.write(base64.b64decode(self.contents))
+            # remove agent resource version file
+            os.unlink(nxNPMD.AGENT_RESOURCE_VERSION_PATH)
             r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-            # Verify that file contents are updated
-            self.verifyFileContents(test_content, self.config_id, True)
-            # Update the module with ws02 steps
-            test_content = str(uuid.uuid4())
-            self.updateFileContents(test_content, self.workspace_id_02, False)
-            self.writeFile(self.agent_version_file, '10.0')
-            self.writeFile(nxNPMD.DSC_RESOURCE_VERSION_PATH, '10.2')
-            # Run set to update with ws02
-            r=nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_present, self.content_checksum) should return == 0')
-            # Verify that file contents are updated even for ws02
-            self.verifyFileContents(test_content, self.workspace_id_02, False)
-            # Update the module with ws02 steps with ensure == absent
-            test_content = str(uuid.uuid4())
-            self.updateFileContents(test_content, self.workspace_id_02, False)
-            self.writeFile(self.agent_version_file, '10.0')
-            self.writeFile(nxNPMD.DSC_RESOURCE_VERSION_PATH, '10.2')
-            # Run set to update with ws02
-            r=nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_absent, self.content_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, self.contents, self.ensure_absent, self.content_checksum) should return == 0')
-            # Verify that file contents are not updated in absent case
-            self.verifyFileContentsMismatch(test_content, self.workspace_id_02, False)
-
-        # Checking cases where agent config update occurs
-        def testSetAgentConfigUpdateCases(self):
-            # setup NPM for workspace 01
-            self.config_id = self.workspace_id_01
-            self.setupNPMWithConfigFile(self.config_id)
-            # generate test data
-            test_content01_str = '<Configuration>Test1</Configuration>'
-            test_content01 = base64.b64encode(test_content01_str)
-            test_content01_checksum = hashlib.md5(test_content01).hexdigest().upper()
-            test_content02_str = '<Configuration>Test2</Configuration>'
-            test_content02 = base64.b64encode(test_content02_str)
-            test_content02_checksum = hashlib.md5(test_content02).hexdigest().upper()
-            test_content03_str = '<Configuration>Test3</Configuration>'
-            test_content03 = base64.b64encode(test_content03_str)
-            test_content03_checksum = hashlib.md5(test_content03).hexdigest().upper()
-            # create file paths
-            agent_conf_file_ws01 = os.path.join(nxNPMD.PREFIX_ETC, self.workspace_id_01, nxNPMD.RPATH_AGENT_CONF, nxNPMD.FNAME_AGENT_CONF)
-            agent_conf_file_ws02 = os.path.join(nxNPMD.PREFIX_ETC, self.workspace_id_02, nxNPMD.RPATH_AGENT_CONF, nxNPMD.FNAME_AGENT_CONF)
-            # Run set to update contents for ws01
-            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, test_content01, self.ensure_present, test_content01_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.config_id, test_content01, self.ensure_present, test_content01_checksum) should return == 0')
-            # Verify that update has occurred
-            read_data = self.readFile(agent_conf_file_ws01)
-            self.assertTrue(test_content01_str == read_data, 'Valid agent config update should happen for ws01 as it is running NPM')
-            # Run set to update contents for ws02
-            r=nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, test_content02, self.ensure_present, test_content02_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, test_content02, self.ensure_present, test_content02_checksum) should return == 0')
-            # Verify that update has occurred even for ws02 as ensure == present
-            read_data = self.readFile(agent_conf_file_ws02)
-            self.assertTrue(test_content02_str == read_data, 'Valid agent config update should happen for ws02 as it used ensure_present even when not running NPM')
-            # Run set to update contents for ws02 with ensure_absent
-            r=nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, test_content03, self.ensure_absent, test_content03_checksum)
-            self.assertTrue(r == [0], 'nxNPMD.Set_Marshall(self.config_type, self.workspace_id_02, test_content03, self.ensure_present, test_content03_checksum) should return == 0')
-            # Verify that update has occurred even for ws02 as ensure == present
-            read_data = self.readFile(agent_conf_file_ws02)
-            self.assertTrue(test_content03_str != read_data, 'Valid agent config update should not happen for ws02 as it used ensure_absent')
-
+            self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+            
+            #verify file contents
+            self.verifyFileContents('testfile\n')
+    
+        def testSetBinaryUpdate(self):
+            # disable config update
+            with open(nxNPMD.CONFIG_PATH.__add__(nxNPMD.DEST_FILE_NAME), 'w+') as dFile:
+                dFile.write(base64.b64decode(self.contents))
+            # update dsc resource version file
+            with open(nxNPMD.DSC_RESOURCE_VERSION_PATH, 'w+') as dFile:
+                dFile.write('1.1')
+            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)
+    
+            #change contents
+            self.updateFileContents('newText')
+    
+            # making sure we are able to override files
+            with open(nxNPMD.DSC_RESOURCE_VERSION_PATH, 'w+') as dFile:
+                dFile.write('1.2')
+    
+            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum)        
+            self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+    
+            #verify file contents
+            self.verifyFileContents('testfile\n')
+    
+        def testSetEnsureAbsentSolutionPurge(self):
+            r=nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_absent, self.content_checksum)
+            self.assertTrue(r == [0],'nxNPMD.Set_Marshall(self.config_type, self.config_id, self.contents, self.ensure_present, self.content_checksum) should return == 0')
+    
+            # make sure files are not present
+            if os.path.exists(nxNPMD.PLUGIN_CONF_PATH.__add__('config')):
+                self.assertTrue(False, 'binary file exists')
+            if os.path.exists(nxNPMD.AGENT_RESOURCE_VERSION_PATH):
+                self.assertTrue(False, 'agent resource version file exists')
+    
 nxOMSWLITestCases = None
 if nxWLI != None:
     class nxOMSWLITestCases(unittest2.TestCase):
