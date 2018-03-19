@@ -5,14 +5,18 @@ import os
 import shutil
 import subprocess
 import sys
+import platform
+import imp
 
 from os.path import basename, dirname, join, realpath, split
-
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
-
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = imp.load_source('helperlib', helperLibPath)
+fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = imp.load_source('nxDSCLog', fullPathDSCLogger)
+logger = nxDSCLog.ConsoleAndFileLogger()
+sys.stdout = logger
 
 try:
     zipfileLibPath = join(helperlib.DSC_SCRIPT_PATH, 'zipfile2.6.py')

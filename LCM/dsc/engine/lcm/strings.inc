@@ -525,7 +525,7 @@ INTERNAL_Intlstr_Define2( ID_PULL_INSTALLMODULEANDREMOVEMODULEFAILED,
  			  ID_PULL_INSTALLMODULEANDREMOVEMODULEFAILED,
       			  _In_z_ const PAL_Char*, firstString,
                           _In_z_ const PAL_Char*, secondString,
-                 	  "Failed to install module: " Intlstr_tstr(1) " with version: "  Intlstr_tstr(2) ". Also failed to remove module.  DSC may need to be reinstalled.")
+                 	  "Failed to install module: " Intlstr_tstr(1) " with version: "  Intlstr_tstr(2) ". Also failed to remove module.")
 
 INTERNAL_Intlstr_Define1( ID_PULL_INITIALIZEMODULETABLEFAILED,
 			  ID_PULL_INITIALIZEMODULETABLEFAILED,
