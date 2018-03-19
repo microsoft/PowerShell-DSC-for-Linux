@@ -2075,7 +2075,7 @@ MI_Result  MI_CALL StopCurrentConfiguration(_Outptr_result_maybenull_ MI_Instanc
 MI_Char* RunCommand(const MI_Char* command)
 {
     MI_Char* result = NULL;
-    FILE * fp;
+    FILE * fp = NULL;
     const int bufferSize = 5000;
     char buffer[bufferSize * 10 + 1];
     char curBuffer[bufferSize + 1];
