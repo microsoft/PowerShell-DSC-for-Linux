@@ -37,6 +37,7 @@ volatile MI_Operation *g_CurrentWmiv2Operation = NULL;
 
 const MI_Char * GetModuleName( _In_ MI_Instance *inst);
 const MI_Char * GetModuleVersion( _In_ MI_Instance *inst);
+static pthread_mutex_t g_pipesMutex;
 
 MI_Result InitResourceErrorList(ResourceErrorList * resourceErrorList)
 {
@@ -2074,6 +2075,9 @@ MI_Result  MI_CALL StopCurrentConfiguration(_Outptr_result_maybenull_ MI_Instanc
 
 MI_Char* RunCommand(const MI_Char* command)
 {
+   
+    pthread_mutex_lock(&g_pipesMutex);
+
     MI_Char* result = NULL;
     FILE * fp = NULL;
     const int bufferSize = 5000;
@@ -2090,7 +2094,8 @@ MI_Char* RunCommand(const MI_Char* command)
     fp = popen(command, "r");
     if (fp == NULL)
     {
-        return NULL;
+        // return NULL;
+	goto Cleanup;
     }
 
    // fctnl(fp, F_SETFD, FD_CLOEXEC);
@@ -2118,6 +2123,9 @@ MI_Char* RunCommand(const MI_Char* command)
     result = (MI_Char*)DSC_malloc((cur_loc + 1) * sizeof(MI_Char*), NitsHere());
     memcpy(result, buffer, cur_loc + 1);
     cur_loc = testcount;
+
+Cleanup:
+    pthread_mutex_unlock(&g_pipesMutex);
     return result;
 }
 
