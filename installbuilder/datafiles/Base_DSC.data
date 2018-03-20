@@ -216,18 +216,6 @@ cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_DSCMetaConfiguration.mof $CONFIG_S
 cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.registration.mof  $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration/MSFT_LogResource
 cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.schema.mof  $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema/MSFT_LogResource
 
-for prov in ${{PROVIDERS}}; do
-#if BUILD_OMS == 1
-    cp -f /opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nx${prov}Resource.reg $OMI_REGISTER_DIR/root-oms
-#else
-    cp -f /opt/microsoft/${{SHORT_NAME}}/etc/MSFT_nx${prov}Resource.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
-#endif
-    mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema/MSFT_nx${prov}Resource/ $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration/MSFT_nx${prov}Resource/
-    cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nx${prov}Resource.schema.mof $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema/MSFT_nx${prov}Resource/
-    cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_nx${prov}Resource.registration.mof $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration/MSFT_nx${prov}Resource/
-    ln -fs /opt/microsoft/${{SHORT_NAME}}/lib/libMSFT_nx${prov}Resource.so $OMI_LIB/libMSFT_nx${prov}Resource.so
-done
-
 chmod a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/
 chmod a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration
 chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema
@@ -243,15 +231,30 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
 # If this is ever changed/removed, coordinate with nxOMSAuditdPlugin author/maintainer(s)
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 
-# Set up the modules
+# Set up built-in resource modules for OMS DSC
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.2.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.1.zip 0"
 
+# Set up a built-in resource module for DIY DSC that was removed during OMS Agent update
+# This is a temporary workaround to prevent DIY DSC from breaking after the OMS Agent is updated from version 1.4.4-210 or below
+# This section can be removed when telemetry shows that customers no longer need to update from version 1.4.4-210 or below
+
+# Check if DIY DSC install module script is present on the machine 
+if [ -f /opt/microsoft/dsc/Scripts/InstallModule.py ]; then
+  # Check if nx module package is available in DIY DSC
+  if [ -f /opt/microsoft/dsc/module_packages/nx_1.0.zip ]; then
+    /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
+  fi
+fi
+
 #else
+
+# Set up built-in resource module for DIY DSC
 /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
+
 #endif
 
 if [ -d  $OMI_LIB/Scripts ]; then
@@ -271,7 +274,6 @@ ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.4
 
 #if BUILD_OMS == 1
 chown -R omsagent /opt/microsoft/${{SHORT_NAME}}/Scripts
-su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py"
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc keymgmtring.gpg"
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc keyring.gpg"
 
@@ -289,8 +291,6 @@ if [ -f /opt/omi/bin/ConsistencyInvoker ]; then
 fi
 
 #else
-/opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py
-
 cat /etc/crontab | awk '{ if ($7 != "/opt/omi/bin/ConsistencyInvoker") { print $0 } }' > /etc/crontabtmp
 cat /etc/crontab | awk '{ if ($7 == "/opt/omi/bin/ConsistencyInvoker") { print $0 } }' > /etc/cron.d/dsc
 mv /etc/crontabtmp /etc/crontab
@@ -342,7 +342,7 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
 #if BUILD_OMS == 1
     rm -rf $OMI_REGISTER_DIR/root-oms
     rm -f $OMI_HOME/bin/OMSConsistencyInvoker
-    rm -f $OMI_LIB/libomsconfig.so    
+    rm -f $OMI_LIB/libomsconfig.so
 #else
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
@@ -351,9 +351,7 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     # Only to be removed for standalone DSC case 
     rm -f /etc/cron.d/dsc
 #endif
-    for prov in ${{PROVIDERS}}; do
-        rm -f $OMI_LIB/libMSFT_nx${prov}Resource.so
-    done
+    
 fi
 
 #if BUILD_OMS == 1
