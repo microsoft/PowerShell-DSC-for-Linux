@@ -96,11 +96,12 @@ class ConsoleAndFileLogger(object):
         try:
             file_handle = codecs.open(self.logpath, 'a', 'utf8')
             try:
-                file_handle.write(message)
-            except:
-                if not self.errorreported:
-                    self.console.write("Failed to write the dsc log file " + self.logpath + "\n")
-                    self.errorreported = True
+                try:
+                    file_handle.write(message)
+                except:
+                    if not self.errorreported:
+                        self.console.write("Failed to write the dsc log file " + self.logpath + "\n")
+                        self.errorreported = True
             finally:
                 file_handle.close()
         except:
