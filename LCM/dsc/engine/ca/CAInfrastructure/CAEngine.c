@@ -2098,6 +2098,9 @@ MI_Char* RunCommand(const MI_Char* command)
 	goto Cleanup;
     }
 
+	testcount++;        
+	testcount++;        
+	
    // fctnl(fp, F_SETFD, FD_CLOEXEC);
     
     while (fgets(curBuffer, 10, fp) != NULL)
