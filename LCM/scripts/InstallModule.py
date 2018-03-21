@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import imp
-import platform
 import os
 import shutil
 import subprocess
