@@ -2075,7 +2075,8 @@ MI_Result  MI_CALL StopCurrentConfiguration(_Outptr_result_maybenull_ MI_Instanc
 
 MI_Char* RunCommand(const MI_Char* command)
 {
-   
+    fflush(NULL);
+
     pthread_mutex_lock(&g_pipesMutex);
 
     MI_Char* result = NULL;
@@ -2089,7 +2090,7 @@ MI_Char* RunCommand(const MI_Char* command)
     int testcount=0;
 
     curBuffer[bufferSize] = '\0';
-    memset(curBuffer,0,bufferSize);
+    // memset(curBuffer,0,bufferSize);
 
     fp = popen(command, "r");
     if (fp == NULL)
