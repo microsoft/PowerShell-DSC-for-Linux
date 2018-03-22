@@ -402,17 +402,17 @@ void SetJobId()
 
     pthread_mutex_lock(&g_JobIdMutex);
 
-  //  palUuid = Generate_UUID(  NitsMakeCallSite(-3, NULL, NULL, 0) );
-  //  if(palUuid == NULL)
-   // {
-     //  goto Cleanup;
-   // }
+    palUuid = Generate_UUID(  NitsMakeCallSite(-3, NULL, NULL, 0) );
+    if(palUuid == NULL)
+    {
+       goto Cleanup;
+    }
 
- memcpy(g_ConfigurationDetails.jobGuidString, "EFDE-5678SD-RET4-WERT543RE34F-ERT4WE", JOB_UUID_LENGTH);
+ //memcpy(g_ConfigurationDetails.jobGuidString, "EFDE-5678SD-RET4-WERT543RE34F-ERT4WE", JOB_UUID_LENGTH);
    
-//    memcpy(g_ConfigurationDetails.jobGuidString, palUuid, JOB_UUID_LENGTH);
+    memcpy(g_ConfigurationDetails.jobGuidString, palUuid, JOB_UUID_LENGTH);
     g_ConfigurationDetails.jobGuidString[36] = '\0';
-//    PAL_Free(palUuid);
+    PAL_Free(palUuid);
     g_ConfigurationDetails.hasSetDetail=MI_TRUE;
 
 Cleanup:

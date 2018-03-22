@@ -290,15 +290,15 @@ PythonProvider::init ()
     int rval = EXIT_SUCCESS;
 
     // Register child process signal handler
-    if(CHILD_SIGNAL_REGISTERED == MI_FALSE)
-    {
-        struct sigaction sa;
-        sa.sa_handler = &handleChildSignal;
-        sigemptyset(&sa.sa_mask);
-        sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
-        sigaction(SIGCHLD, &sa, 0);
-        CHILD_SIGNAL_REGISTERED = MI_TRUE;
-    }
+  //  if(CHILD_SIGNAL_REGISTERED == MI_FALSE)
+   // {
+     //   struct sigaction sa;
+      //  sa.sa_handler = &handleChildSignal;
+      //  sigemptyset(&sa.sa_mask);
+      //  sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+      //  sigaction(SIGCHLD, &sa, 0);
+      //  CHILD_SIGNAL_REGISTERED = MI_TRUE;
+   // }
 
 #if (PRINT_BOOKENDS)
     std::ostringstream strm;
