@@ -27,6 +27,8 @@ BLOCK_SIZE = 8192
 
 global show_mof
 show_mof = False
+RemoteFileRetryCount = 4
+RemoteFileRetryInterval = 10
 
 
 def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents,
@@ -693,7 +695,7 @@ def SetFile(DestinationPath, SourcePath, fc):
             return False
     if SourcePath and len(SourcePath) > 0:
         if '://' in SourcePath and fc.LocalPath == '':
-            ret = GetRemoteFile(fc)
+            ret = GetRemoteFileWithRetries(fc)
             if ret != 0:
                 raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
             else:
@@ -891,7 +893,7 @@ def TestFile(DestinationPath, SourcePath, fc):
         return False
 
     if '://' in SourcePath:
-        return TestRemoteFile(fc)
+        return TestRemoteFileWithRetries(fc)
 
     if TestOwnerGroupMode(DestinationPath, SourcePath, fc) is False:
         return False
@@ -1058,6 +1060,17 @@ def SetProxyFromConf():
             if 'http:' in info:
                 os.environ['HTTP_PROXY'] = info
     return
+
+def GetRemoteFileWithRetries(fc):
+  retryCount = 0
+  ret = GetRemoteFile(fc)
+  while ret!=0 and retryCount<RemoteFileRetryCount :
+    print("Exception Getting Remote File '" + fc.SourcePath  + "' Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+    LG().Log('ERROR', "Exception Getting Remote File '" + fc.SourcePath  + "' Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+    time.sleep(RemoteFileRetryInterval)
+    ret = GetRemoteFile(fc)
+    retryCount = retryCount + 1
+  return ret
         
 def GetRemoteFile(fc):
     SetProxyFromConf()
@@ -1090,6 +1103,17 @@ def GetRemoteFile(fc):
         os.unlink(fc.LocalPath)
         return 1
     return 0
+
+def TestRemoteFileWithRetries(fc):
+  retryCount = 0
+  ret = TestRemoteFile(fc)
+  while not ret and retryCount<RemoteFileRetryCount :
+    print("Exception Getting Remote File '" + fc.SourcePath  + "' Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+    LG().Log('ERROR', "Exception Getting Remote File '" + fc.SourcePath  + "' Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+    time.sleep(RemoteFileRetryInterval)
+    ret = TestRemoteFile(fc)
+    retryCount = retryCount + 1
+  return ret
 
 def TestRemoteFile(fc):
     SetProxyFromConf()
@@ -1184,3 +1208,4 @@ class FileContext:
                 Mode = ""
 
         self.Mode = Mode
+        
