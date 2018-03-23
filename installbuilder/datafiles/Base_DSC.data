@@ -188,6 +188,16 @@ mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration/schema
 mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration/registration
 chmod 700 $CONFIG_SYSCONFDIR/${{SHORT_NAME}}
 
+#if BUILD_OMS == 1
+
+# Set up logging directory
+mkdir -p /var/opt/microsoft/omsconfig
+chown omsagent /var/opt/microsoft/omsconfig
+chgrp omsagent /var/opt/microsoft/omsconfig
+
+#endif
+
+
 # Create links in omi's directories for DSC data
 
 #if BUILD_OMS == 1
@@ -300,11 +310,6 @@ mv /etc/crontabtmp /etc/crontab
 /opt/omi/bin/service_control restart
 
 #if BUILD_OMS == 1
-
-# Set up logging directory
-mkdir -p /var/opt/microsoft/omsconfig
-chown omsagent /var/opt/microsoft/omsconfig
-chgrp omsagent /var/opt/microsoft/omsconfig
 
 # If omsadmin.conf exists, let's apply the metaconfig
 if [ -f /etc/opt/microsoft/omsagent/conf/omsadmin.conf ]; then
