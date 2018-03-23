@@ -94,7 +94,7 @@ class ConsoleAndFileLogger(object):
     def write(self, message):
         self.console.write(message)
         try:
-            file_handle = codecs.open(self.logpath, 'a', 'utf8')
+            file_handle = codecs.open(self.logpath, 'a+', 'utf8')
             try:
                 try:
                     file_handle.write(message)
