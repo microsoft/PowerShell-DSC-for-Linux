@@ -2882,6 +2882,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
 
         if (res != CURLE_OK)
         {
+			GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, curl, curl_easy_strerror(res));
             // Error on communication.  Go to next report.
             curl_easy_cleanup(curl);
             
