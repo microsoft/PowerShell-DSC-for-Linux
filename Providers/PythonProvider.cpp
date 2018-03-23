@@ -268,7 +268,7 @@ PythonProvider::~PythonProvider ()
     {
 	waitpid(m_PreviousPid[xCount] , NULL, WNOHANG);
     }
-    m_pid.clear();
+    m_PreviousPid.clear();
 }
 
 int
@@ -633,9 +633,17 @@ PythonProvider::verifySocketState ()
     }
     if (INVALID_SOCKET == m_FD)
     {
-        if(m_pid > 0 )
+        //Release previous disconnected child process if any
+        if( m_pid > 0 )
         {
-           m_PreviousPid.push_back(m_pid);
+           // It is possible that disconnected process is still running, in that case
+           // try to do cleanup when the provider is unloaded.
+            if( waitpid(m_pid , NULL, WNOHANG) == 0 )
+            {
+                //If process isn't done, cleanup will be done when the provider is unloaded
+                m_PreviousPid.push_back(m_pid);
+            }
+            m_pid = -2;
         }
         result = init ();
     }
