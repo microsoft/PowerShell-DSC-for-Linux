@@ -1415,6 +1415,12 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
     res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+	if (res != CURLE_OK)
+    {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+    }
     res = curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
     
     if (g_sslOptions.cipherList[0] != '\0')
@@ -1551,8 +1557,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     r = SetGeneralCurlOptions(curl, extendedError);
     if (r != MI_RESULT_OK)
     {
-	curl_easy_cleanup(curl);
-	return r;
+	    curl_easy_cleanup(curl);
+	    return r;
     }
     
     curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
@@ -1570,7 +1576,13 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    if (res != CURLE_OK)
+    {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+    }
     curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
 
     
@@ -1910,7 +1922,13 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    if (res != CURLE_OK)
+    {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+    }
     curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
 
     if (g_sslOptions.cipherList[0] != '\0')
@@ -2665,6 +2683,10 @@ MI_Result Pull_Register(MI_Char* serverURL,
     }
     
     curl = curl_easy_init();
+	if (!curl)
+    {
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
+    }
     
     Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')", serverURL, agentId);
     curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
@@ -2852,6 +2874,10 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         reportText = RunCommand(dataBuffer);
         
         curl = curl_easy_init();
+		if (!curl)
+        {
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
+        }
 
 	r = SetGeneralCurlOptions(curl, extendedError);
 	if (r != MI_RESULT_OK)
@@ -2875,14 +2901,20 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-        curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+        res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+        if (res != CURLE_OK)
+        {
+            curl_slist_free_all(list);
+            curl_easy_cleanup(curl);
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+        }
         curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
         
         res = curl_easy_perform(curl);
 
         if (res != CURLE_OK)
         {
-			GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, curl, curl_easy_strerror(res));
+            GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, curl, curl_easy_strerror(res));
             // Error on communication.  Go to next report.
             curl_easy_cleanup(curl);
             
