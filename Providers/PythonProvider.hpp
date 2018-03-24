@@ -30,7 +30,6 @@
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <vector>
 
 
 namespace scx
@@ -151,7 +150,6 @@ private:
     std::string const m_Name;
     int m_FD;
     int m_pid;
-    std::vector<int> m_PreviousPid;
 };
 
 
@@ -166,6 +164,7 @@ PythonProvider::PythonProvider (
     T const& name)
     : m_Name (name)
     , m_FD (PythonProvider::INVALID_SOCKET)
+    , m_pid (-2)
 {
     // empty
 }

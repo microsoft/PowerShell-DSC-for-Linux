@@ -22,7 +22,6 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
-#include <vector>
 #include <errno.h>
 #include <fcntl.h>
 #include <functional>
@@ -260,21 +259,46 @@ PythonProvider::~PythonProvider ()
     {
         close (m_FD);
     }
-    if( m_pid > 0 )
+    if (m_pid != -2)
     {
 	waitpid(m_pid, NULL, 0);
     }
-    for(size_t xCount = 0 ; xCount < m_PreviousPid.size(); xCount++)
-    {
-	waitpid(m_PreviousPid[xCount] , NULL, WNOHANG);
-    }
-    m_PreviousPid.clear();
+}
+
+/* PythonProvider::init() creates a child process (referenced by m_pid) to execute dsc python resources using client.py script.
+   When execution of python resource (child process) is completed, it doesn’t disappear completely.
+   Instead it becomes Zombie which is not capable to execute anything.
+   Any further call to client.py (via socket) will fail.
+
+   The Zombie processes can be simply removed by registering for SIGCHLD signal and calling waitpid API from handler.
+
+   This method is a SIGCHLD handler, which is raised when a child process is terminated.
+*/
+void PythonProvider::handleChildSignal(int sig) {
+    int saved_errno = errno;
+
+    // Obtain information about the child whose state has changed, and release it.
+    // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
+    // several zombie processes during one invocation of the handler function.
+    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+    errno = saved_errno;
 }
 
 int
 PythonProvider::init ()
 {
     int rval = EXIT_SUCCESS;
+
+    // Register child process signal handler
+    if(CHILD_SIGNAL_REGISTERED == MI_FALSE)
+    {
+        struct sigaction sa;
+        sa.sa_handler = &handleChildSignal;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+        sigaction(SIGCHLD, &sa, 0);
+        CHILD_SIGNAL_REGISTERED = MI_TRUE;
+    }
 
 #if (PRINT_BOOKENDS)
     std::ostringstream strm;
@@ -524,14 +548,13 @@ PythonProvider::forkExec ()
     if (INVALID_SOCKET == m_FD)
     {
         int sockets[2];
-	int pid;
         int result = socketpair (AF_UNIX, SOCK_STREAM, 0, sockets);
         if (-1 != result)
         {
             // socketpair succeeded
             SCX_BOOKEND_PRINT ("socketpair - succeeded");
-            pid = fork ();
-            if (0 == pid)
+            m_pid = fork ();
+            if (0 == m_pid)
             {
                 // fork succeded, this is the child process
                 SCX_BOOKEND_PRINT ("fork - succeeded: this is the child");
@@ -558,9 +581,8 @@ PythonProvider::forkExec ()
                 strm.clear ();
                 rval = EXIT_FAILURE;
             }
-            else if (-1 != pid)
+            else if (-1 != m_pid)
             {
-	    	m_pid=pid;
                 // fork succeeded, this is the parent process
                 SCX_BOOKEND_PRINT ("fork - succeeded: this is the parent");
                 close (sockets[0]);
@@ -633,18 +655,6 @@ PythonProvider::verifySocketState ()
     }
     if (INVALID_SOCKET == m_FD)
     {
-        //Release previous disconnected child process if any
-        if( m_pid > 0 )
-        {
-           // It is possible that disconnected process is still running, in that case
-           // try to do cleanup when the provider is unloaded.
-            if( waitpid(m_pid , NULL, WNOHANG) == 0 )
-            {
-                //If process isn't done, cleanup will be done when the provider is unloaded
-                m_PreviousPid.push_back(m_pid);
-            }
-            m_pid = -2;
-        }
         result = init ();
     }
     return result;
