@@ -22,9 +22,13 @@
 #include "EngineHelper.h"
 #include "EventWrapper.h"
 #include "Resources_LCM.h"
+
+#if defined(BUILD_OMS)
 #include <signal.h>
 // Variable to store old Signal for SIGCHLD
-struct sigaction oldAction ;
+static struct sigaction oldAction ;
+#endif
+
 void MI_CALL MSFT_DSCLocalConfigurationManager_Load(
     _Outptr_result_maybenull_ MSFT_DSCLocalConfigurationManager_Self** self,
     _In_opt_ MI_Module_Self* selfModule,
