@@ -351,6 +351,16 @@ void DSCFilePutLog(
 #define DSC_EventWriteMessageDscOperationCompleted(dscOperationName, totalExecutionTimeInSec) \
     ExpandEvent(MessageDscOperationCompleted( g_ConfigurationDetails.jobGuidString, dscOperationName, totalExecutionTimeInSec))
 
+#define DSC_EventWriteMessageLoadingDscEngineProvider() \
+    ExpandEvent(MessageDscEngineProviderLoaded( g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteMessageUnLoadingDscEngineProvider() \
+    ExpandEvent(MessageDscEngineProviderUnLoaded( g_ConfigurationDetails.jobGuidString))
+
+#define DSC_EventWriteMessageRegisterProcessHandler() \
+    ExpandEvent(MessageDscEngineRegisteringSignalHandler( g_ConfigurationDetails.jobGuidString))
+
+
 //Messages output in the operational channel
 #define DSC_EventWriteMessageScheduleTaskAfterReboot() \
     ExpandEvent(MessageScheduleTaskAfterReboot( g_ConfigurationDetails.jobGuidString))
