@@ -6,7 +6,17 @@ import os
 import fcntl
 import shutil
 import stat
+import imp
 from xml.dom.minidom import parse
+from os.path import basename, dirname, join, realpath, split
+
+# Redirect output to our log file
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = imp.load_source('nxDSCLog', fullPathDSCLogger)
+logger = nxDSCLog.ConsoleAndFileLogger()
+sys.stdout = logger
 
 def usage():
    print("""Usage: PerformInventory.py [OPTIONS]
@@ -15,6 +25,15 @@ OPTIONS (case insensitive):
  --OutXML PATH_TO_OUTPUT_REPORT.XML
  --help
 """)
+
+def exitWithError(message, errorCode = 1):
+    errorMessage = "ERROR from PerformInventory.py: " + message
+    print(errorMessage)
+    sys.exit(errorCode)
+
+def printVerboseMessage(message):
+    verboseMessage = "VERBOSE from PerformInventory.py: " + message
+    print(verboseMessage)
 
 Variables = dict()
 
@@ -46,7 +65,7 @@ while i < command_line_length:
          args = sys.argv[i:]
          break
    i += 1
-   
+
 if inArgument:
    Variables[currentArgument] = arg
 
@@ -60,7 +79,7 @@ optionsValid = True
 for arg in Variables.keys():
    if arg.lower() not in AcceptableOptions:
       optionsValid = False
-      print("Error: %s is not a valid option" % arg)
+      exitWithError("Error: %s is not a valid option" % arg)
 
 if optionsValid == False:
    usage()
@@ -96,16 +115,17 @@ else:
     parameters.append("PerformInventory")
 
 if len(dsc_sysconfdir) < 10:
-    # something has gone horribly wrong. error out before we attempt to remove the entire file system
-    print("Error: Something has gone horribly wrong with the directory paths.")
-    sys.exit(1)
+    # something has gone wrong with the directory paths. error out before we attempt to remove the entire file system
+    exitWithError("Error: Something has gone wrong with the directory paths. Exiting PerformInventory.")
 
-# If inventory lock files already exists update its permissions.  
+# If inventory lock files already exists update its permissions.
 if os.path.isfile(inventorylock_path):
     os.chmod(inventorylock_path , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+    printVerboseMessage("Updated permissions of file: " + inventorylock_path + " to  644")
 
-# open the inventory lock file, this also creates a file if it does not exist so we are using 644 permissions 
+# open the inventory lock file, this also creates a file if it does not exist so we are using 644 permissions
 filehandle = os.open(inventorylock_path, os.O_WRONLY | os.O_CREAT , 0o644)
+printVerboseMessage("Opened file: " + inventorylock_path + "with permissions set to 644")
 inventory_lock = os.fdopen(filehandle, 'w')
 
 # Acquire inventory file lock
@@ -117,8 +137,8 @@ p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 stdout, stderr = p.communicate()
 retval = p.returncode
 
-print(stdout)
-print(stderr)
+printVerboseMessage(stdout)
+printVerboseMessage(stderr)
 
 # combine reports together
 reportFiles = os.listdir(dsc_reportdir)

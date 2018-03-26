@@ -547,7 +547,7 @@ INTERNAL_Intlstr_Define0( ID_PULL_RESTARTINGSERVER,
 INTERNAL_Intlstr_Define1( ID_APPLYCONFIG_RESOURCEERRORLIST,
 			  ID_APPLYCONFIG_RESOURCEERRORLIST,
       			  _In_z_ const PAL_Char*, firstString,
-                 	  "Failed to apply the configuration.  These resources produced errors: "  Intlstr_tstr(1) ". Detailed error information can be found in the log file.")
+                 	  "Failed to apply the configuration.  These resources produced errors: "  Intlstr_tstr(1))
 
 INTERNAL_Intlstr_Define1( ID_PULL_REPORTINGFAILED,
 			  ID_PULL_REPORTINGFAILED,

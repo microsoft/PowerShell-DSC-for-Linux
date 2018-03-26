@@ -1,11 +1,30 @@
 #!/usr/bin/python
 import os
 import sys
+import imp
+from os.path import basename, dirname, join, realpath, split
 
 conf_path = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
 metamof_path = "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof"
 agentid_path = "/etc/opt/omi/conf/omsconfig/agentid"
 omshelper_disable_path = "/etc/opt/omi/conf/omsconfig/omshelper_disable"
+
+# Redirect output to our log file
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = imp.load_source('nxDSCLog', fullPathDSCLogger)
+logger = nxDSCLog.ConsoleAndFileLogger()
+sys.stdout = logger
+
+def exitWithError(message, errorCode = 1):
+    errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message
+    print(errorMessage)
+    sys.exit(errorCode)
+
+def printVerboseMessage(message):
+    verboseMessage = "VERBOSE from OMS_MetaConfigHelper.py: " + message
+    print(verboseMessage)
 
 def generate_meta_mof(serverurl):
     return """
@@ -43,15 +62,15 @@ instance of MSFT_DSCMetaConfiguration as $MSFT_DSCMetaConfiguration1ref
  ConfigurationMode = "ApplyAndAutoCorrect";
 
   ResourceModuleManagers = {
-   $MSFT_WebResourceManager1ref  
+   $MSFT_WebResourceManager1ref
   };
-  
+
   ReportManagers = {
    $MSFT_WebReportManager1ref
   };
 
   ConfigurationDownloadManagers = {
-   $MSFT_WebDownloadManager1ref  
+   $MSFT_WebDownloadManager1ref
   };
 
 };
@@ -113,7 +132,7 @@ for arg in sys.argv[1:]:
         # Must be a file
         args.append(arg)
         continue
-    
+
     if arg[0:2] == "--":
         tokens = arg[2:].split("=",1)
         if len(tokens) == 1:
@@ -128,31 +147,32 @@ for arg in sys.argv[1:]:
 
 enable_flag = False
 disable_flag = False
+
 if "enable" in Variables:
     enable_flag = True
 if "disable" in Variables:
     disable_flag = True
 
 if enable_flag == True and disable_flag == True:
-    print("Error: Cannot use both disable and enable options at the same time.")
-    sys.exit(1)
+    exitWithError("Error: Cannot use both disable and enable options at the same time.")
 
 if enable_flag == True:
     if os.path.isfile(omshelper_disable_path):
         os.remove(omshelper_disable_path)
 if disable_flag == True:
     open(omshelper_disable_path, "w").write("a")
+    printVerboseMessage("Disable flag set to True, setting mof to disabled mode.")
 
 
 if not os.path.isfile(omshelper_disable_path):
     # source the omsadmin conf file and get the key/value pairs
+    printVerboseMessage("OMS config path being read: " + os.path.realpath(conf_path))
     keyvals = source_file(conf_path)
-    
+
     # Looking for DSC_ENDPOINT and AGENT_GUID
 
     if "DSC_ENDPOINT" not in keyvals or "AGENT_GUID" not in keyvals:
-        print("Error: Unable to find needed key/value pairs in " + conf_path)
-        sys.exit(1)
+        exitWithError("Error: Unable to find needed key/value pairs in " + conf_path)
 
     DSC_ENDPOINT = keyvals["DSC_ENDPOINT"].strip()
 
@@ -161,14 +181,14 @@ if not os.path.isfile(omshelper_disable_path):
     if Nodes_loc != -1:
         DSC_ENDPOINT = DSC_ENDPOINT[:Nodes_loc]
     AGENT_GUID = keyvals["AGENT_GUID"].strip()
-    
+
     # Write out agentID
     f = open(agentid_path, "w")
     f.write(AGENT_GUID)
     f.close()
 
     os.system("chown omsagent " + agentid_path)
-    
+
     # Write metaconfig
     metaConfig = generate_meta_mof(DSC_ENDPOINT)
 else:
@@ -186,11 +206,9 @@ else:
     commandToRun = "/opt/microsoft/omsconfig/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
 
 # Apply the metaconfig using SetDscLocalConfiguration
-commandToRun += " 1> /dev/null"
 retval = os.system(commandToRun)
 if (retval != 0):
-    print("Error on running command: " + commandToRun)
-    sys.exit(1)
+    exitWithError("Error on running command: " + commandToRun)
 else:
-    print("Successfully configured omsconfig.")
+    printVerboseMessage("Successfully configured omsconfig.")
 

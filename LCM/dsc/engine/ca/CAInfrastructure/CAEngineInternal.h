@@ -39,7 +39,7 @@
 
   Example output in the CIM_Error instance that is returned is:
 
-    Failed to apply the configuration.  These resources produced errors: [nxSshAuthorizedKeys]rootKey, [nxFile]MyFile1. Detailed error information can be found in the log file.
+    Failed to apply the configuration.  These resources produced errors: [nxSshAuthorizedKeys]rootKey, [nxFile]MyFile1.
 */
 
 typedef struct _ResourceError ResourceError;
