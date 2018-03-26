@@ -38,6 +38,9 @@
 #include "OMI_LocalConfigManagerHelper.h"
 #endif
 
+#if defined(BUILD_OMS)
+#include <signal.h>
+#endif
 
 #define NOT_INITIALIZED         0
 #define INITIALIZED             1
@@ -6734,12 +6737,33 @@ MI_Result SetLCMStatusBusy()
         return r;
 }
 
+#if defined(BUILD_OMS)
+void handleSIGCHLDSignal(int sig)
+{
+    int saved_errorno = errno;
+    // OMS providers registers the SIGINT handler but may not have
+    // an opportunity to clean up before getting unloaded.
+    // This code is to ensure that OMSConfig picks up the work left off by
+    // the OMS providers of cleaning up zombie processes.
+    // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
+    // several zombie processes during one invocation of the handler function.
+    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+    errno = saved_errorno;
+}
+#endif
+
 MI_Result SetLCMStatusReady()
 {
         MI_Uint32 lcmStatus;
         MI_Instance *extendedError;
         MI_Result r;
-
+#if defined(BUILD_OMS)
+        struct sigaction sa;
+        sa.sa_handler = &handleSIGCHLDSignal;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+        sigaction(SIGCHLD, &sa, 0);
+#endif
         if (!g_LCMPendingReboot)
         {
                 lcmStatus = LCM_STATUSCODE_READY;
