@@ -166,6 +166,7 @@ PythonProvider::PythonProvider (
     T const& name)
     : m_Name (name)
     , m_FD (PythonProvider::INVALID_SOCKET)
+    , m_pid(-2)
 {
     // empty
 }
