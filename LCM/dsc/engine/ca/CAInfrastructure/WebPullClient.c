@@ -1557,8 +1557,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     r = SetGeneralCurlOptions(curl, extendedError);
     if (r != MI_RESULT_OK)
     {
-	    curl_easy_cleanup(curl);
-	    return r;
+        curl_easy_cleanup(curl);
+        return r;
     }
     
     curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
@@ -2677,13 +2677,13 @@ MI_Result Pull_Register(MI_Char* serverURL,
     struct curl_slist *list = NULL;
 
     r = GetSSLOptions(extendedError);
-    if( r != MI_RESULT_OK)
+    if ( r != MI_RESULT_OK)
     {
         return r;
     }
     
     curl = curl_easy_init();
-	if (!curl)
+    if (!curl)
     {
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
@@ -2874,19 +2874,19 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         reportText = RunCommand(dataBuffer);
         
         curl = curl_easy_init();
-		if (!curl)
+        if (!curl)
         {
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
         }
 
-	r = SetGeneralCurlOptions(curl, extendedError);
-	if (r != MI_RESULT_OK)
-	{
-	    DSC_free(reportText);
-	    curl_easy_cleanup(curl);
-	    return r;
-	}	
-	
+        r = SetGeneralCurlOptions(curl, extendedError);
+        if (r != MI_RESULT_OK)
+        {
+            DSC_free(reportText);
+            curl_easy_cleanup(curl);
+            return r;
+        }
+
         Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')/SendReport", serverURL.string, agentId.string);
         curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
         
