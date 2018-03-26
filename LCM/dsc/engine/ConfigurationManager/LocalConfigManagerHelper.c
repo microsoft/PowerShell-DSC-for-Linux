@@ -6747,7 +6747,10 @@ void handleSIGCHLDSignal(int sig)
     // the OMS providers of cleaning up zombie processes.
     // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
     // several zombie processes during one invocation of the handler function.
-    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) 
+    {
+	DSC_EventWriteMessageWaitForChildProcess();
+    }
     errno = saved_errorno;
 }
 #endif
