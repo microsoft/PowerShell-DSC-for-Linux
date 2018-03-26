@@ -1415,7 +1415,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
     res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
-	if (res != CURLE_OK)
+    if (res != CURLE_OK)
     {
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
