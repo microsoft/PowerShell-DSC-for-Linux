@@ -31,7 +31,7 @@ BLOCK_SIZE = 8192
 
 global show_mof
 show_mof = False
-RemoteFileRetryCount = 4
+RemoteFileRetryCount = 5
 RemoteFileRetryInterval = 10
 
 
@@ -1093,7 +1093,7 @@ def GetRemoteFileWithRetries(fc):
     time.sleep(RemoteFileRetryInterval)
     ret = GetRemoteFile(fc)
     retryCount = retryCount + 1
-    
+      
   return ret
         
 def GetRemoteFile(fc):
@@ -1134,7 +1134,7 @@ def TestRemoteFileWithRetries(fc):
   while not ret and retryCount<RemoteFileRetryCount :
     print("Exception Getting Remote File '" + fc.SourcePath  + "' Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
     LG().Log('ERROR', "Exception Getting Remote File '" + fc.SourcePath  + "' Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
-	time.sleep(RemoteFileRetryInterval)
+    time.sleep(RemoteFileRetryInterval)
     ret = TestRemoteFile(fc)
     retryCount = retryCount + 1
   return ret
