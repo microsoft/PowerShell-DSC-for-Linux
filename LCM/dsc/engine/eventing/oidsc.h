@@ -892,3 +892,24 @@ FILE_EVENT2(4331, MessageStartingDscOperation_Impl, LOG_WARNING, PAL_T("Job %s :
 #define MessageDscOperationCompleted(a0, a1, a2) MessageDscOperationCompleted_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
 #endif
 FILE_EVENT3(4332, MessageDscOperationCompleted_Impl, LOG_WARNING, PAL_T("Job %s : %s DSC operation completed in %s seconds."), const TChar*, const TChar*, const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define MessageDscEngineProviderLoaded(a0) MessageDscEngineProviderLoaded_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define MessageDscEngineProviderLoaded(a0) MessageDscEngineProviderLoaded_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4333, MessageDscEngineProviderLoaded_Impl,LOG_WARNING, PAL_T("Job %s : \nLoading DSC Engine Provider"), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define MessageDscEngineProviderUnLoaded(a0) MessageDscEngineProviderUnLoaded_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define MessageDscEngineProviderUnLoaded(a0) MessageDscEngineProviderUnLoaded_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4334, MessageDscEngineProviderUnLoaded_Impl, LOG_WARNING, PAL_T("Job %s : \nUnLoading DSC Engine Provider"), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define MessageDscEngineRegisteringSignalHandler(a0) MessageDscEngineRegisteringSignalHandler_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define MessageDscEngineRegisteringSignalHandler(a0) MessageDscEngineRegisteringSignalHandler_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4335, MessageDscEngineRegisteringSignalHandler_Impl, LOG_WARNING, PAL_T("Job %s : \nRegistered Process Signal Handler for SIGCHLD Event"), const TChar*)
+
+

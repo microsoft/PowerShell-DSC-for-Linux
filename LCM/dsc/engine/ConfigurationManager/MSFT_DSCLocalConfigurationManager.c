@@ -23,6 +23,11 @@
 #include "EventWrapper.h"
 #include "Resources_LCM.h"
 
+#if defined(BUILD_OMS)
+#include <signal.h>
+// Variable to store old Signal for SIGCHLD
+static struct sigaction oldAction ;
+#endif
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Load(
     _Outptr_result_maybenull_ MSFT_DSCLocalConfigurationManager_Self** self,
@@ -34,7 +39,10 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Load(
     MI_UNREFERENCED_PARAMETER(selfModule);
 
     *self = NULL;
-
+#if defined(BUILD_OMS)
+    memset(&oldAction, 0, sizeof(struct sigaction));
+    sigaction(SIGCHLD, NULL, &oldAction);
+#endif
     //load will not be called by multiple threads
     miResult = InitHandler(MI_T("MSFT_DSCLocalConfigurationManager_Load"), &cimErrorDetails);
 
@@ -45,6 +53,7 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Load(
         return;
     }
 
+    DSC_EventWriteMessageLoadingDscEngineProvider();
     MI_Context_PostResult(context, MI_RESULT_OK);
 }
 
@@ -52,7 +61,18 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Unload(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context)
 {
+   
+    DSC_EventWriteMessageUnLoadingDscEngineProvider();
     UnloadFromProvider(self, context);
+
+#if defined(BUILD_OMS)
+        // Set the SIGCHLD signal to default
+        // This is to ensure that if any provider has overriden this specific signal
+        // provider DSC reset it back to the previous signal. 
+    sigaction(SIGCHLD, &oldAction, NULL);
+    memset(&oldAction, 0, sizeof(struct sigaction));
+#endif
+  
 }
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_SendConfiguration(
