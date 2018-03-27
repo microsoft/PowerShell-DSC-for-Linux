@@ -361,7 +361,7 @@ void DSCFilePutLog(
     ExpandEvent(MessageDscEngineRegisteringSignalHandler( g_ConfigurationDetails.jobGuidString))
 
 #define DSC_EventWriteMessageWaitForChildProcess() \
-    ExpandEvent(MessageDscEngineSignalHandlerWaitingForPorces( g_ConfigurationDetails.jobGuidString))
+    ExpandEvent(MessageDscEngineSignalHandlerWaitingForPorcess( g_ConfigurationDetails.jobGuidString))
 
 //Messages output in the operational channel
 #define DSC_EventWriteMessageScheduleTaskAfterReboot() \
