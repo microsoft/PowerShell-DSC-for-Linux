@@ -6741,16 +6741,16 @@ MI_Result SetLCMStatusBusy()
 void handleSIGCHLDSignal(int sig)
 {
     int saved_errorno = errno;
+
+    DSC_EventWriteMessageWaitForChildProcess();
+
     // OMS providers registers the SIGINT handler but may not have
     // an opportunity to clean up before getting unloaded.
     // This code is to ensure that OMSConfig picks up the work left off by
     // the OMS providers of cleaning up zombie processes.
     // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
     // several zombie processes during one invocation of the handler function.
-    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) 
-    {
-	DSC_EventWriteMessageWaitForChildProcess();
-    }
+    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) { }
     errno = saved_errorno;
 }
 #endif

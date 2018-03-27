@@ -898,25 +898,25 @@ FILE_EVENT3(4332, MessageDscOperationCompleted_Impl, LOG_WARNING, PAL_T("Job %s 
 #else
 #define MessageDscEngineProviderLoaded(a0) MessageDscEngineProviderLoaded_Impl(0, 0, tcs(a0))
 #endif
-FILE_EVENT1(4333, MessageDscEngineProviderLoaded_Impl,LOG_WARNING, PAL_T("Job %s : \nLoading DSC Engine Provider"), const TChar*)
+FILE_EVENT1(4333, MessageDscEngineProviderLoaded_Impl,LOG_INFO, PAL_T("Job %s : \nLoading DSC Engine Provider"), const TChar*)
 #if defined(CONFIG_ENABLE_DEBUG)
 #define MessageDscEngineProviderUnLoaded(a0) MessageDscEngineProviderUnLoaded_Impl(__FILE__, __LINE__, tcs(a0))
 #else
 #define MessageDscEngineProviderUnLoaded(a0) MessageDscEngineProviderUnLoaded_Impl(0, 0, tcs(a0))
 #endif
-FILE_EVENT1(4334, MessageDscEngineProviderUnLoaded_Impl, LOG_WARNING, PAL_T("Job %s : \nUnLoading DSC Engine Provider"), const TChar*)
+FILE_EVENT1(4334, MessageDscEngineProviderUnLoaded_Impl, LOG_INFO, PAL_T("Job %s : \nUnLoading DSC Engine Provider"), const TChar*)
 #if defined(CONFIG_ENABLE_DEBUG)
 #define MessageDscEngineRegisteringSignalHandler(a0) MessageDscEngineRegisteringSignalHandler_Impl(__FILE__, __LINE__, tcs(a0))
 #else
 #define MessageDscEngineRegisteringSignalHandler(a0) MessageDscEngineRegisteringSignalHandler_Impl(0, 0, tcs(a0))
 #endif
-FILE_EVENT1(4335, MessageDscEngineRegisteringSignalHandler_Impl, LOG_WARNING, PAL_T("Job %s : \nRegistered Process Signal Handler for SIGCHLD Event"), const TChar*)
+FILE_EVENT1(4335, MessageDscEngineRegisteringSignalHandler_Impl, LOG_DEBUG, PAL_T("Job %s : \nRegistered Process Signal Handler for SIGCHLD Event"), const TChar*)
 
 #if defined(CONFIG_ENABLE_DEBUG)
 #define MessageDscEngineSignalHandlerWaitingForPorcess(a0) MessageDscEngineSignalHandlerWaitingForPorcess_Impl(__FILE__, __LINE__, tcs(a0))
 #else
 #define MessageDscEngineSignalHandlerWaitingForPorcess(a0) MessageDscEngineSignalHandlerWaitingForPorcess_Impl(0, 0, tcs(a0))
 #endif
-FILE_EVENT1(4336, MessageDscEngineSignalHandlerWaitingForPorcess_Impl, LOG_WARNING, PAL_T("Job %s : \nDsc Engine waiting for Child Process to Terminate"), const TChar*)
+FILE_EVENT1(4336, MessageDscEngineSignalHandlerWaitingForPorcess_Impl, LOG_DEBUG, PAL_T("Job %s : \nDsc Engine waiting for Child Process to Terminate"), const TChar*)
 
 
