@@ -131,7 +131,7 @@ MI_Char* InhaleTextFile(MI_Char* filePath);
 
 static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    Conf* conf;
+    Conf* conf = NULL;
     MI_Char* text;
 
     g_sslOptions.DoNotCheckCertificate = MI_FALSE;
@@ -279,9 +279,9 @@ static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *us
 {
   size_t realsize = size * nmemb;
   struct HeaderChunk *chunk = (struct HeaderChunk *)userp; 
-  char* colonPointer;
-  long key_length;
-  long value_length;
+  char* colonPointer = NULL;
+  long key_length = 0;
+  long value_length = 0;
   char *charContents = (char*)calloc(realsize, 1);
   
   // We have to do a silly memcpy here because there's no safe version of "strstr", used below.
@@ -1174,10 +1174,10 @@ MI_Boolean GetGetActionData( _In_reads_z_(size) char *start,
     int currentTokenEnd = 0, currentTokenEndValue = 0;
     int nextTokenValue = -1;
     char* configName = NULL;
-    char* ptr1;
-    char* ptr1_end;
-    char* ptr2;
-    char* ptr2_end;
+    char* ptr1 = NULL;
+    char* ptr1_end = NULL;
+    char* ptr2 = NULL;
+    char* ptr2_end = NULL;
     *serverAssignedConfigurations = (OverAllGetActionResponse *) DSC_malloc(sizeof(OverAllGetActionResponse), NitsHere());
     *serverResponse = NULL;
     
@@ -1341,10 +1341,10 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     RequestContainer requestParam = {0};
     MI_Char actionUrl[MAX_URL_LENGTH];
     char * getActionStatus = NULL;
-    long responseCode;
+    long responseCode = 0;
 
-    CURL *curl;
-    CURLcode res;
+    CURL *curl = NULL;
+    CURLcode res = CURLE_OK;
     struct Chunk headerChunk;
     struct Chunk dataChunk;
     struct curl_slist *list = NULL;
@@ -1415,6 +1415,12 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
     res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    if (res != CURLE_OK)
+    {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+    }
     res = curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
     
     if (g_sslOptions.cipherList[0] != '\0')
@@ -1511,12 +1517,12 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     MI_Result r = MI_RESULT_OK;
     MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
 
-    CURL *curl;
-    CURLcode res;
+    CURL *curl = NULL;
+    CURLcode res = CURLE_OK;
     struct HeaderChunk headerChunk;
     struct Chunk dataChunk;
     char configurationUrl[MAX_URL_LENGTH];
-    long responseCode;
+    long responseCode = 0;
     size_t i;
     char* checksumResponse = NULL;
     char* checksumAlgorithmResponse = NULL;
@@ -1551,8 +1557,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     r = SetGeneralCurlOptions(curl, extendedError);
     if (r != MI_RESULT_OK)
     {
-	curl_easy_cleanup(curl);
-	return r;
+        curl_easy_cleanup(curl);
+        return r;
     }
     
     curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
@@ -1570,7 +1576,13 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    if (res != CURLE_OK)
+    {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+    }
     curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
 
     
@@ -1848,12 +1860,12 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     MI_Result r = MI_RESULT_OK;
     MI_Char *outputResult = (MI_Char*)DSC_malloc((Tcslen(MI_T("OK"))+1) * sizeof(MI_Char), NitsHere());
 
-    CURL *curl;
-    CURLcode res;
+    CURL *curl = NULL;
+    CURLcode res = CURLE_OK;
     struct HeaderChunk headerChunk;
     struct Chunk dataChunk;
     char configurationUrl[MAX_URL_LENGTH];
-    long responseCode;
+    long responseCode = 0;
     size_t i;
     char* checksumResponse = NULL;
     char* checksumAlgorithmResponse = NULL;
@@ -1910,7 +1922,13 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+    if (res != CURLE_OK)
+    {
+        curl_slist_free_all(list);
+        curl_easy_cleanup(curl);
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+    }
     curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
 
     if (g_sslOptions.cipherList[0] != '\0')
@@ -2060,7 +2078,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
     ModuleTableEntry* current;
     MI_Result r;
     MI_Value value;
-    int retval;
+    int retval = 0;
     char zipPath[MAX_URL_LENGTH];
     char stringBuffer[MAX_URL_LENGTH];
     char * verifyFlag = "1";
@@ -2325,11 +2343,11 @@ static int CompareVersions(MI_Char* a, MI_Char* b)
 {
     MI_Char* a_token;
     MI_Char* a_next_token;
-    long a_val;
+    long a_val = 0;
 
     MI_Char* b_token;
     MI_Char* b_next_token;
-    long b_val;
+    long b_val = 0;
 
     a_token = Strtok(a, ".", &a_next_token);
     b_token = Strtok(b, ".", &b_next_token);
@@ -2364,11 +2382,11 @@ static int CompareVersions(MI_Char* a, MI_Char* b)
 
 static int IsModuleInstalled(MI_Char* moduleName, MI_Char* moduleVersion)
 {
-    int bytesRead;
+    int bytesRead = 0;
     size_t tmpLength;
     MI_Char buffer[MAX_URL_LENGTH];
     MI_Char buffer2[MAX_URL_LENGTH];
-    FILE * fp;
+    FILE * fp = NULL;
 
     Snprintf(buffer, MAX_URL_LENGTH, DSC_MODULES_PATH "/%s/VERSION", moduleName);
     
@@ -2450,7 +2468,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     MI_OperationOptions options;
     MI_Value moduleName;
     MI_Value moduleVersion;
-    int i;    
+    int i = 0;
     size_t tmpLength;
     ModuleTableEntry* current;
     ModuleTableEntry** foundEntry;
@@ -2649,22 +2667,26 @@ MI_Result Pull_Register(MI_Char* serverURL,
     const char *emptyString = "";
     MI_Char actionUrl[MAX_URL_LENGTH];
     char * getActionStatus = NULL;
-    long responseCode;
+    long responseCode = 0;
 
-    CURL *curl;
-    CURLcode res;
+    CURL *curl = NULL;
+    CURLcode res = CURLE_OK;
     struct Chunk headerChunk;
     struct Chunk dataChunk;
     struct ReadChunk readChunk;
     struct curl_slist *list = NULL;
 
     r = GetSSLOptions(extendedError);
-    if( r != MI_RESULT_OK)
+    if ( r != MI_RESULT_OK)
     {
         return r;
     }
     
     curl = curl_easy_init();
+    if (!curl)
+    {
+        return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
+    }
     
     Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')", serverURL, agentId);
     curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
@@ -2774,10 +2796,10 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
     char dataBuffer[10000];
 
     char * getActionStatus = NULL;
-    long responseCode;
+    long responseCode = 0;
     
-    CURL *curl;
-    CURLcode res;
+    CURL *curl = NULL;
+    CURLcode res = CURLE_OK;
     struct Chunk headerChunk;
     struct Chunk dataChunk;
     struct curl_slist *list = NULL;
@@ -2787,9 +2809,9 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
     MI_Value serverURL;
     MI_Value endTime;
     MI_Uint32 flags;
-    int i;
-    const char* commandFormat;
-    const char* reportText;
+    int i = 0;
+    const char* commandFormat = NULL;
+    const char* reportText = NULL;
     int bAtLeastOneReportSuccess = 0;
 
     r = DSC_MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_ReportManagers, &managerInstances, NULL, &flags, NULL);
@@ -2852,15 +2874,19 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         reportText = RunCommand(dataBuffer);
         
         curl = curl_easy_init();
+        if (!curl)
+        {
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
+        }
 
-	r = SetGeneralCurlOptions(curl, extendedError);
-	if (r != MI_RESULT_OK)
-	{
-	    DSC_free(reportText);
-	    curl_easy_cleanup(curl);
-	    return r;
-	}	
-	
+        r = SetGeneralCurlOptions(curl, extendedError);
+        if (r != MI_RESULT_OK)
+        {
+            DSC_free(reportText);
+            curl_easy_cleanup(curl);
+            return r;
+        }
+
         Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')/SendReport", serverURL.string, agentId.string);
         curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
         
@@ -2875,13 +2901,20 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headerChunk);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
 
-        curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+        res = curl_easy_setopt(curl, CURLOPT_SSLCERT, OAAS_CERTPATH);
+        if (res != CURLE_OK)
+        {
+            curl_slist_free_all(list);
+            curl_easy_cleanup(curl);
+            return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
+        }
         curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
         
         res = curl_easy_perform(curl);
 
         if (res != CURLE_OK)
         {
+            GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, curl, curl_easy_strerror(res));
             // Error on communication.  Go to next report.
             curl_easy_cleanup(curl);
             
