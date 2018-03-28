@@ -1455,15 +1455,13 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 
     if (res != CURLE_OK)
     {
-        MI_Char curlPerformValue[MAX_STATUSCODE_SIZE] = {0};
-        Stprintf(curlPerformValue, MAX_STATUSCODE_SIZE, MI_T("%d"), res);
         *getActionStatusCode = GetDscActionCommandFailure;
         free(headerChunk.data);
         free(dataChunk.data);
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
 
-        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curlPerformValue);
+        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
@@ -1491,11 +1489,9 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     if (! (Strcasecmp( getActionStatus, GetActionResultOk) == 0 ||
         Strcasecmp( getActionStatus, GetActionResultGetConfiguration) == 0 ) )
     {
-        MI_Char curlGetActionStatusCode[MAX_STATUSCODE_SIZE] = {0};
         *getActionStatusCode = GetDscActionCommandFailure;
-        Stprintf(curlGetActionStatusCode, MAX_STATUSCODE_SIZE, MI_T("%d"), *getActionStatusCode);
 
-        r = GetCimMIError2Params(MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_GETACTIONUNEXPECTEDRESULT, curlGetActionStatusCode, url);
+        r = GetCimMIError2Params(MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_GETACTIONUNEXPECTEDRESULT, getActionStatus, url);
         DSC_free(getActionStatus);
         return r;
     }
@@ -1623,16 +1619,13 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     curl_slist_free_all(list);
     if (res != CURLE_OK)
     {
-        MI_Char curlPerformValue[MAX_STATUSCODE_SIZE] = {0};
-        Stprintf(curlPerformValue, MAX_STATUSCODE_SIZE, MI_T("%d"), res);
-
         *getActionStatusCode = GetConfigurationCommandFailure;
         CleanupHeaderChunk(&headerChunk);
         free(dataChunk.data);
         DSC_free(outputResult);
         curl_easy_cleanup(curl);
 
-        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curlPerformValue);
+        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }      
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
@@ -1969,16 +1962,13 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     curl_slist_free_all(list);
     if (res != CURLE_OK)
     {
-        MI_Char curlPerformValue[MAX_STATUSCODE_SIZE] = {0};
-        Stprintf(curlPerformValue, MAX_STATUSCODE_SIZE, MI_T("%d"), res);
-
         *getActionStatusCode = GetConfigurationCommandFailure;
         CleanupHeaderChunk(&headerChunk);
         free(dataChunk.data);
         DSC_free(outputResult);
         curl_easy_cleanup(curl);
 
-        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curlPerformValue);
+        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
     }
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
@@ -2761,15 +2751,13 @@ MI_Result Pull_Register(MI_Char* serverURL,
     if (res != CURLE_OK)
     {
         // Error on communication
-        MI_Char curlPerformValue[MAX_STATUSCODE_SIZE] = {0};
-        Stprintf(curlPerformValue, MAX_STATUSCODE_SIZE, MI_T("%d"), res);
 
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
         free(headerChunk.data);
         free(dataChunk.data);
 
-        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, actionUrl, curlPerformValue);
+        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, actionUrl, curl_easy_strerror(res));
     }
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
@@ -2827,8 +2815,8 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
     MI_Value endTime;
     MI_Uint32 flags;
     int i = 0;
-    const char* commandFormat;
-    const char* reportText;
+    const char* commandFormat = NULL;
+    const char* reportText = NULL;
 
     int bAtLeastOneReportSuccess = 0;
 
@@ -2933,9 +2921,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         if (res != CURLE_OK)
         {
             // Error on communication.  Go to next report.
-            MI_Char curlPerformValue[MAX_STATUSCODE_SIZE] = {0};
-            Stprintf(curlPerformValue, MAX_STATUSCODE_SIZE, MI_T("%d"), res);
-            GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, actionUrl, curlPerformValue);
+            GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, actionUrl, curl_easy_strerror(res));
 
             curl_easy_cleanup(curl);
             DSC_free(reportText);
