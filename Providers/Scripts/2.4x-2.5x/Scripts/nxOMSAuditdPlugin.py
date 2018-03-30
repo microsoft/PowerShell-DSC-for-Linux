@@ -421,7 +421,7 @@ def GetDesiredAuomsConf():
     if auoms_ver is not None:
         ver_a = auoms_ver.split(".")
         if len(ver_a) >= 2:
-            if ver_a[0] > 1 or ver_a[1] > 1:
+            if int(ver_a[0]) > 1 or (int(ver_a[0]) == 1 and int(ver_a[1]) > 1):
                 conf_path = RESOURCE_AUOMS_V2_CONF
                 outconf_path = RESOURCE_OUTPUT_V2_CONF
     conf_txt = ReadFile(conf_path)
