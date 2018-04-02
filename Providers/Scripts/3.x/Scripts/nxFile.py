@@ -31,6 +31,8 @@ BLOCK_SIZE = 8192
 
 global show_mof
 show_mof = False
+RemoteFileRetryCount = 5
+RemoteFileRetryInterval = 10
 
 
 def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents,
@@ -716,7 +718,7 @@ def SetFile(DestinationPath, SourcePath, fc):
             return False
     if SourcePath and len(SourcePath) > 0:
         if '://' in SourcePath and fc.LocalPath == '':
-            ret = GetRemoteFile(fc)
+            ret = GetRemoteFileWithRetries(fc)
             if ret != 0:
                 raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
             else:
@@ -914,7 +916,7 @@ def TestFile(DestinationPath, SourcePath, fc):
         return False
 
     if '://' in SourcePath:
-        return TestRemoteFile(fc)
+        return TestRemoteFileWithRetries(fc)
 
     if TestOwnerGroupMode(DestinationPath, SourcePath, fc) is False:
         return False
@@ -1081,16 +1083,33 @@ def SetProxyFromConf():
             if 'http:' in info:
                 os.environ['HTTP_PROXY'] = info
     return
+
+def GetRemoteFileWithRetries(fc):
+    retryCount = 0
+    ret = 1
+    while True:
+      try:
+          ret = GetRemoteFile(fc)
+      except  urllib.error.URLError as e:
+          print("Exception encountered when getting Remote File '" + fc.SourcePath  + "', No Retry attempts will be done - " + repr(e))
+          LG().Log('ERROR', "Exception encountered when getting Remote File '" + fc.SourcePath  + "', No Retry attempts will be done - " + repr(e))
+          if hasattr(e, 'code'):
+             # Client code are not likely to succeed on retry
+             if e.code >= 400 and e.code < 500:
+                return 1
+      retryCount = retryCount + 1	
+      if ret == 0 or retryCount > RemoteFileRetryCount:
+         return ret
+      print("Exception encountered when getting Remote File, Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+      LG().Log('ERROR', "Exception encountered when getting Remote File, Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+      time.sleep(RemoteFileRetryInterval)
+      
+    return ret
         
 def GetRemoteFile(fc):
     SetProxyFromConf()
     req = urllib.request.Request(fc.SourcePath)
-    try:
-        resp = urllib.request.urlopen(req)
-    except urllib.error.URLError as e:
-        print(repr(e))
-        LG().Log('ERROR', repr(e))
-        return 1
+    resp = urllib.request.urlopen(req)
     fc.LocalPath = '/tmp/'+os.path.basename(fc.DestinationPath)+'_remote'
     data=b'keep going'
     hasWritten = False
@@ -1114,15 +1133,32 @@ def GetRemoteFile(fc):
             return 1
     return 0
 
+def TestRemoteFileWithRetries(fc):
+    retryCount = 0
+    ret = False
+    while True:
+      try:
+          ret = TestRemoteFile(fc)
+      except  urllib.error.URLError as e:
+          print("Exception encountered when getting Remote File '" + fc.SourcePath  + "', No Retry attempts will be done - " + repr(e))
+          LG().Log('ERROR', "Exception encountered when getting Remote File '" + fc.SourcePath  + "', No Retry attempts will be done - " + repr(e))
+          if hasattr(e, 'code'):
+             # Client code are not likely to succeed on retry
+             if e.code >= 400 and e.code < 500:
+                return 1
+      retryCount = retryCount + 1	
+      if ret or retryCount > RemoteFileRetryCount:
+         return ret
+      print("ERROR encountered when getting Remote File "+ fc.SourcePath  + " Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+      LG().Log('ERROR', "ERROR encountered when getting Remote File "+ fc.SourcePath  + " Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+      time.sleep(RemoteFileRetryInterval)
+
+    return ret
+
 def TestRemoteFile(fc):
     SetProxyFromConf()
     req = urllib.request.Request(fc.SourcePath)
-    try:
-        resp = urllib.request.urlopen(req)
-    except urllib.request.URLError as e:
-        print(repr(e))
-        LG().Log('ERROR', repr(e))
-        return False
+    resp = urllib.request.urlopen(req)
     h = resp.info()
     if fc.Checksum != 'md5' :  # if not 'md5' check the last_modified header time before we download
         lm = h.get('last-modified')

@@ -33,6 +33,8 @@ BLOCK_SIZE = 8192
 
 global show_mof
 show_mof = False
+RemoteFileRetryCount = 4
+RemoteFileRetryInterval = 10
 
 
 def init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents,
@@ -75,7 +77,7 @@ def Set_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     return retval
 
 
-def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
+def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):    
     DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
                      = init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
     retval = Test(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
@@ -700,7 +702,7 @@ def SetFile(DestinationPath, SourcePath, fc):
             return False
     if SourcePath and len(SourcePath) > 0:
         if '://' in SourcePath and fc.LocalPath == '':
-            ret = GetRemoteFile(fc)
+            ret = GetRemoteFileWithRetries(fc)
             if ret != 0:
                 raise Exception('Unable to retrieve remote resource '+fc.SourcePath+' Error is ' + str(ret))
             else:
@@ -898,7 +900,7 @@ def TestFile(DestinationPath, SourcePath, fc):
         return False
 
     if '://' in SourcePath:
-        return TestRemoteFile(fc)
+        return TestRemoteFileWithRetries(fc)
 
     if TestOwnerGroupMode(DestinationPath, SourcePath, fc) is False:
         return False
@@ -1065,16 +1067,34 @@ def SetProxyFromConf():
             if 'http:' in info:
                 os.environ['HTTP_PROXY'] = info
     return
+
+def GetRemoteFileWithRetries(fc):
+    retryCount = 0
+    ret = 1
+    while True:
+      try:
+			ret = GetRemoteFile(fc)
+      except urllib2.URLError , e:
+          print("Exception encountered when getting Remote File '" + fc.SourcePath  + "', No Retry attempts will be done - " + repr(e))
+          LG().Log('ERROR', "Exception encountered when getting Remote File '" + fc.SourcePath  + "', No Retry attempts will be done - " + repr(e))
+          if hasattr(e, 'code'):
+             # Client code are not likely to succeed on retry
+             if e.code >= 400 and e.code < 500:
+                return 1
+      retryCount = retryCount + 1	
+      if ret == 0 or retryCount > RemoteFileRetryCount:
+         return ret
+      print("Exception encountered when getting Remote File, Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+      LG().Log('ERROR', "Exception encountered when getting Remote File, Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+      time.sleep(RemoteFileRetryInterval)
+      
+    return ret
+        
         
 def GetRemoteFile(fc):
     SetProxyFromConf()
     req = urllib2.Request(fc.SourcePath)
-    try:
-        resp = urllib2.urlopen(req)
-    except urllib2.URLError , e:
-        print(repr(e))
-        LG().Log('ERROR', repr(e))
-        return 1
+    resp = urllib2.urlopen(req)
     fc.LocalPath = '/tmp/'+os.path.basename(fc.DestinationPath)+'_remote'
     data=b'keep going'
     hasWritten = False
@@ -1098,15 +1118,33 @@ def GetRemoteFile(fc):
             return 1
     return 0
 
+def TestRemoteFileWithRetries(fc):
+    retryCount = 0
+    ret = False
+    while True:
+      try:
+			ret = TestRemoteFile(fc)
+      except urllib2.URLError , e:
+          print("Exception encountered when getting Remote File '" + fc.SourcePath  + "', No Retry attempts will be done - " + repr(e))
+          LG().Log('ERROR', "Exception encountered when getting Remote File '" + fc.SourcePath  + "', No Retry attempts will be done - " + repr(e))
+          if hasattr(e, 'code'):
+             # Client code are not likely to succeed on retry
+             if e.code >= 400 and e.code < 500:
+                return 1
+      retryCount = retryCount + 1	
+      if ret or retryCount > RemoteFileRetryCount:
+         return ret
+      print("ERROR encountered when getting Remote File "+ fc.SourcePath  + " Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+      LG().Log('ERROR', "ERROR encountered when getting Remote File "+ fc.SourcePath  + " Sleeping for " + str(RemoteFileRetryInterval) + " seconds Then Retrying again")
+      time.sleep(RemoteFileRetryInterval)
+
+    return ret
+
+
 def TestRemoteFile(fc):
     SetProxyFromConf()
     req = urllib2.Request(fc.SourcePath)
-    try:
-        resp = urllib2.urlopen(req)
-    except urllib2.URLError , e:
-        print(repr(e))
-        LG().Log('ERROR', repr(e))
-        return False
+    resp = urllib2.urlopen(req)
     h = resp.info()
     if fc.Checksum != 'md5' :  # if not 'md5' check the last_modified header time before we download
         lm = h.getheader('last-modified')
@@ -1124,13 +1162,13 @@ def TestRemoteFile(fc):
             return True
         else:
             return False
-    #md5
+    #md5    
     if not os.path.exists(fc.DestinationPath):
         return False
     src_data=b'keep going'
     dest_data=b'keep going'
     src_hash = md5const()
-    dest_hash = md5const()
+    dest_hash = md5const()    
     with (open(fc.DestinationPath, 'rb')) as F:
         try:
             while src_data or dest_data:
@@ -1139,8 +1177,10 @@ def TestRemoteFile(fc):
                 dest_data = F.read(1048576)
                 dest_hash.update(dest_data)
                 if src_hash.hexdigest() != dest_hash.hexdigest():
+                    print("Hash MisMatch found between Source File "+ fc.SourcePath  + " and Destination File " + fc.DestinationPath)
+                    LG().Log('ERROR', "Hash MisMatch found between Source File "+ fc.SourcePath  + " and Destination File " + fc.DestinationPath)
                     return False
-        except Exception, e:
+        except Exception, e:           
             F.close()
             return False
     return True
