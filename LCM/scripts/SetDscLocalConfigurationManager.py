@@ -46,7 +46,7 @@ parameters.append("}")
 
 
 # Apply the metaconfig
-proc = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+proc = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
 exit_code = proc.wait()
 print(proc.stdout.read())
 errorMsg = proc.stderr.read()
