@@ -209,11 +209,12 @@ else:
 # Apply the metaconfig using SetDscLocalConfiguration
 proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True)
 exit_code = proc.wait()
-printVerboseMessage("Output from: " + commandToRun + ": " + proc.stdout.read())
-errorMsg = proc.stderr.read()
 
-if ((exit_code != 0) or (errorMsg)):
-    exitWithError(("Error on running command: " + commandToRun + " Error Message: " + errorMsg), exit_code)
+stdout, stderr = proc.communicate()
+printVerboseMessage("Output from: " + commandToRun + ": " + stdout)
+
+if ((exit_code != 0) or (stderr)):
+    exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr), exit_code)
 else:
     printVerboseMessage("Successfully configured omsconfig.")
 

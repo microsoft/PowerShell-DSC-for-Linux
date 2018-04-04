@@ -48,11 +48,12 @@ parameters.append("}")
 # Apply the metaconfig
 proc = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
 exit_code = proc.wait()
-print(proc.stdout.read())
-errorMsg = proc.stderr.read()
 
-if ((exit_code != 0) or (errorMsg)):
-    sys.stderr.write(errorMsg)
+stdout, stderr = proc.communicate()
+print(stdout)
+
+if ((exit_code != 0) or (stderr)):
+    sys.stderr.write(stderr)
     sys.exit(1)
 else:
     print("Successfully applied metaconfig.")
