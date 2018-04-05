@@ -2,6 +2,7 @@
 import os
 import sys
 import imp
+import subprocess
 from os.path import basename, dirname, join, realpath, split
 
 conf_path = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
@@ -206,9 +207,14 @@ else:
     commandToRun = "/opt/microsoft/omsconfig/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
 
 # Apply the metaconfig using SetDscLocalConfiguration
-retval = os.system(commandToRun)
-if (retval != 0):
-    exitWithError("Error on running command: " + commandToRun)
+proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True)
+exit_code = proc.wait()
+
+stdout, stderr = proc.communicate()
+printVerboseMessage("Output from: " + commandToRun + ": " + stdout)
+
+if ((exit_code != 0) or (stderr)):
+    exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr), exit_code)
 else:
     printVerboseMessage("Successfully configured omsconfig.")
 

@@ -44,14 +44,18 @@ for token in outtokens:
 parameters.append("]")
 parameters.append("}")
 
-#s = ""
-#for param in parameters:
-#    s += param + " "
 
-p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-stdout, stderr = p.communicate()
+# Apply the metaconfig
+proc = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+exit_code = proc.wait()
 
+stdout, stderr = proc.communicate()
 print(stdout)
-print(stderr)
+
+if ((exit_code != 0) or (stderr)):
+    sys.stderr.write(stderr)
+    sys.exit(1)
+else:
+    print("Successfully applied metaconfig.")
 
 
