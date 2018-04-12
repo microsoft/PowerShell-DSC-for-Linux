@@ -221,6 +221,7 @@ def GetFileInfo(fname, Links, MaxContentsReturnable, Checksum):
     Therefore only LStatFile is used.
     If file is link and 'Links' == 'ignore' {} is returned.
     """
+    fileContentChecksum = "@{{Algoritm={0} Hash={1} Path={2}}}"
     d = {}
 
     if fname.endswith("omsadmin.conf"):
@@ -263,7 +264,8 @@ def GetFileInfo(fname, Links, MaxContentsReturnable, Checksum):
 
     if Checksum == 'md5' or Checksum == 'sha-256':
        try:
-        d['Checksum'] = GetChecksum(fname,Checksum)
+        fileHash = GetChecksum(fname,Checksum)
+        d['Checksum'] = fileContentChecksum.format(Checksum.upper(), fileHash.upper(), fname)
        except:
         d['Checksum'] = 0 
     elif Checksum == "ctime":
