@@ -129,7 +129,7 @@ def Inventory_Marshall(DestinationPath, Recurse, Links, Checksum, Type, MaxConte
         d['DestinationPath'] = protocol.MI_String(d['DestinationPath'])
         d['Checksum'] = protocol.MI_String(d['Checksum'])
         d['Type'] = protocol.MI_String(d['Type'])
-        d['Contents'] = protocol.MI_String(d['Contents'])
+        d['Contents'] = protocol.MI_String(MaxContentsReturnable)
         d['ModifiedDate'] = protocol.MI_Timestamp.from_time(d['ModifiedDate'])
         d['CreatedDate'] = protocol.MI_Timestamp.from_time(d['CreatedDate'])
         d['Mode'] = protocol.MI_String(d['Mode'])
