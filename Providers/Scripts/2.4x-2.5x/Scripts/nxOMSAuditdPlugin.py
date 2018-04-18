@@ -160,9 +160,10 @@ def Set(WorkspaceId, Ensure):
 
     conf_path = ""
     if IsTextDifferent(actual_conf, desired_conf):
-        LG().Log(LOG_INFO, "Actual auoms conf differs from desired conf")
-        conf_path = GetTmpAuomsConfPath(WorkspaceId)
-        WriteFile(conf_path, desired_conf)
+        if desired_conf is not None:
+            LG().Log(LOG_INFO, "Actual auoms conf differs from desired conf")
+            conf_path = GetTmpAuomsConfPath(WorkspaceId)
+            WriteFile(conf_path, desired_conf)
 
     outconf_name = ""
     outconf_path = ""
@@ -431,6 +432,7 @@ def GetDesiredAuomsConf():
 def GetDesiredState(WorkspaceId, Ensure, AuditVersion, CurrentPluginState):
     desired_plugin_state = "no"
     desired_rules = None
+    desired_conf = None
     desired_outconf = None
     desired_plugin_conf = None
 

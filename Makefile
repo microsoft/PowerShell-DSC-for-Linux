@@ -535,7 +535,7 @@ nxOMSAgentNPMConfig:
 
 nxOMSAuditdPlugin:
 	rm -rf output/staging; \
-	VERSION="1.4"; \
+	VERSION="1.5"; \
 	PROVIDERS="nxOMSAuditdPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
