@@ -202,8 +202,10 @@ chgrp omsagent /var/opt/microsoft/omsconfig
 
 #if BUILD_OMS == 1
 mkdir -p $OMI_REGISTER_DIR/root-oms
+chmod 755 $OMI_REGISTER_DIR/root-oms
 cp -f /opt/microsoft/${{SHORT_NAME}}/etc/*.reg $OMI_REGISTER_DIR/root-oms
 cp -f /opt/microsoft/${{SHORT_NAME}}/etc/omsconfig.reg $OMI_REGISTER_DIR/root-oms
+chmod 644 $OMI_REGISTER_DIR/root-oms/*.reg
 ln -fs /opt/microsoft/${{SHORT_NAME}}/lib/libomsconfig.so $OMI_HOME/lib/libomsconfig.so
 ln -fs /opt/microsoft/${{SHORT_NAME}}/bin/OMSConsistencyInvoker $OMI_HOME/bin/OMSConsistencyInvoker
 
