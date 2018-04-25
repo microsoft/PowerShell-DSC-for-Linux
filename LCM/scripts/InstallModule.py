@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import imp
 import os
+import stat
 import shutil
 import subprocess
 import sys
@@ -287,7 +288,11 @@ def main(args):
 
         shutil.copy(resourceLibraryFileSourcePath, resourceLibraryFileDestinationPath)
         os.chmod(resourceLibraryFileDestinationPath , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-        printVerboseMessage("Updated permissions of file: " + resourceLibraryFileDestinationPath + " to  644")
+        filePermission = oct(os.stat(resourceLibraryFileDestinationPath).st_mode & 0o777)
+        if filePermission == "0644":
+            printVerboseMessage("Updated permissions of file: " + resourceLibraryFileDestinationPath + " to " + filePermission)
+        else:
+            exitWithError("Permissions on file: " + resourceLibraryFileDestinationPath + " set incorrectly: " + filePermission)
 
         # Copy or write the OMI registration file to the OMI registration folder
         resourceOmiRegistrationFileName = resource + ".reg"
@@ -297,7 +302,11 @@ def main(args):
         if helperlib.DSC_NAMESPACE == "root/Microsoft/DesiredStateConfiguration":
             shutil.copy(resourceOmiRegistrationFileSourcePath, resourceOmiRegistrationFileDestinationPath)
             os.chmod(resourceOmiRegistrationFileDestinationPath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-            printVerboseMessage("Updated permissions of file: " + resourceOmiRegistrationFileDestinationPath + " to  644")
+            filePermission = oct(os.stat(resourceOmiRegistrationFileDestinationPath).st_mode & 0o777)
+            if filePermission == "0644":
+                printVerboseMessage("Updated permissions of file: " + resourceOmiRegistrationFileDestinationPath + " to " + filePermission)
+            else:
+                exitWithError("Permissions on file: " + resourceOmiRegistrationFileDestinationPath + " set incorrectly: " + filePermission)
 
         else:
             # Read the resource OMI registration file
