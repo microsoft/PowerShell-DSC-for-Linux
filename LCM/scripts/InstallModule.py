@@ -207,6 +207,14 @@ def main(args):
     # Install the module's resources
     moduleResources = os.listdir(moduleDscResourcesDestinationPath)
 
+    # Python 2.4 and 3 recognize different formats for octal
+    if sys.version_info >= (3, 0):
+        strMode = "0o777"
+    else:
+        strMode = "0777"
+
+    octMode = int(strMode, base=8)
+
     for resource in moduleResources:
         resourceFolderPath = join(moduleDscResourcesDestinationPath, resource)
 
@@ -255,14 +263,6 @@ def main(args):
             exitWithError("Unable to find the resource library scripts folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceScriptsFolderPath + " in the extracted module.")
 
         pythonVersionFileNames = ['2.4x-2.5x', '2.6x-2.7x', '3.x']
-
-        # Python 2.4 and 3 recognize different formats for octal
-        if sys.version_info >= (3, 0):
-            strMode = "0o777"
-        else:
-            strMode = "0777"
-
-        octMode = int(strMode, base=8)
 
         for pythonVersionFileName in pythonVersionFileNames:
             resourceScriptsPythonVersionFolderPath = join(resourceScriptsFolderPath, pythonVersionFileName)
