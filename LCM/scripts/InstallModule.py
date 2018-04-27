@@ -256,6 +256,14 @@ def main(args):
 
         pythonVersionFileNames = ['2.4x-2.5x', '2.6x-2.7x', '3.x']
 
+        # Python 2.4 and 3 recognize different formats for octal
+        if sys.version_info >= (3, 0):
+            strMode = "0o777"
+        else:
+            strMode = "0777"
+
+        octMode = int(strMode, base=8)
+
         for pythonVersionFileName in pythonVersionFileNames:
             resourceScriptsPythonVersionFolderPath = join(resourceScriptsFolderPath, pythonVersionFileName)
             if not os.path.isdir(resourceScriptsPythonVersionFolderPath):
@@ -285,14 +293,6 @@ def main(args):
             resourceLibraryFileDestinationName = resourceLibraryFileName.replace('.so', "_" + omiNamespaceFolderName + ".so")
 
         resourceLibraryFileDestinationPath = join(helperlib.CONFIG_LIBDIR, resourceLibraryFileDestinationName)
-
-        # Python 2.4 and 3 recognize different formats for octal
-        if sys.version_info >= (3, 0):
-            strMode = "0o777"
-        else:
-            strMode = "0777"
-
-        octMode = int(strMode, base=8)
 
         shutil.copy(resourceLibraryFileSourcePath, resourceLibraryFileDestinationPath)
         os.chmod(resourceLibraryFileDestinationPath , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
