@@ -288,15 +288,15 @@ def main(args):
 
         # Python 2.4 and 3 recognize different formats for octal
         if sys.version_info >= (3, 0):
-            strMask = "0o777"
+            strMode = "0o777"
         else:
-            strMask = "0777"
+            strMode = "0777"
 
-        octMask = int(strMask, base=8)
+        octMode = int(strMode, base=8)
 
         shutil.copy(resourceLibraryFileSourcePath, resourceLibraryFileDestinationPath)
         os.chmod(resourceLibraryFileDestinationPath , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-        filePermission = oct(os.stat(resourceLibraryFileDestinationPath).st_mode & octMask)
+        filePermission = oct(os.stat(resourceLibraryFileDestinationPath).st_mode & octMode)
         if filePermission == "0644" or filePermission == "0o644":
             printVerboseMessage("Updated permissions of file: " + resourceLibraryFileDestinationPath + " to " + filePermission)
         else:
@@ -310,7 +310,7 @@ def main(args):
         if helperlib.DSC_NAMESPACE == "root/Microsoft/DesiredStateConfiguration":
             shutil.copy(resourceOmiRegistrationFileSourcePath, resourceOmiRegistrationFileDestinationPath)
             os.chmod(resourceOmiRegistrationFileDestinationPath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-            filePermission = oct(os.stat(resourceOmiRegistrationFileDestinationPath).st_mode & octMask)
+            filePermission = oct(os.stat(resourceOmiRegistrationFileDestinationPath).st_mode & octMode)
             if filePermission == "0644" or filePermission == "0o644":
                 printVerboseMessage("Updated permissions of file: " + resourceOmiRegistrationFileDestinationPath + " to " + filePermission)
             else:
