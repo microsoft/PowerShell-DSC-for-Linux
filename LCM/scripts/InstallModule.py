@@ -287,9 +287,9 @@ def main(args):
         resourceLibraryFileDestinationPath = join(helperlib.CONFIG_LIBDIR, resourceLibraryFileDestinationName)
 
         shutil.copy(resourceLibraryFileSourcePath, resourceLibraryFileDestinationPath)
-        os.chmod(resourceLibraryFileDestinationPath , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+        os.chmod(resourceLibraryFileDestinationPath , 0o644)
         filePermission = oct(os.stat(resourceLibraryFileDestinationPath).st_mode & 0o777)
-        if filePermission == "0644":
+        if filePermission == "0644" or filePermission == "0o644":
             printVerboseMessage("Updated permissions of file: " + resourceLibraryFileDestinationPath + " to " + filePermission)
         else:
             exitWithError("Permissions on file: " + resourceLibraryFileDestinationPath + " set incorrectly: " + filePermission)
@@ -301,9 +301,9 @@ def main(args):
 
         if helperlib.DSC_NAMESPACE == "root/Microsoft/DesiredStateConfiguration":
             shutil.copy(resourceOmiRegistrationFileSourcePath, resourceOmiRegistrationFileDestinationPath)
-            os.chmod(resourceOmiRegistrationFileDestinationPath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+            os.chmod(resourceOmiRegistrationFileDestinationPath, 0o644)
             filePermission = oct(os.stat(resourceOmiRegistrationFileDestinationPath).st_mode & 0o777)
-            if filePermission == "0644":
+            if filePermission == "0644" or filePermission == "0o644":
                 printVerboseMessage("Updated permissions of file: " + resourceOmiRegistrationFileDestinationPath + " to " + filePermission)
             else:
                 exitWithError("Permissions on file: " + resourceOmiRegistrationFileDestinationPath + " set incorrectly: " + filePermission)
