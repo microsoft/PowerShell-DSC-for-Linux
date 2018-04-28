@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import imp
 import os
+import stat
 import shutil
 import subprocess
 import sys
@@ -131,7 +132,7 @@ def main(args):
             moduleZipExtrationPath = helperlib.DSC_MODULES_PATH
         else:
             moduleZipExtrationPath = join(helperlib.DSC_MODULES_PATH, moduleName)
-        
+
         # Extract module to destination path
         printVerboseMessage("Extracting module zip file from " + moduleZipFilePath + " to " + moduleZipExtrationPath)
         moduleZipFile.extractall(moduleZipExtrationPath)
@@ -149,7 +150,7 @@ def main(args):
         exitWithError("Unable to find the DSCResources directory under the module directory at the path " + moduleDscResourcesDestinationPath + " after extracting module from zip to the path.")
 
     # Populate commom main DSC path
-    dscMainFolderPath = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC) 
+    dscMainFolderPath = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
 
     # Verify the module checksum if specified
     if verifyChecksum:
@@ -169,7 +170,7 @@ def main(args):
         sha256SumsFilePath = join(moduleDestinationPath, sha256SumsFileName)
         if not os.path.isfile(sha256SumsFilePath):
             exitWithError("Unable to find module SHA256 sums file at " + sha256SumsFilePath)
-            
+
         # Verify the SHA256 sums file with the keyring and asc files
         verifySha256SumsCommand = "HOME=" + dscMainFolderPath + " gpg --no-default-keyring --keyring " + keyringFilePath + " --verify " + ascFilePath  + " " + sha256SumsFilePath
         verifySha256SumsResult = subprocess.call(verifySha256SumsCommand, shell = True)
@@ -206,7 +207,15 @@ def main(args):
     # Install the module's resources
     moduleResources = os.listdir(moduleDscResourcesDestinationPath)
 
-    for resource in moduleResources: 
+    # Python 2.4 and 3 recognize different formats for octal
+    if sys.version_info >= (3, 0):
+        strMode = "0o777"
+    else:
+        strMode = "0777"
+
+    octMode = int(strMode, base=8)
+
+    for resource in moduleResources:
         resourceFolderPath = join(moduleDscResourcesDestinationPath, resource)
 
         # Skip anything that is not a directory
@@ -286,6 +295,12 @@ def main(args):
         resourceLibraryFileDestinationPath = join(helperlib.CONFIG_LIBDIR, resourceLibraryFileDestinationName)
 
         shutil.copy(resourceLibraryFileSourcePath, resourceLibraryFileDestinationPath)
+        os.chmod(resourceLibraryFileDestinationPath , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+        filePermission = oct(os.stat(resourceLibraryFileDestinationPath).st_mode & octMode)
+        if filePermission == "0644" or filePermission == "0o644":
+            printVerboseMessage("Updated permissions of file: " + resourceLibraryFileDestinationPath + " to " + filePermission)
+        else:
+            exitWithError("Permissions on file: " + resourceLibraryFileDestinationPath + " set incorrectly: " + filePermission)
 
         # Copy or write the OMI registration file to the OMI registration folder
         resourceOmiRegistrationFileName = resource + ".reg"
@@ -294,6 +309,13 @@ def main(args):
 
         if helperlib.DSC_NAMESPACE == "root/Microsoft/DesiredStateConfiguration":
             shutil.copy(resourceOmiRegistrationFileSourcePath, resourceOmiRegistrationFileDestinationPath)
+            os.chmod(resourceOmiRegistrationFileDestinationPath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+            filePermission = oct(os.stat(resourceOmiRegistrationFileDestinationPath).st_mode & octMode)
+            if filePermission == "0644" or filePermission == "0o644":
+                printVerboseMessage("Updated permissions of file: " + resourceOmiRegistrationFileDestinationPath + " to " + filePermission)
+            else:
+                exitWithError("Permissions on file: " + resourceOmiRegistrationFileDestinationPath + " set incorrectly: " + filePermission)
+
         else:
             # Read the resource OMI registration file
             resourceOmiRegistrationFileSourceHandle = open(resourceOmiRegistrationFileSourcePath, "r")
