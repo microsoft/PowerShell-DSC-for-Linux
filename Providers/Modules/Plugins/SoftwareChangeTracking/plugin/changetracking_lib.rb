@@ -64,13 +64,14 @@ class ChangeTracking
     def self.fileInventoryXMLtoHash(fileInventoryXML, isInventorySnapshot = false)
         fileInventoryHash = instanceXMLtoHash(fileInventoryXML)
         ret = {}
+        ret["FileContentChecksum"] = fileInventoryHash["Checksum"]
         ret["FileSystemPath"] = fileInventoryHash["DestinationPath"]
         ret["CollectionName"] = fileInventoryHash["DestinationPath"]
         ret["Size"] = fileInventoryHash["FileSize"]
         ret["Owner"] = fileInventoryHash["Owner"]
         ret["Group"] = fileInventoryHash["Group"]
         ret["Mode"] = fileInventoryHash["Mode"]
-        ret["Contents"] = fileInventoryHash["Contents"]
+        ret["ContentLength"] = fileInventoryHash["Contents"]
         ret["DateModified"] = OMS::Common.format_time_str(fileInventoryHash["ModifiedDate"])
         ret["DateCreated"] = OMS::Common.format_time_str(fileInventoryHash["CreatedDate"])
 
