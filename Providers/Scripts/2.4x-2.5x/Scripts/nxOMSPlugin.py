@@ -47,7 +47,32 @@ class TestOMSAgent(IOMSAgent):
         return True
 
 def pf_arch():
-    if platform.processor() == "x86_64":
+    arch = platform.architecture()
+    if len(arch) == 2 and len(arch[0]) > 0:
+        if arch[0] == '64bit':
+            return "x64"
+        elif arch[0] == '32bit':
+            return "x86"
+
+    arch = platform.processor()
+    if arch == "x86_64":
+        return "x64"
+    elif arch == "i686":
+        return "x86"
+    elif arch == "i386":
+        return "x86"
+
+    arch = platform.machine()
+    if arch == "x86_64":
+        return "x64"
+    elif arch == "i686":
+        return "x86"
+    elif arch == "i386":
+        return "x86"
+
+    LG().Log('WARN', "Failed to determine the system architecture (64bit or 32bit) the usual way. Relying on 'is_64bit = sys.maxsize > 2**32' instead."
+
+    if sys.maxsize > 2**32:
         return "x64"
     else:
         return "x86"
