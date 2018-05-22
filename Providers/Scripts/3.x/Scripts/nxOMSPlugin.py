@@ -73,7 +73,7 @@ def pf_arch():
     elif arch == "i386":
         return "x86"
 
-    LG().Log('WARN', "Failed to determine the system architecture (64bit or 32bit) the usual way. Relying on 'is_64bit = sys.maxsize > 2**32' instead."
+    LG().Log('WARN', "Failed to determine the system architecture (64bit or 32bit) the usual way. Relying on 'is_64bit = sys.maxsize > 2**32' instead.")
 
     if sys.maxsize > 2**32:
         return "x64"
