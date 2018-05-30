@@ -580,7 +580,7 @@ nxOMSContainers:
 
 nxOMSWLI:
 	rm -rf output/staging; \
-	VERSION="1.1"; \
+	VERSION="1.2"; \
 	PROVIDERS="nxOMSWLI"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
