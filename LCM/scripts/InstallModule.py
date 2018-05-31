@@ -309,12 +309,6 @@ def main(args):
 
         if helperlib.DSC_NAMESPACE == "root/Microsoft/DesiredStateConfiguration":
             shutil.copy(resourceOmiRegistrationFileSourcePath, resourceOmiRegistrationFileDestinationPath)
-            os.chmod(resourceOmiRegistrationFileDestinationPath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-            filePermission = oct(os.stat(resourceOmiRegistrationFileDestinationPath).st_mode & octMode)
-            if filePermission == "0644" or filePermission == "0o644":
-                printVerboseMessage("Updated permissions of file: " + resourceOmiRegistrationFileDestinationPath + " to " + filePermission)
-            else:
-                exitWithError("Permissions on file: " + resourceOmiRegistrationFileDestinationPath + " set incorrectly: " + filePermission)
 
         else:
             # Read the resource OMI registration file
@@ -333,6 +327,13 @@ def main(args):
                 resourceOmiRegistrationFileDesintationHandle.write(resourceOmiRegistrationFileContentWithOmsLib)
             finally:
                 resourceOmiRegistrationFileDesintationHandle.close()
+
+        os.chmod(resourceOmiRegistrationFileDestinationPath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+        filePermission = oct(os.stat(resourceOmiRegistrationFileDestinationPath).st_mode & octMode)
+        if filePermission == "0644" or filePermission == "0o644":
+            printVerboseMessage("Updated permissions of file: " + resourceOmiRegistrationFileDestinationPath + " to " + filePermission)
+        else:
+            exitWithError("Permissions on file: " + resourceOmiRegistrationFileDestinationPath + " set incorrectly: " + filePermission)
 
     # Regenerate the DSC Python scripts init files
     regenerateDscPythonScriptInitFiles()
