@@ -269,6 +269,9 @@ chmod 644 $OMI_REGISTER_DIR/root-oms/*.reg
 # Set up built-in resource module for DIY DSC
 /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
 
+# Ensure .reg files all have correct permissions
+chmod 644 $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration/*.reg
+
 #endif
 
 if [ -d  $OMI_LIB/Scripts ]; then
