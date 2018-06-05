@@ -216,7 +216,6 @@ class ChangeTracking
 
     def self.wrap (inventory_hash, host, time)
         timestamp = OMS::Common.format_time(time)
-        OMS::Log.info_once("The keys in inventory_hash - #{inventory_hash.keys}")
         wrapper = {
                     "DataType"=>"CONFIG_CHANGE_BLOB",
                     "IPName"=>"changetracking",
@@ -256,9 +255,6 @@ class ChangeTracking
         if wrapper["DataItems"].size == 1
             return wrapper
         elsif wrapper["DataItems"].size > 1
-            OMS::Log.warn_once("Multiple change types found. Incorrect inventory xml generated.\n 
-                        The inventory XML should only have one change type, but this XML had -
-                        #{inventory_hash.keys}")
             return {} # Returning null.
         else
             return {} # Returning null.
@@ -280,7 +276,6 @@ class ChangeTracking
                 end
                 return ret
             else
-                OMS::Log.warn_once("Could not find the file #{file_path}")
                 return nil
             end
     end
@@ -312,7 +307,6 @@ class ChangeTracking
 
     def self.transform_and_wrap(inventoryFile, inventoryHashFile, inventoryTimestampFile)
         if File.exist?(inventoryFile)                       
-            OMS::Log.info_once("Found the change tracking inventory file.")
             # Get the parameters ready.
             time = Time.now
             force_send_run_interval_hours = 10
@@ -347,7 +341,6 @@ class ChangeTracking
                   previous_inventory_checksum = JSON.parse(previousSnapshot[PREV_HASH])
                 end
             rescue 
-                OMS::Log.warn_once("Error parsing previous hash file")
                 previousSnapshot = nil
             end
 
@@ -366,7 +359,6 @@ class ChangeTracking
                return {}
             end
         else
-            OMS::Log.warn_once("The ChangeTracking inventory xml file does not exists")
             return {}
         end 
     end
