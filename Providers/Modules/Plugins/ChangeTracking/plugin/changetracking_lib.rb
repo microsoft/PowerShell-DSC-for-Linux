@@ -264,7 +264,6 @@ class ChangeTracking
     def self.getHash(file_path)
             ret = {}
             if File.exist?(file_path) # If file exists
-                OMS::Log.info_once("Found the file {file_path}. Fetching the Hash")
                 File.open(file_path, "r") do |f| # Open file
                         f.each_line do |line|
                         line.split(/\r?\n/).reject{ |l|
