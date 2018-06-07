@@ -198,13 +198,20 @@ chgrp omsagent /var/opt/microsoft/omsconfig
 chmod 755 /var/opt/microsoft/omsconfig
 
 # Set up log file
-if [! -f /var/opt/microsoft/omsconfig/omsconfig.log ]
-then
+if [ ! -f /var/opt/microsoft/omsconfig/omsconfig.log ]; then
     touch /var/opt/microsoft/omsconfig/omsconfig.log
 fi
 chown omsagent /var/opt/microsoft/omsconfig/omsconfig.log
 chgrp omsagent /var/opt/microsoft/omsconfig/omsconfig.log
 chmod 644 /var/opt/microsoft/omsconfig/omsconfig.log
+
+# Set up detailed log file
+if [ ! -f /var/opt/microsoft/omsconfig/omsconfigdetailed.log ]; then
+    touch /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+fi
+chown omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+chgrp omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+chmod 644 /var/opt/microsoft/omsconfig/omsconfigdetailed.log
 
 #endif
 
