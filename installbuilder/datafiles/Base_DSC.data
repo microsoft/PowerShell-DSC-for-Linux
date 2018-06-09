@@ -96,6 +96,7 @@ SHLIB_EXT: 'so'
 /etc/opt/omi/conf;                                        755; root; root; sysdir
 /etc/opt/omi/conf/${{SHORT_NAME}};                        755; ${{RUN_AS_USER}}; root
 /etc/logrotate.d;                                         755; root; root; sysdir
+
 #if BUILD_OMS == 1
 /etc/opt/microsoft/omsagent/conf/omsagent.d; 755; ${{RUN_AS_USER}}; root; sysdir
 #endif
@@ -194,6 +195,23 @@ chmod 700 $CONFIG_SYSCONFDIR/${{SHORT_NAME}}
 mkdir -p /var/opt/microsoft/omsconfig
 chown omsagent /var/opt/microsoft/omsconfig
 chgrp omsagent /var/opt/microsoft/omsconfig
+chmod 755 /var/opt/microsoft/omsconfig
+
+# Set up log file
+if [ ! -f /var/opt/microsoft/omsconfig/omsconfig.log ]; then
+    touch /var/opt/microsoft/omsconfig/omsconfig.log
+fi
+chown omsagent /var/opt/microsoft/omsconfig/omsconfig.log
+chgrp omsagent /var/opt/microsoft/omsconfig/omsconfig.log
+chmod 644 /var/opt/microsoft/omsconfig/omsconfig.log
+
+# Set up detailed log file
+if [ ! -f /var/opt/microsoft/omsconfig/omsconfigdetailed.log ]; then
+    touch /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+fi
+chown omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+chgrp omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+chmod 644 /var/opt/microsoft/omsconfig/omsconfigdetailed.log
 
 #endif
 
