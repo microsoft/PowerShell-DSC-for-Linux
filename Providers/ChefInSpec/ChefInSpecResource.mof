@@ -1,0 +1,84 @@
+#pragma include ("cim_schema_2.26.0.mof")
+#pragma include ("OMI_BaseResource.mof")
+#pragma include ("MSFT_Credential.mof")
+
+
+
+[ClassVersion("1.0.0")] 
+class InSpec_Statistics
+{
+    [write]
+       string duration;
+};
+
+[ClassVersion("1.0.0")] 
+class InSpec_Controls
+{
+  [write]
+      string id;
+  [write]
+      string profile_id;
+  [write]
+      string profile_sha256;
+  [write, ValueMap{"passed", "failed"},Values{"passed", "failed"}] 
+      string status;
+  [write]
+      string codec_desc;
+  [write]
+      string message;
+};
+
+class InSpec_Results
+{
+  [write, EmbeddedInstance("InSpec_Controls")] 
+      string controls[];
+  [write]
+      string version;
+  [write, EmbeddedInstance("InSpec_Statistics")]
+      string statistics;
+  [read, ValueMap{"Compliant", "Non-Compliant"},Values{"Compliant", "Non-Compliant"}]
+      string status;
+};
+[ClassVersion("1.0.0")] 
+class MSFT_ChefInSpecResource : OMI_BaseResource
+{
+  [key] 
+        string Name;
+  [key] 
+        string GithubPath;
+  [read, EmbeddedInstance("InSpec_Results")]
+        string Result;
+
+    [static, Description ("Get resource states based on input configuration file." )]
+    uint32 GetTargetResource(
+        [in, EmbeddedInstance ("MSFT_ChefInSpecResource"), Description ("Configuration document that is to be applied.")]
+        string InputResource,
+        [in, Description ("Flags passed to the providers. Reserved for future use." )]
+        uint32 Flags,
+        [out, EmbeddedInstance ("MSFT_ChefInSpecResource"), Description ("The current state of the specified configuration resources." )]
+        string OutputResource
+    );
+    
+    [static, Description ("Test resource states based on input configuration file." )]
+    uint32 TestTargetResource(
+        [in, EmbeddedInstance("MSFT_ChefInSpecResource"), Description ("Configuration document that to be applied." )]
+        string InputResource,    
+        [in, Description ("Flags passed to the providers. reserved for future use." )]
+        uint32 Flags,   
+        [out, Description ("True if identical. False otherwise." )]
+        boolean Result,     
+        [out, Description ("Context information that the provider can use to optimize the set, This is optional." )]
+        uint64 ProviderContext
+    );
+
+    [static, Description ("Set resource states based on input configuration file." )]
+    uint32 SetTargetResource(
+        [in, EmbeddedInstance ("MSFT_ChefInSpecResource"),
+        Description ("Configuration document that to be applied." )]
+        string InputResource,    
+        [in, Description ("Context information that the provider can use to optimize the set from TestTargetResource, This is optional." )]
+        uint64 ProviderContext,
+        [in, Description ("Flags passed to the providers. reserved for future use." )]
+        uint32 Flags
+    );
+};

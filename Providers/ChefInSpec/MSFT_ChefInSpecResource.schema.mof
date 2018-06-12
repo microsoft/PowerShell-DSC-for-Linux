@@ -1,0 +1,46 @@
+[ClassVersion("1.0.0")] 
+class InSpec_Statistics
+{
+    [write]
+       string duration;
+};
+
+[ClassVersion("1.0.0")] 
+class InSpec_Controls
+{
+  [write]
+      string id;
+  [write]
+      string profile_id;
+  [write]
+      string profile_sha256;
+  [write, ValueMap{"passed", "failed"},Values{"passed", "failed"}] 
+      string status;
+  [write]
+      string codec_desc;
+  [write]
+      string message;
+};
+
+class InSpec_Results
+{
+  [write, EmbeddedInstance("InSpec_Controls")] 
+      string controls[];
+  [write]
+      string version;
+  [write, EmbeddedInstance("InSpec_Statistics")]
+      string statistics;
+  [read, ValueMap{"Compliant", "Non-Compliant"},Values{"Compliant", "Non-Compliant"}]
+      string status;
+};
+[ClassVersion("1.0.0"), FriendlyName("ChefInSpec")] 
+class MSFT_ChefInSpecResource : OMI_BaseResource
+{
+  [key] 
+        string Name;
+  [key] 
+        string GithubPath;
+  [read, EmbeddedInstance("InSpec_Results")]
+        string Result;
+
+};

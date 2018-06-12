@@ -81,6 +81,7 @@ PROVIDERS+=nxOMSAgentNPMConfig
 PROVIDERS+=nxOMSAuditdPlugin
 PROVIDERS+=nxOMSContainers
 PROVIDERS+=nxOMSWLI
+PROVIDERS+=ChefInSpec
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript
