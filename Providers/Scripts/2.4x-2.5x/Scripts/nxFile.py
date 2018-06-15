@@ -446,9 +446,9 @@ def RemoveTree(path):
 def RemovePath(path):
     error = None
     if os.path.islink(path) or os.path.isfile(path):
-        RemoveFile(path)
+        error = RemoveFile(path)
     elif os.path.isdir(path):
-        RemoveTree(path)
+        error = RemoveTree(path)
     else:
         Print("Error: Unknown file type for file: " + path, file=sys.stderr)
         LG().Log('ERROR', "Error: Unknown file type for file: " + path)
@@ -457,9 +457,13 @@ def RemovePath(path):
 
 def TestOwnerGroupMode(DestinationPath, SourcePath, fc):
     stat_info = LStatFile(DestinationPath)
+    if stat_info is None :
+        return False
 
     if SourcePath:
         stat_info_src = LStatFile(SourcePath)
+        if stat_info_src is None :
+            return False
 
     if fc.Owner:
         try:
@@ -641,7 +645,8 @@ def SetOwnerGroupMode(DestinationPath, SourcePath, fc):
 
 def SetDirectoryRecursive(DestinationPath, SourcePath, fc):
     if not os.path.exists(DestinationPath):
-        MakeDirs(DestinationPath)
+        if MakeDirs(DestinationPath) is not None:
+            return False
     if SetOwnerGroupMode(DestinationPath, SourcePath, fc) is False:
         return False
     Destination_subfiles = ListDir(DestinationPath)
@@ -688,7 +693,8 @@ def SetFile(DestinationPath, SourcePath, fc):
     error = None
     if os.path.exists(DestinationPath) and (os.path.islink(DestinationPath) or os.path.isdir(DestinationPath)):
         if fc.Force :
-            RemovePath(DestinationPath)
+            if RemovePath(DestinationPath) is not None:
+                return False
         else:
             Print("Error: " + DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
             LG().Log("ERROR", DestinationPath + " is not a file; cannot overwrite without the 'Force' option being true")
@@ -709,7 +715,7 @@ def SetFile(DestinationPath, SourcePath, fc):
         else:
             should_copy_file = True
         if should_copy_file:
-            if CopyFile(SourcePath, DestinationPath) is False :
+            if CopyFile(SourcePath, DestinationPath) is not None :
                 return False
     elif fc.Contents:
         if WriteFile(DestinationPath, fc.Contents) is not None:
@@ -728,14 +734,16 @@ def SetFile(DestinationPath, SourcePath, fc):
             LG().Log('ERROR', "Exception creating file " + DestinationPath  + " Error: " + str(error))
     SetOwnerGroupMode(DestinationPath, SourcePath, fc)
     if len(fc.LocalPath) > 0 :
-        RemoveFile(fc.LocalPath)
+        if RemoveFile(fc.LocalPath) is not None:
+            return False
     return True
 
 
 def SetDirectory(DestinationPath, SourcePath, fc):
     if os.path.exists(DestinationPath) and not os.path.isdir(DestinationPath):
         if fc.Force :
-            RemovePath(DestinationPath)
+            if RemovePath(DestinationPath) is not None:
+                return False
         else:
             Print("Error: Unable to overwrite currently existing non-directory object at " + DestinationPath + " without the Force option being true.")
             LG().Log("ERROR", "Unable to overwrite currently existing non-directory object at " + DestinationPath + " without the Force option being true.")
@@ -752,7 +760,8 @@ def SetLink(DestinationPath, SourcePath, fc):
 
     if os.path.exists(DestinationPath) and not os.path.islink(DestinationPath) :
         if fc.Force :
-            RemovePath(DestinationPath)
+            if RemovePath(DestinationPath) is not None:
+                return False
         else:
             Print("Error: Unable to overwrite currently existing non-link object at " + DestinationPath + " without the Force option being true.")
             LG().Log("ERROR", "Unable to overwrite currently existing non-link object at " + DestinationPath + " without the Force option being true.")
@@ -829,8 +838,8 @@ def Set(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Re
                 return [-1]
 
     elif fc.Ensure == "absent":
-        RemovePath(DestinationPath)
-        return [0]
+        if RemovePath(DestinationPath) is not None:
+            return [-1]
 
     return [0]
 
