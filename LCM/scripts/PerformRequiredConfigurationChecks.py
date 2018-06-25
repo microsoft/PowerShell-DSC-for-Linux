@@ -1,18 +1,23 @@
 #!/usr/bin/python
 from imp            import load_source
 from os.path        import dirname, join, realpath
-from subprocess     import Popen
+from subprocess     import PIPE, Popen
 from sys            import version_info
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
-helperlib = imp.load_source('helperlib', helperLibPath)
+helperlib = load_source('helperlib', helperLibPath)
+
+operationStatusUtilityPath = join(pathToCommonScriptsFolder, 'OperationStatusUtility.py')
+operationStatusUtility = load_source('operationStatusUtility', operationStatusUtilityPath)
+
+operation = 'PerformRequiredConfigurationChecks'
 
 def main():
     # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions
-    if sys.version_info >= (2, 6):
+    if version_info >= (2, 6):
         main_py26to3()
     else:
         main_py24to27()
@@ -21,14 +26,14 @@ def main_py24to27():
     try:
         run_perform_required_configuration_checks()
     except Exception, errorInstance:
-        write_failure_to_status_file(errorInstance)
+        operationStatusUtility.write_failure_to_status_file(operation, errorInstance)
         raise errorInstance
 
 def main_py26to3():
     try:
         run_perform_required_configuration_checks()
     except Exception as errorInstance:
-        write_failure_to_status_file(errorInstance)
+        operationStatusUtility.write_failure_to_status_file(operation, errorInstance)
         raise errorInstance
 
 def run_perform_required_configuration_checks():
@@ -47,43 +52,16 @@ def run_perform_required_configuration_checks():
     parameters.append("1")
     parameters.append("}")
 
-    p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
+    process = Popen(parameters, stdout = PIPE, stderr = PIPE)
+    stdout, stderr = process.communicate()
 
     if stderr == '':
-        write_success_to_status_file()
+        operationStatusUtility.write_success_to_status_file(operation)
     else:
-        write_failure_to_status_file(stderr)
+        operationStatusUtility.write_failure_to_status_file(operation, stderr)
 
     print(stdout)
     print(stderr)
-
-def write_success_to_status_file():
-    write_to_status_file('DscPerformRequiredConfigurationChecks', True, '')
-
-def write_failure_to_status_file(errorMessage):
-    write_to_status_file('DscPerformRequiredConfigurationChecks', False, errorMessage)
-
-def write_to_status_file(operation, success, message):
-    fileContent = get_status_file_content(operation, success, message)
-
-    statusFileName = 'dsc' + operation.lower()
-    statusFilePath = join(helperlib.PYTHON_PID_DIR, statusFileName)
-
-    statusFileHandle = open(statusFilePath, 'w')
-    try:
-        statusFileHandle.write(fileContent)
-    finally:
-        statusFileHandle.close()
-
-def get_status_file_content(operation, success, message):
-    return '''
-{
-    "operation": "''' + str(operation) + '''",
-    "success": "''' + str(success) + '''",
-    "message": "''' + str(message) + '''"
-}
-'''
 
 if __name__ == "__main__":
     main()
