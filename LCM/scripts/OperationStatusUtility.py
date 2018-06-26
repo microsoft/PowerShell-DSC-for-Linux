@@ -1,17 +1,21 @@
 #!/usr/bin/python
-from datetime   import datetime, timedelta
+from datetime   import datetime
 from imp        import load_source
 from os         import chmod, mkdir, stat
 from os.path    import dirname, join, isdir, isfile, realpath
+from re         import search
 from sys        import version_info
-
-import re
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
+
+def get_current_timestamp():
+    currentDateTime = datetime.now()
+    currentDateTimeFormattedString = datetime.strftime(currentDateTime, "%Y/%m/%d %H:%M:%S")
+    return currentDateTimeFormattedString
 
 def get_permission_in_oct(threeDigitString):
     # Python 2.4 and 3 recognize different formats for octal
@@ -22,6 +26,24 @@ def get_permission_in_oct(threeDigitString):
 
     octMode = int(strMode, base = 8)
     return octMode
+
+def ensure_file_permissions(filePath, permissionString):
+    desiredPermission = get_permission_in_oct(permissionString)
+
+    # Ensure that the file has the desired permissions if it exists
+    if (isfile(filePath)):
+        filePermission = oct(stat(filePath).st_mode & desiredPermission)
+        if (not (filePermission == desiredPermission)):
+            chmod(filePath, desiredPermission)
+
+def ensure_directory_permissions(directoryPath, permissionString):
+    desiredPermission = get_permission_in_oct(permissionString)
+
+    # Ensure that the file has the desired permissions if it exists
+    if (isdir(directoryPath)):
+        directoryPermission = oct(stat(directoryPath).st_mode & desiredPermission)
+        if (not (directoryPermission == desiredPermission)):
+            chmod(directoryPath, desiredPermission)
 
 def get_log_since_datetime(startDateTime):
     logSinceDateTime = ''
@@ -41,7 +63,7 @@ def get_log_since_datetime(startDateTime):
                 logSinceDateTime += logFileLine
             else:
                 # Find the timestamp in the line if present
-                regexResult = re.search('\d{4}\/\d{2}\/\d{2}\s*\d{2}:\d{2}:\d{2}', logFileLine)
+                regexResult = search('\d{4}\/\d{2}\/\d{2}\s*\d{2}:\d{2}:\d{2}', logFileLine)
                 if regexResult is not None:
                     lineTimestamp = regexResult.group(0)
                     print("Found a timestamp: " +  str(lineTimestamp))
@@ -72,26 +94,19 @@ def get_status_file_content(operation, success, message = ''):
 def write_to_status_file(operation, success, message = ''):
     statusFolderName = 'status'
     statusFolderPath = join(helperlib.PYTHON_PID_DIR, statusFolderName)
-    statusFolderDesiredPermission = get_permission_in_oct('755')
 
     # Ensure that the status folder exists
     if (not isdir(statusFolderPath)):
-        mkdir(statusFolderPath, statusFolderDesiredPermission)
+        mkdir(statusFolderPath)
 
     # Ensure that the status folder has the correct permissions (755)
-    statusFolderPermission = oct(stat(statusFolderPath).st_mode & statusFolderDesiredPermission)
-    if (not (statusFolderPermission == "0755" or statusFolderPermission == "0o755")):
-        chmod(statusFolderPath, statusFolderDesiredPermission)
+    ensure_directory_permissions(statusFolderPath, '755')
 
     statusFileName = 'dsc' + operation.lower()
     statusFilePath = join(statusFolderPath, statusFileName)
-    statusFileDesiredPermission = get_permission_in_oct('644')
 
     # Ensure that the status file has the correct permissions (644) if it exists before writing status
-    if (isfile(statusFilePath)):
-        statusFilePermission = oct(stat(statusFilePath).st_mode & statusFileDesiredPermission)
-        if (not (statusFilePermission == "0644" or statusFilePermission == "0o644")):
-            chmod(statusFilePath , statusFileDesiredPermission)
+    ensure_file_permissions(statusFilePath, '644')
 
     statusFileContent = get_status_file_content(operation, success, message)
 
@@ -102,10 +117,7 @@ def write_to_status_file(operation, success, message = ''):
         statusFileHandle.close()
 
     # Ensure that the status file has the correct permissions (644) if it exists after writing status
-    if (isfile(statusFilePath)):
-        statusFilePermission = oct(stat(statusFilePath).st_mode & statusFileDesiredPermission)
-        if (not (statusFilePermission == "0644" or statusFilePermission == "0o644")):
-            chmod(statusFilePath , statusFileDesiredPermission)
+    ensure_file_permissions(statusFilePath, '644')
 
 def write_success_to_status_file(operation):
     write_to_status_file(operation, True)

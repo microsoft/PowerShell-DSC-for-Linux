@@ -1,10 +1,9 @@
 #!/usr/bin/python
+from datetime       import datetime
 from imp            import load_source
-from os.path        import dirname, join, realpath
+from os.path        import dirname, isfile, join, realpath
 from subprocess     import PIPE, Popen
 from sys            import argv, version_info
-
-import datetime
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -48,58 +47,63 @@ def apply_meta_config(args):
     if len(args) != 3:
         usage()
 
-    if args[1].lower() != "-configurationmof":
+    if args[1].lower() != '-configurationmof':
         usage()
 
-    try:
-        filedata = open(args[2], "r").read()
-    except:
-        filedata = open(args[2], "r", encoding = "utf-16").read()
-
-    outtokens = []
-    for char in filedata:
-        outtokens.append(str(ord(char)))
-
-    omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
-
-    parameters = []
-    parameters.append(omicli_path)
-    parameters.append("iv")
-    parameters.append(helperlib.DSC_NAMESPACE)
-    parameters.append("{")
-    parameters.append("MSFT_DSCLocalConfigurationManager")
-    parameters.append("}")
-    parameters.append("SendMetaConfigurationApply")
-    parameters.append("{")
-    parameters.append("ConfigurationData")
-    parameters.append("[")
-    # Insert configurationmof data here
-    for token in outtokens:
-        parameters.append(token)
-    parameters.append("]")
-    parameters.append("}")
-
-    # Save the starting timestamp
-    startDateTime = datetime.datetime.now()
-    startDateTimeStringNoMs = datetime.datetime.strftime(startDateTime, "%Y/%m/%d %H:%M:%S")
-    startDateTimeNoMs = datetime.datetime.strptime(startDateTimeStringNoMs, '%Y/%m/%d %H:%M:%S')
-
-    # Apply the metaconfig
-    process = Popen(parameters, stdout = PIPE, stderr = PIPE, close_fds = True)
-    exit_code = process.wait()
-    stdout, stderr = process.communicate()
-
-    print(stdout)
-
-    if stderr == '':
-        operationStatusUtility.write_success_to_status_file(operation)
-        print("Successfully applied metaconfig.")
-    else:
-        operationStatusUtility.write_failure_to_status_file(operation, startDateTimeNoMs, stderr)
-        print(stderr)
-
-    if ((exit_code != 0) or (stderr)):
+    if (not isfile(args[2])):
+        errorMessage = 'The provided configurationmof file does not exist: ' + str(args[2])
+        print(errorMessage)
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Incorrect parameters to SetDscLocalConfigurationManager.py: ' + errorMessage)
         exit(1)
+
+    fileHandle = open(args[2], 'r')
+    try:
+        fileContent = fileHandle.read()
+        outtokens = []
+        for char in fileContent:
+            outtokens.append(str(ord(char)))
+
+        omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
+
+        parameters = []
+        parameters.append(omicli_path)
+        parameters.append("iv")
+        parameters.append(helperlib.DSC_NAMESPACE)
+        parameters.append("{")
+        parameters.append("MSFT_DSCLocalConfigurationManager")
+        parameters.append("}")
+        parameters.append("SendMetaConfigurationApply")
+        parameters.append("{")
+        parameters.append("ConfigurationData")
+        parameters.append("[")
+        # Insert configurationmof data here
+        for token in outtokens:
+            parameters.append(token)
+        parameters.append("]")
+        parameters.append("}")
+
+        # Save the starting timestamp without milliseconds
+        startTimestamp = operationStatusUtility.get_current_timestamp()
+        startDateTime = datetime.strptime(startTimestamp, '%Y/%m/%d %H:%M:%S')
+
+        # Apply the metaconfig
+        process = Popen(parameters, stdout = PIPE, stderr = PIPE, close_fds = True)
+        exit_code = process.wait()
+        stdout, stderr = process.communicate()
+
+        print(stdout)
+
+        if stderr == '':
+            operationStatusUtility.write_success_to_status_file(operation)
+            print("Successfully applied metaconfig.")
+        else:
+            operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
+            print(stderr)
+
+        if ((exit_code != 0) or (stderr)):
+            exit(1)
+    finally:
+        fileHandle.close()
 
 if __name__ == "__main__":
     main(argv)

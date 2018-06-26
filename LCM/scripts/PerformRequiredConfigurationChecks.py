@@ -1,10 +1,9 @@
 #!/usr/bin/python
+from datetime       import datetime
 from imp            import load_source
 from os.path        import dirname, join, realpath
 from subprocess     import PIPE, Popen
 from sys            import version_info
-
-import datetime
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -54,10 +53,9 @@ def run_perform_required_configuration_checks():
     parameters.append("1")
     parameters.append("}")
 
-    # Save the starting timestamp
-    startDateTime = datetime.datetime.now()
-    startDateTimeStringNoMs = datetime.datetime.strftime(startDateTime, "%Y/%m/%d %H:%M:%S")
-    startDateTimeNoMs = datetime.datetime.strptime(startDateTimeStringNoMs, '%Y/%m/%d %H:%M:%S')
+    # Save the starting timestamp without milliseconds
+    startTimestamp = operationStatusUtility.get_current_timestamp()
+    startDateTime = datetime.strptime(startTimestamp, '%Y/%m/%d %H:%M:%S')
 
     process = Popen(parameters, stdout = PIPE, stderr = PIPE)
     stdout, stderr = process.communicate()
@@ -67,7 +65,7 @@ def run_perform_required_configuration_checks():
     if stderr == '':
         operationStatusUtility.write_success_to_status_file(operation)
     else:
-        operationStatusUtility.write_failure_to_status_file(operation, startDateTimeNoMs, stderr)
+        operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
         print(stderr)
 
 if __name__ == "__main__":
