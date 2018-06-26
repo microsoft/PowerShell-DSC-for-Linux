@@ -79,6 +79,7 @@ def apply_meta_config(args):
     parameters.append("]")
     parameters.append("}")
 
+    # Save the starting timestamp
     startDateTime = datetime.datetime.now()
     startDateTimeStringNoMs = datetime.datetime.strftime(startDateTime, "%Y/%m/%d %H:%M:%S")
     startDateTimeNoMs = datetime.datetime.strptime(startDateTimeStringNoMs, '%Y/%m/%d %H:%M:%S')

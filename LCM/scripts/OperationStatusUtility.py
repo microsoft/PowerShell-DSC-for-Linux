@@ -37,6 +37,7 @@ def get_log_since_datetime(startDateTime):
         for logFileLine in logFileHandle:
             if foundStartDateTime:
                 print("Adding next line to message...")
+                logFileLine = logFileLine.replace('"', '')
                 logSinceDateTime += logFileLine
             else:
                 # Find the timestamp in the line if present
@@ -52,6 +53,7 @@ def get_log_since_datetime(startDateTime):
                     if lineDateTime >= startDateTime:
                         print("Found a valid timestamp: " +  str(lineTimestamp))
                         foundStartDateTime = True
+                        logFileLine = logFileLine.replace('"', '')
                         logSinceDateTime += logFileLine
     finally:
         logFileHandle.close()
