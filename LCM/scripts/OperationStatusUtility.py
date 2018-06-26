@@ -67,7 +67,7 @@ def write_to_status_file(operation, success, message = ''):
 def get_status_file_content(operation, success, message = ''):
     return '''
 {
-    "operation": "''' + str(operation) + '''",
+    "operation": "Dsc''' + str(operation) + '''",
     "success": "''' + str(success) + '''",
     "message": "''' + str(message) + '''"
 }
