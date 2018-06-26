@@ -1,8 +1,11 @@
 #!/usr/bin/python
+from datetime   import datetime, timedelta
 from imp        import load_source
 from os         import chmod, mkdir, stat
 from os.path    import dirname, join, isdir, isfile, realpath
 from sys        import version_info
+
+import re
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -20,11 +23,49 @@ def get_permission_in_oct(threeDigitString):
     octMode = int(strMode, base = 8)
     return octMode
 
-def write_success_to_status_file(operation):
-    write_to_status_file(operation, True)
+def get_log_since_datetime(startDateTime):
+    logSinceDateTime = ''
+    foundStartDateTime = False
 
-def write_failure_to_status_file(operation, errorMessage):
-    write_to_status_file(operation, False, errorMessage)
+    logFileName = 'omsconfig.log'
+    logFilePath = join(helperlib.PYTHON_PID_DIR, logFileName)
+
+    print("Retrieving log with start datetime set to " + str(startDateTime))
+
+    logFileHandle = open(logFilePath)
+    try:
+        for logFileLine in logFileHandle:
+            if foundStartDateTime:
+                print("Adding next line to message...")
+                logSinceDateTime += logFileLine
+            else:
+                # Find the timestamp in the line if present
+                regexResult = re.search('\d{4}\/\d{2}\/\d{2}\s*\d{2}:\d{2}:\d{2}', logFileLine)
+                if regexResult is not None:
+                    lineTimestamp = regexResult.group(0)
+                    print("Found a timestamp: " +  str(lineTimestamp))
+
+                    # Parse the timestamp
+                    lineDateTime = datetime.strptime(lineTimestamp, '%Y/%m/%d %H:%M:%S')
+
+                    # Compare the parsed date to the desired date
+                    if lineDateTime >= startDateTime:
+                        print("Found a valid timestamp: " +  str(lineTimestamp))
+                        foundStartDateTime = True
+                        logSinceDateTime += logFileLine
+    finally:
+        logFileHandle.close()
+
+    return logSinceDateTime
+
+def get_status_file_content(operation, success, message = ''):
+    return '''
+{
+    "operation": "Dsc''' + str(operation) + '''",
+    "success": "''' + str(success) + '''",
+    "message": "''' + str(message) + '''"
+}
+'''
 
 def write_to_status_file(operation, success, message = ''):
     statusFolderName = 'status'
@@ -44,7 +85,7 @@ def write_to_status_file(operation, success, message = ''):
     statusFilePath = join(statusFolderPath, statusFileName)
     statusFileDesiredPermission = get_permission_in_oct('644')
 
-    # Ensure that the status file has the correct permissions (644) before writing status
+    # Ensure that the status file has the correct permissions (644) if it exists before writing status
     if (isfile(statusFilePath)):
         statusFilePermission = oct(stat(statusFilePath).st_mode & statusFileDesiredPermission)
         if (not (statusFilePermission == "0644" or statusFilePermission == "0o644")):
@@ -58,17 +99,19 @@ def write_to_status_file(operation, success, message = ''):
     finally:
         statusFileHandle.close()
 
-    # Ensure that the status file has the correct permissions (644) after writing status
+    # Ensure that the status file has the correct permissions (644) if it exists after writing status
     if (isfile(statusFilePath)):
         statusFilePermission = oct(stat(statusFilePath).st_mode & statusFileDesiredPermission)
         if (not (statusFilePermission == "0644" or statusFilePermission == "0o644")):
             chmod(statusFilePath , statusFileDesiredPermission)
 
-def get_status_file_content(operation, success, message = ''):
-    return '''
-{
-    "operation": "Dsc''' + str(operation) + '''",
-    "success": "''' + str(success) + '''",
-    "message": "''' + str(message) + '''"
-}
-'''
+def write_success_to_status_file(operation):
+    write_to_status_file(operation, True)
+
+def write_failure_to_status_file_no_log(operation, errorMessage):
+    write_to_status_file(operation, False, errorMessage)
+
+def write_failure_to_status_file(operation, startDateTime, errorMessage):
+    logSinceDateTime = get_log_since_datetime(startDateTime)
+    errorMessageWithLog = errorMessage + '\n---LOG---\n' + logSinceDateTime
+    write_to_status_file(operation, False, errorMessageWithLog)

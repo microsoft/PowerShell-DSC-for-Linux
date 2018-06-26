@@ -4,6 +4,8 @@ from os.path        import dirname, join, realpath
 from subprocess     import PIPE, Popen
 from sys            import version_info
 
+import datetime
+
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
@@ -26,14 +28,14 @@ def main_py24to27():
     try:
         run_perform_required_configuration_checks()
     except Exception, errorInstance:
-        operationStatusUtility.write_failure_to_status_file(operation, errorInstance)
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformRequiredConfigurationChecks.py: ' + str(errorInstance))
         raise errorInstance
 
 def main_py26to3():
     try:
         run_perform_required_configuration_checks()
     except Exception as errorInstance:
-        operationStatusUtility.write_failure_to_status_file(operation, errorInstance)
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformRequiredConfigurationChecks.py: ' + str(errorInstance))
         raise errorInstance
 
 def run_perform_required_configuration_checks():
@@ -52,16 +54,20 @@ def run_perform_required_configuration_checks():
     parameters.append("1")
     parameters.append("}")
 
+    startDateTime = datetime.datetime.now()
+    startDateTimeStringNoMs = datetime.datetime.strftime(startDateTime, "%Y/%m/%d %H:%M:%S")
+    startDateTimeNoMs = datetime.datetime.strptime(startDateTimeStringNoMs, '%Y/%m/%d %H:%M:%S')
+
     process = Popen(parameters, stdout = PIPE, stderr = PIPE)
     stdout, stderr = process.communicate()
+
+    print(stdout)
 
     if stderr == '':
         operationStatusUtility.write_success_to_status_file(operation)
     else:
-        operationStatusUtility.write_failure_to_status_file(operation, stderr)
-
-    print(stdout)
-    print(stderr)
+        operationStatusUtility.write_failure_to_status_file(operation, startDateTimeNoMs, stderr)
+        print(stderr)
 
 if __name__ == "__main__":
     main()

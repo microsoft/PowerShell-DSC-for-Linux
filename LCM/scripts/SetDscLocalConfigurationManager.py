@@ -4,6 +4,8 @@ from os.path        import dirname, join, realpath
 from subprocess     import PIPE, Popen
 from sys            import argv, version_info
 
+import datetime
+
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
@@ -18,7 +20,7 @@ operation = 'SetDscLocalConfigurationManager'
 def usage():
     print("Usage:")
     print("    " + argv[0] + " -configurationmof FILE")
-    operationStatusUtility.write_failure_to_status_file(operation, 'Incorrect parameters: ' + str(argv))
+    operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Incorrect parameters to SetDscLocalConfigurationManager.py: ' + str(argv))
     exit(1)
 
 def main(args):
@@ -32,14 +34,14 @@ def main_py24to27(args):
     try:
         apply_meta_config(args)
     except Exception, errorInstance:
-        operationStatusUtility.write_failure_to_status_file(operation, errorInstance)
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from SetDscLocalConfigurationManager.py: ' + str(errorInstance))
         raise errorInstance
 
 def main_py26to3(args):
     try:
         apply_meta_config(args)
     except Exception as errorInstance:
-        operationStatusUtility.write_failure_to_status_file(operation, errorInstance)
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from SetDscLocalConfigurationManager.py: ' + str(errorInstance))
         raise errorInstance
 
 def apply_meta_config(args):
@@ -77,6 +79,9 @@ def apply_meta_config(args):
     parameters.append("]")
     parameters.append("}")
 
+    startDateTime = datetime.datetime.now()
+    startDateTimeStringNoMs = datetime.datetime.strftime(startDateTime, "%Y/%m/%d %H:%M:%S")
+    startDateTimeNoMs = datetime.datetime.strptime(startDateTimeStringNoMs, '%Y/%m/%d %H:%M:%S')
 
     # Apply the metaconfig
     process = Popen(parameters, stdout = PIPE, stderr = PIPE, close_fds = True)
@@ -89,7 +94,7 @@ def apply_meta_config(args):
         operationStatusUtility.write_success_to_status_file(operation)
         print("Successfully applied metaconfig.")
     else:
-        operationStatusUtility.write_failure_to_status_file(operation, stderr)
+        operationStatusUtility.write_failure_to_status_file(operation, startDateTimeNoMs, stderr)
         print(stderr)
 
     if ((exit_code != 0) or (stderr)):
