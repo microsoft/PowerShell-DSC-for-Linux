@@ -52,13 +52,10 @@ def get_log_since_datetime(startDateTime):
     logFileName = 'omsconfig.log'
     logFilePath = join(helperlib.PYTHON_PID_DIR, logFileName)
 
-    print("Retrieving log with start datetime set to " + str(startDateTime))
-
     logFileHandle = open(logFilePath)
     try:
         for logFileLine in logFileHandle:
             if foundStartDateTime:
-                print("Adding next line to message...")
                 logFileLine = logFileLine.replace('"', '')
                 logSinceDateTime += logFileLine
             else:
@@ -66,14 +63,12 @@ def get_log_since_datetime(startDateTime):
                 regexResult = search('\d{4}\/\d{2}\/\d{2}\s*\d{2}:\d{2}:\d{2}', logFileLine)
                 if regexResult is not None:
                     lineTimestamp = regexResult.group(0)
-                    print("Found a timestamp: " +  str(lineTimestamp))
 
                     # Parse the timestamp
                     lineDateTime = datetime.strptime(lineTimestamp, '%Y/%m/%d %H:%M:%S')
 
                     # Compare the parsed date to the desired date
                     if lineDateTime >= startDateTime:
-                        print("Found a valid timestamp: " +  str(lineTimestamp))
                         foundStartDateTime = True
                         logFileLine = logFileLine.replace('"', '')
                         logSinceDateTime += logFileLine
