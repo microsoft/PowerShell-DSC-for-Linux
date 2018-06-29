@@ -1,11 +1,12 @@
 #!/usr/bin/python
 from fcntl              import flock, LOCK_EX, LOCK_UN
 from imp                import load_source
-from os                 import chmod, listdir, system
-from os.path            import basename, dirname, isfile, join, realpath, split
+from os                 import listdir, system
+from os.path            import dirname, isfile, join, realpath
 from shutil             import move
 from subprocess         import Popen, PIPE
-from sys                import argv, exc_info, stdout, version_info
+from sys                import argv, exc_info, exit, stdout, version_info
+from traceback          import format_exc
 from xml.dom.minidom    import parse
 
 pathToCurrentScript = realpath(__file__)
@@ -42,17 +43,19 @@ def exitWithError(message, errorCode = 1):
 
 def printVerboseMessage(message):
     timestamp = operationStatusUtility.get_current_timestamp()
-    verboseMessage = timestamp + ": VERBOSE from PerformInventory.py: " + message
+    verboseMessage = str(timestamp) + ": VERBOSE from PerformInventory.py: " + str(message)
     print(verboseMessage)
 
 def main(args):
     try:
         perform_inventory(args)
+    except SystemExit:
+        exit(exc_info()[1])
     except Exception:
         # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
-        errorInstance = exc_info()
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformInventory.py: ' + str(errorInstance[1]))
-        raise errorInstance[0], errorInstance[1], errorInstance[2]
+        formattedExceptionMessage = format_exc()
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformRequiredConfigurationChecks.py: ' + formattedExceptionMessage)
+        raise
 
 def perform_inventory(args):
     Variables = dict()
@@ -157,7 +160,8 @@ def perform_inventory(args):
 
             printVerboseMessage(stdout)
 
-            if stderr == '':
+            # Python 3 returns an empty byte array into stderr on success
+            if stderr == '' or (version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == ''):
                 operationStatusUtility.write_success_to_status_file(operation)
             else:
                 operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
