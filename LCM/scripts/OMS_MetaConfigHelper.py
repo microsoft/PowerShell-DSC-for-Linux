@@ -13,6 +13,7 @@ omshelper_disable_path = "/etc/opt/omi/conf/omsconfig/omshelper_disable"
 # Redirect output to our log file
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
 fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
 nxDSCLog = imp.load_source('nxDSCLog', fullPathDSCLogger)
 logger = nxDSCLog.ConsoleAndFileLogger()
@@ -107,8 +108,10 @@ instance of OMI_ConfigurationDocument
 def source_file(filename):
     retval = dict()
     f = open(filename, "r")
-    contents = f.read()
-    f.close()
+    try:
+        contents = f.read()
+    finally:
+        f.close()
     lines = contents.splitlines()
     for line in lines:
         # Find first '='; everything before is key, everything after is value
@@ -158,12 +161,18 @@ if enable_flag == True and disable_flag == True:
     exitWithError("Error: Cannot use both disable and enable options at the same time.")
 
 if enable_flag == True:
+    printVerboseMessage("Enable flag set to True, setting mof to enabled mode.")
     if os.path.isfile(omshelper_disable_path):
         os.remove(omshelper_disable_path)
 if disable_flag == True:
-    open(omshelper_disable_path, "w").write("a")
     printVerboseMessage("Disable flag set to True, setting mof to disabled mode.")
+    disableFileHandle = open(omshelper_disable_path, "w")
+    try:
+        disableFileHandle.write("a")
+    finally:
+        disableFileHandle.close()
 
+    os.system("chown omsagent " + omshelper_disable_path)
 
 if not os.path.isfile(omshelper_disable_path):
     # source the omsadmin conf file and get the key/value pairs
@@ -185,8 +194,10 @@ if not os.path.isfile(omshelper_disable_path):
 
     # Write out agentID
     f = open(agentid_path, "w")
-    f.write(AGENT_GUID)
-    f.close()
+    try:
+        f.write(AGENT_GUID)
+    finally:
+        f.close()
 
     os.system("chown omsagent " + agentid_path)
 
@@ -196,8 +207,10 @@ else:
     metaConfig = generate_push_meta_mof()
 
 f = open(metamof_path, "w")
-f.write(metaConfig)
-f.close()
+try:
+    f.write(metaConfig)
+finally:
+    f.close()
 
 os.system("chown omsagent " + metamof_path)
 
@@ -211,10 +224,17 @@ proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.
 exit_code = proc.wait()
 
 stdout, stderr = proc.communicate()
-printVerboseMessage("Output from: " + commandToRun + ": " + stdout)
+printVerboseMessage("Output from: " + commandToRun + ": " + str(stdout))
 
-if ((exit_code != 0) or (stderr)):
-    exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr), exit_code)
+if ((exit_code == 0) and (stderr == '' or (sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == '')) and ('ReturnValue=0' in str(stdout))):
+    printVerboseMessage('Successfully configured omsconfig.')
 else:
-    printVerboseMessage("Successfully configured omsconfig.")
+    if exit_code == 0:
+        exit_code = 1
 
+    if (stderr != ''):
+        exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr), exit_code)
+    elif ((sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') != '')):
+        exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr.decode(encoding = 'UTF-8')), exit_code)
+    else:
+        exitWithError(("Failed on running command: " + commandToRun), exit_code)
