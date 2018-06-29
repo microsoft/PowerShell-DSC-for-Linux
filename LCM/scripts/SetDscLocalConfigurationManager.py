@@ -1,9 +1,8 @@
 #!/usr/bin/python
-from datetime       import datetime
 from imp            import load_source
 from os.path        import dirname, isfile, join, realpath
 from subprocess     import PIPE, Popen
-from sys            import argv, version_info
+from sys            import argv, exc_info, version_info
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -23,25 +22,13 @@ def usage():
     exit(1)
 
 def main(args):
-    # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions
-    if version_info >= (2, 6):
-        main_py26to3(args)
-    else:
-        main_py24to27(args)
-
-def main_py24to27(args):
     try:
         apply_meta_config(args)
-    except Exception, errorInstance:
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from SetDscLocalConfigurationManager.py: ' + str(errorInstance))
-        raise errorInstance
-
-def main_py26to3(args):
-    try:
-        apply_meta_config(args)
-    except Exception as errorInstance:
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from SetDscLocalConfigurationManager.py: ' + str(errorInstance))
-        raise errorInstance
+    except Exception:
+        # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
+        errorInstance = exc_info()
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from SetDscLocalConfigurationManager.py: ' + str(errorInstance[1]))
+        raise errorInstance[0], errorInstance[1], errorInstance[2]
 
 def apply_meta_config(args):
     if len(args) != 3:
@@ -83,8 +70,7 @@ def apply_meta_config(args):
         parameters.append("}")
 
         # Save the starting timestamp without milliseconds
-        startTimestamp = operationStatusUtility.get_current_timestamp()
-        startDateTime = datetime.strptime(startTimestamp, '%Y/%m/%d %H:%M:%S')
+        startDateTime = operationStatusUtility.get_current_time_no_ms()
 
         # Apply the metaconfig
         process = Popen(parameters, stdout = PIPE, stderr = PIPE, close_fds = True)

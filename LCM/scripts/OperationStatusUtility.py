@@ -6,11 +6,24 @@ from os.path    import dirname, join, isdir, isfile, realpath
 from re         import search
 from sys        import version_info
 
+if hasattr(datetime, 'strptime'):
+    # Only available in this module in Python 2.5+
+    strptime = datetime.strptime
+else:
+    # Only for Python 2.4
+    import time
+    strptime = lambda date_string, format: datetime(*(time.strptime(date_string, format)[0:6]))
+
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
+
+def get_current_time_no_ms():
+    currentTimestamp = get_current_timestamp()
+    currentTimeNoMS = strptime(currentTimestamp, '%Y/%m/%d %H:%M:%S')
+    return currentTimeNoMS
 
 def get_current_timestamp():
     currentDateTime = datetime.now()
@@ -65,7 +78,7 @@ def get_log_since_datetime(startDateTime):
                     lineTimestamp = regexResult.group(0)
 
                     # Parse the timestamp
-                    lineDateTime = datetime.strptime(lineTimestamp, '%Y/%m/%d %H:%M:%S')
+                    lineDateTime = strptime(lineTimestamp, '%Y/%m/%d %H:%M:%S')
 
                     # Compare the parsed date to the desired date
                     if lineDateTime >= startDateTime:

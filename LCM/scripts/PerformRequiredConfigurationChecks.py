@@ -1,9 +1,8 @@
 #!/usr/bin/python
-from datetime       import datetime
 from imp            import load_source
 from os.path        import dirname, join, realpath
 from subprocess     import PIPE, Popen
-from sys            import version_info
+from sys            import exc_info, version_info
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -17,25 +16,13 @@ operationStatusUtility = load_source('operationStatusUtility', operationStatusUt
 operation = 'PerformRequiredConfigurationChecks'
 
 def main():
-    # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions
-    if version_info >= (2, 6):
-        main_py26to3()
-    else:
-        main_py24to27()
-
-def main_py24to27():
     try:
         run_perform_required_configuration_checks()
-    except Exception, errorInstance:
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformRequiredConfigurationChecks.py: ' + str(errorInstance))
-        raise errorInstance
-
-def main_py26to3():
-    try:
-        run_perform_required_configuration_checks()
-    except Exception as errorInstance:
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformRequiredConfigurationChecks.py: ' + str(errorInstance))
-        raise errorInstance
+    except Exception:
+        # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
+        errorInstance = exc_info()
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformRequiredConfigurationChecks.py: ' + str(errorInstance[1]))
+        raise errorInstance[0], errorInstance[1], errorInstance[2]
 
 def run_perform_required_configuration_checks():
     omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
@@ -54,8 +41,7 @@ def run_perform_required_configuration_checks():
     parameters.append("}")
 
     # Save the starting timestamp without milliseconds
-    startTimestamp = operationStatusUtility.get_current_timestamp()
-    startDateTime = datetime.strptime(startTimestamp, '%Y/%m/%d %H:%M:%S')
+    startDateTime = operationStatusUtility.get_current_time_no_ms()
 
     process = Popen(parameters, stdout = PIPE, stderr = PIPE)
     stdout, stderr = process.communicate()

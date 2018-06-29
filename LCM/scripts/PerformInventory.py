@@ -1,12 +1,11 @@
 #!/usr/bin/python
-from datetime           import datetime
 from fcntl              import flock, LOCK_EX, LOCK_UN
 from imp                import load_source
 from os                 import chmod, listdir, system
 from os.path            import basename, dirname, isfile, join, realpath, split
 from shutil             import move
 from subprocess         import Popen, PIPE
-from sys                import argv, stdout, version_info
+from sys                import argv, exc_info, stdout, version_info
 from xml.dom.minidom    import parse
 
 pathToCurrentScript = realpath(__file__)
@@ -47,25 +46,13 @@ def printVerboseMessage(message):
     print(verboseMessage)
 
 def main(args):
-    # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions
-    if version_info >= (2, 6):
-        main_py26to3(args)
-    else:
-        main_py24to27(args)
-
-def main_py24to27(args):
     try:
         perform_inventory(args)
-    except Exception, errorInstance:
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformInventory.py: ' + str(errorInstance))
-        raise errorInstance
-
-def main_py26to3(args):
-    try:
-        perform_inventory(args)
-    except Exception as errorInstance:
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformInventory.py: ' + str(errorInstance))
-        raise errorInstance
+    except Exception:
+        # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
+        errorInstance = exc_info()
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformInventory.py: ' + str(errorInstance[1]))
+        raise errorInstance[0], errorInstance[1], errorInstance[2]
 
 def perform_inventory(args):
     Variables = dict()
@@ -162,8 +149,7 @@ def perform_inventory(args):
             system("rm -f " + dsc_reportdir + "/*")
 
             # Save the starting timestamp without milliseconds
-            startTimestamp = operationStatusUtility.get_current_timestamp()
-            startDateTime = datetime.strptime(startTimestamp, '%Y/%m/%d %H:%M:%S')
+            startDateTime = operationStatusUtility.get_current_time_no_ms()
 
             process = Popen(parameters, stdout = PIPE, stderr = PIPE)
             stdout, stderr = process.communicate()
