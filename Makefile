@@ -139,6 +139,7 @@ dsc100: lcm100 providers
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
+	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 dsc110: lcm110 providers
 	mkdir -p intermediate/Scripts
