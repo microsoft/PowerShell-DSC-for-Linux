@@ -2,6 +2,7 @@
 from datetime   import datetime
 from errno      import EINVAL
 from imp        import load_source
+from json       import dump
 from os         import chmod, mkdir, stat
 from os.path    import dirname, join, isdir, isfile, realpath
 from re         import search
@@ -202,13 +203,13 @@ def get_log_since_datetime(startDateTime):
     return logSinceDateTime
 
 def get_status_file_content(operation, success, message = ''):
-    return '''
-{
-    "operation": "Dsc''' + str(operation) + '''",
-    "success": "''' + str(success) + '''",
-    "message": "''' + str(message) + '''"
-}
-'''
+    status_file_content = {
+        "operation": "Dsc" + str(operation),
+        "success": str(success),
+        "message": str(message)
+    }
+
+    return status_file_content
 
 def write_to_status_file(operation, success, message = ''):
     statusFolderName = 'status'
@@ -231,7 +232,7 @@ def write_to_status_file(operation, success, message = ''):
 
     statusFileHandle = open(statusFilePath, 'w')
     try:
-        statusFileHandle.write(statusFileContent)
+        dump(statusFileContent, statusFileHandle)
     finally:
         statusFileHandle.close()
 
