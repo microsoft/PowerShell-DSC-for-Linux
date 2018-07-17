@@ -14,7 +14,7 @@ helperlib = load_source('helperlib', helperLibPath)
 operationStatusUtilityPath = join(pathToCommonScriptsFolder, 'OperationStatusUtility.py')
 operationStatusUtility = load_source('operationStatusUtility', operationStatusUtilityPath)
 
-operation = 'PerformRequiredConfigurationChecks'
+operation = 'PerformConsistency'
 
 def main():
     try:
