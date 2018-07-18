@@ -61,7 +61,6 @@ def perform_inventory(args):
     Variables = dict()
 
     # Parse command line arguments
-    args = []
     optlist = []
 
     command_line_length = len(args)
@@ -71,7 +70,7 @@ def perform_inventory(args):
     arg = ""
 
     while argIndex < command_line_length:
-        arg = args[i]
+        arg = args[argIndex]
         if argIndex == 0:
             # skip the program name
             argIndex += 1
