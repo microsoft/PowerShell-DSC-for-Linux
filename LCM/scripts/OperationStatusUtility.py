@@ -240,7 +240,7 @@ def write_to_status_file(operation, success, message = ''):
     ensure_file_permissions(statusFilePath, '644')
 
 def write_success_to_status_file(operation):
-    write_to_status_file(operation, True)
+    write_to_status_file(operation, True, 'Succeeded')
 
 def write_failure_to_status_file_no_log(operation, errorMessage):
     write_to_status_file(operation, False, errorMessage)
