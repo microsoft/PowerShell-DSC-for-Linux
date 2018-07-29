@@ -9,6 +9,7 @@ import os
 import sys
 import imp
 import md5
+import sha
 import codecs
 import base64
 import platform
@@ -126,9 +127,13 @@ def init_vars(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
 def Set_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     recvdContentChecksum = md5.md5(Contents).hexdigest().upper()
     if recvdContentChecksum != ContentChecksum:
-        # data is corrupt do not proceed further
-        LOG_ACTION.log(LogType.Error, 'Content received did not match checksum, exiting Set')
-        return [-1]
+        LOG_ACTION.log(LogType.Info, 'Content received did not match checksum with md5, trying with sha1')
+        # validate with sha1
+        recvdContentChecksum = sha.sha(Contents).hexdigest().upper()
+        if recvdContentChecksum != ContentChecksum:
+            # data is corrupt do not proceed further
+            LOG_ACTION.log(LogType.Error, 'Content received did not match checksum with sha1, exiting Set')
+            return [-1]
     (ConfigType, ConfigID, Contents, Ensure, ContentChecksum) = init_vars(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = Set(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     return retval
@@ -137,9 +142,13 @@ def Set_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
 def Test_Marshall(ConfigType, ConfigID, Contents, Ensure, ContentChecksum):
     recvdContentChecksum = md5.md5(Contents).hexdigest().upper()
     if recvdContentChecksum != ContentChecksum:
-        # data is corrupt do not proceed further
-        LOG_ACTION.log(LogType.Error, 'Content received did not match checksum, exiting Test')
-        return [0]
+        LOG_ACTION.log(LogType.Info, 'Content received did not match checksum with md5, trying with sha1')
+        # validate with sha1
+        recvdContentChecksum = sha.sha(Contents).hexdigest().upper()
+        if recvdContentChecksum != ContentChecksum:
+            # data is corrupt do not proceed further
+            LOG_ACTION.log(LogType.Error, 'Content received did not match checksum with sha1, exiting Set')
+            return [0]
     (ConfigType, ConfigID, Contents, Ensure, ContentChecksum) = init_vars(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     retval = Test(ConfigType, ConfigID, Contents, Ensure, ContentChecksum)
     return retval
