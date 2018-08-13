@@ -95,7 +95,8 @@ module OMS
             warning_failed_rules = 0;
             informational_failed_rules = 0;
             all_failed_rules = 0;
-    
+            percentage_of_passed_rules = 0;
+
             asm_baseline_results.each do |asm_baseline_result|
 
                 if asm_baseline_result["result"] == "MISS" || asm_baseline_result["result"] == "SKIP"
@@ -120,7 +121,9 @@ module OMS
             end 
 
             all_assessed_rules = all_failed_rules + pass_rules
-            percentage_of_passed_rules = (pass_rules * 100.0 / all_assessed_rules).round
+            if all_assessed_rules != 0
+    	        percentage_of_passed_rules = (pass_rules * 100.0 / all_assessed_rules).round
+            end            
     
             security_baseline_summary_blob = {
                 "DataType" => "SECURITY_BASELINE_SUMMARY_BLOB",
