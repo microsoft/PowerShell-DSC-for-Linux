@@ -281,7 +281,6 @@ def get_cert_info(certificate_path):
 
     if p.poll() != 0:
         raise Exception("Unable to get certificate thumbprint.")
-    thumbprint = raw_fingerprint.split("SHA1 Fingerprint=")[1].replace(":", "").strip()
 
     p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-issuer"],
                          stdout=subprocess.PIPE,
@@ -290,7 +289,6 @@ def get_cert_info(certificate_path):
 
     if p.poll() != 0:
         raise Exception("Unable to get certificate issuer.")
-    issuer = raw_issuer.split("issuer= ")[1].strip()
 
     p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-subject"],
                          stdout=subprocess.PIPE,
@@ -299,9 +297,58 @@ def get_cert_info(certificate_path):
 
     if p.poll() != 0:
         raise Exception("Unable to get certificate subject.")
-    subject = raw_subject.split("subject= ")[1].strip()
 
-    return issuer, subject, thumbprint
+    return parse_issuer_from_openssl_output(raw_issuer), \
+           parse_subject_from_openssl_output(raw_subject), \
+           parse_thumbprint_from_openssl_output(raw_fingerprint)
+
+
+def parse_thumbprint_from_openssl_output(raw_fingerprint):
+    """Parses the thumbprint value from the raw OpenSSL output.
+
+    Example output from openSSL:
+    SHA1 Fingerprint=3B:C3:70:46:00:0C:B2:0B:F9:86:98:CF:9D:11:DF:EB:22:B7:41:F5
+
+    Returns:
+        string : The certificate thumbprint.
+    """
+    return raw_fingerprint.split("SHA1 Fingerprint=")[1].replace(":", "").strip()
+
+
+def parse_issuer_from_openssl_output(raw_issuer):
+    """Parses the issuer value from the raw OpenSSL output.
+
+    For reference, openssl cmd has different format between openssl versions;
+
+    OpenSSL 1.1.x formatting:
+    issuer=C = US, ST = Some-State, O = Internet Widgits Pty Ltd
+    issuer=C = CT, ST = "STA,STB", L = "LocalityA, LocalityB", O = Internet Widgits Pty Ltd
+
+    OpenSSL 1.0.x  formatting:
+    issuer= /C=US/ST=Some-State/O=Internet Widgits Pty Ltd
+    issuer= /C=US/ST=STA,STB/L=LocalityA, LocatlityB/O=Internet Widgits Pty Ltd
+
+    Returns:
+        string : The certificate issuer.
+    """
+    return raw_issuer.split("issuer=")[1].strip()
+
+
+def parse_subject_from_openssl_output(raw_subject):
+    """Parses the subject value from the raw OpenSSL output.
+
+    For reference, openssl cmd has different format between openssl versions;
+
+    OpenSSL 1.1.x formatting:
+    subject=C = CT, ST = "ST,Cs", L = "Locality, Locality", O = Internet Widgits Pty Ltd
+
+    OpenSSL 1.0.x  formatting:
+    subject= /C=US/ST=WA/L=Locality, Locality/O=Internet Widgits Pty Ltd
+
+    Returns:
+        string : The certificate subject.
+    """
+    return raw_subject.split("subject=")[1].strip()
 
 
 @posix_only
