@@ -197,7 +197,7 @@ def UpdateConf(CustomLogObjects):
         for customlog in CustomLogObjects:
             logname = customlog['LogName']
             filepaths = ','.join(customlog['FilePath'])
-            new_source += '\n<source>\n  type sudo_tail\n  path ' + filepaths + '\n  pos_file /var/opt/microsoft/omsagent/state/' + logname + '.pos\n  read_from_head true\n  run_interval 60\n  tag oms.blob.CustomLog.' + logname + '.*\n  format none\n</source>\n'
+            new_source += '\n<source>\n  type sudo_tail\n  path ' + filepaths + '\n  pos_file /var/opt/microsoft/omsagent/state/' + logname + '.pos\n  read_from_head false\n  run_interval 60\n  tag oms.blob.CustomLog.' + logname + '.*\n  format none\n</source>\n'
     txt = header + new_source
     if os.path.isfile(conf_path):
         shutil.copy2(conf_path, conf_path + '.bak')
