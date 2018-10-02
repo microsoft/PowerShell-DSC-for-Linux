@@ -89,8 +89,9 @@ def Set_Marshall(ResourceSettings):
 
         # set cert permissions
         proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--initialize"])
-        if proc.wait() != 0:
-            raise Exception("call to omsutil.py --initialize failed")
+        stdout, stderr = proc.communicate()
+        if proc.returncode != 0:
+            raise Exception("call to omsutil.py --initialize failed. %s" % stderr)
 
     except Exception:
         log(ERROR, "Set_Marshall returned [-1] with following error: %s" % traceback.format_exc())
@@ -190,6 +191,7 @@ def Test_Marshall(ResourceSettings):
     """
     try:
         settings = read_settings_from_mof_json(ResourceSettings)
+        log(DEBUG, "UpdatesEnabled is %s; AutomationWorkerEnabled is %s" % (settings.auto_register_enabled, settings.diy_enabled))
         if not is_oms_primary_workspace(settings.workspace_id):
             # not primary workspace
             # return unconditional [0] for a NOOP on non-primary workspace
@@ -571,7 +573,6 @@ def is_any_1_4_process_running(processes, workspace_id):
             if WORKER_MANAGER_START_PATH in ps and workspace_id in ps and version == "1.4":
                 return True
     return False
-
 
 def get_worker_manager_pid_and_version(workspace_id, throw_error_on_multiple_found=True):
     """
