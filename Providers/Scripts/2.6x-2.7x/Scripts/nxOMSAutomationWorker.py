@@ -88,10 +88,10 @@ def Set_Marshall(ResourceSettings):
             os.chmod(WORKER_STATE_DIR, PERMISSION_LEVEL_0770)
 
         # set cert permissions
-        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--initialize"])
+        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--initialize"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         if proc.returncode != 0:
-            raise Exception("call to omsutil.py --initialize failed. %s" % stderr)
+            raise Exception("call to omsutil.py --initialize failed. %s, %s" % (stdout, stderr))
 
     except Exception:
         log(ERROR, "Set_Marshall returned [-1] with following error: %s" % traceback.format_exc())
