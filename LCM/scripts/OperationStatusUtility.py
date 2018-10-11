@@ -239,11 +239,30 @@ def write_to_status_file(operation, success, message = ''):
     # Ensure that the status file has the correct permissions (644) if it exists after writing status
     ensure_file_permissions(statusFilePath, '644')
 
+def write_to_status_to_log_file(operation, success, message = ''):
+    logFilePath = join(helperlib.PYTHON_PID_DIR, 'omsconfig.log')
+
+    # Ensure that the omsconfig.log file has the correct permissions (644) if it exists before writing log
+    ensure_file_permissions(logFilePath, '644')
+
+    logFileContent = get_status_file_content(operation, success, message)
+
+    logFileHandle = open(logFilePath, 'a')
+    try:
+        dump(logFileContent, logFileHandle)
+    finally:
+        logFileHandle.close()
+
+    # Ensure that the status file has the correct permissions (644) if it exists after writing status
+    ensure_file_permissions(logFilePath, '644')
+
 def write_success_to_status_file(operation):
     write_to_status_file(operation, 'true', 'Succeeded')
+    write_to_status_to_log_file(operation, 'true', 'Succeeded')
 
 def write_failure_to_status_file_no_log(operation, errorMessage):
     write_to_status_file(operation, 'false', errorMessage)
+    write_to_status_to_log_file(operation, 'false', errorMessage)
 
 def write_failure_to_status_file(operation, startDateTime, errorMessage):
     logSinceDateTime = get_log_since_datetime(startDateTime)
