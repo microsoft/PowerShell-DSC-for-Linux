@@ -54,7 +54,7 @@ def main(args):
     except Exception:
         # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
         formattedExceptionMessage = format_exc()
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformRequiredConfigurationChecks.py: ' + formattedExceptionMessage)
+        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformInventory.py: ' + formattedExceptionMessage)
         raise
 
 def perform_inventory(args):

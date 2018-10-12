@@ -283,6 +283,15 @@ fi
 # Ensure .reg files all have correct permissions
 chmod 644 $OMI_REGISTER_DIR/root-oms/*.reg
 
+if [ -f "/etc/opt/omi/conf/omsconfig/agentid" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/agentid"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof"; fi
+if [ -d "/etc/opt/omi/conf/omsconfig/.gnupg" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/.gnupg"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/inventory_lock" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/inventory_lock"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/keymgmtring.gpg" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/keymgmtring.gpg"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/keyring.gpg" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/keyring.gpg"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/last_statusreport" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/last_statusreport"; fi
+if [ -d "/var/opt/microsoft/omsconfig" ]; then chown -R omsagent:omiusers /var/opt/microsoft/omsconfig/*; fi
+
 #else
 
 # Set up built-in resource module for DIY DSC
