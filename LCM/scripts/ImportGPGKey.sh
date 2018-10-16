@@ -19,6 +19,7 @@ RETVAL=$?
 if [ "<CONFIG_SYSCONFDIR_DSC>" = "omsagent" ]; then
     if [ `id -u` = 0 ] ; then
         chown omsagent $DSC_ETC_DIR/$KEYRING_NAME
+        chmod g+r $DSC_ETC_DIR/$KEYRING_NAME
     fi
 fi
 
