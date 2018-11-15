@@ -134,7 +134,7 @@ int UCS2ToAscii( _In_z_ const wchar_t *input,
     size_t xCount = 0;
     char *incInput = (char*) input;
     char *incOutput;
-    inputLen = Wcslen(input);
+    inputLen = wcslen(input);
     *output = (char*) PAL_Malloc(inputLen + 1 );
     if( *output == NULL )
     {
