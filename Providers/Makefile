@@ -66,6 +66,7 @@ ifeq ($(BUILD_OMS),BUILD_OMS)
 PROVIDERS:=nxOMSPerfCounter
 PROVIDERS+=nxOMSSyslog
 PROVIDERS+=nxOMSCustomLog
+PROVIDERS+=nxOMSSudoCustomLog
 PROVIDERS+=nxOMSGenerateInventoryMof
 PROVIDERS+=nxService
 PROVIDERS+=nxPackage
@@ -75,6 +76,9 @@ PROVIDERS+=nxOMSPlugin
 PROVIDERS+=nxAvailableUpdates
 PROVIDERS+=nxOMSKeyMgmt
 PROVIDERS+=nxFileInventory
+PROVIDERS+=nxOMSAutomationWorker
+PROVIDERS+=nxOMSAgentNPMConfig
+PROVIDERS+=nxOMSAuditdPlugin
 else
 PROVIDERS:=nxFile
 PROVIDERS+=nxScript
@@ -95,6 +99,7 @@ PROVIDERS+=nxMySqlGrant
 PROVIDERS+=nxMySqlUser
 PROVIDERS+=nxAvailableUpdates
 PROVIDERS+=nxFileInventory
+PROVIDERS+=nxOMSAutomationWorker
 endif
 
 # this is used to enable the printing of xml style tags for help in debugging
@@ -196,13 +201,15 @@ $(BIN_PATH)/libMSFT_$1Resource.so : \
 	$(addprefix $(BIN_PATH)/$1_,$(GENERATED_OBJS)) \
 	$(BIN_PATH)/MSFT_$1Resource.o
 	@echo ...linking: $(BIN_PATH)/libMSFT_$1Resource.so
-	$(CXX) -shared -o $$@ $$^ -L$(LIBDIR) -lmiapi -lmicodec -lmofparser -lmofparsererror -lprotocol -lomi_error -lxmlserializer -lbase -lpal
+	$(CXX) -shared -o $$@ $$^ -L$(LIBDIR) -lmi -lmicodec -lmofparser -lmofparsererror -lprotocol -lomi_error -lxmlserializer -lbase -lpal
 endef
 
 # instantiate per provider rules
 $(foreach provider,$(PROVIDERS),\
     $(eval $(call PER-PROVIDER-RULES,$(provider))))
 
+$(foreach provider,$(TEST_PROVIDERS),\
+    $(eval $(call PER-PROVIDER-RULES,$(provider))))
 
 # miscellaneous rules
 ################################################################################

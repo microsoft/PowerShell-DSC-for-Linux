@@ -19,7 +19,7 @@ module Fluent
       super
       # This is the first method to be called when it starts running
       # Use it to allocate resources, etc.
-      LinuxUpdates.log = @log
+      # LinuxUpdates.log = @log
     end
 
     def shutdown
@@ -31,7 +31,8 @@ module Fluent
     def filter(tag, time, record)
       xml_string = record['xml']
       @log.debug "LinuxUpdates : Filtering xml size=#{xml_string.size}"
-      return LinuxUpdates.transform_and_wrap(xml_string, @hostname, time)
+      linuxUpdates = LinuxUpdates.new(@log)
+      return linuxUpdates.transform_and_wrap(xml_string, @hostname, time)
     end # filter
   end # class
 end # module

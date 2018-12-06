@@ -219,6 +219,10 @@ def GetFileInfo(fname, Links, MaxContentsReturnable, Checksum):
     If file is link and 'Links' == 'ignore' {} is returned.
     """
     d = {}
+
+    if fname.endswith("omsadmin.conf"):
+        return d
+
     if os.path.islink(fname):
         d['Type'] = 'link'
     else :
@@ -242,6 +246,18 @@ def GetFileInfo(fname, Links, MaxContentsReturnable, Checksum):
     d['ModifiedDate'] = int(stat_info.st_mtime)
     d['CreatedDate'] = int(stat_info.st_ctime)
     d['FileSize'] = stat_info.st_size
+    # if file size is 0 
+    # dont attempt to read the file
+    if stat_info.st_size == 0:
+       d['Contents'] = ''
+       if Checksum == 'md5' or Checksum == 'sha-256':
+        d['Checksum'] = "" 
+       elif Checksum == "ctime":
+        d['Checksum']= str(int(stat_info.st_ctime))
+       else : # Checksum == "mtime":
+        d['Checksum']= str(int(stat_info.st_mtime))
+       return d
+
     if Checksum == 'md5' or Checksum == 'sha-256':
         d['Checksum'] = GetChecksum(fname,Checksum)
     elif Checksum == "ctime":

@@ -239,6 +239,8 @@ MI_Result InitHandler(
         return GetCimMIError3Params(MI_RESULT_FAILED, cimErrorDetails, ID_LCM_MULTIPLE_METHOD_REQUEST, methodName, (const MI_Char*)g_inializingOperationMethodName, methodName);
     }
 
+    InitLocTable();
+
     g_inializingOperationMethodName = (MI_Char*)methodName;
 
     error = DSC_EventRegister();
@@ -367,8 +369,6 @@ MI_Result InitHandler(
         g_inializingOperationMethodName = NULL;
         return result;
     }
-    InitLocTable();
-
     SetJobDeviceName();
 
     RegistrationManager_New((RegistrationManager**)&(g_registrationManager), cimErrorDetails);
@@ -1187,6 +1187,7 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
         MI_Instance* metaConfigInstance = NULL;
         MI_Char* unexpandedPartialConfigFilePath = NULL;
         MI_Char* partialConfigFilePath = NULL;
+        MI_Char* checksumFile = NULL;
         MI_InstanceA resourceInstanceArray = { 0 };
         Internal_Dir *dirHandle = NULL;
         MI_Application application = MI_APPLICATION_NULL;
@@ -1271,9 +1272,15 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
                                         INSTANCE_DELETE_IF_NOT_NULL(*cimErrorDetails);
                                 }
                                 File_RemoveT(partialConfigFilePath); //Delete the file since its irrelevant
+                               
+                                ConcatStrings(&checksumFile, 0, partialConfigFilePath, CHECKSUM_EXTENSION);
+                                File_RemoveT(checksumFile); //Delete the corresponding checksum file as well 
+                                
                                 dirEntry = Internal_Dir_Read(dirHandle, MOF_EXTENSION);
                                 DSCFREE_IF_NOT_NULL(partialConfigFilePath);
-                                result = MI_RESULT_OK;
+                                DSCFREE_IF_NOT_NULL(checksumFile);
+                                                                
+				result = MI_RESULT_OK;
                                 errorOccured = MI_TRUE;
                                 continue; //Carry on to the next file
                         }
@@ -1344,16 +1351,16 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
         }
         else
         {
-                if (errorOccured)
-                {
-                        //This means there was an error and hence partial configurations couldn't be merged
-                        result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_FAILEDPARTIALCONFIGS);
-                }
-                else
-                {
-                        //That means there was no partial config file found that was valid, so throw error
-                        result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_NOPARTIALCONFIGPRESENT);
-                }
+            if (errorOccured)
+            {
+                //This means there was an error and hence partial configurations couldn't be merged
+                result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_FAILEDPARTIALCONFIGS);
+            }
+            else
+            {
+                //That means there was no partial config file found that was valid, so throw error
+                result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_NOPARTIALCONFIGPRESENT);
+            }
         }
         GOTO_CLEANUP_IF_FAILED(result, Exit);
 
@@ -6116,66 +6123,66 @@ MI_Result MI_CALL LCM_Pull_Execute(
         for (xCount = 0; xCount < partialConfigurations.size && result == MI_RESULT_OK; xCount++)
         {
             result = GetPartialConfigurationName(bFullConfiguration ? NULL : partialConfigurations.data[xCount], (const MI_Char**)&partialConfigName, cimErrorDetails);
-                if (partialConfigName != NULL)
-                {
-                    DSC_EventWriteLCMPullingPartial(partialConfigName);//Log that we're pulling this partial configuration
-                }
-                if (result != MI_RESULT_OK)
-                {
-                        moduleManager->ft->Close(moduleManager, NULL);
-                        return result;
-                }
-                result = GetMofChecksum(&checkSumValue, partialConfigName, cimErrorDetails);
-                if (result != MI_RESULT_OK)
-                {
-                        moduleManager->ft->Close(moduleManager, NULL);
-                        return result;
-                }
-                result = LCM_Pull_ExecuteActionPerConfiguration(lcmContext, metaConfigInstance, partialConfigName,
-                                                                checkSumValue, bComplianceStatus, getActionStatusCode, 
-                                                                &numModulesInstalled, &resultStatus, &getActionStatusCode, &serverAssignedConfigurations,
-                                                                moduleManager, cimErrorDetails);
-                DSC_free(checkSumValue);
+            if (partialConfigName != NULL)
+            {
+                DSC_EventWriteLCMPullingPartial(partialConfigName);//Log that we're pulling this partial configuration
+            }
+            if (result != MI_RESULT_OK)
+            {
+                    moduleManager->ft->Close(moduleManager, NULL);
+                    return result;
+            }
+            result = GetMofChecksum(&checkSumValue, partialConfigName, cimErrorDetails);
+            if (result != MI_RESULT_OK)
+            {
+                    moduleManager->ft->Close(moduleManager, NULL);
+                    return result;
+            }
+            result = LCM_Pull_ExecuteActionPerConfiguration(lcmContext, metaConfigInstance, partialConfigName,
+                                                            checkSumValue, bComplianceStatus, getActionStatusCode, 
+                                                            &numModulesInstalled, &resultStatus, &getActionStatusCode, &serverAssignedConfigurations,
+                                                            moduleManager, cimErrorDetails);
+            DSC_free(checkSumValue);
 
-                if (serverAssignedConfigurations)
+            if (serverAssignedConfigurations)
+            {
+                // Release the memory block assigned to each configuration status and then release the overall configurationstatus (serverAssignedConfigurations)
+                // Please refer to the struct definition of 'OverAllGetActionResponse' to understand the logic below easily. 
+                if (serverAssignedConfigurations != NULL)
                 {
-                    // Release the memory block assigned to each configuration status and then release the overall configurationstatus (serverAssignedConfigurations)
-                    // Please refer to the struct definition of 'OverAllGetActionResponse' to understand the logic below easily. 
-                    if (serverAssignedConfigurations != NULL)
+                    MI_Uint32 totalConfigCounts = (serverAssignedConfigurations)->NumberOfConfiguration;
+                    MI_Uint32 memoryOffset;
+                    for (memoryOffset = 0; memoryOffset < totalConfigCounts; memoryOffset++)
                     {
-                        MI_Uint32 totalConfigCounts = (serverAssignedConfigurations)->NumberOfConfiguration;
-                        MI_Uint32 memoryOffset;
-                        for (memoryOffset = 0; memoryOffset < totalConfigCounts; memoryOffset++)
+                        ConfigurationStatus* currentMemoryBlock = (serverAssignedConfigurations)->Details + memoryOffset;
+                        if (currentMemoryBlock != NULL)
                         {
-                            ConfigurationStatus* currentMemoryBlock = (serverAssignedConfigurations)->Details + memoryOffset;
-                            if (currentMemoryBlock != NULL)
-                            {
-                                DSC_free(currentMemoryBlock);
-                                currentMemoryBlock = NULL;
-                            }
+                            DSC_free(currentMemoryBlock);
+                            currentMemoryBlock = NULL;
                         }
-                        DSC_free(serverAssignedConfigurations);
-                    }            
-                    serverAssignedConfigurations = NULL;       
-                }
+                    }
+                    DSC_free(serverAssignedConfigurations);
+                }            
+                serverAssignedConfigurations = NULL;       
+            }
 
-                if (result == MI_RESULT_OK)
+            if (result == MI_RESULT_OK)
+            {
+                // If GetAction required us to get the configuraiton then only we have to apply the new configuration.
+                if (resultStatus && Tcscasecmp(resultStatus, PULL_STATUSCODE_GETCONFIG) == 0)
                 {
-                        // If GetAction required us to get the configuraiton then only we have to apply the new configuration.
-                        if (resultStatus && Tcscasecmp(resultStatus, PULL_STATUSCODE_GETCONFIG) == 0)
-                        {
-                                bGotNewConfiguration = MI_TRUE;
-                        }
-                        else if (resultStatus && Tcscasecmp(resultStatus, PULL_STATUSCODE_RETRY) == 0)
-                        {
-                                // Pull server didn't have configuration file, ignore the failure, it will be handled later.
-                                DSC_EventWritePartialConfigurationNotAvailable(partialConfigName);
-                        }
-                        if (resultStatus)
-                        {
-                                DSC_free(resultStatus);
-                        }
+                        bGotNewConfiguration = MI_TRUE;
                 }
+                else if (resultStatus && Tcscasecmp(resultStatus, PULL_STATUSCODE_RETRY) == 0)
+                {
+                        // Pull server didn't have configuration file, ignore the failure, it will be handled later.
+                        DSC_EventWritePartialConfigurationNotAvailable(partialConfigName);
+                }
+                if (resultStatus)
+                {
+                        DSC_free(resultStatus);
+                }
+            }
         }
         if (result == MI_RESULT_OK && bGotNewConfiguration)
         {

@@ -311,7 +311,11 @@
    
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVREGINS_PROP_NAMESPACE, ID_MODMAN_VALIDATE_PROVREGINS_PROP_NAMESPACE, "Mandatory property Namespace not found.")
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_PROVREGINS_PROP_MODULENAME, ID_MODMAN_VALIDATE_PROVREGINS_PROP_MODULENAME, "Mandatory property ModuleName not found.")
-    INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, "Mandatory property not found.")
+    INTERNAL_Intlstr_Define2( ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, 
+        ID_MODMAN_VALIDATE_CLASSPROP_MAND_NAME, 
+        _In_z_ const PAL_Char*, className,
+        _In_z_ const PAL_Char*, propertyName,
+        "Mandatory property  " Intlstr_tstr(1) " not found for class " Intlstr_tstr(2))
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_CLASSPROP_MAND_TYPE, ID_MODMAN_VALIDATE_CLASSPROP_MAND_TYPE, "Mandatory property type does not match.")
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_CLASSPROP_MAND_GETCLASS, ID_MODMAN_VALIDATE_CLASSPROP_MAND_GETCLASS, "MGet class property count failed.")
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_CLASSPROP_MAND_NOMATCH, ID_MODMAN_VALIDATE_CLASSPROP_MAND_NOMATCH, "The number of properties does not match the expected number.")
@@ -391,11 +395,11 @@
                  "Failed to save the configuration in file " Intlstr_tstr(1) ".")  
     INTERNAL_Intlstr_Define0( ID_PULL_CHECKSUMMISMATCH,ID_PULL_CHECKSUMMISMATCH,"Checksum for configuration does not match.")                 
     INTERNAL_Intlstr_Define0( ID_MODMAN_VALIDATE_DOCINS , ID_MODMAN_VALIDATE_DOCINS ,"There is no document instance inside the metaconfiguration. Please create the configuration with an instance of OMI_ConfigurationDocument and try again.")
- INTERNAL_Intlstr_Define1( ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF ,
+    INTERNAL_Intlstr_Define1( ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF ,
                  ID_LCMHELPER_INVALID_PARTIALCONFIG_NOTINMETACONF ,
                  _In_z_ const PAL_Char*, firstString,
                  "The partial configuration name " Intlstr_tstr(1) " present in the configuration document is invalid. Define a partial configuration inside the metaconfiguration with this partial configuration name in order to use it.")
-
+    INTERNAL_Intlstr_Define0( ID_LCM_CANNOTUSE_PARTIALCONFIG_PUSHMODE_WITHOUTPUBLISH , ID_LCM_CANNOTUSE_PARTIALCONFIG_PUSHMODE_WITHOUTPUBLISH ,"The only way DSC Partial Configurations can be used in Push mode is if the Publish-DscConfiguration Cmdlet is used. No other push cmdlet is supported. To avoid this error, either set a metaconfiguration without partial configurations, or use the Publish-DscConfiguration cmdlet to deploy your partial configuration.")
 
 INTERNAL_Intlstr_Define0( ID_PULL_DSCCONF_NOTOPENABLE,
 			  ID_PULL_DSCCONF_NOTOPENABLE,
@@ -464,14 +468,34 @@ INTERNAL_Intlstr_Define0( ID_PULL_INVALIDCHECKSUMALGORITHM,
 			  ID_PULL_INVALIDCHECKSUMALGORITHM,
                  	  "Receieved an invalid checksum algorithm from server.")
 
-INTERNAL_Intlstr_Define0( ID_PULL_NOPARTIALCONFIGS,
-			  ID_PULL_NOPARTIALCONFIGS,
-                 	  "Unable to find PartialConfigurations in the MetaConfiguration.")
+INTERNAL_Intlstr_Define1( ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE,
+			  ID_MODMAN_INVALID_PARTIALCONFIG_CONFIGSOURCE,
+  			  _In_z_ const PAL_Char*, firstString,
+              "The download manager " Intlstr_tstr(1) " mentioned in the partial configuration is undefined in the meta configuration or assigned incorrectly. Check the download manager and assign ResourceRepositoryWeb or ResourceReporistoryShare to ResourceModuleSource and ConfigurationRepositoryWeb or ConfigurationRepositoryShare to ConfigurationSource")
+
+              
+INTERNAL_Intlstr_Define1( ID_MODMAN_PARTIALCONFIG_CONFIGSOURCE_MUSTBEONE,
+			  ID_MODMAN_PARTIALCONFIG_CONFIGSOURCE_MUSTBEONE,
+  			  _In_z_ const PAL_Char*, firstString,
+              "The download manager " Intlstr_tstr(1) " mentioned in the partial configuration is not allowed. ConfigurationSource must have a single value.")
+
+INTERNAL_Intlstr_Define0( ID_MODMAN_PARTIALCONFIG_RESOURCEMODULESOURCE_NOTSUPPORTED,
+			  ID_MODMAN_PARTIALCONFIG_RESOURCEMODULESOURCE_NOTSUPPORTED,
+              "ResourceModuleSource is not supported for partial configurations on this system.")
+
+INTERNAL_Intlstr_Define0(ID_PARTIALCONFIG_NOPARTIALCONFIGPRESENT,
+              ID_PARTIALCONFIG_NOPARTIALCONFIGPRESENT,
+"None of the partial configurations defined in the mataconfiguraiton was found in the store. Either the configuraitons have not been pulled from the pull server (in the case of pull refres mode), or they have not been published ot the store (in the case of push refresh mode). ")
+
+INTERNAL_Intlstr_Define0(ID_PARTIALCONFIG_FAILEDPARTIALCONFIGS,
+              ID_PARTIALCONFIG_FAILEDPARTIALCONFIGS,
+              "One or more partial configurations failed to apply. No configuration could be created.")
 
 INTERNAL_Intlstr_Define1( ID_PULL_NOCONFIGURATIONSOURCE,
 			  ID_PULL_NOCONFIGURATIONSOURCE,
       			  _In_z_ const PAL_Char*, firstString,
                  	  "No ConfigurationSource is specified for the PartialConfiguration: "  Intlstr_tstr(1) ".")
+
 
 INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODE,
 			  ID_PULL_SERVERHTTPERRORCODE,
@@ -480,11 +504,13 @@ INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODE,
                  	  "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) ".")
 
 
-INTERNAL_Intlstr_Define2( ID_PULL_SERVERHTTPERRORCODEMODULE,
-			  ID_PULL_SERVERHTTPERRORCODEMODULE,
-      			  _In_z_ const PAL_Char*, firstString,
-                          _In_z_ const PAL_Char*, secondString,
-                 	  "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) " for a module.")
+INTERNAL_Intlstr_Define4( ID_PULL_SERVERHTTPERRORCODEMODULE,
+			    ID_PULL_SERVERHTTPERRORCODEMODULE,
+      			_In_z_ const PAL_Char*, firstString,
+                _In_z_ const PAL_Char*, secondString,
+                _In_z_ const PAL_Char*, thirdString,
+                _In_z_ const PAL_Char*, fourthString,
+                "Pull server with url: " Intlstr_tstr(1) " responded with error code: "  Intlstr_tstr(2) " for module '"  Intlstr_tstr(3) "' version '"  Intlstr_tstr(4) "'.")
 
 INTERNAL_Intlstr_Define2( ID_PULL_INSTALLMODULEFAILED,
  			  ID_PULL_INSTALLMODULEFAILED,

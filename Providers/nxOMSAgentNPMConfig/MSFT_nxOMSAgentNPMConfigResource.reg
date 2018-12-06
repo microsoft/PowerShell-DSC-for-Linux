@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSAgentNPMConfigResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSAgentNPMConfigResource:OMI_BaseResource

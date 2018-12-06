@@ -425,6 +425,8 @@ void CleanUpClassCache(_Inout_ MI_ClassA *miClassArray)
         MI_Class_Delete(miClassArray->data[xCount]);
     }
     DSC_free(miClassArray->data);
+    miClassArray->data = 0;
+    miClassArray->size = 0;
 }
 
 void CleanUpInstanceCache(_Inout_ MI_InstanceA *instanceArray)
@@ -439,6 +441,8 @@ void CleanUpInstanceCache(_Inout_ MI_InstanceA *instanceArray)
         MI_Instance_Delete(instanceArray->data[xCount]);
     }
     DSC_free(instanceArray->data);
+    instanceArray->data = 0;
+    instanceArray->size = 0;
 }
 
 void InitLocTable()
@@ -461,7 +465,7 @@ void InitLocTable()
     }
 }
 
- int Get_LocMappingIndex(_In_ MI_Uint32 errorStringId)
+int Get_LocMappingIndex(_In_ MI_Uint32 errorStringId)
 {
     MI_Uint32 high = g_LocMappingTableSize-1;
     MI_Uint32 low = 0;
@@ -485,6 +489,21 @@ void InitLocTable()
     return -1;
 }
 
+/*
+    The current code base uses string ids that are not defined in g_locMappingTable.  To avoid
+    runtime crashes, use placeholder strings until all string ids are fixed.
+    See strings.h for g_UndefinedMessageTable which contains generic format messages
+    the includes the message id and up to 3 of the error message parameter values.
+*/
+extern Loc_Mapping g_UndefinedMessageTable[];
+#define ERROR_ID_SIZE 10
+
+void GetUndefinedString(_In_ MI_Uint32 errorStringId, _Inout_ Intlstr *resStr)
+{
+    MI_Char id[ERROR_ID_SIZE];
+    Stprintf(id,ERROR_ID_SIZE,MI_T("%d"), errorStringId);
+    *resStr = g_UndefinedMessageTable[0].LocFunctionOneArgs(id);
+}
 
 void GetResourceString( _In_ MI_Uint32 errorStringId, _Inout_ Intlstr *resStr)
 {
@@ -493,8 +512,11 @@ void GetResourceString( _In_ MI_Uint32 errorStringId, _Inout_ Intlstr *resStr)
    {
        *resStr = g_LocMappingTable[index].LocFunctionZeroArgs();
    }
+   else
+   {
+       GetUndefinedString(errorStringId, resStr);
+   }
 }
-
 
 void GetResourceString1Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char * param1, _Inout_ Intlstr *resStr)
 {
@@ -502,6 +524,10 @@ void GetResourceString1Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    if( index >= 0 )
    {
        *resStr = g_LocMappingTable[index].LocFunctionOneArgs((MI_Char*)param1);
+   }
+   else
+   {
+       GetUndefinedString(errorStringId, resStr);
    }
 }
 
@@ -513,14 +539,23 @@ void GetResourceString2Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    {
        *resStr = g_LocMappingTable[index].LocFunctionTwoArgs((MI_Char*)param1, (MI_Char*)param2);
    }
+   else
+   {
+       GetUndefinedString(errorStringId, resStr);
+   }
 }
- void GetResourceString3Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char * param1,
+ 
+void GetResourceString3Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char * param1,
                _In_z_ const MI_Char * param2, _In_z_ const MI_Char * param3,_Inout_ Intlstr *resStr)
 {
    int index = Get_LocMappingIndex(errorStringId);
    if( index >= 0 )
    {
        *resStr = g_LocMappingTable[index].LocFunctionThreeArgs((MI_Char*)param1, (MI_Char*)param2, (MI_Char*)param3);
+   }
+   else
+   {
+       GetUndefinedString(errorStringId, resStr);
    }
 }
 
@@ -531,6 +566,10 @@ void GetResourceString4Param( _In_ MI_Uint32 errorStringId, _In_z_ const MI_Char
    if( index >= 0 )
    {
        *resStr = g_LocMappingTable[index].LocFunctionFourArgs((MI_Char*)param1, (MI_Char*)param2, (MI_Char*)param3, (MI_Char*)param4);
+   }
+   else
+   {
+       GetUndefinedString(errorStringId, resStr);
    }
 }
 

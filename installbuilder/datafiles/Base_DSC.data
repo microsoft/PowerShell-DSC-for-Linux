@@ -41,27 +41,30 @@ SHLIB_EXT: 'so'
 
 /opt/microsoft/omsconfig/etc/logrotate.conf; Providers/Extras/Scripts/omsconfig_logrotate.conf; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf; LCM/omsconfig.consistencyinvoker.conf; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/etc/Inventory.mof; LCM/Base_Inventory.mof; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/etc/omsconfig.reg; LCM/omsconfig.reg; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/OMSServiceStat.sh; intermediate/Scripts/OMSServiceStat.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/OMSServiceStatAll.sh; intermediate/Scripts/OMSServiceStatAll.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh; intermediate/Scripts/OMSYumUpdates.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh; intermediate/Scripts/OMSZypperUpdates.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh; intermediate/Scripts/OMSAptUpdates.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSServiceStat.sh; intermediate/Scripts/OMSServiceStat.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSServiceStatAll.sh; intermediate/Scripts/OMSServiceStatAll.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh; intermediate/Scripts/OMSYumUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh; intermediate/Scripts/OMSZypperUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh; intermediate/Scripts/OMSAptUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh; intermediate/Scripts/NPMAgentBinaryCap.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh; intermediate/Scripts/OMSAuditdPlugin.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_1.1.zip; release/nxOMSPerfCounter_1.1.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_1.0.zip; release/nxOMSSyslog_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip; release/nxOMSKeyMgmt_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_1.0.zip; release/nxOMSSudoCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.1.zip; release/nxOMSGenerateInventoryMof_1.1.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc; LCM/keys/dscgpgkey.asc; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc; LCM/keys/msgpgkey.asc; 644; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxFileInventory_1.1.zip; release/nxFileInventory_1.1.zip; 755; ${{RUN_AS_USER}}; root
 
 #else
 
@@ -263,7 +266,9 @@ su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microso
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.0.zip 0"
+su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_1.0.zip 0"
+su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.1.zip 0"
+su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.1.zip 0"
 
 #else
 /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
@@ -312,11 +317,9 @@ if [ -f /etc/opt/microsoft/omsagent/conf/omsadmin.conf ]; then
    su - omsagent -c "/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py"
 fi
 
-cp -f /opt/microsoft/omsconfig/etc/omsconfig.consistencyinvoker.conf /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
 cp -f /opt/microsoft/omsconfig/etc/Inventory.mof /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
-chown omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
-chgrp omsagent /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
-/opt/microsoft/omsagent/bin/service_control reload
+chown omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
+chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 
 #endif
 
@@ -347,7 +350,6 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $OMI_REGISTER_DIR/root-oms
     rm -f $OMI_HOME/bin/OMSConsistencyInvoker
     rm -f $OMI_LIB/libomsconfig.so    
-    rm -f /etc/opt/microsoft/omsagent/conf/omsagent.d/omsconfig.consistencyinvoker.conf
 #else
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration

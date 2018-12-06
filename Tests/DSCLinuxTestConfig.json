@@ -1,0 +1,15 @@
+{
+    "LinuxClient": {
+        "Name": "Linux-Dsc-ClientName",
+        "UserName": "root",
+        "Password": "rootPassword"
+    },
+ 
+    "PullServer1": {
+        "Name": "Dsc-pullServer",
+        "ServerURL": "http://Dsc-pullServer:8080/PSDSCPullServer.svc",
+        "RegistrationKey": "7f466f8e-027e-44c2-9a7b-897c08b355f1",
+        "ConfigurationPath": "\\\\Dsc-pullServer\\c$\\Program Files\\WindowsPowerShell\\DscService\\Configuration"
+    }
+}
+

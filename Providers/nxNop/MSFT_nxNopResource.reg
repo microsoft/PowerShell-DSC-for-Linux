@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxNopResource
+HOSTING=@requestor@
+CLASS=MSFT_nxNopResource:OMI_BaseResource

@@ -25,7 +25,7 @@
 
 
 
-#define INTERNAL_Intlstr_Define0( id, name, text)  \
+#define INTERNAL_Intlstr_Define0( id, name,text)  \
     Intlstr_Define0(id, name, text)
 
 #define INTERNAL_Intlstr_Define1( id, name,  parameter1_type, parameter1_name,text)  \
@@ -42,14 +42,21 @@
 
 
 #include "strings.inc" 
+#define ID_UNDEFINEDERROR_NOPARAM 60000
+#define ID_UNDEFINEDERROR_ONEPARAM 60001
+#define ID_UNDEFINEDERROR_TWOPARAM 60002
+#define ID_UNDEFINEDERROR_THREEPARAM 60003
+#define ID_UNDEFINEDERROR_FOURPARAM 60004
+
+INTERNAL_Intlstr_Define1( ID_UNDEFINEDERROR_NOPARAM, ID_UNDEFINEDERROR_NOPARAM,
+     _In_z_ const PAL_Char*, firstString,
+    "Undefined error id " Intlstr_tstr(1) "." )
 
 #undef INTERNAL_Intlstr_Define0
 #undef INTERNAL_Intlstr_Define1
 #undef INTERNAL_Intlstr_Define2
 #undef INTERNAL_Intlstr_Define3
 #undef INTERNAL_Intlstr_Define4
-
-
 
 #define INTERNAL_Intlstr_Define0( id, name, text) {id, GEN_XFPTR(GEN_HASH(GEN_SUF(id))), NULL, NULL, NULL, NULL }, 
 
@@ -67,5 +74,11 @@ Loc_Mapping g_LocMappingTable[] = {
 
 MI_Uint32 g_LocMappingTableSize = sizeof(g_LocMappingTable)/sizeof(Loc_Mapping);
 
+Loc_Mapping g_UndefinedMessageTable[] = 
+{
+INTERNAL_Intlstr_Define1( ID_UNDEFINEDERROR_NOPARAM, ID_UNDEFINEDERROR_NOPARAM,
+     _In_z_ const PAL_Char*, firstString,
+    "Undefined error id " Intlstr_tstr(1) "." )
+};
 
 #endif /* !defined(_strings_h_) */

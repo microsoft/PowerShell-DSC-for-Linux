@@ -66,17 +66,32 @@ omi_sysconfdir = "<CONFIG_SYSCONFDIR>"
 baseModulePath = "<DSC_MODULES_PATH>"
 baseScriptPath = "<DSC_SCRIPT_PATH>"
 modulePath = baseModulePath + "/" + moduleName
+moduleDirectory = moduleName + "/"
 
 arch = zipfile.ZipFile(filepath)
+
+# Detect if the module was zipped to include the module folder
+# or just the module folder's contents.
+# isModuleNested = True indicates the zip includes the module's folder
+isModuleNested = False
+
 for n in arch.namelist():
     if n.startswith('/') or n.startswith('..'):
         raise Exception(
             'Error: corrupted filename "' + n + '" in zipfile!')
+    if n.startswith(moduleDirectory):
+        isModuleNested = True
+
 bad = arch.testzip()
 if bad is not None:
     raise Exception('Error: First bad filename is "' + bad + '"')
 
-arch.extractall(baseModulePath)
+if isModuleNested:
+    print("Extracting to " + baseModulePath)
+    arch.extractall(baseModulePath)
+else:
+    print("Extracting to " + modulePath)
+    arch.extractall(modulePath) 
 
 if not os.path.isdir(modulePath):
     print("Error: After extracting module, unable to find module directory " + moduleName + " in " + baseModulePath)

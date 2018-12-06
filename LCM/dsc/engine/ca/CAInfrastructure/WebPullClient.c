@@ -240,11 +240,25 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
 #if defined(BUILD_OMS)
     // TODO: read from OMS's config file to read in the Proxy info
     size_t valueLength;
-    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsagent/conf/proxy.conf";
+    // If the user has setup proxy, a conf file will be in one of these two locations
+    // If the user has not setup proxy, no conf file will exist; this is valid
+    const char* legacyOMSProxyFileLocation = "/etc/opt/microsoft/omsagent/conf/proxy.conf";
+    const char* omsProxyFileLocation = "/etc/opt/microsoft/omsagent/proxy.conf";
+
+    char* proxyFileLocationToUse = NULL;
 
     if (File_ExistT(omsProxyFileLocation) != -1)
     {
-	text = InhaleTextFile(omsProxyFileLocation);
+        proxyFileLocationToUse = omsProxyFileLocation;
+    }
+    else if (File_ExistT(legacyOMSProxyFileLocation) != -1)
+    {
+        proxyFileLocationToUse = legacyOMSProxyFileLocation;
+    }
+
+    if (proxyFileLocationToUse != NULL)
+    {
+	text = InhaleTextFile(proxyFileLocationToUse);
 	valueLength = strlen(text);
 	if (valueLength > MAX_SSLOPTION_STRING_LENGTH)
 	{
@@ -673,7 +687,9 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
     // If partialConfigName is defined, get the ConfigurationDownloadManagers, else get the DownloadManagerCustomData
     if ( partialConfigName != NULL )
     {
-        r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_PartialConfigurations, &value, NULL, &flags, NULL);
+        // NOTE: Request miType for GetElement calls to aid in debugging schema changes.
+        MI_Type miType;
+        r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_PartialConfigurations, &value, &miType, &flags, NULL);
         if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
         {
             return GetCimMIError(MI_RESULT_NO_SUCH_PROPERTY, extendedError, ID_PULL_NOPARTIALCONFIGS);
@@ -681,17 +697,17 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
 
         for (xCount = 0; xCount < value.instancea.size; ++xCount)
         {
-            MI_Instance_GetElement(value.instancea.data[xCount], OMI_MetaConfigurationResource_ResourceId, &value2, NULL, &flags, NULL);
+            MI_Instance_GetElement(value.instancea.data[xCount], OMI_MetaConfigurationResource_ResourceId, &value2, &miType, &flags, NULL);
             if ( Tcscasecmp(value2.string, partialConfigName) == 0 )
             {
                 // Found our partial config! Now let's get the configuration source
-                MI_Instance_GetElement(value.instancea.data[xCount], MSFT_PartialConfiguration_ConfigurationSource, &value2, NULL, &flags, NULL);
+                MI_Instance_GetElement(value.instancea.data[xCount], MSFT_PartialConfiguration_ConfigurationSource, &value2, &miType, &flags, NULL);
                 if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
                 {
                     return GetCimMIError1Param(MI_RESULT_NO_SUCH_PROPERTY, extendedError, ID_PULL_NOCONFIGURATIONSOURCE, partialConfigName);
                 }
 
-                configurationSource = value2.string;
+                configurationSource = value2.stringa.data[0];
                 break;
             }
         }
@@ -701,7 +717,7 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
             return GetCimMIError1Param(MI_RESULT_NO_SUCH_PROPERTY, extendedError, ID_PULL_NOCONFIGURATIONSOURCE, partialConfigName);
         }
 
-        r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, &value, NULL, &flags, NULL);
+        r = MI_Instance_GetElement(metaConfig, MSFT_DSCMetaConfiguration_ConfigurationDownloadManagers, &value, &miType, &flags, NULL);
         if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
         {
             // Unable to get the config download managers
@@ -710,11 +726,11 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
 
         for (xCount = 0; xCount < value.instancea.size; ++xCount)
         {
-            MI_Instance_GetElement(value.instancea.data[xCount], OMI_MetaConfigurationResource_ResourceId, &value2, NULL, &flags, NULL);   
+            MI_Instance_GetElement(value.instancea.data[xCount], OMI_MetaConfigurationResource_ResourceId, &value2, &miType, &flags, NULL);   
             if ( Tcscasecmp(value2.string, configurationSource) == 0 )
             {
                 // Found the WebDownloadManager with the proper resource ID.
-                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("ServerURL"), &value2, NULL, &flags, NULL);   
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("ServerURL"), &value2, &miType, &flags, NULL);   
                 if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
                 {
                     return GetCimMIError1Param(MI_RESULT_NO_SUCH_PROPERTY, extendedError, ID_PULL_NOSERVERURL, value3.string);
@@ -722,13 +738,13 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
 
                 memcpy(serverURL, value2.string, (Tcslen(value2.string) + 1) * sizeof(MI_Char));
 
-                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("CertificateID"), &value2, NULL, &flags, NULL);   
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("CertificateID"), &value2, &miType, &flags, NULL);   
                 if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
                 {
                     memcpy(*certificateID, value2.string, Tcslen(value2.string) * sizeof(MI_Char));  
                 }
 
-                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("AllowUnsecureConnection"), &value2, NULL, &flags, NULL);   
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("AllowUnsecureConnection"), &value2, &miType, &flags, NULL);   
                 if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
                 {
                     allowUnsecureConnection = value2.boolean;
@@ -741,6 +757,8 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
                     r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, serverURL);
                     return r;     
                 }
+                // Found the WebDownloadManager, stop searching.
+                break;
             }
         }
     }
@@ -1935,7 +1953,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         free(dataChunk.data);
         DSC_free(outputResult);
         Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), responseCode);
-        return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_SERVERHTTPERRORCODEMODULE, url, statusCodeValue);
+        return GetCimMIError4Params(MI_RESULT_FAILED, extendedError, ID_PULL_SERVERHTTPERRORCODEMODULE, url, statusCodeValue, moduleName, moduleVersion);
     }
 
     for (i = 0; i < headerChunk.size; ++i)

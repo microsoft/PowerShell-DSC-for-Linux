@@ -1,0 +1,53 @@
+/*
+@TargetNode='common'
+@GeneratedBy=OMS
+@GenerationDate=04/18/2016 15:23:05
+@GenerationHost=OMSService
+*/
+
+instance of MSFT_nxOMSPlugin as $MSFT_nxOMSPluginSource1ref
+{
+  PluginName = "Common";
+  Ensure = "Present";
+};
+
+instance of MSFT_nxOMSPluginResource as $MSFT_nxOMSPlugin1ref
+{
+  Name = "SimpleOMSPluginConfiguration";
+  ResourceID = "[nxOMSPluginResource]nodepluginconf";
+  SourceInfo = "C:\\temp\\MicrosoftOperationsManagementLinuxConfiguration.ps1::50::1::nxOMSPluginResource";
+  ModuleName = "nxOMSPlugin";
+  ModuleVersion = "2.11";
+  Plugins = {
+    $MSFT_nxOMSPluginSource1ref
+  };
+};
+
+instance of MSFT_nxFileInventoryResource
+{
+  DestinationPath = "/nonexistent";
+  ResourceId = "[MSFT_nxFileInventoryResource]Inventory";
+  ModuleName = "nxFileInventory";
+  ModuleVersion = "1.0";
+};
+
+instance of MSFT_nxOMSAgentNPMConfigResource as $MSFT_nxOMSAgentNPMConfigResourceRef
+{
+  ResourceID = "[nxOMSAgentNPMConfigResource]nodegeneratenetworkmonitoringconf";
+  ModuleName = "nxOMSAgentNPMConfig";
+  ModuleVersion = "1.0";
+  ConfigType = "UpdatedAgentConfig";  
+  ConfigId = "03f511a0-1218-4b79-8bdb-eddd54b14212";  
+  Ensure = "Present";
+  Contents = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTE2Ij8+PENvbmZpZ3VyYXRpb24geG1sbnM6eHNkPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYSIgeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0YW5jZSIgVmVyc2lvbj0iMyI+PE5ldHdvcmtNb25pdG9yaW5nQWdlbnRDb25maWd1cmF0aW9uVjM+PE1ldGFkYXRhPnsiVmVyc2lvbiI6MywiUHJvdG9jb2wiOjEsIlN1Ym5ldFVpZCI6MSwiQWdlbnRVaWQiOjF9PC9NZXRhZGF0YT48TmV0d29ya05hbWVUb05ldHdvcmtNYXA+eyJEZWZhdWx0Ijp7IlN1Ym5ldHMiOlsiMSJdfX08L05ldHdvcmtOYW1lVG9OZXR3b3JrTWFwPjxTdWJuZXRJZFRvU3VibmV0TWFwPnsiMSI6IjY1LjE3MS4wLjAvMTYifTwvU3VibmV0SWRUb1N1Ym5ldE1hcD48QWdlbnRGcWRuVG9BZ2VudE1hcD57IjEiOnsiSVBzIjpbeyJWYWx1ZSI6IjY1LjE3MS4xMjYuNzIiLCJTdWJuZXQiOiIxIn1dLCJQcm90b2NvbCI6IjEifX08L0FnZW50RnFkblRvQWdlbnRNYXA+PFJ1bGVOYW1lVG9SdWxlTWFwPnsiRGVmYXVsdCI6eyJBY3RPbiI6W3siU04iOiIqIiwiU1MiOiIqIiwiRE4iOiIqIiwiRFMiOiIqIn1dLCJUaHJlc2hvbGQiOnsiTG9zcyI6LTEuMCwiTGF0ZW5jeSI6LTEuMH0sIkV4Y2VwdG9pbnMiOltdLCJQcm90b2NvbCI6MX19PC9SdWxlTmFtZVRvUnVsZU1hcD48L05ldHdvcmtNb25pdG9yaW5nQWdlbnRDb25maWd1cmF0aW9uVjM+PC9Db25maWd1cmF0aW9uPg=="; 
+  ContentChecksum = "B82AE086236EBC7CA8C75A417DF95F5B"; 
+};
+
+instance of OMI_ConfigurationDocument
+{
+  Version="2.0.0";
+  Author="OMS";
+  GenerationDate="04/18/2016 15:23:05";
+  GenerationHost="OMSService";
+};
+

@@ -18,6 +18,8 @@ import re
 import inspect
 import copy
 import fnmatch
+import hashlib
+import base64
 import cPickle as pickle
 from contextlib import contextmanager
 
@@ -175,13 +177,7 @@ nxArchive=imp.load_source('nxArchive', './Scripts/nxArchive.py')
 nxMySqlUser=imp.load_source('nxMySqlUser', './Scripts/nxMySqlUser.py')
 nxMySqlGrant=imp.load_source('nxMySqlGrant', './Scripts/nxMySqlGrant.py')
 nxMySqlDatabase=imp.load_source('nxMySqlDatabase', './Scripts/nxMySqlDatabase.py')
-nxOMSSyslog=imp.load_source('nxOMSSyslog','./Scripts/nxOMSSyslog.py')
-nxOMSPerfCounter=imp.load_source('nxOMSPerfCounter','./Scripts/nxOMSPerfCounter.py')
-nxOMSCustomLog=imp.load_source('nxOMSCustomLog','./Scripts/nxOMSCustomLog.py')
-nxOMSKeyMgmt=imp.load_source('nxOMSKeyMgmt','./Scripts/nxOMSKeyMgmt.py')
 nxFileInventory=imp.load_source('nxFileInventory', './Scripts/nxFileInventory.py')
-nxOMSGenerateInventoryMof=imp.load_source('nxOMSGenerateInventoryMof', './Scripts/nxOMSGenerateInventoryMof.py')
-
 
 class nxUserTestCases(unittest2.TestCase):
     """
@@ -2137,15 +2133,15 @@ class nxServiceTestCases(unittest2.TestCase):
         self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, True, '', r[1]) == True, \
                         'CheckInventory("dummy?*ice", ' + self.controller + ', True, "", r[1]) should == True')
 
-    def testInventoryMarshallDummyServiceFilterState(self):
-        # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
-        time.sleep(3)
-        self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
-                        [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
-        r=nxService.Inventory_Marshall('dummy?*ice', self.controller, None,'running')
-        self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.controller + ", None,'running')  should return == 0")
-        self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, 'running', r[1]) == True, \
-                        'CheckInventory("dummy?*ice", ' + self.controller + ', None, "running", r[1]) should == True')
+#     def testInventoryMarshallDummyServiceFilterState(self):
+#         # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
+#         time.sleep(3)
+#         self.assertTrue(nxService.Set_Marshall("dummy_service", self.controller, True, "running")==
+#                         [0],'nxService.Set_Marshall("dummy_service", "'+self.controller+'", True, "running") should return ==[0]')
+#         r=nxService.Inventory_Marshall('dummy?*ice', self.controller, None,'running')
+#         self.assertTrue(r[0] == 0,"Inventory_Marshall('dummy?*ice', " + self.controller + ", None,'running')  should return == 0")
+#         self.assertTrue(self.CheckInventory('dummy?*ice', self.controller, None, 'running', r[1]) == True, \
+#                         'CheckInventory("dummy?*ice", ' + self.controller + ', None, "running", r[1]) should == True')
 
     def testInventoryMarshallDummyServiceFilterNameError(self):
         # This test inconsistantly fails on slower systems.  The sleep here reduces these failures.
@@ -3191,594 +3187,6 @@ class nxMySqlGrantTestCases(unittest2.TestCase):
         'Get('+repr(d)+' should return ==['+repr(d)+']')
 
     
-@unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
-                      0,'Skipping nxOMSSyslogTestCases.   omsagent is not running.')
-class nxOMSSyslogTestCases(unittest2.TestCase):
-    """
-    Test cases for nxOMSSyslog.py
-    """
-    def setUp(self):
-        """
-        Setup test resources
-        """
-        if os.path.exists('/etc/rsyslog.d/95-omsagent.conf'):
-            os.system('cp /etc/rsyslog.d/95-omsagent.conf /etc/rsyslog.d/95-omsagent.conf.bak')
-            os.system('cp /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf.bak')
-        elif os.path.exists('/etc/rsyslog.conf'):
-            os.system('cp /etc/rsyslog.conf /etc/rsyslog.conf.bak')
-            os.system('cp /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf.bak')
-        elif os.path.exists('/etc/syslog.conf'):
-            os.system('cp /etc/syslog.conf /etc/syslog.conf.bak')
-            os.system('cp /etc/opt/omi/conf/omsconfig/sysklog-oms.conf /etc/opt/omi/conf/omsconfig/sysklog-oms.conf.bak')
-        elif os.path.exists('/etc/syslog-ng/syslog-ng.conf'):
-            os.system('cp /etc/syslog-ng/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf.bak')
-            os.system('cp /etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf /etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf.bak')            
-
-    def tearDown(self):
-        """
-        Remove test resources.
-        """
-        if os.path.exists('/etc/rsyslog.d/95-omsagent.conf'):
-            os.system('mv /etc/rsyslog.d/95-omsagent.conf.bak /etc/rsyslog.d/95-omsagent.conf')
-            os.system('mv /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf.bak /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf')
-        elif os.path.exists('/etc/rsyslog.conf'):
-            os.system('mv /etc/rsyslog.conf.bak /etc/rsyslog.conf')
-            os.system('mv /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf.bak /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf')
-        elif os.path.exists('/etc/syslog.conf'):
-            os.system('mv /etc/syslog.conf.bak /etc/syslog.conf')
-            os.system('mv /etc/opt/omi/conf/omsconfig/sysklog-oms.conf.bak /etc/opt/omi/conf/omsconfig/sysklog-oms.conf')
-        elif os.path.exists('/etc/syslog-ng/syslog-ng.conf'):
-            os.system('mv /etc/syslog-ng/syslog-ng.conf.bak /etc/syslog-ng/syslog-ng.conf')
-            os.system('mv /etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf.bak /etc/opt/omi/conf/omsconfig/syslog-ng-oms.conf')            
-        
-    def make_MI(self,retval,SyslogSource):
-        d=dict()
-        d.clear()
-        if SyslogSource == None :
-            d['SyslogSource'] = None
-        else :
-            for source in SyslogSource:
-                source['Severities'] = nxOMSSyslog.protocol.MI_StringA(source['Severities'])
-                source['Facility']=nxOMSSyslog.protocol.MI_String(source['Facility'])
-            d['SyslogSource'] = nxOMSSyslog.protocol.MI_InstanceA(SyslogSource)
-        return retval,d
-    
-    def testSetOMSSyslog_add(self):
-        d={'SyslogSource': [{'Facility': 'kern','Severities': ['emerg','crit','warning']},{'Facility': 'auth','Severities': ['emerg','crit','warning']}] }
-        self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
-
-    def testTestSetOMSSyslog_add(self):
-        d={'SyslogSource': [{'Facility': 'kern','Severities': ['emerg','crit','warning']},{'Facility': 'auth','Severities': ['emerg','crit','warning']}] }
-        self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set_Marshall('+repr(d)+') should return == [0]') 
-        self.assertTrue(nxOMSSyslog.Test_Marshall(**d) == [0],'Test_Marshall('+repr(d)+') should return == [0]') 
-
-    def testGetOMSSyslog_add(self):
-        d={'SyslogSource': [{'Facility': 'auth','Severities': ['crit','emerg','warning']},{'Facility': 'kern','Severities': ['crit','emerg','warning']}] }
-        e=copy.deepcopy(d)
-        t=copy.deepcopy(d)
-        self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        m=self.make_MI(0,**e)
-        g=nxOMSSyslog.Get_Marshall(**t)
-        print 'GET '+ repr(g) 
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get('+repr(g)+' should return ==['+repr(m)+']')
-
-    def testSetOMSSyslog_del(self):
-        d={'SyslogSource': [{'Facility': 'kern','Severities': None },{'Facility': 'auth','Severities': None }] }
-        self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
-
-    def testGetOMSSyslog_del(self):
-        d={'SyslogSource': [{'Facility': 'auth','Severities': None },{'Facility': 'kern','Severities': None }] }
-        e=copy.deepcopy(d)
-        t=copy.deepcopy(d)
-        self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        m=self.make_MI(0,**t)
-        g=nxOMSSyslog.Get_Marshall(**e)
-        print 'GET '+ repr(g)
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get('+repr(g)+' should return ==['+repr(m)+']')
-
-    def testTestSetOMSSyslog_addSysklogd(self):
-        sysklogd_exists = False
-        if not os.path.exists('/etc/syslog.conf'):
-            os.system('touch /etc/syslog.conf')
-        else:
-            sysklogd_exists = True
-        d={'SyslogSource': [{'Facility': 'kern','Severities': ['emerg','crit','warning']},{'Facility': 'auth','Severities': ['emerg','crit','warning']}] }
-        self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set_Marshall('+repr(d)+') should return == [0]') 
-        self.assertTrue(nxOMSSyslog.Test_Marshall(**d) == [0],'Test_Marshall('+repr(d)+') should return == [0]') 
-        g=nxOMSSyslog.Get_Marshall(**d)
-        print 'GET '+ repr(g) 
-        self.assertTrue(g[0] == 0 and g[1]["SyslogSource"].value == [], \
-       'Get('+repr(g)+' should return g[0] == 0 and g[1]["SyslogSource"].value == []')
-        if sysklogd_exists == False:
-            os.system('rm /etc/syslog.conf')
-
-
-@unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
-                      0,'Skipping nxOMSPerfCounterTestCases.   omsagent is not running.')
-class nxOMSPerfCounterTestCases(unittest2.TestCase):
-    """
-    Test cases for nxOMSPerfCounter.py
-    """
-    def setUp(self):
-        """
-        Setup test resources
-        """
-        os.system('cp /etc/opt/microsoft/omsagent/conf/omsagent.conf /etc/opt/microsoft/omsagent/conf/omsagent.conf.bak')
-
-    def tearDown(self):
-        """
-        Remove test resources.
-        """
-        os.system('mv /etc/opt/microsoft/omsagent/conf/omsagent.conf.bak /etc/opt/microsoft/omsagent/conf/omsagent.conf')            
-
-        
-    def make_MI(self, retval, Name, HeartbeatIntervalSeconds, PerfCounterObject):
-        d=dict()
-        d.clear()
-        if PerfCounterObject == None :
-            d['PerfCounterObject'] = None
-        else :
-            for perf in PerfCounterObject:
-                perf['PerformanceCounter'] =  nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-                perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-                perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-                perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-                perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-            d['PerfCounterObject'] = nxOMSPerfCounter.protocol.MI_InstanceA(PerfCounterObject)
-        d['HeartbeatIntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(HeartbeatIntervalSeconds)
-        d['Name']=nxOMSPerfCounter.protocol.MI_String(Name)
-        return retval,d
-    
-    def testSetOMSPerfCounter_add(self):
-        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        for perf in d['PerfCounterObject']:
-            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
-
-    def testGetOMSPerfCounter_add(self):
-        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        for perf in d['PerfCounterObject']:
-            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        e=copy.deepcopy(d)
-        t={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        m=self.make_MI(0,**t)
-        g=nxOMSPerfCounter.Get_Marshall(**e)
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get '+repr(g)+' should return == '+repr(m)+'')
-
-    def testSetOMSPerfCounter_del(self):
-        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
-        for perf in d['PerfCounterObject']:
-            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
-
-    def testGetOMSPerfCounter_del(self):
-        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
-        for perf in d['PerfCounterObject']:
-            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        t={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[]}
-        m=self.make_MI(0,**t)
-        g=nxOMSPerfCounter.Get_Marshall(**d)
-        print 'GET '+ repr(g)
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get('+repr(g)+' should return ==['+repr(m)+']')
-
-    def testSetOMSPerfCounter_add_missing_conf_file(self):
-        os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
-        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        for perf in d['PerfCounterObject']:
-            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
-
-    def testSetGetOMSPerfCounter_add_missing_conf_file(self):
-        os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
-        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        for perf in d['PerfCounterObject']:
-            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        e=copy.deepcopy(d)
-        t={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        m=self.make_MI(0,**t)
-        g=nxOMSPerfCounter.Get_Marshall(**e)
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get '+repr(g)+' should return == '+repr(m)+'')
-
-    def testGetOMSPerfCounter_add_missing_conf_file(self):
-        os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
-        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        for perf in d['PerfCounterObject']:
-            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        t={'Name':'testPerfCounter','HeartbeatIntervalSeconds':None,'PerfCounterObject':[]}
-        m=self.make_MI(0,**t)
-        g=nxOMSPerfCounter.Get_Marshall(**d)
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get '+repr(g)+' should return == '+repr(m)+'')
-
-    def testTestOMSPerfCounter_add_missing_conf_file(self):
-        os.system('rm /etc/opt/microsoft/omsagent/conf/omsagent.conf')
-        d={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        for perf in d['PerfCounterObject']:
-            perf['PerformanceCounter'] = nxOMSPerfCounter.protocol.MI_StringA(perf['PerformanceCounter'])
-            perf['InstanceName']=nxOMSPerfCounter.protocol.MI_String(perf['InstanceName'])
-            perf['AllInstances']=nxOMSPerfCounter.protocol.MI_Boolean(perf['AllInstances'])
-            perf['IntervalSeconds']=nxOMSPerfCounter.protocol.MI_Uint16(perf['IntervalSeconds'])
-            perf['ObjectName']=nxOMSPerfCounter.protocol.MI_String(perf['ObjectName'])
-        e=copy.deepcopy(d)
-        t={'Name':'testPerfCounter','HeartbeatIntervalSeconds':600,'PerfCounterObject':[{'InstanceName':'*', 'IntervalSeconds':600, 'AllInstances':True,
-            'PerformanceCounter':['FreeMegabytes','PercentFreeSpace','PercentUsedSpace','PercentFreeInodes',
-            'PercentUsedInodes','BytesPerSecond','ReadBytesPerSecond','WriteBytesPerSecond'],
-            'ObjectName':'Logical Disk'},{'InstanceName':'*', 'IntervalSeconds':60, 'AllInstances':True,
-            'PerformanceCounter':['% Processor Time','% DPC Time','% Idle Time','% Nice Time'],
-            'ObjectName':'Processor'}]}
-        self.assertTrue(nxOMSPerfCounter.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        m=self.make_MI(0,**t)
-        g=nxOMSPerfCounter.Get_Marshall(**e)
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get '+repr(g)+' should return == '+repr(m)+'')
-
-@unittest2.skipUnless(os.system('ps -ef | grep -v grep | grep omsagent') ==
-                      0,'Skipping nxOMSCustomLogTestCases.   omsagent is not running.')
-class nxOMSCustomLogTestCases(unittest2.TestCase):
-    """
-    Test Case for nxOMSCustomLog.py
-    """
-
-    original_conf_path = None
-    mock_conf_path = './ut_customlog.conf'
-
-    def setUp(self):
-        """
-        Setup test resources
-        """
-        self.original_conf_path = nxOMSCustomLog.conf_path
-        nxOMSCustomLog.conf_path = self.mock_conf_path
-        os.system('rm -rf {0}'.format(self.mock_conf_path))
-
-    def tearDown(self):
-        """
-        Remove test resources
-        """
-        nxOMSCustomLog.conf_path = self.original_conf_path
-
-    def make_MI(self, retval, Name, EnableCustomLogConfiguration, CustomLogObjects):
-        d = dict()
-        d['Name'] = nxOMSCustomLog.protocol.MI_String(Name)
-        d['EnableCustomLogConfiguration'] = nxOMSCustomLog.protocol.MI_Boolean(EnableCustomLogConfiguration)
-        if CustomLogObjects is None:
-            CustomLogObjects = []
-        for customlog in CustomLogObjects:
-            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
-            if customlog['FilePath'] is not None and len(customlog['FilePath']):
-                customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
-        d['CustomLogObjects'] = nxOMSCustomLog.protocol.MI_InstanceA(CustomLogObjects)
-        return retval, d
-    
-    def testSetOMSCustomLog_add(self):
-        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'CUSTOM_LOG_BLOB.LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'CUSTOM_LOG_BLOB.LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
-        for customlog in d['CustomLogObjects']:
-            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
-            customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
-
-        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-
-    def testGetOMSCustomLog_add(self):
-        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/test1.log', '/tmp/logs/*.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
-        for customlog in d['CustomLogObjects']:
-            customlog['LogName'] = nxOMSCustomLog.protocol.MI_String(customlog['LogName'])
-            customlog['FilePath'] = nxOMSCustomLog.protocol.MI_StringA(customlog['FilePath'])
-
-        e = copy.deepcopy(d)
-        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': [{ 'LogName': 'LinuxSampleCustomLog1', 'FilePath': [ '/tmp/logs/*.log', '/tmp/test1.log' ] }, { 'LogName': 'LinuxSampleCustomLog2', 'FilePath': [ '/tmp/test2.log' ] } ] }
-
-        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-         
-        m = self.make_MI(0,**t)
-        g = nxOMSCustomLog.Get_Marshall(**e)
-        self.assertTrue(check_values(g, m)  ==  True, 'Get('+repr(g)+' should return ==['+repr(m)+']')
-
-    def testSetOMSCustomLog_del(self):
-        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
-        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
-
-    def testGetOMSCustomLog_default(self):
-        d = { 'Name': 'SimpleCustomLog' }
-        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-
-        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': False, 'CustomLogObjects': None }
-        m=self.make_MI(0,**t)
-        g=nxOMSCustomLog.Get_Marshall(**d)
-        print 'GET '+ repr(g)
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get('+repr(g)+' should return ==['+repr(m)+']')
-
-    def testGetOMSCustomLog_del(self):
-        d = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
-        self.assertTrue(nxOMSCustomLog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        t = { 'Name': 'SimpleCustomLog', 'EnableCustomLogConfiguration': True, 'CustomLogObjects': None }
-        m=self.make_MI(0,**t)
-        g=nxOMSCustomLog.Get_Marshall(**d)
-        print 'GET '+ repr(g)
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get('+repr(g)+' should return ==['+repr(m)+']')
-    
-
-class nxOMSGenerateInventoryMofTestCases(unittest2.TestCase):
-    """
-    Test Case for nxOMSGenerateInventoryMof.py
-    """
-
-    original_mof_path = None
-    mock_mof_path = '/tmp/'
-
-    def setUp(self):
-        """
-        Setup test resources
-        """
-        self.original_mof_path = nxOMSGenerateInventoryMof.inventoryMof_path
-        nxOMSGenerateInventoryMof.inventoryMof_path = self.mock_mof_path
-        os.system('rm -rf {0}'.format(self.mock_mof_path + 'generatedinventory.mof'))
-        os.system('rm -rf {0}'.format(self.mock_mof_path + 'generatedinventory.conf'))
-
-    def tearDown(self):
-        """
-        Remove test resources
-        """
-        nxOMSGenerateInventoryMof.inventoryMof_path = self.original_mof_path
-
-    def make_MI(self, retval, FeatureName, Enable, Instances , RunIntervalInSeconds, Tag , Format , FilterType , Configuration):
-        d = dict()
-        d['FeatureName'] = nxOMSGenerateInventoryMof.protocol.MI_String(FeatureName)
-        d['Enable'] = nxOMSGenerateInventoryMof.protocol.MI_Boolean(Enable)
-        if Instances is None:
-            Instances = []
-        for instance in Instances:
-            instance['InstanceName'] = nxOMSGenerateInventoryMof.protocol.MI_String(instance['InstanceName'])
-            instance['ClassName'] = nxOMSGenerateInventoryMof.protocol.MI_String(instance['ClassName'])
-
-            if instance['Properties'] is not None and len(instance['Properties']):
-                instance['Properties'] = nxOMSGenerateInventoryMof.protocol.MI_StringA(instance['Properties'])
-        d['Instances'] = nxOMSGenerateInventoryMof.protocol.MI_InstanceA(Instances)
-        d['RunIntervalInSeconds'] =  nxOMSGenerateInventoryMof.protocol.MI_Uint64(RunIntervalInSeconds)
-        d['Tag'] = nxOMSGenerateInventoryMof.protocol.MI_String(Tag)
-        d['Format'] = nxOMSGenerateInventoryMof.protocol.MI_String(Format)
-        d['FilterType'] = nxOMSGenerateInventoryMof.protocol.MI_String(FilterType)
-
-        if Configuration is None:
-            Configuration = []
-        if Configuration is not None and len(Configuration):
-            d['Configuration'] = nxOMSGenerateInventoryMof.protocol.MI_StringA(Configuration)
-
-        return retval, d
-
-    def testSetOMSGenerateInventoryMof_multipleinstances(self):
-        d = { 'FeatureName': 'generatedinventory', 'Enable': True, 'Instances': [{ 'InstanceName': 'FileInventory', 'ClassName': 'MSFT_nxFileInventoryResource', 'Properties': [ 'DestinationPath = "/etc/*.conf";', 'Recurse=true;' ] }, { 'InstanceName': 'RegistryInventory', 'ClassName':'MSFT_nxRegistryInventoryResource', 'Properties': [ 'RegistryName=hkeylocal;' ] } ], 'RunIntervalInSeconds':300, 'Tag': 'Test', 'Format':'tsv', 'FilterType':'filter', 'Configuration':['testname = value'] }
-
-        for instance in d['Instances']:
-            instance['InstanceName'] = nxOMSGenerateInventoryMof.protocol.MI_String(instance['InstanceName'])
-            instance['ClassName'] = nxOMSGenerateInventoryMof.protocol.MI_String(instance['ClassName'])
-            instance['Properties'] = nxOMSGenerateInventoryMof.protocol.MI_StringA(instance['Properties'])
-
-        self.assertTrue(nxOMSGenerateInventoryMof.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        self.assertTrue(os.path.isfile(self.mock_mof_path + 'generatedinventory' + '.mof'))
-
-
-    def testSetOMSGenerateInventoryMof_noinstances(self):
-        d = { 'FeatureName': 'generatedinventory', 'Enable': True, 'Instances': None }
-        self.assertTrue(nxOMSGenerateInventoryMof.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        self.assertTrue(os.path.isfile(self.mock_mof_path + 'generatedinventory' + '.mof'))
-
-
-    def testSetOMSGenerateInventoryMof_EnableisFalse(self):
-        d = { 'FeatureName': 'generatedinventory', 'Enable': False, 'Instances': [{ 'InstanceName': 'FileInventory', 'ClassName': 'MSFT_nxFileInventoryResource', 'Properties': [ 'DestinationPath = "/etc/*.conf";', 'Recurse=true;' ] }, { 'InstanceName': 'RegistryInventory', 'ClassName':'MSFT_nxRegistryInventoryResource', 'Properties': [ 'RegistryName=hkeylocal;' ] } ], 'RunIntervalInSeconds':300, 'Tag': 'Test', 'Format':'tsv', 'FilterType':'filter', 'Configuration':['testname = value'] }
-        for instance in d['Instances']:
-            instance['InstanceName'] = nxOMSGenerateInventoryMof.protocol.MI_String(instance['InstanceName'])
-            instance['ClassName'] = nxOMSGenerateInventoryMof.protocol.MI_String(instance['ClassName'])
-            instance['Properties'] = nxOMSGenerateInventoryMof.protocol.MI_StringA(instance['Properties'])
-
-        codecs.open(self.mock_mof_path + 'generatedinventory' + '.mof', 'w', 'utf8').write("dummy")
-        codecs.open(self.mock_mof_path + 'generatedinventory' + '.conf', 'w', 'utf8').write("dummy")
-        self.assertTrue(nxOMSGenerateInventoryMof.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
-        self.assertFalse(os.path.isfile(self.mock_mof_path + 'generatedinventory' + '.mof'))
-        self.assertFalse(os.path.isfile(self.mock_mof_path + 'generatedinventory' + '.conf'))
-
-    def testTestOMSGenerateInventoryMof(self):
-
-        d = { 'FeatureName': 'generatedinventory', 'Enable': True, 'Instances': [{ 'InstanceName': 'FileInventory', 'ClassName': 'MSFT_nxFileInventoryResource', 'Properties': [ 'DestinationPath = "/etc/*.conf";', 'Recurse=true;' ] }, { 'InstanceName': 'RegistryInventory', 'ClassName':'MSFT_nxRegistryInventoryResource', 'Properties': [ 'RegistryName=hkeylocal;' ] } ], 'RunIntervalInSeconds':300, 'Tag': 'Test', 'Format':'tsv', 'FilterType':'filter', 'Configuration':['testname = value'] }
-
-        for instance in d['Instances']:
-            instance['InstanceName'] = nxOMSGenerateInventoryMof.protocol.MI_String(instance['InstanceName'])
-            instance['ClassName'] = nxOMSGenerateInventoryMof.protocol.MI_String(instance['ClassName'])
-            instance['Properties'] = nxOMSGenerateInventoryMof.protocol.MI_StringA(instance['Properties'])
-
-        e = copy.deepcopy(d)
-        f = copy.deepcopy(d)
-
-        self.assertTrue(nxOMSGenerateInventoryMof.Test_Marshall(**d) == [-1],'Test('+repr(d)+') should return == [-1]')
-        self.assertFalse(os.path.isfile(self.mock_mof_path + 'generatedinventory' + '.mof'))
-
-        self.assertTrue(nxOMSGenerateInventoryMof.Set_Marshall(**e) == [0],'Set('+repr(e)+') should return == [0]')
-        self.assertTrue(nxOMSGenerateInventoryMof.Test_Marshall(**f) == [0],'Test('+repr(f)+') should return == [0]')
-        self.assertTrue(os.path.isfile(self.mock_mof_path + 'generatedinventory' + '.mof'))
-
-
-    def testGetOMSGenerateInventoryMof_default(self):
-        d = { 'FeatureName': 'generatedinventory', 'Enable': True, 'Instances': [{ 'InstanceName': 'FileInventory', 'ClassName': 'MSFT_nxFileInventoryResource', 'Properties': [ 'DestinationPath = "/etc/*.conf";', 'Recurse=true;' ] }, { 'InstanceName': 'RegistryInventory', 'ClassName':'MSFT_nxRegistryInventoryResource', 'Properties': [ 'RegistryName=hkeylocal;' ] } ], 'RunIntervalInSeconds':300, 'Tag': 'Test', 'Format':'tsv', 'FilterType':'filter', 'Configuration':['testname = value'] }
-        m=self.make_MI(0,**d)
-        g=nxOMSGenerateInventoryMof.Get_Marshall(**d)
-        print('GET '+ repr(g))
-        self.assertTrue(check_values(g, m)  ==  True, \
-        'Get('+repr(g)+' should return ==['+repr(m)+']')
-        self.assertFalse(os.path.isfile(self.mock_mof_path + 'generatedinventory' + '.mof'))
-
-
-# omsagent is not required to  be running.
-class nxOMSKeyMgmtTestCases(unittest2.TestCase):
-    """
-    Test cases for nxOMSSyslog.py
-    """
-    @classmethod    
-    def setUpClass(cls):
-        key_txt = (open('./Scripts/Tests/test_mofs/testdsckey.pub','r').read())
-        sig_txt = (open('./Scripts/Tests/test_mofs/testdsckey.asc','r').read())
-        cls.keymgmt = {'KeyContents': key_txt, \
-                       'KeySignature': sig_txt, 'Ensure':'present'}
-        cls.conf_dir = '/etc/opt/omi/conf/omsconfig'
-        if not os.path.exists(cls.conf_dir):
-            os.system('mkdir -p ' + cls.conf_dir + ' 2>&1 >/dev/null')
-        os.system('cp ' + nxOMSKeyMgmt.signature_keyring_path + ' ' + \
-                  nxOMSKeyMgmt.signature_keyring_path +  '.bak 2>&1 >/dev/null')
-        os.system('cp ' + nxOMSKeyMgmt.dsc_keyring_path + ' ' + \
-                  nxOMSKeyMgmt.dsc_keyring_path +  '.bak 2>&1 >/dev/null')
-
-        
-
-    @classmethod
-    def tearDownClass(cls):
-        os.system('cp ' + nxOMSKeyMgmt.signature_keyring_path + '.bak ' + \
-                  nxOMSKeyMgmt.signature_keyring_path + '2>&1 >/dev/null')
-        os.system('cp ' + nxOMSKeyMgmt.dsc_keyring_path + '.bak ' + \
-                  nxOMSKeyMgmt.dsc_keyring_path +  ' 2>&1 >/dev/null')
-        
-
-    
-    def setUp(self):
-        """
-        Setup test resources
-        """
-        os.system('cp ./Scripts/Tests/test_mofs/keymgmtring.gpg ' + \
-                  nxOMSKeyMgmt.signature_keyring_path +  ' 2>&1 >/dev/null')
-        os.system('cp ./Scripts/Tests/test_mofs/keyring.gpg ' + \
-                  nxOMSKeyMgmt.dsc_keyring_path +  ' 2>&1 >/dev/null')
-        
-
-    def tearDown(self):
-        """
-        Remove test resources.
-        """
-        pass
-    
-    def testOMSKeyMgmtSetTestAbsent(self):
-        self.keymgmt['Ensure'] = 'present'
-        r = nxOMSKeyMgmt.Set_Marshall(**self.keymgmt)
-        self.assertTrue(r == [0], 
-                "nxOMSKeyMgmt.Set_Marshall(self.keymgmt['KeyContents'], self.keymgmt['KeySignature'], 'present') should == [0]")
-        self.keymgmt['Ensure'] = 'absent'
-        r = nxOMSKeyMgmt.Set_Marshall(**self.keymgmt)
-        self.assertTrue(r == [0], 
-                "nxOMSKeyMgmt.Set_Marshall(self.keymgmt['KeyContents'], self.keymgmt['KeySignature'], 'absent') should == [0]")
-        r = nxOMSKeyMgmt.Test_Marshall(**self.keymgmt)
-        self.assertTrue(r == [0], 
-                "nxOMSKeyMgmt.Test_Marshall(self.keymgmt['KeyContents'], self.keymgmt['KeySignature'], 'absent') should == [0]")
-
-    def testOMSKeyMgmtTestAbsent(self):
-        self.keymgmt['Ensure'] = 'absent'
-        r = nxOMSKeyMgmt.Test_Marshall(**self.keymgmt)
-        self.assertTrue(r == [0], 
-                "nxOMSKeyMgmt.Test_Marshall(self.keymgmt['KeyContents'], self.keymgmt['KeySignature'], 'absent') should == [0]")
-
-    def testOMSKeyMgmtSetPresent(self):
-        self.keymgmt['Ensure'] = 'present'
-        r = nxOMSKeyMgmt.Set_Marshall(**self.keymgmt)
-        self.assertTrue(r == [0], 
-                "nxOMSKeyMgmt.Set_Marshall(self.keymgmt['KeyContents'], self.keymgmt['KeySignature'], 'present') should == [0]")
-        r = nxOMSKeyMgmt.Test_Marshall(**self.keymgmt)
-        self.assertTrue(r == [0], 
-                "nxOMSKeyMgmt.Test_Marshall(self.keymgmt['KeyContents'], self.keymgmt['KeySignature'], 'present') should == [0]")
-
-    def testOMSKeyMgmtSetPresentBadSig(self):
-        bad = dict(self.keymgmt)
-        bad['Ensure'] = 'present'
-        bad['KeySignature'] = 'aaa'
-        r = nxOMSKeyMgmt.Set_Marshall(**bad)
-        self.assertTrue(r == [-1], 
-                "nxOMSKeyMgmt.Set_Marshall(bad['KeyContents'], bad['KeySignature'], 'present') should == [-1]")
-        r = nxOMSKeyMgmt.Test_Marshall(**bad)
-        self.assertTrue(r == [-1], 
-                "nxOMSKeyMgmt.Test_Marshall(bad['KeyContents'], bad['KeySignature'], 'present') should == [-1]")
-
-    def testOMSKeyMgmtSetPresentBadCert(self):
-        bad = dict(self.keymgmt)
-        bad['Ensure'] = 'present'
-        bad['KeyContents'] = 'aaa'
-        r = nxOMSKeyMgmt.Set_Marshall(**bad)
-        self.assertTrue(r == [-1], 
-                "nxOMSKeyMgmt.Set_Marshall(bad['KeyContents'], bad['KeySignature'], 'present') should == [-1]")
-        r = nxOMSKeyMgmt.Test_Marshall(**bad)
-        self.assertTrue(r == [-1], 
-                "nxOMSKeyMgmt.Test_Marshall(bad['KeyContents'], bad['KeySignature'], 'present') should == [-1]")
-
 
 class nxFileInventoryTestCases(unittest2.TestCase):
     """
@@ -3810,6 +3218,8 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         os.makedirs(cls.basepath+'joedir0/joedir1/joedir2/')
         open(cls.basepath+'basedirfile1.txt','w+').write(\
             'Contents of basedirfile1.txt\n')
+        open(cls.basepath+'omsadmin.conf','w+').write(\
+            'Contents of omsadmin.conf\n')
         open(cls.basepath+'basedirfile2.txt','w+').write(\
             'Contents of basedirfile2.txt\n')
         open(cls.basepath+'basedirfile3.bin','wb+').write(\
@@ -3953,6 +3363,22 @@ class nxFileInventoryTestCases(unittest2.TestCase):
         l = self.MakeList(r)
         g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallSingleFile')
         self.assertTrue(g == l, repr(g) + '\n should be == to \n' + repr(l))
+        for d in r[1]['__Inventory'].value:
+            print d['DestinationPath'], d['Contents']
+
+    def testFileInventoryInventory_MarshallSingleFile_omsadminconf(self):
+        print('Using path:' + self.basepath + 'omsadmin.conf') 
+        d = {'Links': u'ignore', 'MaxOutputSize': None, \
+             'Checksum': u'md5', 'Recurse': False, \
+             'MaxContentsReturnable': None, \
+             'DestinationPath': self.basepath + 'omsadmin.conf', 'UseSudo': True, 'Type': u'file'}
+        r = nxFileInventory.Inventory_Marshall(**d)
+        self.assertTrue(r[0] == 0,'Inventory_Marshall('+repr(d)+')[0] should return == 0')
+        if self.create_files:
+            self.SerializeInventoryObject('testFileInventoryInventory_MarshallSingleFile',r)
+        l = self.MakeList(r)
+        g = self.DeserializeInventoryObject('testFileInventoryInventory_MarshallSingleFile')
+        self.assertTrue(l == [], repr(g) + '\n should be == to \n' + repr(l))
         for d in r[1]['__Inventory'].value:
             print d['DestinationPath'], d['Contents']
 
@@ -4502,6 +3928,7 @@ class nxFileInventoryTestCases(unittest2.TestCase):
             print d['DestinationPath'], d['Contents']
 
 
+
 ######################################
 if __name__ == '__main__':
     s1=unittest2.TestLoader().loadTestsFromTestCase(nxUserTestCases)
@@ -4521,11 +3948,7 @@ if __name__ == '__main__':
     s15=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlDatabaseTestCases)
     s16=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlUserTestCases)
     s17=unittest2.TestLoader().loadTestsFromTestCase(nxMySqlGrantTestCases)
-    s18=unittest2.TestLoader().loadTestsFromTestCase(nxOMSSyslogTestCases)
-    s19=unittest2.TestLoader().loadTestsFromTestCase(nxOMSPerfCounterTestCases)
-    s20=unittest2.TestLoader().loadTestsFromTestCase(nxOMSCustomLogTestCases)
-    s21=unittest2.TestLoader().loadTestsFromTestCase(nxOMSKeyMgmtTestCases)
-    s22=unittest2.TestLoader().loadTestsFromTestCase(nxFileInventoryTestCases)
-    s23=unittest2.TestLoader().loadTestsFromTestCase(nxOMSGenerateInventoryMofTestCases)
-    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s23])
-    unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests)
+    s18=unittest2.TestLoader().loadTestsFromTestCase(nxFileInventoryTestCases)
+    alltests = unittest2.TestSuite([s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18])
+    if not unittest2.TextTestRunner(stream=sys.stdout,verbosity=3).run(alltests).wasSuccessful():
+        sys.exit(1)

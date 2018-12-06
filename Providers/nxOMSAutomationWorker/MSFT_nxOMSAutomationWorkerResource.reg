@@ -1,0 +1,3 @@
+LIBRARY=MSFT_nxOMSAutomationWorkerResource
+HOSTING=@requestor@
+CLASS=MSFT_nxOMSAutomationWorkerResource:OMI_BaseResource
