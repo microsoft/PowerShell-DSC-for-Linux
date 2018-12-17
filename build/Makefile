@@ -8,12 +8,12 @@
 all:
 	cd ../; \
 	./configure; \
-	ln -s ../omi/Unix ./omi-1.0.8; \
-	ln -s ./release ./target
+	ln -fs ../omi/Unix ./omi-1.0.8; \
+	ln -fs ./release ./target
 	make -C ..
 local:
 	cd ../; \
 	./configure --local; \
-	ln -s ../omi/Unix ./omi-1.0.8; \
-	ln -s ./release ./target
+	ln -fs ../omi/Unix ./omi-1.0.8; \
+	ln -fs ./release ./target
 	make -C ..
