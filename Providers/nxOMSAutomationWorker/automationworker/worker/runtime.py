@@ -171,13 +171,3 @@ def get_default_python_interpreter_major_version():
         return int(default_interpreter_version.strip())
     else:
         return None
-
-def get_ordered_parameters(parameters):
-    import collections
-
-    if parameters < 1 :
-        return parameters
-
-    if parameters["PARAMETER_0"]:
-
-    collections.OrderedDict(sorted(parameters.items()))
