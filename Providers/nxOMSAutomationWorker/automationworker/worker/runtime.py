@@ -48,7 +48,7 @@ class Runtime:
         job_parameters = self.job_data.parameters
         if job_parameters is not None and len(job_parameters) > 0:
             for parameter in job_parameters:
-                cmd += [json.loads(parameter["Value"])]
+                cmd += [str(json.loads(parameter["Value"]))]
 
         # Do not copy current process env var to the sandbox process
         env = os.environ.copy()
@@ -117,7 +117,7 @@ class PowerShellRuntime(Runtime):
         self.execution_alias = "pwsh"
         if linuxutil.is_posix_host() is False:
             self.execution_alias = "powershell"
-
+            
         self.base_cmd = [self.execution_alias, "-File"]
 
 
@@ -171,3 +171,13 @@ def get_default_python_interpreter_major_version():
         return int(default_interpreter_version.strip())
     else:
         return None
+
+def get_ordered_parameters(parameters):
+    import collections
+
+    if parameters < 1 :
+        return parameters
+
+    if parameters["PARAMETER_0"]:
+
+    collections.OrderedDict(sorted(parameters.items()))
