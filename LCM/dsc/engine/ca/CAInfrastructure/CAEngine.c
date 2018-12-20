@@ -24,6 +24,8 @@
 #include "MI.h"
 #include "CAEngine.h"
 #include "CAEngineInternal.h"
+#include "ProviderCallbacks.h"
+#include "NativeResourceManager.h"
 #include "CACrypto.h"
 #include "CAValidate.h"
 #include <curl/curl.h>
