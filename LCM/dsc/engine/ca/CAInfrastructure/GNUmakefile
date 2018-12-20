@@ -7,7 +7,11 @@ LIBRARY = CAEngine
 SOURCES = \
 	CAEngine.c \
 	CAValidate.c \
-	WebPullClient.c
+	WebPullClient.c \
+	ProviderCallbacks.c \
+	NativeResourceProviderMiModule.c \
+	NativeResourceHostMiContext.c \
+	NativeResourceManager.c
 
 INCLUDES = \
 	$(TOP)/../ext/curl/current_platform/include \
