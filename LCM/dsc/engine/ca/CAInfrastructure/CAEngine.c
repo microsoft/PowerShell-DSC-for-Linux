@@ -1082,7 +1082,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
     }
     else if (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
     {
-        return NativeResourceManager_GetTargetResource(provContext, miApp, miSession, instance, regInstance, flags, outputInstance, extendedError);
+        return NativeResourceManager_GetTargetResource(provContext, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
     } 
 #if defined(_MSC_VER)
 #ifndef BUILD_FOR_CORESYSTEM
