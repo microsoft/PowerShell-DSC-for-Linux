@@ -5,7 +5,7 @@
 #endif
 
 #include <pal/strings.h>
-#include "dsc_system_calls.h"
+#include "DSC_Systemcalls.h"
 #include "PAL_Extension.h"
 #include "CAEngine.h"
 #include "EventWrapper.h"
