@@ -848,50 +848,6 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
     return finalr;
 }
 
-/*WriteMessage callbacks from providers*/
-
-void MI_CALL DoWriteMessage(
-    _In_     MI_Operation *operation,
-    _In_opt_ void *callbackContext, 
-             MI_Uint32 channel,
-    _In_z_   const MI_Char *message)
-{
-    ProviderCallbackContext *providerContext = (ProviderCallbackContext *) callbackContext;
-    LCM_WriteMessageFromProvider(providerContext->lcmProviderContext, providerContext->resourceId, channel, message);
-}
-
-void MI_CALL DoWriteProgress(
-    _In_     MI_Operation *operation,
-    _In_opt_ void *callbackContext, 
-    _In_z_   const MI_Char *activity,
-    _In_z_   const MI_Char *currentOperation,
-    _In_z_   const MI_Char *statusDescription,
-             MI_Uint32 percentageComplete,
-             MI_Uint32 secondsRemaining)
-{
-    ProviderCallbackContext *providerContext = (ProviderCallbackContext *) callbackContext;
-    LCM_WriteProgress(providerContext->lcmProviderContext, activity, currentOperation,
-                      statusDescription, percentageComplete, secondsRemaining);
-}
-
-void MI_CALL DoPromptUser(
-    _In_     MI_Operation *operation,
-    _In_opt_ void *callbackContext, 
-    _In_z_   const MI_Char *message,
-             MI_PromptType promptType,
-    _In_     MI_Result (MI_CALL * promptUserResult)(_In_ MI_Operation *operation, 
-                                                      MI_OperationCallback_ResponseType response))
-{
-    MI_Boolean bPromptUserResultStatus;
-    ProviderCallbackContext *providerContext = (ProviderCallbackContext *) callbackContext;
-    LCM_PromptUserFromProvider(providerContext->lcmProviderContext, providerContext->resourceId, message, promptType, &bPromptUserResultStatus);    
-    if(promptUserResult)
-    {
-        promptUserResult(operation, bPromptUserResultStatus);
-    }
-}
-
-
 
 /*Get the current configuration for the desired state objects*/
 MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,   
@@ -1123,7 +1079,11 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
     {
         return Get_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstance, extendedError);
-    }    
+    }
+    else if (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+    {
+        return NativeResourceManager_GetTargetResource(provContext, miApp, miSession, instance, regInstance, flags, outputInstance, extendedError);
+    } 
 #if defined(_MSC_VER)
 #ifndef BUILD_FOR_CORESYSTEM
     else if( Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_PSPROVIDER) == 0 )

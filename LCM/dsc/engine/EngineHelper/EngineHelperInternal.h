@@ -101,6 +101,7 @@
 #define BASE_REGISTRATION                   MI_T("MSFT_BaseConfigurationProviderRegistration")
 #define BASE_REGISTRATION_WMIV2PROVIDER     MI_T("MSFT_CimConfigurationProviderRegistration")
 #define BASE_REGISTRATION_PSPROVIDER        MI_T("MSFT_PSConfigurationProviderRegistration")
+#define BASE_REGISTRATION_NATIVEPROVIDER    MI_T("MSFT_NativeConfigurationProviderRegistration")
 #define METACONFIG_CLASSNAME                MI_T("MSFT_DSCMetaConfiguration")
 #define MSFT_BASECREDENTIAL_CLASSNAME       MI_T("MSFT_Credential")
 #define MSFT_KEYVALUEPAIR_CLASSNAME         MI_T("MSFT_KeyValuePair")
