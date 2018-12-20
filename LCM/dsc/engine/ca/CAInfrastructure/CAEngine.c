@@ -1152,6 +1152,13 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
 
         return Exec_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, canceled, resourceErrorList, extendedError);
     }
+    else if (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+    {
+        if (flags & LCM_EXECUTE_TESTONLY)
+            return NativeResourceManager_TestTargetResource(provContext, extendedError);
+        else
+            return NativeResourceManager_SetTargetResource(provContext, extendedError);
+    }
     
 #if defined(_MSC_VER)
 #ifndef BUILD_FOR_CORESYSTEM

@@ -930,4 +930,6 @@ extern MSFT_DSCMetaConfiguration *g_metaConfig;
      MI_Result MIResultFromHRESULT(HRESULT hr);
 #endif
 
+MI_Boolean IsDSCResource(_In_ MI_Instance *instance);
+
 #endif

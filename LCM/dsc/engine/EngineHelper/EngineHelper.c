@@ -1350,3 +1350,18 @@ void Destroy_StatusReport_RNIDS(StatusReport_ResourceNotInDesiredState* ptr)
         DSC_free(ptr->InDesiredState);
 
 }
+
+//Check if a given instance is a DSC resource instance
+MI_Boolean IsDSCResource(_In_ MI_Instance *instance)
+{
+    const MI_ClassDecl* p;
+    if(!instance)
+        return MI_FALSE;
+
+    for (p = instance->classDecl; p; p = p->superClassDecl)
+    {
+        if( Tcscasecmp(p->superClass, BASE_RESOURCE_CLASSNAME) == 0)
+            return MI_TRUE;
+    }
+    return MI_FALSE;
+}
