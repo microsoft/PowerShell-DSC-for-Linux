@@ -40,7 +40,7 @@ static MI_Result PostInstance(_In_ MI_Context* context, _In_ const MI_Instance *
     return MI_Instance_Clone(instance, &nativeResourceProvider->_private.outputResource);
 }
 
-static MI_Result WriteMessage(_In_ MI_Context* context, MI_Uint32 channel, __in_z const MI_Char* message)
+static MI_Result WriteMessage(_In_ MI_Context* context, MI_Uint32 channel, const MI_Char* message)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
@@ -49,7 +49,7 @@ static MI_Result WriteMessage(_In_ MI_Context* context, MI_Uint32 channel, __in_
 	return MI_RESULT_OK;
 }
 
-static MI_Result WriteProgress(_In_ MI_Context* context, __in_z const MI_Char* activity, __in_z const MI_Char* currentOperation, __in_z const MI_Char* statusDescription, MI_Uint32 percentComplete, MI_Uint32 secondsRemaining)
+static MI_Result WriteProgress(_In_ MI_Context* context, const MI_Char* activity, const MI_Char* currentOperation, const MI_Char* statusDescription, MI_Uint32 percentComplete, MI_Uint32 secondsRemaining)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
@@ -58,7 +58,7 @@ static MI_Result WriteProgress(_In_ MI_Context* context, __in_z const MI_Char* a
     return MI_RESULT_OK;
 }
 
-static MI_Result WriteStreamParameter(_In_ MI_Context* context, __in_z const MI_Char* name, _In_ const MI_Value* value, _In_ MI_Type type, _In_ MI_Uint32 flags)
+static MI_Result WriteStreamParameter(_In_ MI_Context* context, const MI_Char* name, _In_ const MI_Value* value, _In_ MI_Type type, _In_ MI_Uint32 flags)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
@@ -150,7 +150,7 @@ static MI_Result ConstructParameters(_In_ MI_Context* context, _In_ const MI_Met
 #endif   
 }
 
-static MI_Result NewInstance(_In_ MI_Context* context, _In_ const MI_ClassDecl* classDecl, __deref_out MI_Instance** instance)
+static MI_Result NewInstance(_In_ MI_Context* context, _In_ const MI_ClassDecl* classDecl, MI_Instance** instance)
 {
     #if defined(_MSC_VER)
     return Instance_New(classDecl, instance);
@@ -168,7 +168,7 @@ static MI_Result NewDynamicInstance(_In_ MI_Context* context, _In_ const MI_Char
     #endif
 }
 
-static MI_Result NewParameters(_In_ MI_Context* context, _In_ const MI_MethodDecl* methodDecl, __deref_out MI_Instance** instance)
+static MI_Result NewParameters(_In_ MI_Context* context, _In_ const MI_MethodDecl* methodDecl, MI_Instance** instance)
 {
     #if defined(_MSC_VER)
     return Instance_New((MI_ClassDecl*)methodDecl, instance);
@@ -184,7 +184,7 @@ static MI_Result NewParameters(_In_ MI_Context* context, _In_ const MI_MethodDec
 /**************************************************************************************************/
 
 
-static MI_Result PostIndication(_In_ MI_Context* context, _In_ const MI_Instance* indication, MI_Uint32 subscriptionIDCount, __in_z_opt const MI_Char* bookmark)
+static MI_Result PostIndication(_In_ MI_Context* context, _In_ const MI_Instance* indication, MI_Uint32 subscriptionIDCount, const MI_Char* bookmark)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
      DSC_EventUnSupportedHostMethodCalled(MI_T("PostIndication"));
@@ -198,7 +198,7 @@ static MI_Result Canceled(_In_ const MI_Context* context, _Out_ MI_Boolean* flag
     return MI_RESULT_NOT_SUPPORTED;
 }
 
-static MI_Result RegisterCancel(_In_ MI_Context* context, _In_ MI_CancelCallback callback, __in_opt void* callbackData)
+static MI_Result RegisterCancel(_In_ MI_Context* context, _In_ MI_CancelCallback callback, void* callbackData)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
     DSC_EventUnSupportedHostMethodCalled(MI_T("RegisterCancel"));
@@ -275,7 +275,7 @@ static MI_Result GetCustomOptionAt(_In_ MI_Context* context, _In_ MI_Uint32 inde
     return MI_RESULT_NOT_SUPPORTED;
 }
 
-static MI_Result ShouldProcess(_In_ MI_Context* context, __in_z const MI_Char* target, __in_z const MI_Char* action, _Out_ MI_Boolean* flag)
+static MI_Result ShouldProcess(_In_ MI_Context* context, const MI_Char* target, const MI_Char* action, _Out_ MI_Boolean* flag)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
     *flag = MI_FALSE;
@@ -283,7 +283,7 @@ static MI_Result ShouldProcess(_In_ MI_Context* context, __in_z const MI_Char* t
     return MI_RESULT_NOT_SUPPORTED;
 }
 
-static MI_Result ShouldContinue(_In_ MI_Context* context, __in_z const MI_Char* message, _Out_ MI_Boolean* flag)
+static MI_Result ShouldContinue(_In_ MI_Context* context, const MI_Char* message, _Out_ MI_Boolean* flag)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
     *flag = MI_TRUE;
@@ -291,7 +291,7 @@ static MI_Result ShouldContinue(_In_ MI_Context* context, __in_z const MI_Char* 
     return MI_RESULT_NOT_SUPPORTED;
 }
 
-static MI_Result PromptUser(_In_ MI_Context* context, __in_z const MI_Char* message, MI_PromptType promptType, _Out_ MI_Boolean*flag)
+static MI_Result PromptUser(_In_ MI_Context* context, const MI_Char* message, MI_PromptType promptType, _Out_ MI_Boolean*flag)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
     *flag = MI_FALSE;
