@@ -90,7 +90,7 @@ static MI_Result WriteError(_In_ MI_Context* context, MI_Uint32 resultCode, _In_
 
     DoWriteError(NULL, nativeResourceProvider->_private.callbackContext, extendedError, NULL);
 
-EH_UNWIND:
+EH_UNWIND;
     if (extendedError != NULL)
         MI_Instance_Delete(extendedError);
 
@@ -415,7 +415,7 @@ MI_Result NativeResourceProvider_New(const _In_z_ MI_Char* resourceProviderPath,
 
     DSC_EventCreateHostContextSucceeded();
 
-EH_UNWIND:
+EH_UNWIND;
     if (returnValue != MI_RESULT_OK) 
     {
         DSC_EventCreateHostContextFailed();
@@ -555,7 +555,7 @@ static MI_Result InvokeMethod(_In_ NativeResourceProvider* resourceProvider, con
 
     returnValue = MI_RESULT_OK;
 
-EH_UNWIND:
+EH_UNWIND;
 
     if (inputResourceInstance != NULL)
         MI_Instance_Delete(inputResourceInstance);
@@ -617,7 +617,7 @@ EH_UNWIND:
 //     EH_CheckResult(returnValue);
 //     // For Inventory output is send via streaming
 
-// EH_UNWIND:// Empty statement needed for not-C99-standard compiler on Linux
+// EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
 
 //     // Log the duration of the operation
 //     MI_Real64 duration = EndClockAndGetDuration(start);
@@ -698,7 +698,7 @@ MI_Result NativeResourceProvider_GetTargetResource(
     outputInstance->data[0] = outputResourceFiltered;
     outputInstance->size = 1;
 
-EH_UNWIND:// Empty statement needed for not-C99-standard compiler on Linux
+EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
 
     // Log the duration of the operation
     MI_Real64 duration = EndClockAndGetDuration(start);
@@ -766,7 +766,7 @@ MI_Result NativeResourceProvider_TestTargetResource(
 
     *testOperationResult = (MI_Uint32)outputResourceValue.boolean;
 
-EH_UNWIND:// Empty statement needed for not-C99-standard compiler on Linux
+EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
 
     // Log the duration of the operation
     MI_Real64 duration = EndClockAndGetDuration(start);

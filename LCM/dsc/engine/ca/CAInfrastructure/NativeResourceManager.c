@@ -70,7 +70,7 @@ MI_Result NativeResourceManager_New(_In_opt_ ProviderCallbackContext* resourcePr
 
     *nativeResourceManager = nativeResourceManagerLocal;
 
-EH_UNWIND:
+EH_UNWIND;
     if (returnValue != MI_RESULT_OK)
     {
         NativeResourceManager_Delete(nativeResourceManagerLocal);
@@ -122,7 +122,7 @@ MI_Result NativeResourceManager_GetNativeResouceProvider(_In_ NativeResourceMana
 
     *nativeResourceProvider = bucket->resourceProvider;
 
-    EH_UNWIND:
+    EH_UNWIND;
 
     return returnValue;
 }
