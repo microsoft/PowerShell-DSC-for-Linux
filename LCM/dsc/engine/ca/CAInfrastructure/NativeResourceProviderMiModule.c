@@ -179,7 +179,7 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *jobId,
     versionMatch = miModuleVersion == MI_MAJOR;
     if (!versionMatch)
     {
-        DSC_EventMIModuleVersionMisMatch(jobId, MI_MAJOR, miModuleVersion);
+        DSC_EventMIModuleVersionMisMatch(/*jobId,*/ MI_MAJOR, miModuleVersion);
     }
     EH_Check_(versionMatch, returnValue = MI_RESULT_NOT_SUPPORTED);
     *module = nativeResourceProviderMiModule;
