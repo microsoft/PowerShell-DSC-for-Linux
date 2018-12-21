@@ -6,7 +6,7 @@
 #include "EventWrapper.h"
 #include "Resources_LCM.h"
 #include "ProviderCallbacks.h"
-#include "instance.h"
+#include "base/instance.h"
 #include "DSC_sal.h"
 #include "NativeResourceHostMiContext.h"
 
