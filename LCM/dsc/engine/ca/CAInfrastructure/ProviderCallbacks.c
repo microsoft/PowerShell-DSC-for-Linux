@@ -51,5 +51,6 @@ void MI_CALL DoWriteError(
 {
     ProviderCallbackContext *providerContext = (ProviderCallbackContext *)callbackContext;
     //providerContext->lcmProviderContext->initVariables->nonTerminatingErrorFromNativeProvider = TRUE;
-    LCM_WriteError(providerContext->lcmProviderContext, providerContext->resourceId, REPORTING_TYPE_PSWMIRESOURCE, instance);
+    //LCM_WriteError(providerContext->lcmProviderContext, providerContext->resourceId, REPORTING_TYPE_PSWMIRESOURCE, instance);
+    LCM_WriteError(providerContext->lcmProviderContext, instance);
 }
