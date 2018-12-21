@@ -87,7 +87,7 @@
     EH_Check(MI_RESULT_OK == (miResultExpression))
 
 /* unwind block */
-#define EH_UNWIND _eh_unwind:
+#define EH_UNWIND _EH_UNWIND
 
 
 #define SEARCH_PATTERN_DIRECTORY            MI_T("*")

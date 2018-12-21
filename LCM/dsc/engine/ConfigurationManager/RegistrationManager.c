@@ -61,7 +61,7 @@ MI_Result MI_CALL RegistrationManager_New(
     *out = self;
     return MI_RESULT_OK;
 
-EH_UNWIND:
+EH_UNWIND
     if( self)
     {
         free(self);
