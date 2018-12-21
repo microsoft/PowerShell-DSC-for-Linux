@@ -10,6 +10,7 @@
 #pragma once
 
 #include "NativeResourceHostMiContext.h"
+#include "pal/hashmap.h"
 
 typedef struct _NativeResourceManager {
     struct {
