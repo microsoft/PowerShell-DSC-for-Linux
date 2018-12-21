@@ -17,6 +17,8 @@
 #ifndef _LOCALCONFIGMANAGERHELPERFORCA_H_
 #define _LOCALCONFIGMANAGERHELPERFORCA_H_
 
+#include "pal/lock.h"
+
 RecursiveLock g_cs_CurrentWmiv2Operation;
 Sem g_h_ConfigurationStoppedEvent;
 volatile BOOL g_CancelConfiguration;
