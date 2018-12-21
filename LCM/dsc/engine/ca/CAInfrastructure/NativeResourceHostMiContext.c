@@ -566,69 +566,68 @@ EH_UNWIND;
     return returnValue;
 }
 
-/**************************************************************************************************/
-/*                                                                                                */
-/*  NativeResourceProvider_GetInventory                                                      */
-/*                                                                                                */
-/**************************************************************************************************/
+// /**************************************************************************************************/
+// /*                                                                                                */
+// /*  NativeResourceProvider_GetInventory                                                      */
+// /*                                                                                                */
+// /**************************************************************************************************/
 
-MI_Result NativeResourceProvider_GetInventory(
-    _In_ NativeResourceProvider* resourceProvider,
-    _In_ MI_Application *miApplication,
-    _In_ MI_Session *miSession,
-    _In_ MI_Instance *nativeResource,
-    _In_ const MI_Instance *resourceProviderRegistration,
-    _Inout_ MI_InstanceA *outputInstance,
-    _Outptr_result_maybenull_ MI_Instance **extendedError
-)
-{
-    if (outputInstance == NULL)
-        return MI_RESULT_INVALID_PARAMETER;
+// MI_Result NativeResourceProvider_GetInventory(
+//     _In_ NativeResourceProvider* resourceProvider,
+//     _In_ MI_Application *miApplication,
+//     _In_ MI_Session *miSession,
+//     _In_ MI_Instance *nativeResource,
+//     _In_ const MI_Instance *resourceProviderRegistration,
+//     _Inout_ MI_InstanceA *outputInstance,
+//     _Outptr_result_maybenull_ MI_Instance **extendedError
+// )
+// {
+//     if (outputInstance == NULL)
+//         return MI_RESULT_INVALID_PARAMETER;
 
-    if (extendedError == NULL)
-    {
-        return MI_RESULT_INVALID_PARAMETER;
-    }
-    *extendedError = NULL;
+//     if (extendedError == NULL)
+//     {
+//         return MI_RESULT_INVALID_PARAMETER;
+//     }
+//     *extendedError = NULL;
 
-    clock_t  start;
+//     clock_t  start;
 
-    MI_Result returnValue = MI_RESULT_OK;
+//     MI_Result returnValue = MI_RESULT_OK;
 
-    ProviderCallbackContext* providerCallbackContext = resourceProvider->_private.callbackContext;
-    LCMProviderContext*lcmProviderContext = providerCallbackContext->lcmProviderContext;
+//     ProviderCallbackContext* providerCallbackContext = resourceProvider->_private.callbackContext;
+//     LCMProviderContext*lcmProviderContext = providerCallbackContext->lcmProviderContext;
 
-    DSC_EventWriteEngineMethodParameters(
-        lcmProviderContext->configurationDetails.jobGuidString,
-        __WFUNCTION__,
-        nativeResource->classDecl->name,
-        providerCallbackContext->resourceId,
-        0,
-        lcmProviderContext->executionMode,
-        resourceProviderRegistration->nameSpace);
-    //TODO: DSC_EventWriteMessageWmiGet(provContext->lcmProviderContext->configurationDetails.jobGuidString, instance->classDecl->name, provContext->resourceId);
+//     DSC_EventWriteEngineMethodParameters(
+//         __WFUNCTION__,
+//         nativeResource->classDecl->name,
+//         providerCallbackContext->resourceId,
+//         0,
+//         lcmProviderContext->executionMode,
+//         resourceProviderRegistration->nameSpace);
+//     //TODO: DSC_EventWriteMessageWmiGet(provContext->lcmProviderContext->configurationDetails.jobGuidString, instance->classDecl->name, provContext->resourceId);
 
-    start = GetCurrentClockTime();
-    SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_GET, lcmProviderContext);
-    LogCAMessage(lcmProviderContext, ID_OUTPUT_EMPTYSTRING, providerCallbackContext->resourceId);
+//     start = GetCurrentClockTime();
+//     SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_GET, lcmProviderContext);
+//     LogCAMessage(lcmProviderContext, ID_OUTPUT_EMPTYSTRING, providerCallbackContext->resourceId);
 
-    // Invoke GetTargetResource
-    MI_Instance* outputResource = NULL;
-    returnValue = InvokeMethod(resourceProvider, OMI_BaseResource_GetInventoryMethodName, nativeResource, &outputResource, extendedError);
-    EH_CheckResult(returnValue);
-    // For Inventory output is send via streaming
+//     // Invoke GetTargetResource
+//     MI_Instance* outputResource = NULL;
+//     returnValue = InvokeMethod(resourceProvider, OMI_BaseResource_GetInventoryMethodName, nativeResource, &outputResource, extendedError);
+//     EH_CheckResult(returnValue);
+//     // For Inventory output is send via streaming
 
-EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
+// EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
 
-    // Log the duration of the operation
-    MI_Real64 duration = EndClockAndGetDuration(start);
-    SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_GET, lcmProviderContext);
-    LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
+//     // Log the duration of the operation
+//     MI_Real64 duration = EndClockAndGetDuration(start);
+//     SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_GET, lcmProviderContext);
+//     LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
 
-    DSC_EventWriteMethodEnd(lcmProviderContext->configurationDetails.jobGuidString, __WFUNCTION__);
+//     DSC_EventWriteMethodEnd(lcmProviderContext->configurationDetails.jobGuidString, __WFUNCTION__);
 
-    return returnValue;    
-}
+//     return returnValue;    
+// }
 
 
 /**************************************************************************************************/
@@ -664,7 +663,6 @@ MI_Result NativeResourceProvider_GetTargetResource(
     LCMProviderContext*lcmProviderContext = providerCallbackContext->lcmProviderContext;
 
     DSC_EventWriteEngineMethodParameters(
-        lcmProviderContext->configurationDetails.jobGuidString,
         __WFUNCTION__,
         nativeResource->classDecl->name,
         providerCallbackContext->resourceId,
@@ -689,13 +687,14 @@ MI_Result NativeResourceProvider_GetTargetResource(
     EH_CheckResult(returnValue);
 
     MI_Instance *outputResourceFiltered = NULL;
-    returnValue = GetFilteredResource(lcmProviderContext, miApplication, nativeResource, outputResourceValue.instance, MI_TRUE, &outputResourceFiltered, &outputResourceSystemProperties, extendedError);
+    //returnValue = GetFilteredResource(lcmProviderContext, miApplication, nativeResource, outputResourceValue.instance, MI_TRUE, &outputResourceFiltered, &outputResourceSystemProperties, extendedError);
+    returnValue = GetFilteredResource(miApplication, nativeResource, &outputResourceFiltered, extendedError);
     EH_CheckResult(returnValue);
 
     // Return the output resource
     outputInstance->data = (MI_Instance **)DSC_malloc(sizeof(MI_Instance*), NitsHere());
     if (outputInstance->data == NULL)
-        EH_Fail_(returnValue = GetCimMIError(lcmProviderContext, MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR));
+        EH_Fail_(returnValue = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR));
     outputInstance->data[0] = outputResourceFiltered;
     outputInstance->size = 1;
 
@@ -706,7 +705,7 @@ EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
     SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_GET, lcmProviderContext);
     LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
 
-    DSC_EventWriteMethodEnd(lcmProviderContext->configurationDetails.jobGuidString, __WFUNCTION__);
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
 
     if (outputResourceSystemProperties)
         MI_Instance_Delete(outputResourceSystemProperties);
@@ -743,7 +742,6 @@ MI_Result NativeResourceProvider_TestTargetResource(
     LCMProviderContext*lcmProviderContext = providerCallbackContext->lcmProviderContext;
 
     DSC_EventWriteEngineMethodParameters(
-        lcmProviderContext->configurationDetails.jobGuidString,
         __WFUNCTION__,
         nativeResource->classDecl->name,
         providerCallbackContext->resourceId,
@@ -775,7 +773,7 @@ EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
     SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_TEST, lcmProviderContext);
     LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
 
-    DSC_EventWriteMethodEnd(lcmProviderContext->configurationDetails.jobGuidString, __WFUNCTION__);
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
 
     return returnValue;
 }
