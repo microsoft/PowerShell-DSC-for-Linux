@@ -7,7 +7,6 @@
 #include "Resources_LCM.h"
 #include "ProviderCallbacks.h"
 #include "base/instance.h"
-#include "DSC_sal.h"
 #include "NativeResourceHostMiContext.h"
 
 /**************************************************************************************************/
