@@ -75,7 +75,7 @@ static MI_Result MI_CALL NativeResourceHostMiServer_GetSystemName(const MI_Char*
     }
     *systemName = computerName;
 
-EH_UNWIND:
+EH_UNWIND;
     return returnValue;
 }
 
@@ -101,7 +101,7 @@ static MI_Result NativeResourceHostMiServer_New(_Outptr_ MI_Server** server)
 
     *server = (MI_Server*) nativeResourceHostMiServer;
 
-EH_UNWIND:
+EH_UNWIND;
     return returnValue;
 }
 
@@ -184,7 +184,7 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *nativeResourc
     *module = nativeResourceProviderMiModule;
     DSC_EventWriteLoadingDLLSucceeded(nativeResourceProviderPath);
 
-EH_UNWIND:
+EH_UNWIND;
 
     NativeResourceHostMiServer_Delete(miServer);
     if (returnValue != MI_RESULT_OK)
