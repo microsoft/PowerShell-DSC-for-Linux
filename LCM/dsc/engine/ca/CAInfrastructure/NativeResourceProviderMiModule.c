@@ -119,9 +119,8 @@ static MI_Result NativeResourceHostMiServer_Delete(_Outptr_ MI_Server* server)
 /*                                                                                                */
 /**************************************************************************************************/
 
-MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *jobId,
-                                                      const _In_z_ MI_Char *nativeResourceProviderPath,
-                                                      _Outptr_ NativeResourceProviderMiModule** module)
+MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *nativeResourceProviderPath,
+                                            _Outptr_ NativeResourceProviderMiModule** module)
 {
     typedef MI_Module* (MI_MAIN_CALL* MI_ModuleMainFunction)(MI_Server*);
 
@@ -183,7 +182,7 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *jobId,
     }
     EH_Check_(versionMatch, returnValue = MI_RESULT_NOT_SUPPORTED);
     *module = nativeResourceProviderMiModule;
-    DSC_EventWriteLoadingDLLSucceeded(jobId, nativeResourceProviderPath);
+    DSC_EventWriteLoadingDLLSucceeded(nativeResourceProviderPath);
 
 EH_UNWIND;
 
@@ -212,16 +211,14 @@ MI_Result NativeResourceProviderMiModule_Delete(_In_ NativeResourceProviderMiMod
 }
 
 MI_Result NativeResourceProviderMiModule_HasClassDecl(const _In_ NativeResourceProviderMiModule* module,
-                                                                const _In_z_ MI_Char *className,
-                                                                const _In_z_ MI_Char *jobId)
+                                                                const _In_z_ MI_Char *className)
 {
     MI_ClassDecl * classDecl = 0;
-    return NativeResourceProviderMiModule_GetClassDecl(module, className , jobId, (const MI_ClassDecl**)&classDecl);
+    return NativeResourceProviderMiModule_GetClassDecl(module, className , (const MI_ClassDecl**)&classDecl);
 }
 
 MI_Result NativeResourceProviderMiModule_GetSchemaDecls(const _In_ NativeResourceProviderMiModule* module,
                                                                     const _In_z_ MI_Char *className,
-                                                                    const _In_z_ MI_Char *jobId,
                                                                     _Outptr_ const MI_SchemaDecl** schema)
 {
     if (schema == NULL)
@@ -234,7 +231,6 @@ MI_Result NativeResourceProviderMiModule_GetSchemaDecls(const _In_ NativeResourc
 
 MI_Result NativeResourceProviderMiModule_GetClassDecl(const _In_ NativeResourceProviderMiModule* module,
                                                                 const _In_z_ MI_Char *className,
-                                                                const _In_z_ MI_Char *jobId,
                                                                 _Outptr_ const MI_ClassDecl** classDecl)
 {
     if (classDecl == NULL)
@@ -254,7 +250,7 @@ MI_Result NativeResourceProviderMiModule_GetClassDecl(const _In_ NativeResourceP
         if (Tcscasecmp(c->name, className) == 0)
         {
             *classDecl = c;
-            DSC_EventGettingTheSchemaSucceeded(jobId, className);
+            DSC_EventGettingTheSchemaSucceeded(className);
             return MI_RESULT_OK;
         }
     }
@@ -293,7 +289,6 @@ MI_Uint32 ComputeCimNameHash(const MI_Char* name)
 
 MI_Result NativeResourceProviderMiModule_GetMethodDecl(const _In_ MI_ClassDecl* classDecl,
                                                                   const _In_z_ MI_Char *methodName,
-                                                                  const _In_z_ MI_Char *jobId,
                                                                   _Outptr_  const MI_MethodDecl** methodDecl)
 {
     if (methodDecl == NULL)

@@ -29,9 +29,8 @@ typedef struct {
 //
 // Creates a NativeResourceProviderMiModule using the path to the binary file (e.g. a Windows DLL) that implements the MI_Module
 //
-MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *jobId, 
-                                                      const _In_z_ MI_Char *nativeResourceProviderPath, 
-                                                      _Outptr_ NativeResourceProviderMiModule** module);
+MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *nativeResourceProviderPath, 
+                                             _Outptr_ NativeResourceProviderMiModule** module);
 
 //
 // Destroys the NativeResourceProviderMiModule created by NativeResourceProviderMiModule_New
@@ -43,15 +42,13 @@ MI_Result NativeResourceProviderMiModule_Delete(_In_ NativeResourceProviderMiMod
 //
 MI_Result NativeResourceProviderMiModule_GetClassDecl(const _In_ NativeResourceProviderMiModule* module, 
                                                                 const _In_z_ MI_Char *className,
-                                                                const _In_z_ MI_Char *jobId,
                                                                 _Outptr_ const MI_ClassDecl** classDecl);
 
 //
 // Find the declaration of a class within the given MI_Module
 //
 MI_Result NativeResourceProviderMiModule_HasClassDecl(const _In_ NativeResourceProviderMiModule* module, 
-                                                                 const _In_z_ MI_Char *className,
-                                                                 const _In_z_ MI_Char *jobId);
+                                                                 const _In_z_ MI_Char *className);
 
 
 //
@@ -59,7 +56,6 @@ MI_Result NativeResourceProviderMiModule_HasClassDecl(const _In_ NativeResourceP
 //
 MI_Result NativeResourceProviderMiModule_GetSchemaDecls(const _In_ NativeResourceProviderMiModule* module, 
                                                                     const _In_z_ MI_Char *className, 
-                                                                    const _In_z_ MI_Char *jobId,
                                                                     _Outptr_ const MI_SchemaDecl** schema);
 
 
@@ -68,7 +64,6 @@ MI_Result NativeResourceProviderMiModule_GetSchemaDecls(const _In_ NativeResourc
 //
 MI_Result NativeResourceProviderMiModule_GetMethodDecl(const _In_ MI_ClassDecl* classDecl, 
                                                                   const _In_z_ MI_Char *methodName, 
-                                                                  const _In_z_ MI_Char *jobId,
                                                                   _Outptr_  const MI_MethodDecl** methodDecl);
 
 

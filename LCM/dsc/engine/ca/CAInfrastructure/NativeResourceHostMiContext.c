@@ -384,8 +384,7 @@ MI_Result NativeResourceProvider_New(const _In_z_ MI_Char* resourceProviderPath,
     //
     // Load the implementation of the resource provider and invoke Load on the MI_Module
     //
-    returnValue = NativeResourceProviderMiModule_New(nativeResourceProviderLocal->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, 
-                                    resourceProviderPath, &nativeResourceProviderLocal->_private.resourceProviderMiModule);
+    returnValue = NativeResourceProviderMiModule_New(resourceProviderPath, &nativeResourceProviderLocal->_private.resourceProviderMiModule);
     EH_CheckResult(returnValue);
 
     nativeResourceProviderLocal->_private.resourceProviderMiModule->miModule->Load(&nativeResourceProviderLocal->_private.resourceProviderMiModuleSelf, 
@@ -399,7 +398,6 @@ MI_Result NativeResourceProvider_New(const _In_z_ MI_Char* resourceProviderPath,
     //
     returnValue = NativeResourceProviderMiModule_GetClassDecl(nativeResourceProviderLocal->_private.resourceProviderMiModule, 
                                                     resourceProviderClassName, 
-                                                    nativeResourceProviderLocal->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString,
                                                      (const MI_ClassDecl **) &nativeResourceProviderLocal->_private.resourceClassDecl);
     EH_CheckResult(returnValue);
 
@@ -515,9 +513,7 @@ static MI_Result InvokeMethod(_In_ NativeResourceProvider* resourceProvider, con
     // Get the method that will be invoked
     // NOTE: the method declarations is managed by the provider's implementation of MI_Module and should not be deallocated
     const MI_MethodDecl* methodDecl = NULL;
-    returnValue = NativeResourceProviderMiModule_GetMethodDecl(resourceProvider->_private.resourceClassDecl, methodName, 
-                                                                resourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString,
-                                                                &methodDecl);
+    returnValue = NativeResourceProviderMiModule_GetMethodDecl(resourceProvider->_private.resourceClassDecl, methodName, &methodDecl);
     EH_CheckResult(returnValue);
 
     // Invoke the method
