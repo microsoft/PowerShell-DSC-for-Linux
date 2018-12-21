@@ -33,7 +33,7 @@ static MI_Result PostInstance(_In_ MI_Context* context, _In_ const MI_Instance *
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
     if (!nativeResourceProvider->_private.resourceProviderClassLoaded) {
-        DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString ,MI_T("PostIndication"));
+        DSC_EventUnSupportedHostMethodCalled(MI_T("PostIndication"));
         return MI_RESULT_NOT_SUPPORTED;
     }
 
@@ -63,7 +63,7 @@ static MI_Result WriteStreamParameter(_In_ MI_Context* context, __in_z const MI_
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
     if (!nativeResourceProvider->_private.resourceProviderClassLoaded) {
-        DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString ,MI_T("PostIndication"));
+        DSC_EventUnSupportedHostMethodCalled(MI_T("PostIndication"));
         return MI_RESULT_NOT_SUPPORTED;
     }
 
@@ -80,7 +80,7 @@ static MI_Result WriteError(_In_ MI_Context* context, MI_Uint32 resultCode, _In_
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
     if (!nativeResourceProvider->_private.resourceProviderClassLoaded) {
-        DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString ,MI_T("PostIndication"));
+        DSC_EventUnSupportedHostMethodCalled(MI_T("PostIndication"));
         return MI_RESULT_NOT_SUPPORTED;
     }
 
@@ -112,7 +112,7 @@ static MI_Result WriteCimError(_In_ MI_Context* context, _In_ const MI_Instance 
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
     if (!nativeResourceProvider->_private.resourceProviderClassLoaded) {
-        DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString ,MI_T("PostIndication"));
+        DSC_EventUnSupportedHostMethodCalled(MI_T("PostIndication"));
         return MI_RESULT_NOT_SUPPORTED;
     }
 
@@ -187,91 +187,91 @@ static MI_Result NewParameters(_In_ MI_Context* context, _In_ const MI_MethodDec
 static MI_Result PostIndication(_In_ MI_Context* context, _In_ const MI_Instance* indication, MI_Uint32 subscriptionIDCount, __in_z_opt const MI_Char* bookmark)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-     DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("PostIndication"));
+     DSC_EventUnSupportedHostMethodCalled(MI_T("PostIndication"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result Canceled(_In_ const MI_Context* context, _Out_ MI_Boolean* flag)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-     DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("Canceled"));
+     DSC_EventUnSupportedHostMethodCalled(MI_T("Canceled"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result RegisterCancel(_In_ MI_Context* context, _In_ MI_CancelCallback callback, __in_opt void* callbackData)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("RegisterCancel"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("RegisterCancel"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result RequestUnload(_In_ MI_Context* context)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("RequestUnload"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("RequestUnload"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result RefuseUnload(_In_ MI_Context* context)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("RefuseUnload"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("RefuseUnload"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result GetLocalSession(_In_ const MI_Context* context, _Out_ MI_Session* session)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("GetLocalSession"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("GetLocalSession"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result GetLocale(_In_ const MI_Context* context, MI_LocaleType localeType, _Out_writes_z_(MI_MAX_LOCALE_SIZE) MI_Char locale[MI_MAX_LOCALE_SIZE])
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("GetLocale"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("GetLocale"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result GetCustomOption(_In_ MI_Context* context, _In_z_ const MI_Char* name, _Out_opt_  MI_Type* valueType, _Out_opt_  MI_Value* value)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("GetCustomOption"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("GetCustomOption"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result SetStringOption(_In_ MI_Context* context, _In_z_ const MI_Char* name, _In_z_ const MI_Char* value)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("SetStringOption"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("SetStringOption"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result GetStringOption(_In_ MI_Context* context, _In_z_ const MI_Char* name, _Outptr_opt_result_maybenull_z_  const MI_Char** value)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("GetStringOption"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("GetStringOption"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result GetNumberOption(_In_ MI_Context* context, _In_z_ const MI_Char *name, _Out_opt_  MI_Uint32* value)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("GetNumberOption"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("GetNumberOption"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result GetCustomOptionCount(_In_ MI_Context* context, _Out_opt_ MI_Uint32* count)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("GetCustomOptionCount"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("GetCustomOptionCount"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
 static MI_Result GetCustomOptionAt(_In_ MI_Context* context, _In_ MI_Uint32 index, _Outptr_opt_result_maybenull_z_  const MI_Char** name, _Out_opt_  MI_Type* valueType, _Out_opt_  MI_Value* value)
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("GetCustomOptionAt"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("GetCustomOptionAt"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
@@ -279,7 +279,7 @@ static MI_Result ShouldProcess(_In_ MI_Context* context, __in_z const MI_Char* t
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
     *flag = MI_FALSE;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("ShouldProcess"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("ShouldProcess"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
@@ -287,7 +287,7 @@ static MI_Result ShouldContinue(_In_ MI_Context* context, __in_z const MI_Char* 
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
     *flag = MI_TRUE;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("ShouldContinue"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("ShouldContinue"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
@@ -295,7 +295,7 @@ static MI_Result PromptUser(_In_ MI_Context* context, __in_z const MI_Char* mess
 {
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
     *flag = MI_FALSE;
-    DSC_EventUnSupportedHostMethodCalled(nativeResourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString, MI_T("PromptUser"));
+    DSC_EventUnSupportedHostMethodCalled(MI_T("PromptUser"));
     return MI_RESULT_NOT_SUPPORTED;
 }
 
@@ -416,12 +416,12 @@ MI_Result NativeResourceProvider_New(const _In_z_ MI_Char* resourceProviderPath,
     //
     *nativeResourceProvider = nativeResourceProviderLocal;
 
-    DSC_EventCreateHostContextSucceeded(nativeResourceProviderLocal->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString );
+    DSC_EventCreateHostContextSucceeded();
 
 EH_UNWIND;
     if (returnValue != MI_RESULT_OK) 
     {
-        DSC_EventCreateHostContextFailed(nativeResourceProviderLocal->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString);
+        DSC_EventCreateHostContextFailed();
 
         if (nativeResourceProviderLocal != NULL) 
             NativeResourceProvider_Delete(nativeResourceProviderLocal);
@@ -487,8 +487,7 @@ static MI_Result InvokeMethod(_In_ NativeResourceProvider* resourceProvider, con
 
     MI_Context* resourceProviderMiContext = (MI_Context*)resourceProvider;
 
-    DSC_EventInvokingNativeResourceMethod(resourceProvider->_private.callbackContext->lcmProviderContext->configurationDetails.jobGuidString ,
-        methodName, inputResource->classDecl->name, resourceProvider->resourceProviderPath);
+    DSC_EventInvokingNativeResourceMethod(methodName, inputResource->classDecl->name, resourceProvider->resourceProviderPath);
 
     //
     // Create a copy of the arguments that will be passed to the method - this copy is needed because the value of 'inputResource'

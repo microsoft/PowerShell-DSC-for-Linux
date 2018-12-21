@@ -179,7 +179,7 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *jobId,
     versionMatch = miModuleVersion == MI_MAJOR;
     if (!versionMatch)
     {
-        DSC_EventMIModuleVersionMisMatch(/*jobId,*/ MI_MAJOR, miModuleVersion);
+        DSC_EventMIModuleVersionMisMatch(MI_MAJOR, miModuleVersion);
     }
     EH_Check_(versionMatch, returnValue = MI_RESULT_NOT_SUPPORTED);
     *module = nativeResourceProviderMiModule;
@@ -258,7 +258,7 @@ MI_Result NativeResourceProviderMiModule_GetClassDecl(const _In_ NativeResourceP
             return MI_RESULT_OK;
         }
     }
-    DSC_EventGettingTheClassDeclFailed(jobId, className);
+    DSC_EventGettingTheClassDeclFailed(className);
     return MI_RESULT_NOT_FOUND;
 }
 
@@ -308,11 +308,11 @@ MI_Result NativeResourceProviderMiModule_GetMethodDecl(const _In_ MI_ClassDecl* 
         if (classDecl->methods[i]->code == code && Tcscasecmp(classDecl->methods[i]->name, methodName) == 0)
         {
             *methodDecl = classDecl->methods[i];
-            DSC_EventGettingTheMethodDeclSucceeded(jobId, methodName);
+            DSC_EventGettingTheMethodDeclSucceeded(methodName);
             return MI_RESULT_OK;
         }
     }
-    DSC_EventGettingTheMethodDeclSucceeded(jobId, methodName);
+    DSC_EventGettingTheMethodDeclSucceeded(methodName);
     return MI_RESULT_NOT_FOUND;
 }
 

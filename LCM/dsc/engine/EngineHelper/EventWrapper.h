@@ -539,17 +539,14 @@ void DSCFilePutLog(
 #define DSC_EventGettingTheMethodDeclSucceeded(MethodName) \
     ExpandEvent(GettingTheMethodDeclSucceeded(MethodName))
 
-#define DSC_EventGettingTheMethodDeclFailed(MethodName) \
-    ExpandEvent(GettingTheMethodDeclFailed(MethodName))
-
 #define DSC_EventGettingTheHostNameFailed(ErrorCode) \
     ExpandEvent(GettingTheHostNameFailed(ErrorCode))
 
 #define DSC_EventUnSupportedHostMethodCalled(MethodName) \
     ExpandEvent(UnSupportedHostMethodCalled(MethodName))
 
-#define DSC_EventInvokingNativeResourceMethod(MethodName, ClassName,ProviderPath) \
-    ExpandEvent(InvokingNativeResourceMethod(MethodName, ClassName,ProviderPath))
+#define DSC_EventInvokingNativeResourceMethod(MethodName, ClassName, ProviderPath) \
+    ExpandEvent(InvokingNativeResourceMethod(MethodName, ClassName, ProviderPath))
 
 #define DSC_EventCreateHostContextSucceeded() \
     ExpandEvent(CreateHostContextSucceeded())
