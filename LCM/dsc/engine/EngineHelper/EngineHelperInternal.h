@@ -707,9 +707,12 @@ typedef struct _LCMProviderContext
 } LCMProviderContext;
 */
 
+typedef struct _NativeResourceManager NativeResourceManager;
+
 typedef struct _ProviderCallbackContext
 {
     LCMProviderContext *lcmProviderContext;
+    NativeResourceManager* nativeResourceManager;
     const MI_Char *resourceId;
 } ProviderCallbackContext;
 
