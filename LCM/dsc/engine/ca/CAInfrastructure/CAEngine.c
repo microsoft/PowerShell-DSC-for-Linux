@@ -919,6 +919,9 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
+    // Instantiate native resource manager, responsible to load/unload native resource provider. 
+    r = NativeResourceManager_New(&providerContext, &(providerContext.nativeResourceManager));
+    EH_CheckResult(r);
 
     /*Assuming the dependencies is implicit (the order in which instances are specified in instance document). */
     /*Get the instance compatible with the provider.*/
@@ -978,6 +981,9 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
     }
 
     MI_Session_Close(&miSession, NULL, NULL);    
+
+    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+
     return r;
 }
 
@@ -1156,10 +1162,11 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
     }
     else if (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
     {
-        if (flags & LCM_EXECUTE_TESTONLY)
-            return NativeResourceManager_TestTargetResource(provContext, extendedError);
-        else
-            return NativeResourceManager_SetTargetResource(provContext, extendedError);
+        return Exec_NativeProvider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, extendedError);
+        // if (flags & LCM_EXECUTE_TESTONLY)
+        //     return NativeResourceManager_TestTargetResource(provContext, extendedError);
+        // else
+        //     return NativeResourceManager_SetTargetResource(provContext, extendedError);
     }
     
 #if defined(_MSC_VER)
@@ -1494,6 +1501,51 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
 }
 
 
+MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,   
+                             _In_ MI_Application *miApp,
+                             _In_ MI_Session *miSession,
+                             _In_ MI_Instance *instance,
+                             _In_ const MI_Instance *regInstance,
+                             _In_ MI_Uint32 flags,
+                             _Inout_ MI_Uint32 *resultStatus,
+                             _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result result = MI_RESULT_OK;
+    *resultStatus = 0;
+
+    // Execute Test unless SETONLY was provided
+    if (!(flags & LCM_EXECUTE_SETONLY)) {
+        if (provContext->nativeResourceManager == NULL)
+            return GetCimMIError(provContext->lcmProviderContext, MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
+
+        // Get the path to the resource provider module (dll)
+        MI_Value pathValue;
+        result = MI_Instance_GetElement(regInstance, MSFT_NativeConfigurationProviderRegistration_Path, &pathValue, NULL, NULL, NULL);
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+        MI_Char* resourceProviderPath = pathValue.string;
+
+        NativeResourceProvider* nativeResourceProvider = NULL;
+        result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+
+        result = NativeResourceProvider_TestTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, resultStatus, extendedError);
+    }
+
+    /* Skip rest of the operation if we were asked just to test.*/
+    if (flags & LCM_EXECUTE_TESTONLY)
+    {
+        return result;
+    }
+
+    // Set operation is not implemented. return error if Set was called.
+    return MI_RESULT_FAILED;
+}
 
 MI_Result GetSetMethodResult(_In_ MI_Operation *operation,
                               _Out_opt_ MI_Uint32 *returnValue,
