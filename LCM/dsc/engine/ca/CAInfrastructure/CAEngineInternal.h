@@ -140,6 +140,15 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
                              _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
                              _Outptr_result_maybenull_ MI_Instance **extendedError);
 
+MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,   
+                             _In_ MI_Application *miApp,
+                             _In_ MI_Session *miSession,
+                             _In_ MI_Instance *instance,
+                             _In_ const MI_Instance *regInstance,
+                             _In_ MI_Uint32 flags,
+                             _Inout_ MI_Uint32 *resultStatus,
+                             _Outptr_result_maybenull_ MI_Instance **extendedError);
+
 MI_Result Exec_PSProvider(_In_ ProviderCallbackContext *provContext, 
                           _In_ MI_Application *miApp,
                           _In_ MI_Instance *instance,
