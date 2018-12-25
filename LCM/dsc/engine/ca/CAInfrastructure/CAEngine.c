@@ -921,7 +921,14 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
 
     // Instantiate native resource manager, responsible to load/unload native resource provider. 
     r = NativeResourceManager_New(&providerContext, &(providerContext.nativeResourceManager));
-    EH_CheckResult(r);
+    if( r != MI_RESULT_OK)
+    {
+        CleanUpGetCache(outInstances);
+        DSC_free(outInstances->data);
+        outInstances->size = 0;
+        MI_Session_Close(&miSession, NULL, NULL);
+        return r;
+    }
 
     /*Assuming the dependencies is implicit (the order in which instances are specified in instance document). */
     /*Get the instance compatible with the provider.*/
