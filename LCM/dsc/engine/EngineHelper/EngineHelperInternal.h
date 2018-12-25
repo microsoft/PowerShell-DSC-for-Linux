@@ -191,6 +191,9 @@
 #define MSFT_PSConfigurationProviderRegistration_ModuleName                 MI_T("ModuleName")
 #define MSFT_PSConfigurationProviderRegistration_BaseProperty_Count    3
 
+/* MSFT_NativeConfigurationProviderRegistration*/
+#define MSFT_NativeConfigurationProviderRegistration_Path                  MI_T("Path")
+
 /* MSFT_DSCMetaConfiguration*/
 #define MSFT_DSCMetaConfiguration_LCMState                                                                      MI_T("LCMState")
 #define MSFT_DSCMetaConfiguration_ResourceId                                MI_T("ResourceId")
