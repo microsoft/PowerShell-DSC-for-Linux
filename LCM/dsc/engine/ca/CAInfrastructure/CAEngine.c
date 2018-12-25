@@ -1516,7 +1516,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     // Execute Test unless SETONLY was provided
     if (!(flags & LCM_EXECUTE_SETONLY)) {
         if (provContext->nativeResourceManager == NULL)
-            return GetCimMIError(provContext->lcmProviderContext, MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
+            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
 
         // Get the path to the resource provider module (dll)
         MI_Value pathValue;
