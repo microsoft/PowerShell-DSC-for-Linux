@@ -654,7 +654,8 @@ MI_Result NativeResourceProvider_GetTargetResource(
     }
     *extendedError = NULL;
 
-    clock_t  start;
+    ptrdiff_t start,finish;
+    MI_Real64 duration;
 
     MI_Result returnValue = MI_RESULT_OK;
     MI_Instance *outputResourceSystemProperties = NULL;
@@ -671,7 +672,7 @@ MI_Result NativeResourceProvider_GetTargetResource(
         resourceProviderRegistration->nameSpace);
     //TODO: DSC_EventWriteMessageWmiGet(provContext->lcmProviderContext->configurationDetails.jobGuidString, instance->classDecl->name, provContext->resourceId);
 
-    start = GetCurrentClockTime();
+    start = CPU_GetTimeStamp();
     SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_GET, lcmProviderContext);
     LogCAMessage(lcmProviderContext, ID_OUTPUT_EMPTYSTRING, providerCallbackContext->resourceId);
     // TODO: DSC_EventWriteMessageInvokingSession(provContext->lcmProviderContext->configurationDetails.jobGuidString, provNamespace, instance->classDecl->name, OMI_BaseResource_GetMethodName);
@@ -701,7 +702,8 @@ MI_Result NativeResourceProvider_GetTargetResource(
 EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
 
     // Log the duration of the operation
-    MI_Real64 duration = EndClockAndGetDuration(start);
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
     SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_GET, lcmProviderContext);
     LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
 
@@ -734,7 +736,8 @@ MI_Result NativeResourceProvider_TestTargetResource(
     }
     *extendedError = NULL;
 
-    clock_t  start;
+    ptrdiff_t start,finish;
+    MI_Real64 duration;
 
     MI_Result returnValue = MI_RESULT_OK;
 
@@ -749,7 +752,7 @@ MI_Result NativeResourceProvider_TestTargetResource(
         lcmProviderContext->executionMode,
         resourceProviderRegistration->nameSpace);
 
-    start = GetCurrentClockTime();
+    start = CPU_GetTimeStamp();
     SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_TEST, lcmProviderContext);
     LogCAMessage(lcmProviderContext, ID_OUTPUT_EMPTYSTRING, providerCallbackContext->resourceId);
 
@@ -769,7 +772,8 @@ MI_Result NativeResourceProvider_TestTargetResource(
 EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
 
     // Log the duration of the operation
-    MI_Real64 duration = EndClockAndGetDuration(start);
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
     SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_TEST, lcmProviderContext);
     LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
 
