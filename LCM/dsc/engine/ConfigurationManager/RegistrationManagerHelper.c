@@ -191,11 +191,7 @@ MI_Result Register(
     {
         DSC_free(thumbprint);
     }
-#ifdef _MSC_VER
-    DSC_GlobalFree(resultStatus);
-#else
     DSC_free(resultStatus);
-#endif
     return result;
 }
 

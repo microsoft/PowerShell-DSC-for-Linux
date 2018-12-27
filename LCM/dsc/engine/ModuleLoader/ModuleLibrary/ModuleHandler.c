@@ -14,10 +14,6 @@
    THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#if defined(_MSC_VER)
-#include <sal.h>
-#endif
-
 #include <MI.h>
 #include "EngineHelper.h"
 #include "micodec.h"
@@ -740,129 +736,9 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
     }
     miClassArray.size = classArray->size;
     miClassArray.data = classArray->data;
-// We will discover PS schema only if we are running in windows.
-
-#if defined(_MSC_VER)
-
-    r = MI_Deserializer_DeserializeInstanceArray(deserializer, 0, options, 0, pbuffer, contentSize, &miClassArray, &readBytes, &miTempInstanceArray, extendedError);
-
-    if( r != MI_RESULT_OK )
-    {
-        DSC_free(pbuffer);
-        return r;
-    }
-    if( moduleManager)
-    {
-        MI_Result innerResult = MI_RESULT_OK;
-        MI_Uint32 xCount = 0, classCount = 0, yCount = 0;
-        MI_Value value;
-        MI_Uint32 valueFlags;
-        for( xCount = 0 ; xCount < miTempInstanceArray->size ; xCount++)
-        {
-            for( yCount = 0 ; yCount < classArray->size ; yCount++)
-            {
-                if( Tcscasecmp(miTempInstanceArray->data[xCount]->classDecl->name, classArray->data[yCount]->classDecl->name) == 0 )
-                {
-                    break;
-                }
-            }
-            if(classArray->size == yCount)
-            {
-                classCount++;
-            }
-        }
-
-        // There could be schema not loaded yet
-        if( classCount > 0 )
-        {
-            MI_StringA classNames = {0};
-            MI_StringA moduleNames = {0};
-            MI_StringA moduleVersions = {0};
-            classNames.size = classCount;
-            classNames.data = (MI_Char**) DSC_malloc( sizeof(MI_Char*) * classCount, TLINE);
-            if( classNames.data == NULL)
-            {
-                 DSC_free(pbuffer);
-                CleanUpDeserializerInstanceCache(miTempInstanceArray);
-                return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
-            }
-            moduleNames.size = classCount;
-            moduleNames.data = (MI_Char**) DSC_malloc( sizeof(MI_Char*) * classCount, TLINE);
-            if( moduleNames.data == NULL)
-            {
-                 DSC_free(pbuffer);
-                 DSC_free(classNames.data);
-                CleanUpDeserializerInstanceCache(miTempInstanceArray);
-                return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
-            }
-            moduleVersions.size = classCount;
-            moduleVersions.data = (MI_Char**) DSC_malloc( sizeof(MI_Char*) * classCount, TLINE);
-            if( moduleVersions.data == NULL)
-            {
-                 DSC_free(pbuffer);
-                 DSC_free(classNames.data);
-                 DSC_free(moduleNames.data);
-                CleanUpDeserializerInstanceCache(miTempInstanceArray);
-                return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
-            }
-            memset(moduleVersions.data, 0, sizeof(MI_Char*) * classCount);
-            for( xCount = 0, classCount = 0; xCount < miTempInstanceArray->size ; xCount++)
-            {
-                for( yCount = 0 ; yCount < classArray->size ; yCount++)
-                {
-                    if( Tcscasecmp(miTempInstanceArray->data[xCount]->classDecl->name, classArray->data[yCount]->classDecl->name) == 0 )
-                    {
-                        break;
-                    }
-                }
-                if(classArray->size == yCount)
-                {
-                    classNames.data[classCount] = (MI_Char*)miTempInstanceArray->data[xCount]->classDecl->name;
-                    /*Get module Name and send it.*/
-                    innerResult = MI_Instance_GetElement(miTempInstanceArray->data[xCount], OMI_BaseResource_ModuleName , &value, NULL, &valueFlags, NULL);
-                    if( innerResult == MI_RESULT_OK && !(valueFlags & MI_FLAG_NULL) && value.string != NULL)
-                    {
-                        moduleNames.data[classCount] = value.string;
-                    }
-                    else
-                    {
-                        // if module name is not specified, we assume class name as module name.
-                        moduleNames.data[classCount] = (MI_Char*)miTempInstanceArray->data[xCount]->classDecl->name;
-                    }
-
-                    /*Get module version and send it.*/
-                    innerResult = MI_Instance_GetElement(miTempInstanceArray->data[xCount], OMI_BaseResource_ModuleVersion , &value, NULL, &valueFlags, NULL);
-                    if( innerResult == MI_RESULT_OK && !(valueFlags & MI_FLAG_NULL) && value.string != NULL)
-                    {
-                        moduleVersions.data[classCount] = value.string;
-                    }
-                    classCount++;
-                }
-            }
-            r = UpdateAndReloadInMemoryCache(moduleManager, &classNames, &moduleNames, &moduleVersions, extendedError);
-            DSC_free(classNames.data);
-            DSC_free(moduleNames.data);
-            DSC_free(moduleVersions.data);
-            CleanUpDeserializerInstanceCache(miTempInstanceArray);
-            if( r != MI_RESULT_OK)
-            {
-                 DSC_free(pbuffer);
-                return r;
-            }
-            {
-                    ModuleLoaderObject *moduleLoader = NULL;
-                //call the method again with strict to enforce schema validation
-                moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
-                miClassArray.size = moduleLoader->schemaCount;
-                miClassArray.data = moduleLoader->providerSchema;
-            }
-        }
-    }
-    else
-    {
-        CleanUpDeserializerInstanceCache(miTempInstanceArray);
-    }
-#endif
+    
+    // We will discover PS schema only if we are running in windows.
+    // So nothing here for Linux.
 
     miTempInstanceArray = NULL;
 
@@ -879,8 +755,6 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
         DSC_free(pbuffer);
         pbuffer = NULL;
     }
-
-
 
     if( flags & VALIDATE_REGISTRATION_INSTANCE)
     {
@@ -1254,11 +1128,7 @@ MI_Result GetSchemaFromSingleMOF(_In_ MI_Application *miApp,
     {
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
     }
-#if defined(_MSC_VER)
-    result = Stprintf(fullPath, fullPathLength, MI_T("%T\\%T"), mofModulePath, schemaFileName);
-#else
     result = Stprintf(fullPath, fullPathLength, MI_T("%T/%T"), mofModulePath, schemaFileName);
-#endif
 
     if( result <= 0|| NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -1562,11 +1432,7 @@ MI_Result UpdateClassCache(_In_ MI_Application *miApp,
     {
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
     }
-#if defined(_MSC_VER)
-    result = Stprintf(fullPath, fullPathLength, MI_T("%T\\%T"), rootPath, directoryPath);
-#else
     result = Stprintf(fullPath, fullPathLength, MI_T("%T/%T"), rootPath, directoryPath);
-#endif
 
     if( result <= 0 || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -1643,11 +1509,7 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
     {
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
     }
-#if defined(_MSC_VER)
-    result = Stprintf(fullPath, fullPathLength, MI_T("%T\\%T"), rootPath, directoryPath);
-#else
     result = Stprintf(fullPath, fullPathLength, MI_T("%T/%T"), rootPath, directoryPath);
-#endif
 
     if( result <=0 || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
@@ -1681,11 +1543,7 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
                 Internal_Dir_Close( dirHandle);
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
             }
-#if defined(_MSC_VER)
-            result = Stprintf(fullFilePath, fullFilePathLength, MI_T("%T\\%T"), fullPath, dirEntry->name);
-#else
             result = Stprintf(fullFilePath, fullFilePathLength, MI_T("%T/%T"), fullPath, dirEntry->name);
-#endif
 
             if( result <=0 || NitsShouldFault(NitsHere(), NitsAutomatic))
             {

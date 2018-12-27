@@ -43,43 +43,6 @@ static __inline void *DSC_malloc(size_t length, NitsCallSite callSite)
     return memoryVar;
 }
 
-#if defined(_MSC_VER)
-static __inline HANDLE DSC_CreateFile(_In_      LPCTSTR lpFileName,
-                                      _In_      DWORD dwDesiredAccess,
-                                      _In_      DWORD dwShareMode,
-                                      _In_opt_  LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-                                      _In_      DWORD dwCreationDisposition,
-                                      _In_      DWORD dwFlagsAndAttributes,
-                                      _In_opt_  HANDLE hTemplateFile,
-                                      NitsCallSite callSite)
-{
-    if (NitsShouldFault(callSite, NitsAutomatic))
-    {
-        NitsTrace(L"DSC_CreateFile faulted");
-        SetLastError(ERROR_FILE_NOT_FOUND);
-        return INVALID_HANDLE_VALUE;
-    }
-    return CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes,
-                        dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
-}
-
-static __inline DWORD DSC_GetFileSize(_In_       HANDLE hFile,
-                                      _Out_opt_  LPDWORD lpFileSizeHigh,
-                                      NitsCallSite callSite)
-{
-    if (NitsShouldFault(callSite, NitsAutomatic))
-    {
-        if(lpFileSizeHigh != NULL)
-        {
-            *lpFileSizeHigh = 0;
-        }
-        return INVALID_FILE_SIZE;
-    }
-    return GetFileSize(hFile, lpFileSizeHigh);
-}
-
-#endif
-
 static __inline MI_Result DSC_MI_Class_GetElementCount(
         _In_  const MI_Class* self,
         _Out_ MI_Uint32* count)

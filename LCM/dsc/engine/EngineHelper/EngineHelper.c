@@ -20,19 +20,11 @@
 #include "Resources_LCM.h"
 #include "EventWrapper.h"
 
-#if defined(_MSC_VER)
-#include <windows.h>
-#include "Win32_EngineHelper.h"
-#include <objbase.h>
-#include <winsqm.h>
-#endif
-
 extern Loc_Mapping g_LocMappingTable[];
 extern MI_Uint32 g_LocMappingTableSize;
 void *g_registrationManager;
 char g_currentError[5001];
 StatusReport_ResourceNotInDesiredState * g_rnids = NULL;
-
 
 BaseResourceConfiguration g_BaseResourceConfiguration[] =
 {
@@ -45,28 +37,30 @@ BaseResourceConfiguration g_BaseResourceConfiguration[] =
     {NULL,                  0}
 };
 
-
 const MI_Char * GetSchemaSearchPath()
 {
     return CONFIGURATION_SCHEMA_SEARCH_PATH;
 }
+
 const MI_Char * GetSchemaSearchPathProgFiles()
 {
     return CONFIGURATION_PROGFILES_SCHEMA_SEARCH_PATH;
 }
+
 const MI_Char * GetRegistrationInstanceSearchPath()
 {
     return CONFIGURATION_REGINSTANCE_SEARCH_PATH;
 }
+
 const MI_Char * GetRegistrationInstanceSearchPathProgFiles()
 {
     return CONFIGURATION_PROGFILES_REGINSTANCE_SEARCH_PATH;
 }
+
 const MI_Char * GetCoreSchemaPath()
 {
     return CONFIGURATION_BASESCHEMA_MOF_PATH;
 }
-
 
 JobInformation g_JobInformation={EMPTY_STRING};
 
@@ -108,7 +102,6 @@ MI_Result AppendWMIError1Param(
     }
     return r;
 }
-
 
 MI_Result AppendWMIError1ParamID(
                         _Inout_ MI_Instance *cimErrorDetails,
@@ -156,11 +149,7 @@ MI_Result GetCimWin32Error(MI_Uint32 result ,
     DSC_EventWriteCIMError(intlstr.str,(MI_Uint32)result);
     if( intlstr.str)
         Intlstr_Free(intlstr);
-#if defined(_MSC_VER)
-    return MIResultFromHRESULT(HRESULT_FROM_WIN32(result));
-#else
     return MI_RESULT_FAILED;
-#endif
 }
 
 _Always_(_Ret_range_(==, result))
@@ -215,7 +204,6 @@ MI_Result GetCimMIError2Params(MI_Result result ,
 
     }
     return result;
-
 }
 
 _Always_(_Ret_range_(==, result))
@@ -245,7 +233,6 @@ MI_Result GetCimMIError3Params(MI_Result result ,
 
     }
     return result;
-
 }
 
 _Always_(_Ret_range_(==, result))
@@ -276,9 +263,7 @@ MI_Result GetCimMIError4Params(MI_Result result ,
 
     }
     return result;
-
 }
-
 
 MI_Result AppendWMIErrorWithResourceID(
                         _Inout_ MI_Instance *cimErrorDetails,
@@ -326,11 +311,7 @@ MI_Result ResolvePath(_Outptr_opt_result_maybenull_z_ MI_Char **envResolvedPath,
 
     if( envResolvedPath != NULL )
     {
-#if defined(_MSC_VER)
-        dwReturnSizeInitial = ExpandEnvironmentStrings(envPath, NULL, 0);
-#else
         dwReturnSizeInitial = Tcslen(envPath) + 1;
-#endif
 
         *envResolvedPath = (MI_Char*)DSC_malloc(dwReturnSizeInitial* sizeof(MI_Char), NitsHere());
         if( *envResolvedPath == NULL)
@@ -338,24 +319,12 @@ MI_Result ResolvePath(_Outptr_opt_result_maybenull_z_ MI_Char **envResolvedPath,
             return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
         }
 
-#if defined(_MSC_VER)
-        dwReturnSize = ExpandEnvironmentStrings(envPath, *envResolvedPath, dwReturnSizeInitial);
-        if( dwReturnSize == 0 || (dwReturnSize >  dwReturnSizeInitial ) || NitsShouldFault(NitsHere(), NitsAutomatic))
-        {
-            //memory error
-            DSC_free(*envResolvedPath);
-            *envResolvedPath = NULL;
-            return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_EXPANDENV_FAILED);
-        }
-#else
         memcpy(*envResolvedPath, envPath, dwReturnSizeInitial * sizeof(MI_Char));
-#endif
         pathToUse = *envResolvedPath;
     }
 
     if( searchPath != NULL)
     {
-
         dwReturnSize += (MI_Uint32) (Tcslen(searchPattern) + 1);// %s\\%s
 
         /* Create Search Path*/
@@ -369,11 +338,7 @@ MI_Result ResolvePath(_Outptr_opt_result_maybenull_z_ MI_Char **envResolvedPath,
             }
             return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
         }
-#if defined(_MSC_VER)
-        result = Stprintf(*searchPath, dwReturnSize, MI_T("%T\\%T"), pathToUse, searchPattern);
-#else
         result = Stprintf(*searchPath, dwReturnSize, MI_T("%T/%T"), pathToUse, searchPattern);
-#endif
 
         if( result <= 0 || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
@@ -788,12 +753,7 @@ MI_Result ReadFileContent(_In_z_ const MI_Char *pFileName,
     }
 
     // Read the contents
-
-#if defined(_MSC_VER)
-            nSizeWritten = (long)fread(*pBuffer, 1, fileLen, fp);
-#else
-            nSizeWritten = fread(*pBuffer, 1, fileLen, fp);
-#endif
+    nSizeWritten = fread(*pBuffer, 1, fileLen, fp);
 
     File_Close(fp);
     if( nSizeWritten != fileLen)
@@ -806,16 +766,10 @@ MI_Result ReadFileContent(_In_z_ const MI_Char *pFileName,
     return MI_RESULT_OK;
 }
 
-
-
 void CleanupTempDirectory(_In_z_ MI_Char *mofFileName)
 {
     /*It is ok if we fail to cleanup temp directory.*/
-#if defined(_MSC_VER)
-    MI_Char *lastOccurancePointer = Tcsrchr(mofFileName, MI_T('\\'));
-#else
     MI_Char *lastOccurancePointer = Tcsrchr(mofFileName, MI_T('/'));
-#endif
 
     if( lastOccurancePointer != NULL )
     {
@@ -861,11 +815,7 @@ void RecursivelyDeleteDirectory(_In_z_ MI_Char *directoryPath)
 
         while (dirEntry != NULL )
         {
-#if defined(_MSC_VER)
-            if(Stprintf(pathTempVar, MAX_PATH, MI_T("%T\\%T"), directoryPath, dirEntry->name) >0 )
-#else
             if(Stprintf(pathTempVar, MAX_PATH, MI_T("%T/%T"), directoryPath, dirEntry->name) >0 )
-#endif
             {
                 if(Tcscasecmp(MI_T(".."), dirEntry->name) == 0 ||
                    Tcscasecmp(MI_T("."), dirEntry->name)==0 )
@@ -890,64 +840,29 @@ void RecursivelyDeleteDirectory(_In_z_ MI_Char *directoryPath)
 
 void SQMLogResourceCountData(_In_z_ const MI_Char* providerName,_In_ MI_Uint32 resourceCount)
 {
-
-
-/* Windows feature*/
-#if defined(_MSC_VER)
-
-    //Increments the value present for the provider index, with a +valueIncrement. (if there are valueincrement number of resources processed for that resource)
-    SQM_STREAM_ENTRY_EX resourceCountDetail[SQM_PARAMETER_SIZE] = {0};
-    HSESSION sqmSession;
-    GUID sessionGuid;
-    if (FAILED(CoCreateGuid(&sessionGuid)))
-    {
-        return;
-    }
-    //Start a session for the DSC Datapoint called ResourceCount - Usea  known session GUID
-    sqmSession=WinSqmStartSession(&sessionGuid, SQM_MACHINEGLOBAL_SESSIONID, 0);
-    if (sqmSession == INVALID_HANDLE_VALUE)
-    {
-        return;
-    }
-    // Enter the provider name entry in the stream
-    WinSqmCreateStringStreamEntryEx(&resourceCountDetail[SQM_INDEX_PROVIDERNAME],providerName);
-
-    //Enter the resource count entry in stream
-    WinSqmCreateDWORDStreamEntryEx(&resourceCountDetail[SQM_INDEX_RESOURCECOUNT],resourceCount);
-
-    // Record the complete row.
-    WinSqmAddToStreamEx(NULL,
-                        SQM_RESOURCECOUNT_DATAPOINTID,
-                        SQM_PARAMETER_SIZE,
-                        resourceCountDetail,
-                        0);
-
-    //If the value hasn't been set before, increment sets the value to valueIncrement.
-    WinSqmEndSession(sqmSession);
-
-#endif
+    // Nothing to do in Linux
 }
 
 // Method also frees memory of pTempStr
 void DSC_WriteWarningHelper(
-	_In_ LCMProviderContext* lcmContext,
-	_In_ Intlstr pTempStr)
+    _In_ LCMProviderContext* lcmContext,
+    _In_ Intlstr pTempStr)
 {
-	if (pTempStr.str == NULL) return;
+    if (pTempStr.str == NULL) return;
 
-	LCM_WriteMessage_Internal_Tokenized(lcmContext, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_WARNING, pTempStr.str, MI_FALSE);
-	DSC_EventWriteCUMethodWarning(pTempStr.str);
-	Intlstr_Free(pTempStr);
+    LCM_WriteMessage_Internal_Tokenized(lcmContext, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_WARNING, pTempStr.str, MI_FALSE);
+    DSC_EventWriteCUMethodWarning(pTempStr.str);
+    Intlstr_Free(pTempStr);
 }
 
 void DSC_WriteWarning(
-	_In_ LCMProviderContext* lcmContext,
-	_In_ MI_Uint32 messageID)
+    _In_ LCMProviderContext* lcmContext,
+    _In_ MI_Uint32 messageID)
 {
-	Intlstr pTempStr = Intlstr_Null;
-	GetResourceString(messageID, &pTempStr);
+    Intlstr pTempStr = Intlstr_Null;
+    GetResourceString(messageID, &pTempStr);
 
-	DSC_WriteWarningHelper(lcmContext, pTempStr);
+    DSC_WriteWarningHelper(lcmContext, pTempStr);
 }
 
 void DSC_WriteWarning1Param(_In_ MI_Context* context,

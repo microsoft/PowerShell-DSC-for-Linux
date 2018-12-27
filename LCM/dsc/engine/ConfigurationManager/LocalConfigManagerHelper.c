@@ -30,13 +30,7 @@
 #include "common.h"
 #include "MSFT_WebDownloadManager.h"
 #include "RegistrationManager.h"
-
-#if defined(_MSC_VER)
-#include "Win32_LocalConfigManagerHelper.h"
-#include <WinCrypt.h>
-#else
 #include "OMI_LocalConfigManagerHelper.h"
-#endif
 
 #if defined(BUILD_OMS)
 #include <signal.h>
@@ -99,26 +93,7 @@ MI_Result RetryDeleteFile(
         BOOL fResult = File_RemoveT(filePath);
         if (fResult)
         {
-#if defined(_MSC_VER)
-            DWORD lastError;
-            LPTSTR errorMessage = NULL;
-            lastError = GetLastError();
-
-            FormatMessage(
-                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM ,       //dwFlags
-                NULL,                                                               //lpSource
-                lastError,                                                          //dwMessageId
-                0,                                                                  //dwLanguageId. See msdn for details
-                (LPTSTR) &errorMessage,                                             //lpBuffer
-                0,                                                                  //nSize. Not needed if we ask the API to allocate the memory
-                NULL                                                                //Arguments
-                );
-
-            DSC_EventWriteDeleteFileFailed(xCount,filePath, lastError, errorMessage);
-            LocalFree(errorMessage);
-#else
             DSC_EventWriteDeleteFileFailed(xCount,filePath, -1, NULL);
-#endif
 
             Sleep_Milliseconds(RETRY_LOOP_SLEEP);
             continue;
@@ -143,28 +118,7 @@ MI_Result RegisterStandardTasks(_Outptr_result_maybenull_ MI_Instance **cimError
     }
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
 
-#if defined(_MSC_VER)
-    result = RegisterStartAtBootTask(MI_TRUE, cimErrorDetails);
-
-    if (result == MI_RESULT_OK)
-    {
-        // SetMetaConfig has a side-effect of changing the passed in values based on the default min
-        // values. That makes it necessary to retrieve the current cached value which was updated in
-        // SetMetaConfig during the set operation.
-        result = GetMetaConfig((MSFT_DSCMetaConfiguration **)&currentMetaConfigInstance);
-        if (result != MI_RESULT_OK)
-        {
-            return result;
-        }
-
-        result = RegisterConsistencyTask(currentMetaConfigInstance, cimErrorDetails);
-
-        MI_Instance_Delete(currentMetaConfigInstance);
-    }
-
-    return result;
-#else
-        result = GetMetaConfig((MSFT_DSCMetaConfiguration **)&currentMetaConfigInstance);
+    result = GetMetaConfig((MSFT_DSCMetaConfiguration **)&currentMetaConfigInstance);
     if (result != MI_RESULT_OK)
     {
         return result;
@@ -175,7 +129,6 @@ MI_Result RegisterStandardTasks(_Outptr_result_maybenull_ MI_Instance **cimError
         MI_Instance_Delete(currentMetaConfigInstance);
 
     return result;
-#endif
 }
 
 MI_Result DoPushDependencyCheck(
@@ -215,6 +168,7 @@ MI_Result GetNextRefreshTimeHelper(_Inout_updates_z_(MAX_PATH) MI_Char* timeStri
 
     return r;
 }
+
 MI_Result InitHandler(
     _In_z_ const MI_Char* methodName,
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails)
@@ -1178,13 +1132,7 @@ MI_Result ExpandPath(
 {
     MI_Uint32 dwReturnSizeInitial = 0;
 
-    
-#if defined(_MSC_VER)    
-    size_t pathSize;
-    dwReturnSizeInitial = ExpandEnvironmentStrings(pathIn, NULL, 0);         
-#else
     dwReturnSizeInitial = Tcslen(pathIn) + 1;
-#endif
 
     if (cimErrorDetails == NULL)
     {        
@@ -1198,25 +1146,7 @@ MI_Result ExpandPath(
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
     }
 
-#if defined(_MSC_VER) 
-    pathSize = ExpandEnvironmentStrings(pathIn, *expandedPath, dwReturnSizeInitial);
-    if (pathSize == 0 || (pathSize >  dwReturnSizeInitial ) || NitsShouldFault(NitsHere(), NitsAutomatic))
-    {
-        //memory error
-        DSC_free(*expandedPath);
-        *expandedPath = NULL;
-
-        if (!(pathSize == 0 || (pathSize >  dwReturnSizeInitial)))
-        {
-            // Pass through a bogus error if we've faulted in an error otherwise success will be returned.
-            SetLastError(ERROR_ACCESS_DENIED);
-        }
-
-        return GetCimWin32Error(GetLastError(), cimErrorDetails, ID_LCMHELPER_EXPANDENV_FAILED);
-    }
-#else
     memcpy(*expandedPath, pathIn, dwReturnSizeInitial* sizeof(MI_Char));
-#endif
 
     return MI_RESULT_OK;
 }
@@ -1725,11 +1655,9 @@ MI_Result GetFullPath(
         {
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
         }
-#if defined(_MSC_VER)
-        retValue = Stprintf(*fullPath, dwPathSize, MI_T("%T\\%T"), directoryName, fileName);
-#else
+
         retValue = Stprintf(*fullPath, dwPathSize, MI_T("%T/%T"), directoryName, fileName);
-#endif
+        
         if (retValue == -1 || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
                 DSC_free(*fullPath);
@@ -1759,23 +1687,10 @@ MI_Result GetPartialConfigurationPathWithExtension(
         *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
         if (Directory_Exist(GetPartialConfigDataStore()) != 0) //It will be 2 if it doesn't exist - ENOENT
         {
-#if defined(_MSC_VER)             
-
-                if (CreateDirectoryW(GetPartialConfigDataStore(), NULL) == 0) //Which means it failed
-                {
-                        return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_STORECANNOTBE_CREATED);
-                }
-                else
-                { //Need to specify the permissions on the directory if it did get created.
-                        HANDLE hDir = CreateFileW(GetPartialConfigDataStore(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-                        CloseHandle(hDir);
-                }
-#else
-                if (mkdir(GetPartialConfigDataStore(), 0700) != 0) // which means it failed
-                {
-                    return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_STORECANNOTBE_CREATED);
-                }
-#endif
+            if (mkdir(GetPartialConfigDataStore(), 0700) != 0) // which means it failed
+            {
+                return GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_PARTIALCONFIG_STORECANNOTBE_CREATED);
+            }
         }
         dwPathSize = Tcslen(GetPartialConfigDataStore()) + Tcslen(GetPartialConfigSuffix()) + Tcslen(partialConfigName) + Tcslen(fileExtensionName) + 3; // one for '\\' and one for null and one for "_"
         expandedFullPath = (MI_Char*) DSC_malloc(dwPathSize* sizeof(MI_Char), NitsHere());
@@ -1783,11 +1698,9 @@ MI_Result GetPartialConfigurationPathWithExtension(
         {
                 return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
         }
-#if defined(_MSC_VER)
-        retValue = Stprintf(expandedFullPath, dwPathSize, MI_T("%T\\%T_%T%T"), GetPartialConfigDataStore(), GetPartialConfigSuffix(), partialConfigName, fileExtensionName);
-#else
+
         retValue = Stprintf(expandedFullPath, dwPathSize, MI_T("%T/%T_%T%T"), GetPartialConfigDataStore(), GetPartialConfigSuffix(), partialConfigName, fileExtensionName);
-#endif
+        
         if (retValue == -1 || NitsShouldFault(NitsHere(), NitsAutomatic))
         {
                 DSC_free(expandedFullPath);
@@ -2104,10 +2017,7 @@ Cleanup:
             
             if (resultStatus & DSC_RESTART_SYSTEM_FLAG)
             {
-                SetLCMStatusReboot();                   
-#if defined(_MSC_VER)
-                result = RegisterRebootTaskIfNeeded((MI_Instance *)metaConfigInstance, moduleManager, cimErrorDetails);
-#endif
+                SetLCMStatusReboot();
             }
             
             MI_Instance_Delete((MI_Instance *)metaConfigInstance);
@@ -3118,11 +3028,8 @@ MI_Result LoadFromPullRunLogFile(_Out_ MI_Uint32 *lastRun, _Outptr_result_mayben
     {
         // Set pointer to beginning of file:
         fseek( fStream, 0L, SEEK_SET );
-#if defined(_MSC_VER)
-        readError = fwscanf_s(fStream, MI_T("%d"), &storedRun);
-#else
+
         readError = fscanf(fStream, MI_T("%d"), &storedRun);
-#endif
 
         fclose( fStream );
     }
@@ -3171,11 +3078,7 @@ MI_Result SavePullRunLogFile(_In_ MI_Uint32 maxRun, _Outptr_result_maybenull_ MI
             fseek( fStream, 0L, SEEK_SET );
 
             // Read value
-#if defined(_MSC_VER)
-            readError = fwscanf_s(fStream, MI_T("%d"), &storedRun);
-#else
             readError = fscanf(fStream, MI_T("%d"), &storedRun);
-#endif
 
             storedRun = storedRun + 1;
 
@@ -3639,31 +3542,7 @@ MI_Result GetMofChecksum(
         if (r == MI_RESULT_OK)
         {
             PAL_SHA256Transform(checksumBuffer, checksumBufferSize, RawHash);
-#if defined (_MSC_VER)    
-            {
-                MI_Uint32 computedMofChecksumSize = 0;
-                if (!CryptBinaryToStringA( (const BYTE*)RawHash, SHA256TRANSFORM_DIGEST_LEN, CRYPT_STRING_HEXRAW | CRYPT_STRING_NOCRLF,
-                    NULL, (DWORD*)&computedMofChecksumSize))
-                {
-                    DSC_free(checksumBuffer);
-                    return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_ENGINEHELPER_CHECKSUMGEN_ERROR);
-                }
 
-                computedMofChecksum = DSC_malloc( sizeof(MI_Uint8) * computedMofChecksumSize, TLINE);
-                if (computedMofChecksum == NULL)
-                {
-                    DSC_free(checksumBuffer);
-                    return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);                
-                }
-
-                if (!CryptBinaryToStringA( (const BYTE*)RawHash, SHA256TRANSFORM_DIGEST_LEN, CRYPT_STRING_HEXRAW | CRYPT_STRING_NOCRLF,
-                    (LPSTR)computedMofChecksum, (DWORD*)&computedMofChecksumSize) || computedMofChecksumSize != CHECKSUM_SIZE)
-                {
-                    DSC_free(checksumBuffer);
-                    return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_ENGINEHELPER_CHECKSUMGEN_ERROR);
-                }
-            }
-#else
             computedMofChecksum = DSC_malloc( SHA256TRANSFORM_DIGEST_LEN*2 +1, TLINE);
             if (computedMofChecksum == NULL)
             {
@@ -3681,7 +3560,7 @@ MI_Result GetMofChecksum(
                     computedMofChecksum[iCount*2+1] = alphabet[RawHash[iCount]%16];                    
                 }
             }
-#endif
+
             DSC_free(checksumBuffer);
             checksumBuffer = computedMofChecksum;
             checksumBufferSize = CHECKSUM_SIZE;
@@ -3693,29 +3572,8 @@ MI_Result GetMofChecksum(
         return r;
     }
 
-#if defined(_MSC_VER)
-    {    
-        MI_Uint32 mofChecksumSize = 0;
-        mofChecksumSize = 2* (checksumBufferSize + 1);
-        *mofChecksum = (MI_Char*)DSC_malloc( mofChecksumSize , NitsHere());
-        if (*mofChecksum == NULL)
-        {
-            DSC_free(checksumBuffer);
-            return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);
-        }
-
-        memset(*mofChecksum, 0, mofChecksumSize);
-        if (!MultiByteToWideChar(CP_ACP,0,(LPCSTR)checksumBuffer,checksumBufferSize,*mofChecksum, mofChecksumSize) )    
-        {
-            DSC_free(checksumBuffer);
-            return GetCimWin32Error(GetLastError(), cimErrorDetails, ID_ENGINEHELPER_MEMORY_ERROR);
-        }
-
-        DSC_free(checksumBuffer);
-    }
-#else
     *mofChecksum = (char *)checksumBuffer;
-#endif
+
     return MI_RESULT_OK;
 }
 
@@ -3749,8 +3607,6 @@ MI_Result RunConsistencyEngine(
 
     return r;
 }
-
-
 
 MI_Result IsRegisterdForPull(
     _In_ MI_Instance *currentMetaConfigInstance,
@@ -3817,19 +3673,13 @@ MI_Result RegisterTask(
     {
         return GetCimMIError(result, cimErrorDetails, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
     }
-#if defined(_MSC_VER)
+
     result = UpdateTask((MI_Char*)taskName, (MI_Char*)timeString, refreshFrequencyInMins.uint32*60, cimErrorDetails);
     if (result != MI_RESULT_OK)
     {
         return GetCimMIError(result, cimErrorDetails, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
     }
-#else
-    result = UpdateTask((MI_Char*)taskName, (MI_Char*)timeString, refreshFrequencyInMins.uint32*60, cimErrorDetails);
-    if (result != MI_RESULT_OK)
-    {
-        return GetCimMIError(result, cimErrorDetails, ID_LCM_FAILED_TO_GET_METACONFIGURATION);
-    }
-#endif
+
     return result;
 }
 
@@ -3860,24 +3710,14 @@ MI_Result RegisterConsistencyTask(
     if ((flags & MI_FLAG_NULL) == 0 && Tcscasecmp(METADATA_REFRESHMODE_PUSH, refreshMode.string) == 0)
     {
         /*Update for Consistency task using configurationModeFrequencyMins*/
-#if defined(_MSC_VER)
-        result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins, CONSISTENCY_TASKSCHEDULE_NAME,
-                              DEFAULT_ConfigurationModeFrequencyMins, cimErrorDetails);
-#else
         result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_ConfigurationModeFrequencyMins, OMI_CONSISTENCY_TASKSCHEDULE_NAME,
                               DEFAULT_ConfigurationModeFrequencyMins, cimErrorDetails);
-#endif
     }
     else
     {
         /*Update for Consistency task using RefreshFrequencyMins*/
-#if defined(_MSC_VER)
-        result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_RefreshFrequencyMins, CONSISTENCY_TASKSCHEDULE_NAME,
-                              DEFAULT_MinRefreshFrequencyMins, cimErrorDetails);
-#else
         result = RegisterTask(currentMetaConfigInstance, MSFT_DSCMetaConfiguration_RefreshFrequencyMins, OMI_CONSISTENCY_TASKSCHEDULE_NAME,
                               DEFAULT_MinRefreshFrequencyMins, cimErrorDetails);
-#endif
     }
 
     return result;
@@ -6322,9 +6162,6 @@ MI_Result MI_CALL LCM_Pull_Execute(
                 if (result == MI_RESULT_OK && (resultExecutionStatus & DSC_RESTART_SYSTEM_FLAG))
                 {
                     SetLCMStatusReboot(lcmContext);
-#if defined(_MSC_VER)
-                    result = RegisterRebootTaskIfNeeded((MI_Instance *) metaConfigInstance, moduleManager, cimErrorDetails);
-#endif
                 }
                 
                 if (result == MI_RESULT_OK)
@@ -6395,18 +6232,7 @@ MI_Result LCM_Pull_GetAction(
         *cimErrorDetails = NULL;
     }
 
-#if defined(_MSC_VER)
-    if( Tcscasecmp(value.string, DEFAULT_DOWNLOADMANAGER)==0 )
-    {
-        result = Pull_GetActionWebDownloadManager(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
-    }
-    else
-    {
-        result = Pull_GetAction(lcmContext, metaConfigInstance, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, cimErrorDetails);
-    }
-#else
     result = Pull_GetActionWebDownloadManager(lcmContext, metaConfigInstance, partialConfigName, checkSum, bIsCompliant, lastGetActionStatusCode, resultStatus, getActionStatusCode, serverAssignedConfigurations, cimErrorDetails);
-#endif
 
     if (result != MI_RESULT_OK)
     {
@@ -6844,19 +6670,13 @@ MI_Result UpdateLCMStatusCodeHistory(
                 {
                         return MI_RESULT_SERVER_LIMITS_EXCEEDED;
                 }
-#if defined(_MSC_VER)
-                retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T"), tempCodeStr);
-#else
+
                 retValue = TcsStrlcpy(*lcmStatusCodeHistory, tempCodeStr, MAX_LCM_STATUSCODE_HISTORY_SIZE);
-#endif
         }
         else
         {
-#if defined(_MSC_VER)
-                retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T%T"), *lcmStatusCodeHistory, tempCodeStr);
-#else
-                retValue = TcsStrlcat(*lcmStatusCodeHistory, tempCodeStr, MAX_LCM_STATUSCODE_HISTORY_SIZE);
-#endif
+            retValue = TcsStrlcat(*lcmStatusCodeHistory, tempCodeStr, MAX_LCM_STATUSCODE_HISTORY_SIZE);
+
         }
 
         if (retValue == -1)
@@ -6891,11 +6711,7 @@ MI_Result GetLCMStatusCodeHistory(
                 {
                         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
                 }
-#if defined(_MSC_VER)
-                retValue = Stprintf(*lcmStatusCodeHistory, MAX_LCM_STATUSCODE_HISTORY_SIZE, MI_T("%T"), GetCurrentLCMStatusCodeHistory());
-#else
                 retValue = TcsStrlcpy(*lcmStatusCodeHistory, GetCurrentLCMStatusCodeHistory(), MAX_LCM_STATUSCODE_HISTORY_SIZE);
-#endif
 
                 if (retValue == -1)
                 {
