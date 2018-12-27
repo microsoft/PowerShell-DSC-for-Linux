@@ -3,7 +3,7 @@
 
    Copyright (c) Microsoft Corporation
 
-   All rights reserved. 
+   All rights reserved.
 
    MIT License
 
@@ -120,23 +120,23 @@ void AddToTaskQueue(LCMTaskNode * node)
 
     if (g_TaskHead == NULL)
     {
-    g_TaskHead = node;
+        g_TaskHead = node;
     }
     else
     {
-    current = g_TaskHead;
-    while (current != NULL)
-    {
-        if (current->next == NULL)
+        current = g_TaskHead;
+        while (current != NULL)
         {
-        current->next = node;
-        break;
+            if (current->next == NULL)
+            {
+            current->next = node;
+            break;
+            }
+            else
+            {
+            current = current->next;
+            }
         }
-        else
-        {
-        current = current->next;
-        }
-    }
     }
     pthread_mutex_unlock(&g_TaskQueueMutex);
 }
@@ -145,61 +145,61 @@ void TaskQueueLoop()
 {
     int shouldShutdown;
     LCMTaskNode * currentTask = NULL;
-    
+
     pthread_mutex_lock(&g_TaskQueueMutex);
     shouldShutdown = g_TaskQueueShutdown;
     pthread_mutex_unlock(&g_TaskQueueMutex);
-    
+
     while (shouldShutdown == 0)
     {
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskHead != NULL)
-    {
-        Thread t;
-        PAL_Uint32 ret;
-        ptrdiff_t start,finish;
-        MI_Real64 duration;
-        MI_Char wcTime[DURATION_SIZE] = {0}; 
-
-        currentTask = g_TaskHead;
-        g_TaskHead = currentTask->next;
-        
-        Context_Invoke_Basic *nodeArgs = (Context_Invoke_Basic *)currentTask->params;
-        if(nodeArgs != NULL && nodeArgs->methodName != NULL)
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskHead != NULL)
         {
-            Tcslcpy(g_CurrentRunningMethodName, nodeArgs->methodName, LCM_MAX_PATH);
+            Thread t;
+            PAL_Uint32 ret;
+            ptrdiff_t start,finish;
+            MI_Real64 duration;
+            MI_Char wcTime[DURATION_SIZE] = {0};
+
+            currentTask = g_TaskHead;
+            g_TaskHead = currentTask->next;
+
+            Context_Invoke_Basic *nodeArgs = (Context_Invoke_Basic *)currentTask->params;
+            if(nodeArgs != NULL && nodeArgs->methodName != NULL)
+            {
+                Tcslcpy(g_CurrentRunningMethodName, nodeArgs->methodName, LCM_MAX_PATH);
+            }
+            pthread_mutex_unlock(&g_TaskQueueMutex);
+
+            DSC_EventWriteMessageStartingDscOperation(g_CurrentRunningMethodName);
+
+            // Capture timestamp when operation started.
+            start=CPU_GetTimeStamp();
+
+            Thread_CreateJoinable(&t, currentTask->task, NULL, currentTask->params);
+            Thread_Join(&t, &ret);
+            Thread_Destroy(&t);
+            DSC_free(currentTask);
+
+            // Operation is completed.
+            finish=CPU_GetTimeStamp();
+            duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+            Stprintf(wcTime, DURATION_SIZE, MI_T("%0.4f"), duration);
+
+            DSC_EventWriteMessageDscOperationCompleted(g_CurrentRunningMethodName, wcTime);
+            g_CurrentRunningMethodName[0] = '\0';
         }
+        else
+        {
+            currentTask = NULL;
+            pthread_mutex_unlock(&g_TaskQueueMutex);
+        }
+
+        usleep(10000);
+
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        shouldShutdown = g_TaskQueueShutdown;
         pthread_mutex_unlock(&g_TaskQueueMutex);
-        
-        DSC_EventWriteMessageStartingDscOperation(g_CurrentRunningMethodName);
-
-        // Capture timestamp when operation started.
-        start=CPU_GetTimeStamp();
-
-        Thread_CreateJoinable(&t, currentTask->task, NULL, currentTask->params);
-        Thread_Join(&t, &ret);
-        Thread_Destroy(&t);
-        DSC_free(currentTask);
-
-        // Operation is completed.
-        finish=CPU_GetTimeStamp();
-        duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
-        Stprintf(wcTime, DURATION_SIZE, MI_T("%0.4f"), duration);
-
-        DSC_EventWriteMessageDscOperationCompleted(g_CurrentRunningMethodName, wcTime);
-        g_CurrentRunningMethodName[0] = '\0';
-    }
-    else
-    {
-        currentTask = NULL;
-        pthread_mutex_unlock(&g_TaskQueueMutex);
-    }
-
-    usleep(10000);
-
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    shouldShutdown = g_TaskQueueShutdown;
-    pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 
     pthread_mutex_lock(&g_TaskQueueMutex);
@@ -218,11 +218,11 @@ MI_Boolean RunningAsRoot()
 {
     if (getuid() == 0)
     {
-    return MI_TRUE;
+        return MI_TRUE;
     }
     else
     {
-    return MI_FALSE;
+        return MI_FALSE;
     }
 }
 
@@ -248,13 +248,13 @@ void UnloadFromProvider(
     pthread_mutex_unlock(&g_TaskQueueMutex);
 
     // Wait until the TaskQueue is complete before allowing unload
-    do 
+    do
     {
-    usleep(10000);
+        usleep(10000);
 
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    taskQueueExists = g_TaskQueueExists;
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        taskQueueExists = g_TaskQueueExists;
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     } while (taskQueueExists != 0);
 
     MI_Context_PostResult(context, MI_RESULT_OK);
@@ -267,7 +267,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_SendConfigurationApply_Internal(void *p
     MI_Uint32 bufferIndex = 0;
     // Declarations for measuring time
     MI_Real64 duration;
-    ptrdiff_t start, finish; 
+    ptrdiff_t start, finish;
     MSFT_DSCLocalConfigurationManager_SendConfigurationApply outputObject;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)param;
     if( args == NULL )
@@ -298,7 +298,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_SendConfigurationApply_Internal(void *p
         MI_Instance_Delete(cimErrorDetails);
         ResetJobId();
         PAL_Free(args->data.data);
-        PAL_Free(args);        
+        PAL_Free(args);
         return 0;
     }
 
@@ -306,20 +306,20 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_SendConfigurationApply_Internal(void *p
 
     start=CPU_GetTimeStamp();
     SetLCMStatusBusy();
-    miResult = CallSetConfiguration(args->data.data + bufferIndex, 
-        args->data.size - bufferIndex, args->flag, 
-        args->force, args->context, &cimErrorDetails); 
+    miResult = CallSetConfiguration(args->data.data + bufferIndex,
+        args->data.size - bufferIndex, args->flag,
+        args->force, args->context, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
     {
         goto ExitWithError;
     }
-    
+
     miResult = MSFT_DSCLocalConfigurationManager_SendConfigurationApply_Construct(&outputObject, args->context);
     if (miResult != MI_RESULT_OK)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTGET_FAILED);
         goto ExitWithError;
-    } 
+    }
     miResult = MSFT_DSCLocalConfigurationManager_SendConfigurationApply_Set_MIReturn(&outputObject, 0);
     if (miResult != MI_RESULT_OK)
     {
@@ -329,7 +329,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_SendConfigurationApply_Internal(void *p
     }
 
     miResult = MSFT_DSCLocalConfigurationManager_SendConfigurationApply_Post(&outputObject, args->context);
-    MSFT_DSCLocalConfigurationManager_SendConfigurationApply_Destruct(&outputObject);    
+    MSFT_DSCLocalConfigurationManager_SendConfigurationApply_Destruct(&outputObject);
 
     // Stop the clock and measure time taken for this operation
     finish=CPU_GetTimeStamp();
@@ -340,11 +340,11 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_SendConfigurationApply_Internal(void *p
     SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
-    // Debug Log 
+    // Debug Log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();
     PAL_Free(args->data.data);
-    PAL_Free(args);    
+    PAL_Free(args);
     return 0;
 
 ExitWithError:
@@ -352,9 +352,9 @@ ExitWithError:
     EndLcmOperation();
     SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
-    MI_Instance_Delete(cimErrorDetails); 
+    MI_Instance_Delete(cimErrorDetails);
     PAL_Free(args->data.data);
-    PAL_Free(args);    
+    PAL_Free(args);
     return 0;
 }
 
@@ -364,12 +364,12 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     MI_Instance *cimErrorDetails = NULL;
     MI_InstanceA outInstances = {0};
     MI_Value val;
-    MI_Uint32 bufferIndex = 0;    
+    MI_Uint32 bufferIndex = 0;
     MSFT_DSCLocalConfigurationManager_GetConfiguration outputObject;
     MI_Uint8A dataValue = {0};
     //Declarations for measuring time
     MI_Real64 duration;
-    ptrdiff_t start, finish;   
+    ptrdiff_t start, finish;
 
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)param;
 
@@ -381,8 +381,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }    
-
+    }
 
     miResult = InitHandler(args->methodName, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -395,7 +394,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
             PAL_Free(args->data.data);
         }
 
-        PAL_Free(args);        
+        PAL_Free(args);
         return 0;
     }
 
@@ -410,11 +409,11 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
             PAL_Free(args->data.data);
         }
 
-        PAL_Free(args);        
+        PAL_Free(args);
         return 0;
     }
 
-    // If the configuration file has not been passed in the parameters        
+    // If the configuration file has not been passed in the parameters
     if (!args->dataExist)
     {
         // If the current and pending configuration files do not exist, output a corresponding error message and return
@@ -445,7 +444,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     else
     {
         // If a configuration file name is passed in the parameters, read from the passed configuration file.
-        GetRealBufferIndex((MI_ConstUint8A*)&(args->data.data), &bufferIndex);  
+        GetRealBufferIndex((MI_ConstUint8A*)&(args->data.data), &bufferIndex);
         dataValue.data = (MI_Uint8*)(args->data.data + bufferIndex);
         dataValue.size = args->data.size - bufferIndex;
     }
@@ -455,12 +454,12 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTGET_FAILED);
         goto ExitWithError;
-    }   
+    }
 
     start=CPU_GetTimeStamp();
     SetLCMStatusBusy();
-    miResult = CallGetConfiguration(dataValue.data, 
-        dataValue.size, &outInstances, 
+    miResult = CallGetConfiguration(dataValue.data,
+        dataValue.size, &outInstances,
         args->context, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
     {
@@ -471,7 +470,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     val.instancea.data = outInstances.data;
     val.instancea.size = outInstances.size;
     miResult = MI_Instance_SetElement(&outputObject.__instance, MI_T("configurations"), &val, MI_INSTANCEA, 0);
-    CleanUpInstanceCache(&outInstances);    
+    CleanUpInstanceCache(&outInstances);
     if (miResult != MI_RESULT_OK)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_SETGET_FAILED);
@@ -484,7 +483,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_SETGET_FAILED);
         MSFT_DSCLocalConfigurationManager_GetConfiguration_Destruct(&outputObject);
         goto ExitWithError;
-    }    
+    }
 
     miResult = MSFT_DSCLocalConfigurationManager_GetConfiguration_Post(&outputObject, args->context);
     MSFT_DSCLocalConfigurationManager_GetConfiguration_Destruct(&outputObject);
@@ -502,7 +501,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
-    //Debug Log 
+    //Debug Log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     if (!args->dataExist)
     {
@@ -514,7 +513,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetConfiguration_Internal(void *param)
     {
         PAL_Free(args->data.data);
     }
-    PAL_Free(args);    
+    PAL_Free(args);
 
     return 0;
 
@@ -527,13 +526,13 @@ ExitWithError:
     if (!args->dataExist)
     {
        DSC_free(dataValue.data);
-    }    
+    }
     if (args->dataExist)
     {
         PAL_Free(args->data.data);
     }
 
-    PAL_Free(args);    
+    PAL_Free(args);
     return 0;
 }
 
@@ -541,7 +540,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
 {
     MI_Result miResult;
     MI_Instance *cimErrorDetails = NULL;
-    MSFT_DSCLocalConfigurationManager_ApplyConfiguration outputObject;    
+    MSFT_DSCLocalConfigurationManager_ApplyConfiguration outputObject;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)param;
 
     if( args == NULL )
@@ -552,7 +551,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }       
+    }
 
     miResult = InitHandler(args->methodName, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -560,7 +559,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
         MI_PostCimError(args->context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         ResetJobId();
-        PAL_Free(args); 
+        PAL_Free(args);
         return 0;
     }
 
@@ -570,7 +569,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
         MI_PostCimError(args->context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         ResetJobId();
-        PAL_Free(args); 
+        PAL_Free(args);
         return 0;
     }
 
@@ -579,10 +578,10 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTAPPLY_FAILED);
         goto ExitWithError;
-    }       
+    }
 
     SetLCMStatusBusy();
-    miResult = CallConsistencyEngine(args->context, TASK_REGULAR, &cimErrorDetails); 
+    miResult = CallConsistencyEngine(args->context, TASK_REGULAR, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
     {
         goto ExitWithError;
@@ -601,16 +600,16 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_ApplyConfiguration_Internal(void *param
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_POSTAPPLY_FAILED);
         goto ExitWithError;
-    }    
+    }
 
     EndLcmOperation();
     SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
-    // Debug Log 
+    // Debug Log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();
-    PAL_Free(args); 
+    PAL_Free(args);
     return 0;
 
 ExitWithError:
@@ -618,8 +617,8 @@ ExitWithError:
     SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
-    ResetJobId();      
-    PAL_Free(args); 
+    ResetJobId();
+    PAL_Free(args);
     return 0;
 }
 
@@ -628,7 +627,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
     MI_Result miResult;
     MSFT_DSCMetaConfiguration * metaConfigInstance;
     MI_Instance *cimErrorDetails = NULL;
-    MSFT_DSCLocalConfigurationManager_GetMetaConfiguration outputObject;  
+    MSFT_DSCLocalConfigurationManager_GetMetaConfiguration outputObject;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*) param;
 
     if( args == NULL )
@@ -639,7 +638,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }       
+    }
 
     miResult = InitHandler(args->methodName, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -647,7 +646,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
         MI_PostCimError(args->context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         ResetJobId();
-        PAL_Free(args); 
+        PAL_Free(args);
         return 0;
     }
 
@@ -657,7 +656,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
         MI_PostCimError(args->context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         ResetJobId();
-        PAL_Free(args); 
+        PAL_Free(args);
         return 0;
     }
 
@@ -675,7 +674,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTGET_FAILED);
         MSFT_DSCMetaConfiguration_Delete(metaConfigInstance);
         goto ExitWithError;
-    }   
+    }
 
     miResult = MSFT_DSCLocalConfigurationManager_GetMetaConfiguration_SetPtr_MetaConfiguration(&outputObject, (MSFT_DSCMetaConfiguration*)metaConfigInstance);
     if (miResult != MI_RESULT_OK)
@@ -684,7 +683,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
         MSFT_DSCMetaConfiguration_Delete(metaConfigInstance);
         MSFT_DSCLocalConfigurationManager_GetMetaConfiguration_Destruct(&outputObject);
         goto ExitWithError;
-    }   
+    }
 
     miResult = MSFT_DSCLocalConfigurationManager_GetMetaConfiguration_Set_MIReturn(&outputObject, 0);
     if (miResult != MI_RESULT_OK)
@@ -693,7 +692,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
         MSFT_DSCMetaConfiguration_Delete(metaConfigInstance);
         MSFT_DSCLocalConfigurationManager_GetMetaConfiguration_Destruct(&outputObject);
         goto ExitWithError;
-    }   
+    }
 
     miResult = MSFT_DSCLocalConfigurationManager_GetMetaConfiguration_Post(&outputObject, args->context);
     MSFT_DSCMetaConfiguration_Delete(metaConfigInstance);
@@ -703,7 +702,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
         EndLcmOperation();
         MI_Context_PostResult(args->context, miResult);
         ResetJobId();
-        PAL_Free(args); 
+        PAL_Free(args);
         return 0;
     }
 
@@ -711,10 +710,10 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_GetMetaConfiguration_Internal(void *par
     SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
-    //Debug Log 
+    //Debug Log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();
-    PAL_Free(args); 
+    PAL_Free(args);
     return 0;
 
 ExitWithError:
@@ -722,8 +721,8 @@ ExitWithError:
     SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
-    ResetJobId();  
-    PAL_Free(args); 
+    ResetJobId();
+    PAL_Free(args);
     return 0;
 }
 
@@ -731,11 +730,11 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_RollBack_Internal(void *param)
 {
     MI_Result miResult;
     MI_Instance *cimErrorDetails = NULL;
-     
+
     //Declarations for measuring time
     MI_Real64 duration;
     ptrdiff_t start=CPU_GetTimeStamp();
-    ptrdiff_t finish; 
+    ptrdiff_t finish;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*) param;
 
     if( args == NULL )
@@ -746,7 +745,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_RollBack_Internal(void *param)
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }       
+    }
 
     miResult = InitHandler(args->methodName, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -771,7 +770,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_RollBack_Internal(void *param)
     //Log operational event for restoring configuration
     DSC_EventWriteRestoringConfiguration();
     SetLCMStatusBusy();
-    miResult = CallRestoreConfiguration(args->flag, args->context, &cimErrorDetails); 
+    miResult = CallRestoreConfiguration(args->flag, args->context, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
     {
         goto ExitWithError;
@@ -786,7 +785,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_RollBack_Internal(void *param)
     SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
-    //Debug Log 
+    //Debug Log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
     ResetJobId();
     PAL_Free(args);
@@ -800,18 +799,18 @@ ExitWithError:
     ResetJobId();
     PAL_Free(args);
     return 0;
-          
+
 }
 
 MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_TestConfiguration_Internal(void *param)
 {
     MI_Result miResult;
     MI_Instance *cimErrorDetails = NULL;
-    MI_Uint32 xCount = 0;    
+    MI_Uint32 xCount = 0;
     MI_Boolean testStatus = MI_FALSE;
     MSFT_DSCLocalConfigurationManager_TestConfiguration outputObject;
     MI_StringA resourceId = {0};
-    // Declarations for measuring time 
+    // Declarations for measuring time
     MI_Real64 duration;
     ptrdiff_t start=CPU_GetTimeStamp();
     ptrdiff_t finish;
@@ -825,7 +824,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_TestConfiguration_Internal(void *param)
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }       
+    }
 
     miResult = InitHandler(args->methodName, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -852,7 +851,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_TestConfiguration_Internal(void *param)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_CONSTRUCTTEST_FAILED);
         goto ExitWithError;
-    }   
+    }
 
     SetLCMStatusBusy();
     miResult = CallTestConfiguration(&testStatus, &resourceId, args->context, &cimErrorDetails);
@@ -920,7 +919,7 @@ ExitWithError:
     SetLCMStatusReady();
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
-    ResetJobId();  
+    ResetJobId();
     PAL_Free(args);
     return 0;
 }
@@ -943,7 +942,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }       
+    }
 
     miResult = InitHandler(args->methodName, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -1008,7 +1007,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformRequiredConfigurationChecks_Inte
             MI_Instance_Delete(cimErrorDetails);
             goto ExitSimple;
         }
-    }    
+    }
 
     miResult = RunConsistencyEngine(args->context, args->flag, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -1046,7 +1045,7 @@ ExitSimple:
     SetLCMStatusReady();
     // Debug log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
-    ResetJobId();     
+    ResetJobId();
     PAL_Free(args);
     return 0;
 }
@@ -1066,7 +1065,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_StopConfiguration_Internal(void *param)
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }       
+    }
 
     miResult = InitHandler(args->methodName, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
@@ -1143,18 +1142,18 @@ void Invoke_SendConfiguration(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
 
@@ -1175,7 +1174,7 @@ void Invoke_SendConfiguration(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }    
+    }
     memcpy(dataValue, in->ConfigurationData.value.data, in->ConfigurationData.value.size);
     args->context = context;
     args->methodName = methodName;
@@ -1184,24 +1183,24 @@ void Invoke_SendConfiguration(
     args->data.size = in->ConfigurationData.value.size;
     args->flag = LCM_SETFLAGS_SAVETOPENDINGONLY;
     if (in->force.exists && in->force.value == MI_TRUE)
-    {      
+    {
         args->force = MI_TRUE;
-    }    
-
-    {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_SendConfigurationApply_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
-
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
     }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+
+    {
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_SendConfigurationApply_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
+
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1220,21 +1219,21 @@ void Invoke_SendConfigurationApply(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     MI_Uint8 *dataValue = NULL;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
@@ -1252,7 +1251,7 @@ void Invoke_SendConfigurationApply(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }    
+    }
     memcpy(dataValue, in->ConfigurationData.value.data, in->ConfigurationData.value.size);
     args->context = context;
     args->methodName = methodName;
@@ -1261,24 +1260,24 @@ void Invoke_SendConfigurationApply(
     args->data.size = in->ConfigurationData.value.size;
     args->flag = GetCallSetConfigurationFlags(context);
     if (in->force.exists && in->force.value == MI_TRUE)
-    {      
+    {
         args->force = MI_TRUE;
-    }    
-
-    {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_SendConfigurationApply_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
-
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
     }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+
+    {
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_SendConfigurationApply_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
+
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1297,21 +1296,21 @@ void Invoke_GetConfiguration(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     MI_Uint8 *dataValue = NULL;
     MI_Uint32 dataSize = 0;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -1324,11 +1323,11 @@ void Invoke_GetConfiguration(
     }
     args->dataExist = MI_TRUE;
 
-    // If the configuration file has not been passed in the parameters        
+    // If the configuration file has not been passed in the parameters
     if (!in || !in->configurationData.exists)
     {
         args->dataExist = MI_FALSE;
-    }  
+    }
     else
     {
         dataValue = (MI_Uint8*)DSC_malloc( sizeof(MI_Uint8) * in->configurationData.value.size, NitsHere());
@@ -1339,29 +1338,30 @@ void Invoke_GetConfiguration(
             MI_PostCimError(context, cimErrorDetails);
             MI_Instance_Delete(cimErrorDetails);
             return;
-        }    
+        }
         memcpy(dataValue, in->configurationData.value.data, in->configurationData.value.size);
         dataSize = in->configurationData.value.size;
     }
+
     args->context = context;
     args->methodName = methodName;
     args->data.data = dataValue;
-    args->data.size = dataSize; 
+    args->data.size = dataSize;
 
     {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_GetConfiguration_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_GetConfiguration_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
 
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
-    }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1380,21 +1380,21 @@ void Invoke_ApplyConfiguration(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -1402,24 +1402,24 @@ void Invoke_ApplyConfiguration(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }  
-    args->context = context;
-    args->methodName = methodName;   
-
-    {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_ApplyConfiguration_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
-
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
     }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+    args->context = context;
+    args->methodName = methodName;
+
+    {
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_ApplyConfiguration_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
+
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1438,21 +1438,21 @@ void Invoke_SendMetaConfigurationApply(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     MI_Uint8 *dataValue = NULL;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
@@ -1470,29 +1470,29 @@ void Invoke_SendMetaConfigurationApply(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }    
+    }
     memcpy(dataValue, in->ConfigurationData.value.data, in->ConfigurationData.value.size);
     args->context = context;
     args->methodName = methodName;
     args->force = MI_TRUE;
     args->data.data = dataValue;
     args->data.size = in->ConfigurationData.value.size;
-    args->flag = GetCallSetConfigurationFlags(context) | LCM_SET_METACONFIG;  
+    args->flag = GetCallSetConfigurationFlags(context) | LCM_SET_METACONFIG;
 
     {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_SendConfigurationApply_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_SendConfigurationApply_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
 
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
-    }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1511,21 +1511,21 @@ void Invoke_GetMetaConfiguration(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -1533,24 +1533,24 @@ void Invoke_GetMetaConfiguration(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }  
-    args->context = context;
-    args->methodName = methodName;   
-
-    {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_GetMetaConfiguration_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
-
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
     }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+    args->context = context;
+    args->methodName = methodName;
+
+    {
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_GetMetaConfiguration_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
+
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1569,21 +1569,21 @@ void Invoke_RollBack(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -1591,25 +1591,25 @@ void Invoke_RollBack(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }  
+    }
     args->context = context;
-    args->methodName = methodName;  
+    args->methodName = methodName;
     args->flag = GetCallSetConfigurationFlags(context);
 
     {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_RollBack_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_RollBack_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
 
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
-    }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1628,21 +1628,21 @@ void Invoke_TestConfiguration(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -1650,24 +1650,24 @@ void Invoke_TestConfiguration(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }  
+    }
     args->context = context;
     args->methodName = methodName;
 
     {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_TestConfiguration_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_TestConfiguration_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
 
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
-    }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1686,21 +1686,21 @@ void Invoke_PerformRequiredConfigurationChecks(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -1708,27 +1708,27 @@ void Invoke_PerformRequiredConfigurationChecks(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }  
+    }
     args->context = context;
-    args->methodName = methodName; 
+    args->methodName = methodName;
     args->flag = TASK_REGULAR;
     if( in && in->Flags.exists)
         args->flag = in->Flags.value;
 
     {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_PerformRequiredConfigurationChecks_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_PerformRequiredConfigurationChecks_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
 
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
-    }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1747,21 +1747,21 @@ void Invoke_StopConfiguration(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
     if( args == NULL)
     {
@@ -1769,27 +1769,27 @@ void Invoke_StopConfiguration(
         MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         return;
-    }  
+    }
     args->context = context;
-    args->methodName = methodName;   
+    args->methodName = methodName;
     args->force = MI_FALSE;
     if( in )
         args->force = in->force.exists ? in->force.value : MI_FALSE;
 
     {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_StopConfiguration_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_StopConfiguration_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
 
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
-    }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -1799,11 +1799,11 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
     MI_Instance *cimErrorDetails = NULL;
     MI_InstanceA outInstances;
     MI_Value val;
-    MI_Uint32 bufferIndex = 0;    
+    MI_Uint32 bufferIndex = 0;
     MSFT_DSCLocalConfigurationManager_PerformInventory outputObject;
     MI_Uint8A dataValue = {0};
     MI_Real64 duration;
-    ptrdiff_t start, finish;   
+    ptrdiff_t start, finish;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)param;
     MI_Char * InMOF;
 
@@ -1815,7 +1815,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
         return 0;
-    }   
+    }
     if (args->stringdata == NULL)
     {
         MI_Context_PostResult(args->context, MI_RESULT_INVALID_PARAMETER);
@@ -1829,7 +1829,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
         MI_Instance_Delete(cimErrorDetails);
         ResetJobId();
 
-        PAL_Free(args);        
+        PAL_Free(args);
         return 0;
     }
 
@@ -1839,7 +1839,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
         MI_PostCimError(args->context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
         ResetJobId();
-        PAL_Free(args);        
+        PAL_Free(args);
         return 0;
     }
 
@@ -1855,7 +1855,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
 
     InMOF = (MI_Char*) args->stringdata;
 
-    miResult = CallPerformInventory(InMOF, &outInstances, 
+    miResult = CallPerformInventory(InMOF, &outInstances,
         args->context, &cimErrorDetails);
     if (miResult != MI_RESULT_OK)
     {
@@ -1863,7 +1863,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
         goto ExitWithError;
     }
 
-    CleanUpInstanceCache(&outInstances);    
+    CleanUpInstanceCache(&outInstances);
     if (miResult != MI_RESULT_OK)
     {
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_INVENTORY_FAILED);
@@ -1876,7 +1876,7 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
         GetCimMIError(miResult, &cimErrorDetails, ID_LCMHELPER_INVENTORY_FAILED);
         MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
         goto ExitWithError;
-    }    
+    }
 
     miResult = MSFT_DSCLocalConfigurationManager_PerformInventory_Post(&outputObject, args->context);
     MSFT_DSCLocalConfigurationManager_PerformInventory_Destruct(&outputObject);
@@ -1894,12 +1894,12 @@ MI_EXTERN_C PAL_Uint32 THREAD_API Invoke_PerformInventory_Internal(void *param)
     SetLCMStatusReady();
     MI_Context_PostResult(args->context, MI_RESULT_OK);
 
-    //Debug Log 
+    //Debug Log
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
     ResetJobId();
     PAL_Free(args->stringdata);
-    PAL_Free(args);    
+    PAL_Free(args);
 
     return 0;
 
@@ -1910,7 +1910,7 @@ ExitWithError:
     MI_PostCimError(args->context, cimErrorDetails);
     MI_Instance_Delete(cimErrorDetails);
     PAL_Free(args->stringdata);
-    PAL_Free(args);    
+    PAL_Free(args);
     return 0;
 }
 
@@ -1930,21 +1930,21 @@ void Invoke_PerformInventory(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     MI_Uint8 *dataValue = NULL;
     MI_Uint32 dataSize = 0;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -1966,19 +1966,19 @@ void Invoke_PerformInventory(
     args->methodName = methodName;
 
     {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_PerformInventory_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_PerformInventory_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
 
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
-    }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
 
@@ -2005,21 +2005,21 @@ void Invoke_PerformInventoryOOB(
 #if defined(BUILD_OMS)
     if (RunningAsRoot() == MI_TRUE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_OMSCONFIG_AS_ROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #else
     if (RunningAsRoot() == MI_FALSE)
     {
-    miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
-    MI_PostCimError(context, cimErrorDetails);
+        miResult = GetCimMIError(MI_RESULT_FAILED, &cimErrorDetails, ID_CANNOT_RUN_DSC_AS_NONROOT);
+        MI_PostCimError(context, cimErrorDetails);
         MI_Instance_Delete(cimErrorDetails);
-    return;
+        return;
     }
 #endif
-    
+
     MI_Uint8 *dataValue = NULL;
     MI_Uint32 dataSize = 0;
     Context_Invoke_Basic *args = (Context_Invoke_Basic*)DSC_malloc( sizeof(Context_Invoke_Basic), NitsHere());
@@ -2043,18 +2043,18 @@ void Invoke_PerformInventoryOOB(
     args->methodName = methodName;
 
     {
-    LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
-    newNode->task = Invoke_PerformInventory_Internal;
-    newNode->params = args;
-    newNode->next = NULL;
-    AddToTaskQueue(newNode);
-    
-    pthread_mutex_lock(&g_TaskQueueMutex);
-    if (g_TaskQueueExists == 0)
-    {
-        Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
-        g_TaskQueueExists = 1;
-    }
-    pthread_mutex_unlock(&g_TaskQueueMutex);
+        LCMTaskNode * newNode = (LCMTaskNode*)DSC_malloc(sizeof(LCMTaskNode), NitsHere());
+        newNode->task = Invoke_PerformInventory_Internal;
+        newNode->params = args;
+        newNode->next = NULL;
+        AddToTaskQueue(newNode);
+
+        pthread_mutex_lock(&g_TaskQueueMutex);
+        if (g_TaskQueueExists == 0)
+        {
+            Thread_CreateDetached(TaskQueueLoop, NULL, NULL);
+            g_TaskQueueExists = 1;
+        }
+        pthread_mutex_unlock(&g_TaskQueueMutex);
     }
 }
