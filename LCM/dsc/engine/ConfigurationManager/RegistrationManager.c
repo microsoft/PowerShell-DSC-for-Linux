@@ -56,7 +56,7 @@ MI_Result MI_CALL RegistrationManager_New(
         self->agentId = agentId;
     }
 
-    PopulateServerURLs(self, cimErrorDetails);    
+    PopulateServerURLs(self, cimErrorDetails);
 
     *out = self;
     return MI_RESULT_OK;
@@ -66,7 +66,7 @@ EH_UNWIND:
     {
         free(self);
     }   
-    return result;    
+    return result;
     
 }
 

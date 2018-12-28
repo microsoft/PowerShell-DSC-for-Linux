@@ -297,8 +297,8 @@ MI_Result InitHandler(
         g_CurrentConfigFileName = NULL;
         g_PreviousConfigFileName = NULL;
         g_GetConfigFileName = NULL;
-    g_InventoryFileName = NULL;
-    g_InventoryReportFileName = NULL;
+        g_InventoryFileName = NULL;
+        g_InventoryReportFileName = NULL;
         g_MetaConfigFileName = NULL;
         g_MetaConfigTmpFileName = NULL;
         g_ConfigChecksumFileName = NULL;
