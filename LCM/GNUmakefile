@@ -12,6 +12,7 @@ DIRECTORIES += dsc/engine/ConfigurationManager
 DIRECTORIES += dsc/engine/ModuleLoader/ModuleLibrary
 DIRECTORIES += dsc/engine/lcm
 DIRECTORIES += dsc/engine/ConsistencyInvoker
+DIRECTORIES += dsc/engine/dsc_host
 
 include $(OMI)/mak/rules.mak
 
