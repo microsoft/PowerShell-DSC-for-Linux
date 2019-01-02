@@ -19,6 +19,12 @@
 
 #include "PAL_Extension.Format.Placeholders.h"
 
-#define Intlstr_Define4(id, name, parameter1_type, parameter1_name, parameter2_type, parameter2_name, parameter3_type, parameter3_name, parameter4_type, parameter4_name, text) id, text "\0."
+#if defined(_INTLSTR_NOTAPPEND_NULL)
+    #define INTLSTR_APPEND_STRING
+#else
+    #define INTLSTR_APPEND_STRING "\0."
+#endif
+
+#define Intlstr_Define4(id, name, parameter1_type, parameter1_name, parameter2_type, parameter2_name, parameter3_type, parameter3_name, parameter4_type, parameter4_name, text) id, text INTLSTR_APPEND_STRING
 
 #endif

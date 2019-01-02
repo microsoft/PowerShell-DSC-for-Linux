@@ -1,9 +1,17 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <locale.h>
 
-#include "dsc_host.h"
+#include "dsc_sal.h"
+//#include <common/linux/sal.h>
+#include "DSC_Systemcalls.h"
 #include "Resources_LCM.h"
 #include "EngineHelper.h"
+#include "dsc_host.h"
+#include "dsc_operations.h"
+#include "dsc_library.h"
+#include "lcm/strings.h"
+// #include "dsc_operation_context.h"
 
 
 MI_Result GetDSCHostVersion(_In_z_ MI_Char* version, _In_ size_t length)
@@ -33,10 +41,10 @@ void PrintHelp()
 
 int main(int argc, char *argv[])
 {
-    MI_Instance *extendedError = NULL;
+    MI_Instance *extended_error = NULL;
     MI_Result result = MI_RESULT_OK;
-    DscSupportedOperation currentOperation = DscSupportedOperation_NOP;
-    MI_Char* jobId = NULL;
+    DscSupportedOperation current_operation = DscSupportedOperation_NOP;
+    // DSC_Operation_Context *context = NULL;
 
     if(argc != 4)
     {
@@ -54,16 +62,62 @@ int main(int argc, char *argv[])
     // Checking for operation
     if(Tcscasecmp(argv[1], MI_T("GetConfiguration")) == 0 )
     {
-        currentOperation = DscSupportedOperation_GetConfiguration;
+        current_operation = DscSupportedOperation_GetConfiguration;
     } 
     else
     {
-        result = GetCimMIError1Param(MI_RESULT_FAILED, &extendedError, ID_DSC_HOST_INVALID_OPERATION, argv[1]);
+        result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[1]);
         Tprintf(MI_T("Operation %T is not supported\n"), argv[1]);
         goto CleanUp;
     }
 
+    // result = Dsc_Operation_Context_Initialize(context, &extended_error);
+    // if( result != MI_RESULT_OK)
+    // {
+    //     Tprintf(MI_T("Unable to initialize DSC operation context\n"), argv[1]);
+    //     goto CleanUp;
+    // }
+
+    switch(current_operation)
+    {
+        case DscSupportedOperation_GetConfiguration:
+            {
+                // result = Invoke_DscOperation_GetConfiguration(
+                //         context,
+                //         &dscLibraryCallbacks,
+                //         jobId,
+                //         inputFilePath,
+                //         &extendedError
+                //     );
+                JSON_Value *root_value;
+                result = DscLib_GetConfiguration (root_value, argv[2]);
+                if(result == MI_RESULT_OK)
+                {
+                    Tprintf(MI_T("Operation %T completed successfully.\n"), MI_T("GetConfiguration"));
+                }
+                else
+                {
+                    Tprintf(MI_T("Error occured during operation %T. r = %d\n"), MI_T("GetConfiguration"), result);
+                }
+                break;
+            }
+        default:
+            result = GetCimMIError1Param( MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[1]);
+            Tprintf(MI_T("Current operation %d is not supported yet.\n"), current_operation);
+    }
+
 CleanUp:
+
+    // Dsc_Operation_Context_Uninitialize(context, &extendedError);
+
+    if (result == MI_RESULT_OK)
+    {
+        Tprintf(MI_T("Operation was successful.\n"));
+    }
+    else
+    {
+        Tprintf(MI_T("Operation failed.\n"));
+    }
 
     return result;
 }
