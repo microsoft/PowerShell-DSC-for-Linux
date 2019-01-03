@@ -10,10 +10,14 @@ from worker import configuration
 
 WORKSPACE_ID_PLACEHOLDER = "<workspace_id>"
 DIY_WORKER_CONFIG_FILE_LOCATION_PATTERN = "/var/opt/microsoft/omsagent/" + WORKSPACE_ID_PLACEHOLDER + "/state/automationworker/diy/worker.conf"
+WORKER_CONFIG_FILE_LOCATION_PATTERN = "/var/opt/microsoft/omsagent/" + WORKSPACE_ID_PLACEHOLDER + "/state/automationworker/worker.conf"
 
+
+def get_diy_config_file_path(workspace_id):
+    return DIY_WORKER_CONFIG_FILE_LOCATION_PATTERN.replace(WORKSPACE_ID_PLACEHOLDER, workspace_id)
 
 def get_config_file_path(workspace_id):
-    return DIY_WORKER_CONFIG_FILE_LOCATION_PATTERN.replace(WORKSPACE_ID_PLACEHOLDER, workspace_id)
+    return WORKER_CONFIG_FILE_LOCATION_PATTERN.replace(WORKSPACE_ID_PLACEHOLDER, workspace_id)
 
 def set_signature_enforcement_policy(config_file_path, node_locked):
     if os.path.isfile(config_file_path) is False:
@@ -56,11 +60,14 @@ def main():
         sys.stderr.write("Please specify only one and only one workspace id.\n")
         sys.exit(1)
     workspace_id = args[0]
-    config_file_path = get_config_file_path(workspace_id)
+    diy_config_file_path = get_diy_config_file_path(workspace_id)
+    config_file_path     = get_config_file_path(workspace_id)
     if options.f is True:
+        set_signature_enforcement_policy(diy_config_file_path, False)
         set_signature_enforcement_policy(config_file_path, False)
         print "Successfully configured this host to execute both signed and unsigned runbooks."
     elif options.t is True:
+        set_signature_enforcement_policy(diy_config_file_path, True)
         set_signature_enforcement_policy(config_file_path, True)
         print "Successfully configured this host to execute signed runbook exclusively."
 
