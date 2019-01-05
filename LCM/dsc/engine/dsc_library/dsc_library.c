@@ -27,7 +27,7 @@
 
 MI_Result  DscLib_GetConfiguration (
         // _In_ MI_Context* p_context,
-        _In_ JSON_Value* p_result_root_value,
+        _In_ JSON_Value** p_result_root_value,
         _In_ MI_Char* p_configuration_filename
     )
 {
@@ -101,8 +101,8 @@ MI_Result  DscLib_GetConfiguration (
     }
 
     // Extract the output values
-    p_result_root_value = json_value_init_object();
-    JSON_Object *result_root_object = json_value_get_object(p_result_root_value);
+    *p_result_root_value = json_value_init_object();
+    JSON_Object *result_root_object = json_value_get_object(*p_result_root_value);
     json_object_set_value(result_root_object, "configurations", json_value_init_array());
     JSON_Array *configurations_result_arr = json_object_get_array(result_root_object, "configurations");
 
@@ -110,7 +110,7 @@ MI_Result  DscLib_GetConfiguration (
     for(i = 0 ; i < output_instances.size; i++)
     {
         JSON_Value *value;
-        Convert_MIInstance_JSON(output_instances.data[i], value);
+        Convert_MIInstance_JSON(output_instances.data[i], &value);
         json_array_append_value(configurations_result_arr, value);
     }
 
@@ -141,13 +141,13 @@ Cleanup:
 
 MI_Result  Convert_MIInstance_JSON (
         const MI_Instance* p_instance,
-        JSON_Value* p_result_root_value
+        JSON_Value** p_result_root_value
     )
 {
     MI_Result result = MI_RESULT_OK;
 
-    p_result_root_value = json_value_init_object();
-    JSON_Object *result_root_object = json_value_get_object(p_result_root_value);
+    *p_result_root_value = json_value_init_object();
+    JSON_Object *result_root_object = json_value_get_object(*p_result_root_value);
 
     MI_Uint32 i = 0;
     for(i = 0 ; i < p_instance->classDecl->numProperties; i++)

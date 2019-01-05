@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
                 //         &extendedError
                 //     );
                 JSON_Value *root_value;
-                result = DscLib_GetConfiguration (root_value, argv[2]);
+                result = DscLib_GetConfiguration (&root_value, argv[2]);
                 if(result == MI_RESULT_OK)
                 {
                     Tprintf(MI_T("Operation %T completed successfully.\n"), MI_T("GetConfiguration"));
@@ -99,6 +99,11 @@ int main(int argc, char *argv[])
                 {
                     Tprintf(MI_T("Error occured during operation %T. r = %d\n"), MI_T("GetConfiguration"), result);
                 }
+                char *serialized_string = NULL;
+                serialized_string = json_serialize_to_string_pretty(root_value);
+                puts(serialized_string);
+                json_free_serialized_string(serialized_string);
+                json_value_free(root_value);
                 break;
             }
         default:
