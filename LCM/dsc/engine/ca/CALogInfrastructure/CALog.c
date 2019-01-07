@@ -23,10 +23,6 @@
 #define _CA_IMPORT_ 1
 #include "CALog.h"
 
-#if defined(_MSC_VER)
-#include <sal.h>
-#endif
-
 CAJobInformation g_CAJobInformation={EMPTY_STRING};
 MI_Boolean CAWhatIfEnabled(_In_ void *provContext)
 {
@@ -235,7 +231,6 @@ void LogCAProgressMessage(
 
 }
 
-
 const MI_Char * GetResourceIdFromConext(_In_ void *provContext)
 {
     ProviderCallbackContext *providerContext = (ProviderCallbackContext *) provContext;
@@ -246,20 +241,12 @@ void CALogSetJobDeviceName()
    
     MI_Uint32 jobInfoCompNameLen=CA_DEVICE_NAME_SIZE;
     int result = 0;
-#if defined(_MSC_VER)
-    result = !GetComputerName(g_CAJobInformation.deviceName, (LPDWORD)&jobInfoCompNameLen);
-#else
+
     result = gethostname(g_CAJobInformation.deviceName, jobInfoCompNameLen); 
-#endif
 
     if (result != MI_FALSE) 
     {
             Stprintf(g_CAJobInformation.deviceName, CA_DEVICE_NAME_SIZE, EMPTY_STRING);
             return;
     }
-
-
 }
-
-
-

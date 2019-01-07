@@ -17,39 +17,16 @@
 #include <MI.h>
 #include "DSC_Systemcalls.h"
 #include "EventWrapper.h"
-
-
-#if defined(_MSC_VER)
-#include "Win32_EngineHelper.h"
-ConfigurationDetails g_ConfigurationDetails = { 0, 0, MI_FALSE };
-#else
 #include <pal/cpu.h>
+
 ConfigurationDetails g_ConfigurationDetails;
 static FILE *_DSCLogFile;
 static FILE *_DSCDetailedLogFile;
 static Log_Level _DSCLogLevel = OMI_WARNING;
 static Log_Level _DSCDetailedLogLevel = OMI_VERBOSE;
+
 #define FMTSIZE 1024
-#endif 
 
-
-/* Windows Functionas*/
-#if defined(_MSC_VER)
-
-
-unsigned long DSC_EventRegister()
-{
-    return EventRegisterMicrosoft_Windows_DSC();
-}
-
-unsigned long DSC_EventUnRegister()
-{
-    return EventUnregisterMicrosoft_Windows_DSC();
-}
-
-#else
-
-/* Non-windows implementation*/
 static const char* _levelDSCStrings[] =
 {
     "FATAL",
@@ -96,7 +73,6 @@ static void _PutDSCHeader(
     if (file)
         Ftprintf(os, ZT("%s(%u): "), scs(file), line);
 }
-
 
 int DSCLog_VPut(
     FILE * logFile,
@@ -152,7 +128,6 @@ void DSCFilePutLog(
     }    
 }
 
-
 void DSCLog_Close()
 {
     if (_DSCLogFile && _DSCLogFile != stderr)
@@ -202,7 +177,6 @@ MI_Result DSCLog_Open(
 #endif
 }
 
-
 unsigned long DSC_EventRegister()
 {
     char logPath[PAL_MAX_PATH_SIZE];
@@ -231,4 +205,3 @@ unsigned long DSC_EventUnRegister()
     DSCLog_Close();
     return 0;
 }
-#endif

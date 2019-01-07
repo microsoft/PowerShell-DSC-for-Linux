@@ -19,9 +19,7 @@
 
 #include <MI.h>
 #include <pal/intlstr.h>
-#if !defined(_MSC_VER)
 #include <common/linux/sal.h>
-#endif
 #include <micodec.h>
 #include "MSFT_DSCMetaConfiguration.h"
 
@@ -392,11 +390,7 @@
 #define GEN_HASH_EXPAND(locId) locId
 #define GEN_HASH(locId)  GEN_HASH_EXPAND(locId)
 #define GEN_SUF(locId) GEN_XCAT(  GEN_HASH(locId)  )
-#if defined(_MSC_VER)
-#define GEN_FPTR(x)    & ## x
-#else
 #define GEN_FPTR(x)    (void*)x
-#endif
 #define GEN_XFPTR(x)  GEN_FPTR(x)
 
 // This is used by PAL to find strings in dsccore.dll
@@ -432,29 +426,6 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 
 #define NUM_PATHS_TO_LOOK_FOR_PROVIDERS   2 //Look for native providers in both the configuration directory inside systemdir , and inside c:\programfiles (as defined below)
 
-#if defined(_MSC_VER)
-#define CONFIGURATION_SYSTEMDIR         MI_T("%windir%\\System32\\Configuration")
-#define CONFIGURATION_PROGFILES         MI_T("%programFiles%\\WindowsPowerShell\\Configuration")
-#define PATH_SEPARATOR                  MI_T("\\")
-#define DSC_PLUGINWKR_PATH MI_T("%windir%\\System32\\wbem\\Dscpspluginwkr.dll")
-
-
-#define CONFIGURATION_SCHEMA_SEARCH_PATH                CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("Schema")
-#define CONFIGURATION_PARTIALCONFIG_STORE               CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("PartialConfigurations")
-#define CONFIGURATION_BASESCHEMA_MOF_PATH               CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("BaseRegistration")
-#define CONFIGURATION_REGINSTANCE_SEARCH_PATH           CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("Registration")
-#define CONFIGURATION_LOCATION                          CONFIGURATION_SYSTEMDIR
-#define CONFIGURATION_MODULE_SEARCH_PATH                CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("Registration")
-#define CONFIGURATION_LOCATION_BACKUP                   CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("backup.mof")
-#define CONFIGURATION_LOCATION_CHECKSUM                 CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("current.mof.checksum")
-#define CONFIGURATION_LOCATION_INTERNALSTATECACHE       CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("DSCEngineCache.mof")
-#define BUILTIN_PROVIDER_CACHE                          CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("BuiltinProvCache")
-#define PACKAGE_PROVIDER_CACHE                          MI_T("%ProgramData%\\Microsoft\\Windows\\PowerShell\\Configuration\\BuiltinProvCache")
-#define CONFIGURATION_PROGFILES_SCHEMA_SEARCH_PATH      CONFIGURATION_PROGFILES PATH_SEPARATOR MI_T("Schema")
-#define CONFIGURATION_PROGFILES_REGINSTANCE_SEARCH_PATH CONFIGURATION_PROGFILES PATH_SEPARATOR MI_T("Registration")
-
-#else
-//Non-Windows
 #define MAX_COMPUTERNAME_LENGTH 15
 #define PATH_SEPARATOR                              MI_T("/")
 
@@ -488,8 +459,6 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define AGENTID_FILE_PATH CONFIG_SYSCONFDIR PATH_SEPARATOR DSC_CONFIG_DIRNAME "/agentid"
 #define OMI_CONF_FILE_PATH CONFIG_SYSCONFDIR PATH_SEPARATOR DSC_CONFIG_DIRNAME PATH_SEPARATOR MI_T("dsc.conf")
 
-
-
 #define CONFIGURATION_SCHEMA_SEARCH_PATH                  CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("schema")
 #define CONFIGURATION_PARTIALCONFIG_STORE               CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("PartialConfigurations")
 
@@ -504,11 +473,6 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define PACKAGE_PROVIDER_CACHE                            CONFIGURATION_SYSTEMDIR PATH_SEPARATOR MI_T("BuiltinProvCache")  
 #define CONFIGURATION_PROGFILES_SCHEMA_SEARCH_PATH        CONFIGURATION_PROGFILES PATH_SEPARATOR MI_T("schema")
 #define CONFIGURATION_PROGFILES_REGINSTANCE_SEARCH_PATH   CONFIGURATION_PROGFILES PATH_SEPARATOR MI_T("registration")
-
-
-
-#endif
-
 
 /**************************************
     constants used by LCM
@@ -549,10 +513,6 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define TASKSCHEDULE_PROVDER_NAME_NAME MI_T("TaskName")
 #define DSC_TASKSCHEDULE_PATH MI_T("\\Microsoft\\Windows\\Desired State Configuration")
 #define BOOT_TASKSCHEDULE_NAME MI_T("Boot")
-#if defined(_MSC_VER)
-#define CONSISTENCY_TASKSCHEDULE_NAME_BASE MI_T("\\Microsoft\\Windows\\Desired State Configuration\\")
-#define CONSISTENCY_TASKSCHEDULE_NAME CONSISTENCY_TASKSCHEDULE_NAME_BASE MI_T("Consistency")
-#else
 
 #define OMI_RESOURCEMODULEMANAGER_CLASSNAME                         MI_T("OMI_ResourceModuleManager")
 #define OMI_REPORTMANAGER_CLASSNAME                                 MI_T("OMI_ReportManager")
@@ -592,7 +552,7 @@ typedef MI_InstancePtr* MI_InstancePtrPtr;
 #define AGENT_REGISTRATION_CLASS MI_T("MSFT_PSDSCAgentRegistration")
 
 #define OMI_SERVER_PATH CONFIG_BINDIR PATH_SEPARATOR MI_T("omiserver")
-#endif
+
 #define TASK_PARAMETER_SC_DAILY MI_T("DAILY")
 #define TASK_PARAMETER_DU_DAILY MI_T("24:00")
 #define DSCCOMPUTERNAME MI_T("DSC_REMOTE_COMPUTERNAME")
@@ -932,9 +892,6 @@ extern MSFT_DSCMetaConfiguration *g_metaConfig;
     extern ConfigurationDetails g_ConfigurationDetails;
 #endif
 
-#if defined(_MSC_VER)
-     MI_Result MIResultFromHRESULT(HRESULT hr);
-#endif
 
 MI_Boolean IsDSCResource(_In_ MI_Instance *instance);
 

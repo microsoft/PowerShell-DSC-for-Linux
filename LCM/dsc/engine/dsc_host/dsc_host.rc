@@ -50,7 +50,7 @@ END
 //
 // String Table
 //
-#include "DSCstrings.rc"
+#include "strings.rc"
 
 #include "Resources_LCM.h"
 #include <pal/intlstr.rc.inc>
@@ -96,9 +96,9 @@ END
 
 #define VER_FILETYPE            VFT_APP
 #define VER_FILESUBTYPE         VFT2_UNKNOWN
-#define VER_FILEDESCRIPTION_STR         "Dsc Worker"
-#define VER_INTERNALNAME_STR            "DscWorker.exe"
-#define VER_ORIGINALFILENAME_STR        "DscWorker.exe"
+#define VER_FILEDESCRIPTION_STR         "DSC Stand Alone host"
+#define VER_INTERNALNAME_STR            "dsc_host.exe"
+#define VER_ORIGINALFILENAME_STR        "dsc_host.exe"
 
 #include "common.ver"
 

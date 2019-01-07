@@ -3,7 +3,7 @@
 
    Copyright (c) Microsoft Corporation
 
-   All rights reserved. 
+   All rights reserved.
 
    MIT License
 
@@ -67,8 +67,8 @@ extern MI_Char* overWroteUserSpecifiedRefreshFreqMins;
 extern MI_Boolean MetaMofCorrupted;
 
 typedef struct _ExpandedSystemPath
-{ 
-    const MI_Char *dscSystemFile; 
+{
+    const MI_Char *dscSystemFile;
     MI_Char **expandedPath;
 } ExpandedSystemPath;
 
@@ -83,7 +83,7 @@ extern "C"
 
     MI_Result ApplyConfig(_In_ LCMProviderContext *lcmContext,
                              _In_z_ const MI_Char *configFileLocation,
-                             _In_ ModuleManager *moduleManager, 
+                             _In_ ModuleManager *moduleManager,
                              _In_ MI_Uint32 flags,
                              _Inout_ MI_Uint32 *resultStatus,
                             _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
@@ -95,13 +95,13 @@ extern "C"
                          _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result ApplyCurrentConfig(_In_ LCMProviderContext *lcmContext,
-                         _In_ ModuleManager *moduleManager, 
+                         _In_ ModuleManager *moduleManager,
                          _In_ MI_Uint32 flags,
                          _Inout_ MI_Uint32 *resultStatus,
                          _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result ApplyMetaConfig(_In_ LCMProviderContext *lcmContext,
-        _In_ ModuleManager *moduleManager, 
+        _In_ ModuleManager *moduleManager,
         _In_ MI_Uint32 flags,
         _Inout_ MI_Uint32 *resultStatus,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
@@ -109,21 +109,20 @@ extern "C"
     MI_Result DoPullServerRefresh(
         _In_ MI_Instance *metaConfigInstance,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-        
 
         MI_Result UpdateMetaConfigWithLCMState(_In_z_ MI_Uint32 *lcmStatusCode, _Inout_ MI_Instance *metaConfigInstance);
 
     MI_Result UpdateMetaConfigWithCertificateThumbprint(_In_z_ MI_Char *certificateThumbprint, _Inout_ MI_Instance *metaConfigInstance,
                                             _Out_ MI_Boolean *bMetaConfigUpdated, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-    MI_Result UpdateMetaConfigForWebDownloadManager(_In_z_ MI_Char *certificateThumbprint, _Inout_ MI_Instance *metaConfigInstance, 
+    MI_Result UpdateMetaConfigForWebDownloadManager(_In_z_ MI_Char *certificateThumbprint, _Inout_ MI_Instance *metaConfigInstance,
                             _Inout_ MI_InstanceA *customData, _Inout_ MI_Boolean *bMetaConfigUpdated,
-                            _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
+                            _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result RegisterTask(_In_ MI_Instance *currentMetaConfigInstance, _In_z_ const MI_Char *propName, _In_z_ const MI_Char *taskName,
-                            _In_ MI_Uint32 defaultValue, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
+                            _In_ MI_Uint32 defaultValue, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-    MI_Result IsRegisterdForPull(_In_ MI_Instance *currentMetaConfigInstance, _Out_ MI_Boolean *isPullEnabled, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
+    MI_Result IsRegisterdForPull(_In_ MI_Instance *currentMetaConfigInstance, _Out_ MI_Boolean *isPullEnabled, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result SaveFile(_In_z_ const MI_Char* filePath,
         _In_reads_bytes_(dataSize) const MI_Uint8* ConfigData,
@@ -135,7 +134,7 @@ extern "C"
     _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result LoadFromPullRunLogFile(_Out_ MI_Uint32 *lastRun, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-    
+
     MI_Result SavePullRunLogFile(_In_ MI_Uint32 maxRun, _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result RetryDeleteFile(_In_z_ const MI_Char* filePath);
@@ -156,7 +155,7 @@ extern "C"
         _Inout_ MI_InstanceA *outInstances,
         _In_ MI_Context* context,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-    
+
     MI_Result CallRestoreConfiguration(MI_Uint32 dwFlags,
                                _In_ MI_Context* context,
                                _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
@@ -167,19 +166,19 @@ extern "C"
         _In_ MI_Context* context,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-    MI_Result CallTestConfiguration(_Out_ MI_Boolean *testStatus, 
+    MI_Result CallTestConfiguration(_Out_ MI_Boolean *testStatus,
         _Inout_ MI_StringA *resourceId,
         _In_ MI_Context* context,
-        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result CallConsistencyEngine(_In_ MI_Context* context,
         _In_ MI_Uint32 invokeMode,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-    
+
     MI_Result RunConsistencyEngine(_In_ MI_Context* context,
         _In_ MI_Uint32 flags,
-        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
-    
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
     MI_Result SetConfiguration(_In_reads_bytes_(dataSize) const MI_Uint8* ConfigData,
         MI_Uint32 dataSize,
         MI_Boolean force,
@@ -206,7 +205,7 @@ extern "C"
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result ValidateConfigurationDirectory(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-    
+
     MI_Result ProcessPartialConfigurations(
         _In_ LCMProviderContext *lcmContext,
         _In_ ModuleManager *moduleManager,
@@ -230,54 +229,53 @@ extern "C"
     MI_Result DependPartialConfigExist(_In_ MI_Instance *partialConfig,
                                        _In_ HashMap* self,
                                        _Out_ MI_Boolean *dependsOnExist,
-                                       _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
-    
+                                       _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
+
     /*Function to merge N partial configurations.*/
-    MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext, 
+    MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
         _In_ ModuleManager* moduleManager,
         _In_z_ const MI_Char* targetMofFile,
         _In_z_ const MI_Char* targetBaseDocumentMergedFile,
         _Outptr_result_maybenull_ MI_Instance** cimErrorDetails);
 
-    void GetRealBufferIndex(_In_ const MI_ConstUint8A *buffer, 
+    void GetRealBufferIndex(_In_ const MI_ConstUint8A *buffer,
         _Out_ MI_Uint32 *bufferIndex);
 
     void LCM_WriteMessageInfo(
-    _In_ LCMProviderContext *lcmContext,  
-    _In_opt_z_ const MI_Char *computerName, 
+    _In_ LCMProviderContext *lcmContext,
+    _In_opt_z_ const MI_Char *computerName,
     _In_ MI_Uint32 channel,
     _In_z_ const MI_Char *userSid);
-   
+
     void LCM_WriteMessage_Internal_Tokenized(
-        _In_ LCMProviderContext *lcmContext,  
-        _In_z_ const MI_Char *resourceId, 
-        _In_ MI_Uint32 channel, 
+        _In_ LCMProviderContext *lcmContext,
+        _In_z_ const MI_Char *resourceId,
+        _In_ MI_Uint32 channel,
         _In_z_ const MI_Char *message,
         _In_ MI_Boolean bRunWhatIf);
 
-    void LCM_WriteMessage_EngineInternal( _In_ LCMProviderContext *lcmContext,  
-        _In_z_ const MI_Char *resourceId, 
-        _In_ MI_Uint32 channel, 
+    void LCM_WriteMessage_EngineInternal( _In_ LCMProviderContext *lcmContext,
+        _In_z_ const MI_Char *resourceId,
+        _In_ MI_Uint32 channel,
         _In_z_ const MI_Char *message
-        );    
+        );
 
-    void LCM_WriteMessage_ProviderInternal( _In_ LCMProviderContext *lcmContext,  
-        _In_z_ const MI_Char *resourceId, 
-        _In_ MI_Uint32 channel, 
+    void LCM_WriteMessage_ProviderInternal( _In_ LCMProviderContext *lcmContext,
+        _In_z_ const MI_Char *resourceId,
+        _In_ MI_Uint32 channel,
         _In_z_ const MI_Char *message
-        );     
-    
-    void LCM_WriteMessageInfo_Internal( _In_ LCMProviderContext *lcmContext,  
-        _In_opt_z_ const MI_Char *computerName, 
-        _In_ MI_Uint32 channel, 
+        );
+
+    void LCM_WriteMessageInfo_Internal( _In_ LCMProviderContext *lcmContext,
+        _In_opt_z_ const MI_Char *computerName,
+        _In_ MI_Uint32 channel,
         _In_z_ const MI_Char *userSid
         );
 
-    void LCM_BuildMessage(_In_ LCMProviderContext *lcmContext,  
+    void LCM_BuildMessage(_In_ LCMProviderContext *lcmContext,
         _In_ MI_Uint32 errorStringId,
-        _In_z_ const MI_Char *resourceId, 
-        _In_ MI_Uint32 channel); 
-    
+        _In_z_ const MI_Char *resourceId,
+        _In_ MI_Uint32 channel);
 
     MI_Uint32 GetCallSetConfigurationFlags(_In_opt_ MI_Context* context);
 
@@ -295,7 +293,7 @@ extern "C"
 
     MI_Result InitCacheAndMetaConfig(_Outptr_result_maybenull_ MSFT_DSCMetaConfiguration **metaConfig,
                          _Outptr_result_maybenull_ MI_Instance **DSCInternalCache,
-                         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
+                         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result InitMetaConfig(_In_ ModuleManager *moduleManager,
         _Outptr_result_maybenull_ MSFT_DSCMetaConfiguration **metaConfig,
@@ -306,11 +304,11 @@ extern "C"
 
     MI_Result InitDSCInternalCache(_In_ ModuleManager *moduleManager,
         _Outptr_result_maybenull_ MI_Instance **DSCInternalCache,
-        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
+        _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Result UpdateDSCCacheInstance(
         _In_ MI_Application *miApp,
-        _Inout_ MI_Instance **dscCacheInstance, 
+        _Inout_ MI_Instance **dscCacheInstance,
         _In_opt_ MI_Boolean* complianceStatus,
         _In_opt_ MI_Uint32* getActionStatusCode,
                 _In_opt_ MI_Uint32* lcmStatusCode,
@@ -339,7 +337,6 @@ extern "C"
         _In_ ModuleManager *moduleManager,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-
     MI_Result InitPath(_Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     const MI_Char *GetPendingConfigFileName();
@@ -364,8 +361,7 @@ extern "C"
 
     const MI_Char *GetConfigPath();
 
-        const MI_Char *GetCurrentLCMStatusCodeHistory();
-
+    const MI_Char *GetCurrentLCMStatusCodeHistory();
 
     /*This will return the extension for partial Configuration files*/
     const MI_Char*GetMofExtension();
@@ -399,9 +395,9 @@ extern "C"
         _Inout_ MI_Serializer *pSerializer);
 
     /*method to get partial configuration name*/
-    MI_Result GetPartialConfigurationName(_In_ MI_Instance *partialConfiguration, 
+    MI_Result GetPartialConfigurationName(_In_ MI_Instance *partialConfiguration,
                                       _Outptr_result_maybenull_z_ const MI_Char** name,
-                                      _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);    
+                                      _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     /*Returns constant memory for partialconfigurations held by meta config instance*/
     MI_Result GetPartialConfigurations(_In_ MI_Instance *metaInstance, _Inout_ MI_InstanceA *partialConfigurations,
@@ -418,13 +414,11 @@ extern "C"
         _In_ MI_Boolean isLockSensitive,
         _Inout_ MI_Serializer *pSerializer);
 
-
         MI_Result SetLCMStatusBusy();
-        
-        MI_Result SetLCMStatusReady();
-        
-        MI_Result SetLCMStatusReboot();
 
+        MI_Result SetLCMStatusReady();
+
+        MI_Result SetLCMStatusReboot();
 
     MI_Result DeleteRegistrationKeyFromManagerInstance(
         _In_ LCMProviderContext *lcmContext,
@@ -447,7 +441,7 @@ extern "C"
 
     MI_Result DoRegistration(
         _In_ LCMProviderContext* lcmContext,
-        _Inout_ MI_InstanceA *managerInstances,        
+        _Inout_ MI_InstanceA *managerInstances,
         _In_ MI_Uint32 typeOfDownloadManagerInstance,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
@@ -456,8 +450,8 @@ extern "C"
         _In_ MI_InstanceA downloadManagerInstances,
         _In_ MI_Uint32 typeOfDownloadManagerInstance,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-        
-    
+
+
     MI_Result LCM_Pull_GetConfiguration(
         _In_ LCMProviderContext *lcmContext,
         _In_ ModuleManager *moduleManager,
@@ -491,23 +485,23 @@ extern "C"
          _Outptr_result_maybenull_z_  MI_Char** result,
          _Out_ MI_Uint32* getActionStatusCode,
          _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-    
+
     MI_Result MI_CALL LCM_Pull_Execute(
         _In_ LCMProviderContext *lcmContext,
         _In_ MI_Instance *metaConfigInstance,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
-    
+
      void ConcatStrings(_Outptr_result_z_ MI_Char** target,_In_ MI_Uint32 padding,_In_z_ MI_Char* source1, _In_z_ MI_Char* source2);
-    MI_Result TimeToRunConsistencyCheck(_Out_ MI_Boolean *bRunConsistencyCheck, 
+    MI_Result TimeToRunConsistencyCheck(_Out_ MI_Boolean *bRunConsistencyCheck,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-    MI_Result TimeToRunConsistencyCheck(_Out_ MI_Boolean *bRunConsistencyCheck, 
+    MI_Result TimeToRunConsistencyCheck(_Out_ MI_Boolean *bRunConsistencyCheck,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-    MI_Result RegisterConsistencyTask( _In_ MI_Instance *currentMetaConfigInstance, 
+    MI_Result RegisterConsistencyTask( _In_ MI_Instance *currentMetaConfigInstance,
         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
-    MI_Result RegisterStartAtBootTask(_In_ MI_Boolean bregisterTask, 
+    MI_Result RegisterStartAtBootTask(_In_ MI_Boolean bregisterTask,
                                            _Outptr_result_maybenull_ MI_Instance **cimErrorDetails);
 
     MI_Boolean ShouldAutoCorrect(_In_z_ MI_Char* configurationMode);
@@ -524,6 +518,5 @@ extern "C"
 }
 
 #endif
-
 
 #endif //_LOCALCONFIGMANAGERHELPER_H_

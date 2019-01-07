@@ -2,19 +2,38 @@ DSCTOP = ../..
 TOP = ../../..
 include $(TOP)/config.mak
 
-ifeq ($(BUILD_OMS),BUILD_OMS)
-CPROGRAM = oms_dsc_host
-else
+#LIBRARY = dsc_host
+# ifeq ($(BUILD_OMS),BUILD_OMS)
+# CPROGRAM = dsc_host
+# else
 CPROGRAM = dsc_host
-endif
-SOURCES = dsc_host.c \
-		  dsc_host_response_handler.c \
-          dummy_lcm_interface.c
+# endif
 
-INCLUDES = $(OMI) $(OMI)/common $(TOP)/codec/common $(OMI)/nits/base $(DSCTOP)/common/inc $(DSCTOP)/engine/EngineHelper
+SOURCES = \
+        dsc_host.c 
+        # dsc_host.rc 
+        # dsc_operations.c
 
-DEFINES = $(BUILD_OMS) DSC_SCRIPT_PATH=\"$(DSC_SCRIPT_PATH)\"
+INCLUDES = \
+        $(OMI) \
+        $(OMI)/common \
+        $(DSCTOP)/common/inc \
+        $(DSCTOP)/engine/EngineHelper \
+        $(DSCTOP)/engine \
+        $(DSCTOP)/engine/ca/CAInfrastructure \
+        $(DSCTOP)/engine/ModuleLoader/ModuleLibrary \
+        $(DSCTOP)/engine/dsc_library \
+        $(TOP)/codec/common \
+        $(OMI)/nits/base \
+        $(TOP)/json_parson 
 
-LIBRARIES = mi $(PALLIBS)
+DEFINES = MI_CONST= HOOK_BUILD $(BUILD_OMS)
+
+
+##LIBRARIES = dsc_library mi pal ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure
+#LIBRARIES = ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure mi pal omi_error  micodec mofparser base pal curl xmlserializer dsccore dsc_library mi $(PALLIBS)
+LIBRARIES = dsc_library mi $(PALLIBS) ssl ConfigurationManager CAEngine EngineHelper ModuleHandler curl micodec mofparser base pal
 
 include $(OMI)/mak/rules.mak
+
+

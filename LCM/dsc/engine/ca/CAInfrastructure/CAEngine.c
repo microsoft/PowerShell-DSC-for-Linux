@@ -1099,19 +1099,10 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
     {
         return NativeResourceManager_GetTargetResource(provContext, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
     } 
-#if defined(_MSC_VER)
-#ifndef BUILD_FOR_CORESYSTEM
-    else if( Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_PSPROVIDER) == 0 )
-    {
-        return Get_PSProvider(provContext, miApp, instance, regInstance, outputInstance, extendedError);        
-    }
-#endif
-#endif
     else
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
-    }    
-    
+    }
 }
 
 MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,  
@@ -1126,22 +1117,12 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
     {
         return Inventory_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstances, extendedError);
-    }    
-#if defined(_MSC_VER)
-#ifndef BUILD_FOR_CORESYSTEM
-    else if( Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_PSPROVIDER) == 0 )
-    {
-        return Get_PSProvider(provContext, miApp, instance, regInstance, outputInstance, extendedError);        
     }
-#endif
-#endif
     else
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
-    }    
-    
+    }
 }
-
 
 MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,  
                              _In_ MI_Application *miApp,
@@ -1175,19 +1156,6 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
         // else
         //     return NativeResourceManager_SetTargetResource(provContext, extendedError);
     }
-    
-#if defined(_MSC_VER)
-#ifndef BUILD_FOR_CORESYSTEM
-    else if(Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_PSPROVIDER) == 0 )
-    {
-        if(instance->classDecl!=NULL)
-        {
-            SQMLogResourceCountData(instance->classDecl->name,1);
-        }
-        return Exec_PSProvider(provContext, miApp, instance, regInstance, flags, resultStatus, canceled, extendedError);        
-    }
-#endif
-#endif   
     else
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
@@ -2078,16 +2046,6 @@ MI_Result  MI_CALL StopCurrentConfiguration(_Outptr_result_maybenull_ MI_Instanc
             g_CancelConfiguration = FALSE;
             return GetCimMIError(r, extendedError,ID_CA_CANCELWMIV2_FAILED);
         }
-// Stop ps providers on windows        
-#if defined(_MSC_VER)  
-#ifndef BUILD_FOR_CORESYSTEM
-        r = StopCurrentPSProviderConfiguration(extendedError);
-        if (r != MI_RESULT_OK)
-        {
-            return r;
-        }
-#endif  
-#endif      
     }
 
     dwWaitResult = Sem_TimedWait(&g_h_ConfigurationStoppedEvent, STOP_CONFIGURATIONT_TIMEOUT);
