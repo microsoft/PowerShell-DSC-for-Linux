@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
     MI_Result result = MI_RESULT_OK;
     DscSupportedOperation current_operation = DscSupportedOperation_NOP;
     // DSC_Operation_Context *context = NULL;
+    JSON_Value *operation_result_root_value;
 
     if(argc != 4)
     {
@@ -89,8 +90,7 @@ int main(int argc, char *argv[])
                 //         inputFilePath,
                 //         &extendedError
                 //     );
-                JSON_Value *root_value;
-                result = DscLib_GetConfiguration (&root_value, argv[2]);
+                result = DscLib_GetConfiguration (&operation_result_root_value, argv[2]);
                 if(result == MI_RESULT_OK)
                 {
                     Tprintf(MI_T("Operation %T completed successfully.\n"), MI_T("GetConfiguration"));
@@ -99,11 +99,7 @@ int main(int argc, char *argv[])
                 {
                     Tprintf(MI_T("Error occured during operation %T. r = %d\n"), MI_T("GetConfiguration"), result);
                 }
-                char *serialized_string = NULL;
-                serialized_string = json_serialize_to_string_pretty(root_value);
-                puts(serialized_string);
-                json_free_serialized_string(serialized_string);
-                json_value_free(root_value);
+                Print_JSON_Value(&operation_result_root_value);
                 break;
             }
         default:
@@ -114,6 +110,7 @@ int main(int argc, char *argv[])
 CleanUp:
 
     // Dsc_Operation_Context_Uninitialize(context, &extendedError);
+    json_value_free(operation_result_root_value);
 
     if (result == MI_RESULT_OK)
     {
@@ -128,18 +125,16 @@ CleanUp:
 }
 
 
-// void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_GetConfiguration(
-//     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
-//     _In_ MI_Context* context,
-//     _In_opt_z_ const MI_Char* nameSpace,
-//     _In_opt_z_ const MI_Char* className,
-//     _In_opt_z_ const MI_Char* methodName,
-//     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
-//     _In_opt_ const MSFT_DSCLocalConfigurationManager_GetConfiguration* in)
-// {
-//     SetJobId();
+MI_Result  Print_JSON_Value (
+        JSON_Value** p_root_value
+    )
+{
+    MI_Result result = MI_RESULT_OK;
 
-//     // Debug Log
-//     DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
-//     Invoke_GetConfiguration(self, context, nameSpace, className, methodName, instanceName, in);
-// }
+    char *serialized_string = NULL;
+    serialized_string = json_serialize_to_string_pretty(*p_root_value);
+    puts(serialized_string);
+    json_free_serialized_string(serialized_string);
+
+    return result;
+}
