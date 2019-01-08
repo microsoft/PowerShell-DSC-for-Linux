@@ -119,7 +119,92 @@ MI_Result  DscLib_GetConfiguration (
     // Stop the clock and measure time taken for this operation
     finish = CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
-    LCM_WriteMessage_Internal_TimeTaken(p_context,EMPTY_STRING, ID_LCM_TIMEMESSAGE,  ID_OUTPUT_ITEM_GET,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_GET, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+Cleanup_LCMStatus:
+    SetLCMStatusReady();
+
+Cleanup:
+    ResetJobId();
+
+    if (result != MI_RESULT_OK)
+    {
+        // process extended_errors and free its memory.
+        //MI_PostCimError(p_context, extended_errors);
+        MI_Instance_Delete(extended_errors);
+    }
+
+    return result;
+}
+
+MI_Result  DscLib_TestConfiguration (
+        _In_ JSON_Value** p_result_root_value
+    )
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Instance *extended_errors = NULL;
+    MI_Boolean testStatus = MI_FALSE;
+    MI_StringA resourceId = {0};
+    MI_Real64 duration;
+    ptrdiff_t start, finish;
+
+    MI_Char* method_name = MI_T("TestConfiguration");
+
+    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+
+    result = InitHandler(method_name, &extended_errors);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup;
+    }
+
+    SetLCMStatusBusy();
+
+    start = CPU_GetTimeStamp();
+
+    result = CallTestConfiguration(
+        &testStatus,
+        &resourceId,    // Nothing is actually populated here.
+        p_context,
+        &extended_errors
+    );
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    // Create the output object
+    *p_result_root_value = json_value_init_object();
+    JSON_Object *result_root_object = json_value_get_object(*p_result_root_value);
+
+    // Extract InDesiredState field from MI instance result and update the output object
+    json_object_set_boolean(result_root_object, "InDesiredState", testStatus);
+
+    // Extract ResourceId field from MI instance result and update the output object
+    json_object_set_value(result_root_object, "ResourceId", json_value_init_array());
+    JSON_Array *resource_id_arr = json_object_get_array(result_root_object, "ResourceId");
+
+    MI_Uint32 i = 0;
+    for(i = 0 ; i < resourceId.size; i++)
+    {
+        JSON_Value *value;
+        Convert_MIInstance_JSON(resourceId.data[i], &value);
+        json_array_append_value(resource_id_arr, value);
+    }
+
+    // Release allocated memory for test results
+    for(i = 0 ; i < resourceId.size; i++)
+    {
+        DSC_free(resourceId.data[i]);
+    }
+    DSC_free(resourceId.data);
+
+    // Stop the clock and measure time taken for this operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+    LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_TEST, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 

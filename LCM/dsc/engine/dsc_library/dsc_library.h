@@ -11,6 +11,10 @@ MI_Result  DscLib_GetConfiguration (
         _In_ MI_Char* p_configuration_filename
     );
 
+MI_Result  DscLib_TestConfiguration (
+        _In_ JSON_Value** p_result_root_value
+    );
+
 MI_Result  Convert_MIInstance_JSON (
         const MI_Instance* p_instance,
         JSON_Value** p_result_root_value

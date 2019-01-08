@@ -33,10 +33,16 @@ void PrintHelp()
 {
     Tprintf(MI_T("Usage:\n"));
     Tprintf(MI_T("dsc_host [--help] [--version]\n"));
-    Tprintf(MI_T("dsc_host <Operation> <Configuration Document Path> [Output Folder Path]\n"));
-    Tprintf(MI_T("\n. Supported Operation values are: 'GetConfiguration'"));
-    Tprintf(MI_T(", e.g.: \n"));
-    Tprintf(MI_T("dsc_host GetConfiguration ./GetAuditPolicy.mof /tmp/GetAuditPolicy\n"));
+    Tprintf(MI_T("dsc_host <Output Folder Path> <Operation> [Operation Arguments] \n"));
+    Tprintf(MI_T("\n"));
+    Tprintf(MI_T("Supported Operation values are:\n"));
+    Tprintf(MI_T("  GetConfiguration [Configuration Document Path]\n"));
+    Tprintf(MI_T("  TestConfiguration\n"));
+    Tprintf(MI_T("\n"));
+    Tprintf(MI_T("Example:\n"));
+    Tprintf(MI_T("dsc_host /tmp/GetAuditPolicy GetConfiguration ./GetAuditPolicy.mof \n"));
+    Tprintf(MI_T("dsc_host /tmp/GetAuditPolicy TestConfiguration\n"));
+    Tprintf(MI_T("\n"));
 }
 
 int main(int argc, char *argv[])
@@ -45,9 +51,11 @@ int main(int argc, char *argv[])
     MI_Result result = MI_RESULT_OK;
     DscSupportedOperation current_operation = DscSupportedOperation_NOP;
     // DSC_Operation_Context *context = NULL;
-    JSON_Value *operation_result_root_value;
+    JSON_Value *operation_result_root_value = NULL;
 
-    if(argc != 4)
+    // Check the user that has invoked the operation: root for DIY and omsagent for OMS
+
+    if(argc < 3)
     {
         if(argc > 1 && 0 == Tcscasecmp(argv[1], MI_T("--version")))
         {
@@ -61,14 +69,19 @@ int main(int argc, char *argv[])
     }
 
     // Checking for operation
-    if(Tcscasecmp(argv[1], MI_T("GetConfiguration")) == 0 )
+    if(Tcscasecmp(argv[2], MI_T("GetConfiguration")) == 0 )
     {
         current_operation = DscSupportedOperation_GetConfiguration;
     } 
     else
+    if(Tcscasecmp(argv[2], MI_T("TestConfiguration")) == 0 )
     {
-        result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[1]);
-        Tprintf(MI_T("Operation %T is not supported\n"), argv[1]);
+        current_operation = DscSupportedOperation_TestConfiguration;
+    } 
+    else
+    {
+        result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
+        Tprintf(MI_T("Operation %T is not supported\n"), argv[2]);
         goto CleanUp;
     }
 
@@ -83,34 +96,44 @@ int main(int argc, char *argv[])
     {
         case DscSupportedOperation_GetConfiguration:
             {
-                // result = Invoke_DscOperation_GetConfiguration(
-                //         context,
-                //         &dscLibraryCallbacks,
-                //         jobId,
-                //         inputFilePath,
-                //         &extendedError
-                //     );
-                result = DscLib_GetConfiguration (&operation_result_root_value, argv[2]);
+                result = DscLib_GetConfiguration (&operation_result_root_value, argv[3]);
                 if(result == MI_RESULT_OK)
                 {
                     Tprintf(MI_T("Operation %T completed successfully.\n"), MI_T("GetConfiguration"));
+                    Print_JSON_Value(&operation_result_root_value);
                 }
                 else
                 {
                     Tprintf(MI_T("Error occured during operation %T. r = %d\n"), MI_T("GetConfiguration"), result);
                 }
-                Print_JSON_Value(&operation_result_root_value);
+                break;
+            }
+        case DscSupportedOperation_TestConfiguration:
+            {
+                result = DscLib_TestConfiguration (&operation_result_root_value);
+                if(result == MI_RESULT_OK)
+                {
+                    Tprintf(MI_T("Operation %T completed successfully.\n"), MI_T("TestConfiguration"));
+                    Print_JSON_Value(&operation_result_root_value);
+                }
+                else
+                {
+                    Tprintf(MI_T("Error occured during operation %T. r = %d\n"), MI_T("TestConfiguration"), result);
+                }
                 break;
             }
         default:
-            result = GetCimMIError1Param( MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[1]);
+            result = GetCimMIError1Param( MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
             Tprintf(MI_T("Current operation %d is not supported yet.\n"), current_operation);
     }
 
 CleanUp:
 
     // Dsc_Operation_Context_Uninitialize(context, &extendedError);
-    json_value_free(operation_result_root_value);
+    if (operation_result_root_value)
+    {
+        json_value_free(operation_result_root_value);
+    }
 
     if (result == MI_RESULT_OK)
     {
@@ -123,7 +146,6 @@ CleanUp:
 
     return result;
 }
-
 
 MI_Result  Print_JSON_Value (
         JSON_Value** p_root_value
