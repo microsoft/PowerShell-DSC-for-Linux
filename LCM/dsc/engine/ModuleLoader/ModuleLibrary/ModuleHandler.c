@@ -682,6 +682,8 @@ MI_Result GetInstanceFromBuffer(_In_opt_ ModuleManager *moduleManager,
     MI_Result r = MI_RESULT_OK;
     MI_InstanceA *miTempInstanceArray = NULL;
     MI_Uint32 readBytes;
+    // MI_Uint32 xCount = 0, classCount = 0, yCount = 0;
+    // ClassNameCacheA classNameCache = { 0 };
 
     if (extendedError == NULL)
     {
@@ -689,18 +691,60 @@ MI_Result GetInstanceFromBuffer(_In_opt_ ModuleManager *moduleManager,
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
+
     r = MI_Deserializer_DeserializeInstanceArray(deserializer, 0, options, 0, instanceBuffer, instanceBufferSize, classArray, &readBytes, &miTempInstanceArray, extendedError);
     if( r != MI_RESULT_OK || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
         return r;
     }
+
+    // classNameCache.data = (ClassNameCache*)DSC_malloc(sizeof(ClassNameCache) * classCount, TLINE); // this willl memset the memory to zero
+    // if (classNameCache.data == NULL)
+    // {
+    //     EH_CheckResult(r = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR));
+    // }
+    // //Search in native modules first
+    // for (xCount = 0, classCount = 0; xCount < miTempInstanceArray->size; xCount++)
+    // {
+    //     for (yCount = 0; yCount < classArray->size; yCount++)
+    //     {
+    //         if (Tcscasecmp(miTempInstanceArray->data[xCount]->classDecl->name, classArray->data[yCount]->classDecl->name) == 0)
+    //         {
+    //             break;
+    //         }
+    //     }
+    //     if (classArray->size == yCount)
+    //     {
+    //         //check if object already exists
+    //         for (yCount = 0; yCount < classCount; yCount++)
+    //         {
+    //             if (Tcscasecmp(classNameCache.data[yCount].className, miTempInstanceArray->data[xCount]->classDecl->name) == 0)
+    //                 break;
+    //         }
+    //         if (yCount == classCount)
+    //         {
+    //             classNameCache.data[classCount].className = (MI_Char*)miTempInstanceArray->data[xCount]->classDecl->name;
+    //             classCount++;
+    //         }
+    //     }
+    // }
+    // classNameCache.size = classCount;
+
+    // r = UpdateNativeResourceCache(moduleManager, &classNameCache, extendedError);
+    // if (r != MI_RESULT_OK)
+    // {
+    //     DSC_free(classNameCache.data);
+    //     EH_Fail();
+    // }
+
     /*Update actual cache*/
     r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
     }
+
     return r;
 }
 
@@ -1594,8 +1638,6 @@ const ModuleManagerFT g_ModuleManagerFT = {
     ModuleManager_Update
 };
 
-
-
 /*Function to get all the instances in a single array from a file*/
 MI_Result GetArrayInstancesFromSingleMof(_In_ ModuleManager *moduleManager,
     MI_Uint32 flags,
@@ -1616,7 +1658,6 @@ MI_Result GetArrayInstancesFromSingleMof(_In_ ModuleManager *moduleManager,
         return r;
     }
 
-
     moduleLoader = (ModuleLoaderObject*)moduleManager->reserved2;
     miClassArray.size = moduleLoader->schemaCount;
     miClassArray.data = moduleLoader->providerSchema;
@@ -1634,5 +1675,51 @@ MI_Result GetArrayInstancesFromSingleMof(_In_ ModuleManager *moduleManager,
             moduleLoader->options, moduleLoader->options, &miClassArray,
             documentLocation, miInstanceArray, extendedError);
     }
+    return r;
+}
+
+MI_Result UpdateNativeResourceCache(_In_ ModuleManager *moduleManager,
+                                    _Inout_ ClassNameCacheA *classNameA,
+                                    _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_ClassA inputclassArray = {0};
+    MI_StringA ASMProviderDllPath = {0};
+    SchemaMofCache schemaMofPaths;
+    memset(&schemaMofPaths, 0, sizeof(SchemaMofCache));    
+    MI_Uint32 userClassCount = 0;
+    ModuleLoaderObject *moduleLoader = NULL;
+    moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
+    // Copy system classes to resolve rest of the classes
+    inputclassArray.data = (MI_Class**) DSC_malloc( sizeof(MI_Class*) * moduleLoader->schemaCount, NitsHere());
+    if(inputclassArray.data == NULL)
+    {
+        r = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
+        EH_Fail();
+    }
+    inputclassArray.size = moduleLoader->schemaCount;
+    
+    // Copy all classes already in cache here. We are using readonly copy from the cache.
+    memcpy(inputclassArray.data, moduleLoader->providerSchema, sizeof(MI_Class*) * moduleLoader->schemaCount);
+    
+    //Update class Cache from Native OMI providers
+    r = UpdateClassCacheWithSchemas(moduleLoader->application, moduleLoader->deserializer, moduleLoader->options, &inputclassArray, extendedError,
+                            GetSchemaSearchPathProgFiles(), classNameA, &schemaMofPaths);
+    EH_CheckResult(r);  
+
+    // Update class cache by directly loading the OMI provider (bypassing WMI/OMI)
+    r = UpdateClassWithSchemaFromDll(classNameA, &inputclassArray, &ASMProviderDllPath, extendedError);
+    EH_CheckResult(r);
+    
+    //Filter out system classes to contain only User classes.
+    userClassCount = inputclassArray.size - moduleLoader->schemaCount;
+    if (userClassCount > 0)
+    {
+        r = UpdateNativeRegInstance(moduleManager, &inputclassArray, userClassCount, &ASMProviderDllPath, moduleLoader, classNameA, extendedError);
+    }
+    EH_UNWIND
+        DSCFREE_IF_NOT_NULL(inputclassArray.data);
+        DSCFREE_IF_NOT_NULL(ASMProviderDllPath.data);
+
     return r;
 }

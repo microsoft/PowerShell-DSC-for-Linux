@@ -1,6 +1,7 @@
 #include "DSC_Systemcalls.h"
 #include "pal/strings.h"
 #include "CAEngine.h"
+#include "EngineHelper.h"
 #include "CAEngineInternal.h"
 #include "ModuleHandlerInternal.h"
 #include "EventWrapper.h"

@@ -1090,14 +1090,14 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
 {
     *outputInstance = NULL;
 
-    if( Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
+    if( /*Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||*/
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
     {
         return Get_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstance, extendedError);
     }
     else if (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
     {
-        return NativeResourceManager_GetTargetResource(provContext, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
+        return NativeResourceProvider_GetTargetResource(provContext, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
     } 
     else
     {

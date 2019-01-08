@@ -3398,6 +3398,19 @@ void LCM_WriteProgress(
     return ;
 }
 
+void LCM_WriteStreamParameter(
+    _In_ LCMProviderContext* lcmContext,
+    _In_z_ const MI_Char* name,
+    _In_ const MI_Value* value,
+    _In_ MI_Type type,
+    _In_ MI_Uint32 flags)
+{
+    if (lcmContext->context)
+    {
+        MI_Context_WriteStreamParameter(lcmContext->context, name, value, type, flags);
+    }
+}
+
 void LCM_WriteError(
     _In_ LCMProviderContext *lcmContext,
     _In_ MI_Instance* instanceMIError)
