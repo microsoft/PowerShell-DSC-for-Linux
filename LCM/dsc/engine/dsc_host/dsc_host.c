@@ -11,8 +11,6 @@
 #include "dsc_operations.h"
 #include "dsc_library.h"
 #include "lcm/strings.h"
-// #include "dsc_operation_context.h"
-
 
 MI_Result GetDSCHostVersion(_In_z_ MI_Char* version, _In_ size_t length)
 {
@@ -38,10 +36,14 @@ void PrintHelp()
     Tprintf(MI_T("Supported Operation values are:\n"));
     Tprintf(MI_T("  GetConfiguration [Configuration Document Path]\n"));
     Tprintf(MI_T("  TestConfiguration\n"));
+    Tprintf(MI_T("  PerformInventory\n"));
+    Tprintf(MI_T("  PerformInventoryOOB [MOF Document Path]\n"));
     Tprintf(MI_T("\n"));
     Tprintf(MI_T("Example:\n"));
-    Tprintf(MI_T("dsc_host /tmp/GetAuditPolicy GetConfiguration ./GetAuditPolicy.mof \n"));
-    Tprintf(MI_T("dsc_host /tmp/GetAuditPolicy TestConfiguration\n"));
+    Tprintf(MI_T("dsc_host /tmp/GetAuditPolicyOutput GetConfiguration ./GetAuditPolicy.mof \n"));
+    Tprintf(MI_T("dsc_host /tmp/GetAuditPolicyOutput TestConfiguration\n"));
+    Tprintf(MI_T("dsc_host /tmp/InventoryOutput PerformInventory\n"));
+    Tprintf(MI_T("dsc_host /tmp/InventoryOutput PerformInventoryOOB ./Inventory.mof \n"));
     Tprintf(MI_T("\n"));
 }
 
@@ -50,8 +52,8 @@ int main(int argc, char *argv[])
     MI_Instance *extended_error = NULL;
     MI_Result result = MI_RESULT_OK;
     DscSupportedOperation current_operation = DscSupportedOperation_NOP;
-    // DSC_Operation_Context *context = NULL;
     JSON_Value *operation_result_root_value = NULL;
+    char* operation_name;
 
     // Check the user that has invoked the operation: root for DIY and omsagent for OMS
 
@@ -69,14 +71,24 @@ int main(int argc, char *argv[])
     }
 
     // Checking for operation
-    if(Tcscasecmp(argv[2], MI_T("GetConfiguration")) == 0 )
+    if(Tcscasecmp(argv[2], DSC_OPERATION_GET_CONFIGURATION_STR) == 0 )
     {
         current_operation = DscSupportedOperation_GetConfiguration;
     } 
     else
-    if(Tcscasecmp(argv[2], MI_T("TestConfiguration")) == 0 )
+    if(Tcscasecmp(argv[2], DSC_OPERATION_TEST_CONFIGURATION_STR) == 0 )
     {
         current_operation = DscSupportedOperation_TestConfiguration;
+    } 
+    else
+    if(Tcscasecmp(argv[2], DSC_OPERATION_PERFORM_INVENTORY_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_PerformInventory;
+    } 
+    else
+    if(Tcscasecmp(argv[2], DSC_OPERATION_PERFORM_INVENTORY_OOB_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_PerformInventoryOOB;
     } 
     else
     {
@@ -85,41 +97,30 @@ int main(int argc, char *argv[])
         goto CleanUp;
     }
 
-    // result = Dsc_Operation_Context_Initialize(context, &extended_error);
-    // if( result != MI_RESULT_OK)
-    // {
-    //     Tprintf(MI_T("Unable to initialize DSC operation context\n"), argv[1]);
-    //     goto CleanUp;
-    // }
-
     switch(current_operation)
     {
         case DscSupportedOperation_GetConfiguration:
             {
+                operation_name = DSC_OPERATION_GET_CONFIGURATION_STR;
                 result = DscLib_GetConfiguration (&operation_result_root_value, argv[3]);
-                if(result == MI_RESULT_OK)
-                {
-                    Tprintf(MI_T("Operation %T completed successfully.\n"), MI_T("GetConfiguration"));
-                    Print_JSON_Value(&operation_result_root_value);
-                }
-                else
-                {
-                    Tprintf(MI_T("Error occured during operation %T. r = %d\n"), MI_T("GetConfiguration"), result);
-                }
                 break;
             }
         case DscSupportedOperation_TestConfiguration:
             {
+                operation_name = DSC_OPERATION_TEST_CONFIGURATION_STR;
                 result = DscLib_TestConfiguration (&operation_result_root_value);
-                if(result == MI_RESULT_OK)
-                {
-                    Tprintf(MI_T("Operation %T completed successfully.\n"), MI_T("TestConfiguration"));
-                    Print_JSON_Value(&operation_result_root_value);
-                }
-                else
-                {
-                    Tprintf(MI_T("Error occured during operation %T. r = %d\n"), MI_T("TestConfiguration"), result);
-                }
+                break;
+            }
+        case DscSupportedOperation_PerformInventory:
+            {
+                operation_name = DSC_OPERATION_PERFORM_INVENTORY_STR;
+                result = DscLib_PerformInventory ();
+                break;
+            }
+        case DscSupportedOperation_PerformInventoryOOB:
+            {
+                operation_name = DSC_OPERATION_PERFORM_INVENTORY_OOB_STR;
+                result = DscLib_PerformInventoryOOB (argv[3]);
                 break;
             }
         default:
@@ -127,9 +128,22 @@ int main(int argc, char *argv[])
             Tprintf(MI_T("Current operation %d is not supported yet.\n"), current_operation);
     }
 
+    if(result == MI_RESULT_OK)
+    {
+        Tprintf(MI_T("Operation %T completed successfully.\n"), operation_name);
+    }
+    else
+    {
+        Tprintf(MI_T("Error occured during operation %T. r = %d\n"), operation_name, result);
+    }
+
+    if (operation_result_root_value)
+    {
+        Print_JSON_Value(&operation_result_root_value);
+    }
+
 CleanUp:
 
-    // Dsc_Operation_Context_Uninitialize(context, &extendedError);
     if (operation_result_root_value)
     {
         json_value_free(operation_result_root_value);

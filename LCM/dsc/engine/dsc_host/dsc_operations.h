@@ -28,4 +28,9 @@ typedef enum _DscSupportedOperation
     DscSupportedOperation_PerformInventoryOOB
 } DscSupportedOperation;
 
+#define DSC_OPERATION_GET_CONFIGURATION_STR MI_T("GetConfiguration")
+#define DSC_OPERATION_TEST_CONFIGURATION_STR MI_T("TestConfiguration")
+#define DSC_OPERATION_PERFORM_INVENTORY_STR MI_T("PerformInventory")
+#define DSC_OPERATION_PERFORM_INVENTORY_OOB_STR MI_T("PerformInventoryOOB")
+
 #endif
