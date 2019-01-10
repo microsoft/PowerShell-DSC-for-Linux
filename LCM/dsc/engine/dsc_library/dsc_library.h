@@ -47,6 +47,8 @@ MI_Result  DscLib_GetMetaConfiguration (
 
 MI_Result  DscLib_ApplyConfiguration ();
 
+MI_Result  DscLib_RollBack ();
+
 MI_Result  Convert_MIInstance_JSON (
         const MI_Instance* p_instance,
         JSON_Value** p_result_root_value

@@ -122,6 +122,11 @@ int main(int argc, char *argv[])
         current_operation = DscSupportedOperation_ApplyConfiguration;
     }
     else
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_ROLLBACK_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_RollBack;
+    }
+    else
     {
         result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
         Tprintf(MI_T("Operation %T is not supported\n"), argv[2]);
@@ -184,6 +189,12 @@ int main(int argc, char *argv[])
             {
                 operation_name = DSC_OPERATION_APPLY_CONFIGURATION_STR;
                 result = DscLib_ApplyConfiguration ();
+                break;
+            }
+        case DscSupportedOperation_RollBack:
+            {
+                operation_name = DSC_OPERATION_ROLLBACK_STR;
+                result = DscLib_RollBack ();
                 break;
             }
         default:

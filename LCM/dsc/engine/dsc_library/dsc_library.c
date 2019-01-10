@@ -24,7 +24,7 @@ MI_Result  DscLib_GetConfiguration (
 
     MI_Char* method_name = MI_T("GetConfiguration");
 
-    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
 
     result = InitHandler(method_name, &extended_errors);
     if (result != MI_RESULT_OK)
@@ -68,7 +68,7 @@ MI_Result  DscLib_GetConfiguration (
         configuration_mof_data.data,
         configuration_mof_data.size,
         &output_instances,
-        p_context,
+        context,
         &extended_errors
     );
     if (result != MI_RESULT_OK)
@@ -95,7 +95,7 @@ MI_Result  DscLib_GetConfiguration (
     // Stop the clock and measure time taken for this operation
     finish = CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
-    LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_GET, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    LCM_WriteMessage_Internal_TimeTaken(context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_GET, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -108,7 +108,7 @@ Cleanup:
     if (result != MI_RESULT_OK)
     {
         // process extended_errors and free its memory.
-        //MI_PostCimError(p_context, extended_errors);
+        //MI_PostCimError(context, extended_errors);
         MI_Instance_Delete(extended_errors);
     }
 
@@ -128,7 +128,7 @@ MI_Result  DscLib_TestConfiguration (
 
     MI_Char* method_name = MI_T("TestConfiguration");
 
-    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
 
     result = InitHandler(method_name, &extended_errors);
     if (result != MI_RESULT_OK)
@@ -143,7 +143,7 @@ MI_Result  DscLib_TestConfiguration (
     result = CallTestConfiguration(
         &testStatus,
         &resourceId,    // Nothing is actually populated here.
-        p_context,
+        context,
         &extended_errors
     );
     if (result != MI_RESULT_OK)
@@ -180,7 +180,7 @@ MI_Result  DscLib_TestConfiguration (
     // Stop the clock and measure time taken for this operation
     finish = CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
-    LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_TEST, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    LCM_WriteMessage_Internal_TimeTaken(context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_TEST, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -193,7 +193,7 @@ Cleanup:
     if (result != MI_RESULT_OK)
     {
         // process extended_errors and free its memory.
-        //MI_PostCimError(p_context, extended_errors);
+        //MI_PostCimError(context, extended_errors);
         MI_Instance_Delete(extended_errors);
     }
 
@@ -210,7 +210,7 @@ MI_Result  DscLib_PerformInventory ()
 
     MI_Char* method_name = MI_T("PerformInventory");
 
-    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
 
     result = InitHandler(method_name, &extended_errors);
     if (result != MI_RESULT_OK)
@@ -229,7 +229,7 @@ MI_Result  DscLib_PerformInventory ()
     result = CallPerformInventory(
         InMOF,
         &output_instances,
-        p_context,
+        context,
         &extended_errors
     );
     if (result != MI_RESULT_OK)
@@ -242,7 +242,7 @@ MI_Result  DscLib_PerformInventory ()
     // Stop the clock and measure time taken for this operation
     finish = CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
-    LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_INVENTORY,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    LCM_WriteMessage_Internal_TimeTaken(context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_INVENTORY,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -255,7 +255,7 @@ Cleanup:
     if (result != MI_RESULT_OK)
     {
         // process extended_errors and free its memory.
-        //MI_PostCimError(p_context, extended_errors);
+        //MI_PostCimError(context, extended_errors);
         MI_Instance_Delete(extended_errors);
     }
 
@@ -272,7 +272,7 @@ MI_Result  DscLib_PerformInventoryOOB (_In_ MI_Char* p_mof_filename)
 
     MI_Char* method_name = MI_T("PerformInventoryOOB");
 
-    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
 
     result = InitHandler(method_name, &extended_errors);
     if (result != MI_RESULT_OK)
@@ -287,7 +287,7 @@ MI_Result  DscLib_PerformInventoryOOB (_In_ MI_Char* p_mof_filename)
     result = CallPerformInventory(
         p_mof_filename,
         &output_instances,
-        p_context,
+        context,
         &extended_errors
     );
     if (result != MI_RESULT_OK)
@@ -300,7 +300,7 @@ MI_Result  DscLib_PerformInventoryOOB (_In_ MI_Char* p_mof_filename)
     // Stop the clock and measure time taken for this operation
     finish = CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
-    LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_INVENTORY,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    LCM_WriteMessage_Internal_TimeTaken(context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_INVENTORY,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -313,7 +313,7 @@ Cleanup:
     if (result != MI_RESULT_OK)
     {
         // process extended_errors and free its memory.
-        //MI_PostCimError(p_context, extended_errors);
+        //MI_PostCimError(context, extended_errors);
         MI_Instance_Delete(extended_errors);
     }
 
@@ -333,7 +333,7 @@ MI_Result  DscLib_SetConfiguration (
     MI_Real64 duration;
     ptrdiff_t start, finish;
 
-    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
 
     result = InitHandler(p_method_name, &extended_errors);
     if (result != MI_RESULT_OK)
@@ -378,7 +378,7 @@ MI_Result  DscLib_SetConfiguration (
         configuration_mof_data.size,
         p_flags,
         p_force,
-        p_context,
+        context,
         &extended_errors
     );
     if (result != MI_RESULT_OK)
@@ -389,7 +389,7 @@ MI_Result  DscLib_SetConfiguration (
     // Stop the clock and measure time taken for this operation
     finish = CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
-    LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_SET, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+    LCM_WriteMessage_Internal_TimeTaken(context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_SET, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
@@ -402,7 +402,7 @@ Cleanup:
     if (result != MI_RESULT_OK)
     {
         // process extended_errors and free its memory.
-        //MI_PostCimError(p_context, extended_errors);
+        //MI_PostCimError(context, extended_errors);
         MI_Instance_Delete(extended_errors);
     }
 
@@ -466,7 +466,7 @@ MI_Result  DscLib_GetMetaConfiguration (
 
     MI_Char* method_name = MI_T("GetMetaConfiguration");
 
-    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
 
     result = InitHandler(method_name, &extended_errors);
     if (result != MI_RESULT_OK)
@@ -502,7 +502,7 @@ Cleanup:
     if (result != MI_RESULT_OK)
     {
         // process extended_errors and free its memory.
-        //MI_PostCimError(p_context, extended_errors);
+        //MI_PostCimError(context, extended_errors);
         MI_Instance_Delete(extended_errors);
     }
 
@@ -513,13 +513,12 @@ MI_Result  DscLib_ApplyConfiguration ()
 {
     MI_Result result = MI_RESULT_OK;
     MI_Instance *extended_errors = NULL;
-    MI_InstanceA output_instances = {0};
     MI_Real64 duration;
     ptrdiff_t start, finish;
 
     MI_Char* method_name = MI_T("ApplyConfiguration");
 
-    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
 
     result = InitHandler(method_name, &extended_errors);
     if (result != MI_RESULT_OK)
@@ -532,7 +531,7 @@ MI_Result  DscLib_ApplyConfiguration ()
     start = CPU_GetTimeStamp();
 
     result = CallConsistencyEngine(
-        p_context,
+        context,
         TASK_REGULAR,
         &extended_errors
     );
@@ -540,8 +539,6 @@ MI_Result  DscLib_ApplyConfiguration ()
     {
         goto Cleanup_LCMStatus;
     }
-
-    CleanUpInstanceCache(&output_instances);
 
     // Stop the clock and measure time taken for this operation
     finish = CPU_GetTimeStamp();
@@ -558,7 +555,61 @@ Cleanup:
     if (result != MI_RESULT_OK)
     {
         // process extended_errors and free its memory.
-        //MI_PostCimError(p_context, extended_errors);
+        //MI_PostCimError(context, extended_errors);
+        MI_Instance_Delete(extended_errors);
+    }
+
+    return result;
+}
+
+MI_Result  DscLib_RollBack ()
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Instance *extended_errors = NULL;
+    MI_Real64 duration;
+    ptrdiff_t start, finish;
+
+    MI_Char* method_name = MI_T("ApplyConfiguration");
+
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+
+    result = InitHandler(method_name, &extended_errors);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup;
+    }
+
+    SetLCMStatusBusy();
+
+    start = CPU_GetTimeStamp();
+
+    result = CallRestoreConfiguration(
+        LCM_SETFLAGS_DEFAULT,
+        context,
+        &extended_errors
+    );
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    // Stop the clock and measure time taken for this operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+    LCM_WriteMessage_Internal_TimeTaken(context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_ROLLBACK, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+Cleanup_LCMStatus:
+    SetLCMStatusReady();
+
+Cleanup:
+    ResetJobId();
+
+    if (result != MI_RESULT_OK)
+    {
+        // process extended_errors and free its memory.
+        //MI_PostCimError(context, extended_errors);
         MI_Instance_Delete(extended_errors);
     }
 

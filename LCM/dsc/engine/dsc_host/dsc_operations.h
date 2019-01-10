@@ -37,5 +37,6 @@ typedef enum _DscSupportedOperation
 #define DSC_OPERATION_SEND_METACONFIGURATION_APPLY_STR MI_T("SendMetaConfigurationApply")
 #define DSC_OPERATION_GET_METACONFIGURATION_STR MI_T("GetMetaConfiguration")
 #define DSC_OPERATION_APPLY_CONFIGURATION_STR MI_T("ApplyConfiguration")
+#define DSC_OPERATION_ROLLBACK_STR MI_T("RollBack")
 
 #endif
