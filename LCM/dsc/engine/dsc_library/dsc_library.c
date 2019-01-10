@@ -569,7 +569,7 @@ MI_Result  DscLib_RollBack ()
     MI_Real64 duration;
     ptrdiff_t start, finish;
 
-    MI_Char* method_name = MI_T("ApplyConfiguration");
+    MI_Char* method_name = MI_T("RollBack");
 
     MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
 
@@ -601,6 +601,151 @@ MI_Result  DscLib_RollBack ()
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
 Cleanup_LCMStatus:
+    SetLCMStatusReady();
+
+Cleanup:
+    ResetJobId();
+
+    if (result != MI_RESULT_OK)
+    {
+        // process extended_errors and free its memory.
+        //MI_PostCimError(context, extended_errors);
+        MI_Instance_Delete(extended_errors);
+    }
+
+    return result;
+}
+
+MI_Result  DscLib_PerformRequiredConfigurationChecks (
+        _In_ MI_Uint32 p_flags
+    )
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Instance *extended_errors = NULL;
+    // MI_Uint8A configuration_mof_data = {0};
+    MSFT_DSCMetaConfiguration * metaconfiguration_instance;
+    MI_Value value;
+    MI_Uint32 flags = 0;
+    MI_Real64 duration;
+    ptrdiff_t start, finish;
+
+    MI_Char* method_name = MI_T("PerformRequiredConfigurationChecks");
+
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+
+    result = InitHandler(method_name, &extended_errors);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup;
+    }
+
+    start = CPU_GetTimeStamp();
+    SetLCMStatusBusy();
+
+    result = GetMetaConfig(&metaconfiguration_instance);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    if (p_flags == TASK_BOOTSTRAP)
+    {
+        result = RegisterStandardTasks(&extended_errors);
+        if (result != MI_RESULT_OK)
+        {
+            goto Cleanup_LCMStatus;
+        }
+    }
+
+    result = MI_Instance_GetElement((MI_Instance*)metaconfiguration_instance, MSFT_DSCMetaConfiguration_RefreshMode, &value, NULL, &flags, NULL);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    if (flags & MI_FLAG_NULL)
+    {
+        value.string = METADATA_REFRESHMODE_PUSH;
+    }
+
+    if (Tcscasecmp(value.string , METADATA_REFRESHMODE_PULL) == 0)
+    {
+        result = DoPullServerRefresh(metaconfiguration_instance, &extended_errors);
+        if (result != MI_RESULT_OK)
+        {
+            goto Cleanup_LCMStatus;
+        }
+    }
+
+    result = RunConsistencyEngine(
+        p_flags,
+        context,
+        &extended_errors
+    );
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    // Stop the clock and measure time taken for this operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+
+Cleanup_LCMStatus:
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+    SetLCMStatusReady();
+
+Cleanup:
+    ResetJobId();
+    MI_Instance_Delete((MI_Instance *)metaconfiguration_instance);
+
+    if (result != MI_RESULT_OK)
+    {
+        // process extended_errors and free its memory.
+        //MI_PostCimError(context, extended_errors);
+        MI_Instance_Delete(extended_errors);
+    }
+
+    return result;
+}
+
+MI_Result  DscLib_StopConfiguration (
+        _In_ MI_Boolean p_force
+    )
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Instance *extended_errors = NULL;
+    MI_Real64 duration;
+    ptrdiff_t start, finish;
+
+    MI_Char* method_name = MI_T("StopConfiguration");
+
+    MI_Context* context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+
+    result = InitHandler(method_name, &extended_errors);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup;
+    }
+
+    start = CPU_GetTimeStamp();
+    SetLCMStatusBusy();
+
+    result = StopCurrentConfiguration(
+        &extended_errors,
+        p_force
+    );
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    // Stop the clock and measure time taken for this operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+
+Cleanup_LCMStatus:
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
     SetLCMStatusReady();
 
 Cleanup:

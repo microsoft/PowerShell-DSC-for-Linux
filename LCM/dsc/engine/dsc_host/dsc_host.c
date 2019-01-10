@@ -127,6 +127,16 @@ int main(int argc, char *argv[])
         current_operation = DscSupportedOperation_RollBack;
     }
     else
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_PERFORM_REQUIRED_CONFIGURATION_CHECKS_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_PerformRequiredConfigurationChecks;
+    }
+    else
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_STOP_CONFIGURATION_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_StopConfiguration;
+    }
+    else
     {
         result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
         Tprintf(MI_T("Operation %T is not supported\n"), argv[2]);
@@ -195,6 +205,24 @@ int main(int argc, char *argv[])
             {
                 operation_name = DSC_OPERATION_ROLLBACK_STR;
                 result = DscLib_RollBack ();
+                break;
+            }
+        case DscSupportedOperation_PerformRequiredConfigurationChecks:
+            {
+                operation_name = DSC_OPERATION_PERFORM_REQUIRED_CONFIGURATION_CHECKS_STR;
+                MI_Uint32 flags = TASK_REGULAR;
+                if (argc >= 3)
+                {
+                    flags = atoi(argv[3]);
+                }
+                result = DscLib_PerformRequiredConfigurationChecks (flags);
+                break;
+            }
+        case DscSupportedOperation_StopConfiguration:
+            {
+                operation_name = DSC_OPERATION_STOP_CONFIGURATION_STR;
+                MI_Boolean force = (Tcscasecmp(argv[4], MI_T("force")) == 0) ? MI_TRUE : MI_FALSE;
+                result = DscLib_StopConfiguration (force);
                 break;
             }
         default:

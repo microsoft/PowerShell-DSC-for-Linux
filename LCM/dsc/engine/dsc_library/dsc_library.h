@@ -49,6 +49,14 @@ MI_Result  DscLib_ApplyConfiguration ();
 
 MI_Result  DscLib_RollBack ();
 
+MI_Result  DscLib_PerformRequiredConfigurationChecks (
+        _In_ MI_Uint32 p_flags
+    );
+
+MI_Result  DscLib_StopConfiguration (
+        _In_ MI_Boolean p_force
+    );
+
 MI_Result  Convert_MIInstance_JSON (
         const MI_Instance* p_instance,
         JSON_Value** p_result_root_value
