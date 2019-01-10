@@ -425,7 +425,7 @@ nxOMSCustomLog:
 
 nxOMSSudoCustomLog:
 	rm -rf output/staging; \
-	VERSION="2.1"; \
+	VERSION="2.2"; \
 	PROVIDERS="nxOMSSudoCustomLog"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -469,7 +469,7 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.14"; \
+	VERSION="3.15"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -581,7 +581,7 @@ nxOMSContainers:
 
 nxOMSWLI:
 	rm -rf output/staging; \
-	VERSION="1.41"; \
+	VERSION="1.42"; \
 	PROVIDERS="nxOMSWLI"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
