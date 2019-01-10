@@ -38,12 +38,18 @@ void PrintHelp()
     Tprintf(MI_T("  TestConfiguration\n"));
     Tprintf(MI_T("  PerformInventory\n"));
     Tprintf(MI_T("  PerformInventoryOOB [MOF Document Path]\n"));
+    Tprintf(MI_T("  SendConfiguration [MOF Document Path]\n"));
+    Tprintf(MI_T("  SendConfigurationApply [MOF Document Path]\n"));
+    Tprintf(MI_T("  SendMetaConfigurationApply [MOF Document Path]\n"));
     Tprintf(MI_T("\n"));
     Tprintf(MI_T("Example:\n"));
     Tprintf(MI_T("dsc_host /tmp/GetAuditPolicyOutput GetConfiguration ./GetAuditPolicy.mof \n"));
     Tprintf(MI_T("dsc_host /tmp/GetAuditPolicyOutput TestConfiguration\n"));
     Tprintf(MI_T("dsc_host /tmp/InventoryOutput PerformInventory\n"));
     Tprintf(MI_T("dsc_host /tmp/InventoryOutput PerformInventoryOOB ./Inventory.mof \n"));
+    Tprintf(MI_T("dsc_host /tmp/InventoryOutput SendConfiguration ./new_config.mof \n"));
+    Tprintf(MI_T("dsc_host /tmp/InventoryOutput SendConfigurationApply ./new_config.mof \n"));
+    Tprintf(MI_T("dsc_host /tmp/InventoryOutput SendMetaConfigurationApply ./new_metaconfig.mof \n"));
     Tprintf(MI_T("\n"));
 }
 
@@ -71,25 +77,50 @@ int main(int argc, char *argv[])
     }
 
     // Checking for operation
-    if(Tcscasecmp(argv[2], DSC_OPERATION_GET_CONFIGURATION_STR) == 0 )
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_GET_CONFIGURATION_STR) == 0 )
     {
         current_operation = DscSupportedOperation_GetConfiguration;
-    } 
+    }
     else
-    if(Tcscasecmp(argv[2], DSC_OPERATION_TEST_CONFIGURATION_STR) == 0 )
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_TEST_CONFIGURATION_STR) == 0 )
     {
         current_operation = DscSupportedOperation_TestConfiguration;
-    } 
+    }
     else
-    if(Tcscasecmp(argv[2], DSC_OPERATION_PERFORM_INVENTORY_STR) == 0 )
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_PERFORM_INVENTORY_STR) == 0 )
     {
         current_operation = DscSupportedOperation_PerformInventory;
-    } 
+    }
     else
-    if(Tcscasecmp(argv[2], DSC_OPERATION_PERFORM_INVENTORY_OOB_STR) == 0 )
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_PERFORM_INVENTORY_OOB_STR) == 0 )
     {
         current_operation = DscSupportedOperation_PerformInventoryOOB;
-    } 
+    }
+    else
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_SEND_CONFIGURATION_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_SendConfiguration;
+    }
+    else
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_SEND_CONFIGURATION_APPLY_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_SendConfigurationApply;
+    }
+    else
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_SEND_METACONFIGURATION_APPLY_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_SendMetaConfigurationApply;
+    }
+    else
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_GET_METACONFIGURATION_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_GetMetaConfiguration;
+    }
+    else
+    if ( Tcscasecmp(argv[2], DSC_OPERATION_APPLY_CONFIGURATION_STR) == 0 )
+    {
+        current_operation = DscSupportedOperation_ApplyConfiguration;
+    }
     else
     {
         result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
@@ -121,6 +152,38 @@ int main(int argc, char *argv[])
             {
                 operation_name = DSC_OPERATION_PERFORM_INVENTORY_OOB_STR;
                 result = DscLib_PerformInventoryOOB (argv[3]);
+                break;
+            }
+        case DscSupportedOperation_SendConfiguration:
+            {
+                operation_name = DSC_OPERATION_SEND_CONFIGURATION_STR;
+                MI_Boolean force = (Tcscasecmp(argv[4], MI_T("force")) == 0) ? MI_TRUE : MI_FALSE;
+                result = DscLib_SendConfiguration (argv[3], force);
+                break;
+            }
+        case DscSupportedOperation_SendConfigurationApply:
+            {
+                operation_name = DSC_OPERATION_SEND_CONFIGURATION_APPLY_STR;
+                MI_Boolean force = (Tcscasecmp(argv[4], MI_T("force")) == 0) ? MI_TRUE : MI_FALSE;
+                result = DscLib_SendConfigurationApply (argv[3], force);
+                break;
+            }
+        case DscSupportedOperation_SendMetaConfigurationApply:
+            {
+                operation_name = DSC_OPERATION_SEND_METACONFIGURATION_APPLY_STR;
+                result = DscLib_SendMetaConfigurationApply (argv[3]);
+                break;
+            }
+        case DscSupportedOperation_GetMetaConfiguration:
+            {
+                operation_name = DSC_OPERATION_GET_METACONFIGURATION_STR;
+                result = DscLib_GetMetaConfiguration (&operation_result_root_value);
+                break;
+            }
+        case DscSupportedOperation_ApplyConfiguration:
+            {
+                operation_name = DSC_OPERATION_APPLY_CONFIGURATION_STR;
+                result = DscLib_ApplyConfiguration ();
                 break;
             }
         default:

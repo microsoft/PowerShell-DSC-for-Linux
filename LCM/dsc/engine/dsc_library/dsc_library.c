@@ -8,6 +8,7 @@
 #include "parson.h"
 #include "DSC_Systemcalls.h"
 
+#include <stdio.h>
 
 MI_Result  DscLib_GetConfiguration (
         _In_ JSON_Value** p_result_root_value,
@@ -38,28 +39,22 @@ MI_Result  DscLib_GetConfiguration (
         // Read file contents from the pending configuration file into configuration_mof_data
         result = ReadFileContent(p_configuration_filename, &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
     }
+    else if (File_ExistT(GetCurrentConfigFileName()) != -1)
+    {
+        // Read file contents from the current configuration file (Current.mof) into configuration_mof_data
+        result = ReadFileContent(GetCurrentConfigFileName(), &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
+    }
+    else if (File_ExistT(GetPendingConfigFileName()) != -1)
+    {
+        // Read file contents from the pending configuration file (Pending.mof) into configuration_mof_data
+        result = ReadFileContent(GetPendingConfigFileName(), &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
+    }
     else
     {
-        // If the current and pending configuration files do not exist, output a corresponding error message and return
-        if (File_ExistT(GetCurrentConfigFileName())== -1)
-        {
-            if (File_ExistT(GetPendingConfigFileName()) == -1)
-            {
-                GetCimMIError(MI_RESULT_FAILED, &extended_errors, ID_LCMHELPER_CURRENT_NOTFOUND);
-                goto Cleanup;
-            }
-            else
-            {
-                // Read file contents from the pending configuration file into configuration_mof_data
-                result = ReadFileContent(GetPendingConfigFileName(), &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
-            }
-        }
-        else
-        {
-            // Read file contents from the current configuration file into configuration_mof_data
-            result = ReadFileContent(GetCurrentConfigFileName(), &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
-        }
+        GetCimMIError(MI_RESULT_FAILED, &extended_errors, ID_LCMHELPER_CURRENT_NOTFOUND);
+        goto Cleanup;
     }
+
     if (result != MI_RESULT_OK)
     {
         goto Cleanup;
@@ -306,6 +301,251 @@ MI_Result  DscLib_PerformInventoryOOB (_In_ MI_Char* p_mof_filename)
     finish = CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
     LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_INVENTORY,(const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+Cleanup_LCMStatus:
+    SetLCMStatusReady();
+
+Cleanup:
+    ResetJobId();
+
+    if (result != MI_RESULT_OK)
+    {
+        // process extended_errors and free its memory.
+        //MI_PostCimError(p_context, extended_errors);
+        MI_Instance_Delete(extended_errors);
+    }
+
+    return result;
+}
+
+MI_Result  DscLib_SetConfiguration (
+        _In_ MI_Char* p_configuration_filename,
+        _In_ MI_Uint32 p_flags,
+        _In_ MI_Boolean p_force,
+        _In_ MI_Char* p_method_name
+    )
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Instance *extended_errors = NULL;
+    MI_Uint8A configuration_mof_data = {0};
+    MI_Real64 duration;
+    ptrdiff_t start, finish;
+
+    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+
+    result = InitHandler(p_method_name, &extended_errors);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup;
+    }
+
+    // If the configuration file has been passed in the parameters, try to read that file
+    if (p_configuration_filename != NULL)
+    {
+        // If a configuration file name is passed in the parameters, read from the passed configuration file.
+        // Read file contents from the pending configuration file into configuration_mof_data
+        result = ReadFileContent(p_configuration_filename, &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
+    }
+    // else if (File_ExistT(GetCurrentConfigFileName()) != -1)
+    // {
+    //     // Read file contents from the current configuration file (Current.mof) into configuration_mof_data
+    //     result = ReadFileContent(GetCurrentConfigFileName(), &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
+    // }
+    // else if (File_ExistT(GetPendingConfigFileName()) != -1)
+    // {
+    //     // Read file contents from the pending configuration file (Pending.mof) into configuration_mof_data
+    //     result = ReadFileContent(GetPendingConfigFileName(), &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
+    // }
+    else
+    {
+        GetCimMIError(MI_RESULT_FAILED, &extended_errors, ID_LCMHELPER_CURRENT_NOTFOUND);
+        goto Cleanup;
+    }
+
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup;
+    }
+
+    SetLCMStatusBusy();
+
+    start = CPU_GetTimeStamp();
+
+    result = CallSetConfiguration(
+        configuration_mof_data.data,
+        configuration_mof_data.size,
+        p_flags,
+        p_force,
+        p_context,
+        &extended_errors
+    );
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    // Stop the clock and measure time taken for this operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+    LCM_WriteMessage_Internal_TimeTaken(p_context, EMPTY_STRING, ID_LCM_TIMEMESSAGE, ID_OUTPUT_ITEM_SET, (const MI_Real64)duration, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
+
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+Cleanup_LCMStatus:
+    SetLCMStatusReady();
+
+Cleanup:
+    ResetJobId();
+
+    if (result != MI_RESULT_OK)
+    {
+        // process extended_errors and free its memory.
+        //MI_PostCimError(p_context, extended_errors);
+        MI_Instance_Delete(extended_errors);
+    }
+
+    return result;
+}
+
+MI_Result  DscLib_SendConfiguration (
+        _In_ MI_Char* p_configuration_filename,
+        _In_ MI_Boolean p_force
+    )
+{
+    MI_Uint32 flags = LCM_SETFLAGS_SAVETOPENDINGONLY;
+    MI_Char* method_name = MI_T("SendConfiguration");
+    return DscLib_SetConfiguration(
+            p_configuration_filename,
+            flags,
+            p_force,
+            method_name
+        );
+}
+
+MI_Result  DscLib_SendConfigurationApply (
+        _In_ MI_Char* p_configuration_filename,
+        _In_ MI_Boolean p_force
+    )
+{
+    MI_Uint32 flags = LCM_SETFLAGS_DEFAULT;
+    MI_Char* method_name = MI_T("SendConfigurationApply");
+    return DscLib_SetConfiguration(
+            p_configuration_filename,
+            flags,
+            p_force,
+            method_name
+        );
+}
+
+MI_Result  DscLib_SendMetaConfigurationApply (
+        _In_ MI_Char* p_metaconfiguration_filename
+    )
+{
+    MI_Uint32 flags = LCM_SETFLAGS_DEFAULT | LCM_SET_METACONFIG;
+    MI_Char* method_name = MI_T("SendMetaConfigurationApply");
+    MI_Boolean force = MI_TRUE;
+    return DscLib_SetConfiguration(
+            p_metaconfiguration_filename,
+            flags,
+            force,
+            method_name
+        );
+}
+
+MI_Result  DscLib_GetMetaConfiguration (
+        _In_ JSON_Value** p_result_root_value
+    )
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Instance *extended_errors = NULL;
+    MSFT_DSCMetaConfiguration * metaconfiguration_instance;
+    MI_Real64 duration;
+    ptrdiff_t start, finish;
+
+    MI_Char* method_name = MI_T("GetMetaConfiguration");
+
+    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+
+    result = InitHandler(method_name, &extended_errors);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup;
+    }
+
+    SetLCMStatusBusy();
+
+    start = CPU_GetTimeStamp();
+
+    result = GetMetaConfig(&metaconfiguration_instance);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    // // Extract the output values
+    Convert_MIInstance_JSON(metaconfiguration_instance, p_result_root_value);
+
+    // Stop the clock and measure time taken for this operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+Cleanup_LCMStatus:
+    SetLCMStatusReady();
+
+Cleanup:
+    ResetJobId();
+
+    if (result != MI_RESULT_OK)
+    {
+        // process extended_errors and free its memory.
+        //MI_PostCimError(p_context, extended_errors);
+        MI_Instance_Delete(extended_errors);
+    }
+
+    return result;
+}
+
+MI_Result  DscLib_ApplyConfiguration ()
+{
+    MI_Result result = MI_RESULT_OK;
+    MI_Instance *extended_errors = NULL;
+    MI_InstanceA output_instances = {0};
+    MI_Real64 duration;
+    ptrdiff_t start, finish;
+
+    MI_Char* method_name = MI_T("ApplyConfiguration");
+
+    MI_Context* p_context = (MI_Context*)DSC_malloc(sizeof(MI_Context), NitsHere()); 
+
+    result = InitHandler(method_name, &extended_errors);
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup;
+    }
+
+    SetLCMStatusBusy();
+
+    start = CPU_GetTimeStamp();
+
+    result = CallConsistencyEngine(
+        p_context,
+        TASK_REGULAR,
+        &extended_errors
+    );
+    if (result != MI_RESULT_OK)
+    {
+        goto Cleanup_LCMStatus;
+    }
+
+    CleanUpInstanceCache(&output_instances);
+
+    // Stop the clock and measure time taken for this operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 

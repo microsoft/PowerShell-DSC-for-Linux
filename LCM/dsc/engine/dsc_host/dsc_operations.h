@@ -32,5 +32,10 @@ typedef enum _DscSupportedOperation
 #define DSC_OPERATION_TEST_CONFIGURATION_STR MI_T("TestConfiguration")
 #define DSC_OPERATION_PERFORM_INVENTORY_STR MI_T("PerformInventory")
 #define DSC_OPERATION_PERFORM_INVENTORY_OOB_STR MI_T("PerformInventoryOOB")
+#define DSC_OPERATION_SEND_CONFIGURATION_STR MI_T("SendConfiguration")
+#define DSC_OPERATION_SEND_CONFIGURATION_APPLY_STR MI_T("SendConfigurationApply")
+#define DSC_OPERATION_SEND_METACONFIGURATION_APPLY_STR MI_T("SendMetaConfigurationApply")
+#define DSC_OPERATION_GET_METACONFIGURATION_STR MI_T("GetMetaConfiguration")
+#define DSC_OPERATION_APPLY_CONFIGURATION_STR MI_T("ApplyConfiguration")
 
 #endif
