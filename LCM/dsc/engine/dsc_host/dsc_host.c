@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
     MI_Result result = MI_RESULT_OK;
     DscSupportedOperation current_operation = DscSupportedOperation_NOP;
     JSON_Value *operation_result_root_value = NULL;
+    JSON_Value *operation_error_root_value = NULL;
     char* operation_name;
 
     // Check the user that has invoked the operation: root for DIY and omsagent for OMS
@@ -148,63 +149,63 @@ int main(int argc, char *argv[])
         case DscSupportedOperation_GetConfiguration:
             {
                 operation_name = DSC_OPERATION_GET_CONFIGURATION_STR;
-                result = DscLib_GetConfiguration (&operation_result_root_value, argv[3]);
+                result = DscLib_GetConfiguration (&operation_result_root_value, argv[3], &operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_TestConfiguration:
             {
                 operation_name = DSC_OPERATION_TEST_CONFIGURATION_STR;
-                result = DscLib_TestConfiguration (&operation_result_root_value);
+                result = DscLib_TestConfiguration (&operation_result_root_value, &operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_PerformInventory:
             {
                 operation_name = DSC_OPERATION_PERFORM_INVENTORY_STR;
-                result = DscLib_PerformInventory ();
+                result = DscLib_PerformInventory (&operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_PerformInventoryOOB:
             {
                 operation_name = DSC_OPERATION_PERFORM_INVENTORY_OOB_STR;
-                result = DscLib_PerformInventoryOOB (argv[3]);
+                result = DscLib_PerformInventoryOOB (argv[3], &operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_SendConfiguration:
             {
                 operation_name = DSC_OPERATION_SEND_CONFIGURATION_STR;
                 MI_Boolean force = (Tcscasecmp(argv[4], MI_T("force")) == 0) ? MI_TRUE : MI_FALSE;
-                result = DscLib_SendConfiguration (argv[3], force);
+                result = DscLib_SendConfiguration (argv[3], force, &operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_SendConfigurationApply:
             {
                 operation_name = DSC_OPERATION_SEND_CONFIGURATION_APPLY_STR;
                 MI_Boolean force = (Tcscasecmp(argv[4], MI_T("force")) == 0) ? MI_TRUE : MI_FALSE;
-                result = DscLib_SendConfigurationApply (argv[3], force);
+                result = DscLib_SendConfigurationApply (argv[3], force, &operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_SendMetaConfigurationApply:
             {
                 operation_name = DSC_OPERATION_SEND_METACONFIGURATION_APPLY_STR;
-                result = DscLib_SendMetaConfigurationApply (argv[3]);
+                result = DscLib_SendMetaConfigurationApply (argv[3], &operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_GetMetaConfiguration:
             {
                 operation_name = DSC_OPERATION_GET_METACONFIGURATION_STR;
-                result = DscLib_GetMetaConfiguration (&operation_result_root_value);
+                result = DscLib_GetMetaConfiguration (&operation_result_root_value, &operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_ApplyConfiguration:
             {
                 operation_name = DSC_OPERATION_APPLY_CONFIGURATION_STR;
-                result = DscLib_ApplyConfiguration ();
+                result = DscLib_ApplyConfiguration (&operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_RollBack:
             {
                 operation_name = DSC_OPERATION_ROLLBACK_STR;
-                result = DscLib_RollBack ();
+                result = DscLib_RollBack (&operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_PerformRequiredConfigurationChecks:
@@ -215,14 +216,14 @@ int main(int argc, char *argv[])
                 {
                     flags = atoi(argv[3]);
                 }
-                result = DscLib_PerformRequiredConfigurationChecks (flags);
+                result = DscLib_PerformRequiredConfigurationChecks (flags, &operation_error_root_value);
                 break;
             }
         case DscSupportedOperation_StopConfiguration:
             {
                 operation_name = DSC_OPERATION_STOP_CONFIGURATION_STR;
                 MI_Boolean force = (Tcscasecmp(argv[4], MI_T("force")) == 0) ? MI_TRUE : MI_FALSE;
-                result = DscLib_StopConfiguration (force);
+                result = DscLib_StopConfiguration (force, &operation_error_root_value);
                 break;
             }
         default:
@@ -244,11 +245,21 @@ int main(int argc, char *argv[])
         Print_JSON_Value(&operation_result_root_value);
     }
 
+    if (operation_error_root_value)
+    {
+        Print_JSON_Value(&operation_error_root_value);
+    }
+
 CleanUp:
 
     if (operation_result_root_value)
     {
         json_value_free(operation_result_root_value);
+    }
+
+    if (operation_error_root_value)
+    {
+        json_value_free(operation_error_root_value);
     }
 
     if (result == MI_RESULT_OK)
