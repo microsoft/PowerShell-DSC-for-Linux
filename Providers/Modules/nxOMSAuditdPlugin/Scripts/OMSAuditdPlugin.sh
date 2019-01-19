@@ -276,6 +276,10 @@ case $1 in
         fi
 
         if [ -n "$4" ]; then
+            if /sbin/auditctl -s | grep -qe 'enabled[=| ]2'; then
+                echo "Audit configuration is locked for the current session. The system needs to be rebooted to update the auditing rules."
+                exit 4
+            fi
             if [ "$4" == "remove" ]; then
                 remove_rules
             else
