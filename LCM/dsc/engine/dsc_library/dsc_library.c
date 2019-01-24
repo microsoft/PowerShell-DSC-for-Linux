@@ -113,6 +113,8 @@ Cleanup:
         MI_Instance_Delete(extended_errors);
     }
 
+    DSC_free(context);
+
     return result;
 }
 
@@ -199,6 +201,8 @@ Cleanup:
         MI_Instance_Delete(extended_errors);
     }
 
+    DSC_free(context);
+
     return result;
 }
 
@@ -262,6 +266,8 @@ Cleanup:
         Convert_MIInstance_JSON(extended_errors, p_error_root_value);
         MI_Instance_Delete(extended_errors);
     }
+
+    DSC_free(context);
 
     return result;
 }
@@ -327,6 +333,8 @@ Cleanup:
         Convert_MIInstance_JSON(extended_errors, p_error_root_value);
         MI_Instance_Delete(extended_errors);
     }
+
+    DSC_free(context);
 
     return result;
 }
@@ -418,6 +426,8 @@ Cleanup:
         Convert_MIInstance_JSON(extended_errors, p_error_root_value);
         MI_Instance_Delete(extended_errors);
     }
+
+    DSC_free(context);
 
     return result;
 }
@@ -526,6 +536,8 @@ Cleanup:
         MI_Instance_Delete(extended_errors);
     }
 
+    DSC_free(context);
+
     return result;
 }
 
@@ -580,6 +592,8 @@ Cleanup:
         Convert_MIInstance_JSON(extended_errors, p_error_root_value);
         MI_Instance_Delete(extended_errors);
     }
+
+    DSC_free(context);
 
     return result;
 }
@@ -636,6 +650,8 @@ Cleanup:
         Convert_MIInstance_JSON(extended_errors, p_error_root_value);
         MI_Instance_Delete(extended_errors);
     }
+
+    DSC_free(context);
 
     return result;
 }
@@ -731,6 +747,8 @@ Cleanup:
         MI_Instance_Delete(extended_errors);
     }
 
+    DSC_free(context);
+
     return result;
 }
 
@@ -783,6 +801,8 @@ Cleanup:
         Convert_MIInstance_JSON(extended_errors, p_error_root_value);
         MI_Instance_Delete(extended_errors);
     }
+
+    DSC_free(context);
 
     return result;
 }
