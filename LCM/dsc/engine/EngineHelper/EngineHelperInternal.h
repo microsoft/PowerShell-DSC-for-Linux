@@ -782,6 +782,13 @@ MI_Result  GetCimError(MI_Uint32 hr ,
                                 );
 
 _Always_(_Ret_range_(==, result))
+MI_Result  CreateMiInstanceErrorObject(
+        _Outptr_result_maybenull_ MI_Instance **p_cim_error_details,
+        _In_z_ const MI_Char *p_format,
+        ...
+    );
+
+_Always_(_Ret_range_(==, result))
 MI_Result  GetCimMIError(MI_Result result ,
                                   _Outptr_result_maybenull_ MI_Instance **cimErrorDetails,
                                   _In_ MI_Uint32 errorStringId

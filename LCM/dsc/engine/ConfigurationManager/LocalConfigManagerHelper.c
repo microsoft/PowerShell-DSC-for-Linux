@@ -3177,7 +3177,8 @@ void LCM_WriteMessage_Internal_TimeTaken(
             
         if (intlstr.str)
         {
-            MI_Context_WriteMessage(context, channel, intlstr.str);                
+            //// No need when OMI is not in the picture
+            // MI_Context_WriteMessage(context, channel, intlstr.str);                
             DSC_EventWriteMessageFromEngine(channel, resourceId, intlstr.str);
             Intlstr_Free(intlstr);
         }
@@ -3200,16 +3201,17 @@ void LCM_WriteMessage_Internal_Tokenized(
         GetFullMessageWithTokens(g_JobInformation.deviceName, resourceId, message, lcmContext, &intlstr);
         if (intlstr.str)
         { 
-            if (bRunWhatIf)
-            { 
-                MI_Boolean flag=MI_FALSE;
-                //Messages from LCM are output to the user as the whatif prompt if whatif is enabled.
-                MI_Context_PromptUser((MI_Context*) lcmContext->context, intlstr.str, MI_PROMPTTYPE_NORMAL,&flag); 
-            }
-            else 
-            {
-                MI_Context_WriteMessage((MI_Context*) lcmContext->context, channel, intlstr.str);
-            }
+            //// No need when OMI is not in the picture
+            // if (bRunWhatIf)
+            // { 
+            //     MI_Boolean flag=MI_FALSE;
+            //     //Messages from LCM are output to the user as the whatif prompt if whatif is enabled.
+            //     MI_Context_PromptUser((MI_Context*) lcmContext->context, intlstr.str, MI_PROMPTTYPE_NORMAL,&flag); 
+            // }
+            // else 
+            // {
+            //     MI_Context_WriteMessage((MI_Context*) lcmContext->context, channel, intlstr.str);
+            // }
             // log to ETW
             if(lcmContext->messageOperation==0 && lcmContext->messageItem==0) //There is no Action or Item only in the case of a provider message
             {
@@ -3266,17 +3268,18 @@ void LCM_WriteMessageInfo_Internal(
     _In_ MI_Uint32 channel, 
     _In_z_ const MI_Char *userSid)
 {
-    if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
-    {
-        Intlstr resStr = Intlstr_Null;
-        const MI_Char *notNullComputerName = (computerName != NULL) ? computerName : g_JobInformation.deviceName;
-        GetResourceString2Param(ID_LCM_REPUDIATIONMSG, notNullComputerName, userSid, &resStr);
-        if (resStr.str )
-        {                  
-            MI_Context_WriteMessage((MI_Context*) lcmContext->context, channel, resStr.str);
-            Intlstr_Free(resStr);
-        }     
-    }
+    //// No need when OMI is not in the picture
+    // if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
+    // {
+    //     Intlstr resStr = Intlstr_Null;
+    //     const MI_Char *notNullComputerName = (computerName != NULL) ? computerName : g_JobInformation.deviceName;
+    //     GetResourceString2Param(ID_LCM_REPUDIATIONMSG, notNullComputerName, userSid, &resStr);
+    //     if (resStr.str )
+    //     {                  
+    //         MI_Context_WriteMessage((MI_Context*) lcmContext->context, channel, resStr.str);
+    //         Intlstr_Free(resStr);
+    //     }     
+    // }
 }
 
 void LCM_BuildMessage(
@@ -3374,26 +3377,27 @@ void LCM_WriteProgress(
     _In_ MI_Uint32 percentComplete,
     _In_ MI_Uint32 secondsRemaining)
 {
-    if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
-    {
-        size_t targetLength=DEVICE_NAME_SIZE+Tcslen(currentOperation)+50; //+1 for "\0"
-        size_t result;
-        MI_Char* currentOpWithMachine= (MI_Char*) DSC_malloc(sizeof(MI_Char)*targetLength, NitsMakeCallSite(-3, NULL, NULL, 0));
-        if(currentOpWithMachine!=NULL)
-        {
-            result = Stprintf(currentOpWithMachine, targetLength,MI_T("[%T] %T") ,g_JobInformation.deviceName,currentOperation);
-            if (result != -1)
-            {
-                MI_Context_WriteProgress((MI_Context*) lcmContext->context, activity, currentOpWithMachine, statusDescroption, percentComplete, secondsRemaining);
+    //// No need when OMI is not in the picture
+    // if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
+    // {
+    //     size_t targetLength=DEVICE_NAME_SIZE+Tcslen(currentOperation)+50; //+1 for "\0"
+    //     size_t result;
+    //     MI_Char* currentOpWithMachine= (MI_Char*) DSC_malloc(sizeof(MI_Char)*targetLength, NitsMakeCallSite(-3, NULL, NULL, 0));
+    //     if(currentOpWithMachine!=NULL)
+    //     {
+    //         result = Stprintf(currentOpWithMachine, targetLength,MI_T("[%T] %T") ,g_JobInformation.deviceName,currentOperation);
+    //         if (result != -1)
+    //         {
+    //             MI_Context_WriteProgress((MI_Context*) lcmContext->context, activity, currentOpWithMachine, statusDescroption, percentComplete, secondsRemaining);
                                  
-            }
-            DSC_free(currentOpWithMachine);   
-        }
-        else
-        {
-            MI_Context_WriteProgress((MI_Context*) lcmContext->context, activity, currentOperation, statusDescroption, percentComplete, secondsRemaining);
-        }
-    }
+    //         }
+    //         DSC_free(currentOpWithMachine);   
+    //     }
+    //     else
+    //     {
+    //         MI_Context_WriteProgress((MI_Context*) lcmContext->context, activity, currentOperation, statusDescroption, percentComplete, secondsRemaining);
+    //     }
+    // }
 
     return ;
 }
@@ -6745,7 +6749,8 @@ MI_Result CallPerformInventory(
     ModuleManager *moduleManager = NULL;
 
     if (cimErrorDetails == NULL)
-    {        
+    {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         return MI_RESULT_INVALID_PARAMETER; 
     }
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
@@ -6755,6 +6760,7 @@ MI_Result CallPerformInventory(
     result = ValidateConfigurationDirectory(cimErrorDetails);
     if (result != MI_RESULT_OK)
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
@@ -6770,12 +6776,14 @@ MI_Result CallPerformInventory(
     if (File_ExistT(InMOF) != 0)
     {
     SetLCMStatusReady();
+    Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
     return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);
     }
 
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
     if (result != MI_RESULT_OK)
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         SetLCMStatusReady();
         return result;
     }
@@ -6783,6 +6791,7 @@ MI_Result CallPerformInventory(
     result =  moduleManager->ft->LoadInstanceDocumentFromLocation(moduleManager, 0, InMOF, cimErrorDetails, &inventoryInstances, &documentIns);
     if (result != MI_RESULT_OK)
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         moduleManager->ft->Close(moduleManager, NULL);
         SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
@@ -6796,6 +6805,7 @@ MI_Result CallPerformInventory(
         result = ValidateInventoryDocumentInstance(documentIns, cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
+            Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
             CleanUpInstanceCache(&inventoryInstances);
             moduleManager->ft->Close(moduleManager, NULL);
             SetLCMStatusReady();
@@ -6808,6 +6818,7 @@ MI_Result CallPerformInventory(
     // Check if at least 1 resource was specified in the instance document
     if (inventoryInstances.size == 0 )
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         MI_Instance_Delete(documentIns);
         moduleManager->ft->Close(moduleManager, NULL);
         SetLCMStatusReady();
@@ -6826,6 +6837,7 @@ MI_Result CallPerformInventory(
     CleanUpInstanceCache(&inventoryInstances);
     if (result != MI_RESULT_OK)
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
     SetLCMStatusReady();
     if (cimErrorDetails && *cimErrorDetails)
             return result;

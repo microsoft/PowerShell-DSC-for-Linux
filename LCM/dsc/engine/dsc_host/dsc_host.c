@@ -139,8 +139,12 @@ int main(int argc, char *argv[])
     }
     else
     {
-        result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
         Tprintf(MI_T("Operation %T is not supported\n"), argv[2]);
+        // result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
+        result = MI_RESULT_FAILED;
+        CreateMiInstanceErrorObject(&extended_error, MI_T("Operation %T is not supported\n"), argv[2]);
+        JSON_Value *value;
+        Convert_MIInstance_JSON(extended_error, &operation_error_root_value);
         goto CleanUp;
     }
 
@@ -227,8 +231,14 @@ int main(int argc, char *argv[])
                 break;
             }
         default:
-            result = GetCimMIError1Param( MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
-            Tprintf(MI_T("Current operation %d is not supported yet.\n"), current_operation);
+            {
+                // result = GetCimMIError1Param( MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
+                Tprintf(MI_T("Current operation %d is not supported yet.\n"), current_operation);
+                result = MI_RESULT_FAILED;
+                CreateMiInstanceErrorObject(&extended_error, MI_T("Operation %T is not supported\n"), argv[2]);
+                JSON_Value *value;
+                Convert_MIInstance_JSON(extended_error, &operation_error_root_value);
+            }
     }
 
     if(result == MI_RESULT_OK)
@@ -260,6 +270,11 @@ CleanUp:
     if (operation_error_root_value)
     {
         json_value_free(operation_error_root_value);
+    }
+
+    if (extended_error)
+    {
+        MI_Instance_Delete(extended_error);
     }
 
     if (result == MI_RESULT_OK)

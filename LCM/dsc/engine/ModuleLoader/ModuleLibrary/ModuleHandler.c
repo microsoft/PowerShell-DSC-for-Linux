@@ -695,12 +695,15 @@ MI_Result GetInstanceFromBuffer(_In_opt_ ModuleManager *moduleManager,
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
         return r;
     }
+
+    
     /*Update actual cache*/
     r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
     }
+
     return r;
 }
 
@@ -776,6 +779,8 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
             return r;
         }
     }
+
+    // Here we should discover resources and update our resource cache
     /*Update actual cache*/
     r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )

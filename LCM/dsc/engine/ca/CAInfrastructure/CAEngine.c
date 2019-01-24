@@ -2295,17 +2295,20 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
    
     if( outInstances == NULL  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed\n"), __FILE__, __LINE__, __FUNCTION__);
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_INVENTORY_NULLPARAM);
     }
 
     memset(outInstances, 0, sizeof(MI_InstanceA));
     if( instanceA == 0 || moduleManager == 0 || instanceA->size == 0  || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed\n"), __FILE__, __LINE__, __FUNCTION__);
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_DEPENDCY_NULLPARAM);
     }
     
     if (extendedError == NULL)
     {        
+        Tprintf(MI_T("***** %s:%d, method:%T, failed\n"), __FILE__, __LINE__, __FUNCTION__);
         return MI_RESULT_INVALID_PARAMETER; 
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.      
@@ -2315,6 +2318,7 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
     r = GetDocumentEncryptionSetting(documentIns, &bEncryptionEnabled, &certificateid, extendedError);
     if( r != MI_RESULT_OK )
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, r);
         return r;
     }
 
@@ -2331,6 +2335,7 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
     r = DSC_MI_Application_NewSession(moduleLoader->application, NULL, NULL, NULL, NULL, NULL, &miSession);
     if( r != MI_RESULT_OK)
     {
+        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, r);
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
@@ -2343,6 +2348,7 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
         r = moduleManager->ft->GetRegistrationInstance(moduleManager, instanceA->data[xCount]->classDecl->name, (const MI_Instance **)&regInstance, extendedError);
         if( r != MI_RESULT_OK)
         {
+            Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, r);
             MI_Session_Close(&miSession, NULL, NULL);
             return r;
         }        
@@ -2351,6 +2357,7 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
         r = moduleManager->ft->GetProviderCompatibleInstance(moduleManager, instanceA->data[xCount], &filteredInstance, extendedError);
         if( r != MI_RESULT_OK)
         {
+            Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, r);
             MI_Session_Close(&miSession, NULL, NULL);            
             return r;
         }
@@ -2363,6 +2370,7 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
         
         if( r != MI_RESULT_OK)
         {
+            Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, r);
             Intlstr intlstr = Intlstr_Null;
             GetResourceString(ID_LCMHELPER_GETINVENTORY_ERROR, &intlstr);
 

@@ -121,6 +121,68 @@ MI_Result AppendWMIError1ParamID(
 }
 
 _Always_(_Ret_range_(==, result))
+MI_Result  CreateMiInstanceErrorObject(
+        _Outptr_result_maybenull_ MI_Instance **p_cim_error_details,
+        _In_z_ const MI_Char *p_format,
+        ...
+    )
+{
+    MI_Result result = MI_RESULT_OK;
+    va_list arguments;
+    va_list argumentsGetLength;
+    size_t messageLength;
+    size_t finalMessageLength;
+
+    MI_Char *message = NULL;
+    p_cim_error_details = NULL;
+
+    va_start(arguments, p_format);
+
+    // Copy arguments variable list for calculating the length
+    va_copy(argumentsGetLength, arguments);
+    messageLength = vsnprintf( NULL, 0, p_format, arguments );
+    va_end(argumentsGetLength);
+    if (messageLength < 0)
+    {
+        result = MI_RESULT_FAILED;
+        MI_Utilities_CimErrorFromErrorCode( result, MI_RESULT_TYPE_MI, MI_T("Unable to calculate string length"), p_cim_error_details );
+        goto cleanup;
+    }
+
+    // Allocate a buffer with the right size +1 for the null termination character
+    message = (MI_Char*)DSC_malloc((messageLength + 1) * sizeof(MI_Char), NitsHere());
+
+    if (message == NULL)
+    {
+        result = MI_RESULT_SERVER_LIMITS_EXCEEDED;
+        MI_Utilities_CimErrorFromErrorCode( result, MI_RESULT_TYPE_MI, MI_T("Unable to allocate memory for message"), p_cim_error_details );
+        goto cleanup;
+    }
+
+    finalMessageLength = vsnprintf( message, messageLength + 1, p_format, arguments );
+
+    if (finalMessageLength < 0)
+    {
+        result = MI_RESULT_FAILED;
+        MI_Utilities_CimErrorFromErrorCode( result, MI_RESULT_TYPE_MI, MI_T("Unable to format message"), p_cim_error_details );
+        goto cleanup;
+    }
+
+    va_end(arguments);
+   
+    result = MI_Utilities_CimErrorFromErrorCode( result, MI_RESULT_TYPE_MI, message, p_cim_error_details );
+
+cleanup:
+
+    if (message != NULL)
+    {
+        DSC_free(message);
+    }
+    
+    return result;
+}
+
+_Always_(_Ret_range_(==, result))
 MI_Result GetCimMIError(MI_Result result ,
                         _Outptr_result_maybenull_ MI_Instance **cimErrorDetails,
                         _In_ MI_Uint32 errorStringId )
