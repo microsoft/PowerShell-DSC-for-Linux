@@ -24,6 +24,8 @@
 #include "MI.h"
 #include "CAEngine.h"
 #include "CAEngineInternal.h"
+#include "ProviderCallbacks.h"
+#include "NativeResourceManager.h"
 #include "CACrypto.h"
 #include "CAValidate.h"
 #include <curl/curl.h>
@@ -848,50 +850,6 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
     return finalr;
 }
 
-/*WriteMessage callbacks from providers*/
-
-void MI_CALL DoWriteMessage(
-    _In_     MI_Operation *operation,
-    _In_opt_ void *callbackContext, 
-             MI_Uint32 channel,
-    _In_z_   const MI_Char *message)
-{
-    ProviderCallbackContext *providerContext = (ProviderCallbackContext *) callbackContext;
-    LCM_WriteMessageFromProvider(providerContext->lcmProviderContext, providerContext->resourceId, channel, message);
-}
-
-void MI_CALL DoWriteProgress(
-    _In_     MI_Operation *operation,
-    _In_opt_ void *callbackContext, 
-    _In_z_   const MI_Char *activity,
-    _In_z_   const MI_Char *currentOperation,
-    _In_z_   const MI_Char *statusDescription,
-             MI_Uint32 percentageComplete,
-             MI_Uint32 secondsRemaining)
-{
-    ProviderCallbackContext *providerContext = (ProviderCallbackContext *) callbackContext;
-    LCM_WriteProgress(providerContext->lcmProviderContext, activity, currentOperation,
-                      statusDescription, percentageComplete, secondsRemaining);
-}
-
-void MI_CALL DoPromptUser(
-    _In_     MI_Operation *operation,
-    _In_opt_ void *callbackContext, 
-    _In_z_   const MI_Char *message,
-             MI_PromptType promptType,
-    _In_     MI_Result (MI_CALL * promptUserResult)(_In_ MI_Operation *operation, 
-                                                      MI_OperationCallback_ResponseType response))
-{
-    MI_Boolean bPromptUserResultStatus;
-    ProviderCallbackContext *providerContext = (ProviderCallbackContext *) callbackContext;
-    LCM_PromptUserFromProvider(providerContext->lcmProviderContext, providerContext->resourceId, message, promptType, &bPromptUserResultStatus);    
-    if(promptUserResult)
-    {
-        promptUserResult(operation, bPromptUserResultStatus);
-    }
-}
-
-
 
 /*Get the current configuration for the desired state objects*/
 MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,   
@@ -961,6 +919,16 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
+    // Instantiate native resource manager, responsible to load/unload native resource provider. 
+    r = NativeResourceManager_New(&providerContext, &(providerContext.nativeResourceManager));
+    if( r != MI_RESULT_OK)
+    {
+        CleanUpGetCache(outInstances);
+        DSC_free(outInstances->data);
+        outInstances->size = 0;
+        MI_Session_Close(&miSession, NULL, NULL);
+        return r;
+    }
 
     /*Assuming the dependencies is implicit (the order in which instances are specified in instance document). */
     /*Get the instance compatible with the provider.*/
@@ -1020,6 +988,9 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
     }
 
     MI_Session_Close(&miSession, NULL, NULL);    
+
+    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+
     return r;
 }
 
@@ -1119,11 +1090,15 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
 {
     *outputInstance = NULL;
 
-    if( Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
+    if( /*Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||*/
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
     {
         return Get_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstance, extendedError);
     }
+    else if (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+    {
+        return NativeResourceProvider_GetTargetResource(provContext, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
+    } 
     else
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
@@ -1172,6 +1147,14 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
         }
 
         return Exec_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, canceled, resourceErrorList, extendedError);
+    }
+    else if (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+    {
+        return Exec_NativeProvider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, extendedError);
+        // if (flags & LCM_EXECUTE_TESTONLY)
+        //     return NativeResourceManager_TestTargetResource(provContext, extendedError);
+        // else
+        //     return NativeResourceManager_SetTargetResource(provContext, extendedError);
     }
     else
     {
@@ -1493,6 +1476,51 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
 }
 
 
+MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,   
+                             _In_ MI_Application *miApp,
+                             _In_ MI_Session *miSession,
+                             _In_ MI_Instance *instance,
+                             _In_ const MI_Instance *regInstance,
+                             _In_ MI_Uint32 flags,
+                             _Inout_ MI_Uint32 *resultStatus,
+                             _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result result = MI_RESULT_OK;
+    *resultStatus = 0;
+
+    // Execute Test unless SETONLY was provided
+    if (!(flags & LCM_EXECUTE_SETONLY)) {
+        if (provContext->nativeResourceManager == NULL)
+            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
+
+        // Get the path to the resource provider module (dll)
+        MI_Value pathValue;
+        result = MI_Instance_GetElement(regInstance, MSFT_NativeConfigurationProviderRegistration_Path, &pathValue, NULL, NULL, NULL);
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+        MI_Char* resourceProviderPath = pathValue.string;
+
+        NativeResourceProvider* nativeResourceProvider = NULL;
+        result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+
+        result = NativeResourceProvider_TestTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, resultStatus, extendedError);
+    }
+
+    /* Skip rest of the operation if we were asked just to test.*/
+    if (flags & LCM_EXECUTE_TESTONLY)
+    {
+        return result;
+    }
+
+    // Set operation is not implemented. return error if Set was called.
+    return MI_RESULT_FAILED;
+}
 
 MI_Result GetSetMethodResult(_In_ MI_Operation *operation,
                               _Out_opt_ MI_Uint32 *returnValue,

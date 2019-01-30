@@ -521,6 +521,38 @@ void DSCFilePutLog(
 
 //********************* End DscTimer Events ********************//
 
+//**************** Native Provider Manager *******************************//
+
+#define DSC_EventGettingTheClassDeclFailed(className) \
+    ExpandEvent(GettingTheClassDeclFailed(className))
+
+#define DSC_EventGettingTheMethodDeclSucceeded(MethodName) \
+    ExpandEvent(GettingTheMethodDeclSucceeded(MethodName))
+
+#define DSC_EventGettingTheHostNameFailed(ErrorCode) \
+    ExpandEvent(GettingTheHostNameFailed(ErrorCode))
+
+#define DSC_EventUnSupportedHostMethodCalled(MethodName) \
+    ExpandEvent(UnSupportedHostMethodCalled(MethodName))
+
+#define DSC_EventInvokingNativeResourceMethod(MethodName, ClassName, ProviderPath) \
+    ExpandEvent(InvokingNativeResourceMethod(MethodName, ClassName, ProviderPath))
+
+#define DSC_EventCreateHostContextSucceeded() \
+    ExpandEvent(CreateHostContextSucceeded())
+
+#define DSC_EventMIModuleVersionMisMatch(CurrentVersion, ProviderVersion) \
+    ExpandEvent(MIModuleVersionMisMatch(CurrentVersion, ProviderVersion))
+
+#define DSC_EventCreateHostContextFailed() \
+    ExpandEvent(CreateHostContextFailed())
+
+#define DSC_EventWriteLoadingDLLSucceeded(DllFullPath) \
+    ExpandEvent(LoadingDLLSucceeded(DllFullPath))
+
+#define DSC_EventGettingTheSchemaSucceeded(ClassName) \
+    ExpandEvent(GettingTheSchemaSucceeded(ClassName))
+
 
 #ifdef __cplusplus
 

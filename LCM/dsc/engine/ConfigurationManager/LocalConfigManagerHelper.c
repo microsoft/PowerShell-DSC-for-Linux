@@ -865,7 +865,7 @@ MI_Result CallSetConfiguration(
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
     r =  SetConfiguration(ConfigData, dataSize, force, &lcmContext, dwFlags, cimErrorDetails);
 
-EH_UNWIND:
+EH_UNWIND;
     // No need to output set End when LCM is running in 'MonitorOnly' Mode.
     if (!ShouldMonitorOnly(configModeValue.string))
     {
@@ -2112,7 +2112,7 @@ MI_Result ApplyPendingConfig(
         EH_CheckResult(result);
     }
 
-EH_UNWIND:
+EH_UNWIND;
     if (metaConfigInstance != NULL)
     {
         MI_Instance_Delete(metaConfigInstance);
@@ -2164,7 +2164,7 @@ MI_Result ApplyMetaConfig(
     miResult = RegisterWithReportingServers(lcmContext, (MI_Instance*)g_metaConfig, cimErrorDetails);
     EH_CheckResult(miResult);
 
-EH_UNWIND:
+EH_UNWIND;
     return miResult;
 }
 
@@ -2339,7 +2339,7 @@ MI_Result DependPartialConfigExist(_In_ MI_Instance* partialConfig, _In_ HashMap
                 }
         }
 
-EH_UNWIND:
+EH_UNWIND;
                 return r;
 }
 
@@ -2623,7 +2623,7 @@ MI_Result ProcessPartialConfigurations(
                 }
         }
 
-EH_UNWIND:
+EH_UNWIND;
         CleanUpInstanceCache(&partialConfigDocumentIns);
         if (tempInstance != NULL)
         {
@@ -2704,7 +2704,7 @@ MI_Result ApplyConfig(
         EH_CheckResult(r);
     }
 
-EH_UNWIND:
+EH_UNWIND;
 
     if (documentIns)
     {
@@ -2928,7 +2928,7 @@ MI_Result CopyConfigurationFile(
         EH_Fail();
     }
 
-EH_UNWIND:
+EH_UNWIND;
     DSC_free(fileFullFrom);
     DSC_free(fileFullTo);
     DSC_free(filePathFrom);
@@ -2970,7 +2970,7 @@ MI_Result CopyConfigAndRemoveSource(
         result = GetCimMIError1Param(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_DEL_FAILED, sourceConfigFileName);
     }
 
-EH_UNWIND:
+EH_UNWIND;
     DSC_free(sourceConfigFullPath);
     DSC_free(sourceConfigExpandedPath);
 
@@ -3401,6 +3401,19 @@ void LCM_WriteProgress(
     // }
 
     return ;
+}
+
+void LCM_WriteStreamParameter(
+    _In_ LCMProviderContext* lcmContext,
+    _In_z_ const MI_Char* name,
+    _In_ const MI_Value* value,
+    _In_ MI_Type type,
+    _In_ MI_Uint32 flags)
+{
+    if (lcmContext->context)
+    {
+        MI_Context_WriteStreamParameter(lcmContext->context, name, value, type, flags);
+    }
 }
 
 void LCM_WriteError(
@@ -3939,7 +3952,7 @@ MI_Result RegisterWithServers(_In_ LCMProviderContext *lcmContext,
     }
 
 
-EH_UNWIND:   
+EH_UNWIND;   
     return result;
 }
 
@@ -4011,7 +4024,7 @@ MI_Result DoRegistration(
         }
     }
 
-EH_UNWIND:
+EH_UNWIND;
     if (registrationRequest != NULL)
     {
         DSC_free(registrationRequest);
@@ -4061,7 +4074,7 @@ MI_Result SetDownloadManagerInstancesInMetaConfig(
             EH_Fail_(GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_RegistrationKey_Name, OMI_REPORTMANAGER_CLASSNAME));
         }
     }
-EH_UNWIND:
+EH_UNWIND;
         return result;
 }
 
@@ -4130,7 +4143,7 @@ MI_Result DeleteRegistrationKeyFromManagerInstance(_In_ LCMProviderContext *lcmC
         EH_Fail_(GetCimMIError2Params(result, cimErrorDetails, ID_ENGINEHELPER_GET_PROPERTY_X_FROM_Y_FAILED, MSFT_RegistrationKey_Name, downloadManagerClassName));
     }
 
-EH_UNWIND:
+EH_UNWIND;
         return result;
 }
 
@@ -6212,7 +6225,7 @@ MI_Result MI_CALL LCM_Pull_Execute(
                 }
         }
 
-EH_UNWIND:
+EH_UNWIND;
         moduleManager->ft->Close(moduleManager, NULL);
 
 
@@ -6346,7 +6359,7 @@ MI_Result LCM_Pull_GetConfiguration(
         result = GetCimMIError(MI_RESULT_NOT_FOUND, cimErrorDetails, ID_LCM_PULL_GETCONF_UNEXPECTEDRESULTSTATUS);
         EH_Check(result == MI_RESULT_OK);
     }
-EH_UNWIND:
+EH_UNWIND;
     DSCFREE_IF_NOT_NULL(resultStatus);
     if (mofFileName != NULL)
     {

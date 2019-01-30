@@ -85,7 +85,7 @@
     EH_Check(MI_RESULT_OK == (miResultExpression))
 
 /* unwind block */
-#define EH_UNWIND _eh_unwind
+#define EH_UNWIND _eh_unwind:
 
 
 #define SEARCH_PATTERN_DIRECTORY            MI_T("*")
@@ -99,6 +99,7 @@
 #define BASE_REGISTRATION                   MI_T("MSFT_BaseConfigurationProviderRegistration")
 #define BASE_REGISTRATION_WMIV2PROVIDER     MI_T("MSFT_CimConfigurationProviderRegistration")
 #define BASE_REGISTRATION_PSPROVIDER        MI_T("MSFT_PSConfigurationProviderRegistration")
+#define BASE_REGISTRATION_NATIVEPROVIDER    MI_T("MSFT_NativeConfigurationProviderRegistration")
 #define METACONFIG_CLASSNAME                MI_T("MSFT_DSCMetaConfiguration")
 #define MSFT_BASECREDENTIAL_CLASSNAME       MI_T("MSFT_Credential")
 #define MSFT_KEYVALUEPAIR_CLASSNAME         MI_T("MSFT_KeyValuePair")
@@ -190,6 +191,9 @@
 /* MSFT_PSConfigurationProviderRegistration*/
 #define MSFT_PSConfigurationProviderRegistration_ModuleName                 MI_T("ModuleName")
 #define MSFT_PSConfigurationProviderRegistration_BaseProperty_Count    3
+
+/* MSFT_NativeConfigurationProviderRegistration*/
+#define MSFT_NativeConfigurationProviderRegistration_Path                  MI_T("Path")
 
 /* MSFT_DSCMetaConfiguration*/
 #define MSFT_DSCMetaConfiguration_LCMState                                                                      MI_T("LCMState")
@@ -669,9 +673,12 @@ typedef struct _LCMProviderContext
 } LCMProviderContext;
 */
 
+typedef struct _NativeResourceManager NativeResourceManager;
+
 typedef struct _ProviderCallbackContext
 {
     LCMProviderContext *lcmProviderContext;
+    NativeResourceManager* nativeResourceManager;
     const MI_Char *resourceId;
 } ProviderCallbackContext;
 
@@ -894,5 +901,8 @@ extern MSFT_DSCMetaConfiguration *g_metaConfig;
 
     extern ConfigurationDetails g_ConfigurationDetails;
 #endif
+
+
+MI_Boolean IsDSCResource(_In_ MI_Instance *instance);
 
 #endif

@@ -91,7 +91,7 @@ MI_Boolean ShouldDoRegistration(
         }
     }
     
-    EH_UNWIND:
+    EH_UNWIND;
 
     return MI_TRUE;
 }
@@ -181,7 +181,7 @@ MI_Result Register(
                              registrationPayload, &request->configurationNames, request->typeOfManagerInstance, &resultStatus, &getActionStatusCode, cimErrorDetails);
     EH_CheckResult(result);
 
-    EH_UNWIND:
+    EH_UNWIND;
 
     if (registrationPayload != NULL)
     {
@@ -305,7 +305,7 @@ MI_Result CacheServerURL(
     result = WriteServerURLToCache(self, value.string, thumbprint, cimErrorDetails);
     EH_CheckResult(result);    
 
-    EH_UNWIND:
+    EH_UNWIND;
 
     return result;
 }
@@ -359,7 +359,7 @@ MI_Result WriteServerURLToCache(
 
     self->numberOfServerURLs++;
 
-    EH_UNWIND:
+    EH_UNWIND;
 
         return result;
 }
@@ -418,7 +418,7 @@ MI_Result PopulateServerURLs(
         }        
     }
 
-    EH_UNWIND:
+    EH_UNWIND;
 
     if (registeredServerURLs != NULL)
     {
@@ -465,7 +465,7 @@ MI_Result GetRegisteredServerURLsFromCache(
         }
     }
 
-    EH_UNWIND:
+    EH_UNWIND;
         return MI_RESULT_OK;
 }
 
@@ -489,7 +489,7 @@ MI_Result UpdateServerURLsToDSCCache(
     result = UpdateCurrentStatus(NULL, NULL, NULL, serverURLs, cimErrorDetails);
     EH_CheckResult(result);
 
-    EH_UNWIND:
+    EH_UNWIND;
     if (serverURLs)
     {
         DSC_free(serverURLs);
@@ -553,7 +553,7 @@ MI_Result FormatServerURLsForDscCache(
         }
     }
 
-    EH_UNWIND:
+    EH_UNWIND;
         return result;
 }
 
@@ -573,7 +573,7 @@ MI_Result InitializeServerURLs(
     }
     self->numberOfServerURLs = 0;
 
-    EH_UNWIND:
+    EH_UNWIND;
         return MI_RESULT_OK;
 }
 
@@ -630,7 +630,7 @@ MI_Result GetThumbprintForRegisteredServerURL(
         }
     }
 
-EH_UNWIND:
+EH_UNWIND;
 
     return result;
 }

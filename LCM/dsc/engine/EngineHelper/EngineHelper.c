@@ -1150,7 +1150,7 @@ MI_Result StripBracesFromGuid(
     }
     (*resultGuid)[resultGuidLength - 1] = MI_T('\0');
 
-EH_UNWIND:
+EH_UNWIND;
         return MI_RESULT_OK;
 }
 
@@ -1218,7 +1218,7 @@ MI_Result GetAgentInformation(
     result = MI_Instance_AddElement(*registrationPayload, REPORTING_LCMVERSION, &value, MI_STRING, 0);
     EH_CheckResult(result);
 
-    EH_UNWIND
+    EH_UNWIND;
     if (applicationInitialized == MI_TRUE)
     {
         MI_Application_Close(&miApp);
@@ -1246,7 +1246,7 @@ MI_Result GetAgentInformation(
 
     DSC_free(ipAddress);
 */
-EH_UNWIND:
+EH_UNWIND;
     MI_Application_Close(&miApp);
     /* applicationInitialized = MI_FALSE; */
     return result;

@@ -705,12 +705,15 @@ MI_Result GetInstanceFromBuffer(_In_opt_ ModuleManager *moduleManager,
     MI_Result r = MI_RESULT_OK;
     MI_InstanceA *miTempInstanceArray = NULL;
     MI_Uint32 readBytes;
+    // MI_Uint32 xCount = 0, classCount = 0, yCount = 0;
+    // ClassNameCacheA classNameCache = { 0 };
 
     if (extendedError == NULL)
     {
         return MI_RESULT_INVALID_PARAMETER;
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+
 
     r = MI_Deserializer_DeserializeInstanceArray(deserializer, 0, options, 0, instanceBuffer, instanceBufferSize, classArray, &readBytes, &miTempInstanceArray, extendedError);
     if( r != MI_RESULT_OK || NitsShouldFault(NitsHere(), NitsAutomatic))
@@ -1769,5 +1772,51 @@ MI_Result GetArrayInstancesFromSingleMof(_In_ ModuleManager *moduleManager,
             moduleLoader->options, moduleLoader->options, &miClassArray,
             documentLocation, miInstanceArray, extendedError);
     }
+    return r;
+}
+
+MI_Result UpdateNativeResourceCache(_In_ ModuleManager *moduleManager,
+                                    _Inout_ ClassNameCacheA *classNameA,
+                                    _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result r = MI_RESULT_OK;
+    MI_ClassA inputclassArray = {0};
+    MI_StringA ASMProviderDllPath = {0};
+    SchemaMofCache schemaMofPaths;
+    memset(&schemaMofPaths, 0, sizeof(SchemaMofCache));    
+    MI_Uint32 userClassCount = 0;
+    ModuleLoaderObject *moduleLoader = NULL;
+    moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
+    // Copy system classes to resolve rest of the classes
+    inputclassArray.data = (MI_Class**) DSC_malloc( sizeof(MI_Class*) * moduleLoader->schemaCount, NitsHere());
+    if(inputclassArray.data == NULL)
+    {
+        r = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
+        EH_Fail();
+    }
+    inputclassArray.size = moduleLoader->schemaCount;
+    
+    // Copy all classes already in cache here. We are using readonly copy from the cache.
+    memcpy(inputclassArray.data, moduleLoader->providerSchema, sizeof(MI_Class*) * moduleLoader->schemaCount);
+    
+    //Update class Cache from Native OMI providers
+    r = UpdateClassCacheWithSchemas(moduleLoader->application, moduleLoader->deserializer, moduleLoader->options, &inputclassArray, extendedError,
+                            GetSchemaSearchPathProgFiles(), classNameA, &schemaMofPaths);
+    EH_CheckResult(r);  
+
+    // Update class cache by directly loading the OMI provider (bypassing WMI/OMI)
+    r = UpdateClassWithSchemaFromDll(classNameA, &inputclassArray, &ASMProviderDllPath, extendedError);
+    EH_CheckResult(r);
+    
+    //Filter out system classes to contain only User classes.
+    userClassCount = inputclassArray.size - moduleLoader->schemaCount;
+    if (userClassCount > 0)
+    {
+        r = UpdateNativeRegInstance(moduleManager, &inputclassArray, userClassCount, &ASMProviderDllPath, moduleLoader, classNameA, extendedError);
+    }
+    EH_UNWIND
+        DSCFREE_IF_NOT_NULL(inputclassArray.data);
+        DSCFREE_IF_NOT_NULL(ASMProviderDllPath.data);
+
     return r;
 }

@@ -196,5 +196,9 @@ MI_Result CreateWMIv1CompatibleMof(_In_ ModuleLoaderObject* moduleLoader,
                                 _In_z_ MI_Char *mofFilePath, 
                                 _Outptr_result_maybenull_ MI_Instance **extendedError);
 
+MI_Result UpdateNativeResourceCache(_In_ LCMProviderContext* lcmContext, 
+                                    _In_ ModuleManager *moduleManager,
+                                    _Inout_ ClassNameCacheA *classNameA,
+                                    _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 #endif //__MODULEHANDLERINTERNAL_H_
