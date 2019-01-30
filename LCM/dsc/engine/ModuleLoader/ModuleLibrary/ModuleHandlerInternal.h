@@ -100,6 +100,15 @@ MI_Result GetRegistrationInstanceFromMOFs(_In_opt_ ModuleManager *moduleManager,
                                           _Inout_ MI_InstanceA *miInstanceArray, 
                                           _Outptr_result_maybenull_ MI_Instance **extendedError);
 
+MI_Result GetRegistrationInstanceFromSharedObjects(_In_opt_ ModuleManager *moduleManager,
+                                          _In_ MI_Application *miApp,    
+                                          _In_ MI_Deserializer *deserializer,
+                                          _In_ MI_OperationOptions * options,
+                                          _In_ MI_OperationOptions * strictOptions,
+                                          _In_ MI_ClassA *classArray,
+                                          _Inout_ MI_InstanceA *miInstanceArray, 
+                                          _Outptr_result_maybenull_ MI_Instance **extendedError);
+
 
 MI_Result GetEachRegistrationInfo(_In_opt_ ModuleManager *moduleManager,
                                           _In_ MI_Application *miApp,       

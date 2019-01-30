@@ -20,7 +20,7 @@
 
 
 
-#define _CA_IMPORT_ 1
+#define _CA_IMPORT_ 1 
 #include "CALog.h"
 
 CAJobInformation g_CAJobInformation={EMPTY_STRING};

@@ -1210,6 +1210,7 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
                 return MI_RESULT_INVALID_PARAMETER;
         }
         *cimErrorDetails = NULL;
+        Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
         result = LoadModuleManager(moduleManager, cimErrorDetails);
         RETURN_RESULT_IF_FAILED(result);
         result = ExpandPath(CONFIGURATION_PARTIALCONFIG_STORE, &partialConfigDir, cimErrorDetails);
@@ -4978,6 +4979,7 @@ MI_Result InitCacheAndMetaConfig(
         return r;
     }    
 
+    Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, cimErrorDetails);
     if (r != MI_RESULT_OK)
     {
@@ -5291,6 +5293,7 @@ MI_Result SerializeMetaConfig(
     }
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
 
+    Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, cimErrorDetails);
     if (r != MI_RESULT_OK)
     {

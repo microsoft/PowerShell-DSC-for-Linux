@@ -73,6 +73,7 @@ MI_Result MI_CALL LoadModuleManager(_Inout_ ModuleManager *moduleManager,
 
     if( moduleManager->reserved1 == MODULEHANDLER_LOADED)
     {
+        Tprintf(MI_T("%T:%d in %T ~ LoadModuleManager - Module handler already loaded\n"), __FILE__, __LINE__, __FUNCTION__);
         return MI_RESULT_OK;
     }
     else
@@ -93,6 +94,7 @@ MI_Result MI_CALL LoadModuleManager(_Inout_ ModuleManager *moduleManager,
             DSC_free(miApp);
             return GetCimMIError(r, extendedError,ID_MODMAN_APPINIT_FAILED);
         }
+        Tprintf(MI_T("%T:%d in %T ~ GetModuleLoader\n"), __FILE__, __LINE__, __FUNCTION__);
         r = GetModuleLoader(miApp, &moduleLoader, extendedError);
         if( r != MI_RESULT_OK)
         {
@@ -181,6 +183,7 @@ MI_Result ModuleManager_LoadInstanceDocument (
     *documentInstance = NULL;
 
     /*Load the manager*/
+    Tprintf(MI_T("%T:%d in %T ~ LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -224,6 +227,7 @@ MI_Result ModuleManager_LoadInstanceDocumentFromLocation (
     memset(resources, 0, sizeof(MI_InstanceA));
 
     /*Load the manager*/
+    Tprintf(MI_T("%T:%d in %T ~ LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -265,6 +269,7 @@ MI_Result  ModuleManager_GetRegistrationInstance (
     }
 
     /*Load the manager*/
+    Tprintf(MI_T("%T:%d in %T ~ LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -325,6 +330,7 @@ _Return_type_success_(return == MI_RESULT_OK)
     *outInstance = NULL;
 
     /*Load the manager*/
+    Tprintf(MI_T("%T:%d in %T ~ LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -378,6 +384,7 @@ MI_Result ModuleManager_Update (
         miApp = inModuleLoader->application;
     }
     /*First get new registration information. If we fail, user can still use old data.*/
+    Tprintf(MI_T("%T:%d in %T ~ GetModuleLoader\n"), __FILE__, __LINE__, __FUNCTION__);
     r = GetModuleLoader(miApp, &outModuleLoader, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -449,21 +456,31 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
         return r;
     }
 
-    /*Get the Registration information from MOFs*/
-    r = GetRegistrationInstanceFromMOFs(NULL, miApp, de, options, strictOptions, &miClassArray, &miInstanceArray, extendedError);
-    if( r != MI_RESULT_OK)
-    {
-        MI_Deserializer_Close(de);
-        MI_OperationOptions_Delete(options);
-        DSC_free(de);
-        DSC_free(options);
-        CleanUpClassCache(&miClassArray);
-        CleanUpInstanceCache(&miInstanceArray);
-        return r;
-    }
+    Tprintf(MI_T("%T:%d in %T ~ Calling GetRegistrationInstanceFromMOFs \n"), __FILE__, __LINE__, __FUNCTION__);
+    Tprintf(MI_T("---------------------------------------------------\n"));
+    Tprintf(MI_T("%T:%d in %T ~ BEFORE - Printing miInstanceArray\n"), __FILE__, __LINE__, __FUNCTION__);
+    Print_MI_InstanceA(&miInstanceArray);
+    Tprintf(MI_T("---------------------------------------------------\n"));
+    // // No need to do this after removing OMI since we will discover resources directly from shared objects (except for DIY DSC)
+    // // Get the Registration information from MOFs
+    // r = GetRegistrationInstanceFromMOFs(NULL, miApp, de, options, strictOptions, &miClassArray, &miInstanceArray, extendedError);
+    // if( r != MI_RESULT_OK)
+    // {
+    //     MI_Deserializer_Close(de);
+    //     MI_OperationOptions_Delete(options);
+    //     DSC_free(de);
+    //     DSC_free(options);
+    //     CleanUpClassCache(&miClassArray);
+    //     CleanUpInstanceCache(&miInstanceArray);
+    //     return r;
+    // }
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ AFTER GetRegistrationInstanceFromMOFs - Printing miInstanceArray\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_InstanceA(&miInstanceArray);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
-    /*Perform registration against schema validation*/
-    r = ValidateProviderRegistrationAgainstSchema(&miClassArray, &miInstanceArray, extendedError);
+    // Get the Registration information from shared objects
+    r = GetRegistrationInstanceFromSharedObjects(NULL, miApp, de, options, strictOptions, &miClassArray, &miInstanceArray, extendedError);
     if( r != MI_RESULT_OK)
     {
         MI_Deserializer_Close(de);
@@ -474,6 +491,24 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
         CleanUpInstanceCache(&miInstanceArray);
         return r;
     }
+    Tprintf(MI_T("---------------------------------------------------\n"));
+    Tprintf(MI_T("%T:%d in %T ~ AFTER GetRegistrationInstanceFromSharedObjects - Printing miInstanceArray\n"), __FILE__, __LINE__, __FUNCTION__);
+    Print_MI_InstanceA(&miInstanceArray);
+    Tprintf(MI_T("---------------------------------------------------\n"));
+
+    // No need to do this after removing OMI since we will discover resources directly from shared objects (except for DIY DSC)
+    // /*Perform registration against schema validation*/
+    // r = ValidateProviderRegistrationAgainstSchema(&miClassArray, &miInstanceArray, extendedError);
+    // if( r != MI_RESULT_OK)
+    // {
+    //     MI_Deserializer_Close(de);
+    //     MI_OperationOptions_Delete(options);
+    //     DSC_free(de);
+    //     DSC_free(options);
+    //     CleanUpClassCache(&miClassArray);
+    //     CleanUpInstanceCache(&miInstanceArray);
+    //     return r;
+    // }
 
     /*Form mapping tables*/
 
@@ -576,18 +611,6 @@ MI_Result GetMappingTable(_In_ MI_Application *miApp,
             }
             if( Tcscasecmp( miClassArray->data[xCount]->classDecl->name , className.string) == 0 )
             {
-                // disable validation for non-windows for now. Add it back once OMI team supports getting full RTTI in binary protocol.
-#if defined(_MSC_VER)
-                // Validate the mapping and provider registration
-                r = ValidateDSCProviderMapping(miInstanceArray->data[yCount], miClassArray->data[xCount], &miSession, extendedError);
-                if( r != MI_RESULT_OK)
-                {
-                    DSC_free(*moduleLoader);
-                    *moduleLoader = NULL;
-                    MI_Session_Close(&miSession, NULL, NULL);
-                    return r;
-                }
-#endif
                 ((*moduleLoader)->schemaToRegistrationMapping)[xCount] = yCount;
                 break;
             }
@@ -696,13 +719,25 @@ MI_Result GetInstanceFromBuffer(_In_opt_ ModuleManager *moduleManager,
         return r;
     }
 
-    
+    // This code is updating the discovered resources through OMI
     /*Update actual cache*/
+    // r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
+    // if( r != MI_RESULT_OK )
+    // {
+    //     CleanUpDeserializerInstanceCache(miTempInstanceArray);
+    // }
+
+    // Update cache with discovered native resources (not through OMI)
     r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
     }
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing miInstanceArray\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_InstanceA(miInstanceArray);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     return r;
 }
@@ -780,13 +815,26 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
         }
     }
 
-    // Here we should discover resources and update our resource cache
-    /*Update actual cache*/
+    // // Here we should discover resources and update our resource cache
+    // /*Update actual cache*/
+    // r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
+    // if( r != MI_RESULT_OK )
+    // {
+    //     CleanUpDeserializerInstanceCache(miTempInstanceArray);
+    // }
+
+    // Update cache with discovered native resources (not through OMI)
     r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
     }
+    
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing miInstanceArray\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_InstanceA(miInstanceArray);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
     return r;
 }
 
@@ -813,7 +861,6 @@ MI_Result MI_CALL SchemaCallback(_In_opt_ void *context,
     }
     return MI_RESULT_NOT_FOUND;
 }
-
 
 /*Cleanup is done by this method. Caller should not cleanup in success or failure case*/
 MI_Result FilterForConfigurationResource(_Inout_ MI_InstanceA *inputInstanceArray,
@@ -919,7 +966,6 @@ MI_Result FilterForConfigurationResource(_Inout_ MI_InstanceA *inputInstanceArra
     DSC_free(embeddedResourceMap);
     return r;
 }
-
 
 MI_Result GetMofDeserializer(_In_ MI_Application *miApp,
                              _Outptr_result_maybenull_ MI_Deserializer **deserializer,
@@ -1082,16 +1128,13 @@ MI_Result GetSystemSchema(_In_ MI_Application *miApp,
         return r;
     }
 
-
     /*Validate Schema*/
-
     r = ValidateInfrastructureSchema(miTempClassArray, extendedError);
     if( r != MI_RESULT_OK)
     {
         CleanUpDeserializerClassCache(miTempClassArray);
         return r;
     }
-
 
     /*Update actual cache*/
     r = UpdateClassArray(miTempClassArray, miClassArray, extendedError, MI_TRUE);
@@ -1227,6 +1270,99 @@ MI_Result GetRegistrationInstanceFromMOFs(_In_opt_ ModuleManager *moduleManager,
     }
     DSC_free(pathsForRegistration);
     return r;
+}
+
+/*Caller will free up miInstanceArray*/
+MI_Result GetRegistrationInstanceFromSharedObjects(_In_opt_ ModuleManager *moduleManager,
+                                          _In_ MI_Application *miApp,
+                                          _In_ MI_Deserializer *deserializer,
+                                          _In_ MI_OperationOptions * options,
+                                          _In_ MI_OperationOptions * strictOptions,
+                                          _In_ MI_ClassA *classArray,
+                                          _Inout_ MI_InstanceA *miInstanceArray,
+                                          _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    MI_Result result = MI_RESULT_OK;
+    Internal_Dir *dirHandle = NULL;
+    Internal_DirEnt *dirEntry = NULL;
+    MI_Char *envResolvedPath = NULL;
+    // MI_Char **pathsForRegistration;
+    // MI_Uint32 count=0;
+    // MI_Char *resources_so_path;
+
+    if (extendedError == NULL)
+    {
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
+
+    // resources_so_path = SO_LIB_PATH;
+
+    /* Resolve schema search path*/
+    result = ResolvePath(&envResolvedPath, NULL, SO_LIB_PATH, NULL, extendedError);
+    if( result != MI_RESULT_OK )
+    {
+        goto clean_up;
+    }
+    Tprintf(MI_T("%T:%d in %T ~ resolved path = %T\n"), __FILE__, __LINE__, __FUNCTION__, envResolvedPath);
+
+    dirHandle = Internal_Dir_Open(envResolvedPath, NitsHere() );
+    if(dirHandle == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
+    {
+        result = GetCimMIError(MI_RESULT_FAILED, extendedError, ID_MODMAN_FINDFIRST_FAILED);
+        goto clean_up;
+    }
+
+    dirEntry =  Internal_Dir_Read(dirHandle, SEARCH_PATTERN_SHARED_OBJECT);
+    while( dirEntry != NULL )
+    {
+        Tprintf(MI_T("%T:%d in %T ~ entry name = %T\n"), __FILE__, __LINE__, __FUNCTION__, dirEntry->name);
+    //     /* Only process directories as modules are expected to have a directory per module.*/
+    //     if( dirEntry->isDir &&
+    //         (Tcscasecmp(MI_T(".."), dirEntry->name)!=0) &&
+    //         (Tcscasecmp(MI_T("."), dirEntry->name)!=0))
+    //     {
+    //         r = UpdateRegistrationInstanceCache(moduleManager, miApp, deserializer, options, strictOptions, classArray, envResolvedPath, dirEntry->name, miInstanceArray, extendedError);
+    //         if( r != MI_RESULT_OK)
+    //         {
+    //             DSC_free(envResolvedPath);
+    //             Internal_Dir_Close( dirHandle);
+    //             return r;
+    //         }
+    //     }
+        dirEntry =  Internal_Dir_Read(dirHandle, SEARCH_PATTERN_SHARED_OBJECT);
+    }
+
+clean_up:
+
+    if (dirHandle)
+    {
+        Internal_Dir_Close(dirHandle);
+    }
+    if (envResolvedPath)
+    {
+        DSC_free(envResolvedPath);
+    }
+
+    // pathsForRegistration = (MI_Char**)DSC_malloc(NUM_PATHS_TO_LOOK_FOR_PROVIDERS * sizeof(MI_Char*), NitsHere());
+    // if( pathsForRegistration == NULL)
+    // {
+    //     return MI_RESULT_FAILED;
+    // }
+    // pathsForRegistration[0] = (MI_Char*)GetRegistrationInstanceSearchPath();
+    // pathsForRegistration[1] = (MI_Char*)GetRegistrationInstanceSearchPathProgFiles();
+    // for (count = 0; count < NUM_PATHS_TO_LOOK_FOR_PROVIDERS; count++)
+    // {
+    //     r= GetEachRegistrationInfo(moduleManager,miApp,deserializer,options,strictOptions,classArray,miInstanceArray, extendedError,pathsForRegistration[count]);
+    //     if(r != MI_RESULT_OK)
+    //     {
+    //         DSC_free(pathsForRegistration);
+    //         return r;
+    //     }
+    // }
+    // DSC_free(pathsForRegistration);
+
+    return result;
 }
 
 MI_Result GetEachRegistrationInfo(_In_opt_ ModuleManager *moduleManager,
@@ -1406,9 +1542,7 @@ MI_Result UpdateClassCacheWithSchemas(_In_ MI_Application *miApp,
     return MI_RESULT_OK;
 }
 
-
 /* Caller will clean up miClassArray*/
-
 MI_Result UpdateClassCache(_In_ MI_Application *miApp,
                            _In_ MI_Deserializer *deserializer,
                            _In_ MI_OperationOptions * options,
@@ -1478,7 +1612,6 @@ MI_Result UpdateClassCache(_In_ MI_Application *miApp,
 
     return MI_RESULT_OK;
 }
-
 
 MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
                                           _In_ MI_Application *miApp,
@@ -1558,6 +1691,7 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
                 Internal_Dir_Close( dirHandle);
                 return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_LCMHELPER_PRINTF_ERROR);
             }
+            Tprintf(MI_T("%T:%d in %T ~ fullFilePath = %T\n"), __FILE__, __LINE__, __FUNCTION__, fullFilePath);
             r = GetInstanceFromSingleMOF(moduleManager, VALIDATE_REGISTRATION_INSTANCE, miApp, deserializer, options, strictOptions, classArray, fullFilePath, &miTempInstanceArray, extendedError);
             DSC_free(fullFilePath);
             if( r != MI_RESULT_OK)
@@ -1588,8 +1722,6 @@ MI_Result UpdateRegistrationInstanceCache(_In_opt_ ModuleManager *moduleManager,
     return MI_RESULT_OK;
 }
 
-
-
 const ModuleManagerFT g_ModuleManagerFT = {
     ModuleManager_Close,
     ModuleManager_LoadInstanceDocument,
@@ -1598,8 +1730,6 @@ const ModuleManagerFT g_ModuleManagerFT = {
     ModuleManager_GetProviderCompatibleInstance,
     ModuleManager_Update
 };
-
-
 
 /*Function to get all the instances in a single array from a file*/
 MI_Result GetArrayInstancesFromSingleMof(_In_ ModuleManager *moduleManager,
@@ -1615,12 +1745,12 @@ MI_Result GetArrayInstancesFromSingleMof(_In_ ModuleManager *moduleManager,
     DSC_EventWriteMessageLoadingInstance(documentLocation);
 
     /*Load the manager*/
+    Tprintf(MI_T("%T:%d in %T ~ LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, extendedError);
     if (r != MI_RESULT_OK)
     {
         return r;
     }
-
 
     moduleLoader = (ModuleLoaderObject*)moduleManager->reserved2;
     miClassArray.size = moduleLoader->schemaCount;

@@ -288,17 +288,3 @@ CleanUp:
 
     return result;
 }
-
-MI_Result  Print_JSON_Value (
-        JSON_Value** p_root_value
-    )
-{
-    MI_Result result = MI_RESULT_OK;
-
-    char *serialized_string = NULL;
-    serialized_string = json_serialize_to_string_pretty(*p_root_value);
-    puts(serialized_string);
-    json_free_serialized_string(serialized_string);
-
-    return result;
-}

@@ -73,9 +73,4 @@ MI_Result  DscLib_StopConfiguration (
         _In_ JSON_Value** p_error_root_value
     );
 
-MI_Result  Convert_MIInstance_JSON (
-        const MI_Instance* p_instance,
-        JSON_Value** p_result_root_value
-    );
-
 #endif // _DSC_LIBRARY_H
