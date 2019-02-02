@@ -88,6 +88,11 @@ MI_Result  Convert_MIInstance_JSON (
         JSON_Value** p_result_root_value
     );
 
+MI_Result  Convert_MiClass_JSON (
+        const MI_Class* p_instance,
+        JSON_Value** p_result_root_value
+    );
+
 MI_Result  Print_JSON_Value (
         JSON_Value** p_root_value
     );
@@ -98,6 +103,10 @@ MI_Result  Print_MI_Instance (
 
 MI_Result  Print_MI_InstanceA (
         const MI_InstanceA* p_instanceA
+    );
+
+MI_Result  Print_MI_Class (
+        const MI_Class* p_class
     );
 
 extern BaseResourceConfiguration g_BaseResourceConfiguration[];

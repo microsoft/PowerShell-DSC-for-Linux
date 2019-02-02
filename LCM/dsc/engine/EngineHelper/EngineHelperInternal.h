@@ -112,8 +112,7 @@
 #define QUALIFIER_REQUIRED                  MI_T("Required")
 #define METACONF_RESOURCE_CLASSNAME         MI_T("OMI_MetaConfigurationResource")
 
-#define SO_LIB_PATH MI_T("/opt/omi/lib/")
-#define SEARCH_PATTERN_SHARED_OBJECT        MI_T("_root-oms.so")
+#define DSC_LIB_PATH MI_T("/opt/dsc/lib")
 
 #define MSFT_ServerURL_Name MI_T("ServerURL")
 

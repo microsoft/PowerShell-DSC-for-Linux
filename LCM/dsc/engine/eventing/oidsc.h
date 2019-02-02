@@ -979,12 +979,12 @@ FILE_EVENT0(4622, CreateHostContextFailed_Impl, LOG_ERR, PAL_T("Creating host co
 #else
 #define LoadingDLLSucceeded(a0) LoadingDLLSucceeded_Impl(0, 0, a0)
 #endif
-FILE_EVENT1(4623, LoadingDLLSucceeded_Impl, LOG_ERR, PAL_T("Loading the native provider .so from &apos;%s&apos; succeeded."), MI_Uint32)
+FILE_EVENT1(4623, LoadingDLLSucceeded_Impl, LOG_INFO, PAL_T("Loading the native provider .so from &apos;%s&apos; succeeded."), const TChar*)
 
 #if defined(CONFIG_ENABLE_DEBUG)
 #define GettingTheSchemaSucceeded(a0) GettingTheSchemaSucceeded_Impl(__FILE__, __LINE__, a0)
 #else
 #define GettingTheSchemaSucceeded(a0) GettingTheSchemaSucceeded_Impl(0, 0, a0)
 #endif
-FILE_EVENT1(4624, GettingTheSchemaSucceeded_Impl, LOG_ERR, PAL_T("Getting the schema class for &apos;%s&apos; succeeded."), MI_Uint32)
+FILE_EVENT1(4624, GettingTheSchemaSucceeded_Impl, LOG_INFO, PAL_T("Getting the schema class for &apos;%s&apos; succeeded."), const TChar*)
 

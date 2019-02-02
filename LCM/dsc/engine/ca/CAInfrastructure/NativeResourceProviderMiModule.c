@@ -140,25 +140,13 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *nativeResourc
     EH_Check_(nativeResourceProviderMiModule != NULL, returnValue = MI_RESULT_SERVER_LIMITS_EXCEEDED);
     memset(nativeResourceProviderMiModule, 0, sizeof(NativeResourceProviderMiModule));
 
-#if defined(_MSC_VER)
-    // LoadLibrary flags ensure that the nativeResourceProviderPath is searched in addition to the standard directories for dependent dlls.
-    nativeResourceProviderMiModule->_private.moduleHandle = LoadLibraryEx(nativeResourceProviderPath, NULL, (LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS));
-    errorCode = GetLastError();
-    EH_Check_(nativeResourceProviderMiModule->_private.moduleHandle != NULL, returnValue = errorCode);
-
-    MI_ModuleMainFunction resourceProviderMainFunction = (MI_ModuleMainFunction) GetProcAddress(nativeResourceProviderMiModule->_private.moduleHandle, "MI_Main");
-    errorCode = GetLastError();
-    EH_Check_(resourceProviderMainFunction != NULL, returnValue = errorCode);
-
-#else
+    // Tprintf(MI_T("%T:%d in %T ~ nativeResourceProviderPath = %T\n"), __FILE__, __LINE__, __FUNCTION__, nativeResourceProviderPath);
     //TODO: Add searching nativeResourceProviderPath for dependent dlls for Linux
     nativeResourceProviderMiModule->_private.moduleHandle = dlopen(nativeResourceProviderPath, RTLD_LAZY | RTLD_DEEPBIND);
     EH_Check_(nativeResourceProviderMiModule->_private.moduleHandle != NULL, returnValue = MI_RESULT_NOT_FOUND); // TODO - Get actual error using GetLastError
 
     MI_ModuleMainFunction resourceProviderMainFunction = (MI_ModuleMainFunction) dlsym(nativeResourceProviderMiModule->_private.moduleHandle, "MI_Main");
     EH_Check_(resourceProviderMainFunction != NULL, returnValue = MI_RESULT_METHOD_NOT_FOUND); // TODO - Get actual error using GetLastError
-
-#endif
 
     returnValue = NativeResourceHostMiServer_New(&miServer);
     EH_CheckResult(returnValue);
@@ -239,13 +227,26 @@ MI_Result NativeResourceProviderMiModule_GetClassDecl(const _In_ NativeResourceP
 
     const MI_SchemaDecl* schema = module->miModule->schemaDecl;
 
+    // Tprintf(MI_T("%T:%d in %T ~ searching for class '%T', size = %d\n"), __FILE__, __LINE__, __FUNCTION__, className, schema->numClassDecls);
+
     MI_Uint32 i;
+    for (i = 0; i != schema->numClassDecls; i++)
+    {
+        const MI_ClassDecl* c = schema->classDecls[i];
+        if (!c) // end of array
+            break;
+
+        // Tprintf(MI_T("%T:%d in %T ~ found '%T', i = %d\n"), __FILE__, __LINE__, __FUNCTION__, c->name, i);
+    }
+
     for (i = 0; i != schema->numClassDecls; i++)
     {
         const MI_ClassDecl* c = schema->classDecls[i];
 
         if (!c) // end of array
             break;
+
+        // Tprintf(MI_T("%T:%d in %T ~ checking '%T', i = %d\n"), __FILE__, __LINE__, __FUNCTION__, c->name, i);
 
         if (Tcscasecmp(c->name, className) == 0)
         {

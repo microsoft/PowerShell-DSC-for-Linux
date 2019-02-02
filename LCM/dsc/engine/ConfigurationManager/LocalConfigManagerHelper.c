@@ -4992,7 +4992,7 @@ MI_Result InitCacheAndMetaConfig(
         return r;
     }    
 
-    Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, cimErrorDetails);
     if (r != MI_RESULT_OK)
     {
@@ -5306,7 +5306,7 @@ MI_Result SerializeMetaConfig(
     }
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
 
-    Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, cimErrorDetails);
     if (r != MI_RESULT_OK)
     {
