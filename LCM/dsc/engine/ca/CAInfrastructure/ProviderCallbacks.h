@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _PROVIDER_CALLBACKS_H
+#define _PROVIDER_CALLBACKS_H
 
 /**************************************************************************************************/
 /*                                                                                                */
@@ -39,3 +40,5 @@ void MI_CALL DoWriteError(
     _In_     MI_Instance* instance,
     _In_     MI_Result(MI_CALL* writeErrorResult)(_In_ MI_Operation* operation,
         MI_OperationCallback_ResponseType response));
+
+#endif // _PROVIDER_CALLBACKS_H

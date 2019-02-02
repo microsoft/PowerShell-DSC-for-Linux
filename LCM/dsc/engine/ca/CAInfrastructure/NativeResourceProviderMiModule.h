@@ -5,7 +5,8 @@
 /*                                                                                                */
 /**************************************************************************************************/
 
-#pragma once
+#ifndef _NATIVE_RESOURCE_PROVIDER_MI_MODULE_H
+#define _NATIVE_RESOURCE_PROVIDER_MI_MODULE_H
 
 #include <MI.h>
 
@@ -67,3 +68,4 @@ MI_Result NativeResourceProviderMiModule_GetMethodDecl(const _In_ MI_ClassDecl* 
                                                                   _Outptr_  const MI_MethodDecl** methodDecl);
 
 
+#endif // _NATIVE_RESOURCE_PROVIDER_MI_MODULE_H

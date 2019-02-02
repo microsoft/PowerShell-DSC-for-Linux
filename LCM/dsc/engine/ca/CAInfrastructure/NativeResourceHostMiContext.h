@@ -9,7 +9,8 @@
 /*                                                                                                */
 /**************************************************************************************************/
 
-#pragma once
+#ifndef _NATIVE_RESOURCE_HOST_MI_MODULE_H
+#define _NATIVE_RESOURCE_HOST_MI_MODULE_H
 
 #include <MI.h>
 #include "NativeResourceProviderMiModule.h"
@@ -116,3 +117,5 @@ MI_Result NativeResourceProvider_TestTargetResource(
 //     _Inout_ MI_InstanceA *outputInstance,
 //     _Outptr_result_maybenull_ MI_Instance **extendedError
 // );
+
+#endif _NATIVE_RESOURCE_HOST_MI_MODULE_H

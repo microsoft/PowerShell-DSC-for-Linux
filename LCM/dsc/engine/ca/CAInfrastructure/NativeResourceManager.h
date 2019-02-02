@@ -7,7 +7,8 @@
 /*                                                                                                */
 /**************************************************************************************************/
 
-#pragma once
+#ifndef _NATIVE_RESOURCE_MANAGER_H
+#define _NATIVE_RESOURCE_MANAGER_H
 
 #include "NativeResourceHostMiContext.h"
 #include "pal/hashmap.h"
@@ -29,3 +30,5 @@ MI_Result NativeResourceManager_GetNativeResouceProvider(_In_ NativeResourceMana
                                                                     const _In_z_ MI_Char* providerPath, 
                                                                     const _In_z_ MI_Char* resourceProviderClassName, 
                                                                     _Outptr_ NativeResourceProvider** nativeResourceProvider);
+
+#endif // _NATIVE_RESOURCE_MANAGER_H
