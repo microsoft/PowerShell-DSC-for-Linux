@@ -48,7 +48,11 @@ class Runtime:
         job_parameters = self.job_data.parameters
         if job_parameters is not None and len(job_parameters) > 0:
             for parameter in job_parameters:
-                cmd += [json.loads(parameter["Value"])]
+                tracer.log_debug_trace("Parameter is: \n" + str(parameter))
+                if self.runbook.definition_kind_str == "PowerShell" and parameter["Name"]:
+                    # Handle named parameters for PowerShell arriving out of order
+                    cmd += ["-%s" % parameter["Name"]]
+                cmd += [str(json.loads(parameter["Value"]))]
 
         # Do not copy current process env var to the sandbox process
         env = os.environ.copy()
@@ -117,7 +121,7 @@ class PowerShellRuntime(Runtime):
         self.execution_alias = "pwsh"
         if linuxutil.is_posix_host() is False:
             self.execution_alias = "powershell"
-
+            
         self.base_cmd = [self.execution_alias, "-File"]
 
 
