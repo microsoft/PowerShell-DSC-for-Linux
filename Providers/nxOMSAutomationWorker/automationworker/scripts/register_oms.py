@@ -145,8 +145,7 @@ def get_metadata_from_imds(http_client):
         return None
 
 
-def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, certificate_path,
-                            platform_update_domain, tags):
+def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, certificate_path, http_client):
     """Formats the required headers and payload for the registration and deregitration requests.
 
     Returns:
@@ -158,8 +157,26 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resourc
                "Content-Type": "application/json"}
 
     asset_tag = "Unknown"
+    platform_update_domain = ""
+    tags = {}
     if is_azure_vm:
         asset_tag = linuxutil.get_azure_vm_asset_tag()
+        try:
+            metadata = get_metadata_from_imds(http_client)
+            if metadata is not None:
+                try:
+                    vm_id = metadata["compute"]["vmId"]
+                    sub_id = metadata["compute"]["subscriptionId"]
+                    resource_group = metadata["compute"]["resourceGroupName"]
+                    vm_name = metadata["compute"]["name"]
+                    azure_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Compute/virtualMachines/{2}".format(sub_id, resource_group, vm_name)
+                    platform_update_domain = metadata["compute"]["platformUpdateDomain"]
+                    tags = metadata["compute"]["tags"]
+
+                except KeyError:
+                    pass
+        except:
+            pass
 
     payload = {"RunbookWorkerGroup": worker_group_name,
                "MachineName": get_hostname(),
@@ -171,7 +188,7 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resourc
                "VirtualMachineId": vm_id,
                "Subject": subject,
                "platformUpdateDomain": platform_update_domain,
-               "VirtualMachineTags": tags}
+               "tags": tags}
 
     if azure_resource_id is not None:
         payload["AzureResourceId"] = azure_resource_id
@@ -182,7 +199,7 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resourc
 # TODO: add test-register code to test changes in payload, change cadence to increase polling time period
 
 def register(registration_endpoint, worker_group_name, machine_id, cert_path, key_path, is_azure_vm, vm_id,
-             azure_resource_id, test_mode, platform_update_domain, tags):
+             azure_resource_id, test_mode):
     """Registers the worker through the automation linked account with the Agent Service.
 
     Returns:
@@ -190,10 +207,8 @@ def register(registration_endpoint, worker_group_name, machine_id, cert_path, ke
     """
     http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode)
     http_client = http_client_factory.create_http_client(sys.version_info)
-
-
     headers, payload = get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, cert_path,
-                                               platform_update_domain, tags)
+                                               http_client)
     url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
 
     response = http_client.put(url, headers=headers, data=payload)
@@ -201,7 +216,7 @@ def register(registration_endpoint, worker_group_name, machine_id, cert_path, ke
     if response.status_code != 200:
         raise Exception("Unable to register [status_code=" + str(response.status_code) + "]")
 
-    return json.loads(response.raw_data)
+    return json.loads(response.raw_data), payload
 
 
 def deregister(registration_endpoint, worker_group_name, machine_id, cert_path, key_path, test_mode):
@@ -397,33 +412,8 @@ def main(argv):
                      'AccountId': '23216587-8f56-428c-9006-4c2f28c036f5'}
                 cert_info = ['', '', '959GG850526XC5JT35E269CZ69A55E1C7E1256JH']
             else:
-                # Update the metadata if possible
-                platform_update_domain = ""
-                tags = ""
-                try:
-                    http_client_factory = httpclientfactory.HttpClientFactory(oms_cert_path, oms_key_path, test_mode)
-                    http_client = http_client_factory.create_http_client(sys.version_info)
-                    metadata = get_metadata_from_imds(http_client)
-                    if metadata is not None:
-                        try:
-                            vm_id = metadata["compute"]["vmId"]
-                            sub_id = metadata["compute"]["subscriptionId"]
-                            resource_group = metadata["compute"]["resourceGroupName"]
-                            vm_name = metadata["compute"]["name"]
-                            azure_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Compute/virtualMachines/{2}".format(
-                                sub_id, resource_group, vm_name)
-                            platform_update_domain = metadata["compute"]["platformUpdateDomain"]
-                            tags = metadata["compute"]["tags"]
-
-                        except KeyError:
-                            pass
-                except:
-                    pass
-
-
-                registration_response = register(registration_endpoint, worker_group_name, machine_id,
-                                                          oms_cert_path, oms_key_path, is_azure_vm, vm_id,
-                                                          azure_resource_id, test_mode, platform_update_domain, tags)
+                registration_response, payload = register(registration_endpoint, worker_group_name, machine_id, oms_cert_path,
+                                                 oms_key_path, is_azure_vm, vm_id, azure_resource_id, test_mode)
                 cert_info = linuxutil.get_cert_info(oms_cert_path)
                 account_id = registration_response["AccountId"]
 
@@ -436,7 +426,8 @@ def main(argv):
                                                  registration_endpoint, workspace_id, account_id,
                                                  worker_group_name, machine_id, oms_cert_path, oms_key_path,
                                                  state_directory, gpg_keyring_path, proxy_configuration_path, test_mode,
-                                                 cert_info, is_azure_vm, vm_id)
+                                                 cert_info, is_azure_vm,
+                                                 payload["VirtualMachineId"])
         elif operation == DEREGISTER:
             deregister(registration_endpoint, worker_group_name, machine_id, oms_cert_path, oms_key_path, test_mode)
         else:
