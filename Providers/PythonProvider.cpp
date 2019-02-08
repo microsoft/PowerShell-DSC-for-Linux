@@ -333,7 +333,6 @@ PythonProvider::set (
     strm << "name: \"" << m_Name << '\"';
     SCX_BOOKEND_EX ("PythonProvider::set", strm.str ());
 #endif
-    Tprintf(MI_T("*** %T:%d in %T ~ \n"), __FILE__, __LINE__, __FUNCTION__, inInstance->classDecl->name);
     MI_Result rval = MI_RESULT_FAILED;
     int result = sendRequest (SET, instance);
     if (EXIT_SUCCESS == result)
