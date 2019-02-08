@@ -13,13 +13,13 @@
 #include "NativeResourceHostMiContext.h"
 #include "pal/hashmap.h"
 
-typedef struct _NativeResourceManager {
+struct _NativeResourceManager {
     struct {
         ProviderCallbackContext* resourceProviderContext;
         HashMap resourceProviderHashMap;
         MI_Boolean hashInited;
     } _private;
-} NativeResourceManager;
+};
 
 
 MI_Result NativeResourceManager_New(_In_opt_ ProviderCallbackContext* resourceProviderContext, _Outptr_ NativeResourceManager** manager);
