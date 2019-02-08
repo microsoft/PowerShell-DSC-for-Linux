@@ -787,6 +787,12 @@ MI_Result CallGetConfiguration(
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     result = GetConfiguration(&lcmContext, 0, &getInstances, moduleManager, documentIns, &getResultInstances, cimErrorDetails);
+    // result = GetConfiguration(&lcmContext, 0, &getInstances, moduleManager, documentIns, outInstances, cimErrorDetails);
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing output_instances, size = %d\n"), __FILE__, __LINE__, __FUNCTION__, getResultInstances.size);
+    // Print_MI_InstanceA(&getResultInstances);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
     
     MI_Instance_Delete(documentIns);
 
@@ -811,11 +817,22 @@ MI_Result CallGetConfiguration(
 
     outInstances->data = getResultInstances.data;
     outInstances->size = getResultInstances.size;
+    //MI_Instance_Clone(instance, &nativeResourceProvider->_private.outputResource);
 
+    // //Update InstanceArray.
+    // outInstances = (MI_Instance **)DSC_malloc( sizeof(MI_Instance*) * (getResultInstances.size), TLINE);
+    // if (result != MI_RESULT_OK)
+    // {
+    //     return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
+    // }
+
+    // // copy existing customData
+    // memcpy(outInstances, getResultInstances.data, sizeof(MI_InstanceA*) * getResultInstances.size );
+    
     //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
-    return MI_RESULT_OK;
+    return result;
 }
 
 MI_Result CallSetConfiguration(

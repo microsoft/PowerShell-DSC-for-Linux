@@ -895,7 +895,7 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
     MI_Instance *filteredInstance = NULL;
     MI_Instance *regInstance = NULL;
     ModuleLoaderObject *moduleLoader = NULL;
-    MI_Instance *getInstanceResult = NULL;
+    MI_InstanceA getInstanceResult = {0};
     MI_Session miSession = MI_SESSION_NULL;
     ProviderCallbackContext providerContext = {0};
 
@@ -1014,9 +1014,27 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
             MI_Session_Close(&miSession, NULL, NULL);            
             return r;
         }
-        outInstances->data[xCount] = getInstanceResult;
+
+        // Tprintf(MI_T("---------------------------------------------------\n"));
+        // Tprintf(MI_T("%T:%d in %T ~ Printing getInstanceResult [%d], r = %d\n"), __FILE__, __LINE__, __FUNCTION__, xCount, r);
+        // Print_MI_Instance(getInstanceResult.data[0]);
+        // Tprintf(MI_T("---------------------------------------------------\n"));
+
+        outInstances->data[xCount] = getInstanceResult.data[0];
         outInstances->size += 1;
+        // Tprintf(MI_T("%T:%d in %T ~ outInstances->size = %d\n"), __FILE__, __LINE__, __FUNCTION__, outInstances->size);
+
+        // Tprintf(MI_T("---------------------------------------------------\n"));
+        // Tprintf(MI_T("%T:%d in %T ~ Printing outInstances, size = %d\n"), __FILE__, __LINE__, __FUNCTION__, outInstances->size);
+        // Print_MI_InstanceA(outInstances);
+        // Tprintf(MI_T("---------------------------------------------------\n"));
+
     }
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing outInstances, size = %d\n"), __FILE__, __LINE__, __FUNCTION__, outInstances->size);
+    // Print_MI_InstanceA(outInstances);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     MI_Session_Close(&miSession, NULL, NULL);    
 
@@ -1117,19 +1135,81 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
                            _In_ MI_Session *miSession,
                            _In_ MI_Instance *instance,
                            _In_ const MI_Instance *regInstance,
-                           _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                           _Outptr_result_maybenull_ MI_InstanceA *outputInstance,
                            _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    *outputInstance = NULL;
+    //*outputInstance = NULL;
 
     if( /*Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||*/
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
     {
         return Get_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstance, extendedError);
     }
-    else if (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+    else if (1) // (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
     {
-        return NativeResourceProvider_GetTargetResource(provContext, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
+        MI_Result result = MI_RESULT_OK;
+        if (provContext->nativeResourceManager == NULL)
+            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
+
+        // Get ClassName
+        MI_Value class_name_value;
+        result = MI_Instance_GetElement(regInstance, MI_T("ClassName"), &class_name_value, NULL, NULL, NULL);
+        // Tprintf(MI_T("%T:%d in %T ~ MI_Instance_GetElement == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+        MI_Char* class_name = class_name_value.string;
+        // Tprintf(MI_T("%T:%d in %T ~ class_name == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, class_name);
+
+        // Get provider .so path for class
+        MI_Char resources_so_path[MAX_PATH];
+        int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+        if (ret == -1)
+        {
+            return result;
+        }
+        // Tprintf(MI_T("%T:%d in %T ~ resources_so_path == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resources_so_path);
+
+        // Get the path to the resource provider module (.so)
+        size_t resourceProviderPathLength = (MI_Uint32)(Tcslen(resources_so_path) + 1) ;
+        MI_Char* resourceProviderPath = (MI_Char*)DSC_malloc(resourceProviderPathLength * sizeof(MI_Char), NitsHere());
+        if( resourceProviderPath == NULL)
+        {
+            return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
+        }
+        result = Stprintf(resourceProviderPath, resourceProviderPathLength, MI_T("%T"), resources_so_path);
+
+        // Tprintf(MI_T("%T:%d in %T ~ resourceProviderPath == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resourceProviderPath);
+
+        NativeResourceProvider* nativeResourceProvider = NULL;
+        result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
+        // Tprintf(MI_T("%T:%d in %T ~ NativeResourceManager_GetNativeResouceProvider == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+
+        // if ((flags & GET_ALL_CONFIGURATION_OPERATION))
+        // {
+        //     result = NativeResourceProvider_GetInventory(nativeResourceProvider, miApp, miSession, instance, regInstance, outputInstance, extendedError);
+        // }
+        // else
+        // {
+        //     result = NativeResourceProvider_GetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, outputInstance, extendedError);
+        // }
+        // if (result != MI_RESULT_OK)
+        //     return result;
+
+        // return result;
+        result = NativeResourceProvider_GetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
+        
+        // Tprintf(MI_T("---------------------------------------------------\n"));
+        // Tprintf(MI_T("%T:%d in %T ~ Printing outputInstance\n"), __FILE__, __LINE__, __FUNCTION__);
+        // Print_MI_InstanceA(outputInstance);
+        // Tprintf(MI_T("---------------------------------------------------\n"));
+
+        return result;
     } 
     else
     {

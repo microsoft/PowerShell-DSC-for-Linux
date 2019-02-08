@@ -105,17 +105,17 @@ MI_Result NativeResourceProvider_TestTargetResource(
 );
 
 
-// //
-// // Invokes GetInventory on the resource provider
-// //
-// MI_Result NativeResourceProvider_GetInventory(
-//     _In_ NativeResourceProvider* nativeResourceProvider,
-//     _In_ MI_Application *miApplication,
-//     _In_ MI_Session *miSession,
-//     _In_ MI_Instance *nativeResource,
-//     _In_ const MI_Instance *resourceProviderRegistration,
-//     _Inout_ MI_InstanceA *outputInstance,
-//     _Outptr_result_maybenull_ MI_Instance **extendedError
-// );
+//
+// Invokes GetInventory on the resource provider
+//
+MI_Result NativeResourceProvider_GetInventory(
+    _In_ NativeResourceProvider* nativeResourceProvider,
+    _In_ MI_Application *miApplication,
+    _In_ MI_Session *miSession,
+    _In_ MI_Instance *nativeResource,
+    _In_ const MI_Instance *resourceProviderRegistration,
+    _Inout_ MI_InstanceA *outputInstance,
+    _Outptr_result_maybenull_ MI_Instance **extendedError
+);
 
 #endif _NATIVE_RESOURCE_HOST_MI_MODULE_H

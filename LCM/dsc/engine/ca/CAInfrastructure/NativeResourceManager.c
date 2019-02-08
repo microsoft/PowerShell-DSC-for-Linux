@@ -108,8 +108,10 @@ MI_Result NativeResourceManager_GetNativeResouceProvider(_In_ NativeResourceMana
                     (NativeResourceManagerHashMapBucket*)HashMap_Find(&nativeResourceManager->_private.resourceProviderHashMap, (const HashBucket*)&searchBucket);
     if (bucket == NULL) // resource provider is not loaded yet
     {
+        // Tprintf(MI_T("%T:%d in %T ~ loading resource provider for the first time from '%T'\n"), __FILE__, __LINE__, __FUNCTION__, providerPath);
         NativeResourceProvider* nativeResourceProviderLocal = NULL;
         returnValue = NativeResourceProvider_New(providerPath, resourceProviderClassName, nativeResourceManager->_private.resourceProviderContext, &nativeResourceProviderLocal);
+        // Tprintf(MI_T("%T:%d in %T ~ NativeResourceProvider_New = %d\n"), __FILE__, __LINE__, __FUNCTION__, returnValue);
         EH_CheckResult(returnValue);
 
         bucket = (NativeResourceManagerHashMapBucket*)DSC_malloc(sizeof(NativeResourceManagerHashMapBucket), NitsHere());
@@ -118,9 +120,16 @@ MI_Result NativeResourceManager_GetNativeResouceProvider(_In_ NativeResourceMana
         Tcslcpy(bucket->key, providerPath, keySize);
         bucket->resourceProvider = nativeResourceProviderLocal;
         HashMap_Insert(&nativeResourceManager->_private.resourceProviderHashMap, (HashBucket*)bucket);
+        //Tprintf(MI_T("%T:%d in %T ~ NativeResourceProvider_New = %d\n"), __FILE__, __LINE__, __FUNCTION__, returnValue);
+    }
+    else
+    {
+        // Tprintf(MI_T("%T:%d in %T ~ resource provider has already been loaded\n"), __FILE__, __LINE__, __FUNCTION__);
     }
 
     *nativeResourceProvider = bucket->resourceProvider;
+
+    // Tprintf(MI_T("%T:%d in %T ~ nativeResourceProvider->resourceProviderPath = %T\n"), __FILE__, __LINE__, __FUNCTION__, (*nativeResourceProvider)->resourceProviderPath);
 
     EH_UNWIND;
 

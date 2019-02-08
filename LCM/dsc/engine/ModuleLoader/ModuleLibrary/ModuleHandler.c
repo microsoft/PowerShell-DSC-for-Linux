@@ -343,6 +343,7 @@ _Return_type_success_(return == MI_RESULT_OK)
     moduleLoader = (ModuleLoaderObject*) moduleManager->reserved2;
     // Remove non-provider properties.
     r = GetFilteredResource(moduleLoader->application ,inInstance, &filteredInstance, extendedError);
+    // Tprintf(MI_T("%T:%d in %T ~ returnValue = %d\n"), __FILE__, __LINE__, __FUNCTION__, r);
     if( r != MI_RESULT_OK)
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_GETFILTERED_FAILED);
@@ -674,6 +675,13 @@ MI_Result GetFilteredResource( _In_ MI_Application *miApp,
     MI_Value value;
     MI_Type type;
     MI_Uint32 flags;
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inInstance (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inInstance->classDecl->name);
+    // Print_MI_Instance(inInstance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
+
     if( miApp == NULL || inInstance == NULL || outInstance == NULL || NitsShouldFault(NitsHere(), NitsAutomatic))
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_FILTER_ARGNULL);
@@ -974,16 +982,16 @@ MI_Result FilterForConfigurationResource(_Inout_ MI_InstanceA *inputInstanceArra
         return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
     }
 
-    Tprintf(MI_T("%T:%d in %T ~ inputInstanceArray->size = %d\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->size);
+    // Tprintf(MI_T("%T:%d in %T ~ inputInstanceArray->size = %d\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->size);
     for(xCount = 0 ; xCount < inputInstanceArray->size ; xCount++)
     {
         embeddedResourceMap[xCount] = 0;
 
-        Tprintf(MI_T("%T:%d in %T ~ 1 inputInstanceArray->data[xCount]->classDecl->name = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->name);
-        Tprintf(MI_T("%T:%d in %T ~ 1 inputInstanceArray->data[xCount]->classDecl->superClass = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->superClass);
+        // Tprintf(MI_T("%T:%d in %T ~ 1 inputInstanceArray->data[xCount]->classDecl->name = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->name);
+        // Tprintf(MI_T("%T:%d in %T ~ 1 inputInstanceArray->data[xCount]->classDecl->superClass = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->superClass);
         if( Tcscasecmp(inputInstanceArray->data[xCount]->classDecl->name, BASE_DOCUMENT_CLASSNAME) == 0 )
         {
-            Tprintf(MI_T("%T:%d in %T ~ 2 inputInstanceArray->data[xCount]->classDecl->name = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->name);
+            // Tprintf(MI_T("%T:%d in %T ~ 2 inputInstanceArray->data[xCount]->classDecl->name = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->name);
             if( bDocumentInstance )
             {
                 //Error multiple instances specified, only 1 allowed
@@ -1002,7 +1010,7 @@ MI_Result FilterForConfigurationResource(_Inout_ MI_InstanceA *inputInstanceArra
         else if ((inputInstanceArray->data[xCount]->classDecl->superClass != NULL && Tcscasecmp(inputInstanceArray->data[xCount]->classDecl->superClass, BASE_RESOURCE_CLASSNAME) == 0) ||
                  Tcscasecmp(inputInstanceArray->data[xCount]->classDecl->name, METACONFIG_CLASSNAME) == 0)
         {
-            Tprintf(MI_T("%T:%d in %T ~ 3 inputInstanceArray->data[xCount]->classDecl->name = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->name);
+            // Tprintf(MI_T("%T:%d in %T ~ 3 inputInstanceArray->data[xCount]->classDecl->name = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->name);
             resourceCount++;
 
             // Resource must contain resourceID as mandatory parameter.
@@ -1018,10 +1026,10 @@ MI_Result FilterForConfigurationResource(_Inout_ MI_InstanceA *inputInstanceArra
             }
             embeddedResourceMap[xCount] = 1;
         }
-        else
-        {
-            Tprintf(MI_T("%T:%d in %T ~ 4 inputInstanceArray->data[xCount]->classDecl->name = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->name);
-        }
+        // else
+        // {
+        //     Tprintf(MI_T("%T:%d in %T ~ 4 inputInstanceArray->data[xCount]->classDecl->name = %T\n"), __FILE__, __LINE__, __FUNCTION__, inputInstanceArray->data[xCount]->classDecl->name);
+        // }
     }
 
     if( bDocumentInstance == MI_FALSE || NitsShouldFault(NitsHere(), NitsAutomatic))
@@ -1032,7 +1040,7 @@ MI_Result FilterForConfigurationResource(_Inout_ MI_InstanceA *inputInstanceArra
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_MODMAN_FILTER_NOINSTANCE);
 
     }
-    Tprintf(MI_T("%T:%d in %T ~ resourceCount = %d\n"), __FILE__, __LINE__, __FUNCTION__, resourceCount);
+    // Tprintf(MI_T("%T:%d in %T ~ resourceCount = %d\n"), __FILE__, __LINE__, __FUNCTION__, resourceCount);
     tempOutput = (MI_Instance **)DSC_malloc( resourceCount * sizeof(MI_Instance*), NitsHere());
     if( tempOutput == NULL)
     {

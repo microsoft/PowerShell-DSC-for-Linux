@@ -18,6 +18,7 @@
 
 static MI_Result PostResult(_In_ MI_Context* context, MI_Result result)
 {
+    // Tprintf(MI_T("%T:%d in %T ~ result = %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
     nativeResourceProvider->_private.result = result;
     return MI_RESULT_OK;
@@ -27,8 +28,14 @@ static MI_Result PostInstance(_In_ MI_Context* context, _In_ const MI_Instance *
 {
     if (instance == NULL)
     {
+        // Tprintf(MI_T("%T:%d in %T ~ instance is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
         return MI_RESULT_INVALID_PARAMETER;
     }
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing instance\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_Instance(instance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
@@ -37,11 +44,15 @@ static MI_Result PostInstance(_In_ MI_Context* context, _In_ const MI_Instance *
         return MI_RESULT_NOT_SUPPORTED;
     }
 
+    
+    // Tprintf(MI_T("%T:%d in %T ~ cloning outputResource\n"), __FILE__, __LINE__, __FUNCTION__);
+
     return MI_Instance_Clone(instance, &nativeResourceProvider->_private.outputResource);
 }
 
 static MI_Result WriteMessage(_In_ MI_Context* context, MI_Uint32 channel, const MI_Char* message)
 {
+    // Tprintf(MI_T("%T:%d in %T ~ message = '%T'\n"), __FILE__, __LINE__, __FUNCTION__, message);
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
     DoWriteMessage(NULL, nativeResourceProvider->_private.callbackContext, channel, message);
@@ -51,6 +62,8 @@ static MI_Result WriteMessage(_In_ MI_Context* context, MI_Uint32 channel, const
 
 static MI_Result WriteProgress(_In_ MI_Context* context, const MI_Char* activity, const MI_Char* currentOperation, const MI_Char* statusDescription, MI_Uint32 percentComplete, MI_Uint32 secondsRemaining)
 {
+    // Tprintf(MI_T("%T:%d in %T ~ activity = '%T'\n"), __FILE__, __LINE__, __FUNCTION__, activity);
+    // Tprintf(MI_T("%T:%d in %T ~ currentOperation = '%T'\n"), __FILE__, __LINE__, __FUNCTION__, currentOperation);
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
     DoWriteProgress(NULL, nativeResourceProvider->_private.callbackContext, activity, currentOperation, statusDescription, percentComplete, secondsRemaining);
@@ -60,6 +73,7 @@ static MI_Result WriteProgress(_In_ MI_Context* context, const MI_Char* activity
 
 static MI_Result WriteStreamParameter(_In_ MI_Context* context, const MI_Char* name, _In_ const MI_Value* value, _In_ MI_Type type, _In_ MI_Uint32 flags)
 {
+    // Tprintf(MI_T("%T:%d in %T ~ name = '%T'\n"), __FILE__, __LINE__, __FUNCTION__, name);
     NativeResourceProvider* nativeResourceProvider = (NativeResourceProvider*)context;
 
     if (!nativeResourceProvider->_private.resourceProviderClassLoaded) {
@@ -74,6 +88,7 @@ static MI_Result WriteStreamParameter(_In_ MI_Context* context, const MI_Char* n
 
 static MI_Result WriteError(_In_ MI_Context* context, MI_Uint32 resultCode, _In_z_ const MI_Char* resultType, _In_z_ const MI_Char* errorMessage, _Out_ MI_Boolean *flag)
 {
+    // Tprintf(MI_T("%T:%d in %T ~ errorMessage = '%T'\n"), __FILE__, __LINE__, __FUNCTION__, errorMessage);
     MI_Result returnValue = MI_RESULT_OK;
     MI_Instance* extendedError = NULL;
 
@@ -472,11 +487,17 @@ MI_Result NativeResourceProvider_Delete(_In_ NativeResourceProvider* nativeResou
 
 static MI_Result InvokeMethod(_In_ NativeResourceProvider* resourceProvider, const _In_z_ MI_Char* methodName, const _In_ MI_Instance* inputResource, _Outptr_result_maybenull_ MI_Instance** outputResource, _Outptr_result_maybenull_ MI_Instance** extendedError) {
     if (outputResource == NULL)
+    {
+        // Tprintf(MI_T("%T:%d in %T ~ outputResource is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
         return MI_RESULT_INVALID_PARAMETER;
+    }
     *outputResource = NULL;
 
     if (extendedError == NULL)
+    {
+        // Tprintf(MI_T("%T:%d in %T ~ extendedError is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
         return MI_RESULT_INVALID_PARAMETER;
+    }
     *extendedError = NULL;
 
     MI_Result returnValue = MI_RESULT_OK;
@@ -498,6 +519,11 @@ static MI_Result InvokeMethod(_In_ NativeResourceProvider* resourceProvider, con
     returnValue = MI_Instance_GetElementCount(inputResource, &elementCount);
     EH_CheckResult(returnValue);
 
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inputResource->classDecl->name);
+    // Print_MI_Instance(inputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
     MI_Uint32 i;
     for (i = 0; i < elementCount; i++) {
         const MI_Char* propertyName;
@@ -510,21 +536,60 @@ static MI_Result InvokeMethod(_In_ NativeResourceProvider* resourceProvider, con
         returnValue = MI_Instance_SetElement(methodInputResourceCopy, propertyName, &propertyValue, propertyType, 0);
         EH_CheckResult(returnValue);
     }
+    
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inputResource->classDecl->name);
+    // Print_MI_Instance(inputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing methodInputResourceCopy\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_Instance(methodInputResourceCopy);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     // Get the method that will be invoked
     // NOTE: the method declarations is managed by the provider's implementation of MI_Module and should not be deallocated
     const MI_MethodDecl* methodDecl = NULL;
     returnValue = NativeResourceProviderMiModule_GetMethodDecl(resourceProvider->_private.resourceClassDecl, methodName, &methodDecl);
     EH_CheckResult(returnValue);
+    
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inputResource->classDecl->name);
+    // Print_MI_Instance(inputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     // Invoke the method
     returnValue = resourceProviderMiContext->ft->NewParameters(resourceProviderMiContext, methodDecl, &inputResourceInstance);
     EH_CheckResult(returnValue);
+    
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inputResource->classDecl->name);
+    // Print_MI_Instance(inputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResourceInstance\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_Instance(inputResourceInstance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     // Check if provider needs an array or single element
     MI_Type type;
     returnValue = MI_Instance_GetElement(inputResourceInstance, OMI_BaseResource_Method_InputResource, NULL, &type, NULL,NULL);
-    MI_Value value;    
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResourceInstance\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_Instance(inputResourceInstance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inputResource->classDecl->name);
+    // Print_MI_Instance(inputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
+
+    // Tprintf(MI_T("%T:%d in %T ~ type = %d\n"), __FILE__, __LINE__, __FUNCTION__, type);
+
+    MI_Value value;
     EH_CheckResult(returnValue);
     if( type & MI_ARRAY)
     {
@@ -535,22 +600,67 @@ static MI_Result InvokeMethod(_In_ NativeResourceProvider* resourceProvider, con
     {
         value.instance = methodInputResourceCopy;
     }
+    
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inputResource->classDecl->name);
+    // Print_MI_Instance(inputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing value\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_Instance(value.instance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ BEFORE Printing inputResourceInstance\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_Instance(inputResourceInstance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
     returnValue = MI_Instance_SetElement(inputResourceInstance, OMI_BaseResource_Method_InputResource, &value, type, 0);
     EH_CheckResult(returnValue);
 
-    methodDecl->function(resourceProvider->_private.resourceClassDeclSelf, resourceProviderMiContext, NULL, inputResource->classDecl->name, methodName, NULL, inputResourceInstance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ AFTER Printing inputResourceInstance\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_Instance(inputResourceInstance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inputResource->classDecl->name);
+    // Print_MI_Instance(inputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+
+    size_t length = Tcslen(inputResource->classDecl->name)+1;
+    MI_Char* str = (MI_Char*)DSC_malloc(length * sizeof(MI_Char), NitsHere()); 
+    memcpy(str, inputResource->classDecl->name, length * sizeof(MI_Char));
+
+
+    // methodDecl->function(resourceProvider->_private.resourceClassDeclSelf, resourceProviderMiContext, NULL, inputResource->classDecl->name, methodName, NULL, inputResourceInstance);
+    methodDecl->function(resourceProvider->_private.resourceClassDeclSelf, resourceProviderMiContext, NULL, str, methodName, NULL, inputResourceInstance);
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing inputResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, inputResource->classDecl->name);
+    // Print_MI_Instance(inputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     // Set the output resource to the instance posted by the provider, but only if the result is MI_RESULT_OK. 
     // If no instance has been posted, return MI_RESULT_NOT_FOUND.
     if (resourceProvider->_private.result != MI_RESULT_OK) {
+        // Tprintf(MI_T("%T:%d in %T ~ resourceProvider->_private.result = %d\n"), __FILE__, __LINE__, __FUNCTION__, resourceProvider->_private.result);
         EH_Fail_(returnValue = resourceProvider->_private.result);
     }
 
     if (resourceProvider->_private.outputResource == NULL) {
+        // Tprintf(MI_T("%T:%d in %T ~ resourceProvider->_private.outputResource == NULL\n"), __FILE__, __LINE__, __FUNCTION__);
         EH_Fail_(returnValue = MI_RESULT_NOT_FOUND);
     }
     
     *outputResource = resourceProvider->_private.outputResource;
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing outputResource\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_Instance(*outputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
     
     resourceProvider->_private.outputResource = NULL;
 
@@ -566,70 +676,6 @@ EH_UNWIND;
 
     return returnValue;
 }
-
-// /**************************************************************************************************/
-// /*                                                                                                */
-// /*  NativeResourceProvider_GetInventory                                                      */
-// /*                                                                                                */
-// /**************************************************************************************************/
-
-// MI_Result NativeResourceProvider_GetInventory(
-//     _In_ NativeResourceProvider* resourceProvider,
-//     _In_ MI_Application *miApplication,
-//     _In_ MI_Session *miSession,
-//     _In_ MI_Instance *nativeResource,
-//     _In_ const MI_Instance *resourceProviderRegistration,
-//     _Inout_ MI_InstanceA *outputInstance,
-//     _Outptr_result_maybenull_ MI_Instance **extendedError
-// )
-// {
-//     if (outputInstance == NULL)
-//         return MI_RESULT_INVALID_PARAMETER;
-
-//     if (extendedError == NULL)
-//     {
-//         return MI_RESULT_INVALID_PARAMETER;
-//     }
-//     *extendedError = NULL;
-
-//     clock_t  start;
-
-//     MI_Result returnValue = MI_RESULT_OK;
-
-//     ProviderCallbackContext* providerCallbackContext = resourceProvider->_private.callbackContext;
-//     LCMProviderContext*lcmProviderContext = providerCallbackContext->lcmProviderContext;
-
-//     DSC_EventWriteEngineMethodParameters(
-//         __WFUNCTION__,
-//         nativeResource->classDecl->name,
-//         providerCallbackContext->resourceId,
-//         0,
-//         lcmProviderContext->executionMode,
-//         resourceProviderRegistration->nameSpace);
-//     //TODO: DSC_EventWriteMessageWmiGet(provContext->lcmProviderContext->configurationDetails.jobGuidString, instance->classDecl->name, provContext->resourceId);
-
-//     start = GetCurrentClockTime();
-//     SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_GET, lcmProviderContext);
-//     LogCAMessage(lcmProviderContext, ID_OUTPUT_EMPTYSTRING, providerCallbackContext->resourceId);
-
-//     // Invoke GetTargetResource
-//     MI_Instance* outputResource = NULL;
-//     returnValue = InvokeMethod(resourceProvider, OMI_BaseResource_GetInventoryMethodName, nativeResource, &outputResource, extendedError);
-//     EH_CheckResult(returnValue);
-//     // For Inventory output is send via streaming
-
-// EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
-
-//     // Log the duration of the operation
-//     MI_Real64 duration = EndClockAndGetDuration(start);
-//     SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_GET, lcmProviderContext);
-//     LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
-
-//     DSC_EventWriteMethodEnd(lcmProviderContext->configurationDetails.jobGuidString, __WFUNCTION__);
-
-//     return returnValue;    
-// }
-
 
 /**************************************************************************************************/
 /*                                                                                                */
@@ -647,13 +693,22 @@ MI_Result NativeResourceProvider_GetTargetResource(
     _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     if (outputInstance == NULL)
+    {
+        // Tprintf(MI_T("%T:%d in %T ~ outputInstance is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
         return MI_RESULT_INVALID_PARAMETER;
+    }
 
     if (extendedError == NULL)
     {
+        // Tprintf(MI_T("%T:%d in %T ~ extendedError is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
         return MI_RESULT_INVALID_PARAMETER;
     }
     *extendedError = NULL;
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing nativeResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, nativeResource->classDecl->name);
+    // Print_MI_Instance(nativeResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     ptrdiff_t start,finish;
     MI_Real64 duration;
@@ -662,7 +717,15 @@ MI_Result NativeResourceProvider_GetTargetResource(
     MI_Instance *outputResourceSystemProperties = NULL;
 
     ProviderCallbackContext* providerCallbackContext = resourceProvider->_private.callbackContext;
-    LCMProviderContext*lcmProviderContext = providerCallbackContext->lcmProviderContext;
+
+    // Tprintf(MI_T("%T:%d in %T ~ resourceProvider->resourceProviderPath = '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resourceProvider->resourceProviderPath);
+
+    // Tprintf(MI_T("%T:%d in %T ~ providerCallbackContext = %T\n"), __FILE__, __LINE__, __FUNCTION__, providerCallbackContext == NULL ? MI_T("NULL") : MI_T("OK"));
+    // Tprintf(MI_T("%T:%d in %T ~ providerCallbackContext->resourceId = %T\n"), __FILE__, __LINE__, __FUNCTION__, providerCallbackContext->resourceId);
+    // Tprintf(MI_T("%T:%d in %T ~ providerCallbackContext->nativeResourceManager = %T\n"), __FILE__, __LINE__, __FUNCTION__, providerCallbackContext->nativeResourceManager == NULL ? MI_T("NULL") : MI_T("OK"));
+    // Tprintf(MI_T("%T:%d in %T ~ providerCallbackContext->lcmProviderContext = %T\n"), __FILE__, __LINE__, __FUNCTION__, providerCallbackContext->lcmProviderContext == NULL ? MI_T("NULL") : MI_T("OK"));
+
+    LCMProviderContext* lcmProviderContext = providerCallbackContext->lcmProviderContext;
 
     DSC_EventWriteEngineMethodParameters(
         __WFUNCTION__,
@@ -681,16 +744,30 @@ MI_Result NativeResourceProvider_GetTargetResource(
     // Invoke GetTargetResource
     MI_Instance* outputResource = NULL;
     returnValue = InvokeMethod(resourceProvider, OMI_BaseResource_GetMethodName, nativeResource, &outputResource, extendedError);
+    // Tprintf(MI_T("%T:%d in %T ~ returnValue = %d\n"), __FILE__, __LINE__, __FUNCTION__, returnValue);
     EH_CheckResult(returnValue);
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing nativeResource (%T)\n"), __FILE__, __LINE__, __FUNCTION__, nativeResource->classDecl->name);
+    // Print_MI_Instance(nativeResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     // Get the output resource returned by GetTargetResource and remove (filter) the system properties (resource properties from base classes)
     MI_Value outputResourceValue;
     returnValue = DSC_MI_Instance_GetElement(outputResource, OMI_BaseResource_Method_OutputResource, &outputResourceValue, NULL, NULL, NULL);
+    // Tprintf(MI_T("%T:%d in %T ~ returnValue = %d\n"), __FILE__, __LINE__, __FUNCTION__, returnValue);
     EH_CheckResult(returnValue);
+
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing outputResource\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_InstanceA(outputResource);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
     MI_Instance *outputResourceFiltered = NULL;
     //returnValue = GetFilteredResource(lcmProviderContext, miApplication, nativeResource, outputResourceValue.instance, MI_TRUE, &outputResourceFiltered, &outputResourceSystemProperties, extendedError);
-    returnValue = GetFilteredResource(miApplication, nativeResource, &outputResourceFiltered, extendedError);
+    // returnValue = GetFilteredResource(miApplication, nativeResource, &outputResourceFiltered, extendedError);
+    returnValue = GetFilteredResource(miApplication, outputResourceValue.instance, &outputResourceFiltered, extendedError);
+    // Tprintf(MI_T("%T:%d in %T ~ returnValue = %d\n"), __FILE__, __LINE__, __FUNCTION__, returnValue);
     EH_CheckResult(returnValue);
 
     // Return the output resource
@@ -699,6 +776,11 @@ MI_Result NativeResourceProvider_GetTargetResource(
         EH_Fail_(returnValue = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR));
     outputInstance->data[0] = outputResourceFiltered;
     outputInstance->size = 1;
+    
+    // Tprintf(MI_T("---------------------------------------------------\n"));
+    // Tprintf(MI_T("%T:%d in %T ~ Printing outputInstance\n"), __FILE__, __LINE__, __FUNCTION__);
+    // Print_MI_InstanceA(outputInstance);
+    // Tprintf(MI_T("---------------------------------------------------\n"));
 
 EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
 
@@ -733,6 +815,7 @@ MI_Result NativeResourceProvider_TestTargetResource(
 {
     if (extendedError == NULL)
     {
+        // Tprintf(MI_T("%T:%d in %T ~ extendedError is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
         return MI_RESULT_INVALID_PARAMETER;
     }
     *extendedError = NULL;
@@ -776,6 +859,75 @@ EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
     finish = CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
     SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_TEST, lcmProviderContext);
+    LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
+
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+    return returnValue;
+}
+
+/**************************************************************************************************/
+/*                                                                                                */
+/*  NativeResourceProvider_GetInventory                                                      */
+/*                                                                                                */
+/**************************************************************************************************/
+
+MI_Result NativeResourceProvider_GetInventory(
+    _In_ NativeResourceProvider* resourceProvider,
+    _In_ MI_Application *miApplication,
+    _In_ MI_Session *miSession,
+    _In_ MI_Instance *nativeResource,
+    _In_ const MI_Instance *resourceProviderRegistration,
+    _Inout_ MI_InstanceA *outputInstance,
+    _Outptr_result_maybenull_ MI_Instance **extendedError
+)
+{
+    if (outputInstance == NULL)
+    {
+        // Tprintf(MI_T("%T:%d in %T ~ outputInstance is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+
+    if (extendedError == NULL)
+    {
+        // Tprintf(MI_T("%T:%d in %T ~ extendedError is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *extendedError = NULL;
+
+    ptrdiff_t start,finish;
+    MI_Real64 duration;
+
+    MI_Result returnValue = MI_RESULT_OK;
+
+    ProviderCallbackContext* providerCallbackContext = resourceProvider->_private.callbackContext;
+    LCMProviderContext*lcmProviderContext = providerCallbackContext->lcmProviderContext;
+
+    DSC_EventWriteEngineMethodParameters(
+        __WFUNCTION__,
+        nativeResource->classDecl->name,
+        providerCallbackContext->resourceId,
+        0,
+        lcmProviderContext->executionMode,
+        resourceProviderRegistration->nameSpace);
+    //TODO: DSC_EventWriteMessageWmiGet(provContext->lcmProviderContext->configurationDetails.jobGuidString, instance->classDecl->name, provContext->resourceId);
+
+    start = CPU_GetTimeStamp();
+    SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_GET, lcmProviderContext);
+    LogCAMessage(lcmProviderContext, ID_OUTPUT_EMPTYSTRING, providerCallbackContext->resourceId);
+
+    // Invoke GetTargetResource
+    MI_Instance* outputResource = NULL;
+    returnValue = InvokeMethod(resourceProvider, OMI_BaseResource_InventoryMethodName, nativeResource, &outputResource, extendedError);
+    EH_CheckResult(returnValue);
+    // For Inventory output is send via streaming
+
+EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
+
+    // Log the duration of the operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+    SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_GET, lcmProviderContext);
     LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
 
     DSC_EventWriteMethodEnd(__WFUNCTION__);

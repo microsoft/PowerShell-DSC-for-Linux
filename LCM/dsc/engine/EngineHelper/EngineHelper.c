@@ -1343,6 +1343,9 @@ MI_Result  Convert_MIInstance_JSON (
         return result;
     }
 
+    // Tprintf(MI_T("*** %T:%d in %T ~ p_instance->classDecl->name\n"), __FILE__, __LINE__, __FUNCTION__, p_instance->classDecl->name);
+    // Tprintf(MI_T("*** %T:%d in %T ~ p_instance->classDecl->numProperties = %d\n"), __FILE__, __LINE__, __FUNCTION__, p_instance->classDecl->numProperties);
+
     MI_Uint32 i = 0;
     for(i = 0 ; i < p_instance->classDecl->numProperties; i++)
     {
@@ -1443,7 +1446,7 @@ MI_Result  Convert_MIInstance_JSON (
                     }
                     case MI_INSTANCE : {
                         JSON_Value *json_value;
-                        Convert_MIInstance_JSON(value.instance, json_value);
+                        Convert_MIInstance_JSON(value.instance, &json_value);
                         json_object_set_value(result_root_object, p_instance->classDecl->properties[i]->name, json_value);
                         break;
                     }
@@ -1788,7 +1791,7 @@ MI_Result  Convert_MiClass_JSON (
                     }
                     case MI_INSTANCE : {
                         JSON_Value *json_value;
-                        Convert_MIInstance_JSON(value.instance, json_value);
+                        Convert_MIInstance_JSON(value.instance, &json_value);
                         json_object_set_value(result_root_object, p_instance->classDecl->properties[i]->name, json_value);
                         break;
                     }
@@ -2047,11 +2050,62 @@ MI_Result  Print_MI_InstanceA (
     )
 {
     MI_Uint32 i = 0;
+    MI_Result result = MI_RESULT_OK;
+    // Tprintf(MI_T("*** %T:%d in %T ~ p_instanceA->size = %d\n"), __FILE__, __LINE__, __FUNCTION__, p_instanceA->size);
+
+    // const MI_Char* propertyName;
+    // MI_Value propertyValue;
+    // MI_Type propertyType;
+
+    // result = MI_Instance_GetElementAt(p_instanceA->data[0], 0, &propertyName, &propertyValue, &propertyType, 0);
+    // Tprintf(MI_T("*** %T:%d in %T ~ result = %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+    // Tprintf(MI_T("*** %T:%d in %T ~ propertyName = '%T', propertyType = %d\n"), __FILE__, __LINE__, __FUNCTION__, propertyName, propertyType);
+
+    int type = 0;
+
+    // if( propertyType & MI_ARRAY)
+    // {
+    //     type = 1;
+    // }
+    // else
+    // {
+    //     type = 0;
+    // }
+
+    // Tprintf(MI_T("*** %T:%d in %T ~ type = %d\n"), __FILE__, __LINE__, __FUNCTION__, type);
+
     for(i = 0 ; i < p_instanceA->size ; i++)
     {
-        Print_MI_Instance(p_instanceA->data[i]);
+        const MI_Char* propertyName;
+        MI_Value propertyValue;
+        MI_Type propertyType;
+
+        result = MI_Instance_GetElementAt(*(p_instanceA->data), i, &propertyName, &propertyValue, &propertyType, 0);
+        // Tprintf(MI_T("*** %T:%d in %T ~ propertyName = '%T', propertyType = %d\n"), __FILE__, __LINE__, __FUNCTION__, propertyName, propertyType);
+
+        if( propertyType & MI_ARRAY)
+        {
+            type = 1;
+        }
+        else
+        {
+            type = 0;
+        }
+
+        // Tprintf(MI_T("*** %T:%d in %T ~ type = %d\n"), __FILE__, __LINE__, __FUNCTION__, type);
+
+        if( type == 1)
+        {
+            Print_MI_InstanceA(p_instanceA->data[i]);
+        }
+        else
+        {
+            Print_MI_Instance(p_instanceA->data[i]);
+        }
+
+        //Print_MI_Instance(p_instanceA->data[i]);
     }
-    return MI_RESULT_OK;
+    return result;
 }
 
 MI_Result  Print_MI_Class (
