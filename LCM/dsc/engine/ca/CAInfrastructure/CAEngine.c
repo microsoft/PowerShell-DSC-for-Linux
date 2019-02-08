@@ -895,7 +895,8 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
     MI_Instance *filteredInstance = NULL;
     MI_Instance *regInstance = NULL;
     ModuleLoaderObject *moduleLoader = NULL;
-    MI_InstanceA getInstanceResult = {0};
+    // MI_InstanceA getInstanceResult = {0};
+    MI_Instance *getInstanceResult = NULL;
     MI_Session miSession = MI_SESSION_NULL;
     ProviderCallbackContext providerContext = {0};
 
@@ -1020,7 +1021,8 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
         // Print_MI_Instance(getInstanceResult.data[0]);
         // Tprintf(MI_T("---------------------------------------------------\n"));
 
-        outInstances->data[xCount] = getInstanceResult.data[0];
+        // outInstances->data[xCount] = getInstanceResult.data[0];
+        outInstances->data[xCount] = getInstanceResult;
         outInstances->size += 1;
         // Tprintf(MI_T("%T:%d in %T ~ outInstances->size = %d\n"), __FILE__, __LINE__, __FUNCTION__, outInstances->size);
 
@@ -1135,7 +1137,8 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
                            _In_ MI_Session *miSession,
                            _In_ MI_Instance *instance,
                            _In_ const MI_Instance *regInstance,
-                           _Outptr_result_maybenull_ MI_InstanceA *outputInstance,
+                        //    _Outptr_result_maybenull_ MI_InstanceA *outputInstance,
+                           _Outptr_result_maybenull_ MI_Instance *outputInstance,
                            _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     //*outputInstance = NULL;

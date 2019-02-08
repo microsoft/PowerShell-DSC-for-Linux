@@ -87,7 +87,8 @@ MI_Result NativeResourceProvider_GetTargetResource(
     _In_ MI_Session *miSession,
     _In_ MI_Instance *nativeResource,
     _In_ const MI_Instance *resourceProviderRegistration,
-    _Inout_ MI_InstanceA *outputInstance,
+    _Inout_ MI_Instance *outputInstance,
+    // _Inout_ MI_InstanceA *outputInstance,
     _Outptr_result_maybenull_ MI_Instance **extendedError
 );
 

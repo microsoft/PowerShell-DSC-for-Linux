@@ -689,7 +689,8 @@ MI_Result NativeResourceProvider_GetTargetResource(
     _In_ MI_Session *miSession,
     _In_ MI_Instance *nativeResource,
     _In_ const MI_Instance *resourceProviderRegistration,
-    _Inout_ MI_InstanceA *outputInstance,
+    // _Inout_ MI_InstanceA *outputInstance,
+    _Inout_ MI_Instance *outputInstance,
     _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
     if (outputInstance == NULL)
@@ -771,11 +772,17 @@ MI_Result NativeResourceProvider_GetTargetResource(
     EH_CheckResult(returnValue);
 
     // Return the output resource
-    outputInstance->data = (MI_Instance **)DSC_malloc(sizeof(MI_Instance*), NitsHere());
-    if (outputInstance->data == NULL)
-        EH_Fail_(returnValue = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR));
-    outputInstance->data[0] = outputResourceFiltered;
-    outputInstance->size = 1;
+    // outputInstance->data = (MI_Instance **)DSC_malloc(sizeof(MI_Instance*), NitsHere());
+    // if (outputInstance->data == NULL)
+    //     EH_Fail_(returnValue = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR));
+    // outputInstance->data[0] = outputResourceFiltered;
+    // outputInstance->size = 1;
+    MI_Instance_Clone(outputResourceFiltered, outputInstance);
+    // outputInstance->data = (MI_Instance **)DSC_malloc(sizeof(MI_Instance*), NitsHere());
+    // if (outputInstance->data == NULL)
+    //     EH_Fail_(returnValue = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR));
+    // outputInstance->data[0] = outputResourceFiltered;
+    // outputInstance->size = 1;
     
     // Tprintf(MI_T("---------------------------------------------------\n"));
     // Tprintf(MI_T("%T:%d in %T ~ Printing outputInstance\n"), __FILE__, __LINE__, __FUNCTION__);
