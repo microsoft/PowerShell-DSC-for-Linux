@@ -102,9 +102,9 @@ SHLIB_EXT: 'so'
 
 #if BUILD_OMS == 1
 /etc/opt/microsoft/omsagent/conf/omsagent.d; 755; ${{RUN_AS_USER}}; root; sysdir
-/etc/dsc; 777; ${{RUN_AS_USER}}; root
-/etc/dsc/bin; 777; ${{RUN_AS_USER}}; root
-/etc/dsc/lib; 755; ${{RUN_AS_USER}}; root
+/opt/dsc; 777; ${{RUN_AS_USER}}; root
+/opt/dsc/bin; 777; ${{RUN_AS_USER}}; root
+/opt/dsc/lib; 755; ${{RUN_AS_USER}}; root
 #endif
 
 %Links
