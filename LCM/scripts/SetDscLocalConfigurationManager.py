@@ -53,24 +53,28 @@ def apply_meta_config(args):
         for char in fileContent:
             outtokens.append(str(ord(char)))
 
-        omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
+        # omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
 
         parameters = []
-        parameters.append(omicli_path)
-        parameters.append("iv")
-        parameters.append(helperlib.DSC_NAMESPACE)
-        parameters.append("{")
-        parameters.append("MSFT_DSCLocalConfigurationManager")
-        parameters.append("}")
+        parameters.append("/opt/dsc/bin/dsc_host")
+        parameters.append("/opt/dsc/output")
         parameters.append("SendMetaConfigurationApply")
-        parameters.append("{")
-        parameters.append("ConfigurationData")
-        parameters.append("[")
-        # Insert configurationmof data here
-        for token in outtokens:
-            parameters.append(token)
-        parameters.append("]")
-        parameters.append("}")
+        parameters.append(args[2])
+        # parameters.append(omicli_path)
+        # parameters.append("iv")
+        # parameters.append(helperlib.DSC_NAMESPACE)
+        # parameters.append("{")
+        # parameters.append("MSFT_DSCLocalConfigurationManager")
+        # parameters.append("}")
+        # parameters.append("SendMetaConfigurationApply")
+        # parameters.append("{")
+        # parameters.append("ConfigurationData")
+        # parameters.append("[")
+        # # Insert configurationmof data here
+        # for token in outtokens:
+        #     parameters.append(token)
+        # parameters.append("]")
+        # parameters.append("}")
 
         # Save the starting timestamp without milliseconds
         startDateTime = operationStatusUtility.get_current_time_no_ms()

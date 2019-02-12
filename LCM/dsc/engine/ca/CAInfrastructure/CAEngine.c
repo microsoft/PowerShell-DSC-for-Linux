@@ -1254,10 +1254,10 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
 
     MI_Result r = MI_RESULT_OK;
 
-    Tprintf(MI_T("%T:%d in %T ~ instance->classDecl->name = %T - %T\n"), __FILE__, __LINE__, __FUNCTION__, instance->classDecl->name, METACONFIG_CLASSNAME);
-    Tprintf(MI_T("%T:%d in %T ~ regInstance->classDecl->name = %T - %T\n"), __FILE__, __LINE__, __FUNCTION__, regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER);
-    Tprintf(MI_T("%T:%d in %T ~ instance->classDecl->name = %T - %T\n"), __FILE__, __LINE__, __FUNCTION__, instance->classDecl->name, MSFT_LOGRESOURCENAME);
-    Tprintf(MI_T("%T:%d in %T ~ regInstance->classDecl->name = %T - %T\n"), __FILE__, __LINE__, __FUNCTION__, regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER);
+    // Tprintf(MI_T("%T:%d in %T ~ instance->classDecl->name = %T - %T\n"), __FILE__, __LINE__, __FUNCTION__, instance->classDecl->name, METACONFIG_CLASSNAME);
+    // Tprintf(MI_T("%T:%d in %T ~ regInstance->classDecl->name = %T - %T\n"), __FILE__, __LINE__, __FUNCTION__, regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER);
+    // Tprintf(MI_T("%T:%d in %T ~ instance->classDecl->name = %T - %T\n"), __FILE__, __LINE__, __FUNCTION__, instance->classDecl->name, MSFT_LOGRESOURCENAME);
+    // Tprintf(MI_T("%T:%d in %T ~ regInstance->classDecl->name = %T - %T\n"), __FILE__, __LINE__, __FUNCTION__, regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER);
        
     if( Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
         //Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
