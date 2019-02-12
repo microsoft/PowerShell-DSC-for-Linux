@@ -102,35 +102,40 @@ def main(argv):
     for char in configurationFileContent:
         configurationData.append(str(ord(char)))
 
-    # OMI CLI location
-    omiBinDir = "<CONFIG_BINDIR>"
-    omiCliPath = omiBinDir + "/omicli"
+    # # OMI CLI location
+    # omiBinDir = "<CONFIG_BINDIR>"
+    # omiCliPath = omiBinDir + "/omicli"
+    dsc_host_path = '/opt/dsc/bin/dsc_host'
 
     # Assemble parameters to pass to OMI CLI
     omiCliParameters = []
-    omiCliParameters.append(omiCliPath)
-    omiCliParameters.append("iv")
-    omiCliParameters.append("<DSC_NAMESPACE>")
-    omiCliParameters.append("{")
-    omiCliParameters.append("MSFT_DSCLocalConfigurationManager")
-    omiCliParameters.append("}")
+    omiCliParameters.append("/opt/dsc/bin/dsc_host")
+    omiCliParameters.append("/opt/dsc/output")
     omiCliParameters.append("SendConfigurationApply")
-    omiCliParameters.append("{")
-    omiCliParameters.append("ConfigurationData")
-    omiCliParameters.append("[")
+    omiCliParameters.append(args[2])
+    # omiCliParameters.append(omiCliPath)
+    # omiCliParameters.append("iv")
+    # omiCliParameters.append("<DSC_NAMESPACE>")
+    # omiCliParameters.append("{")
+    # omiCliParameters.append("MSFT_DSCLocalConfigurationManager")
+    # omiCliParameters.append("}")
+    # omiCliParameters.append("SendConfigurationApply")
+    # omiCliParameters.append("{")
+    # omiCliParameters.append("ConfigurationData")
+    # omiCliParameters.append("[")
 
-    # Insert configurationmof data here
-    for token in configurationData:
-        omiCliParameters.append(token)
+    # # Insert configurationmof data here
+    # for token in configurationData:
+    #     omiCliParameters.append(token)
     
-    omiCliParameters.append("]")
+    # omiCliParameters.append("]")
 
     # Insert force if specified
     if parsedArguments.force:
         omiCliParameters.append("force")
-        omiCliParameters.append("true")
+        # omiCliParameters.append("true")
 
-    omiCliParameters.append("}")
+    # omiCliParameters.append("}")
 
     # Call OMI CLI in subprocess
     omiCliProcess = Popen(omiCliParameters, stdout = PIPE, stderr = PIPE)

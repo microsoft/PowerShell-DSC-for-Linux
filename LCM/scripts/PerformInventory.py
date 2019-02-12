@@ -111,7 +111,7 @@ def perform_inventory(args):
     dsc_sysconfdir = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
     dsc_reportdir = join(dsc_sysconfdir, 'InventoryReports')
     # omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
-    dsc_host_path = join(helperlib.CONFIG_BINDIR, 'dsc_host')
+    dsc_host_path = '/opt/dsc/bin/dsc_host'
     dsc_configuration_path = join(dsc_sysconfdir, 'configuration')
     temp_report_path = join(dsc_configuration_path, 'Inventory.xml.temp')
     report_path = join(dsc_configuration_path, 'Inventory.xml')
