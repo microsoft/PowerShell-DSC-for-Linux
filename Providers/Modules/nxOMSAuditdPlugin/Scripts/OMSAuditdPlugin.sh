@@ -336,6 +336,10 @@ case $1 in
         fi
 
         if [ -n "$7" ]; then
+            if /sbin/auditctl -s | grep -qe 'enabled[=| ]2'; then
+                echo "Audit configuration is locked for the current session. The system needs to be rebooted to update the auditing rules."
+                exit 7
+            fi
             TmpFile=$(mktemp /tmp/OMSAuditdPlugin.XXXXXXXX)
             cp $7 $TmpFile
             /sbin/auditctl -R $TmpFile
