@@ -466,10 +466,11 @@ nxOMSGenerateInventoryMof:
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
+Y
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.17"; \
+	VERSION="3.18"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
