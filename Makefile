@@ -466,7 +466,6 @@ nxOMSGenerateInventoryMof:
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
-Y
 
 nxOMSPlugin:
 	rm -rf output/staging; \
