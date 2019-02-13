@@ -124,6 +124,7 @@
 
 #define OMI_BaseResource_Method_InputResource                 MI_T("InputResource")
 #define OMI_BaseResource_Method_Result                        MI_T("Result")
+#define OMI_BaseResource_Method_MIReturn                      MI_T("MIReturn")
 #define OMI_BaseResource_Method_ProviderContext               MI_T("ProviderContext")
 #define OMI_BaseResource_Method_ReturnValue                   MI_T("ReturnValue")
 #define OMI_BaseResource_Method_Configurations                MI_T("Configurations")

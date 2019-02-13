@@ -119,4 +119,17 @@ MI_Result NativeResourceProvider_GetInventory(
     _Outptr_result_maybenull_ MI_Instance **extendedError
 );
 
+//
+// Invokes SetTargetResource on the resource provider
+//
+MI_Result NativeResourceProvider_SetTargetResource(
+    _In_ NativeResourceProvider* resourceProvider,
+    _In_ MI_Application *miApplication,
+    _In_ MI_Session *miSession,
+    _In_ MI_Instance *nativeResource,
+    _In_ const MI_Instance *resourceProviderRegistration,
+    _Outptr_ MI_Uint32 *p_operation_result,
+    _Outptr_result_maybenull_ MI_Instance **extendedError
+);
+
 #endif _NATIVE_RESOURCE_HOST_MI_MODULE_H

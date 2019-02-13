@@ -941,3 +941,78 @@ EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
 
     return returnValue;
 }
+
+/**************************************************************************************************/
+/*                                                                                                */
+/*  NativeResourceProvider_SetTargetResource                                                      */
+/*                                                                                                */
+/**************************************************************************************************/
+
+MI_Result NativeResourceProvider_SetTargetResource(
+    _In_ NativeResourceProvider* resourceProvider,
+    _In_ MI_Application *miApplication,
+    _In_ MI_Session *miSession,
+    _In_ MI_Instance *nativeResource,
+    _In_ const MI_Instance *resourceProviderRegistration,
+    _Outptr_ MI_Uint32 *p_operation_result,
+    _Outptr_result_maybenull_ MI_Instance **extendedError)
+{
+    if (extendedError == NULL)
+    {
+        Tprintf(MI_T("*********** %T:%d in %T ~ extendedError is NULL\n"), __FILE__, __LINE__, __FUNCTION__);
+        return MI_RESULT_INVALID_PARAMETER;
+    }
+    *extendedError = NULL;
+
+    ptrdiff_t start,finish;
+    MI_Real64 duration;
+
+    MI_Result returnValue = MI_RESULT_OK;
+
+    ProviderCallbackContext* providerCallbackContext = resourceProvider->_private.callbackContext;
+    LCMProviderContext*lcmProviderContext = providerCallbackContext->lcmProviderContext;
+
+    DSC_EventWriteEngineMethodParameters(
+        __WFUNCTION__,
+        nativeResource->classDecl->name,
+        providerCallbackContext->resourceId,
+        0,
+        lcmProviderContext->executionMode,
+        resourceProviderRegistration->nameSpace);
+
+    start = CPU_GetTimeStamp();
+    SetMessageInContext(ID_OUTPUT_OPERATION_START, ID_OUTPUT_ITEM_SET, lcmProviderContext);
+    LogCAMessage(lcmProviderContext, ID_OUTPUT_EMPTYSTRING, providerCallbackContext->resourceId);
+
+    // Invoke SetTargetResource
+    MI_Instance* outputResource = NULL;
+    returnValue = InvokeMethod(resourceProvider, OMI_BaseResource_SetMethodName, nativeResource, &outputResource, extendedError);
+    Tprintf(MI_T("*********** %T:%d in %T ~ InvokeMethod == %d\n"), __FILE__, __LINE__, __FUNCTION__, returnValue);
+    EH_CheckResult(returnValue);
+
+    // Get the output resource returned by SetTargetResource
+    MI_Value outputResourceValue;
+    returnValue = DSC_MI_Instance_GetElement(outputResource, OMI_BaseResource_Method_MIReturn, &outputResourceValue, NULL, NULL, NULL);
+    Tprintf(MI_T("*********** %T:%d in %T ~ DSC_MI_Instance_GetElement == %d\n"), __FILE__, __LINE__, __FUNCTION__, returnValue);
+
+    Tprintf(MI_T("---------------------------------------------------\n"));
+    Tprintf(MI_T("%T:%d in %T ~ Printing outputResource\n"), __FILE__, __LINE__, __FUNCTION__);
+    Print_MI_Instance(outputResource);
+    Tprintf(MI_T("---------------------------------------------------\n"));
+
+    EH_CheckResult(returnValue);
+    
+    *p_operation_result = (MI_Uint32)outputResourceValue.boolean;
+
+EH_UNWIND;// Empty statement needed for not-C99-standard compiler on Linux
+
+    // Log the duration of the operation
+    finish = CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+    SetMessageInContext(ID_OUTPUT_OPERATION_END, ID_OUTPUT_ITEM_SET, lcmProviderContext);
+    LogCAMessageTime(lcmProviderContext, ID_CA_GET_TIMEMESSAGE, (const MI_Real64)duration, providerCallbackContext->resourceId);
+
+    DSC_EventWriteMethodEnd(__WFUNCTION__);
+
+    return returnValue;
+}

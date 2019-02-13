@@ -1614,81 +1614,159 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
 {
     MI_Result result = MI_RESULT_OK;
     *resultStatus = 0;
+    MI_Uint32 test_operation_result = 0;
+    MI_Uint32 set_operation_result = 0;
+    MI_Real64 duration;
+    ptrdiff_t start,finish;
+
+    if (provContext->nativeResourceManager == NULL)
+    {
+        return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
+    }
+
+    Tprintf(MI_T("---------------------------------------------------\n"));
+    Tprintf(MI_T("%T:%d in %T ~ regInstance\n"), __FILE__, __LINE__, __FUNCTION__);
+    Print_MI_Instance(regInstance);
+    Tprintf(MI_T("---------------------------------------------------\n"));
+
+    // // Get the path to the resource provider module (dll)
+    // MI_Value pathValue;
+    // result = MI_Instance_GetElement(regInstance, MSFT_NativeConfigurationProviderRegistration_Path, &pathValue, NULL, NULL, NULL);
+    // Tprintf(MI_T("%T:%d in %T ~ MI_Instance_GetElement == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+    // if (result != MI_RESULT_OK)
+    // {
+    //     return result;
+    // }
+    // MI_Char* resourceProviderPath = pathValue.string;
+    // Tprintf(MI_T("%T:%d in %T ~ resourceProviderPath == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resourceProviderPath);
+
+    // Get ClassName
+    MI_Value class_name_value;
+    result = MI_Instance_GetElement(regInstance, MI_T("ClassName"), &class_name_value, NULL, NULL, NULL);
+    Tprintf(MI_T("%T:%d in %T ~ MI_Instance_GetElement == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+    if (result != MI_RESULT_OK)
+    {
+        return result;
+    }
+    MI_Char* class_name = class_name_value.string;
+    Tprintf(MI_T("%T:%d in %T ~ class_name == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, class_name);
+
+    // Get provider .so path for class
+    MI_Char resources_so_path[MAX_PATH];
+    int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+    if (ret == -1)
+    {
+        return result;
+    }
+    Tprintf(MI_T("%T:%d in %T ~ resources_so_path == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resources_so_path);
+
+    // Get the path to the resource provider module (.so)
+    size_t resourceProviderPathLength = (MI_Uint32)(Tcslen(resources_so_path) + 1) ;
+    MI_Char* resourceProviderPath = (MI_Char*)DSC_malloc(resourceProviderPathLength * sizeof(MI_Char), NitsHere());
+    if( resourceProviderPath == NULL)
+    {
+        return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
+    }
+    result = Stprintf(resourceProviderPath, resourceProviderPathLength, MI_T("%T"), resources_so_path);
+
+    Tprintf(MI_T("%T:%d in %T ~ resourceProviderPath == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resourceProviderPath);
+
+    NativeResourceProvider* nativeResourceProvider = NULL;
+    result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
+    Tprintf(MI_T("%T:%d in %T ~ NativeResourceManager_GetNativeResouceProvider == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+    if (result != MI_RESULT_OK)
+    {
+        return result;
+    }
+
+    Tprintf(MI_T("************* %T:%d in %T ~ Ready to perform operation\n"), __FILE__, __LINE__, __FUNCTION__);
 
     // Execute Test unless SETONLY was provided
     if (!(flags & LCM_EXECUTE_SETONLY)) {
-        if (provContext->nativeResourceManager == NULL)
-        {
-            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
-        }
+        Tprintf(MI_T("************* %T:%d in %T ~ Now performing TEST operation\n"), __FILE__, __LINE__, __FUNCTION__);
 
-        Tprintf(MI_T("---------------------------------------------------\n"));
-        Tprintf(MI_T("%T:%d in %T ~ regInstance\n"), __FILE__, __LINE__, __FUNCTION__);
-        Print_MI_Instance(regInstance);
-        Tprintf(MI_T("---------------------------------------------------\n"));
+        //Stop the timer for test
+        finish=CPU_GetTimeStamp();
+        duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+        SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_TEST,provContext->lcmProviderContext);
+        // LogCAMessageTime(provContext->lcmProviderContext, ID_CA_TEST_TIMEMESSAGE, (const MI_Real64)duration,provContext->resourceId);
 
-        // // Get the path to the resource provider module (dll)
-        // MI_Value pathValue;
-        // result = MI_Instance_GetElement(regInstance, MSFT_NativeConfigurationProviderRegistration_Path, &pathValue, NULL, NULL, NULL);
-        // Tprintf(MI_T("%T:%d in %T ~ MI_Instance_GetElement == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
-        // if (result != MI_RESULT_OK)
-        // {
-        //     return result;
-        // }
-        // MI_Char* resourceProviderPath = pathValue.string;
-        // Tprintf(MI_T("%T:%d in %T ~ resourceProviderPath == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resourceProviderPath);
+        // DSC_EventWriteMessageInvokingSession(provNamespace,instance->classDecl->name,OMI_BaseResource_TestMethodName);
+        // SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_TEST,provContext->lcmProviderContext);
+        // LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
 
-        // Get ClassName
-        MI_Value class_name_value;
-        result = MI_Instance_GetElement(regInstance, MI_T("ClassName"), &class_name_value, NULL, NULL, NULL);
-        Tprintf(MI_T("%T:%d in %T ~ MI_Instance_GetElement == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
-        if (result != MI_RESULT_OK)
-        {
-            return result;
-        }
-        MI_Char* class_name = class_name_value.string;
-        Tprintf(MI_T("%T:%d in %T ~ class_name == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, class_name);
+        result = NativeResourceProvider_TestTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &test_operation_result, extendedError);
+        Tprintf(MI_T("************* %T:%d in %T ~ NativeResourceProvider_TestTargetResource == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
 
-        // Get provider .so path for class
-        MI_Char resources_so_path[MAX_PATH];
-        int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
-        if (ret == -1)
-        {
-            return result;
-        }
-        Tprintf(MI_T("%T:%d in %T ~ resources_so_path == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resources_so_path);
-
-        // Get the path to the resource provider module (.so)
-        size_t resourceProviderPathLength = (MI_Uint32)(Tcslen(resources_so_path) + 1) ;
-        MI_Char* resourceProviderPath = (MI_Char*)DSC_malloc(resourceProviderPathLength * sizeof(MI_Char), NitsHere());
-        if( resourceProviderPath == NULL)
-        {
-            return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
-        }
-        result = Stprintf(resourceProviderPath, resourceProviderPathLength, MI_T("%T"), resources_so_path);
-
-        Tprintf(MI_T("%T:%d in %T ~ resourceProviderPath == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resourceProviderPath);
-
-        NativeResourceProvider* nativeResourceProvider = NULL;
-        result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
-        Tprintf(MI_T("%T:%d in %T ~ NativeResourceManager_GetNativeResouceProvider == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
-        if (result != MI_RESULT_OK)
-        {
-            return result;
-        }
-
-        result = NativeResourceProvider_TestTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, resultStatus, extendedError);
-        Tprintf(MI_T("%T:%d in %T ~ NativeResourceProvider_TestTargetResource == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+        //Stop the timer for test
+        finish=CPU_GetTimeStamp();
+        duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+        SetMessageInContext(ID_OUTPUT_OPERATION_END,ID_OUTPUT_ITEM_TEST,provContext->lcmProviderContext);
+        LogCAMessageTime(provContext->lcmProviderContext, ID_CA_TEST_TIMEMESSAGE, (const MI_Real64)duration,provContext->resourceId);
     }
 
     /* Skip rest of the operation if we were asked just to test.*/
     if (flags & LCM_EXECUTE_TESTONLY)
     {
+        if(test_operation_result == 1) // TestTargetResource returned TRUE
+        {
+            *resultStatus = 1;
+        }
+        else // TestTargetResource returned FALSE
+        {
+            *resultStatus = 0;
+        }
+
+        Tprintf(MI_T("************* %T:%d in %T ~ LCM_EXECUTE_TESTONLY , resultStatus = %d\n"), __FILE__, __LINE__, __FUNCTION__, *resultStatus);
+
         return result;
     }
 
-    // Set operation is not implemented. return error if Set was called.
-    return MI_RESULT_FAILED;
+    /* Perform Set if value returned is FALSE*/
+    if(test_operation_result == 1) // TestTargetResource returned TRUE, so we are skipping SetTargetResource 
+    {
+        SetMessageInContext(ID_OUTPUT_OPERATION_SKIP,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
+        LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
+
+        Tprintf(MI_T("************* %T:%d in %T ~ No need to perform SET since TEST returned %d\n"), __FILE__, __LINE__, __FUNCTION__, test_operation_result);
+
+        return result;
+    }
+
+    Tprintf(MI_T("************* %T:%d in %T ~ Now performing SET operation\n"), __FILE__, __LINE__, __FUNCTION__);
+
+    /* Perform Set*/
+    //Start timer for set
+    start=CPU_GetTimeStamp();
+    SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
+    // LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
+    // DSC_EventWriteMessageInvokingSession(provNamespace,instance->classDecl->name,OMI_BaseResource_SetMethodName);
+
+    // SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_TEST,provContext->lcmProviderContext);
+    // LogCAMessageTime(provContext->lcmProviderContext, ID_CA_TEST_TIMEMESSAGE, (const MI_Real64)duration,provContext->resourceId);
+
+    result = NativeResourceProvider_SetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &set_operation_result, extendedError);
+    Tprintf(MI_T("************* %T:%d in %T ~ NativeResourceProvider_SetTargetResource == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+
+    if(set_operation_result == 1) // TestTargetResource returned TRUE
+    {
+        *resultStatus = 1;
+    }
+    else // TestTargetResource returned FALSE
+    {
+        *resultStatus = 0;
+    }
+
+    
+    //Stop the timer for set
+    finish=CPU_GetTimeStamp();
+    duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
+    SetMessageInContext(ID_OUTPUT_OPERATION_END,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
+    LogCAMessageTime(provContext->lcmProviderContext, ID_CA_SET_TIMEMESSAGE, (const MI_Real64)duration,provContext->resourceId);
+
+    Tprintf(MI_T("************* %T:%d in %T ~ SET operation done, returned %d\n"), __FILE__, __LINE__, __FUNCTION__, *resultStatus);
+
+    return result;
 }
 
 MI_Result GetSetMethodResult(_In_ MI_Operation *operation,
