@@ -105,6 +105,7 @@ SHLIB_EXT: 'so'
 /opt/dsc; 777; ${{RUN_AS_USER}}; root
 /opt/dsc/bin; 777; ${{RUN_AS_USER}}; root
 /opt/dsc/lib; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/output; 777; ${{RUN_AS_USER}}; root
 #endif
 
 %Links
