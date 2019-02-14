@@ -1228,11 +1228,60 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
                            _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                            _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    if( Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
+    if( // Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
     {
         return Inventory_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstances, extendedError);
     }
+    else if (1) // (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+    {
+        MI_Result result = MI_RESULT_OK;
+        if (provContext->nativeResourceManager == NULL)
+            return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
+
+        // Get ClassName
+        MI_Value class_name_value;
+        result = MI_Instance_GetElement(regInstance, MI_T("ClassName"), &class_name_value, NULL, NULL, NULL);
+        // Tprintf(MI_T("%T:%d in %T ~ MI_Instance_GetElement == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+        MI_Char* class_name = class_name_value.string;
+        // Tprintf(MI_T("%T:%d in %T ~ class_name == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, class_name);
+
+        // Get provider .so path for class
+        MI_Char resources_so_path[MAX_PATH];
+        int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+        if (ret == -1)
+        {
+            return result;
+        }
+        // Tprintf(MI_T("%T:%d in %T ~ resources_so_path == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resources_so_path);
+
+        // Get the path to the resource provider module (.so)
+        size_t resourceProviderPathLength = (MI_Uint32)(Tcslen(resources_so_path) + 1) ;
+        MI_Char* resourceProviderPath = (MI_Char*)DSC_malloc(resourceProviderPathLength * sizeof(MI_Char), NitsHere());
+        if( resourceProviderPath == NULL)
+        {
+            return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
+        }
+        result = Stprintf(resourceProviderPath, resourceProviderPathLength, MI_T("%T"), resources_so_path);
+
+        // Tprintf(MI_T("%T:%d in %T ~ resourceProviderPath == '%T'\n"), __FILE__, __LINE__, __FUNCTION__, resourceProviderPath);
+
+        NativeResourceProvider* nativeResourceProvider = NULL;
+        result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
+        // Tprintf(MI_T("%T:%d in %T ~ NativeResourceManager_GetNativeResouceProvider == %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
+        if (result != MI_RESULT_OK)
+        {
+            return result;
+        }
+
+        result = NativeResourceProvider_GetInventory(nativeResourceProvider, miApp, miSession, instance, regInstance,/* flags,*/ outputInstances, extendedError);
+        
+        return result;
+    } 
     else
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
@@ -2614,6 +2663,16 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
         return GetCimMIError(r, extendedError,ID_CAINFRA_NEWSESSION_FAILED);
     }
 
+    // Instantiate native resource manager, responsible to load/unload native resource provider. 
+    r = NativeResourceManager_New(&providerContext, &(providerContext.nativeResourceManager));
+    if( r != MI_RESULT_OK)
+    {
+        // CleanUpGetCache(outInstances);
+        // DSC_free(outInstances->data);
+        // outInstances->size = 0;
+        // MI_Session_Close(&miSession, NULL, NULL);
+        return r;
+    }
 
     /*Assuming the dependencies is implicit (the order in which instances are specified in instance document). */
     /*Get the instance compatible with the provider.*/
@@ -2639,7 +2698,9 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
         providerContext.resourceId = GetResourceId(instanceA->data[xCount]);    
         
         /* Get the inventory.*/
+        Tprintf(MI_T("***** %s:%d, calling PerformInventoryState\n"), __FILE__, __LINE__, __FUNCTION__);
         r = PerformInventoryState(&providerContext, moduleLoader->application, &miSession, filteredInstance, regInstance, &inventoryInstancesResult, extendedError);
+        Tprintf(MI_T("***** %s:%d, called PerfomInventoryState = %d\n"), __FILE__, __LINE__, __FUNCTION__, r);
         MI_Instance_Delete(filteredInstance);
         filteredInstance = NULL;
         
@@ -2685,11 +2746,14 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
     }
     else
     {
-	outInstances->data = NULL;
-	outInstances->size = 0;
+        outInstances->data = NULL;
+        outInstances->size = 0;
     }
 
-    MI_Session_Close(&miSession, NULL, NULL);    
+    MI_Session_Close(&miSession, NULL, NULL);
+
+    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+
     return r;
 }
 
