@@ -32,7 +32,7 @@ DEFINES = MI_CONST= HOOK_BUILD $(BUILD_OMS)
 
 ##LIBRARIES = dsc_library mi pal ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure
 #LIBRARIES = ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure mi pal omi_error  micodec mofparser base pal curl xmlserializer dsccore dsc_library mi $(PALLIBS)
-LIBRARIES = dsc_library mi $(PALLIBS) ssl ConfigurationManager CAEngine EngineHelper ModuleHandler curl micodec mofparser base pal
+LIBRARIES = dsc_library mi $(PALLIBS) ssl ConfigurationManager CAEngine EngineHelper ModuleHandler curl micodec mofparser base pal stdc++
 
 include $(OMI)/mak/rules.mak
 
