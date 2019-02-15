@@ -114,16 +114,16 @@ SHLIB_EXT: 'so'
 %Dependencies
 #if BUILD_OMS == 1
 #if PACKAGE_TYPE == RPM
-omsagent >= 1.0.0
+omsagent >= 1.8.1
 #else
-omsagent (>= 1.0.0)
+omsagent (>= 1.8.1)
 #endif
 #endif
-#if PACKAGE_TYPE == RPM
-omi >= 1.0.8-6
-#else
-omi (>= 1.0.8.6)
-#endif
+# #if PACKAGE_TYPE == RPM
+# omi >= 1.0.8-6
+# #else
+# omi (>= 1.0.8.6)
+# #endif
 
 %Preinstall_10
 PREREQ_ERROR=0
