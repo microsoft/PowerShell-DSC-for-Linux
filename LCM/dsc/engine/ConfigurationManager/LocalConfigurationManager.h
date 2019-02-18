@@ -17,7 +17,6 @@
 #ifndef _LOCALCONFIGURATIONMANAGER_H
 #define _LOCALCONFIGURATIONMANAGER_H
 
-
 void UnloadFromProvider(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context);
@@ -50,7 +49,6 @@ void Invoke_GetConfiguration(
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
     _In_opt_ const MSFT_DSCLocalConfigurationManager_GetConfiguration* in);
 
-
 void Invoke_ApplyConfiguration(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context,
@@ -60,7 +58,6 @@ void Invoke_ApplyConfiguration(
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
     _In_opt_ const MSFT_DSCLocalConfigurationManager_ApplyConfiguration* in);
 
-
 void Invoke_SendMetaConfigurationApply(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context,
@@ -69,7 +66,6 @@ void Invoke_SendMetaConfigurationApply(
     _In_opt_z_ const MI_Char* methodName,
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
     _In_opt_ const MSFT_DSCLocalConfigurationManager_SendMetaConfigurationApply* in);
-
 
 void Invoke_GetMetaConfiguration(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
@@ -98,7 +94,6 @@ void Invoke_TestConfiguration(
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
     _In_opt_ const MSFT_DSCLocalConfigurationManager_TestConfiguration* in);
 
-
 void Invoke_PerformRequiredConfigurationChecks(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context,
@@ -117,7 +112,6 @@ void Invoke_StopConfiguration(
     _In_ const MSFT_DSCLocalConfigurationManager* instanceName,
     _In_opt_ const MSFT_DSCLocalConfigurationManager_StopConfiguration* in);
 
-
 typedef struct _Context_Invoke_Basic
 {
     MI_Context *context;
@@ -129,7 +123,5 @@ typedef struct _Context_Invoke_Basic
     MI_Boolean dataExist;
     
 } Context_Invoke_Basic;
-
-
 
 #endif

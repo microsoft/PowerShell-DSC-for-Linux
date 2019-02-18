@@ -919,4 +919,72 @@ FILE_EVENT1(4335, MessageDscEngineRegisteringSignalHandler_Impl, LOG_DEBUG, PAL_
 #endif
 FILE_EVENT1(4336, MessageDscEngineSignalHandlerWaitingForPorcess_Impl, LOG_DEBUG, PAL_T("Job %s : \nDsc Engine waiting for Child Process to Terminate"), const TChar*)
 
+#if defined(CONFIG_ENABLE_DEBUG)
+#define GettingTheClassDeclFailed(a0) GettingTheClassDeclFailed_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define GettingTheClassDeclFailed(a0) GettingTheClassDeclFailed_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4614, GettingTheClassDeclFailed_Impl, LOG_ERR, PAL_T("Getting the MI_ClassDecl for class name &apos;%s&apos; Failed."), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define GettingTheMethodDeclSucceeded(a0) GettingTheMethodDeclSucceeded_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define GettingTheMethodDeclSucceeded(a0) GettingTheMethodDeclSucceeded_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4615, GettingTheMethodDeclSucceeded_Impl, LOG_INFO, PAL_T("Getting the MI_MethodDecl for method name &apos;%s&apos; succeeded."), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define GettingTheMethodDeclFailed(a0) GettingTheMethodDeclFailed_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define GettingTheMethodDeclFailed(a0) GettingTheMethodDeclFailed_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4616, GettingTheMethodDeclFailed_Impl, LOG_ERR, PAL_T("Getting the MI_MethodDecl for method name &apos;%s&apos; failed."), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define GettingTheHostNameFailed(a0) GettingTheHostNameFailed_Impl(__FILE__, __LINE__, a0)
+#else
+#define GettingTheHostNameFailed(a0) GettingTheHostNameFailed_Impl(0, 0, a0)
+#endif
+FILE_EVENT1(4617, GettingTheHostNameFailed_Impl, LOG_ERR, PAL_T("Getting the hostname failed with error code &apos;%s&apos;."), MI_Uint32)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define UnSupportedHostMethodCalled(a0) UnSupportedHostMethodCalled_Impl(__FILE__, __LINE__, tcs(a0))
+#else
+#define UnSupportedHostMethodCalled(a0) UnSupportedHostMethodCalled_Impl(0, 0, tcs(a0))
+#endif
+FILE_EVENT1(4618, UnSupportedHostMethodCalled_Impl, LOG_ERR, PAL_T("Unsupported host method &apos;%s&apos; called."), const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define InvokingNativeResourceMethod(a0, a1, a2) InvokingNativeResourceMethod_Impl(__FILE__, __LINE__, tcs(a0), tcs(a1), tcs(a2))
+#else
+#define InvokingNativeResourceMethod(a0, a1, a2) InvokingNativeResourceMethod_Impl(0, 0, tcs(a0), tcs(a1), tcs(a2))
+#endif
+FILE_EVENT3(4619, InvokingNativeResourceMethod_Impl, LOG_INFO, PAL_T("Invoking resource method &apos;%s&apos; with class name &apos;%s&apos; from prodvider path  &apos;%s&apos;."), const TChar*, const TChar*, const TChar*)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define CreateHostContextSucceeded() CreateHostContextSucceeded_Impl(__FILE__, __LINE__)
+#else
+#define CreateHostContextSucceeded() CreateHostContextSucceeded_Impl(0, 0)
+#endif
+FILE_EVENT0(4620, CreateHostContextSucceeded_Impl, LOG_INFO, PAL_T("Creating host context succeeded."))
+#if defined(CONFIG_ENABLE_DEBUG)
+#define MIModuleVersionMisMatch(a0, a1) MIModuleVersionMisMatch_Impl(__FILE__, __LINE__, a0, a1)
+#else
+#define MIModuleVersionMisMatch(a0, a1) MIModuleVersionMisMatch_Impl(0, 0, a0, a1)
+#endif
+FILE_EVENT2(4621, MIModuleVersionMisMatch_Impl, LOG_ERR, PAL_T("Version mismatch between the current MI_Module version (&apos;%s&apos;) and the provider module version (&apos;%s&apos;)."), MI_Uint32, MI_Uint32)
+#if defined(CONFIG_ENABLE_DEBUG)
+#define CreateHostContextFailed() CreateHostContextFailed_Impl(__FILE__, __LINE__)
+#else
+#define CreateHostContextFailed() CreateHostContextFailed_Impl(0, 0)
+#endif
+FILE_EVENT0(4622, CreateHostContextFailed_Impl, LOG_ERR, PAL_T("Creating host context failed."))
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define LoadingDLLSucceeded(a0) LoadingDLLSucceeded_Impl(__FILE__, __LINE__, a0)
+#else
+#define LoadingDLLSucceeded(a0) LoadingDLLSucceeded_Impl(0, 0, a0)
+#endif
+FILE_EVENT1(4623, LoadingDLLSucceeded_Impl, LOG_INFO, PAL_T("Loading the native provider .so from &apos;%s&apos; succeeded."), const TChar*)
+
+#if defined(CONFIG_ENABLE_DEBUG)
+#define GettingTheSchemaSucceeded(a0) GettingTheSchemaSucceeded_Impl(__FILE__, __LINE__, a0)
+#else
+#define GettingTheSchemaSucceeded(a0) GettingTheSchemaSucceeded_Impl(0, 0, a0)
+#endif
+FILE_EVENT1(4624, GettingTheSchemaSucceeded_Impl, LOG_INFO, PAL_T("Getting the schema class for &apos;%s&apos; succeeded."), const TChar*)
 

@@ -22,7 +22,8 @@ INCLUDES = \
 	$(DSCTOP)/engine/ca/CAInfrastructure \
 	$(DSCTOP)/engine/ModuleLoader/ModuleLibrary \
 	$(TOP)/codec/common \
-	$(OMI)/nits/base
+	$(OMI)/nits/base \
+	$(TOP)/json_parson
 
 DEFINES = MI_CONST= HOOK_BUILD $(BUILD_OMS)
 

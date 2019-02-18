@@ -18,6 +18,7 @@
 #ifndef __MODULEHANDLER_H_
 #define __MODULEHANDLER_H_
 #include <MI.h>
+#include <EngineHelperInternal.h>
 
 
 typedef struct _ModuleManager ModuleManager;

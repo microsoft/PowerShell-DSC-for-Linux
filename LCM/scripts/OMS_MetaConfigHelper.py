@@ -226,7 +226,7 @@ exit_code = proc.wait()
 stdout, stderr = proc.communicate()
 printVerboseMessage("Output from: " + commandToRun + ": " + str(stdout))
 
-if ((exit_code == 0) and (stderr == '' or (sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == '')) and ('ReturnValue=0' in str(stdout))):
+if ((exit_code == 0) and (stderr == '' or (sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == '')) and ('Operation SendMetaConfigurationApply completed successfully.' in str(stdout))):
     printVerboseMessage('Successfully configured omsconfig.')
 else:
     if exit_code == 0:

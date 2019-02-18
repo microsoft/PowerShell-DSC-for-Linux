@@ -608,3 +608,5 @@ INTERNAL_Intlstr_Define0(ID_LCMHELPER_TEST_OPERATION_AGAINST_PENDING ,
                          ID_LCMHELPER_TEST_OPERATION_AGAINST_PENDING ,
                          "The TEST operation will be carried against a pending configuration since the latest configuration has not converged yet.")
  
+INTERNAL_Intlstr_Define0( ID_DSC_OPERATION_CONTEXT_INVALID_OPERATION , ID_DSC_OPERATION_CONTEXT_INVALID_OPERATION , "Invalid value for DSC Operation Context")
+INTERNAL_Intlstr_Define0( ID_DSC_HOST_INVALID_OPERATION , ID_DSC_HOST_INVALID_OPERATION , "Invalid value for DSC Operation")

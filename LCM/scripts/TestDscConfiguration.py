@@ -3,17 +3,20 @@ import fileinput
 import sys
 import subprocess
 
-omi_bindir = "<CONFIG_BINDIR>"
-omicli_path = omi_bindir + "/omicli"
+# omi_bindir = "<CONFIG_BINDIR>"
+# omicli_path = omi_bindir + "/omicli"
 
 parameters = []
-parameters.append(omicli_path)
-parameters.append("iv")
-parameters.append("<DSC_NAMESPACE>")
-parameters.append("{")
-parameters.append("MSFT_DSCLocalConfigurationManager")
-parameters.append("}")
+parameters.append("/opt/dsc/bin/dsc_host")
+parameters.append("/opt/dsc/output")
 parameters.append("TestConfiguration")
+# parameters.append(omicli_path)
+# parameters.append("iv")
+# parameters.append("<DSC_NAMESPACE>")
+# parameters.append("{")
+# parameters.append("MSFT_DSCLocalConfigurationManager")
+# parameters.append("}")
+# parameters.append("TestConfiguration")
 
 #s = ""
 #for param in parameters:

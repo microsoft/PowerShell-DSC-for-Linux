@@ -66,12 +66,6 @@ enum ServerOperation
 
 typedef struct _RequestContainer
 {
-#if defined (_MSC_VER)
-    HINTERNET httpSession;
-    HINTERNET httpConnection;
-    HINTERNET httpRequest;
-    Sem httpRequestDoneEvent;
-#endif
     // common
     MI_Uint32 serverOperation;
     MI_Boolean httpResponseReveived;

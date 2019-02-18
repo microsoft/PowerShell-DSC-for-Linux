@@ -17,16 +17,12 @@
 #ifndef __EVENTWRAPPER_H_
 #define __EVENTWRAPPER_H_
 
-#if defined(_MSC_VER)
-#include "DscCoreREvents.h"
-#else
 #ifndef Hex_Int32
 #define Hex_Int32 int
 #endif
+
 #define NOTINCLUDE_OMILOGGING
 #include <base/paths.h>
-#endif 
-
 
 #define WIDEN(x) MI_T(x)
 #define __WFUNCTION__ WIDEN(__FUNCTION__)
@@ -61,13 +57,8 @@ extern "C" {
 #endif
 
 unsigned long DSC_EventRegister();
-
 unsigned long DSC_EventUnRegister();
 
-#if defined(_MSC_VER)
-#define ExpandEvent(eventdefinition) EventWrite ## eventdefinition
-
-#else
 #define ExpandEvent(eventdefinition) eventdefinition
 
 #define FILE_EVENT0(eventId, eventName, priority, format)                                               \
@@ -145,7 +136,6 @@ void DSCFilePutLog(
     ...);
 
 #include <eventing/oidsc.h>
-#endif
 
 #define DSC_EventWriteLCMSendConfigurationError(ComponentName,ErrorId, ErrorDetail, ResourceId, SourceInfo, errorMessage) \
      ExpandEvent(LCMSendConfigurationError( g_ConfigurationDetails.jobGuidString, ComponentName, ErrorId, ErrorDetail, ResourceId, SourceInfo, errorMessage))
@@ -530,6 +520,38 @@ void DSCFilePutLog(
     ExpandEvent(LCMAgentIdWriteToRegistrySuccess(JobGuidString, AgentIdString))
 
 //********************* End DscTimer Events ********************//
+
+//**************** Native Provider Manager *******************************//
+
+#define DSC_EventGettingTheClassDeclFailed(className) \
+    ExpandEvent(GettingTheClassDeclFailed(className))
+
+#define DSC_EventGettingTheMethodDeclSucceeded(MethodName) \
+    ExpandEvent(GettingTheMethodDeclSucceeded(MethodName))
+
+#define DSC_EventGettingTheHostNameFailed(ErrorCode) \
+    ExpandEvent(GettingTheHostNameFailed(ErrorCode))
+
+#define DSC_EventUnSupportedHostMethodCalled(MethodName) \
+    ExpandEvent(UnSupportedHostMethodCalled(MethodName))
+
+#define DSC_EventInvokingNativeResourceMethod(MethodName, ClassName, ProviderPath) \
+    ExpandEvent(InvokingNativeResourceMethod(MethodName, ClassName, ProviderPath))
+
+#define DSC_EventCreateHostContextSucceeded() \
+    ExpandEvent(CreateHostContextSucceeded())
+
+#define DSC_EventMIModuleVersionMisMatch(CurrentVersion, ProviderVersion) \
+    ExpandEvent(MIModuleVersionMisMatch(CurrentVersion, ProviderVersion))
+
+#define DSC_EventCreateHostContextFailed() \
+    ExpandEvent(CreateHostContextFailed())
+
+#define DSC_EventWriteLoadingDLLSucceeded(DllFullPath) \
+    ExpandEvent(LoadingDLLSucceeded(DllFullPath))
+
+#define DSC_EventGettingTheSchemaSucceeded(ClassName) \
+    ExpandEvent(GettingTheSchemaSucceeded(ClassName))
 
 
 #ifdef __cplusplus

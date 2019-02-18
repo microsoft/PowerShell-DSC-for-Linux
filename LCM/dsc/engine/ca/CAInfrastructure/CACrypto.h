@@ -21,10 +21,6 @@
 #include "MI.h"
 #include "ModuleHandler.h"
 
-#if defined(_MSC_VER)
-#include <wincrypt.h>
-#endif
-
 #define CER_PATH_LENGTH 512
 
 #ifdef __cplusplus

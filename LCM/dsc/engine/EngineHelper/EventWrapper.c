@@ -17,39 +17,17 @@
 #include <MI.h>
 #include "DSC_Systemcalls.h"
 #include "EventWrapper.h"
-
-
-#if defined(_MSC_VER)
-#include "Win32_EngineHelper.h"
-ConfigurationDetails g_ConfigurationDetails = { 0, 0, MI_FALSE };
-#else
 #include <pal/cpu.h>
+#include "plog_wrapper.h"
+
 ConfigurationDetails g_ConfigurationDetails;
 static FILE *_DSCLogFile;
 static FILE *_DSCDetailedLogFile;
 static Log_Level _DSCLogLevel = OMI_WARNING;
 static Log_Level _DSCDetailedLogLevel = OMI_VERBOSE;
+
 #define FMTSIZE 1024
-#endif 
 
-
-/* Windows Functionas*/
-#if defined(_MSC_VER)
-
-
-unsigned long DSC_EventRegister()
-{
-    return EventRegisterMicrosoft_Windows_DSC();
-}
-
-unsigned long DSC_EventUnRegister()
-{
-    return EventUnregisterMicrosoft_Windows_DSC();
-}
-
-#else
-
-/* Non-windows implementation*/
 static const char* _levelDSCStrings[] =
 {
     "FATAL",
@@ -97,7 +75,6 @@ static void _PutDSCHeader(
         Ftprintf(os, ZT("%s(%u): "), scs(file), line);
 }
 
-
 int DSCLog_VPut(
     FILE * logFile,
     Log_Level level,
@@ -129,29 +106,64 @@ void DSCFilePutLog(
     const PAL_Char* format,
     ...)
 {
-    if ((unsigned int)priority > OMI_VERBOSE)
-        return;
+    // if ((unsigned int)priority > OMI_VERBOSE)
+    //     return;
 
-    if (priority <= _DSCDetailedLogLevel)
-    {
-        TChar fmt[FMTSIZE];
-        va_list ap;
+    // if (priority <= _DSCDetailedLogLevel)
+    // {
+    //     TChar fmt[FMTSIZE];
+    //     va_list ap;
 
-        Stprintf(fmt, FMTSIZE, PAL_T("EventId=%d Priority=%s "), priority, _levelDSCStrings[priority]);
-        Tcslcat(fmt, format, FMTSIZE);
+    //     Stprintf(fmt, FMTSIZE, PAL_T("EventId=%d Priority=%s "), priority, _levelDSCStrings[priority]);
+    //     Tcslcat(fmt, format, FMTSIZE);
                 
-        va_start(ap, format);
-        // Write warning and error level logs
-        DSCLog_VPut(_DSCLogFile, (Log_Level)priority, _DSCLogLevel, file, line, fmt, ap);
-        va_end(ap);        
+    //     va_start(ap, format);
+    //     // Write warning and error level logs
+    //     DSCLog_VPut(_DSCLogFile, (Log_Level)priority, _DSCLogLevel, file, line, fmt, ap);
+    //     va_end(ap);        
 
-        va_start(ap, format);
-        // Write all the logs
-        DSCLog_VPut(_DSCDetailedLogFile, (Log_Level)priority, _DSCDetailedLogLevel, file, line, fmt, ap);
-        va_end(ap);        
-    }    
+    //     va_start(ap, format);
+    //     // Write all the logs
+    //     DSCLog_VPut(_DSCDetailedLogFile, (Log_Level)priority, _DSCDetailedLogLevel, file, line, fmt, ap);
+    //     va_end(ap);        
+    // }    
+
+    va_list argumentsGetLength;
+    size_t messageLength;
+    size_t finalMessageLength;
+    char *message = NULL;
+
+    va_list arguments;
+    va_start(arguments, format);
+    
+    va_copy(argumentsGetLength, arguments);
+    messageLength = vsnprintf( NULL, 0, format, argumentsGetLength );
+    va_end(argumentsGetLength);
+    
+    if (messageLength < 0)
+    {
+        goto cleanup;
+    }
+
+    // Allocate a buffer with the right size
+    message = (char*)malloc(messageLength + 1);
+
+    finalMessageLength = vsnprintf( message, messageLength + 1, format, arguments ); // +1 for the null termination character
+
+    if (finalMessageLength < 0)
+    {
+        goto cleanup;
+    }
+
+    DSC_PLog_Write((unsigned int)priority, line, file, message);
+
+cleanup:
+
+    if (message)
+        free(message);
+        
+    va_end(arguments);
 }
-
 
 void DSCLog_Close()
 {
@@ -202,33 +214,28 @@ MI_Result DSCLog_Open(
 #endif
 }
 
-
 unsigned long DSC_EventRegister()
 {
-    char logPath[PAL_MAX_PATH_SIZE];
-    char detailedLogPath[PAL_MAX_PATH_SIZE];
-
+    return DSC_PLog_Register();
 #if defined(BUILD_OMS)
-    Strlcpy(logPath, "/var/opt/microsoft/omsconfig", PAL_MAX_PATH_SIZE);
-    Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
-    Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
-    Strlcat(logPath, "omsconfig.log", PAL_MAX_PATH_SIZE);
-    Strlcat(detailedLogPath, "omsconfigdetailed.log", PAL_MAX_PATH_SIZE);
+    
 #else
-    Strlcpy(logPath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
-    Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
-    Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
-    Strlcat(logPath, "dsc.log", PAL_MAX_PATH_SIZE);
-    Strlcat(detailedLogPath, "dscdetailed.log", PAL_MAX_PATH_SIZE);
+    // char logPath[PAL_MAX_PATH_SIZE];
+    // char detailedLogPath[PAL_MAX_PATH_SIZE];
+    // Strlcpy(logPath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
+    // Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
+    // Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
+    // Strlcat(logPath, "dsc.log", PAL_MAX_PATH_SIZE);
+    // Strlcat(detailedLogPath, "dscdetailed.log", PAL_MAX_PATH_SIZE);
+    // DSCLog_Open(logPath, &_DSCLogFile);
+    // DSCLog_Open(detailedLogPath, &_DSCDetailedLogFile);
+    // return 0;
 #endif
-    DSCLog_Open(logPath, &_DSCLogFile);
-    DSCLog_Open(detailedLogPath, &_DSCDetailedLogFile);
-    return 0;
 }
 
 unsigned long DSC_EventUnRegister()
 {
-    DSCLog_Close();
-    return 0;
+    return DSC_PLog_Unregister();
+    // DSCLog_Close();
+    // return 0;
 }
-#endif
