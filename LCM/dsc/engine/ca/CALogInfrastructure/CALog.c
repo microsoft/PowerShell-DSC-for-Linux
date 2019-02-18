@@ -20,12 +20,8 @@
 
 
 
-#define _CA_IMPORT_ 1
+#define _CA_IMPORT_ 1 
 #include "CALog.h"
-
-#if defined(_MSC_VER)
-#include <sal.h>
-#endif
 
 CAJobInformation g_CAJobInformation={EMPTY_STRING};
 MI_Boolean CAWhatIfEnabled(_In_ void *provContext)
@@ -113,12 +109,14 @@ const MI_Char *  LogCADebugMessage(_In_ void *provContext,_In_opt_z_ const MI_Ch
             {
                 if(Stprintf(fullMessage, msgLen,VERBOSE_FORMAT , g_CAJobInformation.deviceName, EMPTY_STRING, providerContext->resourceId, message) >0 )
                 {
-                    result = MI_Context_WriteDebug((MI_Context*) lcmContext->context, fullMessage);
+                    // TODO: zijalali
+                    //// Need to update this when OMI is not in the picture
+                    // result = MI_Context_WriteDebug((MI_Context*) lcmContext->context, fullMessage);
 
-                    if(result != MI_RESULT_OK)
-                    {
-                        // Ignore the failure, this doesn't impact the functionality.
-                    }
+                    // if(result != MI_RESULT_OK)
+                    // {
+                    //     // Ignore the failure, this doesn't impact the functionality.
+                    // }
                 }
                 //Return the message since the event is output from the parent rfunction
                 return fullMessage;
@@ -147,14 +145,16 @@ const MI_Char *  LogCAVerboseMessage(_In_ void *provContext,_In_opt_z_ const MI_
             {
 				if (Stprintf(fullMessage, msgLen, VERBOSE_FORMAT,g_CAJobInformation.deviceName, EMPTY_STRING, providerContext->resourceId, message) >0)
                 {
-                    if(!whatifEnabled)
-                    {
-                        result = MI_Context_WriteVerbose((MI_Context*) lcmContext->context, fullMessage);
-                    }
-                    if(result != MI_RESULT_OK)
-                    {
-                        // Ignore the failure, this doesn't impact the functionality.
-                    }
+                    // TODO: zijalali
+                    //// Need to update this when OMI is not in the picture
+                    // if(!whatifEnabled)
+                    // {
+                    //     result = MI_Context_WriteVerbose((MI_Context*) lcmContext->context, fullMessage);
+                    // }
+                    // if(result != MI_RESULT_OK)
+                    // {
+                    //     // Ignore the failure, this doesn't impact the functionality.
+                    // }
                 }
 
                 return fullMessage;
@@ -185,12 +185,14 @@ void LogCAWarningMessage(_In_ void *provContext,_In_opt_z_ const MI_Char *messag
             {                
                 if(Stprintf(fullMessage, msgLen,VERBOSE_FORMAT , g_CAJobInformation.deviceName, EMPTY_STRING, providerContext->resourceId, message) >0 )
                 {
-                    result = MI_Context_WriteWarning((MI_Context*) lcmContext->context, fullMessage);
+                    // TODO: zijalali
+                    //// Need to update this when OMI is not in the picture
+                    // result = MI_Context_WriteWarning((MI_Context*) lcmContext->context, fullMessage);
 
-                    if(result != MI_RESULT_OK)
-                    {
-                        // Ignore the failure, this doesn't impact the functionality.
-                    }
+                    // if(result != MI_RESULT_OK)
+                    // {
+                    //     // Ignore the failure, this doesn't impact the functionality.
+                    // }
                 }
 
                 DSC_free(fullMessage);
@@ -207,34 +209,35 @@ void LogCAProgressMessage(
     _In_ MI_Uint32 percentComplete,
     _In_ MI_Uint32 secondsRemaining)
 {
-    MI_Result result = MI_RESULT_OK;
+    // TODO: zijalali
+    //// Need to update this when OMI is not in the picture
+    // MI_Result result = MI_RESULT_OK;
         
-    if(activity != NULL && currentOperation != NULL && statusDescroption != NULL)
-    {
-        ProviderCallbackContext *providerContext = (ProviderCallbackContext *) provContext;
-        LCMProviderContext *lcmContext = providerContext->lcmProviderContext;
+    // if(activity != NULL && currentOperation != NULL && statusDescroption != NULL)
+    // {
+    //     ProviderCallbackContext *providerContext = (ProviderCallbackContext *) provContext;
+    //     LCMProviderContext *lcmContext = providerContext->lcmProviderContext;
 
 
-        if((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
-        {
-            result = MI_Context_WriteProgress(
-                (MI_Context*) lcmContext->context, 
-                activity, 
-                currentOperation, 
-                statusDescroption, 
-                percentComplete, 
-                secondsRemaining);
+    //     if((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
+    //     {
+    //         result = MI_Context_WriteProgress(
+    //             (MI_Context*) lcmContext->context, 
+    //             activity, 
+    //             currentOperation, 
+    //             statusDescroption, 
+    //             percentComplete, 
+    //             secondsRemaining);
 
-            if(result != MI_RESULT_OK)
-            {
-                // Ignore it...
-            }
-        }
+    //         if(result != MI_RESULT_OK)
+    //         {
+    //             // Ignore it...
+    //         }
+    //     }
 
-    }
+    // }
 
 }
-
 
 const MI_Char * GetResourceIdFromConext(_In_ void *provContext)
 {
@@ -246,20 +249,12 @@ void CALogSetJobDeviceName()
    
     MI_Uint32 jobInfoCompNameLen=CA_DEVICE_NAME_SIZE;
     int result = 0;
-#if defined(_MSC_VER)
-    result = !GetComputerName(g_CAJobInformation.deviceName, (LPDWORD)&jobInfoCompNameLen);
-#else
+
     result = gethostname(g_CAJobInformation.deviceName, jobInfoCompNameLen); 
-#endif
 
     if (result != MI_FALSE) 
     {
             Stprintf(g_CAJobInformation.deviceName, CA_DEVICE_NAME_SIZE, EMPTY_STRING);
             return;
     }
-
-
 }
-
-
-

@@ -41,9 +41,6 @@
 #include <EngineHelper.h>
 #include "LocalConfigManagerHelper.h"
 #include "ModuleHandlerInternal.h"
-#if defined(_MSC_VER)
-#pragma warning(disable:4100 6031) /*systemcalls.h for nits has this warning*/
-#endif
 #include "common\SystemCalls.h"
 #include "Resources_LCM.h"
 

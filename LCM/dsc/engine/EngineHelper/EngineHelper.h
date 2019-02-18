@@ -34,6 +34,8 @@
 #include "EngineHelperInternal.h"
 #include "PAL_Extension.h"
 
+#include "parson.h"
+
 typedef struct _Loc_Mapping
 {
     MI_Uint32 locId;
@@ -81,7 +83,31 @@ void DSC_WriteWarningFromError1Param(_In_ MI_Context* context,
     _In_ MI_Uint32 messageID,
     _In_z_ MI_Char* param1);
 
+MI_Result  Convert_MIInstance_JSON (
+        const MI_Instance* p_instance,
+        JSON_Value** p_result_root_value
+    );
 
+MI_Result  Convert_MiClass_JSON (
+        const MI_Class* p_instance,
+        JSON_Value** p_result_root_value
+    );
+
+MI_Result  Print_JSON_Value (
+        JSON_Value** p_root_value
+    );
+
+MI_Result  Print_MI_Instance (
+        const MI_Instance* p_instance
+    );
+
+MI_Result  Print_MI_InstanceA (
+        const MI_InstanceA* p_instanceA
+    );
+
+MI_Result  Print_MI_Class (
+        const MI_Class* p_class
+    );
 
 extern BaseResourceConfiguration g_BaseResourceConfiguration[];
 extern JobInformation g_JobInformation;
