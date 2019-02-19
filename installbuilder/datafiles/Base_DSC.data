@@ -421,68 +421,68 @@ fi
 
 #endif
 
-%Postuninstall_999
+#%Postuninstall_999
 
 sudo mkdir -p /opt/dsc/lib
-sudo mkdir -p /opt/dsc/bin
-sudo mkdir -p /opt/dsc/output
-sudo chmod 755 -R /opt/dsc/lib
-sudo chmod 755 -R /opt/dsc/bin
-sudo chmod 777 -R /opt/dsc/output
-
-sudo mkdir -p /opt/dsc/lib/MSFT_nxAvailableUpdatesResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxFileInventoryResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxGroupResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSAuditdPluginResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSAutomationWorkerResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSGenerateInventoryMofResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSKeyMgmtResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSPerfCounterResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSPluginResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSSyslogResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSWLIResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxPackageResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxServiceResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxUserResource
-
-sudo mkdir -p /opt/dsc/lib/MSFT_nxArchiveResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxEnvironmentResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxFileLineResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxFileResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxGroupResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxPackageResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxScriptResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxServiceResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxSshAuthorizedKeysResource
-sudo mkdir -p /opt/dsc/lib/MSFT_nxUserResource
-
-sudo cp /opt/omi/lib/libMSFT_nxAvailableUpdatesResource_root-oms.so /opt/dsc/lib/MSFT_nxAvailableUpdatesResource/libMSFT_nxAvailableUpdatesResource.so
-sudo cp /opt/omi/lib/libMSFT_nxFileInventoryResource_root-oms.so /opt/dsc/lib/MSFT_nxFileInventoryResource/libMSFT_nxFileInventoryResource.so
-sudo cp /opt/omi/lib/libMSFT_nxGroupResource_root-oms.so /opt/dsc/lib/MSFT_nxGroupResource/libMSFT_nxGroupResource.so
-sudo cp /opt/omi/lib/libMSFT_nxOMSAuditdPluginResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSAuditdPluginResource/libMSFT_nxOMSAuditdPluginResource.so
-sudo cp /opt/omi/lib/libMSFT_nxOMSAutomationWorkerResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSAutomationWorkerResource/libMSFT_nxOMSAutomationWorkerResource.so
-sudo cp /opt/omi/lib/libMSFT_nxOMSGenerateInventoryMofResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSGenerateInventoryMofResource/libMSFT_nxOMSGenerateInventoryMofResource.so
-sudo cp /opt/omi/lib/libMSFT_nxOMSKeyMgmtResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSKeyMgmtResource/libMSFT_nxOMSKeyMgmtResource.so
-sudo cp /opt/omi/lib/libMSFT_nxOMSPerfCounterResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSPerfCounterResource/libMSFT_nxOMSPerfCounterResource.so
-sudo cp /opt/omi/lib/libMSFT_nxOMSPluginResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSPluginResource/libMSFT_nxOMSPluginResource.so
-sudo cp /opt/omi/lib/libMSFT_nxOMSSyslogResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSSyslogResource/libMSFT_nxOMSSyslogResource.so
-sudo cp /opt/omi/lib/libMSFT_nxOMSWLIResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSWLIResource/libMSFT_nxOMSWLIResource.so
-sudo cp /opt/omi/lib/libMSFT_nxPackageResource_root-oms.so /opt/dsc/lib/MSFT_nxPackageResource/libMSFT_nxPackageResource.so
-sudo cp /opt/omi/lib/libMSFT_nxServiceResource_root-oms.so /opt/dsc/lib/MSFT_nxServiceResource/libMSFT_nxServiceResource.so
-sudo cp /opt/omi/lib/libMSFT_nxUserResource_root-oms.so /opt/dsc/lib/MSFT_nxUserResource/libMSFT_nxUserResource.so
-
-sudo cp /opt/omi/lib/libMSFT_nxArchiveResource.so /opt/dsc/lib/MSFT_nxArchiveResource/libMSFT_nxArchiveResource.so
-sudo cp /opt/omi/lib/libMSFT_nxEnvironmentResource.so /opt/dsc/lib/MSFT_nxEnvironmentResource/libMSFT_nxEnvironmentResource.so
-sudo cp /opt/omi/lib/libMSFT_nxFileLineResource.so /opt/dsc/lib/MSFT_nxFileLineResource/libMSFT_nxFileLineResource.so
-sudo cp /opt/omi/lib/libMSFT_nxFileResource.so /opt/dsc/lib/MSFT_nxFileResource/libMSFT_nxFileResource.so
-sudo cp /opt/omi/lib/libMSFT_nxGroupResource.so /opt/dsc/lib/MSFT_nxGroupResource/libMSFT_nxGroupResource.so
-sudo cp /opt/omi/lib/libMSFT_nxPackageResource.so /opt/dsc/lib/MSFT_nxPackageResource/libMSFT_nxPackageResource.so
-sudo cp /opt/omi/lib/libMSFT_nxScriptResource.so /opt/dsc/lib/MSFT_nxScriptResource/libMSFT_nxScriptResource.so
-sudo cp /opt/omi/lib/libMSFT_nxServiceResource.so /opt/dsc/lib/MSFT_nxServiceResource/libMSFT_nxServiceResource.so
-sudo cp /opt/omi/lib/libMSFT_nxSshAuthorizedKeysResource.so /opt/dsc/lib/MSFT_nxSshAuthorizedKeysResource/libMSFT_nxSshAuthorizedKeysResource.so
-sudo cp /opt/omi/lib/libMSFT_nxUserResource.so /opt/dsc/lib/MSFT_nxUserResource/libMSFT_nxUserResource.so
-
-sudo chown -R  omsagent:omiusers /opt/dsc
+#sudo mkdir -p /opt/dsc/bin
+#sudo mkdir -p /opt/dsc/output
+#sudo chmod 755 -R /opt/dsc/lib
+#sudo chmod 755 -R /opt/dsc/bin
+#sudo chmod 777 -R /opt/dsc/output
+#
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxAvailableUpdatesResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxFileInventoryResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxGroupResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSAuditdPluginResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSAutomationWorkerResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSGenerateInventoryMofResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSKeyMgmtResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSPerfCounterResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSPluginResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSSyslogResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxOMSWLIResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxPackageResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxServiceResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxUserResource
+#
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxArchiveResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxEnvironmentResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxFileLineResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxFileResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxGroupResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxPackageResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxScriptResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxServiceResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxSshAuthorizedKeysResource
+#sudo mkdir -p /opt/dsc/lib/MSFT_nxUserResource
+#
+#sudo cp /opt/omi/lib/libMSFT_nxAvailableUpdatesResource_root-oms.so /opt/dsc/lib/MSFT_nxAvailableUpdatesResource/libMSFT_nxAvailableUpdatesResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxFileInventoryResource_root-oms.so /opt/dsc/lib/MSFT_nxFileInventoryResource/libMSFT_nxFileInventoryResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxGroupResource_root-oms.so /opt/dsc/lib/MSFT_nxGroupResource/libMSFT_nxGroupResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxOMSAuditdPluginResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSAuditdPluginResource/libMSFT_nxOMSAuditdPluginResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxOMSAutomationWorkerResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSAutomationWorkerResource/libMSFT_nxOMSAutomationWorkerResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxOMSGenerateInventoryMofResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSGenerateInventoryMofResource/libMSFT_nxOMSGenerateInventoryMofResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxOMSKeyMgmtResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSKeyMgmtResource/libMSFT_nxOMSKeyMgmtResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxOMSPerfCounterResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSPerfCounterResource/libMSFT_nxOMSPerfCounterResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxOMSPluginResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSPluginResource/libMSFT_nxOMSPluginResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxOMSSyslogResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSSyslogResource/libMSFT_nxOMSSyslogResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxOMSWLIResource_root-oms.so /opt/dsc/lib/MSFT_nxOMSWLIResource/libMSFT_nxOMSWLIResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxPackageResource_root-oms.so /opt/dsc/lib/MSFT_nxPackageResource/libMSFT_nxPackageResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxServiceResource_root-oms.so /opt/dsc/lib/MSFT_nxServiceResource/libMSFT_nxServiceResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxUserResource_root-oms.so /opt/dsc/lib/MSFT_nxUserResource/libMSFT_nxUserResource.so
+#
+#sudo cp /opt/omi/lib/libMSFT_nxArchiveResource.so /opt/dsc/lib/MSFT_nxArchiveResource/libMSFT_nxArchiveResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxEnvironmentResource.so /opt/dsc/lib/MSFT_nxEnvironmentResource/libMSFT_nxEnvironmentResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxFileLineResource.so /opt/dsc/lib/MSFT_nxFileLineResource/libMSFT_nxFileLineResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxFileResource.so /opt/dsc/lib/MSFT_nxFileResource/libMSFT_nxFileResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxGroupResource.so /opt/dsc/lib/MSFT_nxGroupResource/libMSFT_nxGroupResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxPackageResource.so /opt/dsc/lib/MSFT_nxPackageResource/libMSFT_nxPackageResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxScriptResource.so /opt/dsc/lib/MSFT_nxScriptResource/libMSFT_nxScriptResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxServiceResource.so /opt/dsc/lib/MSFT_nxServiceResource/libMSFT_nxServiceResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxSshAuthorizedKeysResource.so /opt/dsc/lib/MSFT_nxSshAuthorizedKeysResource/libMSFT_nxSshAuthorizedKeysResource.so
+#sudo cp /opt/omi/lib/libMSFT_nxUserResource.so /opt/dsc/lib/MSFT_nxUserResource/libMSFT_nxUserResource.so
+#
+#sudo chown -R  omsagent:omiusers /opt/dsc
 
 
 %Preinstall_0
