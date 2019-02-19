@@ -7,13 +7,18 @@ omi_bindir = "<CONFIG_BINDIR>"
 omicli_path = omi_bindir + "/omicli"
 
 parameters = []
-parameters.append(omicli_path)
-parameters.append("iv")
-parameters.append("<DSC_NAMESPACE>")
-parameters.append("{")
-parameters.append("MSFT_DSCLocalConfigurationManager")
-parameters.append("}")
-parameters.append("RollBack")
+if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+    parameters.append("/opt/dsc/bin/dsc_host")
+    parameters.append("/opt/dsc/output")
+    parameters.append("RollBack")
+else:
+    parameters.append(omicli_path)
+    parameters.append("iv")
+    parameters.append("<DSC_NAMESPACE>")
+    parameters.append("{")
+    parameters.append("MSFT_DSCLocalConfigurationManager")
+    parameters.append("}")
+    parameters.append("RollBack")
 
 #s = ""
 #for param in parameters:

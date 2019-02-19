@@ -305,21 +305,23 @@ def main(args):
         else:
             exitWithError("Permissions on file: " + resourceLibraryFileDestinationPath + " set incorrectly: " + filePermission)
 
-        # Copy the resource library file to the OMSCONFIG library folder 
-        resourceSharedObjectDestinationPath = join("/opt/dsc/lib", resource)
+        
+        if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+            # Copy the resource library file to the OMSCONFIG library folder 
+            resourceSharedObjectDestinationPath = join("/opt/dsc/lib", resource)
 
-        if not os.path.isdir(resourceSharedObjectDestinationPath):
-            os.mkdir(resourceSharedObjectDestinationPath)
+            if not os.path.isdir(resourceSharedObjectDestinationPath):
+                os.mkdir(resourceSharedObjectDestinationPath)
 
-        resourceSharedObjectFileDestinationPath = join(resourceSharedObjectDestinationPath, resourceLibraryFileName)
+            resourceSharedObjectFileDestinationPath = join(resourceSharedObjectDestinationPath, resourceLibraryFileName)
 
-        shutil.copy(resourceLibraryFileSourcePath, resourceSharedObjectFileDestinationPath)
-        os.chmod(resourceSharedObjectFileDestinationPath , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-        filePermission = oct(os.stat(resourceSharedObjectFileDestinationPath).st_mode & octMode)
-        if filePermission == "0644" or filePermission == "0o644":
-            printVerboseMessage("Updated permissions of file: " + resourceSharedObjectFileDestinationPath + " to " + filePermission)
-        else:
-            exitWithError("Permissions on file: " + resourceSharedObjectFileDestinationPath + " set incorrectly: " + filePermission)
+            shutil.copy(resourceLibraryFileSourcePath, resourceSharedObjectFileDestinationPath)
+            os.chmod(resourceSharedObjectFileDestinationPath , stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+            filePermission = oct(os.stat(resourceSharedObjectFileDestinationPath).st_mode & octMode)
+            if filePermission == "0644" or filePermission == "0o644":
+                printVerboseMessage("Updated permissions of file: " + resourceSharedObjectFileDestinationPath + " to " + filePermission)
+            else:
+                exitWithError("Permissions on file: " + resourceSharedObjectFileDestinationPath + " set incorrectly: " + filePermission)
 
         # Copy or write the OMI registration file to the OMI registration folder
         resourceOmiRegistrationFileName = resource + ".reg"

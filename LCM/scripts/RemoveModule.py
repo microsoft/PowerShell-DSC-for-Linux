@@ -179,11 +179,11 @@ def main(args):
             printVerboseMessage("Unable to find OMI library file for resource " + resource + " at the path " + resourceLibraryFilePath + ". Continuing with resource removal.")
         
         # Remove OMSCONFIG library file for the resource
+        if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+            resourceSharedObjectDestinationPath = join("/opt/dsc/lib", resource)
 
-        resourceSharedObjectDestinationPath = join("/opt/dsc/lib", resource)
-
-        if os.path.isdir(resourceSharedObjectDestinationPath):
-            os.remove(resourceSharedObjectDestinationPath)
+            if os.path.isdir(resourceSharedObjectDestinationPath):
+                os.remove(resourceSharedObjectDestinationPath)
 
         # Remove OMI registration for the resource
         resourceOmiRegistrationFileName = resource + ".reg"

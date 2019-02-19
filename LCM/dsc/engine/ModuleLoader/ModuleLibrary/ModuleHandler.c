@@ -491,19 +491,20 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
     // Print_MI_InstanceA(&miInstanceArray);
     // Tprintf(MI_T("---------------------------------------------------\n"));
 
-    // // Get the Registration information from shared objects
-    // r = GetRegistrationInstanceFromSharedObjects(NULL, miApp, de, options, strictOptions, &miClassArray, &miInstanceArray, extendedError);
-    // if( r != MI_RESULT_OK)
-    // {
-    //     MI_Deserializer_Close(de);
-    //     MI_OperationOptions_Delete(options);
-    //     DSC_free(de);
-    //     DSC_free(options);
-    //     CleanUpClassCache(&miClassArray);
-    //     CleanUpInstanceCache(&miInstanceArray);
-    //     return r;
-    // }
-
+#if !defined(BUILD_OMS)
+    // Get the Registration information from shared objects
+    r = GetRegistrationInstanceFromSharedObjects(NULL, miApp, de, options, strictOptions, &miClassArray, &miInstanceArray, extendedError);
+    if( r != MI_RESULT_OK)
+    {
+        MI_Deserializer_Close(de);
+        MI_OperationOptions_Delete(options);
+        DSC_free(de);
+        DSC_free(options);
+        CleanUpClassCache(&miClassArray);
+        CleanUpInstanceCache(&miInstanceArray);
+        return r;
+    }
+#endif
     // Tprintf(MI_T("---------------------------------------------------\n"));
     // Tprintf(MI_T("%T:%d in %T ~ After reading schemas from shared objects - miClassArray.size = %d\n"), __FILE__, __LINE__, __FUNCTION__, miClassArray.size);
     // if (miClassArray.size > 0)
@@ -904,20 +905,14 @@ MI_Result GetInstanceFromSingleMOF(_In_opt_ ModuleManager *moduleManager,
         }
     }
 
-    // // Here we should discover resources and update our resource cache
-    // /*Update actual cache*/
-    // r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
-    // if( r != MI_RESULT_OK )
-    // {
-    //     CleanUpDeserializerInstanceCache(miTempInstanceArray);
-    // }
-
-    // Update cache with discovered native resources (not through OMI)
+    // Here we should discover resources and update our resource cache
+    /*Update actual cache*/
     r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
     if( r != MI_RESULT_OK )
     {
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
     }
+
     // Tprintf(MI_T("%T:%d in %T ~ UpdateInstanceArray = %d\n"), __FILE__, __LINE__, __FUNCTION__, r);
     
     // Tprintf(MI_T("---------------------------------------------------\n"));

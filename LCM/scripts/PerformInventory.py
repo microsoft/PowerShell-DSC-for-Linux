@@ -110,7 +110,7 @@ def perform_inventory(args):
 
     dsc_sysconfdir = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
     dsc_reportdir = join(dsc_sysconfdir, 'InventoryReports')
-    # omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
+    omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
     dsc_host_path = '/opt/dsc/bin/dsc_host'
     dsc_configuration_path = join(dsc_sysconfdir, 'configuration')
     temp_report_path = join(dsc_configuration_path, 'Inventory.xml.temp')
@@ -121,23 +121,32 @@ def perform_inventory(args):
         report_path = Variables["outxml"]
 
     parameters = []
-    parameters.append(dsc_host_path)
-    parameters.append(dsc_configuration_path) # output folder for dsc_host (not used yet)
-    # parameters.append(omicli_path)
-    # parameters.append("iv")
-    # parameters.append(helperlib.DSC_NAMESPACE)
-    # parameters.append("{")
-    # parameters.append("MSFT_DSCLocalConfigurationManager")
-    # parameters.append("}")
 
-    if "inmof" in Variables:
-        parameters.append("PerformInventoryOOB")
-    #     parameters.append("{")
-    #     parameters.append("InventoryMOFPath")
-        parameters.append(Variables["inmof"])
-    #     parameters.append("}")
+    if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+        parameters.append(dsc_host_path)
+        parameters.append(dsc_configuration_path) # output folder for dsc_host (not used yet)
+
+        if "inmof" in Variables:
+            parameters.append("PerformInventoryOOB")
+            parameters.append(Variables["inmof"])
+        else:
+            parameters.append("PerformInventory")
     else:
-        parameters.append("PerformInventory")
+        parameters.append(omicli_path)
+        parameters.append("iv")
+        parameters.append(helperlib.DSC_NAMESPACE)
+        parameters.append("{")
+        parameters.append("MSFT_DSCLocalConfigurationManager")
+        parameters.append("}")
+
+        if "inmof" in Variables:
+            parameters.append("PerformInventoryOOB")
+            parameters.append("{")
+            parameters.append("InventoryMOFPath")
+            parameters.append(Variables["inmof"])
+            parameters.append("}")
+        else:
+            parameters.append("PerformInventory")
 
     # Ensure inventory lock file permission is set correctly before opening
     operationStatusUtility.ensure_file_permissions(inventorylock_path, '644')

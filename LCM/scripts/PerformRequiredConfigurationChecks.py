@@ -29,24 +29,28 @@ def main():
 
 def run_perform_required_configuration_checks():
     dsc_sysconfdir = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
-    # omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
+    omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
     dsc_host_path = '/opt/dsc/bin/dsc_host'
     dsc_configuration_path = join(dsc_sysconfdir, 'configuration')
 
     parameters = []
-    parameters.append(dsc_host_path)
-    parameters.append(dsc_configuration_path) # output folder for dsc_host (not used yet)
-    # parameters.append(omicli_path)
-    # parameters.append("iv")
-    # parameters.append(helperlib.DSC_NAMESPACE)
-    # parameters.append("{")
-    # parameters.append("MSFT_DSCLocalConfigurationManager")
-    # parameters.append("}")
-    parameters.append("PerformRequiredConfigurationChecks")
-    # parameters.append("{")
-    # parameters.append("Flags")
-    parameters.append("1")
-    # parameters.append("}")
+    if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+        parameters.append(dsc_host_path)
+        parameters.append(dsc_configuration_path) # output folder for dsc_host (not used yet)
+        parameters.append("PerformRequiredConfigurationChecks")
+        parameters.append("1")
+    else:
+        parameters.append(omicli_path)
+        parameters.append("iv")
+        parameters.append(helperlib.DSC_NAMESPACE)
+        parameters.append("{")
+        parameters.append("MSFT_DSCLocalConfigurationManager")
+        parameters.append("}")
+        parameters.append("PerformRequiredConfigurationChecks")
+        parameters.append("{")
+        parameters.append("Flags")
+        parameters.append("1")
+        parameters.append("}")
 
     # Save the starting timestamp without milliseconds
     startDateTime = operationStatusUtility.get_current_time_no_ms()
