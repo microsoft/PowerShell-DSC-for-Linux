@@ -1777,6 +1777,15 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
         SetMessageInContext(ID_OUTPUT_OPERATION_SKIP,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
         LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
 
+        if(test_operation_result == 1) // TestTargetResource returned TRUE
+        {
+            *resultStatus = 1;
+        }
+        else // TestTargetResource returned FALSE
+        {
+            *resultStatus = 0;
+        }
+
         Tprintf(MI_T("************* %T:%d in %T ~ No need to perform SET since TEST returned %d\n"), __FILE__, __LINE__, __FUNCTION__, test_operation_result);
 
         return result;
