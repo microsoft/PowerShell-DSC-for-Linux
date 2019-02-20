@@ -30,10 +30,6 @@ else:
     parameters.append("}")
     parameters.append("GetConfiguration")
 
-# s = ""
-# for param in parameters:
-# s += param + " "
-
 p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 stdout, stderr = p.communicate()
 
