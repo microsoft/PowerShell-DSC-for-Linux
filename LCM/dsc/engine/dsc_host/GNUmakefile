@@ -2,17 +2,10 @@ DSCTOP = ../..
 TOP = ../../..
 include $(TOP)/config.mak
 
-#LIBRARY = dsc_host
-# ifeq ($(BUILD_OMS),BUILD_OMS)
-# CPROGRAM = dsc_host
-# else
 CPROGRAM = dsc_host
-# endif
 
 SOURCES = \
         dsc_host.c 
-        # dsc_host.rc 
-        # dsc_operations.c
 
 INCLUDES = \
         $(OMI) \
@@ -29,9 +22,6 @@ INCLUDES = \
 
 DEFINES = MI_CONST= HOOK_BUILD $(BUILD_OMS)
 
-
-##LIBRARIES = dsc_library mi pal ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure
-#LIBRARIES = ConfigurationManager CAEngine ModuleHandler EngineHelper CALogInfrastructure mi pal omi_error  micodec mofparser base pal curl xmlserializer dsccore dsc_library mi $(PALLIBS)
 LIBRARIES = dsc_library mi $(PALLIBS) ssl ConfigurationManager CAEngine EngineHelper ModuleHandler curl micodec mofparser base pal stdc++
 
 include $(OMI)/mak/rules.mak

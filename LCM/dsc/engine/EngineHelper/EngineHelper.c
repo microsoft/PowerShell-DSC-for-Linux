@@ -14,6 +14,7 @@
    THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <stdio.h>
 #include <MI.h>
 #include "EngineHelper.h"
 #include "DSC_Systemcalls.h"
@@ -1343,9 +1344,6 @@ MI_Result  Convert_MIInstance_JSON (
         return result;
     }
 
-    // Tprintf(MI_T("*** %T:%d in %T ~ p_instance->classDecl->name\n"), __FILE__, __LINE__, __FUNCTION__, p_instance->classDecl->name);
-    // Tprintf(MI_T("*** %T:%d in %T ~ p_instance->classDecl->numProperties = %d\n"), __FILE__, __LINE__, __FUNCTION__, p_instance->classDecl->numProperties);
-
     MI_Uint32 i = 0;
     for(i = 0 ; i < p_instance->classDecl->numProperties; i++)
     {
@@ -1357,12 +1355,6 @@ MI_Result  Convert_MIInstance_JSON (
         r = MI_Instance_GetElementAt(p_instance, i, &name, &value, &type, &flags);
         if( r == MI_RESULT_OK)
         {
-            // if(Tcscasecmp(name, MI_T("ErrorSource")) == 0 )
-            // {
-            //     value.string = (MI_Char*)MI_T("Default");
-            //     MI_Instance_SetElement(const_cast<MI_Instance*>(p_instance), name, &value, MI_STRING, 0);
-            //     MI_Instance_GetElement(p_instance, name, &value, &type, &flags, NULL);
-            // }
             if( flags & MI_FLAG_NULL)
             {
                 json_object_set_null(result_root_object, p_instance->classDecl->properties[i]->name);
@@ -2035,6 +2027,25 @@ MI_Result  Print_JSON_Value (
     return result;
 }
 
+MI_Result  Save_JSON_Value (
+        const char* p_file_path,
+        JSON_Value** p_root_value
+    )
+{
+    MI_Result result = MI_RESULT_OK;
+
+    char *serialized_string = NULL;
+    serialized_string = json_serialize_to_string_pretty(*p_root_value);
+    
+    FILE * fd = fopen( p_file_path, "w");
+    fputs(serialized_string, fd);
+    fclose(fd);
+
+    json_free_serialized_string(serialized_string);
+
+    return result;
+}
+
 MI_Result  Print_MI_Instance (
         const MI_Instance* p_instance
     )
@@ -2051,28 +2062,8 @@ MI_Result  Print_MI_InstanceA (
 {
     MI_Uint32 i = 0;
     MI_Result result = MI_RESULT_OK;
-    // Tprintf(MI_T("*** %T:%d in %T ~ p_instanceA->size = %d\n"), __FILE__, __LINE__, __FUNCTION__, p_instanceA->size);
-
-    // const MI_Char* propertyName;
-    // MI_Value propertyValue;
-    // MI_Type propertyType;
-
-    // result = MI_Instance_GetElementAt(p_instanceA->data[0], 0, &propertyName, &propertyValue, &propertyType, 0);
-    // Tprintf(MI_T("*** %T:%d in %T ~ result = %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
-    // Tprintf(MI_T("*** %T:%d in %T ~ propertyName = '%T', propertyType = %d\n"), __FILE__, __LINE__, __FUNCTION__, propertyName, propertyType);
 
     int type = 0;
-
-    // if( propertyType & MI_ARRAY)
-    // {
-    //     type = 1;
-    // }
-    // else
-    // {
-    //     type = 0;
-    // }
-
-    // Tprintf(MI_T("*** %T:%d in %T ~ type = %d\n"), __FILE__, __LINE__, __FUNCTION__, type);
 
     for(i = 0 ; i < p_instanceA->size ; i++)
     {
@@ -2081,20 +2072,8 @@ MI_Result  Print_MI_InstanceA (
         MI_Type propertyType;
 
         result = MI_Instance_GetElementAt(*(p_instanceA->data), i, &propertyName, &propertyValue, &propertyType, 0);
-        // Tprintf(MI_T("*** %T:%d in %T ~ propertyName = '%T', propertyType = %d\n"), __FILE__, __LINE__, __FUNCTION__, propertyName, propertyType);
 
         if( propertyType & MI_ARRAY)
-        {
-            type = 1;
-        }
-        else
-        {
-            type = 0;
-        }
-
-        // Tprintf(MI_T("*** %T:%d in %T ~ type = %d\n"), __FILE__, __LINE__, __FUNCTION__, type);
-
-        if( type == 1)
         {
             Print_MI_InstanceA(p_instanceA->data[i]);
         }
@@ -2102,8 +2081,6 @@ MI_Result  Print_MI_InstanceA (
         {
             Print_MI_Instance(p_instanceA->data[i]);
         }
-
-        //Print_MI_Instance(p_instanceA->data[i]);
     }
     return result;
 }

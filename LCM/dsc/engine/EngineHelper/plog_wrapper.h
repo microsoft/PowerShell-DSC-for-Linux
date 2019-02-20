@@ -24,7 +24,7 @@ enum // Define log instances. Default is 0 and is omitted from this enum.
 
 typedef enum _DSC_Log_Level
 {
-    DSC_LOG_FATAL,
+    DSC_LOG_FATAL = 0,
     DSC_LOG_ERROR,
     DSC_LOG_WARNING,
     DSC_LOG_INFO,
@@ -40,17 +40,6 @@ extern "C" {
 unsigned long DSC_PLog_Register();
 unsigned long DSC_PLog_Unregister();
 unsigned long DSC_PLog_Write(DSC_Log_Level p_level, int p_line_number, const char * p_file_name, const char * p_message);
-
-/*
-int DSCLog_VPut(
-    FILE * logFile,
-    Log_Level level,
-    Log_Level maxLevel,
-    const char* file,
-    MI_Uint32 line,
-    const ZChar* format,
-    va_list ap)
-*/
 
 #ifdef __cplusplus
 }

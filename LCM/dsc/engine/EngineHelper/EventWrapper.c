@@ -106,28 +106,7 @@ void DSCFilePutLog(
     const PAL_Char* format,
     ...)
 {
-    // if ((unsigned int)priority > OMI_VERBOSE)
-    //     return;
-
-    // if (priority <= _DSCDetailedLogLevel)
-    // {
-    //     TChar fmt[FMTSIZE];
-    //     va_list ap;
-
-    //     Stprintf(fmt, FMTSIZE, PAL_T("EventId=%d Priority=%s "), priority, _levelDSCStrings[priority]);
-    //     Tcslcat(fmt, format, FMTSIZE);
-                
-    //     va_start(ap, format);
-    //     // Write warning and error level logs
-    //     DSCLog_VPut(_DSCLogFile, (Log_Level)priority, _DSCLogLevel, file, line, fmt, ap);
-    //     va_end(ap);        
-
-    //     va_start(ap, format);
-    //     // Write all the logs
-    //     DSCLog_VPut(_DSCDetailedLogFile, (Log_Level)priority, _DSCDetailedLogLevel, file, line, fmt, ap);
-    //     va_end(ap);        
-    // }    
-
+#if defined(BUILD_OMS)
     va_list argumentsGetLength;
     size_t messageLength;
     size_t finalMessageLength;
@@ -161,8 +140,33 @@ cleanup:
 
     if (message)
         free(message);
-        
+
     va_end(arguments);
+
+#else
+
+    if ((unsigned int)priority > OMI_VERBOSE)
+        return;
+
+    if (priority <= _DSCDetailedLogLevel)
+    {
+        TChar fmt[FMTSIZE];
+        va_list ap;
+
+        Stprintf(fmt, FMTSIZE, PAL_T("EventId=%d Priority=%s "), priority, _levelDSCStrings[priority]);
+        Tcslcat(fmt, format, FMTSIZE);
+                
+        va_start(ap, format);
+        // Write warning and error level logs
+        DSCLog_VPut(_DSCLogFile, (Log_Level)priority, _DSCLogLevel, file, line, fmt, ap);
+        va_end(ap);
+
+        va_start(ap, format);
+        // Write all the logs
+        DSCLog_VPut(_DSCDetailedLogFile, (Log_Level)priority, _DSCDetailedLogLevel, file, line, fmt, ap);
+        va_end(ap);
+    }
+#endif
 }
 
 void DSCLog_Close()
@@ -216,26 +220,28 @@ MI_Result DSCLog_Open(
 
 unsigned long DSC_EventRegister()
 {
-    return DSC_PLog_Register();
 #if defined(BUILD_OMS)
-    
+    return DSC_PLog_Register();
 #else
-    // char logPath[PAL_MAX_PATH_SIZE];
-    // char detailedLogPath[PAL_MAX_PATH_SIZE];
-    // Strlcpy(logPath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
-    // Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
-    // Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
-    // Strlcat(logPath, "dsc.log", PAL_MAX_PATH_SIZE);
-    // Strlcat(detailedLogPath, "dscdetailed.log", PAL_MAX_PATH_SIZE);
-    // DSCLog_Open(logPath, &_DSCLogFile);
-    // DSCLog_Open(detailedLogPath, &_DSCDetailedLogFile);
-    // return 0;
+    char logPath[PAL_MAX_PATH_SIZE];
+    char detailedLogPath[PAL_MAX_PATH_SIZE];
+    Strlcpy(logPath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
+    Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "dsc.log", PAL_MAX_PATH_SIZE);
+    Strlcat(detailedLogPath, "dscdetailed.log", PAL_MAX_PATH_SIZE);
+    DSCLog_Open(logPath, &_DSCLogFile);
+    DSCLog_Open(detailedLogPath, &_DSCDetailedLogFile);
+    return 0;
 #endif
 }
 
 unsigned long DSC_EventUnRegister()
 {
+#if defined(BUILD_OMS)
     return DSC_PLog_Unregister();
-    // DSCLog_Close();
-    // return 0;
+#else
+    DSCLog_Close();
+    return 0;
+#endif
 }

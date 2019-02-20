@@ -787,13 +787,7 @@ MI_Result CallGetConfiguration(
     LCM_BuildMessage(&lcmContext, ID_OUTPUT_EMPTYSTRING, EMPTY_STRING, MI_WRITEMESSAGE_CHANNEL_VERBOSE);
 
     result = GetConfiguration(&lcmContext, 0, &getInstances, moduleManager, documentIns, &getResultInstances, cimErrorDetails);
-    // result = GetConfiguration(&lcmContext, 0, &getInstances, moduleManager, documentIns, outInstances, cimErrorDetails);
 
-    // Tprintf(MI_T("---------------------------------------------------\n"));
-    // Tprintf(MI_T("%T:%d in %T ~ Printing output_instances, size = %d\n"), __FILE__, __LINE__, __FUNCTION__, getResultInstances.size);
-    // Print_MI_InstanceA(&getResultInstances);
-    // Tprintf(MI_T("---------------------------------------------------\n"));
-    
     MI_Instance_Delete(documentIns);
 
     moduleManager->ft->Close(moduleManager, NULL);
@@ -817,19 +811,7 @@ MI_Result CallGetConfiguration(
 
     outInstances->data = getResultInstances.data;
     outInstances->size = getResultInstances.size;
-    //MI_Instance_Clone(instance, &nativeResourceProvider->_private.outputResource);
-
-    // //Update InstanceArray.
-    // outInstances = (MI_Instance **)DSC_malloc( sizeof(MI_Instance*) * (getResultInstances.size), TLINE);
-    // if (result != MI_RESULT_OK)
-    // {
-    //     return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, cimErrorDetails, ID_LCMHELPER_MEMORY_ERROR);
-    // }
-
-    // // copy existing customData
-    // memcpy(outInstances, getResultInstances.data, sizeof(MI_InstanceA*) * getResultInstances.size );
     
-    //Debug Log 
     DSC_EventWriteMethodEnd(__WFUNCTION__);
 
     return result;
@@ -849,7 +831,6 @@ MI_Result CallSetConfiguration(
 
     LCMProviderContext lcmContext = {0};
 
-    //Debug Log 
     DSC_EventWriteLocalConfigMethodParameters(__WFUNCTION__,dataSize,dwFlags,lcmContext.executionMode);
 
     lcmContext.executionMode = (LCM_EXECUTIONMODE_OFFLINE | LCM_EXECUTIONMODE_ONLINE);
@@ -1227,7 +1208,6 @@ MI_Result MergePartialConfigurations(_In_ LCMProviderContext *lcmContext,
                 return MI_RESULT_INVALID_PARAMETER;
         }
         *cimErrorDetails = NULL;
-        Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
         result = LoadModuleManager(moduleManager, cimErrorDetails);
         RETURN_RESULT_IF_FAILED(result);
         result = ExpandPath(CONFIGURATION_PARTIALCONFIG_STORE, &partialConfigDir, cimErrorDetails);
@@ -5009,7 +4989,6 @@ MI_Result InitCacheAndMetaConfig(
         return r;
     }    
 
-    // Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, cimErrorDetails);
     if (r != MI_RESULT_OK)
     {
@@ -5323,7 +5302,6 @@ MI_Result SerializeMetaConfig(
     }
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
 
-    // Tprintf(MI_T("%T:%d in %T ~ Calling LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, cimErrorDetails);
     if (r != MI_RESULT_OK)
     {
@@ -6783,7 +6761,6 @@ MI_Result CallPerformInventory(
 
     if (cimErrorDetails == NULL)
     {
-        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         return MI_RESULT_INVALID_PARAMETER; 
     }
     *cimErrorDetails = NULL;    // Explicitly set *cimErrorDetails to NULL as _Outptr_ requires setting this at least once. 
@@ -6793,7 +6770,6 @@ MI_Result CallPerformInventory(
     result = ValidateConfigurationDirectory(cimErrorDetails);
     if (result != MI_RESULT_OK)
     {
-        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
             return result;
@@ -6809,14 +6785,12 @@ MI_Result CallPerformInventory(
     if (File_ExistT(InMOF) != 0)
     {
     SetLCMStatusReady();
-    Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
     return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);
     }
 
     result = InitializeModuleManager(0, cimErrorDetails, &moduleManager);
     if (result != MI_RESULT_OK)
     {
-        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         SetLCMStatusReady();
         return result;
     }
@@ -6824,7 +6798,6 @@ MI_Result CallPerformInventory(
     result =  moduleManager->ft->LoadInstanceDocumentFromLocation(moduleManager, 0, InMOF, cimErrorDetails, &inventoryInstances, &documentIns);
     if (result != MI_RESULT_OK)
     {
-        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         moduleManager->ft->Close(moduleManager, NULL);
         SetLCMStatusReady();
         if (cimErrorDetails && *cimErrorDetails)
@@ -6838,7 +6811,6 @@ MI_Result CallPerformInventory(
         result = ValidateInventoryDocumentInstance(documentIns, cimErrorDetails);
         if (result != MI_RESULT_OK)
         {
-            Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
             CleanUpInstanceCache(&inventoryInstances);
             moduleManager->ft->Close(moduleManager, NULL);
             SetLCMStatusReady();
@@ -6851,7 +6823,6 @@ MI_Result CallPerformInventory(
     // Check if at least 1 resource was specified in the instance document
     if (inventoryInstances.size == 0 )
     {
-        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
         MI_Instance_Delete(documentIns);
         moduleManager->ft->Close(moduleManager, NULL);
         SetLCMStatusReady();
@@ -6870,7 +6841,6 @@ MI_Result CallPerformInventory(
     CleanUpInstanceCache(&inventoryInstances);
     if (result != MI_RESULT_OK)
     {
-        Tprintf(MI_T("***** %s:%d, method:%T, failed: %d\n"), __FILE__, __LINE__, __FUNCTION__, result);
     SetLCMStatusReady();
     if (cimErrorDetails && *cimErrorDetails)
             return result;

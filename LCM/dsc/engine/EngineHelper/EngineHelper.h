@@ -97,6 +97,11 @@ MI_Result  Print_JSON_Value (
         JSON_Value** p_root_value
     );
 
+MI_Result  Save_JSON_Value (
+        const char* p_file_path,
+        JSON_Value** p_root_value
+    );
+
 MI_Result  Print_MI_Instance (
         const MI_Instance* p_instance
     );

@@ -291,7 +291,6 @@ MI_Result  DscLib_PerformInventoryOOB (
     if (result != MI_RESULT_OK)
     {
         //CreateMiInstanceErrorObject(&extended_errors, MI_T("method: %T, InitHandler failed: %T\n"), method_name, result);
-        Tprintf(MI_T("method: %T, InitHandler failed: %d\n"), method_name, result);
         goto Cleanup;
     }
 
@@ -308,7 +307,6 @@ MI_Result  DscLib_PerformInventoryOOB (
     if (result != MI_RESULT_OK)
     {
         // CreateMiInstanceErrorObject(&extended_errors, MI_T("method: %T, CallPerformInventory failed: %T\n"), method_name, result);
-        Tprintf(MI_T("method: %T, CallPerformInventory failed: %d\n"), method_name, result);
         goto Cleanup_LCMStatus;
     }
 
@@ -366,19 +364,8 @@ MI_Result  DscLib_SetConfiguration (
     {
         // If a configuration file name is passed in the parameters, read from the passed configuration file.
         // Read file contents from the pending configuration file into configuration_mof_data
-        //Tprintf(MI_T("%T ~ method: %T, mof pat =: '%T'\n"), __FUNCTION__, p_method_name, p_configuration_filename);
         result = ReadFileContent(p_configuration_filename, &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
     }
-    // else if (File_ExistT(GetCurrentConfigFileName()) != -1)
-    // {
-    //     // Read file contents from the current configuration file (Current.mof) into configuration_mof_data
-    //     result = ReadFileContent(GetCurrentConfigFileName(), &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
-    // }
-    // else if (File_ExistT(GetPendingConfigFileName()) != -1)
-    // {
-    //     // Read file contents from the pending configuration file (Pending.mof) into configuration_mof_data
-    //     result = ReadFileContent(GetPendingConfigFileName(), &configuration_mof_data.data, &configuration_mof_data.size, &extended_errors);
-    // }
     else
     {
         GetCimMIError(MI_RESULT_FAILED, &extended_errors, ID_LCMHELPER_CURRENT_NOTFOUND);

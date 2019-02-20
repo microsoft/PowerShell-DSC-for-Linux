@@ -29,7 +29,7 @@ extern "C" {
 unsigned long DSC_PLog_Register()
 {
    plog::init(plog::warning, "/opt/dsc/output/omsconfig.log");
-   plog::init<OmsConfigDetailed>(plog::none, "/opt/dsc/output/omsconfigdetailed.log");
+   plog::init<OmsConfigDetailed>(plog::verbose, "/opt/dsc/output/omsconfigdetailed.log");
 
    return 0;
 }

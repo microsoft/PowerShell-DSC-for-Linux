@@ -3,12 +3,10 @@
 #include <locale.h>
 
 #include "dsc_sal.h"
-//#include <common/linux/sal.h>
 #include "DSC_Systemcalls.h"
 #include "Resources_LCM.h"
 #include "EngineHelper.h"
 #include "dsc_host.h"
-#include "dsc_operations.h"
 #include "dsc_library.h"
 #include "lcm/strings.h"
 
@@ -34,22 +32,32 @@ void PrintHelp()
     Tprintf(MI_T("dsc_host <Output Folder Path> <Operation> [Operation Arguments] \n"));
     Tprintf(MI_T("\n"));
     Tprintf(MI_T("Supported Operation values are:\n"));
+    Tprintf(MI_T("  SendConfiguration <MOF Document Path>\n"));
+    Tprintf(MI_T("  SendConfigurationApply <MOF Document Path>\n"));
     Tprintf(MI_T("  GetConfiguration [Configuration Document Path]\n"));
+    Tprintf(MI_T("  ApplyConfiguration\n"));
+    Tprintf(MI_T("  SendMetaConfigurationApply <MOF Document Path> [force]\n"));
+    Tprintf(MI_T("  GetMetaConfiguration\n"));
+    Tprintf(MI_T("  RollBack\n"));
     Tprintf(MI_T("  TestConfiguration\n"));
+    Tprintf(MI_T("  PerformRequiredConfigurationChecks [flags value]\n"));
+    Tprintf(MI_T("  StopConfiguration [force]\n"));
     Tprintf(MI_T("  PerformInventory\n"));
     Tprintf(MI_T("  PerformInventoryOOB [MOF Document Path]\n"));
-    Tprintf(MI_T("  SendConfiguration [MOF Document Path]\n"));
-    Tprintf(MI_T("  SendConfigurationApply [MOF Document Path]\n"));
-    Tprintf(MI_T("  SendMetaConfigurationApply [MOF Document Path]\n"));
     Tprintf(MI_T("\n"));
-    Tprintf(MI_T("Example:\n"));
-    Tprintf(MI_T("dsc_host /tmp/GetAuditPolicyOutput GetConfiguration ./GetAuditPolicy.mof \n"));
-    Tprintf(MI_T("dsc_host /tmp/GetAuditPolicyOutput TestConfiguration\n"));
-    Tprintf(MI_T("dsc_host /tmp/InventoryOutput PerformInventory\n"));
-    Tprintf(MI_T("dsc_host /tmp/InventoryOutput PerformInventoryOOB ./Inventory.mof \n"));
-    Tprintf(MI_T("dsc_host /tmp/InventoryOutput SendConfiguration ./new_config.mof \n"));
-    Tprintf(MI_T("dsc_host /tmp/InventoryOutput SendConfigurationApply ./new_config.mof \n"));
-    Tprintf(MI_T("dsc_host /tmp/InventoryOutput SendMetaConfigurationApply ./new_metaconfig.mof \n"));
+    Tprintf(MI_T("Examples:\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output SendConfiguration ./new_config.mof\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output SendConfigurationApply ./new_config.mof\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output GetConfiguration ./GetAuditPolicy.mof\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output ApplyConfiguration\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output SendMetaConfigurationApply ./new_metaconfig.mof\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output GetMetaConfiguration\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output RollBack\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output TestConfiguration\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output PerformRequiredConfigurationChecks 1\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output StopConfiguration force\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output PerformInventory\n"));
+    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output PerformInventoryOOB ./Inventory.mof\n"));
     Tprintf(MI_T("\n"));
 }
 
@@ -63,7 +71,6 @@ int main(int argc, char *argv[])
     char* operation_name;
 
     // Check the user that has invoked the operation: root for DIY and omsagent for OMS
-
     if(argc < 3)
     {
         if(argc > 1 && 0 == Tcscasecmp(argv[1], MI_T("--version")))
@@ -140,7 +147,6 @@ int main(int argc, char *argv[])
     else
     {
         Tprintf(MI_T("Operation %T is not supported\n"), argv[2]);
-        // result = GetCimMIError1Param(MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
         result = MI_RESULT_FAILED;
         CreateMiInstanceErrorObject(&extended_error, MI_T("Operation %T is not supported\n"), argv[2]);
         JSON_Value *value;
@@ -253,11 +259,17 @@ int main(int argc, char *argv[])
     if (operation_result_root_value)
     {
         Print_JSON_Value(&operation_result_root_value);
+        char output_file_path[DSCHOST_STR_BUFFER_SIZE];
+        Stprintf(output_file_path, DSCHOST_STR_BUFFER_SIZE, MI_T("%T/dsc.%T.log"), argv[3], operation_name);
+        Save_JSON_Value(output_file_path, &operation_result_root_value);
     }
 
     if (operation_error_root_value)
     {
         Print_JSON_Value(&operation_error_root_value);
+        char error_file_path[DSCHOST_STR_BUFFER_SIZE];
+        Stprintf(error_file_path, DSCHOST_STR_BUFFER_SIZE, MI_T("%T/dsc.%T.err"), argv[3], operation_name);
+        Save_JSON_Value(error_file_path, &operation_result_root_value);
     }
 
 CleanUp:
