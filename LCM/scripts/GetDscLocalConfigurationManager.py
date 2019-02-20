@@ -3,6 +3,15 @@ import fileinput
 import sys
 import subprocess
 
+from imp                import load_source
+from os.path            import dirname, isfile, join, realpath
+
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
+helperlib = load_source('helperlib', helperLibPath)
+
 omi_bindir = "<CONFIG_BINDIR>"
 omicli_path = omi_bindir + "/omicli"
 

@@ -4,6 +4,15 @@
 from subprocess import Popen, PIPE
 from sys import argv
 
+from imp                import load_source
+from os.path            import dirname, isfile, join, realpath
+
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
+helperlib = load_source('helperlib', helperLibPath)
+
 try:
     # Used by Python 2.7+
     from argparse import ArgumentParser
