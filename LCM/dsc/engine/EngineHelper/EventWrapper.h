@@ -28,6 +28,22 @@
 #define __WFUNCTION__ WIDEN(__FUNCTION__)
 #define _STRINGEMPTY_ MI_T("")
 
+enum // Define log instances. Default is 0 and is omitted from this enum.
+{
+    OmsConfigDetailed = 1
+};
+
+typedef enum _DSC_Log_Level
+{
+    DSC_LOG_FATAL_LEVEL = 0,
+    DSC_LOG_ERROR_LEVEL,
+    DSC_LOG_WARNING_LEVEL,
+    DSC_LOG_INFO_LEVEL,
+    DSC_LOG_DEBUG_LEVEL,
+    DSC_LOG_VERBOSE_LEVEL
+}
+DSC_Log_Level;
+
 /*ErrorEventInfo */
 typedef struct _ErrorEventInfo
 { 
@@ -36,9 +52,7 @@ typedef struct _ErrorEventInfo
     const MI_Char * ErrorDetail ; 
 } ErrorEventInfo;
 
-
 #ifdef __cplusplus
-
 extern "C" {
 #endif
 
@@ -554,10 +568,21 @@ void DSCFilePutLog(
     ExpandEvent(GettingTheSchemaSucceeded(ClassName))
 
 
+unsigned long DSC_PLog_Register();
+unsigned long DSC_PLog_Unregister();
+unsigned long DSC_PLog_Write(DSC_Log_Level p_level, int p_line_number, const char * p_file_name, const char * p_message);
+
 #ifdef __cplusplus
-
 }
-
 #endif
+
+#define DSC_LOG(level, format, ...) DSCFilePutLog(level, 0, "", 0, format, ##__VA_ARGS__)
+
+#define DSC_LOG_FATAL(format, ...) DSCFilePutLog(DSC_LOG_FATAL_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_ERROR(format, ...) DSCFilePutLog(DSC_LOG_ERROR_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_WARNING(format, ...) DSCFilePutLog(DSC_LOG_WARNING_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_INFO(format, ...) DSCFilePutLog(DSC_LOG_INFO_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_DEBUG(format, ...) DSCFilePutLog(DSC_LOG_DEBUG_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_VERBOSE(format, ...) DSCFilePutLog(DSC_LOG_VERBOSE_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
 #endif //__EVENTWRAPPER_H_

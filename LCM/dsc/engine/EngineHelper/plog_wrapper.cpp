@@ -14,7 +14,8 @@
    THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "plog_wrapper.h"
+// #include "plog_wrapper.h"
+#include "EventWrapper.h"
 #include <plog/Log.h>
 #include <iostream>
 #include <sstream>
@@ -44,37 +45,37 @@ unsigned long DSC_PLog_Write(DSC_Log_Level p_level, int p_line_number, const cha
 {
    switch(p_level)
    {
-      case DSC_LOG_FATAL:
+      case DSC_LOG_FATAL_LEVEL:
       {
          LOG_FATAL << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          LOG_FATAL_(OmsConfigDetailed) << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          break;
       }
-      case DSC_LOG_ERROR:
+      case DSC_LOG_ERROR_LEVEL:
       {
          LOG_ERROR << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          LOG_ERROR_(OmsConfigDetailed) << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          break;
       }
-      case DSC_LOG_WARNING:
+      case DSC_LOG_WARNING_LEVEL:
       {
          LOG_WARNING << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          LOG_WARNING_(OmsConfigDetailed) << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          break;
       }
-      case DSC_LOG_INFO:
+      case DSC_LOG_INFO_LEVEL:
       {
          LOG_INFO << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          LOG_INFO_(OmsConfigDetailed) << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          break;
       }
-      case DSC_LOG_DEBUG:
+      case DSC_LOG_DEBUG_LEVEL:
       {
          LOG_DEBUG << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          LOG_DEBUG_(OmsConfigDetailed) << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          break;
       }
-      case DSC_LOG_VERBOSE:
+      case DSC_LOG_VERBOSE_LEVEL:
       {
          LOG_VERBOSE << "[" << p_file_name << ":" << p_line_number << "] " << p_message;
          LOG_VERBOSE_(OmsConfigDetailed) << "[" << p_file_name << ":" << p_line_number << "] " << p_message;

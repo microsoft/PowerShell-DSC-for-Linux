@@ -17,22 +17,6 @@
 #ifndef __PLOGWRAPPER_H_
 #define __PLOGWRAPPER_H_
 
-enum // Define log instances. Default is 0 and is omitted from this enum.
-{
-    OmsConfigDetailed = 1
-};
-
-typedef enum _DSC_Log_Level
-{
-    DSC_LOG_FATAL = 0,
-    DSC_LOG_ERROR,
-    DSC_LOG_WARNING,
-    DSC_LOG_INFO,
-    DSC_LOG_DEBUG,
-    DSC_LOG_VERBOSE
-}
-DSC_Log_Level;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
