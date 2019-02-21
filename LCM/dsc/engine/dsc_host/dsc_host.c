@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
         Print_JSON_Value(&operation_error_root_value);
         char error_file_path[DSCHOST_STR_BUFFER_SIZE];
         Stprintf(error_file_path, DSCHOST_STR_BUFFER_SIZE, MI_T("%T/dsc.%T.err"), argv[1], operation_name);
-        Save_JSON_Value(error_file_path, &operation_result_root_value);
+        Save_JSON_Value(error_file_path, &operation_error_root_value);
     }
 
 CleanUp:
