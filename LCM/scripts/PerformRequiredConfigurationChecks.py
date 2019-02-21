@@ -31,12 +31,12 @@ def run_perform_required_configuration_checks():
     dsc_sysconfdir = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
     omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
     dsc_host_path = '/opt/dsc/bin/dsc_host'
-    dsc_configuration_path = join(dsc_sysconfdir, 'configuration')
+    dsc_output_path = '/opt/dsc/output'
 
     parameters = []
     if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
         parameters.append(dsc_host_path)
-        parameters.append(dsc_configuration_path) # output folder for dsc_host (not used yet)
+        parameters.append(dsc_output_path)
         parameters.append("PerformRequiredConfigurationChecks")
         parameters.append("1")
     else:

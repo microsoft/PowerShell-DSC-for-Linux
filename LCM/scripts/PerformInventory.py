@@ -112,6 +112,7 @@ def perform_inventory(args):
     dsc_reportdir = join(dsc_sysconfdir, 'InventoryReports')
     omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
     dsc_host_path = '/opt/dsc/bin/dsc_host'
+    dsc_output_path = '/opt/dsc/output'
     dsc_configuration_path = join(dsc_sysconfdir, 'configuration')
     temp_report_path = join(dsc_configuration_path, 'Inventory.xml.temp')
     report_path = join(dsc_configuration_path, 'Inventory.xml')
@@ -124,7 +125,7 @@ def perform_inventory(args):
 
     if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
         parameters.append(dsc_host_path)
-        parameters.append(dsc_configuration_path) # output folder for dsc_host (not used yet)
+        parameters.append(dsc_output_path)
 
         if "inmof" in Variables:
             parameters.append("PerformInventoryOOB")
