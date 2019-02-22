@@ -386,6 +386,7 @@ MI_Result NativeResourceProvider_New(const _In_z_ MI_Char* resourceProviderPath,
     // Load the implementation of the resource provider and invoke Load on the MI_Module
     //
     returnValue = NativeResourceProviderMiModule_New(resourceProviderPath, &nativeResourceProviderLocal->_private.resourceProviderMiModule);
+    Tprintf("***** %T:%d ~ NativeResourceProviderMiModule_New = %d\n", __FILE__, __LINE__, returnValue);
     EH_CheckResult(returnValue);
 
     nativeResourceProviderLocal->_private.resourceProviderMiModule->miModule->Load(&nativeResourceProviderLocal->_private.resourceProviderMiModuleSelf, 
@@ -400,6 +401,7 @@ MI_Result NativeResourceProvider_New(const _In_z_ MI_Char* resourceProviderPath,
     returnValue = NativeResourceProviderMiModule_GetClassDecl(nativeResourceProviderLocal->_private.resourceProviderMiModule, 
                                                     resourceProviderClassName, 
                                                      (const MI_ClassDecl **) &nativeResourceProviderLocal->_private.resourceClassDecl);
+    Tprintf("***** %T:%d ~ NativeResourceProviderMiModule_GetClassDecl = %d\n", __FILE__, __LINE__, returnValue);
     EH_CheckResult(returnValue);
 
     nativeResourceProviderLocal->_private.resourceClassDecl->providerFT->Load(&nativeResourceProviderLocal->_private.resourceClassDeclSelf, 
@@ -705,12 +707,14 @@ MI_Result NativeResourceProvider_TestTargetResource(
     // Invoke TestTargetResource
     MI_Instance* outputResource = NULL;
     returnValue = InvokeMethod(resourceProvider, OMI_BaseResource_TestMethodName, nativeResource, &outputResource, extendedError);
+    Tprintf("***** %T:%d ~ InvokeMethod = %d\n", __FILE__, __LINE__, returnValue);
     EH_CheckResult(returnValue);
 
 
     // Get the output resource returned by TestTargetResource
     MI_Value outputResourceValue;
     returnValue = DSC_MI_Instance_GetElement(outputResource, OMI_BaseResource_Method_Result, &outputResourceValue, NULL, NULL, NULL);
+    Tprintf("***** %T:%d ~ DSC_MI_Instance_GetElement = %d\n", __FILE__, __LINE__, returnValue);
     EH_CheckResult(returnValue);
 
     *testOperationResult = (MI_Uint32)outputResourceValue.boolean;

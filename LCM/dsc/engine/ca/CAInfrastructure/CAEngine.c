@@ -693,6 +693,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
             
         }
         providerContext.resourceId = GetResourceId(instanceA->data[index]);
+        Tprintf("***** %T:%d ~ providerContext.resourceId = '%T'\n", __FILE__, __LINE__, providerContext.resourceId);
         
         //metaconfig doesn't have resourceID
         if(providerContext.resourceId == NULL &&
@@ -751,13 +752,16 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
 
         /* Move the resource to desired state.*/
         canceled = MI_FALSE;
+        Tprintf("***** %T:%d ~ calling MoveToDesiredState for '%T'\n", __FILE__, __LINE__, instanceA->data[index]->classDecl->name);
         r = MoveToDesiredState(&providerContext, moduleLoader->application, miSession, filteredInstance, regInstance, flags, resultStatus, &canceled, resourceErrorList, extendedError);
+        Tprintf("***** %T:%d ~ resultStatus = %d, r = %d, name = '%T'\n", __FILE__, __LINE__, *resultStatus, r, instanceA->data[index]->classDecl->name);
         MI_Instance_Delete(filteredInstance);
         filteredInstance = NULL;
 
         if (r != MI_RESULT_OK)
         {        
             // Failure case, update the resource status
+            Tprintf("***** %T:%d ~ Failure case, update the resource status, r = %d\n", __FILE__, __LINE__, r);
             Intlstr intlstr = Intlstr_Null;
             executionOrder->ExecutionList[xCount].resourceStatus = ResourceProcessedAndFailed;
             if (canceled)
@@ -779,20 +783,21 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
                     certificateid = NULL;
                 }
 
+                Tprintf("***** %T:%d ~ Failure case, update the resource status = %d\n", __FILE__, __LINE__, r);
                 return r;
             }                           
 
             GetResourceString(ID_LCMHELPER_SENDCONFIGAPPLY_ERROR, &intlstr);
 
-                DSC_EventWriteLCMSendConfigurationError(CA_ACTIVITY_NAME, 
-                    r, 
-                    intlstr.str, 
-                    providerContext.resourceId, 
-                    GetSourceInfo(instanceA->data[index]), 
-                    (MI_Char*)GetErrorDetail(*extendedError));
+            DSC_EventWriteLCMSendConfigurationError(CA_ACTIVITY_NAME, 
+                r, 
+                intlstr.str, 
+                providerContext.resourceId, 
+                GetSourceInfo(instanceA->data[index]), 
+                (MI_Char*)GetErrorDetail(*extendedError));
 
-               if( intlstr.str)
-                   Intlstr_Free(intlstr);
+            if( intlstr.str)
+                Intlstr_Free(intlstr);
 
             //send the error to WriteError stream.
             LCM_WriteError( lcmContext, *extendedError);
@@ -817,6 +822,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
 
         if (resultStatus != NULL && *resultStatus == MI_TRUE)
         {
+            Tprintf("***** %T:%d ~ resultStatus == MI_TRUE = %d\n", __FILE__, __LINE__, *resultStatus);
             Destroy_StatusReport_RNIDS(g_rnids);
             g_rnids = NULL;
         }
@@ -837,6 +843,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
                     certificateid = NULL;
                 }
 
+                Tprintf("***** %T:%d ~ resultStatus == MI_FALSE = %d\n", __FILE__, __LINE__, resultStatus);
                 return r;
             }
         }
@@ -848,6 +855,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
                 certificateid = NULL;
             }
 
+            Tprintf("***** %T:%d ~ DSC_RESTART_SYSTEM_FLAG & *resultStatus = %d\n", __FILE__, __LINE__, *resultStatus);
             return MI_RESULT_OK;
         }
     }
@@ -860,6 +868,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
 
     NativeResourceManager_Delete(providerContext.nativeResourceManager);
 
+    Tprintf("***** %T:%d ~ finalr = %d\n", __FILE__, __LINE__, finalr);
     return finalr;
 }
 
@@ -1067,6 +1076,7 @@ MI_Result MI_CALL SendConfigurationApply( _In_ LCMProviderContext *lcmContext,
     /*execute the list in sequence.*/
     r = SetResourcesInOrder(lcmContext, moduleManager, instanceA, &miSession, & executionContainer, 
                             flags, documentIns, resultStatus, &resourceErrorList, extendedError);
+    Tprintf("***** %T:%d ~ resultStatus = %d\n", __FILE__, __LINE__, *resultStatus);
 
     if (resourceErrorList.first != NULL)
     {
@@ -1251,7 +1261,9 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
     }
     else if (1) // (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
     {
+        Tprintf("***** %T:%d ~ calling Exec_NativeProvider\n", __FILE__, __LINE__);
         r =  Exec_NativeProvider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, extendedError);
+        Tprintf("***** %T:%d ~ resultStatus = %d, r = %d\n", __FILE__, __LINE__, *resultStatus, r);
     }
     else
     {
@@ -1614,6 +1626,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     {
         return result;
     }
+    Tprintf("***** %T:%d ~ resources_so_path = '%T'\n", __FILE__, __LINE__, resources_so_path);
 
     // Get the path to the resource provider module (.so)
     size_t resourceProviderPathLength = (MI_Uint32)(Tcslen(resources_so_path) + 1) ;
@@ -1626,6 +1639,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
 
     NativeResourceProvider* nativeResourceProvider = NULL;
     result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
+    Tprintf("***** %T:%d ~ NativeResourceManager_GetNativeResouceProvider = %d\n", __FILE__, __LINE__, result);
     if (result != MI_RESULT_OK)
     {
         return result;
@@ -1639,6 +1653,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
         SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_TEST,provContext->lcmProviderContext);
 
         result = NativeResourceProvider_TestTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &test_operation_result, extendedError);
+        Tprintf("***** %T:%d ~ NativeResourceProvider_TestTargetResource = %d\n", __FILE__, __LINE__, result);
 
         //Stop the timer for test
         finish=CPU_GetTimeStamp();
@@ -1650,6 +1665,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     /* Skip rest of the operation if we were asked just to test.*/
     if (flags & LCM_EXECUTE_TESTONLY)
     {
+        Tprintf("***** %T:%d ~ Skip rest of the operation if we were asked just to test. test_operation_result=%d\n", __FILE__, __LINE__, test_operation_result);
         if(test_operation_result == 1) // TestTargetResource returned TRUE
         {
             *resultStatus = 1;
@@ -1659,12 +1675,14 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
             *resultStatus = 0;
         }
 
+        Tprintf("***** %T:%d ~ resultStatus = %d, result = %d\n", __FILE__, __LINE__, *resultStatus, result);
         return result;
     }
 
     /* Perform Set if value returned is FALSE*/
     if(test_operation_result == 1) // TestTargetResource returned TRUE, so we are skipping SetTargetResource 
     {
+        Tprintf("***** %T:%d ~ TestTargetResource returned TRUE, so we are skipping SetTargetResource. test_operation_result=%d\n", __FILE__, __LINE__, test_operation_result);
         SetMessageInContext(ID_OUTPUT_OPERATION_SKIP,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
         LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
 
@@ -1680,12 +1698,15 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
         return result;
     }
 
+    Tprintf("***** %T:%d ~ Running SET\n", __FILE__, __LINE__);
+
     /* Perform Set*/
     //Start timer for set
     start=CPU_GetTimeStamp();
     SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
 
     result = NativeResourceProvider_SetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &set_operation_result, extendedError);
+    Tprintf("***** %T:%d ~ NativeResourceProvider_SetTargetResource = %d\n", __FILE__, __LINE__, result);
 
     if(set_operation_result == 1) // TestTargetResource returned TRUE
     {

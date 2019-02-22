@@ -110,6 +110,7 @@ MI_Result NativeResourceManager_GetNativeResouceProvider(_In_ NativeResourceMana
     {
         NativeResourceProvider* nativeResourceProviderLocal = NULL;
         returnValue = NativeResourceProvider_New(providerPath, resourceProviderClassName, nativeResourceManager->_private.resourceProviderContext, &nativeResourceProviderLocal);
+        Tprintf("***** %T:%d ~ NativeResourceProvider_New = %d\n", __FILE__, __LINE__, returnValue);
         EH_CheckResult(returnValue);
 
         bucket = (NativeResourceManagerHashMapBucket*)DSC_malloc(sizeof(NativeResourceManagerHashMapBucket), NitsHere());

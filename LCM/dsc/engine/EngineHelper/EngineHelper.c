@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 #include <MI.h>
+#include <errno.h>
+#include <string.h>
 #include "EngineHelper.h"
 #include "DSC_Systemcalls.h"
 #include "Resources_LCM.h"
@@ -2038,10 +2040,17 @@ MI_Result  Save_JSON_Value (
     serialized_string = json_serialize_to_string_pretty(*p_root_value);
     
     FILE * fd = fopen( p_file_path, "w");
-    fputs(serialized_string, fd);
-    fclose(fd);
-
-    json_free_serialized_string(serialized_string);
+    if (fd == NULL)
+    {
+        result = errno;
+        Tprintf("Failed to open file '%T' with errno = %T (%d)\n", __FILE__, __LINE__, p_file_path, errno, strerror(errno));
+    }
+    else
+    {
+        fputs(serialized_string, fd);
+        fclose(fd);
+        json_free_serialized_string(serialized_string);
+    }
 
     return result;
 }
