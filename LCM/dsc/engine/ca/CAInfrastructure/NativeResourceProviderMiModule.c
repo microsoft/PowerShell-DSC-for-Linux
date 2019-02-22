@@ -143,7 +143,10 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *nativeResourc
     //TODO: Add searching nativeResourceProviderPath for dependent dlls for Linux
     nativeResourceProviderMiModule->_private.moduleHandle = dlopen(nativeResourceProviderPath, RTLD_LAZY | RTLD_DEEPBIND);
     if (nativeResourceProviderMiModule->_private.moduleHandle == NULL)
+    {
         Tprintf("***** %T:%d ~ nativeResourceProviderMiModule->_private.moduleHandle == NULL\n", __FILE__, __LINE__);
+    }
+    Tprintf("***** %T:%d ~ dlerror() == '%T'\n", __FILE__, __LINE__, dlerror());
     EH_Check_(nativeResourceProviderMiModule->_private.moduleHandle != NULL, returnValue = MI_RESULT_NOT_FOUND); // TODO - Get actual error using GetLastError
 
     MI_ModuleMainFunction resourceProviderMainFunction = (MI_ModuleMainFunction) dlsym(nativeResourceProviderMiModule->_private.moduleHandle, "MI_Main");
