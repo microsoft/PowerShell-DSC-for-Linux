@@ -1100,22 +1100,26 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
                            _In_ MI_Session *miSession,
                            _In_ MI_Instance *instance,
                            _In_ const MI_Instance *regInstance,
-                        //    _Outptr_result_maybenull_ MI_InstanceA *outputInstance,
                            _Outptr_result_maybenull_ MI_Instance *outputInstance,
                            _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    //*outputInstance = NULL;
-
-    if( /*Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||*/
-        Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
+    if (
+#if !defined(BUILD_OMS)
+        Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
+#endif
+        Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0
+        )
     {
         return Get_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstance, extendedError);
     }
-    else if (1) // (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+#if defined(BUILD_OMS)
+    else
     {
         MI_Result result = MI_RESULT_OK;
         if (provContext->nativeResourceManager == NULL)
+        {
             return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError, ID_MODMAN_MODMAN_NULLPARAM);
+        }
 
         // Get ClassName
         MI_Value class_name_value;
@@ -1143,7 +1147,6 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         }
         result = Stprintf(resourceProviderPath, resourceProviderPathLength, MI_T("%T"), resources_so_path);
 
-
         NativeResourceProvider* nativeResourceProvider = NULL;
         result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
         if (result != MI_RESULT_OK)
@@ -1154,11 +1157,13 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         result = NativeResourceProvider_GetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
 
         return result;
-    } 
+    }
+#else
     else
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
     }
+#endif
 }
 
 MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,  
@@ -1169,12 +1174,17 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
                            _Outptr_result_maybenull_ MI_InstanceA *outputInstances,
                            _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    if( // Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
-        Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
+    if (
+#if !defined(BUILD_OMS)
+        Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
+#endif
+        Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0
+        )
     {
         return Inventory_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, outputInstances, extendedError);
     }
-    else if (1) // (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+#if defined(BUILD_OMS)
+    else
     {
         MI_Result result = MI_RESULT_OK;
         if (provContext->nativeResourceManager == NULL)
@@ -1216,11 +1226,13 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
         result = NativeResourceProvider_GetInventory(nativeResourceProvider, miApp, miSession, instance, regInstance,/* flags,*/ outputInstances, extendedError);
         
         return result;
-    } 
+    }
+#else
     else
     {
         return GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
     }
+#endif
 }
 
 MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,  
@@ -1237,10 +1249,14 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
     DSC_EventWriteMessageMoveResourceToDesired(provContext->resourceId,instance->classDecl->name);
 
     MI_Result r = MI_RESULT_OK;
-
-    if( Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
-        //Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
-        Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0)
+    
+    if (
+#if !defined(BUILD_OMS)
+        Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
+#endif
+        Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
+        Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0
+        )
     {
         if(instance->classDecl!=NULL)
         {
@@ -1249,14 +1265,17 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
 
         r = Exec_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, canceled, resourceErrorList, extendedError);
     }
-    else if (1) // (Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_NATIVEPROVIDER) == 0)
+#if defined(BUILD_OMS)
+    else
     {
         r =  Exec_NativeProvider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, extendedError);
     }
+#else
     else
     {
         r =  GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
     }
+#endif
 
     return r;
 }
@@ -1308,7 +1327,6 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
                                         instanceNamespace);
     DSC_EventWriteMessageExecutingWMI(instance->classDecl->name,provContext->resourceId);
     
-    
     callbacks.writeMessage = DoWriteMessage;
     /* Sign up for progress only if we are in online mode*/
     if ((LCM_EXECUTIONMODE_ONLINE & provContext->lcmProviderContext->executionMode) == LCM_EXECUTIONMODE_ONLINE)
@@ -1335,7 +1353,6 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
     {
         *canceled = MI_TRUE;
         return MI_RESULT_FAILED;
-    
     }
 
     // If the input MI_Instance is a MSFT_LogResource then directly log the message using LCM log API's
@@ -1400,7 +1417,6 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
     }  
     else
     {
-
         /*Get target namespace*/
         r = DSC_MI_Instance_GetElement(regInstance, MSFT_CimConfigurationProviderRegistration_Namespace, &value, NULL, NULL, NULL);
         if (r != MI_RESULT_OK)
@@ -1576,7 +1592,6 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
     return r;
 }
 
-
 MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,   
                              _In_ MI_Application *miApp,
                              _In_ MI_Session *miSession,
@@ -1670,7 +1685,6 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
         return result;
     }
 
-
     /* Perform Set*/
     //Start timer for set
     start=CPU_GetTimeStamp();
@@ -1756,9 +1770,7 @@ MI_Result GetSetMethodResult(_In_ MI_Operation *operation,
     *returnValue = value.uint32;
 
     return r;
-                                
 }
-
 
 MI_Result GetTestMethodResult(_In_ MI_Operation *operation,
                               _Out_opt_ MI_Boolean *bTestResult,
@@ -1778,7 +1790,7 @@ MI_Result GetTestMethodResult(_In_ MI_Operation *operation,
     *outProviderContext = 0;
     
     if (extendedError == NULL)
-    {        
+    {
         return MI_RESULT_INVALID_PARAMETER; 
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.     
@@ -1819,7 +1831,6 @@ MI_Result GetTestMethodResult(_In_ MI_Operation *operation,
     *outProviderContext = value.uint64;
 
     return r;
-                                
 }
 
 MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
@@ -1836,7 +1847,7 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
     MI_Value value;
 
     if (extendedError == NULL)
-    {        
+    {
         return MI_RESULT_INVALID_PARAMETER; 
     }
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.   
@@ -1876,8 +1887,8 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
         return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
     }    
     return r;
-                                
 }
+
 MI_Result Get_WMIv2Provider(_In_ ProviderCallbackContext *provContext,   
                                _In_ MI_Application *miApp,
                                _In_ MI_Session *miSession,
@@ -1938,8 +1949,6 @@ MI_Result Get_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
     }
     else
     {
-    
-
         /*Get target namespace*/
         r = DSC_MI_Instance_GetElement(regInstance, MSFT_CimConfigurationProviderRegistration_Namespace, &value, NULL, NULL, NULL);
         if( r != MI_RESULT_OK )
@@ -2058,7 +2067,7 @@ MI_Result PerformInventoryMethodResult(_In_ MI_Operation *operation,
 	    if( r != MI_RESULT_OK )
 	    {
 		return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
-	    }    
+	    }
 	    outputInstances->data[i] = tempInstance;
 	}
     }
@@ -2069,7 +2078,6 @@ MI_Result PerformInventoryMethodResult(_In_ MI_Operation *operation,
     }
 
     return r;
-                                
 }
 
 const MI_Char * GetResourceId( _In_ MI_Instance *inst)
