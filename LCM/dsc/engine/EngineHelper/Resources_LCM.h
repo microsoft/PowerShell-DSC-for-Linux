@@ -396,8 +396,8 @@
 #define ID_LCMHELPER_ERROR_CREATING_DYNAMIC_INSTANCE_INVENTORY 1918
 #define ID_LCMHELPER_ERROR_ADDING_DYNAMIC_INSTANCE_INVENTORY 1919
 
-/*DSC Operation (and Context) string ids 2001 to 2100*/
-#define ID_DSC_OPERATION_CONTEXT_INVALID_OPERATION              2001
+/*Native provider manager string ids 2001 to 2100*/
+#define ID_NATIVE_PROVIDER_MANAGER_SET_OPERATION_FAILED         2001
 
 /*DSC Host string ids 2101 to 2200*/
 #define ID_DSC_HOST_INVALID_OPERATION                           2100

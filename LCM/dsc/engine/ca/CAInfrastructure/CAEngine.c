@@ -759,7 +759,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
         filteredInstance = NULL;
 
         if (r != MI_RESULT_OK)
-        {        
+        {
             // Failure case, update the resource status
             Tprintf("***** %T:%d ~ Failure case, update the resource status, r = %d\n", __FILE__, __LINE__, r);
             Intlstr intlstr = Intlstr_Null;
@@ -1685,16 +1685,6 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
         Tprintf("***** %T:%d ~ TestTargetResource returned TRUE, so we are skipping SetTargetResource. test_operation_result=%d\n", __FILE__, __LINE__, test_operation_result);
         SetMessageInContext(ID_OUTPUT_OPERATION_SKIP,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
         LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
-
-        if(test_operation_result == 1) // TestTargetResource returned TRUE
-        {
-            *resultStatus = 1;
-        }
-        else // TestTargetResource returned FALSE
-        {
-            *resultStatus = 0;
-        }
-
         return result;
     }
 
@@ -1707,17 +1697,21 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
 
     result = NativeResourceProvider_SetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &set_operation_result, extendedError);
     Tprintf("***** %T:%d ~ NativeResourceProvider_SetTargetResource = %d\n", __FILE__, __LINE__, result);
-
-    if(set_operation_result == 1) // TestTargetResource returned TRUE
+    if (result != MI_RESULT_OK)
     {
-        *resultStatus = 1;
-    }
-    else // TestTargetResource returned FALSE
-    {
-        *resultStatus = 0;
+        return GetCimMIError(result, extendedError, ID_NATIVE_PROVIDER_MANAGER_SET_OPERATION_FAILED);
+        return result;
     }
 
-    
+    if(set_operation_result == 1) // SetTargetResource returned TRUE
+    {
+        result = MI_RESULT_OK;
+    }
+    else // SetTargetResource returned FALSE
+    {
+        result = MI_RESULT_FAILED;
+    }
+
     //Stop the timer for set
     finish=CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
