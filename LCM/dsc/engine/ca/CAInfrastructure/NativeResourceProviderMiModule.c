@@ -142,20 +142,12 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *nativeResourc
 
     //TODO: Add searching nativeResourceProviderPath for dependent dlls for Linux
     nativeResourceProviderMiModule->_private.moduleHandle = dlopen(nativeResourceProviderPath, RTLD_LAZY | RTLD_DEEPBIND);
-    if (nativeResourceProviderMiModule->_private.moduleHandle == NULL)
-    {
-        Tprintf("***** %T:%d ~ nativeResourceProviderMiModule->_private.moduleHandle == NULL\n", __FILE__, __LINE__);
-    }
-    Tprintf("***** %T:%d ~ dlerror() == '%T'\n", __FILE__, __LINE__, dlerror());
     EH_Check_(nativeResourceProviderMiModule->_private.moduleHandle != NULL, returnValue = MI_RESULT_NOT_FOUND); // TODO - Get actual error using GetLastError
 
     MI_ModuleMainFunction resourceProviderMainFunction = (MI_ModuleMainFunction) dlsym(nativeResourceProviderMiModule->_private.moduleHandle, "MI_Main");
-    if (resourceProviderMainFunction == NULL)
-        Tprintf("***** %T:%d ~ resourceProviderMainFunction == NULL\n", __FILE__, __LINE__);
     EH_Check_(resourceProviderMainFunction != NULL, returnValue = MI_RESULT_METHOD_NOT_FOUND); // TODO - Get actual error using GetLastError
 
     returnValue = NativeResourceHostMiServer_New(&miServer);
-    Tprintf("***** %T:%d ~ NativeResourceHostMiServer_New = %d\n", __FILE__, __LINE__, returnValue);
     EH_CheckResult(returnValue);
 
     // NOTE: the MiModule returned by the main function in the provider is statically allocated and should not be freed.
@@ -165,7 +157,6 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *nativeResourc
 #else
     // TODO: get the actual error code on Linux
     errorCode = MI_RESULT_METHOD_NOT_FOUND;
-    Tprintf("***** %T:%d ~ resourceProviderMainFunction = %d (errno=%d)\n", __FILE__, __LINE__, errorCode, errno);
 #endif
     EH_Check_(nativeResourceProviderMiModule->miModule != NULL, returnValue = errorCode);
 
@@ -176,8 +167,6 @@ MI_Result NativeResourceProviderMiModule_New(const _In_z_ MI_Char *nativeResourc
     {
         DSC_EventMIModuleVersionMisMatch(MI_MAJOR, miModuleVersion);
     }
-    if (!versionMatch)
-        Tprintf("***** %T:%d ~ version mismatch\n", __FILE__, __LINE__);
     EH_Check_(versionMatch, returnValue = MI_RESULT_NOT_SUPPORTED);
     *module = nativeResourceProviderMiModule;
     DSC_EventWriteLoadingDLLSucceeded(nativeResourceProviderPath);
