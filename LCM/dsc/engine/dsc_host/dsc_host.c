@@ -71,6 +71,28 @@ int main(int argc, char *argv[])
     char* operation_name;
 
     // Check the user that has invoked the operation: root for DIY and omsagent for OMS
+#if defined(BUILD_OMS)
+    if (RunningAsRoot() == MI_TRUE)
+    {
+        Tprintf(MI_T("Unable to run omsconfig configurations as root. Please use omsagent credentials.\n"));
+        result = MI_RESULT_FAILED;
+        CreateMiInstanceErrorObject(&extended_error, MI_T("Unable to run omsconfig configurations as root. Please use omsagent credentials.\n"));
+        JSON_Value *value;
+        Convert_MIInstance_JSON(extended_error, &operation_error_root_value);
+        goto CleanUp;
+    }
+#else
+    if (RunningAsRoot() == MI_FALSE)
+    {
+        Tprintf(MI_T("Unable to run dsc configurations as non-root.  Please use root credentials.\n"));
+        result = MI_RESULT_FAILED;
+        CreateMiInstanceErrorObject(&extended_error, MI_T("Unable to run dsc configurations as non-root. Please use root credentials.\n"));
+        JSON_Value *value;
+        Convert_MIInstance_JSON(extended_error, &operation_error_root_value);
+        goto CleanUp;
+    }
+#endif  
+
     if(argc < 3)
     {
         if(argc > 1 && 0 == Tcscasecmp(argv[1], MI_T("--version")))
