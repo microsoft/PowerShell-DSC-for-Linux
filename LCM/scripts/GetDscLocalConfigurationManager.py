@@ -5,6 +5,7 @@ import subprocess
 
 from imp                import load_source
 from os.path            import dirname, isfile, join, realpath
+from fcntl              import flock, LOCK_EX, LOCK_UN
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)

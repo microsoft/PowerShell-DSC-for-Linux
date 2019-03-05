@@ -5,6 +5,7 @@ import subprocess
 
 from imp                import load_source
 from os.path            import dirname, isfile, join, realpath
+from fcntl              import flock, LOCK_EX, LOCK_UN
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -12,13 +13,22 @@ pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
 
+if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+    is_oms_config = True
+else:
+    is_oms_config = False
+
 omi_bindir = "<CONFIG_BINDIR>"
 omicli_path = omi_bindir + "/omicli"
+dsc_host_base_path = '/opt/dsc'
+dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
+dsc_host_output_path = join(dsc_host_base_path, 'output')
+dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
 
 parameters = []
-if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
-    parameters.append("/opt/dsc/bin/dsc_host")
-    parameters.append("/opt/dsc/output")
+if is_oms_config:
+    parameters.append(dsc_host_path)
+    parameters.append(dsc_host_output_path)
     parameters.append("RollBack")
 else:
     parameters.append(omicli_path)
@@ -29,8 +39,24 @@ else:
     parameters.append("}")
     parameters.append("RollBack")
 
-p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-stdout, stderr = p.communicate()
+try:
+    if is_oms_config:
+        # Open the dsc host lock file. This also creates a file if it does not exist
+        dschostlock_filehandle = open(dsc_host_lock_path, 'w')
+        printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
+        
+        # Acquire dsc host file lock
+        flock(dschostlock_filehandle, LOCK_EX)
+
+    p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+finally:
+    if is_oms_config:
+        # Release dsc host file lock
+        flock(dschostlock_filehandle, LOCK_UN)
+
+        # Close dsc host lock file handle
+        dschostlock_filehandle.close()
 
 print(stdout)
 print(stderr)
