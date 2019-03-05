@@ -207,8 +207,12 @@ def register(registration_endpoint, worker_group_name, machine_id, cert_path, ke
     """
     http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode)
     http_client = http_client_factory.create_http_client(sys.version_info)
+
+    no_proxy_http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode, force_no_proxy=True)
+    no_proxy_http_client = no_proxy_http_client_factory.create_http_client(sys.version_info)
+
     headers, payload = get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resource_id, cert_path,
-                                               http_client)
+                                               no_proxy_http_client)
     url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
 
     response = http_client.put(url, headers=headers, data=payload)
@@ -229,7 +233,7 @@ def deregister(registration_endpoint, worker_group_name, machine_id, cert_path, 
     Returns:
 
     """
-    headers, payload = get_headers_and_payload(worker_group_name, cert_path)
+    headers, payload = get_headers_and_payload(worker_group_name, certificate_path=cert_path)
     url = registration_endpoint + "/Hybrid(MachineId='" + machine_id + "')"
 
     http_client_factory = httpclientfactory.HttpClientFactory(cert_path, key_path, test_mode)
