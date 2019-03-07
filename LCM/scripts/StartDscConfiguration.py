@@ -4,6 +4,16 @@
 from subprocess import Popen, PIPE
 from sys import argv
 
+from imp                import load_source
+from os.path            import dirname, isfile, join, realpath
+from fcntl              import flock, LOCK_EX, LOCK_UN
+
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
+helperlib = load_source('helperlib', helperLibPath)
+
 try:
     # Used by Python 2.7+
     from argparse import ArgumentParser
@@ -102,43 +112,74 @@ def main(argv):
     for char in configurationFileContent:
         configurationData.append(str(ord(char)))
 
-    # OMI CLI location
+    if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+        is_oms_config = True
+    else:
+        is_oms_config = False
+
+    # # OMI CLI location
     omiBinDir = "<CONFIG_BINDIR>"
     omiCliPath = omiBinDir + "/omicli"
+    dsc_host_base_path = '/opt/dsc'
+    dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
+    dsc_host_output_path = join(dsc_host_base_path, 'output')
+    dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
 
     # Assemble parameters to pass to OMI CLI
-    omiCliParameters = []
-    omiCliParameters.append(omiCliPath)
-    omiCliParameters.append("iv")
-    omiCliParameters.append("<DSC_NAMESPACE>")
-    omiCliParameters.append("{")
-    omiCliParameters.append("MSFT_DSCLocalConfigurationManager")
-    omiCliParameters.append("}")
-    omiCliParameters.append("SendConfigurationApply")
-    omiCliParameters.append("{")
-    omiCliParameters.append("ConfigurationData")
-    omiCliParameters.append("[")
+    host_parameters = []
+    if is_oms_config:
+        host_parameters.append(dsc_host_path)
+        host_parameters.append(dsc_host_output_path)
+        host_parameters.append("SendConfigurationApply")
+        host_parameters.append(args[2])
+        # Insert force if specified
+        if parsedArguments.force:
+            host_parameters.append("force")
+    else:
+        host_parameters.append(omiCliPath)
+        host_parameters.append("iv")
+        host_parameters.append("<DSC_NAMESPACE>")
+        host_parameters.append("{")
+        host_parameters.append("MSFT_DSCLocalConfigurationManager")
+        host_parameters.append("}")
+        host_parameters.append("SendConfigurationApply")
+        host_parameters.append("{")
+        host_parameters.append("ConfigurationData")
+        host_parameters.append("[")
 
-    # Insert configurationmof data here
-    for token in configurationData:
-        omiCliParameters.append(token)
-    
-    omiCliParameters.append("]")
+        # Insert configurationmof data here
+        for token in configurationData:
+            host_parameters.append(token)
+        
+        host_parameters.append("]")
 
-    # Insert force if specified
-    if parsedArguments.force:
-        omiCliParameters.append("force")
-        omiCliParameters.append("true")
+        # Insert force if specified
+        if parsedArguments.force:
+            host_parameters.append("force")
+            host_parameters.append("true")
 
-    omiCliParameters.append("}")
+        host_parameters.append("}")
 
-    # Call OMI CLI in subprocess
-    omiCliProcess = Popen(omiCliParameters, stdout = PIPE, stderr = PIPE)
+    try:
+        if is_oms_config:
+            # Open the dsc host lock file. This also creates a file if it does not exist
+            dschostlock_filehandle = open(dsc_host_lock_path, 'w')
+            printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
+            
+            # Acquire dsc host file lock
+            flock(dschostlock_filehandle, LOCK_EX)
 
-    # Retrieve stdout and stderr from OMI CLI call
-    stdout, stderr = omiCliProcess.communicate()
+        p = subprocess.Popen(host_parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+    finally:
+        if is_oms_config:
+            # Release dsc host file lock
+            flock(dschostlock_filehandle, LOCK_UN)
 
-    # Print output from OMI CLI call
+            # Close dsc host lock file handle
+            dschostlock_filehandle.close()
+
+    # Print output from omicli/dsc_host call
     print(stdout)
     print(stderr)
 

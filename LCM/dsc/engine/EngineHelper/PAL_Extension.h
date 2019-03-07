@@ -23,7 +23,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-
 typedef struct _Internal_DirEnt 
 {
     TChar name[PAL_MAX_PATH_SIZE];

@@ -111,30 +111,50 @@ def perform_inventory(args):
     dsc_sysconfdir = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
     dsc_reportdir = join(dsc_sysconfdir, 'InventoryReports')
     omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
+    dsc_host_base_path = '/opt/dsc'
+    dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
+    dsc_host_output_path = join(dsc_host_base_path, 'output')
+    dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
     dsc_configuration_path = join(dsc_sysconfdir, 'configuration')
     temp_report_path = join(dsc_configuration_path, 'Inventory.xml.temp')
     report_path = join(dsc_configuration_path, 'Inventory.xml')
     inventorylock_path = join(dsc_sysconfdir, 'inventory_lock')
 
+    if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+        is_oms_config = True
+    else:
+        is_oms_config = False
+
     if "outxml" in Variables:
         report_path = Variables["outxml"]
 
     parameters = []
-    parameters.append(omicli_path)
-    parameters.append("iv")
-    parameters.append(helperlib.DSC_NAMESPACE)
-    parameters.append("{")
-    parameters.append("MSFT_DSCLocalConfigurationManager")
-    parameters.append("}")
 
-    if "inmof" in Variables:
-        parameters.append("PerformInventoryOOB")
-        parameters.append("{")
-        parameters.append("InventoryMOFPath")
-        parameters.append(Variables["inmof"])
-        parameters.append("}")
+    if is_oms_config:
+        parameters.append(dsc_host_path)
+        parameters.append(dsc_host_output_path)
+
+        if "inmof" in Variables:
+            parameters.append("PerformInventoryOOB")
+            parameters.append(Variables["inmof"])
+        else:
+            parameters.append("PerformInventory")
     else:
-        parameters.append("PerformInventory")
+        parameters.append(omicli_path)
+        parameters.append("iv")
+        parameters.append(helperlib.DSC_NAMESPACE)
+        parameters.append("{")
+        parameters.append("MSFT_DSCLocalConfigurationManager")
+        parameters.append("}")
+
+        if "inmof" in Variables:
+            parameters.append("PerformInventoryOOB")
+            parameters.append("{")
+            parameters.append("InventoryMOFPath")
+            parameters.append(Variables["inmof"])
+            parameters.append("}")
+        else:
+            parameters.append("PerformInventory")
 
     # Ensure inventory lock file permission is set correctly before opening
     operationStatusUtility.ensure_file_permissions(inventorylock_path, '644')
@@ -142,11 +162,23 @@ def perform_inventory(args):
     # Open the inventory lock file. This also creates a file if it does not exist.
     inventorylock_filehandle = open(inventorylock_path, 'w')
 
+    # Open the dsc host lock file. This also creates a file if it does not exist.
+    if is_oms_config:
+        dschostlock_filehandle = open(dsc_host_lock_path, 'w')
+
     try:
         printVerboseMessage("Opened the inventory lock file at the path '" + inventorylock_path + "'")
+        
+        if is_oms_config:
+            printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
 
         # Acquire inventory file lock
         flock(inventorylock_filehandle, LOCK_EX)
+
+        # Acquire dsc host file lock
+        if is_oms_config:
+            flock(dschostlock_filehandle, LOCK_EX)
+
         try:
             system("rm -f " + dsc_reportdir + "/*")
 
@@ -202,12 +234,24 @@ def perform_inventory(args):
         finally:
             # Release inventory file lock
             flock(inventorylock_filehandle, LOCK_UN)
+
+            # Release dsc host file lock
+            if is_oms_config:
+                flock(dschostlock_filehandle, LOCK_UN)
     finally:
         # Close inventory lock file handle
         inventorylock_filehandle.close()
+        
+        # Close dsc host lock file handle
+        if is_oms_config:
+            dschostlock_filehandle.close()
 
     # Ensure inventory lock file permission is set correctly after opening
     operationStatusUtility.ensure_file_permissions(inventorylock_path, '644')
+
+    # Ensure dsc host lock file permission is set correctly after opening
+    if is_oms_config:
+        operationStatusUtility.ensure_file_permissions(dsc_host_lock_path, '644')
 
     exit(retval)
 

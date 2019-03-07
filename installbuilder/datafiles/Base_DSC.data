@@ -64,6 +64,8 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc; LCM/keys/msgpgkey.asc; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip; release/nxFileInventory_1.3.zip; 755; ${{RUN_AS_USER}}; root
 
+/opt/dsc/bin/dsc_host; omi-1.0.8/output/bin/dsc_host; 755; ${{RUN_AS_USER}}; root
+
 #else
 
 /opt/microsoft/${{SHORT_NAME}}/bin/omi_preexec.sh; intermediate/Scripts/omi_preexec.sh; 755; ${{RUN_AS_USER}}; root
@@ -100,6 +102,10 @@ SHLIB_EXT: 'so'
 
 #if BUILD_OMS == 1
 /etc/opt/microsoft/omsagent/conf/omsagent.d; 755; ${{RUN_AS_USER}}; root; sysdir
+/opt/dsc; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/bin; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/lib; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/output; 755; ${{RUN_AS_USER}}; root
 #endif
 
 %Links
@@ -107,16 +113,21 @@ SHLIB_EXT: 'so'
 
 %Dependencies
 #if BUILD_OMS == 1
+
 #if PACKAGE_TYPE == RPM
-omsagent >= 1.0.0
+omsagent >= 1.8.1
 #else
-omsagent (>= 1.0.0)
+omsagent (>= 1.8.1)
 #endif
-#endif
+
+#else
+
 #if PACKAGE_TYPE == RPM
 omi >= 1.0.8-6
 #else
 omi (>= 1.0.8.6)
+#endif
+
 #endif
 
 %Preinstall_10
@@ -363,7 +374,7 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     done
 fi
 
-%Postuninstall_999
+%Postuninstall_899
 OMI_HOME=/opt/omi
 OMI_REGISTER_DIR=/etc/opt/omi/conf/omiregister
 CONFIG_SYSCONFDIR=/etc/opt/omi/conf
