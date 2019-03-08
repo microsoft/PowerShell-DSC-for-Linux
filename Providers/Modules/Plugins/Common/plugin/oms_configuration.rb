@@ -106,7 +106,7 @@ module OMS
             return imds_instance_json_compute['location']
           rescue => e
             # this may be a container instance or a non-Azure VM
-            OMS::Log.warn_once("Could not fetch Azure Resource ID from IMDS, Reason: #{e}")
+            OMS::Log.warn_once("Could not fetch Azure region from IMDS, Reason: #{e}")
             return nil
           end
       end  
