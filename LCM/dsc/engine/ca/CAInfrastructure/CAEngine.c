@@ -1151,7 +1151,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
         if (result != MI_RESULT_OK)
         {
-            goto cleaup;
+            goto cleanup;
         }
 
         result = NativeResourceProvider_GetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
