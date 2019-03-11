@@ -83,12 +83,6 @@ def Test_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Ch
 
 
 def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode):
-
-    f = open("/home/zia/test_folder/python.txt", "a")
-    f.write("DestinationPath = " + DestinationPath)
-    f.write("Ensure = " + Ensure)
-    
-
     arg_names = list(locals().keys())
     DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode \
             = init_locals(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Checksum, Recurse, Links, Owner, Group, Mode)
@@ -113,9 +107,6 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     ld = locals()
     for k in arg_names :
         retd[k] = ld[k]
-        f.write("\n ld[" + k + "] = " + ld[k])
-
-    f.close() 
     return retval, retd
 
 

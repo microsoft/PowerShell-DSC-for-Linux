@@ -26,7 +26,6 @@
 #include "CAEngineInternal.h"
 #include "ProviderCallbacks.h"
 #include "NativeResourceManager.h"
-#include "CACrypto.h"
 #include "CAValidate.h"
 #include <curl/curl.h>
 
@@ -652,10 +651,11 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
     r = NativeResourceManager_New(&providerContext, &(providerContext.nativeResourceManager));
     if( r != MI_RESULT_OK)
     {
-        // CleanUpGetCache(outInstances);
-        // DSC_free(outInstances->data);
-        // outInstances->size = 0;
-        // MI_Session_Close(&miSession, NULL, NULL);
+        if(certificateid != NULL)
+        {
+            DSC_free(certificateid);
+            certificateid = NULL;
+        }
         return r;
     }
 
@@ -679,6 +679,11 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
         r = DependentResourceFailed(index, executionOrder, instanceA, &bDependentFailed, extendedError);
         if( r != MI_RESULT_OK )
         {
+            if(certificateid != NULL)
+            {
+                DSC_free(certificateid);
+                certificateid = NULL;
+            }
             return r;
         }
         if( bDependentFailed == MI_TRUE )
@@ -873,7 +878,6 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
     MI_Instance *filteredInstance = NULL;
     MI_Instance *regInstance = NULL;
     ModuleLoaderObject *moduleLoader = NULL;
-    // MI_InstanceA getInstanceResult = {0};
     MI_Instance *getInstanceResult = NULL;
     MI_Session miSession = MI_SESSION_NULL;
     ProviderCallbackContext providerContext = {0};
@@ -1137,7 +1141,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         // Get the path to the resource provider module (.so)
         size_t resourceProviderPathLength = (MI_Uint32)(Tcslen(resources_so_path) + 1) ;
         MI_Char* resourceProviderPath = (MI_Char*)DSC_malloc(resourceProviderPathLength * sizeof(MI_Char), NitsHere());
-        if( resourceProviderPath == NULL)
+        if (resourceProviderPath == NULL)
         {
             return GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_LCMHELPER_MEMORY_ERROR);
         }
@@ -1147,10 +1151,17 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
         if (result != MI_RESULT_OK)
         {
-            return result;
+            goto cleaup;
         }
 
         result = NativeResourceProvider_GetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance,/* flags,*/ outputInstance, extendedError);
+
+cleanup:
+
+        if (!resourceProviderPath)
+        {
+            DSC_free(resourceProviderPath);
+        }
 
         return result;
     }
@@ -1216,10 +1227,17 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
         result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
         if (result != MI_RESULT_OK)
         {
-            return result;
+            goto cleanup;
         }
 
         result = NativeResourceProvider_GetInventory(nativeResourceProvider, miApp, miSession, instance, regInstance,/* flags,*/ outputInstances, extendedError);
+
+cleanup:
+
+        if (!resourceProviderPath)
+        {
+            DSC_free(resourceProviderPath);
+        }
 
         return result;
     }
@@ -1639,7 +1657,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
     if (result != MI_RESULT_OK)
     {
-        return result;
+        goto cleanup;
     }
 
     // Execute Test unless SETONLY was provided
@@ -1670,7 +1688,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
             *resultStatus = 0;
         }
 
-        return result;
+        goto cleanup;
     }
 
     /* Perform Set if value returned is FALSE*/
@@ -1678,7 +1696,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     {
         SetMessageInContext(ID_OUTPUT_OPERATION_SKIP,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
         LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
-        return result;
+        goto cleanup;
     }
 
     /* Perform Set*/
@@ -1689,8 +1707,8 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     result = NativeResourceProvider_SetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &set_operation_result, extendedError);
     if (result != MI_RESULT_OK)
     {
-        return GetCimMIError(result, extendedError, ID_NATIVE_PROVIDER_MANAGER_SET_OPERATION_FAILED);
-        return result;
+        result = GetCimMIError(result, extendedError, ID_NATIVE_PROVIDER_MANAGER_SET_OPERATION_FAILED);
+        goto cleanup;
     }
 
     if(set_operation_result == 1) // SetTargetResource returned TRUE
@@ -1707,6 +1725,13 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
     SetMessageInContext(ID_OUTPUT_OPERATION_END,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
     LogCAMessageTime(provContext->lcmProviderContext, ID_CA_SET_TIMEMESSAGE, (const MI_Real64)duration,provContext->resourceId);
+
+cleanup:
+
+    if (!resourceProviderPath)
+    {
+        DSC_free(resourceProviderPath);
+    }
 
     return result;
 }
@@ -2549,10 +2574,6 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
     r = NativeResourceManager_New(&providerContext, &(providerContext.nativeResourceManager));
     if( r != MI_RESULT_OK)
     {
-        // CleanUpGetCache(outInstances);
-        // DSC_free(outInstances->data);
-        // outInstances->size = 0;
-        // MI_Session_Close(&miSession, NULL, NULL);
         return r;
     }
 
@@ -2603,7 +2624,7 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
 
         inventoryInstancesResultArray[xCount].data = inventoryInstancesResult.data;
         inventoryInstancesResultArray[xCount].size = inventoryInstancesResult.size;
-    totalInstanceCount += inventoryInstancesResult.size;
+        totalInstanceCount += inventoryInstancesResult.size;
     }
 
     if (totalInstanceCount > 0)
