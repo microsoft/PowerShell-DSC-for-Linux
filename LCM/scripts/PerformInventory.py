@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from fcntl              import flock, LOCK_EX, LOCK_UN
+from fcntl              import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from imp                import load_source
 from os                 import listdir, system
 from os.path            import dirname, isfile, join, realpath
@@ -172,72 +172,84 @@ def perform_inventory(args):
         if is_oms_config:
             printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
 
+        retVal = 0
+        inventorylock_acquired = True
+
         # Acquire inventory file lock
-        flock(inventorylock_filehandle, LOCK_EX)
-
-        # Acquire dsc host file lock
-        if is_oms_config:
-            flock(dschostlock_filehandle, LOCK_EX)
-
         try:
-            system("rm -f " + dsc_reportdir + "/*")
+            flock(inventorylock_filehandle, LOCK_EX | LOCK_NB)
+        except IOError:
+            inventorylock_acquired = False
 
-            # Save the starting timestamp without milliseconds
-            startDateTime = operationStatusUtility.get_current_time_no_ms()
-
-            process = Popen(parameters, stdout = PIPE, stderr = PIPE)
-            stdout, stderr = process.communicate()
-            retval = process.returncode
-
-            printVerboseMessage(stdout)
-
-            # Python 3 returns an empty byte array into stderr on success
-            if stderr == '' or (version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == ''):
-                operationStatusUtility.write_success_to_status_file(operation)
-            else:
-                operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
-                printVerboseMessage(stderr)
-
-            # Combine reports together
-            reportFiles = listdir(dsc_reportdir)
-
-            final_xml_report = '<INSTANCE CLASSNAME="Inventory"><PROPERTY.ARRAY NAME="Instances" TYPE="string" EmbeddedObject="object"><VALUE.ARRAY>'
-            values = []
-            for reportFileName in reportFiles:
-                reportFilePath = join(dsc_reportdir, reportFileName)
-
-                if not isfile(reportFilePath):
-                    continue
-                report = parse(reportFilePath)
-                for valueNode in report.getElementsByTagName('VALUE'):
-                    values.append(valueNode.toxml())
-
-            final_xml_report = final_xml_report + "".join(values) + "</VALUE.ARRAY></PROPERTY.ARRAY></INSTANCE>"
-
-            # Ensure temporary inventory report file permission is set correctly before opening
-            operationStatusUtility.ensure_file_permissions(temp_report_path, '644')
-
-            tempReportFileHandle = open(temp_report_path, 'w')
-            try:
-                tempReportFileHandle.write(final_xml_report)
-            finally:
-                tempReportFileHandle.close()
-
-            # Ensure temporary inventory report file permission is set correctly after opening
-            operationStatusUtility.ensure_file_permissions(temp_report_path, '644')
-
-            system("rm -f " + dsc_reportdir + "/*")
-            move(temp_report_path, report_path)
-
-            # Ensure inventory report file permission is set correctly
-            operationStatusUtility.ensure_file_permissions(report_path, '644')
-        finally:
-            # Release inventory file lock
-            flock(inventorylock_filehandle, LOCK_UN)
-
-            # Release dsc host file lock
+        if inventorylock_acquired:
+            dschostlock_acquired = True
+            # Acquire dsc host file lock
             if is_oms_config:
-                flock(dschostlock_filehandle, LOCK_UN)
+                try:
+                    flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                except IOError:
+                    dschostlock_acquired = False
+
+            if dschostlock_acquired:
+                try:
+                    system("rm -f " + dsc_reportdir + "/*")
+
+                    # Save the starting timestamp without milliseconds
+                    startDateTime = operationStatusUtility.get_current_time_no_ms()
+
+                    process = Popen(parameters, stdout = PIPE, stderr = PIPE)
+                    stdout, stderr = process.communicate()
+                    retval = process.returncode
+
+                    printVerboseMessage(stdout)
+
+                    # Python 3 returns an empty byte array into stderr on success
+                    if stderr == '' or (version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == ''):
+                        operationStatusUtility.write_success_to_status_file(operation)
+                    else:
+                        operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
+                        printVerboseMessage(stderr)
+
+                    # Combine reports together
+                    reportFiles = listdir(dsc_reportdir)
+
+                    final_xml_report = '<INSTANCE CLASSNAME="Inventory"><PROPERTY.ARRAY NAME="Instances" TYPE="string" EmbeddedObject="object"><VALUE.ARRAY>'
+                    values = []
+                    for reportFileName in reportFiles:
+                        reportFilePath = join(dsc_reportdir, reportFileName)
+
+                        if not isfile(reportFilePath):
+                            continue
+                        report = parse(reportFilePath)
+                        for valueNode in report.getElementsByTagName('VALUE'):
+                            values.append(valueNode.toxml())
+
+                    final_xml_report = final_xml_report + "".join(values) + "</VALUE.ARRAY></PROPERTY.ARRAY></INSTANCE>"
+
+                    # Ensure temporary inventory report file permission is set correctly before opening
+                    operationStatusUtility.ensure_file_permissions(temp_report_path, '644')
+
+                    tempReportFileHandle = open(temp_report_path, 'w')
+                    try:
+                        tempReportFileHandle.write(final_xml_report)
+                    finally:
+                        tempReportFileHandle.close()
+
+                    # Ensure temporary inventory report file permission is set correctly after opening
+                    operationStatusUtility.ensure_file_permissions(temp_report_path, '644')
+
+                    system("rm -f " + dsc_reportdir + "/*")
+                    move(temp_report_path, report_path)
+
+                    # Ensure inventory report file permission is set correctly
+                    operationStatusUtility.ensure_file_permissions(report_path, '644')
+                finally:
+                    # Release inventory file lock
+                    flock(inventorylock_filehandle, LOCK_UN)
+
+                    # Release dsc host file lock
+                    if is_oms_config:
+                        flock(dschostlock_filehandle, LOCK_UN)
     finally:
         # Close inventory lock file handle
         inventorylock_filehandle.close()

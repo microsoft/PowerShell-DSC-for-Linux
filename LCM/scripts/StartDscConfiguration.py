@@ -160,26 +160,38 @@ def main(argv):
 
         host_parameters.append("}")
 
-    try:
-        if is_oms_config:
+    if is_oms_config:
+        try:
             # Open the dsc host lock file. This also creates a file if it does not exist
             dschostlock_filehandle = open(dsc_host_lock_path, 'w')
             print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
             
-            # Acquire dsc host file lock
-            flock(dschostlock_filehandle, LOCK_EX)
+            dschostlock_acquired = True
 
-        p = subprocess.Popen(host_parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-    finally:
-        if is_oms_config:
+            # Acquire dsc host file lock
+            try:
+                flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+            except IOError:
+                dschostlock_acquired = False
+
+            if dschostlock_acquired:
+                p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = p.communicate()
+                print(stdout)
+            else:
+                print("dsc host lock already acuired by a different process")
+                stdout = ''
+                stderr = ''
+        finally:
             # Release dsc host file lock
             flock(dschostlock_filehandle, LOCK_UN)
 
             # Close dsc host lock file handle
             dschostlock_filehandle.close()
+    else:
+        p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate()
 
-    # Print output from omicli/dsc_host call
     print(stdout)
     print(stderr)
 
