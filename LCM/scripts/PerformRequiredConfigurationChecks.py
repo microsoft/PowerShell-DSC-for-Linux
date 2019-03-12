@@ -79,7 +79,7 @@ def run_perform_required_configuration_checks():
                 dschostlock_acquired = False
 
             if dschostlock_acquired:
-                p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                p = Popen(parameters, stdout=PIPE, stderr=PIPE)
                 stdout, stderr = p.communicate()
                 print(stdout)
             else:
@@ -93,7 +93,7 @@ def run_perform_required_configuration_checks():
             # Close dsc host lock file handle
             dschostlock_filehandle.close()
     else:
-        p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = Popen(parameters, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
 
     print(stdout)
