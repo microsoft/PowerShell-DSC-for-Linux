@@ -6,6 +6,7 @@
 #include "DSC_Systemcalls.h"
 #include "Resources_LCM.h"
 #include "EngineHelper.h"
+#include "EventWrapper.h"
 #include "dsc_host.h"
 #include "dsc_library.h"
 #include "lcm/strings.h"
@@ -176,6 +177,7 @@ int main(int argc, char *argv[])
         goto CleanUp;
     }
 
+    DSC_TELEMETRY_INFO("dsc_host starting operation '%s'", argv[2]);
     switch(current_operation)
     {
         case DscSupportedOperation_GetConfiguration:
@@ -260,7 +262,6 @@ int main(int argc, char *argv[])
             }
         default:
             {
-                // result = GetCimMIError1Param( MI_RESULT_FAILED, &extended_error, ID_DSC_HOST_INVALID_OPERATION, argv[2]);
                 Tprintf(MI_T("Current operation %d is not supported yet.\n"), current_operation);
                 result = MI_RESULT_FAILED;
                 CreateMiInstanceErrorObject(&extended_error, MI_T("Operation %T is not supported\n"), argv[2]);
@@ -272,10 +273,12 @@ int main(int argc, char *argv[])
     if(result == MI_RESULT_OK)
     {
         Tprintf(MI_T("Operation %T completed successfully.\n"), operation_name);
+        DSC_TELEMETRY_INFO("dsc_host completed operation '%s' successfully.", operation_name);
     }
     else
     {
         Tprintf(MI_T("Error occured during operation %T. r = %d\n"), operation_name, result);
+        DSC_TELEMETRY_ERROR("dsc_host operation '%s' failed. r = %d", operation_name, result);
     }
 
     if (operation_result_root_value)
@@ -292,6 +295,10 @@ int main(int argc, char *argv[])
         char error_file_path[DSCHOST_STR_BUFFER_SIZE];
         Stprintf(error_file_path, DSCHOST_STR_BUFFER_SIZE, MI_T("%T/dsc.%T.err"), argv[1], operation_name);
         Save_JSON_Value(error_file_path, &operation_error_root_value);
+        
+        const char *error_message = NULL;
+        error_message = json_object_get_string(json_object(operation_error_root_value), "Message");
+        DSC_TELEMETRY_ERROR("dsc_host failed with error message '%s'", error_message);
     }
 
 CleanUp:
