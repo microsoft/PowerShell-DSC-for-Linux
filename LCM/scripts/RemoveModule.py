@@ -183,7 +183,7 @@ def main(args):
             resourceSharedObjectDestinationPath = join("/opt/dsc/lib", resource)
 
             if os.path.isdir(resourceSharedObjectDestinationPath):
-                os.remove(resourceSharedObjectDestinationPath)
+                shutil.rmtree(resourceSharedObjectDestinationPath)
 
         # Remove OMI registration for the resource
         resourceOmiRegistrationFileName = resource + ".reg"
