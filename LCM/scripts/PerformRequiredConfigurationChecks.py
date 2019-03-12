@@ -4,7 +4,7 @@ from os.path    import dirname, join, realpath
 from subprocess import PIPE, Popen
 from sys        import exc_info, exit, version_info
 from traceback  import format_exc
-from fcntl      import flock, LOCK_EX, LOCK_UN
+from fcntl      import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
