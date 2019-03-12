@@ -26,6 +26,8 @@ static Log_Level _DSCLogLevel = OMI_WARNING;
 static Log_Level _DSCDetailedLogLevel = OMI_VERBOSE;
 
 #define FMTSIZE 1024
+#define MSGSIZE 4096
+#define TIMESTAMP_SIZE 128
 
 static const char* _levelDSCStrings[] =
 {
@@ -37,7 +39,6 @@ static const char* _levelDSCStrings[] =
     "VERBOSE",
 };
 
-#define TIMESTAMP_SIZE 128
 
 static int _GetDSCTimeStamp(_Pre_writable_size_(TIMESTAMP_SIZE) char buf[TIMESTAMP_SIZE])
 {
@@ -125,7 +126,52 @@ void DSCFilePutLog(
         // Write all the logs
         DSCLog_VPut(_DSCDetailedLogFile, (Log_Level)priority, _DSCDetailedLogLevel, file, line, fmt, ap);
         va_end(ap);
+
+        if (priority <= OMI_WARNING)
+        {
+            va_start(ap, format);
+            DSC_TELEMETRY(priority, eventId, file, line, format, ap);
+            va_end(ap);
+        }
     }
+}
+
+void DSCFilePutTelemetry(
+    int priority,
+    int eventId,
+    const char * file,
+    int line,
+    const PAL_Char* format,
+    ...)
+{
+    FILE *telemetry_file = fopen("/var/opt/microsoft/omsconfig/status/omsconfighost", "a");
+
+    if (telemetry_file == NULL)
+        return;
+
+    MI_Char fmt[FMTSIZE];
+    MI_Char buffer[MSGSIZE];
+    va_list ap;
+
+    char timestamp_buffer[TIMESTAMP_SIZE];
+    _GetDSCTimeStamp(timestamp_buffer);
+
+    // [timestamp] [level] [event id] [filename:line number] message
+    Stprintf(fmt, FMTSIZE, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
+    Tcslcat(fmt, format, FMTSIZE);
+
+    va_start(ap, fmt);
+    int n = Vstprintf(buffer, MSGSIZE, format, ap);
+    va_end(ap);
+
+    if (n<0)
+        return;
+
+    Vftprintf(telemetry_file, format, ap);
+    Ftprintf(telemetry_file,ZT("</OMSCONFIGLOG>\n"));
+
+    fflush(telemetry_file);
+    fclose(telemetry_file);
 }
 
 void DSCLog_Close()
