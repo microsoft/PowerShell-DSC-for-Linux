@@ -149,26 +149,30 @@ void DSCFilePutTelemetry(
     if (telemetry_file == NULL)
         return;
 
-    MI_Char fmt[FMTSIZE];
-    MI_Char buffer[MSGSIZE];
+    // MI_Char fmt[FMTSIZE];
+    // MI_Char buffer[MSGSIZE];
     va_list ap;
 
     char timestamp_buffer[TIMESTAMP_SIZE];
     _GetDSCTimeStamp(timestamp_buffer);
 
-    // [timestamp] [level] [event id] [filename:line number] message
-    Stprintf(fmt, FMTSIZE, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
-    Tcslcat(fmt, format, FMTSIZE);
+    // // [timestamp] [level] [event id] [filename:line number] message
+    // Stprintf(fmt, FMTSIZE, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
+    // Stprintf(buffer, FMTSIZE, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
+    // Tcslcat(fmt, format, FMTSIZE);
 
-    va_start(ap, fmt);
-    int n = Vstprintf(buffer, MSGSIZE, format, ap);
-    va_end(ap);
+    // va_start(ap, fmt);
+    // int n = Vstprintf(buffer, MSGSIZE, format, ap);
+    // va_end(ap);
 
-    if (n<0)
-        return;
+    // if (n<0)
+    //     return;
 
+    va_start(ap, format);
+    Ftprintf(telemetry_file, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
     Vftprintf(telemetry_file, format, ap);
-    Ftprintf(telemetry_file,ZT("</OMSCONFIGLOG>\n"));
+    Ftprintf(telemetry_file, PAL_T("</OMSCONFIGLOG>\n"));
+    va_end(ap);
 
     fflush(telemetry_file);
     fclose(telemetry_file);
