@@ -18,6 +18,7 @@
 #include "DSC_Systemcalls.h"
 #include "EventWrapper.h"
 #include <pal/cpu.h>
+#include <unistd.h>
 
 ConfigurationDetails g_ConfigurationDetails;
 static FILE *_DSCLogFile;
@@ -156,7 +157,8 @@ void DSCFilePutTelemetry(
     char timestamp_buffer[TIMESTAMP_SIZE];
     _GetDSCTimeStamp(timestamp_buffer);
 
-    // // [timestamp] [level] [event id] [filename:line number] message
+    // [timestamp] [pid] [level] [event id] [filename:line number] message
+
     // Stprintf(fmt, FMTSIZE, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
     // Stprintf(buffer, FMTSIZE, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
     // Tcslcat(fmt, format, FMTSIZE);
@@ -168,8 +170,10 @@ void DSCFilePutTelemetry(
     // if (n<0)
     //     return;
 
+    int current_pid = getpid();
+
     va_start(ap, format);
-    Ftprintf(telemetry_file, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
+    Ftprintf(telemetry_file, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] "), timestamp_buffer, current_pid, _levelDSCStrings[priority], eventId, file, line);
     Vftprintf(telemetry_file, format, ap);
     Ftprintf(telemetry_file, PAL_T("</OMSCONFIGLOG>\n"));
     va_end(ap);
