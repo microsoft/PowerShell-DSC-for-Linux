@@ -99,6 +99,33 @@ int DSCLog_VPut(
     return 1;
 }
 
+void DSCFileVPutTelemetry(
+        Log_Level level,
+        int eventId,
+        const char* file,
+        MI_Uint32 line,
+        const ZChar* format,
+        va_list ap
+    )
+{
+    FILE *telemetry_file = fopen("/var/opt/microsoft/omsconfig/status/omsconfighost", "a");
+
+    if (telemetry_file == NULL)
+        return;
+
+    char timestamp_buffer[TIMESTAMP_SIZE];
+    _GetDSCTimeStamp(timestamp_buffer);
+
+    int current_pid = getpid();
+
+    Ftprintf(telemetry_file, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] "), timestamp_buffer, current_pid, _levelDSCStrings[level], eventId, file, line);
+    Vftprintf(telemetry_file, format, ap);
+    Ftprintf(telemetry_file, PAL_T("</OMSCONFIGLOG>\n"));
+
+    fflush(telemetry_file);
+    fclose(telemetry_file);
+}
+
 void DSCFilePutLog(
     int priority,
     int eventId,
@@ -131,7 +158,7 @@ void DSCFilePutLog(
         if (priority <= OMI_WARNING)
         {
             va_start(ap, format);
-            DSC_TELEMETRY(priority, eventId, file, line, format, ap);
+            DSCFileVPutTelemetry(priority, eventId, file, line, format, ap);
             va_end(ap);
         }
     }
@@ -150,25 +177,10 @@ void DSCFilePutTelemetry(
     if (telemetry_file == NULL)
         return;
 
-    // MI_Char fmt[FMTSIZE];
-    // MI_Char buffer[MSGSIZE];
     va_list ap;
 
     char timestamp_buffer[TIMESTAMP_SIZE];
     _GetDSCTimeStamp(timestamp_buffer);
-
-    // [timestamp] [pid] [level] [event id] [filename:line number] message
-
-    // Stprintf(fmt, FMTSIZE, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
-    // Stprintf(buffer, FMTSIZE, PAL_T("<OMSCONFIGLOG>[%s] [%s] [%d] [%s:%d] "), timestamp_buffer, _levelDSCStrings[priority], eventId, file, line);
-    // Tcslcat(fmt, format, FMTSIZE);
-
-    // va_start(ap, fmt);
-    // int n = Vstprintf(buffer, MSGSIZE, format, ap);
-    // va_end(ap);
-
-    // if (n<0)
-    //     return;
 
     int current_pid = getpid();
 
