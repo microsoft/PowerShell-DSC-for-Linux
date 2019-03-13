@@ -262,11 +262,13 @@ PythonProvider::~PythonProvider ()
     }
     if( m_pid > 0 )
     {
-	waitpid(m_pid, NULL, 0);
+        printf("****** %s:%d ~ waitpid(%d)\n", __FILE__, __LINE__, m_pid);
+        waitpid(m_pid, NULL, 0);
     }
     for(size_t xCount = 0 ; xCount < m_PreviousPid.size(); xCount++)
     {
-	waitpid(m_PreviousPid[xCount] , NULL, WNOHANG);
+        printf("****** %s:%d ~ waitpid(%d), xCount = %d\n", __FILE__, __LINE__, m_PreviousPid[xCount], xCount);
+        waitpid(m_PreviousPid[xCount] , NULL, WNOHANG);
     }
     m_PreviousPid.clear();
 }
@@ -636,8 +638,9 @@ PythonProvider::verifySocketState ()
         //Release previous disconnected child process if any
         if( m_pid > 0 )
         {
-           // It is possible that disconnected process is still running, in that case
-           // try to do cleanup when the provider is unloaded.
+            // It is possible that disconnected process is still running, in that case
+            // try to do cleanup when the provider is unloaded.
+            printf("****** %s:%d ~ waitpid(%d)\n", __FILE__, __LINE__, m_pid);
             if( waitpid(m_pid , NULL, WNOHANG) == 0 )
             {
                 //If process isn't done, cleanup will be done when the provider is unloaded
