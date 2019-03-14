@@ -13,7 +13,7 @@ import signal
 import subprocess
 import sys
 import time
-
+import shutil
 import pwd
 import traceback
 
@@ -155,6 +155,9 @@ def Set_Marshall(ResourceSettings):
             else:
                 os.chmod(AUTO_REGISTERED_WORKER_CONF_PATH, PERMISSION_LEVEL_0770)
 
+        if settings.diy_enabled:
+            move_diy_settings_to_new_location()
+
     except Exception:
         log(ERROR, "Set_Marshall returned [-1] with following error: %s" % traceback.format_exc())
         return [-1]
@@ -280,12 +283,20 @@ OPTION_JRDS_CERT_THUMBPRINT = "jrds_cert_thumbprint"
 
 SECTION_WORKER_REQUIRED = "worker-required"
 OPTION_ACCOUNT_ID = "account_id"
+OPTION_JRDS_CERT_PATH = "jrds_cert_path"
+OPTION_JRDS_KEY_PATH = "jrds_key_path"
+OPTION_WORKING_DIRECTORY_PATH = "working_directory_path"
+
+SECTION_WORKER_OPTIONAL = "worker-optional"
+OPTION_STATE_DIRECTORY_PATH = "state_directory_path"
 
 WORKER_STATE_DIR = "/var/opt/microsoft/omsagent/state/automationworker"
-DIY_WORKER_STATE_DIR = os.path.join(WORKER_STATE_DIR, "diy")
+DIY_WORKER_STATE_DIR = "/home/nxautomation/state"
+DIY_WORKER_STATE_DIR_OLD = os.path.join(WORKER_STATE_DIR, "diy")
 OMS_CONF_FILE_PATH = os.path.join(WORKER_STATE_DIR, "oms.conf")
 AUTO_REGISTERED_WORKER_CONF_PATH = os.path.join(WORKER_STATE_DIR, "worker.conf")
 DIY_WORKER_CONF_PATH = os.path.join(DIY_WORKER_STATE_DIR, "worker.conf")
+DIY_WORKER_CONF_PATH_OLD = os.path.join(DIY_WORKER_STATE_DIR_OLD, "worker.conf")
 STATE_CONF_FILE_PATH = os.path.join(WORKER_STATE_DIR, "state.conf")
 
 OMS_PRIMARY_WORKSPACE_CONF_DIR = "/etc/opt/microsoft/omsagent/conf"
@@ -293,6 +304,7 @@ DSC_RESOURCE_VERSION_FILE = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWor
 OMS_ADMIN_CONFIG_FILE = os.path.join(OMS_PRIMARY_WORKSPACE_CONF_DIR, "omsadmin.conf")
 OMS_AGENTID_FILE= "/etc/opt/microsoft/omsagent/agentid"
 WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run/automationworker"
+DIY_WORKING_DIRECTORY_PATH = "/home/nxautomation/run"
 WORKER_MANAGER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
 HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py"
 PROXY_CONF_PATH_LEGACY = os.path.join(OMS_PRIMARY_WORKSPACE_CONF_DIR, "proxy.conf")
@@ -349,9 +361,6 @@ def get_optional_metadata():
 
     return asset_tag, is_azure_vm, vm_id
 
-
-def get_manually_registered_worker_conf_path(workspace_id):
-    return "/var/opt/microsoft/omsagent/%s/state/automationworker/diy/worker.conf" % workspace_id
 
 
 def is_certificate_valid(worker_conf_path, certificate_path):
@@ -451,7 +460,7 @@ def write_omsconf_file(workspace_id, updates_enabled, diy_enabled):
         oms_config.remove_option(SECTION_OMS_WORKER_CONF, OPTION_AUTO_REGISTERED_WORKER_CONF_PATH)
     if diy_enabled:
         oms_config.set(SECTION_OMS_WORKER_CONF, OPTION_MANUALLY_REGISTERED_WORKER_CONF_PATH,
-                       get_manually_registered_worker_conf_path(workspace_id))
+                       DIY_WORKER_CONF_PATH)
     else:
         oms_config.remove_option(SECTION_OMS_WORKER_CONF, OPTION_MANUALLY_REGISTERED_WORKER_CONF_PATH)
 
@@ -466,6 +475,46 @@ def write_omsconf_file(workspace_id, updates_enabled, diy_enabled):
     oms_config_fp = open(OMS_CONF_FILE_PATH, 'wb')
     oms_config.write(oms_config_fp)
     oms_config_fp.close()
+
+def move_diy_settings_to_new_location():
+    if os.path.isdir(DIY_WORKER_STATE_DIR_OLD):
+        # Destination directory is already created by omsutil --initialize
+
+        proc = subprocess.Popen(["cp", "-r", "-f", DIY_WORKER_STATE_DIR_OLD, DIY_WORKER_STATE_DIR],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate()
+        if proc.returncode != 0:
+            raise OSError(
+                "Copying old diy director to new diy directory failed\nstdout: " + stdout + "\nstderr: " + stderr)
+
+        if os.path.isfile(DIY_WORKER_CONF_PATH_OLD):
+            worker_config = ConfigParser.ConfigParser()
+            worker_config.read(DIY_WORKER_CONF_PATH_OLD)
+            certificate_path = worker_config.get(SECTION_WORKER_REQUIRED, OPTION_JRDS_CERT_PATH)
+            key_path = worker_config.get(SECTION_WORKER_REQUIRED, OPTION_JRDS_KEY_PATH)
+
+            new_certificate_path = os.path.join(DIY_WORKER_STATE_DIR, os.path.basename(certificate_path))
+            new_key_path = os.path.join(DIY_WORKER_STATE_DIR, os.path.basename(key_path))
+
+            # explicitly copy certificate and key files if not already copied
+            if not os.path.isfile(new_certificate_path):
+                shutil.copyfile(certificate_path, new_certificate_path)
+            if not os.path.isfile(new_key_path):
+                shutil.copyfile(key_path, new_key_path)
+
+
+            worker_config.set(SECTION_WORKER_REQUIRED, OPTION_JRDS_CERT_PATH, new_certificate_path)
+            worker_config.set(SECTION_WORKER_REQUIRED, OPTION_JRDS_KEY_PATH, new_key_path)
+            worker_config.set(SECTION_WORKER_REQUIRED, OPTION_WORKING_DIRECTORY_PATH, DIY_WORKING_DIRECTORY_PATH)
+            worker_config.set(SECTION_WORKER_OPTIONAL, OPTION_STATE_DIRECTORY_PATH, DIY_WORKER_STATE_DIR)
+
+            if os.path.isfile(DIY_WORKER_CONF_PATH):
+                os.remove(DIY_WORKER_CONF_PATH)
+            with open(DIY_WORKER_CONF_PATH, 'wb') as fp:
+                worker_config.write(fp)
+
+        # remove old config file when copy is complete
+        shutil.rmtree(DIY_WORKER_STATE_DIR_OLD)
 
 
 def is_oms_primary_workspace(workspace_id):

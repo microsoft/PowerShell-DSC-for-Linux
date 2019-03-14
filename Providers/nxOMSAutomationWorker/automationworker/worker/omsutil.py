@@ -15,6 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from worker import configuration
 from worker import serializerfactory
 from worker import linuxutil
+from worker import diydirs
 
 json = serializerfactory.get_serializer(sys.version_info)
 configuration.clear_config()
@@ -107,6 +108,11 @@ def initialize():
                 raise Exception("Unable set read permission to proxy configuration file. Error: " + str(error))
             else:
                 print "Successfully set read permission to proxy configuration file."
+
+    # create home dir for nxautomation
+    diydirs.create_persistent_diy_dirs()
+
+
 
 
 def dmidecode():
