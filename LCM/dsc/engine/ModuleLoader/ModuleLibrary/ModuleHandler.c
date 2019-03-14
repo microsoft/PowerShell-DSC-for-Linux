@@ -183,7 +183,6 @@ MI_Result ModuleManager_LoadInstanceDocument (
     *documentInstance = NULL;
 
     /*Load the manager*/
-    (MI_T("%T:%d in %T ~ LoadModuleManager\n"), __FILE__, __LINE__, __FUNCTION__);
     r = LoadModuleManager(moduleManager, extendedError);
     if( r != MI_RESULT_OK)
     {
@@ -706,14 +705,6 @@ MI_Result GetInstanceFromBuffer(_In_opt_ ModuleManager *moduleManager,
         CleanUpDeserializerInstanceCache(miTempInstanceArray);
         return r;
     }
-
-    // This code is updating the discovered resources through OMI
-    /*Update actual cache*/
-    // r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);
-    // if( r != MI_RESULT_OK )
-    // {
-    //     CleanUpDeserializerInstanceCache(miTempInstanceArray);
-    // }
 
     // Update cache with discovered native resources(not through OMI) 
     r = UpdateInstanceArray(miTempInstanceArray, miInstanceArray, extendedError, MI_TRUE);

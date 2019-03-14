@@ -43,7 +43,7 @@ try:
     if is_oms_config:
         # Open the dsc host lock file. This also creates a file if it does not exist
         dschostlock_filehandle = open(dsc_host_lock_path, 'w')
-        printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
+        print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
         
         # Acquire dsc host file lock
         flock(dschostlock_filehandle, LOCK_EX)

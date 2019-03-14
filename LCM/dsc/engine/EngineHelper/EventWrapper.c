@@ -18,7 +18,6 @@
 #include "DSC_Systemcalls.h"
 #include "EventWrapper.h"
 #include <pal/cpu.h>
-#include "plog_wrapper.h"
 
 ConfigurationDetails g_ConfigurationDetails;
 static FILE *_DSCLogFile;
@@ -106,45 +105,6 @@ void DSCFilePutLog(
     const PAL_Char* format,
     ...)
 {
-#if defined(BUILD_OMS)
-    va_list argumentsGetLength;
-    size_t messageLength;
-    size_t finalMessageLength;
-    char *message = NULL;
-
-    va_list arguments;
-    va_start(arguments, format);
-    
-    va_copy(argumentsGetLength, arguments);
-    messageLength = vsnprintf( NULL, 0, format, argumentsGetLength );
-    va_end(argumentsGetLength);
-    
-    if (messageLength < 0)
-    {
-        goto cleanup;
-    }
-
-    // Allocate a buffer with the right size
-    message = (char*)malloc(messageLength + 1);
-
-    finalMessageLength = vsnprintf( message, messageLength + 1, format, arguments ); // +1 for the null termination character
-
-    if (finalMessageLength < 0)
-    {
-        goto cleanup;
-    }
-
-    DSC_PLog_Write((unsigned int)priority, line, file, message);
-
-cleanup:
-
-    if (message)
-        free(message);
-
-    va_end(arguments);
-
-#else
-
     if ((unsigned int)priority > OMI_VERBOSE)
         return;
 
@@ -166,7 +126,6 @@ cleanup:
         DSCLog_VPut(_DSCDetailedLogFile, (Log_Level)priority, _DSCDetailedLogLevel, file, line, fmt, ap);
         va_end(ap);
     }
-#endif
 }
 
 void DSCLog_Close()
@@ -220,9 +179,6 @@ MI_Result DSCLog_Open(
 
 unsigned long DSC_EventRegister()
 {
-#if defined(BUILD_OMS)
-    return DSC_PLog_Register();
-#else
     char logPath[PAL_MAX_PATH_SIZE];
     char detailedLogPath[PAL_MAX_PATH_SIZE];
     Strlcpy(logPath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
@@ -233,15 +189,10 @@ unsigned long DSC_EventRegister()
     DSCLog_Open(logPath, &_DSCLogFile);
     DSCLog_Open(detailedLogPath, &_DSCDetailedLogFile);
     return 0;
-#endif
 }
 
 unsigned long DSC_EventUnRegister()
 {
-#if defined(BUILD_OMS)
-    return DSC_PLog_Unregister();
-#else
     DSCLog_Close();
     return 0;
-#endif
 }

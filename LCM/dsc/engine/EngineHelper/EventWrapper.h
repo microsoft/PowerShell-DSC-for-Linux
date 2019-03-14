@@ -568,9 +568,9 @@ void DSCFilePutLog(
     ExpandEvent(GettingTheSchemaSucceeded(ClassName))
 
 
-unsigned long DSC_PLog_Register();
-unsigned long DSC_PLog_Unregister();
-unsigned long DSC_PLog_Write(DSC_Log_Level p_level, int p_line_number, const char * p_file_name, const char * p_message);
+unsigned long DSC_Log_Register();
+unsigned long DSC_Log_Unregister();
+unsigned long DSC_Log_Write(DSC_Log_Level p_level, int p_line_number, const char * p_file_name, const char * p_message);
 
 #ifdef __cplusplus
 }
