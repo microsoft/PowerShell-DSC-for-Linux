@@ -6601,14 +6601,14 @@ MI_Result SetLCMStatusReady()
         MI_Uint32 lcmStatus;
         MI_Instance *extendedError;
         MI_Result r;
-#if defined(BUILD_OMS)
-        struct sigaction sa;
-        sa.sa_handler = &handleSIGCHLDSignal;
-        sigemptyset(&sa.sa_mask);
-        sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
-        sigaction(SIGCHLD, &sa, 0);
-        DSC_EventWriteMessageRegisterProcessHandler();
-#endif
+// #if defined(BUILD_OMS)
+//         struct sigaction sa;
+//         sa.sa_handler = &handleSIGCHLDSignal;
+//         sigemptyset(&sa.sa_mask);
+//         sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+//         sigaction(SIGCHLD, &sa, 0);
+//         DSC_EventWriteMessageRegisterProcessHandler();
+// #endif
    
  
         if (!g_LCMPendingReboot)
