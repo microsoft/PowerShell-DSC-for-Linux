@@ -263,7 +263,7 @@ PythonProvider::~PythonProvider ()
     if( m_pid > 0 )
     {
         printf("****** %s:%d ~ waitpid(%d)\n", __FILE__, __LINE__, m_pid);
-        waitpid(m_pid, NULL, 0);
+        waitpid(m_pid, NULL, WNOHANG);
     }
     for(size_t xCount = 0 ; xCount < m_PreviousPid.size(); xCount++)
     {
