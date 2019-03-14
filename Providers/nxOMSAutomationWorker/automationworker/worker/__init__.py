@@ -18,4 +18,5 @@ from worker.tracer import *
 from worker.urllib2httpclient import *
 from worker.util import *
 from worker.workerexception import *
+from worker.diydirs import *
 
