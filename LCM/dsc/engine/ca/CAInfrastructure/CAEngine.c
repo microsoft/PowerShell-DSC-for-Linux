@@ -1133,6 +1133,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         // Get provider .so path for class
         MI_Char resources_so_path[MAX_PATH];
         int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+        DSC_LOG_INFO("***** resources_so_path = '%s'\n", resources_so_path);
         if (ret == -1)
         {
             return result;
@@ -1209,6 +1210,7 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
         // Get provider .so path for class
         MI_Char resources_so_path[MAX_PATH];
         int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+        DSC_LOG_INFO("***** resources_so_path = '%s'\n", resources_so_path);
         if (ret == -1)
         {
             return result;
@@ -1639,6 +1641,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     // Get provider .so path for class
     MI_Char resources_so_path[MAX_PATH];
     int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+    DSC_LOG_INFO("***** resources_so_path = '%s'\n", resources_so_path);
     if (ret == -1)
     {
         return result;
