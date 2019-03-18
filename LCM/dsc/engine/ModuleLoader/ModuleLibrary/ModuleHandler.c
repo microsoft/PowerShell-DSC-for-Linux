@@ -1284,6 +1284,7 @@ MI_Result GetRegistrationInstanceFromSharedObjects(_In_opt_ ModuleManager *modul
             MI_Char resources_so_path[MAX_PATH];
             int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, dirEntry->name, dirEntry->name);
             DSC_LOG_INFO("***** resources_so_path = '%s'\n", resources_so_path);
+            Tprintf("***** %s:%d ~ resources_so_path = '%s'\n", __FILE__, __LINE__, resources_so_path);
             if (ret == -1)
             {
                 result = GetCimMIError(MI_RESULT_FAILED, extendedError, ID_LCMHELPER_PRINTF_ERROR);
