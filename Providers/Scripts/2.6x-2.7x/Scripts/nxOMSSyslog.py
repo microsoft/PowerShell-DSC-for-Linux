@@ -21,6 +21,8 @@ oms_rsyslog_conf_path = '/etc/opt/omi/conf/omsconfig/rsyslog-oms.conf'
 conf_path = ''
 omsagent_dir = '/etc/opt/microsoft/omsagent/'
 default_port = '25224'
+default_host = '127.0.0.1'
+default_protocol = 'udp'
 oms_wkspc_regex = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
 non_oms_wkspcs = ['LAD', 'scom']
 
@@ -190,7 +192,6 @@ def ReadSyslogConf(SyslogSource, WorkspaceID):
     except:
         LG().Log('ERROR', 'Unable to read ' + src_conf_path + '.')
         return out
-
     # Find all lines sending to this workspace's port
     port = ExtractPortFromFluentDConf(WorkspaceID)
     facility_search = r'^([^#].*?)@.*?' + port + '$'
@@ -227,6 +228,9 @@ def UpdateSyslogConf(SyslogSource, WorkspaceID):
 
     # Remove all lines related to this workspace ID (correlated by port)
     port = ExtractPortFromFluentDConf(WorkspaceID)
+    protocol_type = ExtractFieldFromFluentDConf(WorkspaceID, 'protocol_type', default_protocol).replace('tcp', '@@').replace('udp', '@')
+    bind_addr = ExtractFieldFromFluentDConf(WorkspaceID, 'bind', default_host)
+
     wkspc_comment = GetSyslogConfMultiHomedHeaderString(WorkspaceID)
     wkspc_comment_search = r'(\n+)?(' + wkspc_comment + '.*)$'
     wkspc_comment_re = re.compile(wkspc_comment_search, re.M)
@@ -250,7 +254,7 @@ def UpdateSyslogConf(SyslogSource, WorkspaceID):
         facility_txt = ''
         for s in d['Severities']:
             facility_txt += d['Facility'] + '.=' + s + ';'
-        facility_txt = facility_txt[0:-1] + '\t@127.0.0.1:' + port + '\n'
+        facility_txt = facility_txt[0:-1] + '\t' + protocol_type + bind_addr + ':' + port + '\n'
         txt += facility_txt
 
     # Write the new complete txt to the conf file
@@ -332,7 +336,8 @@ def UpdateSyslogNGConf(SyslogSource, WorkspaceID):
         source_expr = source_result.group(1)
 
     port = ExtractPortFromFluentDConf(WorkspaceID)
-
+    protocol_type = ExtractFieldFromFluentDConf(WorkspaceID, 'protocol_type', default_protocol)
+    bind_addr = ExtractFieldFromFluentDConf(WorkspaceID, 'bind', default_host)
     # Remove all lines related to this workspace ID
     wkspc_comment = '#OMS Workspace ' + WorkspaceID
     wkspc_comment_search = r'(\n+)?(' + wkspc_comment + '.*$)'
@@ -390,7 +395,7 @@ def UpdateSyslogNGConf(SyslogSource, WorkspaceID):
     # Append conf lines for this workspace
     destination_str = 'd_' + WorkspaceID + '_oms'
     txt += '\n\n' + wkspc_comment + ' Destination\ndestination ' \
-           + destination_str + ' { udp("127.0.0.1" port(' + port + ')); };\n'
+           + destination_str + ' { ' + protocol_type + '("' + bind_addr + '" port(' + port + ')); };\n'
     for d in SyslogSource:
         if ('Severities' in d.keys() and d['Severities'] is not None
                 and len(d['Severities']) > 0):
@@ -431,6 +436,45 @@ def GetSyslogConfMultiHomedHeaderString(WorkspaceID):
     """
     return '# OMS Syslog collection for workspace ' + WorkspaceID
 
+def ExtractFieldFromFluentDConf(WorkspaceID, field_name, default_field_value):
+    """
+    Returns the field used for this workspace's syslog collection from the
+    FluentD configuration file:
+    If multi-homed:
+    /etc/opt/microsoft/omsagent/<workspace-ID>/conf/omsagent.d/syslog.conf
+    if not multi-homed:
+    /etc/opt/microsoft/omsagent/conf/omsagent.conf
+    """
+    global omsagent_dir
+    fluentd_syslog_conf = 'conf/omsagent.d/syslog.conf'
+    fluentd_omsagent_conf = 'conf/omsagent.conf'
+    if os.path.exists(omsagent_dir + WorkspaceID + '/' + fluentd_syslog_conf):
+        config_path = omsagent_dir + WorkspaceID + '/' + fluentd_syslog_conf
+    elif os.path.exists(omsagent_dir + fluentd_omsagent_conf):
+        config_path = omsagent_dir + fluentd_omsagent_conf
+    else:
+        LG().Log('ERROR', 'No FluentD syslog configuration found: using ' \
+                          'default syslog ' + field_name + ' ' + default_field_value + '.')
+        return default_field_value
+
+    try:
+        txt = codecs.open(config_path, 'r', 'utf8').read()
+        LG().Log('INFO', 'Succesfully read ' + config_path + ' for syslog "' + field_name + '" field.')
+    except:
+        LG().Log('ERROR', 'Unable to read ' + config_path + ': using default ' \
+                          'syslog ' + field_name + ' "' + default_field_value + '".')
+        return default_field_value
+
+    field_search = r'^<source>.*type syslog[^#]*'+field_name+r' (.*?)\n.*</source>$'
+    field_re = re.compile(field_search, re.M | re.S)
+    field_result = field_re.search(txt)
+    if field_result:
+        field_value = str(field_result.group(1))
+    else:
+        LG().Log('ERROR', 'No protocol found in ' + config_path + ': using ' \
+                          'default syslog ' + field_name + ' "' + default_field_value + '".')
+        field_value = default_field_value
+    return field_value
 
 def ExtractPortFromFluentDConf(WorkspaceID):
     """
@@ -450,7 +494,7 @@ def ExtractPortFromFluentDConf(WorkspaceID):
         port_path = omsagent_dir + fluentd_omsagent_conf
     else:
         LG().Log('ERROR', 'No FluentD syslog configuration found: using ' \
-                          'default syslog port ' + default_port + '.')
+                          'default syslog port "' + default_port + '".')
         return default_port
 
     try:
@@ -458,7 +502,7 @@ def ExtractPortFromFluentDConf(WorkspaceID):
         LG().Log('INFO', 'Succesfully read ' + port_path + ' for syslog port.')
     except:
         LG().Log('ERROR', 'Unable to read ' + port_path + ': using default ' \
-                          'syslog port ' + default_port + '.')
+                          'syslog port "' + default_port + '".')
         return default_port
 
     port_search = r'^<source>.*type syslog[^#]*port ([0-9]*)\n.*</source>$'

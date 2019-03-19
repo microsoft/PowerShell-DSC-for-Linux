@@ -2,10 +2,14 @@
 
 /config.mak
 /build/dsc.version
+/build/config.mak
 /Providers/bin/
 /intermediate/
 /omi-1.0.8
 /output/
 /release/
+/target
 /dsc_config.h
 **/.vscode
+/.idea/
+*.pyc
