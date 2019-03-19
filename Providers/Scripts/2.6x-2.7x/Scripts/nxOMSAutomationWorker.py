@@ -515,6 +515,7 @@ def move_diy_settings_to_new_location():
 
         # remove old config file when copy is complete
         shutil.rmtree(DIY_WORKER_STATE_DIR_OLD)
+        log(INFO, 'Migrated DIY worker settings and workind directory under /home/nxautomation')
 
 
 def is_oms_primary_workspace(workspace_id):
