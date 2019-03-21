@@ -251,8 +251,7 @@ module OMS
               end
               else
                 Thread.new(&method(:update_azure_resource_id)) if @@AzureResIDThreadLock.try_lock
-              end
-            end
+              end            
             else
               OMS::Log.info_once("There is non empty value set for overriden-resourceId environment variable. It will be used")
             end
