@@ -1,0 +1,3 @@
+[submodule "LCM/json_parson"]
+	path = LCM/json_parson
+	url = https://github.com/kgabis/parson.git
