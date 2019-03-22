@@ -262,12 +262,10 @@ PythonProvider::~PythonProvider ()
     }
     if( m_pid > 0 )
     {
-        printf("****** %s:%d ~ waitpid(%d)\n", __FILE__, __LINE__, m_pid);
         waitpid(m_pid, NULL, WNOHANG);
     }
     for(size_t xCount = 0 ; xCount < m_PreviousPid.size(); xCount++)
     {
-        printf("****** %s:%d ~ waitpid(%d), xCount = %d\n", __FILE__, __LINE__, m_PreviousPid[xCount], xCount);
         waitpid(m_PreviousPid[xCount] , NULL, WNOHANG);
     }
     m_PreviousPid.clear();
@@ -510,8 +508,6 @@ PythonProvider::inventory (
     return rval;
 }
 
-
-
 int
 PythonProvider::forkExec ()
 {
@@ -640,7 +636,6 @@ PythonProvider::verifySocketState ()
         {
             // It is possible that disconnected process is still running, in that case
             // try to do cleanup when the provider is unloaded.
-            printf("****** %s:%d ~ waitpid(%d)\n", __FILE__, __LINE__, m_pid);
             if( waitpid(m_pid , NULL, WNOHANG) == 0 )
             {
                 //If process isn't done, cleanup will be done when the provider is unloaded
