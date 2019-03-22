@@ -859,7 +859,8 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
         certificateid = NULL;
     }
 
-    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+    // Ignore this call and do not delete the native resource manager instance. It will be cleaned up when the host process goes away.
+    // NativeResourceManager_Delete(providerContext.nativeResourceManager);
 
     return finalr;
 }
@@ -1004,7 +1005,8 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
 
     MI_Session_Close(&miSession, NULL, NULL);
 
-    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+    // Ignore this call and do not delete the native resource manager instance. It will be cleaned up when the host process goes away.
+    // NativeResourceManager_Delete(providerContext.nativeResourceManager);
 
     return r;
 }
@@ -2653,7 +2655,8 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
 
     MI_Session_Close(&miSession, NULL, NULL);
 
-    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+    // Ignore this call and do not delete the native resource manager instance. It will be cleaned up when the host process goes away.
+    // NativeResourceManager_Delete(providerContext.nativeResourceManager);
 
     return r;
 }
