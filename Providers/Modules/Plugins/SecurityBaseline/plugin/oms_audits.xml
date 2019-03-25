@@ -1,7 +1,5 @@
-<data>
-  <audits
-    BaselineId="OMS.Linux.1"
-    BaseOrigId="1">
+<baseline BaselineId="OMS.Linux.1" BaseOrigId="1">
+	<audits>
     <audit
       description="The nodev option should be enabled for all removable media."
       msid="2.1"
@@ -1082,7 +1080,7 @@
     <audit
       description="Ensure auditd service is enabled"
       msid="162"
-      cceid=" CCE-4240-2"
+      cceid="CCE-4240-2"
       severity="Critical"
       impact="The capturing of system events provides system administrators with information to allow them to determine if unauthorized access to their system is occurring."
       remediation="Install audit package (systemctl enable auditd)"
@@ -1112,12 +1110,12 @@
     Remediations are preformed in the order they appear in this file.
     All actions in a remediation that match the distro are performed, and in the order they appear.
   -->
-  <remediation id="install-updates" cceids="CCE-XXXXX-1" description="Install all available package updates">
+  <remediation id="install-updates" msids="7" description="Install all available package updates">
     <action distro="*" action="ActionUpdatePackageInfo"/>
     <action distro="*" action="ActionInstallAvailableUpdates"/>
   </remediation>
 
-  <remediation id="install-ntp" cceids="CCE-4376-0" description="Install the ntp service">
+  <remediation id="install-ntp" msids="118" description="Install the ntp service">
     <action distro="*" action="ActionInstallPackage" package="ntp"/>
     <action distro="Ubuntu|Debian|SLES=11" action="ActionEnableService" service="ntp"/>
     <action distro="CentOS|RedHat|Oracle|SLES=12" action="ActionEnableService" service="ntpd"/>
@@ -1125,7 +1123,7 @@
     <action distro="CentOS|RedHat|Oracle|SLES=12" action="ActionRestartService" service="ntpd"/>
   </remediation>
 
-  <remediation id="configure-ntp" cceids="CCE-4385-1" description="Configure the ntp service">
+  <remediation id="configure-ntp" msids="119" description="Configure the ntp service">
     <action distro="!SLES" action="ActionScript">
       <script>
       <![CDATA[
@@ -1150,7 +1148,7 @@ fi
     <action distro="CentOS|RedHat|Oracle|SLES=12" action="ActionRestartService" service="ntpd"/>
   </remediation>
 
-  <remediation id="remove-at" cceids="CCE-14466-7" description="Remove atd service">
+  <remediation id="remove-at" msids="105" description="Remove atd service">
     <action distro="*" action="ActionRemovePackage" package="at"/>
     <action distro="*" action="ActionScript">
       <script>
@@ -1161,44 +1159,44 @@ rm -fr /etc/init/atd.conf /etc/init.d/atd
     </action>
   </remediation>
 
-  <remediation id="configure-ssh-protocol" cceids="CCE-4325-7" description="Configure ssh protocol">
+  <remediation id="configure-ssh-protocol" msids="106.1" description="Configure ssh protocol">
     <action distro="*" action="ActionEditConfig" name="Protocol" value="2" value-regex="[1-2\,]+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
-  <remediation id="enable-ssh-ignore-rhosts" cceids="CCE-4030-3" description="Enable IgnoreRhosts in ssh">
+  <remediation id="enable-ssh-ignore-rhosts" msids="106.3" description="Enable IgnoreRhosts in ssh">
     <action distro="*" action="ActionEditConfig" name="IgnoreRhosts" value="yes" value-regex="[a-z-]+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
-  <remediation id="disable-ssh-rhost-rsa-auth" cceids="CCE-4475-0" description="Disable RhostsRSAAuthentication in ssh">
+  <remediation id="disable-ssh-rhost-rsa-auth" msids="107" description="Disable RhostsRSAAuthentication in ssh">
     <action distro="*" action="ActionEditConfig" name="RhostsRSAAuthentication" value="no" value-regex="[a-z-]+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
-  <remediation id="disable-ssh-host-based-auth" cceids="CCE-4370-3" description="Disable HostbasedAuthentication in ssh">
+  <remediation id="disable-ssh-host-based-auth" msids="108" description="Disable HostbasedAuthentication in ssh">
     <action distro="*" action="ActionEditConfig" name="HostbasedAuthentication" value="no" value-regex="[a-z-]+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
-  <remediation id="disable-ssh-root-login" cceids="CCE-4387-7" description="Disable SSH root login">
+  <remediation id="disable-ssh-root-login" msids="109" description="Disable SSH root login">
     <action distro="*" action="ActionEditConfig" name="PermitRootLogin" value="no" value-regex="[a-z-]+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
-  <remediation id="configure-ssh-ciphers" cceids="CCE-14491-5" description="Configure ssh ciphers">
+  <remediation id="configure-ssh-ciphers" msids="113" description="Configure ssh ciphers">
     <action distro="*" action="ActionEditConfig" name="Ciphers" value="aes128-ctr,aes192-ctr,aes256-ctr" value-regex="[a-z\,-]+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
-  <remediation id="disable-ssh-empty-passwords" cceids="CCE-3660-8" description="Disable SSH empty passwords">
+  <remediation id="disable-ssh-empty-passwords" msids="110" description="Disable SSH empty passwords">
     <action distro="*" action="ActionEditConfig" name="PermitEmptyPasswords" value="no" value-regex="[a-z-]+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
-  <remediation id="configure-ssh-banner" cceids="CCE-4431-3" description="Configure ssh banner">
+  <remediation id="configure-ssh-banner" msids="111" description="Configure ssh banner">
     <action distro="*" action="ActionEditConfig" name="Banner" value="/etc/azsec/banner.txt" value-regex="\S+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
-  <remediation id="restart-ssh" cceids="CCE-4325-7,CCE-4475-0,CCE-4387-7,CCE-14491-5,CCE-4431-3" description="Restart ssh service">
+  <remediation id="restart-ssh" msids="106.1,106.3,107,108,109,110,113,111" description="Restart ssh service">
     <action distro="Ubuntu|Debian" action="ActionRestartService" service="ssh"/>
     <action distro="CentOS|Redhat|Oracle|Sles" action="ActionRestartService" service="sshd"/>
   </remediation>
 
-  <remediation id="restrict-root-login" cceids="CCE-3485-0" description="Restrict root login">
+  <remediation id="restrict-root-login" msids="20" description="Restrict root login">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1208,7 +1206,7 @@ echo -e "console\ntty1" > /etc/securetty
     </action>
   </remediation>
 
-  <remediation id="fix-su-permissions" cceids="CCE-15047-4" description="Fix su permissions">
+  <remediation id="fix-su-permissions" msids="21" description="Fix su permissions">
     <action distro="!SLES" action="ActionScript">
       <script>
       <![CDATA[
@@ -1228,7 +1226,7 @@ fi
     </action>
   </remediation>
 
-  <remediation id="fix-home-dir-permissions" cceids="CCE-4090-7" description="Fix home dir permissions">
+  <remediation id="fix-home-dir-permissions" msids="28" description="Fix home dir permissions">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1253,7 +1251,7 @@ fi
     </action>
   </remediation>
 
-  <remediation id="set-default-user-umask" cceids="CCE-14847-8" description="Set default umask for all users to 077">
+  <remediation id="set-default-user-umask" msids="29" description="Set default umask for all users to 077">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1264,7 +1262,7 @@ sed -i 's/^\(UMASK\s\+\)[0-9]\{3\}/\1077/g' /etc/login.defs
     </action>
   </remediation>
 
-  <remediation id="disable-ip-forward" cceids="CCE-3561-8" description="Disable IP forwarding">
+  <remediation id="disable-ip-forward" msids="37" description="Disable IP forwarding">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.ip_forward" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv6.conf.default.forwarding" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv6.conf.all.forwarding" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
@@ -1282,7 +1280,7 @@ done
     </action>
   </remediation>
 
-  <remediation id="enable-tcp-syncookies" cceids="CCE-4265-5" description="Enable tcp_syncookies">
+  <remediation id="enable-tcp-syncookies" msids="47" description="Enable tcp_syncookies">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.tcp_syncookies" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionScript">
       <script>
@@ -1293,7 +1291,7 @@ sysctl -w net.ipv4.tcp_syncookies=1
     </action>
   </remediation>
 
-  <remediation id="enable-rp-filter" cceids="CCE-4080-8,CCE-3840-6" description="Enable reverse path filter">
+  <remediation id="enable-rp-filter" msids="46.1,46.2" description="Enable reverse path filter">
     <!-- TODO: Add ipv6 once that support gets added to the kernel. -->
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.default.rp_filter" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.rp_filter" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
@@ -1309,7 +1307,7 @@ done
     </action>
   </remediation>
 
-  <remediation id="disable-accept-redirects" cceids="CCE-4217-6,CCE-4186-3,CCE-4313-3" description="Disable accept-redirects">
+  <remediation id="disable-accept-redirects" msids="38.1,38.4,38.8" description="Disable accept-redirects">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.default.accept_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.accept_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv6.conf.default.accept_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
@@ -1326,7 +1324,7 @@ done
     </action>
   </remediation>
 
-  <remediation id="disable-secure-redirects" cceids="CCE-3472-8,CCE-4151-7" description="Disable secure_redirects">
+  <remediation id="disable-secure-redirects" msids="38.2,38.5" description="Disable secure_redirects">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.default.secure_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.secure_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionScript">
@@ -1341,7 +1339,7 @@ done
     </action>
   </remediation>
 
-  <remediation id="disable-send-redirects" cceids="CCE-4155-8,CCE-3339-9" description="Disable send_redirects">
+  <remediation id="disable-send-redirects" msids="38.3,38.6" description="Disable send_redirects">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.default.send_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.send_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionScript">
@@ -1356,7 +1354,7 @@ done
     </action>
   </remediation>
 
-  <remediation id="disable-accept-source-route" cceids="CCE-4236-6,CCE-4091-5" description="Disable accept_source_route">
+  <remediation id="disable-accept-source-route" msids="40.1,40.2,42.1,42.2" description="Disable accept_source_route">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.default.accept_source_route" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.accept_source_route" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv6.conf.default.accept_source_route" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
@@ -1373,7 +1371,7 @@ done
     </action>
   </remediation>
 
-  <remediation id="enable-log-martians" cceids="CCE-4320-8" description="Enable log_martians">
+  <remediation id="enable-log-martians" msids="45.1,45.2" description="Enable log_martians">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.default.log_martians" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.log_martians" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionScript">
@@ -1388,7 +1386,7 @@ done
     </action>
   </remediation>
 
-  <remediation id="enable-icmp-ignore-bogus-error-responses" cceids="CCE-4133-5" description="Enable icmp_ignore_bogus_error_responses">
+  <remediation id="enable-icmp-ignore-bogus-error-responses" msids="43" description="Enable icmp_ignore_bogus_error_responses">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.icmp_ignore_bogus_error_responses" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionScript">
       <script>
@@ -1399,7 +1397,7 @@ sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
     </action>
   </remediation>
 
-  <remediation id="enable-icmp-echo-ignore-broadcasts" cceids="CCE-3644-2" description="Enable icmp_echo_ignore_broadcasts">
+  <remediation id="enable-icmp-echo-ignore-broadcasts" msids="44" description="Enable icmp_echo_ignore_broadcasts">
     <action distro="*" action="ActionEditConfig" name="net.ipv4.icmp_echo_ignore_broadcasts" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
     <action distro="*" action="ActionScript">
       <script>
@@ -1410,18 +1408,18 @@ sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
     </action>
   </remediation>
 
-  <remediation id="install-rsyslog" cceids="CCE-17742-8" description="Install rsyslog">
+  <remediation id="install-rsyslog" msids="61" description="Install rsyslog">
     <action distro="*" action="ActionInstallPackage" package="rsyslog"/>
   </remediation>
 
-  <remediation id="enable-rsyslog" cceids="CCE-17698-2" description="Enable rsyslog">
+  <remediation id="enable-rsyslog" msids="62" description="Enable rsyslog">
     <action distro="!SLES=11" action="ActionEnableService" service="rsyslog"/>
     <action distro="SLES=11" action="ActionEnableService" service="syslog"/>
     <action distro="!SLES=11" action="ActionRestartService" service="rsyslog"/>
     <action distro="SLES=11" action="ActionRestartService" service="syslog"/>
   </remediation>
 
-  <remediation id="configure-syslog-file-create-mode" cceids="CCE-18095-0" description="Configure rsyslog $FileCreateMode">
+  <remediation id="configure-syslog-file-create-mode" msids="63" description="Configure rsyslog $FileCreateMode">
     <action distro="CentOS|RedHat|Oracle" action="ActionScript">
       <script>
       <![CDATA[
@@ -1433,7 +1431,7 @@ fi
     </action>
   </remediation>
 
-  <remediation id="set-etc-shadow-perms" cceids="CCE-4130-1" description="Set permissions on /etc/shadow">
+  <remediation id="set-etc-shadow-perms" msids="11.1,11.2" description="Set permissions on /etc/shadow">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1450,7 +1448,7 @@ fi
     </action>
   </remediation>
 
-  <remediation id="set-etc-gshadow-perms" cceids="CCE-3932-1" description="Set permissions on /etc/gshadow">
+  <remediation id="set-etc-gshadow-perms" msids="11.3" description="Set permissions on /etc/gshadow">
     <action distro="Ubuntu|Debian" action="ActionScript">
       <script>
       <![CDATA[
@@ -1474,7 +1472,7 @@ chmod 400 /etc/gshadow
     </action>
   </remediation>
 
-  <remediation id="set-etc-passwd-perms" cceids="CCE-3566-7" description="Set permissions on /etc/passwd">
+  <remediation id="set-etc-passwd-perms" msids="12.1" description="Set permissions on /etc/passwd">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1485,7 +1483,7 @@ chmod 644 /etc/passwd
     </action>
   </remediation>
 
-  <remediation id="set-etc-group-perms" cceids="CCE-3967-7" description="Set permissions on /etc/group">
+  <remediation id="set-etc-group-perms" msids="12.2" description="Set permissions on /etc/group">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1496,7 +1494,7 @@ chmod 644 /etc/group
     </action>
   </remediation>
 
-  <remediation id="fix-anacrontab-perms" cceids="CCE-4304-2" description="Fix anacrontab perms">
+  <remediation id="fix-anacrontab-perms" msids="91" description="Fix anacrontab perms">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1508,7 +1506,7 @@ fi
     </action>
   </remediation>
 
-  <remediation id="fix-crontab-perms" cceids="CCE-4388-5" description="Fix crontab perms">
+  <remediation id="fix-crontab-perms" msids="92" description="Fix crontab perms">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1519,7 +1517,7 @@ chmod 600 /etc/crontab
     </action>
   </remediation>
 
-  <remediation id="fix-cron-file-perms" cceids="CCE-4250-7,CCE-4450-3,CCE-4106-1,CCE-4251-5,CCE-4203-6" description="Fix cron file/folder permissions">
+  <remediation id="fix-cron-file-perms" msids="93,94,95,96,97" description="Fix cron file/folder permissions">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1530,7 +1528,7 @@ chmod 700 /etc/cron.*
     </action>
   </remediation>
 
-  <remediation id="fix-root-path-perms" cceids="CCE-14957-5" description="Fix permissions on dirs in root's path">
+  <remediation id="fix-root-path-perms" msids="27.2" description="Fix permissions on dirs in root's path">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1543,7 +1541,7 @@ done
     </action>
   </remediation>
 
-  <remediation id="disable-non-root-system-login" cceids="CCE-3987-5" description="Disable login for system accounts">
+  <remediation id="disable-non-root-system-login" msids="23.1" description="Disable login for system accounts">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1557,29 +1555,29 @@ done
     </action>
   </remediation>
 
-  <remediation id="disable-avahi-daemon" cceids="CCE-4365-3" description="Disable avahi-daemon service">
+  <remediation id="disable-avahi-daemon" msids="114" description="Disable avahi-daemon service">
     <action distro="*" action="ActionDisableService" service="avahi-daemon"/>
   </remediation>
 
-  <remediation id="disable-cups" cceids="CCE-4425-5" description="Disable cups service">
+  <remediation id="disable-cups" msids="115" description="Disable cups service">
     <action distro="*" action="ActionDisableService" service="cups"/>
   </remediation>
 
-  <remediation id="disable-rpcgssd" cceids="CCE-3535-2" description="Disable rpcgssd service">
+  <remediation id="disable-rpcgssd" msids="126" description="Disable rpcgssd service">
     <action distro="*" action="ActionDisableService" service="rpcgssd"/>
   </remediation>
 
-  <remediation id="disable-rpcidmapd" cceids="CCE-3568-3" description="Disable rpcidmapd service">
+  <remediation id="disable-rpcidmapd" msids="127" description="Disable rpcidmapd service">
     <action distro="*" action="ActionDisableService" service="rpcidmapd"/>
   </remediation>
 
-  <remediation id="disable-rpcbind" cceids="CCE-4550-0" description="Disable rpcbind service">
+  <remediation id="disable-rpcbind" msids="129" description="Disable rpcbind service">
     <action distro="SLES=11" action="ActionDisableService" service="nfs"/>
     <action distro="*" action="ActionDisableService" service="rpcbind"/>
     <action distro="CentOS>=7|RedHat>=7|SLES>11" action="ActionDisableService" service="rpcbind.socket"/>
   </remediation>
 
-  <remediation id="disable-unnecessary-kernel-mods" cceids="CCE-14089-7,CCE-14457-6,CCE-15087-0,CCE-14093-9,CCE-14853-6,CCE-14118-4,CCE-14268-7,CCE-14132-5,CCE-14027-7,CCE-14911-2" description="Disable unnecessary Kernel Modules">
+  <remediation id="disable-unnecessary-kernel-mods" msids="6.1,6.2,6.3,6.4,6.5,6.6,54,55,56,57" description="Disable unnecessary Kernel Modules">
     <action distro="*" action="ActionScript">
       <script>
       <![CDATA[
@@ -1604,4 +1602,4 @@ chmod 644 /etc/modprobe.d/blacklist-azurebaseline.conf
     </action>
   </remediation>
  </remediations>
-</data>
+</baseline>
