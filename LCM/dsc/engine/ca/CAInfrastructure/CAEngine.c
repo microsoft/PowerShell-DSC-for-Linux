@@ -1660,6 +1660,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
 
     NativeResourceProvider* nativeResourceProvider = NULL;
     result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
+    Tprintf(MI_T("+++++ %T:%d ~ result = %d\n"), __FILE__, __LINE__, result);
     if (result != MI_RESULT_OK)
     {
         goto cleanup;
@@ -1673,6 +1674,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
         SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_TEST,provContext->lcmProviderContext);
 
         result = NativeResourceProvider_TestTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &test_operation_result, extendedError);
+        Tprintf(MI_T("+++++ %T:%d ~ result = %d\n"), __FILE__, __LINE__, result);
 
         //Stop the timer for test
         finish=CPU_GetTimeStamp();
@@ -1710,6 +1712,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
 
     result = NativeResourceProvider_SetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &set_operation_result, extendedError);
+    Tprintf(MI_T("+++++ %T:%d ~ result = %d\n"), __FILE__, __LINE__, result);
     if (result != MI_RESULT_OK)
     {
         result = GetCimMIError(result, extendedError, ID_NATIVE_PROVIDER_MANAGER_SET_OPERATION_FAILED);
