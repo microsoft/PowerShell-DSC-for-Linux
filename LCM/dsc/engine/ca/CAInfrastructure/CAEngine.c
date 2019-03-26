@@ -753,7 +753,8 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
         /* Move the resource to desired state.*/
         canceled = MI_FALSE;
         r = MoveToDesiredState(&providerContext, moduleLoader->application, miSession, filteredInstance, regInstance, flags, resultStatus, &canceled, resourceErrorList, extendedError);
-        Tprintf(MI_T("***** %T:%d ~ MoveToDesiredState result = %d\n"), __FILE__, __LINE__, r);
+        // Tprintf(MI_T("***** %T:%d ~ MoveToDesiredState r = %d\n"), __FILE__, __LINE__, r);
+         DSC_LOG_INFO(MI_T("***** %T:%d ~ MoveToDesiredState r = %d\n"), __FILE__, __LINE__, r);
         MI_Instance_Delete(filteredInstance);
         filteredInstance = NULL;
 
@@ -1070,8 +1071,9 @@ MI_Result MI_CALL SendConfigurationApply( _In_ LCMProviderContext *lcmContext,
     /*execute the list in sequence.*/
     r = SetResourcesInOrder(lcmContext, moduleManager, instanceA, &miSession, & executionContainer,
                             flags, documentIns, resultStatus, &resourceErrorList, extendedError);
-    Tprintf(MI_T("***** %T:%d ~ SetResourcesInOrder result = %d\n"), __FILE__, __LINE__, r);
-    
+    // Tprintf(MI_T("***** %T:%d ~ SetResourcesInOrder r = %d\n"), __FILE__, __LINE__, r);
+    DSC_LOG_INFO(MI_T("***** %T:%d ~ SetResourcesInOrder r = %d\n"), __FILE__, __LINE__, r);
+
     if (resourceErrorList.first != NULL)
     {
         resourceErrorString = BuildStringResourceErrorList(&resourceErrorList);
@@ -1662,7 +1664,8 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
 
     NativeResourceProvider* nativeResourceProvider = NULL;
     result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
-    Tprintf(MI_T("***** %T:%d ~ NativeResourceManager_GetNativeResouceProvider result = %d\n"), __FILE__, __LINE__, result);
+    // Tprintf(MI_T("***** %T:%d ~ NativeResourceManager_GetNativeResouceProvider result = %d\n"), __FILE__, __LINE__, result);
+    DSC_LOG_INFO(MI_T("***** %T:%d ~ NativeResourceManager_GetNativeResouceProvider result = %d\n"), __FILE__, __LINE__, result);
     if (result != MI_RESULT_OK)
     {
         goto cleanup;
@@ -1676,7 +1679,8 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
         SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_TEST,provContext->lcmProviderContext);
 
         result = NativeResourceProvider_TestTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &test_operation_result, extendedError);
-        Tprintf(MI_T("***** %T:%d ~ NativeResourceProvider_TestTargetResource, result = %d\n"), __FILE__, __LINE__, result);
+        // Tprintf(MI_T("***** %T:%d ~ NativeResourceProvider_TestTargetResource, result = %d\n"), __FILE__, __LINE__, result);
+        DSC_LOG_INFO(MI_T("***** %T:%d ~ NativeResourceProvider_TestTargetResource, result = %d\n"), __FILE__, __LINE__, result);
 
         //Stop the timer for test
         finish=CPU_GetTimeStamp();
@@ -1714,7 +1718,8 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
 
     result = NativeResourceProvider_SetTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &set_operation_result, extendedError);
-    Tprintf(MI_T("***** %T:%d ~ NativeResourceProvider_SetTargetResource result = %d\n"), __FILE__, __LINE__, result);
+    // Tprintf(MI_T("***** %T:%d ~ NativeResourceProvider_SetTargetResource result = %d\n"), __FILE__, __LINE__, result);
+    DSC_LOG_INFO(MI_T("***** %T:%d ~ NativeResourceProvider_SetTargetResource result = %d\n"), __FILE__, __LINE__, result);
     if (result != MI_RESULT_OK)
     {
         result = GetCimMIError(result, extendedError, ID_NATIVE_PROVIDER_MANAGER_SET_OPERATION_FAILED);
@@ -1724,11 +1729,13 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     if(set_operation_result == 1) // SetTargetResource returned TRUE
     {
         result = MI_RESULT_OK;
+        
     }
     else // SetTargetResource returned FALSE
     {
         result = MI_RESULT_FAILED;
     }
+    DSC_LOG_INFO(MI_T("***** %T:%d ~ NativeResourceProvider_SetTargetResource operation result = %d\n"), __FILE__, __LINE__, result);
 
     //Stop the timer for set
     finish=CPU_GetTimeStamp();

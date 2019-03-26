@@ -247,11 +247,20 @@ unsigned long DSC_EventRegister()
 {
     char logPath[PAL_MAX_PATH_SIZE];
     char detailedLogPath[PAL_MAX_PATH_SIZE];
+
+#if defined(BUILD_OMS)
+    Strlcpy(logPath, "/var/opt/microsoft/omsconfig", PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
+    Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "omsconfig.log", PAL_MAX_PATH_SIZE);
+    Strlcat(detailedLogPath, "omsconfigdetailed.log", PAL_MAX_PATH_SIZE);
+#else
     Strlcpy(logPath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
     Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
     Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
     Strlcat(logPath, "dsc.log", PAL_MAX_PATH_SIZE);
     Strlcat(detailedLogPath, "dscdetailed.log", PAL_MAX_PATH_SIZE);
+#endif
     DSCLog_Open(logPath, &_DSCLogFile);
     DSCLog_Open(detailedLogPath, &_DSCDetailedLogFile);
     return 0;

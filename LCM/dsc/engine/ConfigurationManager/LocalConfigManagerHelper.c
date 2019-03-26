@@ -2252,7 +2252,8 @@ MI_Result ApplyConfigGroup(
         }
 
         r = SendConfigurationApply(lcmContext, flags, resourceInstances, moduleManager, documentIns, resultStatus, cimErrorDetails);
-        Tprintf(MI_T("***** %T:%d ~ SetResourcesInOrder r = %d\n"), __FILE__, __LINE__, r);
+        // Tprintf(MI_T("***** %T:%d ~ SetResourcesInOrder r = %d\n"), __FILE__, __LINE__, r);
+        DSC_LOG_INFO(MI_T("***** %T:%d ~ SetResourcesInOrder r = %d\n"), __FILE__, __LINE__, r);
         if (r != MI_RESULT_OK)
         {
                 if (cimErrorDetails && *cimErrorDetails)
