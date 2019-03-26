@@ -485,7 +485,7 @@ def move_diy_settings_to_new_location():
         stdout, stderr = proc.communicate()
         if proc.returncode != 0:
             raise OSError(
-                "Copying old diy director to new diy directory failed\nstdout: " + stdout + "\nstderr: " + stderr)
+                "Copying old diy directory to new diy directory failed\nstdout: " + stdout + "\nstderr: " + stderr)
 
         if os.path.isfile(DIY_WORKER_CONF_PATH_OLD):
             worker_config = ConfigParser.ConfigParser()
@@ -515,7 +515,7 @@ def move_diy_settings_to_new_location():
 
         # remove old config file when copy is complete
         shutil.rmtree(DIY_WORKER_STATE_DIR_OLD)
-        log(INFO, 'Migrated DIY worker settings and workind directory under /home/nxautomation')
+        log(INFO, 'Migrated DIY worker settings and working directory under /home/nxautomation')
 
 
 def is_oms_primary_workspace(workspace_id):

@@ -2,7 +2,7 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-"""Utility for DIY hybbrid worker directories"""
+"""Utility for DIY hybrid worker directories"""
 
 
 from worker import linuxutil
