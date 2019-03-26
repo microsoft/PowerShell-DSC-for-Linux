@@ -6561,6 +6561,28 @@ void handleSIGCHLDSignal(int sig)
     // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
     // several zombie processes during one invocation of the handler function.
     while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) { }
+
+    FILE *fp = popen("ps -C dsc_host --format '%P %p'" , "r");
+    if (fp != NULL)
+    {
+        char parentID[256];
+        char processID[256];
+        while (fscanf(fp, "%s %s", parentID, processID) != EOF)
+        {
+            // Check the parentID to see if it that of your process
+            if (Tcscasecmp(parentID, getpid()) == 0)
+            {
+                DSC_LOG_INFO("****** PID: %s  This is the ps process: %s\n", processID, parentID);
+            }
+            else
+            {
+                DSC_LOG_INFO("****** PID: %s  Parent: %s\n", processID, parentID);
+            }
+        }
+
+        pclose(fp);
+    }
+
     errno = saved_errorno;
 }
 #endif
