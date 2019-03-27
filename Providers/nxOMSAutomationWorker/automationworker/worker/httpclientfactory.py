@@ -26,24 +26,25 @@ class HttpClientFactory:
         The ssl module was also unavailable for [2.4.0 - 2.6.0[.
     """
 
-    def __init__(self, cert, key, insecure=False):
+    def __init__(self, cert, key, insecure=False, force_no_proxy=False):
         self.cert = cert
         self.key = key
         self.insecure = insecure
         self.proxy_configuration = None
 
         # set proxy if valid proxy_configuration path is detected
-        proxy_conf_path = configuration.get_proxy_configuration_path()
-        if proxy_conf_path != configuration.DEFAULT_PROXY_CONFIGURATION_PATH \
-                and os.path.isfile(proxy_conf_path):
-            if util.assert_file_read_permission(configuration.get_proxy_configuration_path()) is False:
-                raise InvalidFilePermissionException(configuration.get_proxy_configuration_path())
-            else:
-                proxy_conf_file = open(configuration.get_proxy_configuration_path(), "r")
-                proxy_configuration = proxy_conf_file.readline().strip()
-                if proxy_configuration != "":
-                    self.proxy_configuration = proxy_configuration
-                proxy_conf_file.close()
+        if not force_no_proxy:
+            proxy_conf_path = configuration.get_proxy_configuration_path()
+            if proxy_conf_path != configuration.DEFAULT_PROXY_CONFIGURATION_PATH \
+                    and os.path.isfile(proxy_conf_path):
+                if util.assert_file_read_permission(configuration.get_proxy_configuration_path()) is False:
+                    raise InvalidFilePermissionException(configuration.get_proxy_configuration_path())
+                else:
+                    proxy_conf_file = open(configuration.get_proxy_configuration_path(), "r")
+                    proxy_configuration = proxy_conf_file.readline().strip()
+                    if proxy_configuration != "":
+                        self.proxy_configuration = proxy_configuration
+                    proxy_conf_file.close()
 
     def create_http_client(self, version_info):
         """Create a new instance of the appropriate HttpClient.
