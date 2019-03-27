@@ -4,7 +4,7 @@ from os.path    import dirname, join, realpath
 from subprocess import PIPE, Popen
 from sys        import exc_info, exit, version_info
 from traceback  import format_exc
-from fcntl      import flock, LOCK_EX, LOCK_UN
+from fcntl      import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -64,24 +64,37 @@ def run_perform_required_configuration_checks():
     # Save the starting timestamp without milliseconds
     startDateTime = operationStatusUtility.get_current_time_no_ms()
 
-    try:
-        if is_oms_config:
+    if is_oms_config:
+        try:
             # Open the dsc host lock file. This also creates a file if it does not exist
             dschostlock_filehandle = open(dsc_host_lock_path, 'w')
             print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
             
-            # Acquire dsc host file lock
-            flock(dschostlock_filehandle, LOCK_EX)
+            dschostlock_acquired = True
 
-        p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-    finally:
-        if is_oms_config:
+            # Acquire dsc host file lock
+            try:
+                flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+            except IOError:
+                dschostlock_acquired = False
+
+            if dschostlock_acquired:
+                p = Popen(parameters, stdout=PIPE, stderr=PIPE)
+                stdout, stderr = p.communicate()
+                print(stdout)
+            else:
+                print("dsc host lock already acuired by a different process")
+                stdout = ''
+                stderr = ''
+        finally:
             # Release dsc host file lock
             flock(dschostlock_filehandle, LOCK_UN)
 
             # Close dsc host lock file handle
             dschostlock_filehandle.close()
+    else:
+        p = Popen(parameters, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = p.communicate()
 
     print(stdout)
 

@@ -6170,7 +6170,9 @@ MI_Result MI_CALL LCM_Pull_Execute(
                     {
                         return result;
                     }
+#if !defined(BUILD_OMS)
                     system(OMI_RELOAD_COMMAND);
+#endif
                 }
 
                 result = ApplyPendingConfig(lcmContext, moduleManager, 0, &resultExecutionStatus, cimErrorDetails);
@@ -6305,6 +6307,7 @@ MI_Result LCM_Pull_GetConfiguration(
         {
             snprintf(command, 1024, "rm -rf %s", directoryName);
             system(command);
+            DSC_LOG_INFO("Executed '%T'\n", command);
             free(directoryName);
         }
         return result;
@@ -6372,6 +6375,7 @@ EH_UNWIND;
     {
         snprintf(command, 1024, "rm -rf %s", directoryName);
         system(command);
+        DSC_LOG_INFO("Executed '%T'\n", command);
         free(directoryName);
     }
     return result;
@@ -6545,6 +6549,26 @@ MI_Result TimeToRunConsistencyCheck(
     return MI_RESULT_OK;
 }
 
+#if defined(BUILD_OMS)
+void handleSIGCHLDSignal(int sig)
+{
+    int saved_errorno = errno;
+
+    // TODO: Maybe addressed later.
+    // DSC_EventWriteMessageWaitForChildProcess();
+
+    // OMS providers registers the SIGINT handler but may not have
+    // an opportunity to clean up before getting unloaded.
+    // This code is to ensure that OMSConfig picks up the work left off by
+    // the OMS providers of cleaning up zombie processes.
+    // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
+    // several zombie processes during one invocation of the handler function.
+    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) { }
+
+    errno = saved_errorno;
+}
+#endif
+
 MI_Result SetLCMStatusBusy()
 {
         MI_Uint32 lcmStatus;
@@ -6578,29 +6602,12 @@ MI_Result SetLCMStatusBusy()
         return r;
 }
 
-#if defined(BUILD_OMS)
-void handleSIGCHLDSignal(int sig)
-{
-    int saved_errorno = errno;
-
-    DSC_EventWriteMessageWaitForChildProcess();
-
-    // OMS providers registers the SIGINT handler but may not have
-    // an opportunity to clean up before getting unloaded.
-    // This code is to ensure that OMSConfig picks up the work left off by
-    // the OMS providers of cleaning up zombie processes.
-    // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
-    // several zombie processes during one invocation of the handler function.
-    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) { }
-    errno = saved_errorno;
-}
-#endif
-
 MI_Result SetLCMStatusReady()
 {
         MI_Uint32 lcmStatus;
         MI_Instance *extendedError;
         MI_Result r;
+
 #if defined(BUILD_OMS)
         struct sigaction sa;
         sa.sa_handler = &handleSIGCHLDSignal;
@@ -6609,8 +6616,7 @@ MI_Result SetLCMStatusReady()
         sigaction(SIGCHLD, &sa, 0);
         DSC_EventWriteMessageRegisterProcessHandler();
 #endif
-   
- 
+
         if (!g_LCMPendingReboot)
         {
                 lcmStatus = LCM_STATUSCODE_READY;

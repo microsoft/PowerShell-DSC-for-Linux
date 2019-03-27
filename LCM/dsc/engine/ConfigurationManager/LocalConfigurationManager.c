@@ -211,7 +211,9 @@ void TaskQueueLoop()
 
 void ReloadOMI()
 {
+#if !defined(BUILD_OMS)
     system(OMI_RELOAD_COMMAND);
+#endif
 }
 
 MI_Boolean RunningAsRoot()

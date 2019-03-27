@@ -18,6 +18,7 @@
 #include "DSC_Systemcalls.h"
 #include "EventWrapper.h"
 #include <pal/cpu.h>
+#include <unistd.h>
 
 ConfigurationDetails g_ConfigurationDetails;
 static FILE *_DSCLogFile;
@@ -26,6 +27,8 @@ static Log_Level _DSCLogLevel = OMI_WARNING;
 static Log_Level _DSCDetailedLogLevel = OMI_VERBOSE;
 
 #define FMTSIZE 1024
+#define MSGSIZE 4096
+#define TIMESTAMP_SIZE 128
 
 static const char* _levelDSCStrings[] =
 {
@@ -37,7 +40,6 @@ static const char* _levelDSCStrings[] =
     "VERBOSE",
 };
 
-#define TIMESTAMP_SIZE 128
 
 static int _GetDSCTimeStamp(_Pre_writable_size_(TIMESTAMP_SIZE) char buf[TIMESTAMP_SIZE])
 {
@@ -97,6 +99,33 @@ int DSCLog_VPut(
     return 1;
 }
 
+void DSCFileVPutTelemetry(
+        Log_Level level,
+        int eventId,
+        const char* file,
+        MI_Uint32 line,
+        const ZChar* format,
+        va_list ap
+    )
+{
+    FILE *telemetry_file = fopen("/var/opt/microsoft/omsconfig/status/omsconfighost", "a");
+
+    if (telemetry_file == NULL)
+        return;
+
+    char timestamp_buffer[TIMESTAMP_SIZE];
+    _GetDSCTimeStamp(timestamp_buffer);
+
+    int current_pid = getpid();
+
+    Ftprintf(telemetry_file, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] "), timestamp_buffer, current_pid, _levelDSCStrings[level], eventId, file, line);
+    Vftprintf(telemetry_file, format, ap);
+    Ftprintf(telemetry_file, PAL_T("</OMSCONFIGLOG>\n"));
+
+    fflush(telemetry_file);
+    fclose(telemetry_file);
+}
+
 void DSCFilePutLog(
     int priority,
     int eventId,
@@ -125,7 +154,44 @@ void DSCFilePutLog(
         // Write all the logs
         DSCLog_VPut(_DSCDetailedLogFile, (Log_Level)priority, _DSCDetailedLogLevel, file, line, fmt, ap);
         va_end(ap);
+
+        if (priority <= OMI_WARNING)
+        {
+            va_start(ap, format);
+            DSCFileVPutTelemetry(priority, eventId, file, line, format, ap);
+            va_end(ap);
+        }
     }
+}
+
+void DSCFilePutTelemetry(
+    int priority,
+    int eventId,
+    const char * file,
+    int line,
+    const PAL_Char* format,
+    ...)
+{
+    FILE *telemetry_file = fopen("/var/opt/microsoft/omsconfig/status/omsconfighost", "a");
+
+    if (telemetry_file == NULL)
+        return;
+
+    va_list ap;
+
+    char timestamp_buffer[TIMESTAMP_SIZE];
+    _GetDSCTimeStamp(timestamp_buffer);
+
+    int current_pid = getpid();
+
+    va_start(ap, format);
+    Ftprintf(telemetry_file, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] "), timestamp_buffer, current_pid, _levelDSCStrings[priority], eventId, file, line);
+    Vftprintf(telemetry_file, format, ap);
+    Ftprintf(telemetry_file, PAL_T("</OMSCONFIGLOG>\n"));
+    va_end(ap);
+
+    fflush(telemetry_file);
+    fclose(telemetry_file);
 }
 
 void DSCLog_Close()
@@ -181,11 +247,20 @@ unsigned long DSC_EventRegister()
 {
     char logPath[PAL_MAX_PATH_SIZE];
     char detailedLogPath[PAL_MAX_PATH_SIZE];
+
+#if defined(BUILD_OMS)
+    Strlcpy(logPath, "/var/opt/microsoft/omsconfig", PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
+    Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
+    Strlcat(logPath, "omsconfig.log", PAL_MAX_PATH_SIZE);
+    Strlcat(detailedLogPath, "omsconfigdetailed.log", PAL_MAX_PATH_SIZE);
+#else
     Strlcpy(logPath, OMI_GetPath(ID_LOGDIR), PAL_MAX_PATH_SIZE);
     Strlcat(logPath, "/", PAL_MAX_PATH_SIZE);
     Strlcpy(detailedLogPath, logPath, PAL_MAX_PATH_SIZE);
     Strlcat(logPath, "dsc.log", PAL_MAX_PATH_SIZE);
     Strlcat(detailedLogPath, "dscdetailed.log", PAL_MAX_PATH_SIZE);
+#endif
     DSCLog_Open(logPath, &_DSCLogFile);
     DSCLog_Open(detailedLogPath, &_DSCDetailedLogFile);
     return 0;

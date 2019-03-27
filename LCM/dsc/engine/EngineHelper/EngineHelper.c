@@ -2043,7 +2043,7 @@ MI_Result  Save_JSON_Value (
     if (fd == NULL)
     {
         result = errno;
-        Tprintf("Failed to open file '%T' with errno = %T (%d)\n", __FILE__, __LINE__, p_file_path, errno, strerror(errno));
+        Tprintf(MI_T("Failed to open file '%T' with errno = %d (%T)\n"), p_file_path, errno, strerror(errno));
     }
     else
     {

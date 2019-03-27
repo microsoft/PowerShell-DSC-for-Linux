@@ -149,6 +149,14 @@ void DSCFilePutLog(
     const PAL_Char* format,
     ...);
 
+void DSCFilePutTelemetry(
+    int priority,
+    int eventId,
+    const char * file,
+    int line,
+    const PAL_Char* format,
+    ...);
+
 #include <eventing/oidsc.h>
 
 #define DSC_EventWriteLCMSendConfigurationError(ComponentName,ErrorId, ErrorDetail, ResourceId, SourceInfo, errorMessage) \
@@ -567,11 +575,6 @@ void DSCFilePutLog(
 #define DSC_EventGettingTheSchemaSucceeded(ClassName) \
     ExpandEvent(GettingTheSchemaSucceeded(ClassName))
 
-
-unsigned long DSC_Log_Register();
-unsigned long DSC_Log_Unregister();
-unsigned long DSC_Log_Write(DSC_Log_Level p_level, int p_line_number, const char * p_file_name, const char * p_message);
-
 #ifdef __cplusplus
 }
 #endif
@@ -584,5 +587,15 @@ unsigned long DSC_Log_Write(DSC_Log_Level p_level, int p_line_number, const char
 #define DSC_LOG_INFO(format, ...) DSCFilePutLog(DSC_LOG_INFO_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
 #define DSC_LOG_DEBUG(format, ...) DSCFilePutLog(DSC_LOG_DEBUG_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
 #define DSC_LOG_VERBOSE(format, ...) DSCFilePutLog(DSC_LOG_VERBOSE_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+
+#define DSC_TELEMETRY(level, event_id, file, line, format, ...) DSCFilePutTelemetry(level, event_id, file, line, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_WITHOUT_SOURCE_INFO(level, format, ...) DSCFilePutTelemetry(level, 0, "", 0, format, ##__VA_ARGS__)
+
+#define DSC_TELEMETRY_FATAL(format, ...) DSC_TELEMETRY(DSC_LOG_FATAL_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_ERROR(format, ...) DSC_TELEMETRY(DSC_LOG_ERROR_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_WARNING(format, ...) DSC_TELEMETRY(DSC_LOG_WARNING_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_INFO(format, ...) DSC_TELEMETRY(DSC_LOG_INFO_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_DEBUG(format, ...) DSC_TELEMETRY(DSC_LOG_DEBUG_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_VERBOSE(format, ...) DSC_TELEMETRY(DSC_LOG_VERBOSE_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
 #endif //__EVENTWRAPPER_H_

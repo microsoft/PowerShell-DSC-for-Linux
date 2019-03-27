@@ -814,7 +814,7 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
 
             continue;
         }
-        // Success Case
+        // Success Case 
 
         if (resultStatus != NULL && *resultStatus == MI_TRUE)
         {
@@ -859,7 +859,8 @@ MI_Result SetResourcesInOrder(_In_ LCMProviderContext *lcmContext,
         certificateid = NULL;
     }
 
-    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+    // Ignore this call and do not delete the native resource manager instance. It will be cleaned up when the host process goes away.
+    // NativeResourceManager_Delete(providerContext.nativeResourceManager);
 
     return finalr;
 }
@@ -1004,7 +1005,8 @@ MI_Result MI_CALL GetConfiguration( _In_ LCMProviderContext *lcmContext,
 
     MI_Session_Close(&miSession, NULL, NULL);
 
-    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+    // Ignore this call and do not delete the native resource manager instance. It will be cleaned up when the host process goes away.
+    // NativeResourceManager_Delete(providerContext.nativeResourceManager);
 
     return r;
 }
@@ -1133,6 +1135,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         // Get provider .so path for class
         MI_Char resources_so_path[MAX_PATH];
         int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+        DSC_LOG_INFO("Looking into shared object file under '%s'\n", resources_so_path);
         if (ret == -1)
         {
             return result;
@@ -1209,6 +1212,7 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
         // Get provider .so path for class
         MI_Char resources_so_path[MAX_PATH];
         int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+        DSC_LOG_INFO("Looking into shared object file under '%s'\n", resources_so_path);
         if (ret == -1)
         {
             return result;
@@ -1639,6 +1643,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     // Get provider .so path for class
     MI_Char resources_so_path[MAX_PATH];
     int ret = Stprintf(resources_so_path, MAX_PATH, MI_T("%T/%T/lib%T.so"), DSC_LIB_PATH, class_name, class_name);
+    DSC_LOG_INFO("Looking into shared object file under '%s'\n", resources_so_path);
     if (ret == -1)
     {
         return result;
@@ -1668,6 +1673,12 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
         SetMessageInContext(ID_OUTPUT_OPERATION_START,ID_OUTPUT_ITEM_TEST,provContext->lcmProviderContext);
 
         result = NativeResourceProvider_TestTargetResource(nativeResourceProvider, miApp, miSession, instance, regInstance, &test_operation_result, extendedError);
+        DSC_LOG_INFO("NativeResourceProvider_TestTargetResource for '%s' returned %d\n", class_name, test_operation_result);
+
+        if (result != MI_RESULT_OK)
+        {
+            DSC_LOG_WARNING("NativeResourceProvider_TestTargetResource failed.\n");
+        }
 
         //Stop the timer for test
         finish=CPU_GetTimeStamp();
@@ -1696,6 +1707,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     {
         SetMessageInContext(ID_OUTPUT_OPERATION_SKIP,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
         LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
+        DSC_LOG_INFO("TestTargetResource returned TRUE, so we are skipping SetTargetResource\n");
         goto cleanup;
     }
 
@@ -1708,6 +1720,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     if (result != MI_RESULT_OK)
     {
         result = GetCimMIError(result, extendedError, ID_NATIVE_PROVIDER_MANAGER_SET_OPERATION_FAILED);
+        DSC_LOG_ERROR("NativeResourceProvider_SetTargetResource failed.\n");
         goto cleanup;
     }
 
@@ -1719,6 +1732,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     {
         result = MI_RESULT_FAILED;
     }
+    DSC_LOG_INFO("NativeResourceProvider_SetTargetResource for '%s' returned %d\n", class_name, set_operation_result);
 
     //Stop the timer for set
     finish=CPU_GetTimeStamp();
@@ -2650,7 +2664,8 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
 
     MI_Session_Close(&miSession, NULL, NULL);
 
-    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+    // Ignore this call and do not delete the native resource manager instance. It will be cleaned up when the host process goes away.
+    // NativeResourceManager_Delete(providerContext.nativeResourceManager);
 
     return r;
 }
