@@ -2252,8 +2252,6 @@ MI_Result ApplyConfigGroup(
         }
 
         r = SendConfigurationApply(lcmContext, flags, resourceInstances, moduleManager, documentIns, resultStatus, cimErrorDetails);
-        // Tprintf(MI_T("***** %T:%d ~ SetResourcesInOrder r = %d\n"), __FILE__, __LINE__, r);
-        DSC_LOG_INFO(MI_T("***** %T:%d ~ SetResourcesInOrder r = %d\n"), __FILE__, __LINE__, r);
         if (r != MI_RESULT_OK)
         {
                 if (cimErrorDetails && *cimErrorDetails)
@@ -6172,7 +6170,9 @@ MI_Result MI_CALL LCM_Pull_Execute(
                     {
                         return result;
                     }
+#if !defined(BUILD_OMS)
                     system(OMI_RELOAD_COMMAND);
+#endif
                 }
 
                 result = ApplyPendingConfig(lcmContext, moduleManager, 0, &resultExecutionStatus, cimErrorDetails);
@@ -6307,6 +6307,7 @@ MI_Result LCM_Pull_GetConfiguration(
         {
             snprintf(command, 1024, "rm -rf %s", directoryName);
             system(command);
+            DSC_LOG_INFO("Executed '%T'\n", command);
             free(directoryName);
         }
         return result;
@@ -6374,6 +6375,7 @@ EH_UNWIND;
     {
         snprintf(command, 1024, "rm -rf %s", directoryName);
         system(command);
+        DSC_LOG_INFO("Executed '%T'\n", command);
         free(directoryName);
     }
     return result;
@@ -6552,7 +6554,8 @@ void handleSIGCHLDSignal(int sig)
 {
     int saved_errorno = errno;
 
-    DSC_EventWriteMessageWaitForChildProcess();
+    // TODO: Maybe addressed later.
+    // DSC_EventWriteMessageWaitForChildProcess();
 
     // OMS providers registers the SIGINT handler but may not have
     // an opportunity to clean up before getting unloaded.
@@ -6561,27 +6564,6 @@ void handleSIGCHLDSignal(int sig)
     // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
     // several zombie processes during one invocation of the handler function.
     while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) { }
-
-    FILE *fp = popen("ps -C dsc_host --format '%P %p'" , "r");
-    if (fp != NULL)
-    {
-        char parentID[256];
-        char processID[256];
-        while (fscanf(fp, "%s %s", parentID, processID) != EOF)
-        {
-            // Check the parentID to see if it that of your process
-            if (Tcscasecmp(parentID, getpid()) == 0)
-            {
-                DSC_LOG_INFO("****** PID: %s  This is the ps process: %s\n", processID, parentID);
-            }
-            else
-            {
-                DSC_LOG_INFO("****** PID: %s  Parent: %s\n", processID, parentID);
-            }
-        }
-
-        pclose(fp);
-    }
 
     errno = saved_errorno;
 }
