@@ -20,6 +20,10 @@
 #include "MI.h"
 #include <ModuleHandler.h>
 
+#if defined(BUILD_OMS)
+#include <signal.h>
+#endif
+
 typedef enum _ResourceStatus
 {
     ResourceNotProcessed = -1,
@@ -142,6 +146,9 @@ void SetMessageInContext(MI_Uint32 msgOperation,MI_Uint32 msgItem,LCMProviderCon
 
 MI_Result  MI_CALL StopCurrentConfiguration(_Outptr_result_maybenull_ MI_Instance **extendedError, BOOL force);
 
+#if defined(BUILD_OMS)
+void handleSIGCHLDSignal(int sig);
+#endif
 
 
 #ifdef __cplusplus

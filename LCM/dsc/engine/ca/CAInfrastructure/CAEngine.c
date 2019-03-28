@@ -34,6 +34,10 @@
 #include "Resources_LCM.h"
 #include "EventWrapper.h"
 
+#if defined(BUILD_OMS)
+#include <signal.h>
+#endif
+
 volatile MI_Operation *g_CurrentWmiv2Operation = NULL;
 
 const MI_Char * GetModuleName( _In_ MI_Instance *inst);
@@ -2665,7 +2669,37 @@ MI_Result MI_CALL PerformInventory( _In_ LCMProviderContext *lcmContext,
     MI_Session_Close(&miSession, NULL, NULL);
 
     // Ignore this call and do not delete the native resource manager instance. It will be cleaned up when the host process goes away.
-    // NativeResourceManager_Delete(providerContext.nativeResourceManager);
+    NativeResourceManager_Delete(providerContext.nativeResourceManager);
+
+#if defined(BUILD_OMS)
+    struct sigaction sa;
+    sa.sa_handler = &handleSIGCHLDSignal;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+    sigaction(SIGCHLD, &sa, 0);
+    DSC_EventWriteMessageRegisterProcessHandler();
+#endif
 
     return r;
 }
+
+
+#if defined(BUILD_OMS)
+void handleSIGCHLDSignal(int sig)
+{
+    int saved_errorno = errno;
+
+    // TODO: Maybe addressed later.
+    DSC_EventWriteMessageWaitForChildProcess();
+
+    // OMS providers registers the SIGINT handler but may not have
+    // an opportunity to clean up before getting unloaded.
+    // This code is to ensure that OMSConfig picks up the work left off by
+    // the OMS providers of cleaning up zombie processes.
+    // Only one instance of SIGCHLD can be queued, so it becomes necessary to reap
+    // several zombie processes during one invocation of the handler function.
+    while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) { }
+
+    errno = saved_errorno;
+}
+#endif
