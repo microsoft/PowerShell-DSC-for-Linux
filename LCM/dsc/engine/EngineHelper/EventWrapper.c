@@ -20,6 +20,8 @@
 #include <pal/cpu.h>
 #include <unistd.h>
 
+#include "parson.h"
+
 ConfigurationDetails g_ConfigurationDetails;
 static FILE *_DSCLogFile;
 static FILE *_DSCDetailedLogFile;
@@ -28,6 +30,7 @@ static Log_Level _DSCDetailedLogLevel = OMI_VERBOSE;
 
 #define FMTSIZE 1024
 #define MSGSIZE 4096
+#define BIGMSGSIZE 1024 * 64
 #define TIMESTAMP_SIZE 128
 
 static const char* _levelDSCStrings[] =
@@ -108,22 +111,41 @@ void DSCFileVPutTelemetry(
         va_list ap
     )
 {
-    FILE *telemetry_file = fopen("/var/opt/microsoft/omsconfig/status/omsconfighost", "a");
-
-    if (telemetry_file == NULL)
-        return;
-
+    char tmp_msg_buffer[MSGSIZE * 2];
+    char formatter_msg_buffer[MSGSIZE];
     char timestamp_buffer[TIMESTAMP_SIZE];
     _GetDSCTimeStamp(timestamp_buffer);
 
     int current_pid = getpid();
 
-    Ftprintf(telemetry_file, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] "), timestamp_buffer, current_pid, _levelDSCStrings[level], eventId, file, line);
-    Vftprintf(telemetry_file, format, ap);
-    Ftprintf(telemetry_file, PAL_T("</OMSCONFIGLOG>\n"));
+    Vstprintf(formatter_msg_buffer, MSGSIZE , format, ap);
+    Stprintf(tmp_msg_buffer, MSGSIZE * 2, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>"), timestamp_buffer, current_pid, _levelDSCStrings[level], eventId, file, line, formatter_msg_buffer);
 
-    fflush(telemetry_file);
-    fclose(telemetry_file);
+    JSON_Value *telemetry_root_value = NULL;
+    telemetry_root_value = json_parse_file("/var/opt/microsoft/omsconfig/status/omsconfighost");
+
+    if (telemetry_root_value == NULL)
+    {
+        return;
+    }
+
+    if (json_value_get_type(telemetry_root_value) != JSONObject) {
+        telemetry_root_value = json_value_init_object();
+    }
+
+    JSON_Object *telemetry_root_object = json_value_get_object(telemetry_root_value);
+
+    const char *current_message_buffer = NULL;
+    current_message_buffer = json_object_get_string(telemetry_root_object, "message");
+
+    char new_msg_buffer[BIGMSGSIZE];
+    snprintf(new_msg_buffer, BIGMSGSIZE, "%s%s", current_message_buffer, tmp_msg_buffer);
+
+    json_object_set_string(telemetry_root_object, "operation", "omsconfighost");
+    json_object_set_string(telemetry_root_object, "message", new_msg_buffer);
+    json_object_set_boolean(telemetry_root_object, "success", 1);
+
+    json_serialize_to_file(telemetry_root_value, "/var/opt/microsoft/omsconfig/status/omsconfighost");
 }
 
 void DSCFilePutLog(
