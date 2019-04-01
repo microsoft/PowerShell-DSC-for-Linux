@@ -124,11 +124,6 @@ void DSCFileVPutTelemetry(
     JSON_Value *telemetry_root_value = NULL;
     telemetry_root_value = json_parse_file("/var/opt/microsoft/omsconfig/status/omsconfighost");
 
-    if (telemetry_root_value == NULL)
-    {
-        return;
-    }
-
     if (json_value_get_type(telemetry_root_value) != JSONObject) {
         telemetry_root_value = json_value_init_object();
     }
@@ -211,11 +206,6 @@ void DSCFilePutTelemetry(
 
     JSON_Value *telemetry_root_value = NULL;
     telemetry_root_value = json_parse_file("/var/opt/microsoft/omsconfig/status/omsconfighost");
-
-    if (telemetry_root_value == NULL)
-    {
-        return;
-    }
 
     if (json_value_get_type(telemetry_root_value) != JSONObject) {
         telemetry_root_value = json_value_init_object();
