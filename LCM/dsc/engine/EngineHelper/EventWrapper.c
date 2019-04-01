@@ -194,6 +194,7 @@ void DSCFilePutTelemetry(
     const PAL_Char* format,
     ...)
 {
+    va_list ap;
     char tmp_msg_buffer[MSGSIZE * 2];
     char formatter_msg_buffer[MSGSIZE];
     char timestamp_buffer[TIMESTAMP_SIZE];
@@ -201,8 +202,12 @@ void DSCFilePutTelemetry(
 
     int current_pid = getpid();
 
+
+    va_start(ap, format);
     Vstprintf(formatter_msg_buffer, MSGSIZE , format, ap);
-    Stprintf(tmp_msg_buffer, MSGSIZE * 2, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>"), timestamp_buffer, current_pid, _levelDSCStrings[level], eventId, file, line, formatter_msg_buffer);
+    va_end(ap);
+
+    Stprintf(tmp_msg_buffer, MSGSIZE * 2, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>"), timestamp_buffer, current_pid, _levelDSCStrings[priority], eventId, file, line, formatter_msg_buffer);
 
     JSON_Value *telemetry_root_value = NULL;
     telemetry_root_value = json_parse_file("/var/opt/microsoft/omsconfig/status/omsconfighost");
