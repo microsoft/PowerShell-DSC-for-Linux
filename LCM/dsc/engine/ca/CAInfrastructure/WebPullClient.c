@@ -15,7 +15,6 @@
 */
 #include <MI.h>
 #include "DSC_Systemcalls.h"
-//#include "LocalConfigManagerHelperForCA.h"
 #include "EngineHelper.h"
 #include "Resources_LCM.h"
 #include <pal/format.h>
@@ -26,26 +25,10 @@
 #include "CAEngineInternal.h"
 #include "EventWrapper.h"
 #include <ctype.h>
-
-#if defined(_MSC_VER)
-
-#include <WinCrypt.h>
-#include <winhttp.h>
-#if _MSC_VER >= 1200
-#pragma warning(push)
-#endif
-#pragma warning(disable:4201)
-#include <sha2.h>
-#if _MSC_VER >= 1200
-#pragma warning(pop)
-#endif    
-
-#else
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <curl/curl.h>
 #include <base/conf.h>
-#endif
 
 #include "WebPullClient.h"
 
@@ -486,43 +469,24 @@ MI_Boolean ValidateChecksum(_In_z_ MI_Char *checksum, _In_z_ const MI_Char* path
     if( fp == NULL )
         return MI_FALSE;
 
-#if defined(_MSC_VER)
-
-    SHA256Init(&Ctx);
-#else
     SHA256_Init(&Ctx);
-#endif
-
 
     do
     {
         bytesRead = fread(buffer , 1, BUFFER_SIZE_1KB, fp);
         if( bytesRead > 0 )
         {
-#if defined(_MSC_VER)
-
-            SHA256Update
-                (
-                &Ctx,
-                (unsigned char *)buffer,
-                (MI_Uint32) bytesRead
-                );
-#else
             SHA256_Update
                 (
                 &Ctx,
                 (unsigned char *)buffer,
                 (MI_Uint32) bytesRead
                 );
-#endif        
         }
-    }while( bytesRead >= BUFFER_SIZE_1KB );
-#if defined(_MSC_VER)
+    }
+    while( bytesRead >= BUFFER_SIZE_1KB );
     
-        SHA256Final(&Ctx, hashedValue);    
-#else
-        SHA256_Final(hashedValue, &Ctx);
-#endif
+    SHA256_Final(hashedValue, &Ctx);
     
     File_Close(fp);
     // validate the checksum.
@@ -541,6 +505,7 @@ MI_Boolean ValidateChecksum(_In_z_ MI_Char *checksum, _In_z_ const MI_Char* path
     return MI_TRUE;
     
 }
+
 MI_INLINE MI_Boolean IsValidUuid(_In_z_ MI_Char* systemUuid)
 {
     MI_Uint32 len = 0;
@@ -878,26 +843,7 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
     }
 
     if (*serverURL != '\0')
-    {       
-#if defined (_MSC_VER)                
-        //format is: http://server:port/suburl or http://server/suburl
-        if( swscanf_s(serverURL, MI_T("http://%99[^:]:%d/%199[^\n]"), url, URL_SIZE, port, subUrl, SUBURL_SIZE) == 3 || 
-            swscanf_s(serverURL, MI_T("http://%99[^/]/%199[^\n]"), url, URL_SIZE, subUrl, SUBURL_SIZE) == 2 )
-        {
-            //success
-        }
-        //format is: http://server:port/suburl or http://server/suburl
-        else if( swscanf_s(serverURL, MI_T("https://%99[^:]:%d/%199[^\n]"), url, URL_SIZE, port, subUrl, SUBURL_SIZE) == 3 || 
-                 swscanf_s(serverURL, MI_T("https://%99[^/]/%199[^\n]"), url, URL_SIZE, subUrl, SUBURL_SIZE) == 2 )
-        {
-            //success
-            *bIsHttps = MI_TRUE;
-            if (*port == 80)
-            {
-                *port = 443;
-            }
-        }
-#else
+    {
         if( sscanf(serverURL, MI_T("http://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
             sscanf(serverURL, MI_T("http://%99[^/]/%199[^\n]"), url, subUrl) == 2 )
         {
@@ -914,7 +860,6 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
                 *port = 443;
             }
         }
-#endif                      
     }
     else
     {
@@ -1281,7 +1226,7 @@ MI_Result SetGeneralCurlOptions(CURL* curl,
 {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30);
     /*
         Default curl operation timeout is infinite.
@@ -1754,22 +1699,8 @@ MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
                     *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
                     r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, value.string);
                     return r;   
-                }            
-#if defined (_MSC_VER)                
-                //format is: http://server:port/suburl or http://server/suburl
-                if( swscanf_s(value.string, MI_T("http://%99[^:]:%d/%199[^\n]"), url, URL_SIZE, port, subUrl, SUBURL_SIZE) == 3 || 
-                    swscanf_s(value.string, MI_T("http://%99[^/]/%199[^\n]"), url, URL_SIZE, subUrl, SUBURL_SIZE) == 2 )
-                {
-                    //success
                 }
-                //format is: http://server:port/suburl or http://server/suburl
-                else if( swscanf_s(value.string, MI_T("https://%99[^:]:%d/%199[^\n]"), url, URL_SIZE, port, subUrl, SUBURL_SIZE) == 3 || 
-                    swscanf_s(value.string, MI_T("https://%99[^/]/%199[^\n]"), url, URL_SIZE, subUrl, SUBURL_SIZE) == 2 )
-                {
-                    //success
-                    *bIsHttps = MI_TRUE;
-                }
-#else
+                
                 if( sscanf(value.string, MI_T("http://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
                     sscanf(value.string, MI_T("http://%99[^/]/%199[^\n]"), url, subUrl) == 2 )
                 {
@@ -1782,11 +1713,10 @@ MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
                     //success
                     *bIsHttps = MI_TRUE;
                 }
-#endif                      
                 break;
             }
         }
-    }    
+    }
 
     if(  xCount >= customData->size ) // Not found
     {
@@ -1795,8 +1725,6 @@ MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
     }
     return MI_RESULT_OK;
 }
-    
-
 
 MI_Result GetRequestParam(_In_ MI_Instance *metaConfig, 
                           _In_ MI_Char * partialConfigName,
@@ -1835,11 +1763,9 @@ MI_Result CreateTmpDirectoryPath(_Outptr_result_maybenull_z_  MI_Char** director
                 free(path);
                 return MI_RESULT_FAILED;
             }
-#if defined(_MSC_VER)            
-            Stprintf(filePath, MAX_URL_LENGTH, MI_T("%T\\localhost.mof"), path);
-#else
+
             Stprintf(filePath, MAX_URL_LENGTH, MI_T("%T/localhost.mof"), path);
-#endif
+
             *fileLocation = filePath;
             *directoryPath = path;
             return MI_RESULT_OK;
@@ -2141,7 +2067,9 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
         }
 
         Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
+        DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
+        DSC_LOG_INFO("Executed '%T', returned %d\n", stringBuffer, retval);
         
         if (retval != 0)
         {
@@ -2154,6 +2082,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
                 // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
                 Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/RemoveModule.py", current->moduleName);
                 retval = system(stringBuffer); 
+                DSC_LOG_INFO("Executed '%T', returned %d\n", stringBuffer, retval);
                 if ( retval == 0 || (retval == -1 && errno == ECHILD) )
                 {
                     r = GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_INSTALLMODULEFAILED, current->moduleName, current->moduleVersionClassTuple->moduleVersion);

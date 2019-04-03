@@ -19,13 +19,7 @@
 #include "PAL_Extension.h"
 #include "EngineHelper.h"
 #include "Resources_LCM.h"
-
-#if defined(_MSC_VER)
-#include <winhttp.h>
-#endif
-
 #include "WebPullClient.h"
-
 
 void GetDSCAction(_In_ MI_Context* context, _In_opt_ const MSFT_DSCWebPullClient_GetDSCAction* in)
 {

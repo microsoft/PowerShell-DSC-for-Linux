@@ -91,7 +91,7 @@ MI_Boolean ShouldDoRegistration(
         }
     }
     
-    EH_UNWIND:
+    EH_UNWIND;
 
     return MI_TRUE;
 }
@@ -129,8 +129,11 @@ MI_Result Register(
     if ( (access(OAAS_KEYPATH, F_OK) == -1) || (access(OAAS_CERTPATH, F_OK) == -1) )
     {
         system("touch "  OAAS_KEYPATH "; chmod 0600 "  OAAS_KEYPATH);
+        DSC_LOG_INFO("Executed '%T'\n", "touch "  OAAS_KEYPATH "; chmod 0600 "  OAAS_KEYPATH);
         system("touch "  OAAS_KEYPATH "_old; chmod 0600 "  OAAS_KEYPATH "_old");
+        DSC_LOG_INFO("Executed '%T'\n", "touch "  OAAS_KEYPATH "_old; chmod 0600 "  OAAS_KEYPATH "_old");
         systemResult = system("openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " OAAS_KEYPATH "_old -out " OAAS_CERTPATH " && openssl rsa -in " OAAS_KEYPATH "_old -out " OAAS_KEYPATH " && rm -f " OAAS_KEYPATH "_old");
+        DSC_LOG_INFO("Executed '%T', returned %d\n", "openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " OAAS_KEYPATH "_old -out " OAAS_CERTPATH " && openssl rsa -in " OAAS_KEYPATH "_old -out " OAAS_KEYPATH " && rm -f " OAAS_KEYPATH "_old", systemResult);
         if (systemResult != 0 && errno != 10)
         {
             DSC_EventWriteLCMServerRegCertGenFailed(g_ConfigurationDetails.jobGuidString, self->agentId);
@@ -138,6 +141,7 @@ MI_Result Register(
         }
         
         systemResult = system("openssl x509 -noout -in " OAAS_CERTPATH " -fingerprint | sed 's/^.*=//' > " OAAS_THUMBPRINTPATH);
+        DSC_LOG_INFO("Executed '%T', returned %d\n", "openssl x509 -noout -in " OAAS_CERTPATH " -fingerprint | sed 's/^.*=//' > " OAAS_THUMBPRINTPATH, systemResult);
         if (systemResult != 0 && errno != 10)
         {
             DSC_EventWriteLCMServerRegCertGenFailed(g_ConfigurationDetails.jobGuidString, self->agentId);
@@ -181,7 +185,7 @@ MI_Result Register(
                              registrationPayload, &request->configurationNames, request->typeOfManagerInstance, &resultStatus, &getActionStatusCode, cimErrorDetails);
     EH_CheckResult(result);
 
-    EH_UNWIND:
+    EH_UNWIND;
 
     if (registrationPayload != NULL)
     {
@@ -191,11 +195,7 @@ MI_Result Register(
     {
         DSC_free(thumbprint);
     }
-#ifdef _MSC_VER
-    DSC_GlobalFree(resultStatus);
-#else
     DSC_free(resultStatus);
-#endif
     return result;
 }
 
@@ -309,7 +309,7 @@ MI_Result CacheServerURL(
     result = WriteServerURLToCache(self, value.string, thumbprint, cimErrorDetails);
     EH_CheckResult(result);    
 
-    EH_UNWIND:
+    EH_UNWIND;
 
     return result;
 }
@@ -363,7 +363,7 @@ MI_Result WriteServerURLToCache(
 
     self->numberOfServerURLs++;
 
-    EH_UNWIND:
+    EH_UNWIND;
 
         return result;
 }
@@ -422,7 +422,7 @@ MI_Result PopulateServerURLs(
         }        
     }
 
-    EH_UNWIND:
+    EH_UNWIND;
 
     if (registeredServerURLs != NULL)
     {
@@ -469,7 +469,7 @@ MI_Result GetRegisteredServerURLsFromCache(
         }
     }
 
-    EH_UNWIND:
+    EH_UNWIND;
         return MI_RESULT_OK;
 }
 
@@ -493,7 +493,7 @@ MI_Result UpdateServerURLsToDSCCache(
     result = UpdateCurrentStatus(NULL, NULL, NULL, serverURLs, cimErrorDetails);
     EH_CheckResult(result);
 
-    EH_UNWIND:
+    EH_UNWIND;
     if (serverURLs)
     {
         DSC_free(serverURLs);
@@ -557,7 +557,7 @@ MI_Result FormatServerURLsForDscCache(
         }
     }
 
-    EH_UNWIND:
+    EH_UNWIND;
         return result;
 }
 
@@ -577,7 +577,7 @@ MI_Result InitializeServerURLs(
     }
     self->numberOfServerURLs = 0;
 
-    EH_UNWIND:
+    EH_UNWIND;
         return MI_RESULT_OK;
 }
 
@@ -634,7 +634,7 @@ MI_Result GetThumbprintForRegisteredServerURL(
         }
     }
 
-EH_UNWIND:
+EH_UNWIND;
 
     return result;
 }

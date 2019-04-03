@@ -43,7 +43,8 @@ MI_Result GetSystemSchema(_In_ MI_Application *miApp,
                           _In_opt_ MI_ClassA *inputClasses,
                           _Inout_ MI_ClassA *miClassArray, 
                           _Outptr_result_maybenull_ MI_Instance **extendedError);
-MI_Result UpdateClassCacheWithSchemas(_In_ MI_Application *miApp,
+
+MI_Result UpdateClassCacheWithSchemasMofs(_In_ MI_Application *miApp,
                             _In_ MI_Deserializer *deserializer,
                             _In_ MI_OperationOptions * options,
                             _Inout_ MI_ClassA *miClassArray, 
@@ -92,6 +93,15 @@ MI_Result GetSchemaFromSingleMOF(_In_ MI_Application *miApp,
 /* Instance methods*/
 
 MI_Result GetRegistrationInstanceFromMOFs(_In_opt_ ModuleManager *moduleManager,
+                                          _In_ MI_Application *miApp,    
+                                          _In_ MI_Deserializer *deserializer,
+                                          _In_ MI_OperationOptions * options,
+                                          _In_ MI_OperationOptions * strictOptions,
+                                          _In_ MI_ClassA *classArray,
+                                          _Inout_ MI_InstanceA *miInstanceArray, 
+                                          _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+MI_Result GetRegistrationInstanceFromSharedObjects(_In_opt_ ModuleManager *moduleManager,
                                           _In_ MI_Application *miApp,    
                                           _In_ MI_Deserializer *deserializer,
                                           _In_ MI_OperationOptions * options,
@@ -187,5 +197,8 @@ MI_Result CreateWMIv1CompatibleMof(_In_ ModuleLoaderObject* moduleLoader,
                                 _In_z_ MI_Char *mofFilePath, 
                                 _Outptr_result_maybenull_ MI_Instance **extendedError);
 
+MI_Result GetMIClass(_In_ MI_ClassDecl* classDecl,
+                    _Outptr_  MI_Class ** miClass,
+                    MI_Instance ** extendedErro);
 
 #endif //__MODULEHANDLERINTERNAL_H_

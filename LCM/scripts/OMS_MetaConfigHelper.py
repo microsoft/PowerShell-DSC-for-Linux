@@ -5,6 +5,15 @@ import imp
 import subprocess
 from os.path import basename, dirname, join, realpath, split
 
+from imp                import load_source
+from os.path            import dirname, isfile, join, realpath
+
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
+helperlib = load_source('helperlib', helperLibPath)
+
 conf_path = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
 metamof_path = "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof"
 agentid_path = "/etc/opt/omi/conf/omsconfig/agentid"
@@ -226,7 +235,13 @@ exit_code = proc.wait()
 stdout, stderr = proc.communicate()
 printVerboseMessage("Output from: " + commandToRun + ": " + str(stdout))
 
-if ((exit_code == 0) and (stderr == '' or (sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == '')) and ('ReturnValue=0' in str(stdout))):
+set_metaconfig_success_string = ""
+if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+    set_metaconfig_success_string = "Operation SendMetaConfigurationApply completed successfully."
+else:
+    set_metaconfig_success_string = "ReturnValue=0"
+
+if ((exit_code == 0) and (stderr == '' or (sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == '')) and (set_metaconfig_success_string in str(stdout))):
     printVerboseMessage('Successfully configured omsconfig.')
 else:
     if exit_code == 0:
