@@ -5,6 +5,7 @@ module OMS
   class Configuration
     require 'openssl'
     require 'uri'
+    require 'iso8601'
 
     require_relative 'omslog'
     
@@ -14,17 +15,24 @@ module OMS
     @@Key = nil
 
     @@AgentId = nil
+    @@WorkspaceId = nil
     @@ODSEndpoint = nil
     @@DiagnosticEndpoint = nil
     @@GetBlobODSEndpoint = nil
     @@NotifyBlobODSEndpoint = nil
     @@OmsCloudId = nil
+    @@AgentGUID = nil
+    @@URLTLD = nil
+    @@LogFacility = nil
     @@AzureResourceId = nil
+    @@AzureRegion = nil
     @@AzureIMDSEndpoint = "http://169.254.169.254/metadata/instance?api-version=2017-12-01"
     @@AzureResIDThreadLock = Mutex.new
     @@ProxyConfig = nil
     @@ProxyConfigFilePath = "/etc/opt/microsoft/omsagent/proxy.conf"
     @@UUID = nil
+    @@TopologyInterval = nil
+    @@TelemetryInterval = nil
  
     class << self
       
@@ -80,17 +88,41 @@ module OMS
           # Convert nammed matches to a hash
           Hash[ matches.names.map{ |name| name.to_sym}.zip( matches.captures ) ]
       end
+      
+      def get_azure_region_from_imds()
+          begin
+            uri = URI.parse(@@AzureIMDSEndpoint)
+            http_get_req = Net::HTTP::Get.new(uri, initheader = {'Metadata' => 'true'})
 
+            http_req = Net::HTTP.new(uri.host, uri.port)
+
+            http_req.open_timeout = 3
+            http_req.read_timeout = 2
+
+            res = http_req.start() do |http|
+              http.request(http_get_req)
+            end
+
+            imds_instance_json = JSON.parse(res.body)
+
+            return nil if !imds_instance_json.has_key?("compute") || imds_instance_json['compute'].empty? #classic vm
+
+            imds_instance_json_compute = imds_instance_json['compute']
+            return nil unless imds_instance_json_compute.has_key?("location")
+            return nil if imds_instance_json_compute['location'].empty?
+            return imds_instance_json_compute['location']
+          rescue => e
+            # this may be a container instance or a non-Azure VM            
+            return nil
+          end
+      end  
+      
       def get_azure_resid_from_imds()
           begin
             uri = URI.parse(@@AzureIMDSEndpoint)
             http_get_req = Net::HTTP::Get.new(uri, initheader = {'Metadata' => 'true'})
 
-            if @@ProxyConfig.empty?
-              http_req = Net::HTTP.new(uri.host, uri.port)
-            else
-              http_req = Net::HTTP.new(uri.host, uri.port, @@ProxyConfig[:addr], @@ProxyConfig[:port], @@ProxyConfig[:user], @@ProxyConfig[:pass])
-            end
+            http_req = Net::HTTP.new(uri.host, uri.port)
 
             http_req.open_timeout = 3
             http_req.read_timeout = 2
@@ -151,8 +183,8 @@ module OMS
       end
 
       # load the configuration from the configuration file, cert, and key path
-      def load_configuration(conf_path, cert_path, key_path)
-        return true if @@ConfigurationLoaded
+      def load_configuration(conf_path, cert_path, key_path, force_reload=false)
+        return true if @@ConfigurationLoaded and !force_reload
         return false if !test_onboard_file(conf_path) or !test_onboard_file(cert_path) or !test_onboard_file(key_path)
 
         @@ProxyConfig = get_proxy_config(@@ProxyConfigFilePath)
@@ -211,12 +243,38 @@ module OMS
         end
 
         File.open(conf_path).each_line do |line|
+          if line =~ /^WORKSPACE_ID/
+            @@WorkspaceId = line.sub("WORKSPACE_ID=","").strip
+          end
           if line =~ /AZURE_RESOURCE_ID/
-            @@AzureResourceId = line.sub("AZURE_RESOURCE_ID=","").strip
-            Thread.new(&method(:update_azure_resource_id)) if @@AzureResIDThreadLock.try_lock
+            # We have contract with AKS team about how to pass AKS specific resource id.
+            # As per contract, AKS team before starting the agent will set environment variable 
+            # 'customResourceId'
+            @@AzureResourceId = ENV['customResourceId']
+            
+            # Only if environment variable is empty/nil load it from imds and refresh it periodically.
+            if @@AzureResourceId.nil? || @@AzureResourceId.empty?              
+              @@AzureResourceId = line.sub("AZURE_RESOURCE_ID=","").strip
+              if @@AzureResourceId.include? "Microsoft.ContainerService"
+                OMS::Log.info_once("Azure resource id in configuration file is for AKS. It will be used")                  
+              else
+                Thread.new(&method(:update_azure_resource_id)) if @@AzureResIDThreadLock.try_lock
+              end            
+            else
+              OMS::Log.info_once("There is non empty value set for overriden-resourceId environment variable. It will be used")
+            end
           end
           if line =~ /OMSCLOUD_ID/
             @@OmsCloudId = line.sub("OMSCLOUD_ID=","").strip
+          end
+          if line =~ /^AGENT_GUID/
+            @@AgentGUID = line.sub("AGENT_GUID=","").strip
+          end
+          if line =~ /^URL_TLD/
+            @@URLTLD = line.sub("URL_TLD=","").strip
+          end
+          if line =~ /^LOG_FACILITY/
+            @@LogFacility = line.sub("LOG_FACILITY=","").strip
           end
           if line =~ /UUID/
             @@UUID = line.sub("UUID=","").strip
@@ -232,10 +290,46 @@ module OMS
           OMS::Log.error_once("Error loading certs: #{e}")
           return false
         end
-
+    
+        @@AzureRegion = get_azure_region_from_imds()
+        if @@AzureRegion.nil? || @@AzureRegion.empty?
+          OMS::Log.warn_once("Azure region value is not set. This must be onpremise machine")
+          @@AzureRegion = "OnPremise"
+        end
+        
         @@ConfigurationLoaded = true
         return true        
       end # load_configuration
+
+      # Update the topology and telemetry request frequencies
+      def apply_request_intervals(server_resp)
+        topology_interval = ""
+        telemetry_interval = ""
+
+        request_interval_regex = /queryInterval=\"(?<topologyInterval>.*)\"\stelemetryReportInterval=\"(?<telemetryInterval>.*)\"\sid/
+        request_interval_regex.match(server_resp) { |match|
+          topology_interval = match["topologyInterval"]
+          telemetry_interval = match["telemetryInterval"]
+        }
+
+        if topology_interval.empty?
+          OMS::Log.error_once("Could not extract the topology request interval.")
+          return OMS::ERROR_EXTRACTING_ATTRIBUTES
+        end
+
+        if telemetry_interval.empty?
+          OMS::Log.error_once("Could not extract the telemetry request interval.")
+          return OMS::ERROR_EXTRACTING_ATTRIBUTES
+        end
+
+        @@TopologyInterval = ISO8601::Duration.new(topology_interval).to_seconds
+        OMS::Log.info_once("OMS agent management service topology request interval now #{@@TopologyInterval}")
+
+        @@TelemetryInterval = ISO8601::Duration.new(telemetry_interval).to_seconds
+        OMS::Log.info_once("OMS agent management service telemetry request interval now #{@@TelemetryInterval}")
+
+        return ""
+      end # apply_request_intervals
 
       def cert
         @@Cert
@@ -244,6 +338,10 @@ module OMS
       def key
         @@Key
       end # getter key
+
+      def workspace_id
+        @@WorkspaceId
+      end # getter workspace_id
 
       def agent_id
         @@AgentId
@@ -273,9 +371,33 @@ module OMS
         @@OmsCloudId
       end
 
+      def agent_guid
+        @@AgentGUID
+      end # getter agent_guid
+
+      def url_tld
+        @@URLTLD
+      end # getter url_tld
+
+      def log_facility
+        @@LogFacility
+      end # getter log_facility
+
       def uuid
         @@UUID
       end # getter for VM uuid
+
+      def azure_region
+        @@AzureRegion
+      end
+
+      def topology_interval
+        @@TopologyInterval
+      end
+
+      def telemetry_interval
+        @@TelemetryInterval
+      end
 
     end # Class methods
         

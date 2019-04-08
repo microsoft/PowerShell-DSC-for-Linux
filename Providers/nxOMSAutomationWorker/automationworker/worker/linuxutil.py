@@ -395,7 +395,6 @@ def daemonize():
     # fork second child and exit parent
     fork_and_exit_parent()
 
-
 @posix_only
 def popen_communicate(command, shell=False):
     """Issues a process open followed by a communicate call.
@@ -410,6 +409,37 @@ def popen_communicate(command, shell=False):
     process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = process.communicate()
     return process, output, error
+
+
+def set_permission_recursive(permission, path):
+    """Sets the permission for a specific path and it's child items recursively.
+
+    Args:
+        permission  : string, linux permission (i.e 770).
+        path        : string, the target path.
+    """
+    cmd = ["sudo", "chmod", "-R", permission, path]
+    process, output, error = popen_communicate(cmd)
+    if process.returncode != 0:
+        raise Exception(
+            "Unable to change permission of " + str(path) + " to " + str(permission) + ". Error : " + str(error))
+    print "Permission changed to " + str(permission) + " for " + str(path)
+
+
+def set_user_and_group_recursive(owning_username, owning_group_name, path):
+    """Sets the owner for a specific path and it's child items recursively.
+
+    Args:
+        owning_username     : string, the owning user
+        owning_group_name   : string, the owning group
+        path                : string, the target path.
+    """
+    owners = owning_username + ":" + owning_group_name
+    cmd = ["sudo", "chown", "-R", owners, path]
+    process, output, error = popen_communicate(cmd)
+    if process.returncode != 0:
+        raise Exception("Unable to change owner of " + str(path) + " to " + str(owners) + ". Error : " + str(error))
+    print "Owner changed to " + str(owners) + " for " + str(path)
 
 
 class ProcessModel:
