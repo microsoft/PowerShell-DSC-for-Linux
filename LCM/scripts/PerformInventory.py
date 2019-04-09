@@ -115,12 +115,13 @@ def perform_inventory(args):
     dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
     dsc_host_output_path = join(dsc_host_base_path, 'output')
     dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
+    dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
     dsc_configuration_path = join(dsc_sysconfdir, 'configuration')
     temp_report_path = join(dsc_configuration_path, 'Inventory.xml.temp')
     report_path = join(dsc_configuration_path, 'Inventory.xml')
     inventorylock_path = join(dsc_sysconfdir, 'inventory_lock')
 
-    if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+    if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
         is_oms_config = True
     else:
         is_oms_config = False

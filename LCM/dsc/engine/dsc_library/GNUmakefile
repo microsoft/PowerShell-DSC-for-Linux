@@ -5,8 +5,7 @@ include $(TOP)/config.mak
 LIBRARY = dsc_library
 
 SOURCES = \
-        dsc_library.c \
-        $(TOP)/json_parson/parson.c
+        dsc_library.c 
 
 INCLUDES = \
         $(OMI) \

@@ -29,6 +29,10 @@ void *g_registrationManager;
 char g_currentError[5001];
 StatusReport_ResourceNotInDesiredState * g_rnids = NULL;
 
+#if defined(BUILD_OMS)
+MI_Boolean g_DscHost = MI_FALSE;
+#endif
+
 BaseResourceConfiguration g_BaseResourceConfiguration[] =
 {
     {MI_T("ResourceId"),         MI_STRING},

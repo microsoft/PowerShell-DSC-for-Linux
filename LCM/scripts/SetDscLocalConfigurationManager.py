@@ -47,11 +47,6 @@ def apply_meta_config(args):
         operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Incorrect parameters to SetDscLocalConfigurationManager.py: ' + errorMessage)
         exit(1)
 
-    if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
-        is_oms_config = True
-    else:
-        is_oms_config = False
-
     fileHandle = open(args[2], 'r')
     try:
         fileContent = fileHandle.read()
@@ -64,6 +59,12 @@ def apply_meta_config(args):
         dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
         dsc_host_output_path = join(dsc_host_base_path, 'output')
         dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
+        dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
+
+        if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
+            is_oms_config = True
+        else:
+            is_oms_config = False
 
         parameters = []
 

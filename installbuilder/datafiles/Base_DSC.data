@@ -225,6 +225,14 @@ chown omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
 chgrp omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
 chmod 644 /var/opt/microsoft/omsconfig/omsconfigdetailed.log
 
+# Set up dsc_host use switch
+if [ ! -f /opt/dsc/dsc_host_ready ]; then
+    touch /opt/dsc/dsc_host_ready
+fi
+chown omsagent /opt/dsc/dsc_host_ready
+chgrp omsagent /opt/dsc/dsc_host_ready
+chmod 644 /opt/dsc/dsc_host_ready
+
 #endif
 
 

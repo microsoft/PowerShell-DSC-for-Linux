@@ -118,7 +118,6 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     f.close() 
     return retval, retd
 
-
 # ###########################################################
 # Begin user defined DSC functions
 # ###########################################################

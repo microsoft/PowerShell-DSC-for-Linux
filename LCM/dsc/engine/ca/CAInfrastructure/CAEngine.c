@@ -35,7 +35,10 @@
 #include "EventWrapper.h"
 
 #if defined(BUILD_OMS)
+
 #include <signal.h>
+extern MI_Boolean g_DscHost;
+
 #endif
 
 volatile MI_Operation *g_CurrentWmiv2Operation = NULL;
@@ -1277,13 +1280,16 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
     MI_Result r = MI_RESULT_OK;
 
     if (
-#if !defined(BUILD_OMS)
+#if defined(BUILD_OMS)
+        g_DscHost == MI_FALSE ||
+#else
         Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
 #endif
         Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0
         )
     {
+        DSC_LOG_INFO("Executing OMI Provider.\n");
         if(instance->classDecl!=NULL)
         {
             SQMLogResourceCountData(instance->classDecl->name,1);
@@ -1294,12 +1300,13 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
 #if defined(BUILD_OMS)
     else
     {
-        r =  Exec_NativeProvider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, extendedError);
+        DSC_LOG_INFO("Executing Native Provider.\n");
+        r = Exec_NativeProvider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, extendedError);
     }
 #else
     else
     {
-        r =  GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
+        r = GetCimMIError(MI_RESULT_INVALID_PARAMETER, extendedError,ID_CAINFRA_UNKNOWN_REGISTRATION);
     }
 #endif
 

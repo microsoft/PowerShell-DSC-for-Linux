@@ -112,11 +112,6 @@ def main(argv):
     for char in configurationFileContent:
         configurationData.append(str(ord(char)))
 
-    if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
-        is_oms_config = True
-    else:
-        is_oms_config = False
-
     # # OMI CLI location
     omiBinDir = "<CONFIG_BINDIR>"
     omiCliPath = omiBinDir + "/omicli"
@@ -124,6 +119,12 @@ def main(argv):
     dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
     dsc_host_output_path = join(dsc_host_base_path, 'output')
     dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
+    dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
+
+    if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
+        is_oms_config = True
+    else:
+        is_oms_config = False
 
     # Assemble parameters to pass to OMI CLI
     host_parameters = []

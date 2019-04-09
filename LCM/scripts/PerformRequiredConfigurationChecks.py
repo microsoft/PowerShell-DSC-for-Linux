@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from imp        import load_source
-from os.path    import dirname, join, realpath
+from os.path    import dirname, join, realpath, isfile
 from subprocess import PIPE, Popen
 from sys        import exc_info, exit, version_info
 from traceback  import format_exc
@@ -30,17 +30,18 @@ def main():
 
 def run_perform_required_configuration_checks():
 
-    if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
-        is_oms_config = True
-    else:
-        is_oms_config = False
-
     dsc_sysconfdir = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
     omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
     dsc_host_base_path = '/opt/dsc'
     dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
     dsc_host_output_path = join(dsc_host_base_path, 'output')
     dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
+    dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
+
+    if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
+        is_oms_config = True
+    else:
+        is_oms_config = False
 
     parameters = []
     if is_oms_config:

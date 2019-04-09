@@ -262,7 +262,7 @@ PythonProvider::~PythonProvider ()
     }
     if( m_pid > 0 )
     {
-        waitpid(m_pid, NULL, WNOHANG);
+        waitpid(m_pid, NULL, 0);
     }
     for(size_t xCount = 0 ; xCount < m_PreviousPid.size(); xCount++)
     {
