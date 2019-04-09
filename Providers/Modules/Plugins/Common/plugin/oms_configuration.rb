@@ -300,6 +300,13 @@ module OMS
         return true
       end # load_configuration
 
+      def set_request_intervals(topology_interval, telemetry_interval)
+        @@TopologyInterval = topology_interval
+        @@TelemetryInterval = telemetry_interval
+        OMS::Log.info_once("OMS agent management service topology request interval now #{@@TopologyInterval}")
+        OMS::Log.info_once("OMS agent management service telemetry request interval now #{@@TelemetryInterval}")
+      end
+
       def cert
         @@Cert
       end # getter cert
