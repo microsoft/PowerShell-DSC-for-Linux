@@ -92,10 +92,10 @@ module OMS
 
       @load_config_return_code = OMS::Configuration.load_configuration(@omsadmin_conf_path, @cert_path, @key_path)
 
-      @workspace_id = OMS::Configuration.workspace_id if defined?(OMS::Configuration.workspace_id)
-      @agent_guid = OMS::Configuration.agent_guid if defined?(OMS::Configuration.agent_guid)
-      @url_tld = OMS::Configuration.url_tld if defined?(OMS::Configuration.url_tld)
-      @log_facility = OMS::Configuration.log_facility if defined?(OMS::Configuration.log_facility)
+      @workspace_id = OMS::Configuration.workspace_id
+      @agent_guid = OMS::Configuration.agent_guid
+      @url_tld = OMS::Configuration.url_tld
+      @log_facility = OMS::Configuration.log_facility
 
       @log = log.nil? ? OMS::Common.get_logger(@log_facility) : log
       @verbose = verbose

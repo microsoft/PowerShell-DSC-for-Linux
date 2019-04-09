@@ -65,7 +65,7 @@ module Fluent
         now = Time.now
         if now > next_heartbeat
           @telemetry_script.heartbeat
-          query_interval = OMS::Configuration.telemetry_interval if defined?(OMS::Configuration.telemetry_interval)
+          query_interval = OMS::Configuration.telemetry_interval
           @query_interval = query_interval if query_interval.between?(MIN_QUERY_INTERVAL, MAX_QUERY_INTERVAL)
           next_heartbeat = now + @query_interval
         end
