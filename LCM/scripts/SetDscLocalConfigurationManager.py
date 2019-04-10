@@ -4,6 +4,7 @@ from os.path        import dirname, isfile, join, realpath
 from subprocess     import PIPE, Popen
 from sys            import argv, exc_info, exit, version_info
 from traceback      import format_exc
+from fcntl          import flock, LOCK_EX, LOCK_UN
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -54,23 +55,40 @@ def apply_meta_config(args):
             outtokens.append(str(ord(char)))
 
         omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
+        dsc_host_base_path = '/opt/dsc'
+        dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
+        dsc_host_output_path = join(dsc_host_base_path, 'output')
+        dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
+        dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
+
+        if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
+            is_oms_config = True
+        else:
+            is_oms_config = False
 
         parameters = []
-        parameters.append(omicli_path)
-        parameters.append("iv")
-        parameters.append(helperlib.DSC_NAMESPACE)
-        parameters.append("{")
-        parameters.append("MSFT_DSCLocalConfigurationManager")
-        parameters.append("}")
-        parameters.append("SendMetaConfigurationApply")
-        parameters.append("{")
-        parameters.append("ConfigurationData")
-        parameters.append("[")
-        # Insert configurationmof data here
-        for token in outtokens:
-            parameters.append(token)
-        parameters.append("]")
-        parameters.append("}")
+
+        if is_oms_config:
+            parameters.append(dsc_host_path)
+            parameters.append(dsc_host_output_path)
+            parameters.append("SendMetaConfigurationApply")
+            parameters.append(args[2])
+        else:
+            parameters.append(omicli_path)
+            parameters.append("iv")
+            parameters.append(helperlib.DSC_NAMESPACE)
+            parameters.append("{")
+            parameters.append("MSFT_DSCLocalConfigurationManager")
+            parameters.append("}")
+            parameters.append("SendMetaConfigurationApply")
+            parameters.append("{")
+            parameters.append("ConfigurationData")
+            parameters.append("[")
+            # Insert configurationmof data here
+            for token in outtokens:
+                parameters.append(token)
+            parameters.append("]")
+            parameters.append("}")
 
         # Save the starting timestamp without milliseconds
         startDateTime = operationStatusUtility.get_current_time_no_ms()
