@@ -3,6 +3,7 @@
 #include "pal/strings.h"
 #include "ModuleHandlerInternal.h"
 #include "NativeResourceManager.h"
+#include "EventWrapper.h"
 
 typedef struct _NativeResourceManagerHashMapBucket
 {
@@ -110,7 +111,7 @@ MI_Result NativeResourceManager_GetNativeResouceProvider(_In_ NativeResourceMana
     {
         NativeResourceProvider* nativeResourceProviderLocal = NULL;
         returnValue = NativeResourceProvider_New(providerPath, resourceProviderClassName, nativeResourceManager->_private.resourceProviderContext, &nativeResourceProviderLocal);
-        EH_CheckResult(returnValue);
+        EH_CheckResult_(returnValue, { DSC_LOG_ERROR("NativeResourceProvider_New failed (code = %d) for '%s'\n", returnValue, providerPath); });
 
         bucket = (NativeResourceManagerHashMapBucket*)DSC_malloc(sizeof(NativeResourceManagerHashMapBucket), NitsHere());
         EH_Check_(bucket != NULL, returnValue = MI_RESULT_SERVER_LIMITS_EXCEEDED);

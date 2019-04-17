@@ -6,6 +6,13 @@ from sys            import argv, exc_info, exit, version_info
 from traceback      import format_exc
 from fcntl          import flock, LOCK_EX, LOCK_UN
 
+import json
+import time
+import datetime
+import os
+import os.path
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event
+
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
@@ -60,6 +67,9 @@ def apply_meta_config(args):
         dsc_host_output_path = join(dsc_host_base_path, 'output')
         dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
         dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
+
+        if ("omsconfig" in helperlib.DSC_SCRIPT_PATH):
+            write_omsconfig_host_event(pathToCurrentScript, isfile(dsc_host_switch_path))
 
         if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
             is_oms_config = True

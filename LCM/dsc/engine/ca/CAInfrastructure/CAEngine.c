@@ -1149,6 +1149,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         DSC_LOG_INFO("Looking into shared object file under '%s'\n", resources_so_path);
         if (ret == -1)
         {
+            DSC_LOG_ERROR("Stprintf failed (code = %d) for '%s'\n", ret, resources_so_path);
             return result;
         }
 
@@ -1165,6 +1166,7 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
         result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
         if (result != MI_RESULT_OK)
         {
+            DSC_LOG_ERROR("NativeResourceManager_GetNativeResouceProvider failed (code = %d) for '%s'\n", result, resourceProviderPath);
             goto cleanup;
         }
 
@@ -1226,6 +1228,7 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
         DSC_LOG_INFO("Looking into shared object file under '%s'\n", resources_so_path);
         if (ret == -1)
         {
+            DSC_LOG_ERROR("Stprintf failed (code = %d) for '%s'\n", ret, resources_so_path);
             return result;
         }
 
@@ -1242,6 +1245,7 @@ MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,
         result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
         if (result != MI_RESULT_OK)
         {
+            DSC_LOG_ERROR("NativeResourceManager_GetNativeResouceProvider failed (code = %d) for '%s'\n", result, resourceProviderPath);
             goto cleanup;
         }
 
@@ -1661,6 +1665,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     DSC_LOG_INFO("Looking into shared object file under '%s'\n", resources_so_path);
     if (ret == -1)
     {
+        DSC_LOG_ERROR("Stprintf failed (code = %d) for '%s'\n", ret, resources_so_path);
         return result;
     }
 
@@ -1677,6 +1682,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     result = NativeResourceManager_GetNativeResouceProvider(provContext->nativeResourceManager, resourceProviderPath, instance->classDecl->name, &nativeResourceProvider);
     if (result != MI_RESULT_OK)
     {
+        DSC_LOG_ERROR("NativeResourceManager_GetNativeResouceProvider failed (code = %d) for '%s'\n", result, resourceProviderPath);
         goto cleanup;
     }
 

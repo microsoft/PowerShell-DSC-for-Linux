@@ -122,7 +122,7 @@ void DSCFileVPutTelemetry(
     Stprintf(tmp_msg_buffer, MSGSIZE * 2, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>"), timestamp_buffer, current_pid, _levelDSCStrings[level], eventId, file, line, formatter_msg_buffer);
 
     JSON_Value *telemetry_root_value = NULL;
-    telemetry_root_value = json_parse_file("/var/opt/microsoft/omsconfig/status/omsconfighost");
+    telemetry_root_value = json_parse_file(OMSCONFIG_HOST_TELEMETRY_PATH);
 
     if (json_value_get_type(telemetry_root_value) != JSONObject) {
         telemetry_root_value = json_value_init_object();
@@ -140,7 +140,7 @@ void DSCFileVPutTelemetry(
     json_object_set_string(telemetry_root_object, "message", new_msg_buffer);
     json_object_set_boolean(telemetry_root_object, "success", 1);
 
-    json_serialize_to_file(telemetry_root_value, "/var/opt/microsoft/omsconfig/status/omsconfighost");
+    json_serialize_to_file(telemetry_root_value, OMSCONFIG_HOST_TELEMETRY_PATH);
 }
 
 void DSCFilePutLog(
@@ -205,7 +205,7 @@ void DSCFilePutTelemetry(
     Stprintf(tmp_msg_buffer, MSGSIZE * 2, PAL_T("<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>"), timestamp_buffer, current_pid, _levelDSCStrings[priority], eventId, file, line, formatter_msg_buffer);
 
     JSON_Value *telemetry_root_value = NULL;
-    telemetry_root_value = json_parse_file("/var/opt/microsoft/omsconfig/status/omsconfighost");
+    telemetry_root_value = json_parse_file(OMSCONFIG_HOST_TELEMETRY_PATH);
 
     if (json_value_get_type(telemetry_root_value) != JSONObject) {
         telemetry_root_value = json_value_init_object();
@@ -223,7 +223,7 @@ void DSCFilePutTelemetry(
     json_object_set_string(telemetry_root_object, "message", new_msg_buffer);
     json_object_set_boolean(telemetry_root_object, "success", 1);
 
-    json_serialize_to_file(telemetry_root_value, "/var/opt/microsoft/omsconfig/status/omsconfighost");
+    json_serialize_to_file(telemetry_root_value, OMSCONFIG_HOST_TELEMETRY_PATH);
 }
 
 void DSCLog_Close()

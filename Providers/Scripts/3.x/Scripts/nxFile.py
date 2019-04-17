@@ -109,7 +109,6 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
         retd[k] = ld[k]
     return retval, retd
 
-
 # ###########################################################
 # Begin user defined DSC functions
 # ###########################################################

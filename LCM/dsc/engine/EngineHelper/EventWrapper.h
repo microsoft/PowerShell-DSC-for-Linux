@@ -28,10 +28,7 @@
 #define __WFUNCTION__ WIDEN(__FUNCTION__)
 #define _STRINGEMPTY_ MI_T("")
 
-enum // Define log instances. Default is 0 and is omitted from this enum.
-{
-    OmsConfigDetailed = 1
-};
+#define OMSCONFIG_HOST_TELEMETRY_PATH "/var/opt/microsoft/omsconfig/status/omsconfighost"
 
 typedef enum _DSC_Log_Level
 {

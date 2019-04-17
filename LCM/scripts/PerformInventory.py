@@ -9,6 +9,13 @@ from sys                import argv, exc_info, exit, stdout, version_info
 from traceback          import format_exc
 from xml.dom.minidom    import parse
 
+import json
+import time
+import datetime
+import os
+import os.path
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event
+
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
@@ -120,6 +127,9 @@ def perform_inventory(args):
     temp_report_path = join(dsc_configuration_path, 'Inventory.xml.temp')
     report_path = join(dsc_configuration_path, 'Inventory.xml')
     inventorylock_path = join(dsc_sysconfdir, 'inventory_lock')
+
+    if ("omsconfig" in helperlib.DSC_SCRIPT_PATH):
+        write_omsconfig_host_event(pathToCurrentScript, isfile(dsc_host_switch_path))
 
     if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
         is_oms_config = True
