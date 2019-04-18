@@ -132,16 +132,16 @@ def perform_inventory(args):
         write_omsconfig_host_event(pathToCurrentScript, isfile(dsc_host_switch_path))
 
     if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
-        is_oms_config = True
+        use_omsconfig_host = True
     else:
-        is_oms_config = False
+        use_omsconfig_host = False
 
     if "outxml" in Variables:
         report_path = Variables["outxml"]
 
     parameters = []
 
-    if is_oms_config:
+    if use_omsconfig_host:
         parameters.append(dsc_host_path)
         parameters.append(dsc_host_output_path)
 
@@ -174,13 +174,13 @@ def perform_inventory(args):
     inventorylock_filehandle = open(inventorylock_path, 'w')
 
     # Open the dsc host lock file. This also creates a file if it does not exist.
-    if is_oms_config:
+    if use_omsconfig_host:
         dschostlock_filehandle = open(dsc_host_lock_path, 'w')
 
     try:
         printVerboseMessage("Opened the inventory lock file at the path '" + inventorylock_path + "'")
         
-        if is_oms_config:
+        if use_omsconfig_host:
             printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
 
         retVal = 0
@@ -193,13 +193,16 @@ def perform_inventory(args):
             inventorylock_acquired = False
 
         if inventorylock_acquired:
-            dschostlock_acquired = True
+            dschostlock_acquired = False
+
             # Acquire dsc host file lock
-            if is_oms_config:
+            for retry in range(10):
                 try:
                     flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                    dschostlock_acquired = True
+                    break
                 except IOError:
-                    dschostlock_acquired = False
+                    time.sleep(60)
 
             if dschostlock_acquired:
                 try:
@@ -259,21 +262,21 @@ def perform_inventory(args):
                     flock(inventorylock_filehandle, LOCK_UN)
 
                     # Release dsc host file lock
-                    if is_oms_config:
+                    if use_omsconfig_host:
                         flock(dschostlock_filehandle, LOCK_UN)
     finally:
         # Close inventory lock file handle
         inventorylock_filehandle.close()
         
         # Close dsc host lock file handle
-        if is_oms_config:
+        if use_omsconfig_host:
             dschostlock_filehandle.close()
 
     # Ensure inventory lock file permission is set correctly after opening
     operationStatusUtility.ensure_file_permissions(inventorylock_path, '644')
 
     # Ensure dsc host lock file permission is set correctly after opening
-    if is_oms_config:
+    if use_omsconfig_host:
         operationStatusUtility.ensure_file_permissions(dsc_host_lock_path, '644')
 
     exit(retval)

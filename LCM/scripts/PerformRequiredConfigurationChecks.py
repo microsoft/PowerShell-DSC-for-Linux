@@ -49,12 +49,12 @@ def run_perform_required_configuration_checks():
         write_omsconfig_host_event(pathToCurrentScript, isfile(dsc_host_switch_path))
 
     if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
-        is_oms_config = True
+        use_omsconfig_host = True
     else:
-        is_oms_config = False
+        use_omsconfig_host = False
 
     parameters = []
-    if is_oms_config:
+    if use_omsconfig_host:
         parameters.append(dsc_host_path)
         parameters.append(dsc_host_output_path)
         parameters.append("PerformRequiredConfigurationChecks")
@@ -75,20 +75,23 @@ def run_perform_required_configuration_checks():
     # Save the starting timestamp without milliseconds
     startDateTime = operationStatusUtility.get_current_time_no_ms()
 
-    if is_oms_config:
+    if use_omsconfig_host:
         try:
             # Open the dsc host lock file. This also creates a file if it does not exist
             dschostlock_filehandle = open(dsc_host_lock_path, 'w')
             print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
             
-            dschostlock_acquired = True
+            dschostlock_acquired = False
 
             # Acquire dsc host file lock
-            try:
-                flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
-            except IOError:
-                dschostlock_acquired = False
-
+            for retry in range(10):
+                try:
+                    flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                    dschostlock_acquired = True
+                    break
+                except IOError:
+                    time.sleep(60)
+                
             if dschostlock_acquired:
                 p = Popen(parameters, stdout=PIPE, stderr=PIPE)
                 stdout, stderr = p.communicate()

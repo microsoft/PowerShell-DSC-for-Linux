@@ -26,7 +26,7 @@ def write_omsconfig_host_telemetry(message):
         json.dump(host_telemetry_json, host_telemetry_file)
 
 def write_omsconfig_host_event(pathToCurrentScript, dsc_host_switch_exists):
-    msg_template = '<OMSCONFIGLOG>[{}] [{}] [{}] [{}] [{}:{}] {}</OMSCONFIGLOG>'
+    msg_template = '<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>'
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y/%m/%d %H:%M:%S')
     if dsc_host_switch_exists:
         msg_buffer = 'Using dsc_host'

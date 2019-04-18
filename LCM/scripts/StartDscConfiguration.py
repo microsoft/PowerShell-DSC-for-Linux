@@ -132,13 +132,13 @@ def main(argv):
         write_omsconfig_host_event(pathToCurrentScript, isfile(dsc_host_switch_path))
 
     if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
-        is_oms_config = True
+        use_omsconfig_host = True
     else:
-        is_oms_config = False
+        use_omsconfig_host = False
 
     # Assemble parameters to pass to OMI CLI
     host_parameters = []
-    if is_oms_config:
+    if use_omsconfig_host:
         host_parameters.append(dsc_host_path)
         host_parameters.append(dsc_host_output_path)
         host_parameters.append("SendConfigurationApply")
@@ -171,7 +171,7 @@ def main(argv):
 
         host_parameters.append("}")
 
-    if is_oms_config:
+    if use_omsconfig_host:
         try:
             # Open the dsc host lock file. This also creates a file if it does not exist
             dschostlock_filehandle = open(dsc_host_lock_path, 'w')

@@ -72,13 +72,13 @@ def apply_meta_config(args):
             write_omsconfig_host_event(pathToCurrentScript, isfile(dsc_host_switch_path))
 
         if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
-            is_oms_config = True
+            use_omsconfig_host = True
         else:
-            is_oms_config = False
+            use_omsconfig_host = False
 
         parameters = []
 
-        if is_oms_config:
+        if use_omsconfig_host:
             parameters.append(dsc_host_path)
             parameters.append(dsc_host_output_path)
             parameters.append("SendMetaConfigurationApply")
