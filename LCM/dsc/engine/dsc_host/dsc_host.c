@@ -43,7 +43,7 @@ void PrintHelp()
     Tprintf(MI_T("  ApplyConfiguration\n"));
     Tprintf(MI_T("  SendMetaConfigurationApply <MOF Document Path> [force]\n"));
     Tprintf(MI_T("  GetMetaConfiguration\n"));
-    Tprintf(MI_T("  RollBack\n"));
+    // Tprintf(MI_T("  RollBack\n")); // Commented out since we do not support this operation. The operation exists as is. No change in behavior.
     Tprintf(MI_T("  TestConfiguration\n"));
     Tprintf(MI_T("  PerformRequiredConfigurationChecks [flags value]\n"));
     Tprintf(MI_T("  StopConfiguration [force]\n"));
@@ -57,7 +57,7 @@ void PrintHelp()
     Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output ApplyConfiguration\n"));
     Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output SendMetaConfigurationApply ./new_metaconfig.mof\n"));
     Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output GetMetaConfiguration\n"));
-    Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output RollBack\n"));
+    // Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output RollBack\n"));
     Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output TestConfiguration\n"));
     Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output PerformRequiredConfigurationChecks 1\n"));
     Tprintf(MI_T("  /opt/dsc/bin/dsc_host /opt/dsc/output StopConfiguration force\n"));
