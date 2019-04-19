@@ -11,7 +11,7 @@ import time
 import datetime
 import os
 import os.path
-from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event, write_omsconfig_host_log
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -90,6 +90,7 @@ def run_perform_required_configuration_checks():
                     dschostlock_acquired = True
                     break
                 except IOError:
+                    write_omsconfig_host_log(pathToCurrentScript, 'dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...')
                     time.sleep(60)
                 
             if dschostlock_acquired:
