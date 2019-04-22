@@ -2,17 +2,11 @@
 import fileinput
 import sys
 import subprocess
-
-from imp                import load_source
-from os.path            import dirname, isfile, join, realpath
-from fcntl              import flock, LOCK_EX, LOCK_UN, LOCK_NB
-
-import json
-import time
-import datetime
-import os
-import os.path
-from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event
+from imp                  import load_source
+from os.path              import dirname, isfile, join, realpath
+from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event, write_omsconfig_host_log
+from time                 import sleep
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -22,7 +16,7 @@ helperlib = load_source('helperlib', helperLibPath)
 
 omi_bindir = "<CONFIG_BINDIR>"
 omicli_path = omi_bindir + "/omicli"
-dsc_host_base_path = '/opt/dsc'
+dsc_host_base_path = helperlib.DSC_HOST_BASE_PATH
 dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
 dsc_host_output_path = join(dsc_host_base_path, 'output')
 dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
@@ -56,13 +50,17 @@ if use_omsconfig_host:
         dschostlock_filehandle = open(dsc_host_lock_path, 'w')
         print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
         
-        dschostlock_acquired = True
+        dschostlock_acquired = False
 
         # Acquire dsc host file lock
-        try:
-            flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
-        except IOError:
-            dschostlock_acquired = False
+        for retry in range(10):
+            try:
+                flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                dschostlock_acquired = True
+                break
+            except IOError:
+                write_omsconfig_host_log(pathToCurrentScript, 'dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...')
+                time.sleep(60)
 
         if dschostlock_acquired:
             p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

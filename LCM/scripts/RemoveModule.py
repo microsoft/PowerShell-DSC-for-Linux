@@ -5,8 +5,8 @@ import subprocess
 import shutil
 import platform
 import imp
-
 from os.path import dirname, join, realpath
+
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
@@ -15,7 +15,6 @@ fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
 nxDSCLog = imp.load_source('nxDSCLog', fullPathDSCLogger)
 logger = nxDSCLog.ConsoleAndFileLogger()
 sys.stdout = logger
-
 
 def usage():
     print("Usage:")

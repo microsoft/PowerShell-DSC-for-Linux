@@ -4,6 +4,14 @@ import sys
 import imp
 import subprocess
 from os.path import basename, dirname, join, realpath, split
+from imp                import load_source
+from os.path            import dirname, isfile, join, realpath
+
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
+helperlib = load_source('helperlib', helperLibPath)
 
 from imp                import load_source
 from os.path            import dirname, isfile, join, realpath

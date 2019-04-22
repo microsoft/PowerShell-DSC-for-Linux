@@ -5,13 +5,8 @@ from subprocess import PIPE, Popen
 from sys        import exc_info, exit, version_info
 from traceback  import format_exc
 from fcntl      import flock, LOCK_EX, LOCK_UN, LOCK_NB
-
-import json
-import time
-import datetime
-import os
-import os.path
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event, write_omsconfig_host_log
+from time       import sleep
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -39,7 +34,7 @@ def run_perform_required_configuration_checks():
 
     dsc_sysconfdir = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
     omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
-    dsc_host_base_path = '/opt/dsc'
+    dsc_host_base_path = helperlib.DSC_HOST_BASE_PATH
     dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
     dsc_host_output_path = join(dsc_host_base_path, 'output')
     dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
