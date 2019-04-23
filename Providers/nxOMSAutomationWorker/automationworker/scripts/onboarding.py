@@ -21,13 +21,13 @@ from worker import httpclientfactory
 from worker import linuxutil
 from worker import serializerfactory
 from worker import util
+from worker import diydirs
 
 json = serializerfactory.get_serializer(sys.version_info)
 configuration.clear_config()
 configuration.set_config({configuration.PROXY_CONFIGURATION_PATH: "/etc/opt/microsoft/omsagent/proxy.conf",
                           configuration.WORKER_VERSION: "LinuxDIYRegister",
                           configuration.WORKING_DIRECTORY_PATH: "/tmp"})
-
 
 def get_ip_address():
     try:
@@ -36,36 +36,8 @@ def get_ip_address():
         return "127.0.0.1"
 
 
-def set_permission_recursive(permission, path):
-    """Sets the permission for a specific path and it's child items recursively.
-
-    Args:
-        permission  : string, linux permission (i.e 770).
-        path        : string, the target path.
-    """
-    cmd = ["chmod", "-R", permission, path]
-    process, output, error = linuxutil.popen_communicate(cmd)
-    if process.returncode != 0:
-        raise Exception(
-            "Unable to change permission of " + str(path) + " to " + str(permission) + ". Error : " + str(error))
-    print "Permission changed to " + str(permission) + " for " + str(path)
-
-
-def set_user_and_group_recursive(owning_username, owning_group_name, path):
-    """Sets the owner for a specific path and it's child items recursively.
-
-    Args:
-        owning_username     : string, the owning user
-        owning_group_name   : string, the owning group
-        path                : string, the target path.
-    """
-    owners = owning_username + ":" + owning_group_name
-    cmd = ["chown", "-R", owners, path]
-    process, output, error = linuxutil.popen_communicate(cmd)
-    if process.returncode != 0:
-        raise Exception("Unable to change owner of " + str(path) + " to " + str(owners) + ". Error : " + str(error))
-    print "Owner changed to " + str(owners) + " for " + str(path)
-
+DIY_STATE_PATH = diydirs.DIY_STATE_PATH
+DIY_WORKING_DIR = diydirs.DIY_WORKING_DIR
 
 def generate_self_signed_certificate(certificate_path, key_path):
     """Creates a self-signed x509 certificate and key pair in the spcified path.
@@ -249,21 +221,20 @@ def register(options):
     if auto_registered_account_id != None and auto_registered_account_id != diy_account_id:
         raise Exception("Cannot register, conflicting worker already registered.")
 
-    diy_state_base_path = os.path.join(state_base_path, os.path.join("automationworker", "diy"))
-    diy_working_directory_base_path = os.path.join(working_directory_base_path, os.path.join("automationworker", "diy"))
-    worker_conf_path = os.path.join(diy_state_base_path, "worker.conf")
+
+    worker_conf_path = os.path.join(DIY_STATE_PATH, "worker.conf")
 
     if os.path.isfile(worker_conf_path) is True:
         raise Exception("Unable to register, an existing worker was found. Please deregister any existing worker and "
                         "try again.")
 
-    certificate_path = os.path.join(diy_state_base_path, "worker_diy.crt")
-    key_path = os.path.join(diy_state_base_path, "worker_diy.key")
+    certificate_path = os.path.join(DIY_STATE_PATH, "worker_diy.crt")
+    key_path = os.path.join(DIY_STATE_PATH, "worker_diy.key")
     machine_id = util.generate_uuid()
 
     # generate state path (certs/conf will be dropped in this path)
-    if os.path.isdir(diy_state_base_path) is False:
-        os.makedirs(diy_state_base_path)
+    if os.path.isdir(DIY_STATE_PATH) is False:
+        os.makedirs(DIY_STATE_PATH)
     generate_self_signed_certificate(certificate_path=certificate_path, key_path=key_path)
     issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
 
@@ -319,21 +290,12 @@ def register(options):
     registration_response = json.loads(response.raw_data)
     account_id = registration_response["AccountId"]
     create_worker_configuration_file(registration_response["jobRuntimeDataServiceUri"], account_id,
-                                     hybrid_worker_group_name, machine_id, diy_working_directory_base_path,
-                                     diy_state_base_path, certificate_path, key_path, registration_endpoint,
-                                     workspace_id, thumbprint, vm_id, is_azure_vm, options.gpg_keyring ,options.test)
+                                     hybrid_worker_group_name, machine_id, DIY_WORKING_DIR,
+                                     DIY_STATE_PATH, certificate_path, key_path, registration_endpoint,
+                                     workspace_id, thumbprint, vm_id, is_azure_vm, options.gpg_keyring, options.test)
 
     # generate working directory path
-    if os.path.isdir(diy_working_directory_base_path) is False:
-        os.makedirs(diy_working_directory_base_path)
-
-    # set appropriate permission to the created directory
-    set_user_and_group_recursive(owning_username="omsagent", owning_group_name="omiusers", path=diy_state_base_path)
-    set_permission_recursive(permission="770", path=diy_state_base_path)
-
-    set_user_and_group_recursive(owning_username="nxautomation", owning_group_name="omiusers",
-                                 path=diy_working_directory_base_path)
-    set_permission_recursive(permission="770", path=diy_working_directory_base_path)
+    diydirs.create_persistent_diy_dirs()
 
     print "Registration successful!"
 
@@ -350,11 +312,9 @@ def deregister(options):
         raise Exception("Invalid workspace id. Is the specified workspace id registered as the OMSAgent "
                         "primary worksapce?")
 
-    diy_state_base_path = os.path.join(state_base_path, os.path.join("automationworker", "diy"))
-    diy_working_directory_base_path = os.path.join(working_directory_base_path, os.path.join("automationworker", "diy"))
-    worker_conf_path = os.path.join(diy_state_base_path, "worker.conf")
-    certificate_path = os.path.join(diy_state_base_path, "worker_diy.crt")
-    key_path = os.path.join(diy_state_base_path, "worker_diy.key")
+    worker_conf_path = os.path.join(DIY_STATE_PATH, "worker.conf")
+    certificate_path = os.path.join(DIY_STATE_PATH, "worker_diy.crt")
+    key_path = os.path.join(DIY_STATE_PATH, "worker_diy.key")
 
     if os.path.exists(worker_conf_path) is False:
         raise Exception("Unable to deregister, no worker configuration found on disk.")
@@ -409,13 +369,13 @@ def deregister(options):
     print "Cleaning up left over directories."
 
     try:
-        shutil.rmtree(diy_state_base_path)
+        shutil.rmtree(DIY_STATE_PATH)
         print "Removed state directory."
     except:
         raise Exception("Unable to remove state directory base path.")
 
     try:
-        shutil.rmtree(diy_working_directory_base_path)
+        shutil.rmtree(DIY_WORKING_DIR)
         print "Removed working directory."
     except:
         raise Exception("Unable to remove working directory base path.")
