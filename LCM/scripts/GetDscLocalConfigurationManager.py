@@ -3,14 +3,14 @@ import fileinput
 import sys
 import subprocess
 import json
-import time
 import datetime
 import os
 import os.path
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event, write_omsconfig_host_log
-from imp                import load_source
-from os.path            import dirname, isfile, join, realpath
-from fcntl              import flock, LOCK_EX, LOCK_UN
+from imp                  import load_source
+from os.path              import dirname, isfile, join, realpath
+from fcntl                import flock, LOCK_EX, LOCK_UN
+from time                 import sleep
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -65,7 +65,7 @@ if use_omsconfig_host:
                 break
             except IOError:
                 write_omsconfig_host_log(pathToCurrentScript, 'dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...')
-                time.sleep(60)
+                sleep(60)
 
         if dschostlock_acquired:
             p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

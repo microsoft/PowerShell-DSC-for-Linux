@@ -117,7 +117,7 @@ def apply_meta_config(args):
                         break
                     except IOError:
                         write_omsconfig_host_log(pathToCurrentScript, 'dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...')
-                        time.sleep(60)
+                        sleep(60)
 
                 if dschostlock_acquired:
                     p = Popen(parameters, stdout=PIPE, stderr=PIPE)
