@@ -23,6 +23,7 @@ module Fluent
       require_relative 'oms_configuration'
       require_relative 'oms_common'
       require_relative 'blocklock'
+      require_relative 'agent_telemetry_script'
     end
 
     config_param :omsadmin_conf_path, :string, :default => '/etc/opt/microsoft/omsagent/conf/omsadmin.conf'
@@ -74,8 +75,8 @@ module Fluent
       azure_region = OMS::Configuration.azure_region if defined?(OMS::Configuration.azure_region)
       if !azure_region.to_s.empty?
         headers[OMS::CaseSensitiveString.new("x-ms-AzureRegion")] = azure_region
-      end	    
-	    
+      end
+
       omscloud_id = OMS::Configuration.omscloud_id
       if !omscloud_id.to_s.empty?
         headers[OMS::CaseSensitiveString.new("x-ms-OMSCloudId")] = omscloud_id
@@ -189,12 +190,16 @@ module Fluent
       end
 
       # append blocks
-      # if the msg is longer than 4MB (to be safe, we use 4,000,000), we should break it into multiple blocks
-      chunk_size = 4000000
+      # if the msg is longer than 100MB (to be safe, blob limitation is 100MB), we should break it into multiple blocks
+      chunk_size = 100000000
       blocks_uncommitted = []
-      while msg.to_s.length > 0 do
-        chunk = msg.slice!(0, chunk_size)
-        blocks_uncommitted << upload_block(uri, chunk)
+      if msg.to_s.length <= chunk_size
+        blocks_uncommitted << upload_block(uri, msg)
+      else
+        while msg.to_s.length > 0 do
+          chunk = msg.slice!(0, chunk_size)
+          blocks_uncommitted << upload_block(uri, chunk)
+        end
       end
 
       # commit blocks
@@ -356,7 +361,7 @@ module Fluent
       else
         dataSize, etag = append_blob(blob_uri, records, filePath, blocks_committed)
       end
-      
+
       time = Time.now - start
       @log.debug "Success sending #{dataSize} bytes of data to BLOB #{time.round(3)}s"
 
@@ -365,6 +370,7 @@ module Fluent
       time = Time.now - start
       @log.trace "Success notify the data to BLOB #{time.round(3)}s"
       write_status_file("true","Sending success")
+      OMS::Telemetry.push_qos_event(OMS::SEND_BATCH, "true", "", tag, records, records.size, time)
     rescue OMS::RetryRequestException => e
       @log.info "Encountered retryable exception. Will retry sending data later."
       @log.debug "Error:'#{e}'"
