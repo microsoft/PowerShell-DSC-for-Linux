@@ -13,15 +13,6 @@ pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
 
-from imp                import load_source
-from os.path            import dirname, isfile, join, realpath
-
-pathToCurrentScript = realpath(__file__)
-pathToCommonScriptsFolder = dirname(pathToCurrentScript)
-
-helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
-helperlib = load_source('helperlib', helperLibPath)
-
 conf_path = "/etc/opt/microsoft/omsagent/conf/omsadmin.conf"
 metamof_path = "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof"
 agentid_path = "/etc/opt/omi/conf/omsconfig/agentid"
