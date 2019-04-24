@@ -141,6 +141,9 @@ def apply_meta_config(args):
 
         print(stdout)
 
+        if ((exit_code != 0) or (stderr)):
+            exit(1)
+
         # Python 3 returns an empty byte array into stderr on success
         if stderr == '' or (version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == ''):
             operationStatusUtility.write_success_to_status_file(operation)
@@ -148,9 +151,6 @@ def apply_meta_config(args):
         else:
             operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
             print(stderr)
-
-        if ((exit_code != 0) or (stderr)):
-            exit(1)
     finally:
         fileHandle.close()
 

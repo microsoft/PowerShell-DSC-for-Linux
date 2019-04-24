@@ -213,6 +213,10 @@ def perform_inventory(args):
 
                     printVerboseMessage(stdout)
 
+                    if (retval > 0):
+                        write_omsconfig_host_log(pathToCurrentScript, 'dsc_host failed with code = ' + str(retval))
+                        exit(retval)
+
                     # Python 3 returns an empty byte array into stderr on success
                     if stderr == '' or (version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == ''):
                         operationStatusUtility.write_success_to_status_file(operation)

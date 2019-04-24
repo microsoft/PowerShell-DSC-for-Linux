@@ -64,7 +64,12 @@ if use_omsconfig_host:
         if dschostlock_acquired:
             p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = p.communicate()
+            exit_code = p.wait()
             print(stdout)
+
+            if (exit_code > 0):
+                write_omsconfig_host_log(pathToCurrentScript, 'dsc_host failed with code = ' + str(exit_code))
+                exit(exit_code)
         else:
             print("dsc host lock already acuired by a different process")
             stdout = ''
