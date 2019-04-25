@@ -7,7 +7,7 @@ import time
 import datetime
 import os
 import os.path
-from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event, write_omsconfig_host_log
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log
 from imp                import load_source
 from os.path            import dirname, isfile, join, realpath
 from fcntl              import flock, LOCK_EX, LOCK_UN
@@ -27,7 +27,7 @@ dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
 dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
 
 if ("omsconfig" in helperlib.DSC_SCRIPT_PATH):
-    write_omsconfig_host_event(pathToCurrentScript, isfile(dsc_host_switch_path))
+    write_omsconfig_host_switch_event(pathToCurrentScript, isfile(dsc_host_switch_path))
 
 if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
     use_omsconfig_host = True
@@ -64,7 +64,7 @@ if use_omsconfig_host:
                 dschostlock_acquired = True
                 break
             except IOError:
-                write_omsconfig_host_log(pathToCurrentScript, 'dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...')
+                write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
                 sleep(60)
 
         if dschostlock_acquired:

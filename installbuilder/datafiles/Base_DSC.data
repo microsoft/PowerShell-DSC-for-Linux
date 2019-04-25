@@ -180,6 +180,11 @@ if [ $cmdline_ctypes -ne 0 ]; then
     exit 1
 fi
 
+%Preinstall_300
+echo "Cleanning up existing dsc_hosts..."
+kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | awk '{$1=$1;print}' | cut -d' ' -f 1) 1&> /dev/null
+rm -f /opt/dsc/dsc_host_lock
+
 %Postinstall_10
 OMI_HOME=/opt/omi
 OMI_REGISTER_DIR=/etc/opt/omi/conf/omiregister/

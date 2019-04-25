@@ -27,6 +27,7 @@ const MI_Uint32 BuildVersion = 0000;
 
 #define DSCHOST_VERSION_BUFF_SIZE   512
 #define DSCHOST_STR_BUFFER_SIZE   512
+#define DSCHOST_PID_FILE_PATH "/opt/dsc/bin/dsc_host.pid"
 
 typedef enum _DscSupportedOperation
 {

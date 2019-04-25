@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
+#include <unistd.h>
 
 #include "DSC_Systemcalls.h"
 #include "Resources_LCM.h"
@@ -81,6 +82,23 @@ void PrintHelp()
     Tprintf(MI_T("\n"));
 }
 
+void SaveCurrentPID()
+{
+    int current_pid = getpid();
+
+    FILE * fd = fopen(DSCHOST_PID_FILE_PATH, "w+");
+    if (fd == NULL)
+    {
+        Tprintf(MI_T("Failed to open file '%T' with errno = %d (%T)\n"), DSCHOST_PID_FILE_PATH, errno, strerror(errno));
+        DSC_TELEMETRY_ERROR("Failed to open file '%s' with errno = %d (%s)\n", DSCHOST_PID_FILE_PATH, errno, strerror(errno));
+    }
+    else
+    {
+        Ftprintf(fd, ZT("%d"), current_pid);
+        fclose(fd);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     MI_Instance *extended_error = NULL;
@@ -89,6 +107,8 @@ int main(int argc, char *argv[])
     JSON_Value *operation_result_root_value = NULL;
     JSON_Value *operation_error_root_value = NULL;
     char* operation_name;
+
+    SaveCurrentPID();
 
     // Check the user that has invoked the operation: root for DIY and omsagent for OMS
 #if defined(BUILD_OMS)

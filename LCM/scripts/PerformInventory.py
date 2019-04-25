@@ -8,7 +8,7 @@ from subprocess           import Popen, PIPE
 from sys                  import argv, exc_info, exit, stdout, version_info
 from traceback            import format_exc
 from xml.dom.minidom      import parse
-from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_event, write_omsconfig_host_log
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log
 from time                 import sleep
 
 pathToCurrentScript = realpath(__file__)
@@ -124,7 +124,7 @@ def perform_inventory(args):
     inventorylock_path = join(dsc_sysconfdir, 'inventory_lock')
 
     if ("omsconfig" in helperlib.DSC_SCRIPT_PATH):
-        write_omsconfig_host_event(pathToCurrentScript, isfile(dsc_host_switch_path))
+        write_omsconfig_host_switch_event(pathToCurrentScript, isfile(dsc_host_switch_path))
 
     if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
         use_omsconfig_host = True
@@ -197,7 +197,7 @@ def perform_inventory(args):
                     dschostlock_acquired = True
                     break
                 except IOError:
-                    write_omsconfig_host_log(pathToCurrentScript, 'dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...')
+                    write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
                     sleep(60)
 
             if dschostlock_acquired:
@@ -214,7 +214,7 @@ def perform_inventory(args):
                     printVerboseMessage(stdout)
 
                     if (retval > 0):
-                        write_omsconfig_host_log(pathToCurrentScript, 'dsc_host failed with code = ' + str(retval))
+                        write_omsconfig_host_log('dsc_host failed with code = ' + str(retval), pathToCurrentScript)
                         exit(retval)
 
                     # Python 3 returns an empty byte array into stderr on success
