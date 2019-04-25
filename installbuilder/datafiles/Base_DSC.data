@@ -184,6 +184,7 @@ fi
 echo "Cleanning up existing dsc_hosts..."
 kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | awk '{$1=$1;print}' | cut -d' ' -f 1) 1&> /dev/null
 rm -f /opt/dsc/dsc_host_lock
+echo "Cleaned up existing dsc_hosts..."
 
 %Postinstall_10
 OMI_HOME=/opt/omi
@@ -378,6 +379,12 @@ chown omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 
 #endif
+
+%Preuninstall_899
+echo "Cleanning up existing dsc_hosts before uninstall..."
+kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | awk '{$1=$1;print}' | cut -d' ' -f 1) 1&> /dev/null
+rm -f /opt/dsc/dsc_host_lock
+echo "Cleaned up existing dsc_hosts before uninstall..."
 
 %Preuninstall_999
 # if this is a package removal, not an upgrade, remove the modules
