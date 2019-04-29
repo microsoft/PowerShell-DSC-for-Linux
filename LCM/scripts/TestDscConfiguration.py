@@ -43,43 +43,47 @@ else:
     parameters.append("}")
     parameters.append("TestConfiguration")
 
+stdout = ''
+stderr = ''
+
 if use_omsconfig_host:
-    try:
-        # Open the dsc host lock file. This also creates a file if it does not exist
-        dschostlock_filehandle = open(dsc_host_lock_path, 'w')
-        print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
-        
-        dschostlock_acquired = False
+    if (isfile(dsc_host_lock_path):
+        try:
+            # Open the dsc host lock file. This also creates a file if it does not exist
+            dschostlock_filehandle = open(dsc_host_lock_path, 'w')
+            print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
+            
+            dschostlock_acquired = False
 
-        # Acquire dsc host file lock
-        for retry in range(10):
-            try:
-                flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
-                dschostlock_acquired = True
-                break
-            except IOError:
-                write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
-                sleep(60)
+            # Acquire dsc host file lock
+            for retry in range(10):
+                try:
+                    flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                    dschostlock_acquired = True
+                    break
+                except IOError:
+                    write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
+                    sleep(60)
 
-        if dschostlock_acquired:
-            p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = p.communicate()
-            exit_code = p.wait()
-            print(stdout)
+            if dschostlock_acquired:
+                p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = p.communicate()
+                exit_code = p.wait()
+                print(stdout)
 
-            if (exit_code > 0):
-                write_omsconfig_host_log('dsc_host failed with code = ' + str(exit_code), pathToCurrentScript)
-                exit(exit_code)
-        else:
-            print("dsc host lock already acuired by a different process")
-            stdout = ''
-            stderr = ''
-    finally:
-        # Release dsc host file lock
-        flock(dschostlock_filehandle, LOCK_UN)
+                if (exit_code > 0):
+                    write_omsconfig_host_log('dsc_host failed with code = ' + str(exit_code), pathToCurrentScript)
+                    exit(exit_code)
+            else:
+                print("dsc host lock already acuired by a different process")
+        finally:
+            # Release dsc host file lock
+            flock(dschostlock_filehandle, LOCK_UN)
 
-        # Close dsc host lock file handle
-        dschostlock_filehandle.close()
+            # Close dsc host lock file handle
+            dschostlock_filehandle.close()
+    else:
+        write_omsconfig_host_log('dsc_host lock file does not exist. Skipping this operation until next consistency hits.', pathToCurrentScript, 'WARNING')
 else:
     p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()

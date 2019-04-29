@@ -100,6 +100,9 @@ def apply_meta_config(args):
         # Save the starting timestamp without milliseconds
         startDateTime = operationStatusUtility.get_current_time_no_ms()
 
+        stdout = ''
+        stderr = ''
+
         # Apply the metaconfig
         if use_omsconfig_host:
             try:
@@ -126,8 +129,6 @@ def apply_meta_config(args):
                     print(stdout)
                 else:
                     print("dsc host lock already acuired by a different process")
-                    stdout = ''
-                    stderr = ''
             finally:
                 # Release dsc host file lock
                 flock(dschostlock_filehandle, LOCK_UN)

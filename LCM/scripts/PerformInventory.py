@@ -167,20 +167,11 @@ def perform_inventory(args):
 
     # Open the inventory lock file. This also creates a file if it does not exist.
     inventorylock_filehandle = open(inventorylock_path, 'w')
-
-    # Open the dsc host lock file. This also creates a file if it does not exist.
-    if use_omsconfig_host:
-        dschostlock_filehandle = open(dsc_host_lock_path, 'w')
+    printVerboseMessage("Opened the inventory lock file at the path '" + inventorylock_path + "'")
+    retVal = 0
+    inventorylock_acquired = True
 
     try:
-        printVerboseMessage("Opened the inventory lock file at the path '" + inventorylock_path + "'")
-        
-        if use_omsconfig_host:
-            printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
-
-        retVal = 0
-        inventorylock_acquired = True
-
         # Acquire inventory file lock
         try:
             flock(inventorylock_filehandle, LOCK_EX | LOCK_NB)
@@ -189,18 +180,26 @@ def perform_inventory(args):
 
         if inventorylock_acquired:
             dschostlock_acquired = False
+            
+            if use_omsconfig_host:
+                if isfile(dsc_host_lock_path):
+                    # Open the dsc host lock file. This also creates a file if it does not exist.
+                    dschostlock_filehandle = open(dsc_host_lock_path, 'w')
+                    printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
 
-            # Acquire dsc host file lock
-            for retry in range(10):
-                try:
-                    flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
-                    dschostlock_acquired = True
-                    break
-                except IOError:
-                    write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
-                    sleep(60)
+                    # Acquire dsc host file lock
+                    for retry in range(10):
+                        try:
+                            flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                            dschostlock_acquired = True
+                            break
+                        except IOError:
+                            write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
+                            sleep(60)
+                else:
+                    write_omsconfig_host_log('dsc_host lock file does not exist. Skipping this operation until next consistency hits.', pathToCurrentScript, 'WARNING')
 
-            if dschostlock_acquired:
+            if dschostlock_acquired or (not use_omsconfig_host):
                 try:
                     system("rm -f " + dsc_reportdir + "/*")
 
@@ -262,15 +261,21 @@ def perform_inventory(args):
                     flock(inventorylock_filehandle, LOCK_UN)
 
                     # Release dsc host file lock
-                    if use_omsconfig_host:
-                        flock(dschostlock_filehandle, LOCK_UN)
+                    if isfile(dsc_host_lock_path) and use_omsconfig_host:
+                        try:
+                            flock(dschostlock_filehandle, LOCK_UN)
+                        except:
+                            pass
     finally:
         # Close inventory lock file handle
         inventorylock_filehandle.close()
         
         # Close dsc host lock file handle
         if use_omsconfig_host:
-            dschostlock_filehandle.close()
+            try:
+                dschostlock_filehandle.close()
+            except:
+                pass
 
     # Ensure inventory lock file permission is set correctly after opening
     operationStatusUtility.ensure_file_permissions(inventorylock_path, '644')

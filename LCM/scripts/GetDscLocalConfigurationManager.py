@@ -49,6 +49,9 @@ else:
     parameters.append("}")
     parameters.append("GetMetaConfiguration")
 
+stdout = ''
+stderr = ''
+
 if use_omsconfig_host:
     try:
         # Open the dsc host lock file. This also creates a file if it does not exist
@@ -73,8 +76,6 @@ if use_omsconfig_host:
             print(stdout)
         else:
             print("dsc host lock already acuired by a different process")
-            stdout = ''
-            stderr = ''
     finally:
         # Release dsc host file lock
         flock(dschostlock_filehandle, LOCK_UN)
