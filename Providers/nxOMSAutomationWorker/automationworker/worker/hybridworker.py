@@ -192,6 +192,10 @@ class Worker:
         self.stop_tracking_terminated_sandbox()
 
         sandbox_actions = self.jrds_client.get_sandbox_actions()
+        if sandbox_actions is None:
+            tracer.log_get_sandbox_action_returned_null_data()
+            return
+
         tracer.log_debug_trace("Get sandbox action. Found " + str(len(sandbox_actions)) + " action(s).")
 
         for action in sandbox_actions:
