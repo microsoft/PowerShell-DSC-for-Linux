@@ -4,6 +4,7 @@ BUILD_RPM=1
 BUILD_DPKG=1
 BUILD_SSL_098=1
 BUILD_SSL_100=1
+BUILD_SSL_102=1
 BUILD_SSL_110=1
 BUILD_SSL_SYSTEM=0
 BUILD_DEBUG=0
@@ -54,6 +55,9 @@ do
 	    ;;
 	--no-ssl-100)
 	    BUILD_SSL_100=0
+		;;
+	--no-ssl-102)
+	    BUILD_SSL_102=0
 		;;
 	--no-ssl-110)
 	    BUILD_SSL_110=0
@@ -107,7 +111,7 @@ fi
 
 pkgconfig=`which pkg-config`
 
-if [ -d "/usr/local_ssl_0.9.8" ] || [ -d "/usr/local_ssl_1.0.0" ] || [ -d "/usr/local_ssl_1.1.0" ]; then
+if [ -d "/usr/local_ssl_0.9.8" ] || [ -d "/usr/local_ssl_1.0.0" ] || [ -d "/usr/local_ssl_1.0.2" ] || [ -d "/usr/local_ssl_1.1.0" ]; then
     if [ -d "/usr/local_ssl_0.9.8" ]; then
         if [ "`uname -m`" == "x86_64" ]; then
             openssl098_libdir=/usr/local_ssl_0.9.8/lib
@@ -132,6 +136,16 @@ if [ -d "/usr/local_ssl_0.9.8" ] || [ -d "/usr/local_ssl_1.0.0" ] || [ -d "/usr/
         echo -e "\e[33mYellow SSL version 1.0.0 is not found at path /usr/local_ssl_1.0.0. Skipping build for SSL 1.0.0.\e[0m"
         BUILD_SSL_100=0
     fi
+    if [ -d "/usr/local_ssl_1.0.2" ]; then
+        if [ "`uname -m`" == "x86_64" ]; then
+            openssl102_libdir=/usr/local_ssl_1.0.2/lib
+        fi
+        openssl102_cflags=`PKG_CONFIG_PATH=$openssl102_libdir/pkgconfig $pkgconfig --cflags openssl`
+        openssl102_libs=`PKG_CONFIG_PATH=$openssl102_libdir/pkgconfig $pkgconfig --libs openssl`
+    else
+        echo -e "\e[33mYellow SSL version 1.0.2 is not found at path /usr/local_ssl_1.0.2. Skipping build for SSL 1.0.2.\e[0m"
+        BUILD_SSL_102=0
+    fi
     if [ -d "/usr/local_ssl_1.1.0" ]; then
         if [ "`uname -m`" == "x86_64" ]; then
             openssl110_libdir=/usr/local_ssl_1.1.0/lib
@@ -149,6 +163,7 @@ BUILD_RPM=$BUILD_RPM
 BUILD_DPKG=$BUILD_DPKG
 BUILD_SSL_098=$BUILD_SSL_098
 BUILD_SSL_100=$BUILD_SSL_100
+BUILD_SSL_102=$BUILD_SSL_102
 BUILD_SSL_110=$BUILD_SSL_110
 BUILD_LOCAL=$BUILD_LOCAL
 BUILD_OMS=$BUILD_OMS
@@ -166,6 +181,9 @@ openssl098_libdir=$openssl098_libdir
 openssl100_cflags=$openssl100_cflags
 openssl100_libs=$openssl100_libs
 openssl100_libdir=$openssl100_libdir
+openssl102_cflags=$openssl102_cflags
+openssl102_libs=$openssl102_libs
+openssl102_libdir=$openssl102_libdir
 openssl110_cflags=$openssl110_cflags
 openssl110_libs=$openssl110_libs
 openssl110_libdir=$openssl110_libdir
