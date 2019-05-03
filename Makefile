@@ -361,7 +361,7 @@ nxOMSPerfCounter:
 
 nxOMSSyslog:
 	rm -rf output/staging; \
-        VERSION="2.2"; \
+        VERSION="2.3"; \
         PROVIDERS="nxOMSSyslog"; \
         STAGINGDIR="output/staging/$@/DSCResources"; \
         cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -425,7 +425,7 @@ nxOMSCustomLog:
 
 nxOMSSudoCustomLog:
 	rm -rf output/staging; \
-	VERSION="2.3"; \
+	VERSION="2.4"; \
 	PROVIDERS="nxOMSSudoCustomLog"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -536,7 +536,7 @@ nxOMSAgentNPMConfig:
 
 nxOMSAuditdPlugin:
 	rm -rf output/staging; \
-	VERSION="1.6"; \
+	VERSION="1.7"; \
 	PROVIDERS="nxOMSAuditdPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
