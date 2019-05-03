@@ -297,6 +297,10 @@ def log_exception_trace(stacktrace):
     message = "Exception encountered. \n" + stacktrace
     trace_generic_hybrid_worker_event_async(3, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
+def log_warning_trace(message):
+    message = "[WARNING] " + message
+    trace_generic_hybrid_worker_event_async(4, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
+
 
 # worker specific traces
 # traces in this section are mainly for the worker component
@@ -526,6 +530,10 @@ def log_runbook_runtime_trace(trace, activity_id):
     message = "Runbook runtime trace: " + str(trace)
     trace_generic_hybrid_worker_event(89000, inspect.stack()[0][3], message, 1, KEYWORD_RUNBOOK,
                                       activity_id=activity_id)
+
+def log_get_sandbox_action_returned_null_data():
+    message = "Get sandbox action returned null data."
+    trace_generic_hybrid_worker_event_async(10024, inspect.stack()[0][3], message, 1, KEYWORD_WARNING)
 
 
 # GenericHybridWorker event for ETW traces

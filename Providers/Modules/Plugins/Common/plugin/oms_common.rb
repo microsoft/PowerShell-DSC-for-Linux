@@ -866,15 +866,15 @@ module OMS
     end
 
     def get_ip(hostname)
-      @cache_lock.synchronize {
-        if @cache.has_key?(hostname)
-          return @cache[hostname]
-        else
-          ip = get_ip_from_socket(hostname)
+      if @cache.has_key?(hostname)
+        return @cache[hostname]
+      else
+        ip = get_ip_from_socket(hostname)
+        @cache_lock.synchronize {
           @cache[hostname] = ip
-          return ip
-        end
-      }
+        }
+        return ip
+      end
     end
 
     private
