@@ -18,17 +18,11 @@
 #define _CAENGINEINTERNAL_H
 #include "MI.h"
 
-
-
-
-
-
 #define INITIAL_CONTAINER_SIZE 10
 #define CONTAINER_DEFAULT_EXECUTION 0
 #define CONTAINER_REMAINING_EXECUTION 1
 #define NODE_VISITED 1
 #define NODE_RESOLVED 1
-
 
 #define LOGRESOURCE_CLASSNAME MI_T("MSFT_LogResource")
 #define LOGRESOURCE_MESSAGEPROPERTYNAME MI_T("Message")
@@ -118,7 +112,8 @@ MI_Result GetCurrentState(_In_ ProviderCallbackContext *provContext,
                            _In_ MI_Session *miSession,
                            _In_ MI_Instance *instance,
                            _In_ const MI_Instance *regInstance,
-                           _Outptr_result_maybenull_ MI_Instance **outputInstance,
+                           _Outptr_result_maybenull_ MI_Instance *outputInstance,
+                        //    _Outptr_result_maybenull_ MI_InstanceA *outputInstance,
                            _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result PerformInventoryState(_In_ ProviderCallbackContext *provContext,  
@@ -138,6 +133,15 @@ MI_Result Exec_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
                              _Inout_ MI_Uint32 *resultStatus,
                              _Inout_ MI_Boolean* canceled,
                              _Outptr_result_maybenull_ ResourceErrorList *resourceErrorList,
+                             _Outptr_result_maybenull_ MI_Instance **extendedError);
+
+MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,   
+                             _In_ MI_Application *miApp,
+                             _In_ MI_Session *miSession,
+                             _In_ MI_Instance *instance,
+                             _In_ const MI_Instance *regInstance,
+                             _In_ MI_Uint32 flags,
+                             _Inout_ MI_Uint32 *resultStatus,
                              _Outptr_result_maybenull_ MI_Instance **extendedError);
 
 MI_Result Exec_PSProvider(_In_ ProviderCallbackContext *provContext, 

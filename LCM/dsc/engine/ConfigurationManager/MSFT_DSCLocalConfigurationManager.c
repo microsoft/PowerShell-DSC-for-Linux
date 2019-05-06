@@ -3,7 +3,7 @@
 
    Copyright (c) Microsoft Corporation
 
-   All rights reserved. 
+   All rights reserved.
 
    MIT License
 
@@ -49,7 +49,7 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Load(
     if(miResult != MI_RESULT_OK)
     {
         MI_PostCimError(context, cimErrorDetails);
-        MI_Instance_Delete(cimErrorDetails);        
+        MI_Instance_Delete(cimErrorDetails);
         return;
     }
 
@@ -61,18 +61,16 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Unload(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,
     _In_ MI_Context* context)
 {
-   
     DSC_EventWriteMessageUnLoadingDscEngineProvider();
     UnloadFromProvider(self, context);
 
 #if defined(BUILD_OMS)
         // Set the SIGCHLD signal to default
         // This is to ensure that if any provider has overriden this specific signal
-        // provider DSC reset it back to the previous signal. 
+        // provider DSC reset it back to the previous signal.
     sigaction(SIGCHLD, &oldAction, NULL);
     memset(&oldAction, 0, sizeof(struct sigaction));
 #endif
-  
 }
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_SendConfiguration(
@@ -85,8 +83,8 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_SendConfiguration(
     _In_opt_ const MSFT_DSCLocalConfigurationManager_SendConfiguration* in)
 {
     SetJobId();
-    
-    // Debug Log 
+
+    // Debug Log
     DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
     if (!in || !in->ConfigurationData.exists)
     {
@@ -107,17 +105,16 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_SendConfigurationApply(
     _In_opt_ const MSFT_DSCLocalConfigurationManager_SendConfigurationApply* in)
 {
     SetJobId();
-    
-    // Debug Log 
+
+    // Debug Log
     DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
     if (!in || !in->ConfigurationData.exists)
     {
         MI_Context_PostResult(context, MI_RESULT_INVALID_PARAMETER);
         ResetJobId();
-        return;        
+        return;
     }
     Invoke_SendConfigurationApply(self, context, nameSpace, className, methodName, instanceName, in);
-    
 }
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_GetConfiguration(
@@ -130,9 +127,9 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_GetConfiguration(
     _In_opt_ const MSFT_DSCLocalConfigurationManager_GetConfiguration* in)
 {
     SetJobId();
-    
-    // Debug Log 
-    DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace); 
+
+    // Debug Log
+    DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
     Invoke_GetConfiguration(self, context, nameSpace, className, methodName, instanceName, in);
 }
 
@@ -146,11 +143,10 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_ApplyConfiguration(
     _In_opt_ const MSFT_DSCLocalConfigurationManager_ApplyConfiguration* in)
 {
     SetJobId();
-    
-    // Debug Log 
+
+    // Debug Log
     DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
     Invoke_ApplyConfiguration(self, context, nameSpace, className, methodName, instanceName, in);
-    
 }
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_SendMetaConfigurationApply(
@@ -163,17 +159,16 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_SendMetaConfigurationApply
     _In_opt_ const MSFT_DSCLocalConfigurationManager_SendMetaConfigurationApply* in)
 {
     SetJobId();
-    // Debug Log 
-    DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);    
+    // Debug Log
+    DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
 
     if (!in || !in->ConfigurationData.exists)
     {
         MI_Context_PostResult(context, MI_RESULT_INVALID_PARAMETER);
         ResetJobId();
-        return;        
+        return;
     }
     Invoke_SendMetaConfigurationApply(self, context, nameSpace, className, methodName, instanceName, in);
-
 }
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_GetMetaConfiguration(
@@ -186,9 +181,9 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_GetMetaConfiguration(
     _In_opt_ const MSFT_DSCLocalConfigurationManager_GetMetaConfiguration* in)
 {
     SetJobId();
-    
-    // Debug Log 
-    DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);  
+
+    // Debug Log
+    DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
     Invoke_GetMetaConfiguration(self, context, nameSpace, className, methodName, instanceName, in);
 }
 
@@ -222,7 +217,6 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_RollBack(
         return;
     }
     Invoke_RollBack(self, context, nameSpace, className, methodName, instanceName, in);
-    
 }
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_TestConfiguration(
@@ -237,7 +231,7 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_TestConfiguration(
     MI_Instance *cimErrorDetails = NULL;
     SetJobId();
 
-    // Debug Log 
+    // Debug Log
     DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
     // If configuration data exists, output error mentioning this is reserved for future use
     if (in && in->configurationData.exists)
@@ -261,17 +255,16 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_PerformRequiredConfigurati
     _In_opt_ const MSFT_DSCLocalConfigurationManager_PerformRequiredConfigurationChecks* in)
 {
     SetJobId();
-    
-    // Debug Log 
+
+    // Debug Log
     DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
     if (!in->Flags.exists || !(in->Flags.value == TASK_REGULAR || in->Flags.value == TASK_REBOOT || in->Flags.value == TASK_BOOTSTRAP ))
     {
         MI_Context_PostResult(context, MI_RESULT_INVALID_PARAMETER);
         ResetJobId();
-        return;        
+        return;
     }
     Invoke_PerformRequiredConfigurationChecks(self, context, nameSpace, className, methodName, instanceName, in);
-
 }
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_StopConfiguration(
@@ -289,7 +282,6 @@ void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_StopConfiguration(
     DSC_EventWriteMSFTMethodParameters(__WFUNCTION__,className,methodName,nameSpace);
     Invoke_StopConfiguration(self, context, nameSpace, className, methodName, instanceName, in);
 }
-
 
 void MI_CALL MSFT_DSCLocalConfigurationManager_Invoke_PerformInventory(
     _In_opt_ MSFT_DSCLocalConfigurationManager_Self* self,

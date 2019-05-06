@@ -13,7 +13,8 @@ INCLUDES = \
 	$(DSCTOP)/common/inc \
 	$(DSCTOP)/engine/EngineHelper \
 	$(TOP)/codec/common \
-	$(OMI)/nits/base
+	$(OMI)/nits/base \
+	$(TOP)/json_parson
 
 DEFINES = MI_CONST= HOOK_BUILD $(BUILD_OMS)
 

@@ -112,6 +112,7 @@ dsc098: lcm098 providers
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
@@ -136,6 +137,7 @@ dsc100: lcm100 providers
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
@@ -159,6 +161,7 @@ dsc110: lcm110 providers
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
@@ -656,6 +659,7 @@ providersreg:
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(CONFIG_DATADIR)/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done 
