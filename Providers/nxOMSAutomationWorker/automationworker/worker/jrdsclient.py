@@ -51,6 +51,8 @@ class JRDSClient:
         response = self.issue_request(self.httpClient.get(url))
 
         if response.status_code == 200:
+            if response.deserialized_data is None:
+                return None
             return response.deserialized_data["value"]
 
         raise Exception("Unable to get sandbox actions. [status=" + str(response.status_code) + "]")
