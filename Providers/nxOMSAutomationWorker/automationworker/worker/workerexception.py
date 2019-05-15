@@ -32,6 +32,15 @@ class JrdsAuthorizationException(Exception):
             self.message = msg
 
 
+class Jrds503Exception(Exception):
+    def __init___(self, msg=None):
+        my_message = "JRDS returned status code 503 exception."
+        if msg is None:
+            self.message = my_message
+        else:
+            self.message = my_message + "\n" + msg
+
+
 class SandboxRuntimeException(Exception):
     def __init__(self, msg=None):
         if msg is None:
