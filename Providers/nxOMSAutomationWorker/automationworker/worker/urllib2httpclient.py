@@ -140,8 +140,11 @@ class Urllib2HttpClient(HttpClient):
 
         try:
             response = self.issue_request(url, headers=headers, method=self.GET)
-        except urllib2.HTTPError:
-            exception_type, error = sys.exc_info()[:2]
+        except urllib2.HTTPError, e:
+            if e and e.code:
+                return RequestResponse(e.code)
+            else:
+                exception_type, error = sys.exc_info()[:2]
             return RequestResponse(error.code)
 
         return RequestResponse(response.getcode(), response.read())
