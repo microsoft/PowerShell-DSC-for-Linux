@@ -66,9 +66,14 @@ class JRDSClient:
         response = self.issue_request(lambda: self.httpClient.get(url))
 
         if response.status_code == 200:
-            if response.deserialized_data is None:
+            try:
+                if response.deserialized_data is None or "value" not in response.deserialized_data:
+                    return None
+            except TypeError:
                 return None
-            return response.deserialized_data["value"]
+
+        # success path
+        return response.deserialized_data["value"]
 
         raise Exception("Unable to get sandbox actions. [status=" + str(response.status_code) + "]")
 
@@ -104,6 +109,11 @@ class JRDSClient:
             raise JrdsSandboxTerminated()
 
         if response.status_code == 200:
+            try:
+                if response.deserialized_data is None or "value" not in response.deserialized_data:
+                    return []
+            except TypeError:
+                return []
             job_actions = response.deserialized_data["value"]
             if len(job_actions) != 0:
                 message_metadatas = [action["MessageMetadata"] for action in job_actions]
@@ -432,8 +442,12 @@ class JRDSClient:
             return response.deserialized_data
         elif response.status_code == 404:
             raise AutomationAssetNotFound()
+        elif response.status_code == 503:
+            raise Jrds503Exception()
 
-        raise Exception("An unknown error occurred. Unable to set the value of the specified variable asset.")
+
+        raise Exception("An unknown error occurred. Unable to set the value of the specified variable asset. status code: "
+                        + str(response.status_code))
 
     def get_credential_asset(self, name):
         """Gets the requested automation credential asset.

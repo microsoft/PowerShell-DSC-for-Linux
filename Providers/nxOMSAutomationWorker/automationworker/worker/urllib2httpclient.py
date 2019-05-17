@@ -141,11 +141,14 @@ class Urllib2HttpClient(HttpClient):
         try:
             response = self.issue_request(url, headers=headers, method=self.GET)
         except urllib2.HTTPError, e:
-            if e and e.code:
+            if e is not None and e.code is not None:
                 return RequestResponse(e.code)
             else:
                 exception_type, error = sys.exc_info()[:2]
             return RequestResponse(error.code)
+        except RetryAttemptExceededException :
+            # return an http timeout status code when all retries fail due to timeout
+            return RequestResponse(408)
 
         return RequestResponse(response.getcode(), response.read())
 
@@ -170,9 +173,15 @@ class Urllib2HttpClient(HttpClient):
 
         try:
             response = self.issue_request(url, headers=headers, method=self.POST, data=serial_data)
-        except urllib2.HTTPError:
-            exception_type, error = sys.exc_info()[:2]
+        except urllib2.HTTPError, e:
+            if e is not None and e.code is not None:
+                return RequestResponse(e.code)
+            else:
+                exception_type, error = sys.exc_info()[:2]
             return RequestResponse(error.code)
+        except RetryAttemptExceededException:
+            # return an http timeout status code when all retries fail due to timeout
+            return RequestResponse(408)
 
         return RequestResponse(response.getcode(), response.read())
 
@@ -197,9 +206,15 @@ class Urllib2HttpClient(HttpClient):
 
         try:
             response = self.issue_request(url, headers=headers, method=self.PUT, data=serial_data)
-        except urllib2.HTTPError:
-            exception_type, error = sys.exc_info()[:2]
+        except urllib2.HTTPError, e:
+            if e is not None and e.code is not None:
+                return RequestResponse(e.code)
+            else:
+                exception_type, error = sys.exc_info()[:2]
             return RequestResponse(error.code)
+        except RetryAttemptExceededException:
+            # return an http timeout status code when all retries fail due to timeout
+            return RequestResponse(408)
 
         return RequestResponse(response.getcode(), response.read())
 
@@ -224,8 +239,14 @@ class Urllib2HttpClient(HttpClient):
 
         try:
             response = self.issue_request(url, headers=headers, method=self.DELETE, data=serial_data)
-        except urllib2.HTTPError:
-            exception_type, error = sys.exc_info()[:2]
+        except urllib2.HTTPError, e:
+            if e is not None and e.code is not None:
+                return RequestResponse(e.code)
+            else:
+                exception_type, error = sys.exc_info()[:2]
             return RequestResponse(error.code)
+        except RetryAttemptExceededException:
+            # return an http timeout status code when all retries fail due to timeout
+            return RequestResponse(408)
 
         return RequestResponse(response.getcode(), response.read())
