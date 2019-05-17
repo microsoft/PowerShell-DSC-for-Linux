@@ -5,15 +5,15 @@
 """Tracer module."""
 
 import inspect
-import logging
-import logging.handlers
+
 import os
 import sys
 import threading
-import time
+
 import traceback
 
 import configuration
+import locallogger
 import util
 from httpclientfactory import HttpClientFactory
 from jrdsclient import JRDSClient
@@ -29,8 +29,7 @@ hybrid_worker_group_name = None
 worker_version = None
 sandbox_id = None
 
-default_logger = None
-sandbox_stdout = None
+
 
 
 def safe_trace(func):
@@ -38,11 +37,11 @@ def safe_trace(func):
         try:
             func(*args, **kwargs)
         except Exception:
-            if default_logger is None:
+            if locallogger.default_logger is None:
                 print traceback.format_exc()
                 print "Logger not defined."
             else:
-                default_logger.critical(traceback.format_exc())
+                locallogger.default_logger.critical(traceback.format_exc())
 
     return decorated_func
 
@@ -59,7 +58,7 @@ def background_thread(func):
 def init():
     """Initializes all required variable for the tracer."""
     global jrds_client, jrds_cert_path, jrds_key_path, jrds_base_uri, subscription_id, \
-        account_id, machine_id, hybrid_worker_group_name, worker_version, activity_id, sandbox_id
+        account_id, machine_id, hybrid_worker_group_name, worker_version, sandbox_id
 
     # Create the http client
     http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),
@@ -85,48 +84,7 @@ def init():
 
     # initialize the loggers for for all components except runbook
     if configuration.get_component() != "runbook":
-        init_logger()
-
-
-def init_logger():
-    global default_logger, sandbox_stdout, sandbox_id
-
-    if sandbox_id is not None:
-        log_file_name = configuration.get_component() + sandbox_id
-    else:
-        log_file_name = configuration.get_component()
-
-    file_name = os.path.join(configuration.get_working_directory_path(), log_file_name + '.log')
-    logging.Formatter.converter = time.gmtime
-
-    # Default logger
-    default_logger = logging.getLogger("default_logger")
-    default_logger.setLevel(logging.INFO)
-
-    # Logger for the sandbox traces coming back to worker
-    sandbox_stdout = logging.getLogger("sandbox_stdout_logger")
-    sandbox_stdout.setLevel(logging.INFO)
-
-    # Default rotating file handler write traces with the specified format to disk.
-    default_rf_handler = logging.handlers.RotatingFileHandler(file_name, maxBytes=10485760, backupCount=5)
-    formatter = logging.Formatter('%(asctime)s (' + str(os.getpid()) + ')' + configuration.get_component() +
-                                  ' : %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
-    default_rf_handler.setFormatter(formatter)
-    default_logger.addHandler(default_rf_handler)
-
-    # Traces coming from sandbox child process and collected by the worker are already formatted, hence no formatter
-    # needed.
-    worker_sandbox_rf_handler = logging.handlers.RotatingFileHandler(file_name, maxBytes=10485760, backupCount=5)
-    sandbox_stdout.addHandler(worker_sandbox_rf_handler)
-
-    # Stdout handler (Worker traces have to be formatted).
-    log_stream = logging.StreamHandler(sys.stdout)
-    log_stream.setFormatter(formatter)
-    default_logger.addHandler(log_stream)
-
-    # Stdout handler (traces coming from child process are already formatted).
-    sandbox_log_stream = logging.StreamHandler(sys.stdout)
-    sandbox_stdout.addHandler(sandbox_log_stream)
+        locallogger.init_logger()
 
 
 @background_thread
@@ -167,7 +125,7 @@ def trace_generic_hybrid_worker_event(event_id, task_name, message, t_id, keywor
         return
     # # # # # # # # # # # # # # # # # # # #
 
-    if jrds_client is None or default_logger is None:
+    if jrds_client is None or locallogger.default_logger is None:
         init()
 
     if debug and not configuration.get_debug_traces():
@@ -185,12 +143,7 @@ def trace_generic_hybrid_worker_event(event_id, task_name, message, t_id, keywor
 
     # local trace
     # we prioritize cloud traces, do not raise exception if local tracing raises an exception
-    try:
-        if default_logger is not None:
-            default_logger.info(message)
-    except Exception, e:
-        print str(e)
-        pass
+    locallogger.log_info(message)
 
     # MDS
     if not debug:
@@ -217,7 +170,7 @@ def trace_etw_event(event_id, activity_id, log_type, arg_array):
         return
     # # # # # # # # # # # # # # # # # # # #
 
-    if jrds_client is None or default_logger is None:
+    if jrds_client is None or locallogger.default_logger is None:
         init()
 
     # MDS
@@ -305,7 +258,7 @@ def log_warning_trace(message):
 # worker specific traces
 # traces in this section are mainly for the worker component
 def log_sandbox_stdout(trace_content):
-    sandbox_stdout.info(trace_content)
+    locallogger.sandbox_stdout.info(trace_content)
 
 
 def log_worker_starting(version):
