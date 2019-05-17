@@ -9,6 +9,7 @@ import sys
 
 import configuration
 import serializerfactory
+import locallogger
 
 
 class HttpClient:
@@ -127,4 +128,5 @@ class RequestResponse:
             try:
                 self.deserialized_data = self.json.loads(self.raw_data)
             except ValueError:
+                locallogger.log_warning("Could not deserialize response body: %s" %self.raw_data)
                 self.deserialized_data = None
