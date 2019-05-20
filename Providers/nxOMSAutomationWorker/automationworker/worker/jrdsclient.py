@@ -70,10 +70,10 @@ class JRDSClient:
         if response.status_code == 200:
             try:
                 if response.deserialized_data is None or "value" not in response.deserialized_data:
-                    locallogger.log_info("INFO: Could not deserialize get_sandbox_actions response body: %s" % self.raw_data)
+                    locallogger.log_info("INFO: Could not deserialize get_sandbox_actions response body: %s" % str(response.deserialized_data))
                     return None
             except TypeError:
-                locallogger.log_info("INFO: Could not deserialize get_sandbox_actions response body: %s" % self.raw_data)
+                locallogger.log_info("INFO: Could not deserialize get_sandbox_actions response body: %s" % str(response.deserialized_data))
                 return None
 
         # success path
@@ -116,11 +116,11 @@ class JRDSClient:
             try:
                 if response.deserialized_data is None or "value" not in response.deserialized_data:
                     locallogger.log_info(
-                        "INFO: Could not deserialize get_job_actions response body: %s" % self.raw_data)
+                        "INFO: Could not deserialize get_job_actions response body: %s" % str(response.deserialized_data))
                     return []
             except TypeError:
                 locallogger.log_info(
-                    "INFO: Could not deserialize get_job_actions response body: %s" % self.raw_data)
+                    "INFO: Could not deserialize get_job_actions response body: %s" % str(response.deserialized_data))
                 return []
             job_actions = response.deserialized_data["value"]
             if len(job_actions) != 0:
