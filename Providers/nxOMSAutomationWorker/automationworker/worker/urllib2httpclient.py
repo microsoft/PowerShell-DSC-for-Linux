@@ -81,6 +81,10 @@ def request_retry_handler(func):
                     if type(exception).__name__ == 'SSLError':
                         time.sleep(5 + iteration)
                         continue
+                elif isinstance(exception, urllib2.URLError):
+                    if "name resolution" in exception.reason:
+                        time.sleep(5 + iteration)
+                        continue
                 raise exception
     return decorated_func
 
