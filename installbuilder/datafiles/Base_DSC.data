@@ -182,7 +182,7 @@ fi
 
 %Preinstall_300
 echo "Cleanning up existing dsc_hosts..."
-kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | awk '{$1=$1;print}' | cut -d' ' -f 1) 1&> /dev/null
+ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | awk "{$1=$1;print}" | cut -d" " -f 1 |  while read line; do kill $line ; done
 rm -f /opt/dsc/dsc_host_lock
 echo "Cleaned up existing dsc_hosts..."
 
@@ -382,7 +382,7 @@ chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 
 %Preuninstall_899
 echo "Cleanning up existing dsc_hosts before uninstall..."
-kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | awk '{$1=$1;print}' | cut -d' ' -f 1) 1&> /dev/null
+ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | awk "{$1=$1;print}" | cut -d" " -f 1 |  while read line; do kill $line ; done
 rm -f /opt/dsc/dsc_host_lock
 echo "Cleaned up existing dsc_hosts before uninstall..."
 
