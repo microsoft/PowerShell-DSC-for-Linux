@@ -168,7 +168,7 @@ def perform_inventory(args):
     # Open the inventory lock file. This also creates a file if it does not exist.
     inventorylock_filehandle = open(inventorylock_path, 'w')
     printVerboseMessage("Opened the inventory lock file at the path '" + inventorylock_path + "'")
-    retVal = 0
+    retval = 0
     inventorylock_acquired = True
 
     try:
