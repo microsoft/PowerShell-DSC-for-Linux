@@ -38,12 +38,21 @@ def write_omsconfig_host_telemetry(message, pathToCurrentScript='', level = 'INF
     with open(dsc_host_telemetry_path, 'w+') as host_telemetry_file:
         json.dump(host_telemetry_json, host_telemetry_file)
 
+def get_agent_id():
+    agentid_path = "/etc/opt/omi/conf/omsconfig/agentid"
+    if os.path.isfile(agentid_path):
+        with open(agentid_path, "r") as agentid_file:
+            agent_id = agentid_file.read(36) # read 36 characters from the file
+            return agent_id
+    return "00000000-0000-0000-0000-000000000000"
+
 def write_omsconfig_host_switch_event(pathToCurrentScript, dsc_host_switch_exists):
     if dsc_host_switch_exists:
         message = 'Using dsc_host'
     else:
         message = 'Falling back to OMI'
-    write_omsconfig_host_telemetry(message, pathToCurrentScript)
+    telemetry_message = '[%s] %s' % (get_agent_id(), message)
+    write_omsconfig_host_telemetry(telemetry_message, pathToCurrentScript)
 
 def write_omsconfig_host_log(message, pathToCurrentScript, level = 'INFO'):
     log_entry_template = '[%s] [%d] [%s] [%d] [%s:%d] %s'
