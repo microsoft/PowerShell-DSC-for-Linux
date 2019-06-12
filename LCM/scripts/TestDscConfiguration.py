@@ -6,6 +6,7 @@ from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig
 from imp                  import load_source
 from os.path              import dirname, isfile, join, realpath
 from time                 import sleep
+from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -47,7 +48,7 @@ stdout = ''
 stderr = ''
 
 if use_omsconfig_host:
-    if (isfile(dsc_host_lock_path):
+    if isfile(dsc_host_lock_path):
         try:
             # Open the dsc host lock file. This also creates a file if it does not exist
             dschostlock_filehandle = open(dsc_host_lock_path, 'w')
