@@ -10,7 +10,7 @@ import os.path
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log
 from imp                import load_source
 from os.path            import dirname, isfile, join, realpath
-from fcntl              import flock, LOCK_EX, LOCK_UN
+from fcntl              import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
