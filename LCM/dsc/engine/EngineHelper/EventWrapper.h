@@ -28,7 +28,7 @@
 #define __WFUNCTION__ WIDEN(__FUNCTION__)
 #define _STRINGEMPTY_ MI_T("")
 
-#define OMSCONFIG_HOST_TELEMETRY_PATH "/var/opt/microsoft/omsconfig/status/omsconfighost"
+#define OMSCONFIG_HOST_TELEMETRY_PATH "/var/opt/microsoft/omsconfig/status"
 
 typedef enum _DSC_Log_Level
 {
