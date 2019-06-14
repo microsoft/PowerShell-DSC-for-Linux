@@ -8,32 +8,20 @@ import signal
 
 def write_omsconfig_host_telemetry(message, pathToCurrentScript='', level = 'INFO'):
     omsagent_telemetry_path = '/var/opt/microsoft/omsconfig/status'
-    dsc_host_telemetry_path = os.path.join(omsagent_telemetry_path, 'omsconfighost')
+    event_file_name = 'omsconfighost.%d.tld' % (int(round(time.time() * 1000000000)))
+    dsc_host_telemetry_path = os.path.join(omsagent_telemetry_path, event_file_name)
 
     if not os.path.exists(omsagent_telemetry_path):
         os.makedirs(omsagent_telemetry_path)
-
-    if os.path.isfile(dsc_host_telemetry_path):
-        with open(dsc_host_telemetry_path) as host_telemetry_file:
-            try:
-                host_telemetry_json = json.load(host_telemetry_file)
-            except:
-                host_telemetry_json = {}
-                host_telemetry_json['operation'] = 'omsconfighost'
-                host_telemetry_json['message'] = ''
-                host_telemetry_json['success'] = 1
-    else:
-        os.mknod(dsc_host_telemetry_path)
-        host_telemetry_json = {}
-        host_telemetry_json['operation'] = 'omsconfighost'
-        host_telemetry_json['message'] = ''
-        host_telemetry_json['success'] = 1
 
     msg_template = '<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>'
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y/%m/%d %H:%M:%S')
     msg_buffer = msg_template % (timestamp, os.getpid(), level, 0, pathToCurrentScript, 0, message)
 
-    host_telemetry_json['message'] += msg_buffer
+    host_telemetry_json = {}
+    host_telemetry_json['operation'] = 'omsconfighost'
+    host_telemetry_json['message'] = msg_buffer
+    host_telemetry_json['success'] = 1
 
     with open(dsc_host_telemetry_path, 'w+') as host_telemetry_file:
         json.dump(host_telemetry_json, host_telemetry_file)
