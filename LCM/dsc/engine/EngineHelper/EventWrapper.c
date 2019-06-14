@@ -130,7 +130,7 @@ void DSCFileVPutTelemetry(
     event_timestamp_sec = event_timestamp_timespec.tv_sec;
     event_timestamp_ns = event_timestamp_timespec.tv_nsec;
     event_timestamp = (uint64_t) event_timestamp_sec * 1000000000 + (uint64_t) event_timestamp_ns;
-    Stprintf(eventfilename_buffer, EVENTPATHSIZE, PAL_T("%s/%" PRIu64  ".tld"), OMSCONFIG_HOST_TELEMETRY_PATH, event_timestamp);
+    Stprintf(eventfilename_buffer, EVENTPATHSIZE, PAL_T("%s/omsconfighost.%" PRIu64  ".tld"), OMSCONFIG_HOST_TELEMETRY_PATH, event_timestamp);
 
     int current_pid = getpid();
 
@@ -221,7 +221,7 @@ void DSCFilePutTelemetry(
     event_timestamp_sec = event_timestamp_timespec.tv_sec;
     event_timestamp_ns = event_timestamp_timespec.tv_nsec;
     event_timestamp = (uint64_t) event_timestamp_sec * 1000000000 + (uint64_t) event_timestamp_ns;
-    Stprintf(eventfilename_buffer, EVENTPATHSIZE, PAL_T("%s/%" PRIu64  ".tld"), OMSCONFIG_HOST_TELEMETRY_PATH, event_timestamp);
+    Stprintf(eventfilename_buffer, EVENTPATHSIZE, PAL_T("%s/omsconfighost.%" PRIu64  ".tld"), OMSCONFIG_HOST_TELEMETRY_PATH, event_timestamp);
 
     int current_pid = getpid();
 
