@@ -19,6 +19,9 @@
 #include "EventWrapper.h"
 #include <pal/cpu.h>
 #include <unistd.h>
+#include <time.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include "parson.h"
 
@@ -28,6 +31,7 @@ static FILE *_DSCDetailedLogFile;
 static Log_Level _DSCLogLevel = OMI_WARNING;
 static Log_Level _DSCDetailedLogLevel = OMI_VERBOSE;
 
+#define EVENTPATHSIZE 1024
 #define FMTSIZE 1024
 #define MSGSIZE 4096
 #define BIGMSGSIZE 1024 * 64
@@ -115,6 +119,18 @@ void DSCFileVPutTelemetry(
     char formatter_msg_buffer[MSGSIZE];
     char timestamp_buffer[TIMESTAMP_SIZE];
     _GetDSCTimeStamp(timestamp_buffer);
+    
+    char eventfilename_buffer[EVENTPATHSIZE];
+    uint64_t event_timestamp;
+    long int event_timestamp_ns;
+    time_t event_timestamp_sec;
+    struct event_timestamp_timespec spec;
+
+    clock_gettime(CLOCK_REALTIME, &event_timestamp_timespec);
+    event_timestamp_sec = event_timestamp_timespec.tv_sec;
+    event_timestamp_ns = event_timestamp_timespec.tv_nsec;
+    event_timestamp = (uint64_t) event_timestamp_sec * 1000000000 + (uint64_t) event_timestamp_ns;
+    Stprintf(eventfilename_buffer, EVENTPATHSIZE, PAL_T("%s/%" PRIu64  ".tld"), OMSCONFIG_HOST_TELEMETRY_PATH, event_timestamp);
 
     int current_pid = getpid();
 
@@ -140,7 +156,7 @@ void DSCFileVPutTelemetry(
     json_object_set_string(telemetry_root_object, "message", new_msg_buffer);
     json_object_set_boolean(telemetry_root_object, "success", 1);
 
-    json_serialize_to_file(telemetry_root_value, OMSCONFIG_HOST_TELEMETRY_PATH);
+    json_serialize_to_file(telemetry_root_value, eventfilename_buffer);
 }
 
 void DSCFilePutLog(
@@ -194,6 +210,18 @@ void DSCFilePutTelemetry(
     char formatter_msg_buffer[MSGSIZE];
     char timestamp_buffer[TIMESTAMP_SIZE];
     _GetDSCTimeStamp(timestamp_buffer);
+    
+    char eventfilename_buffer[EVENTPATHSIZE];
+    uint64_t event_timestamp;
+    long int event_timestamp_ns;
+    time_t event_timestamp_sec;
+    struct event_timestamp_timespec spec;
+
+    clock_gettime(CLOCK_REALTIME, &event_timestamp_timespec);
+    event_timestamp_sec = event_timestamp_timespec.tv_sec;
+    event_timestamp_ns = event_timestamp_timespec.tv_nsec;
+    event_timestamp = (uint64_t) event_timestamp_sec * 1000000000 + (uint64_t) event_timestamp_ns;
+    Stprintf(eventfilename_buffer, EVENTPATHSIZE, PAL_T("%s/%" PRIu64  ".tld"), OMSCONFIG_HOST_TELEMETRY_PATH, event_timestamp);
 
     int current_pid = getpid();
 
@@ -223,7 +251,7 @@ void DSCFilePutTelemetry(
     json_object_set_string(telemetry_root_object, "message", new_msg_buffer);
     json_object_set_boolean(telemetry_root_object, "success", 1);
 
-    json_serialize_to_file(telemetry_root_value, OMSCONFIG_HOST_TELEMETRY_PATH);
+    json_serialize_to_file(telemetry_root_value, eventfilename_buffer);
 }
 
 void DSCLog_Close()
