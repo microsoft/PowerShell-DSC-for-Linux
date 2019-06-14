@@ -22,7 +22,7 @@ INCLUDES = \
 
 DEFINES = MI_CONST= HOOK_BUILD $(BUILD_OMS)
 
-LIBRARIES = dsc_library mi $(PALLIBS) ssl ConfigurationManager CAEngine EngineHelper ModuleHandler curl micodec mofparser base pal stdc++
+LIBRARIES = dsc_library mi $(PALLIBS) ssl ConfigurationManager CAEngine EngineHelper ModuleHandler curl micodec mofparser base pal stdc++ rt
 
 include $(OMI)/mak/rules.mak
 
