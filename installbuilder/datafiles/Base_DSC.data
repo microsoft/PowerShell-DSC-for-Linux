@@ -331,11 +331,31 @@ fi
 cp -R /opt/microsoft/${{SHORT_NAME}}/Scripts $OMI_LIB/Scripts
 
 # create symlink from /opt/omi/lib/libcurl.so.4 to wherever libcurl.so is on the system
+#if BUILD_OMS == 1
+
+CURL_PATH=`which curl`
+LIBCURL_SO=`ldd ${CURL_PATH} | grep libcurl.so | awk '{print $3}'`
+
+# if libcurl was not found (in case of libcurl-gnutls-dev package) let use ldconfig intead.
+if [ -z "$LIBCURL_SO" ]; then
+  echo "Warning: Unable to find libcurl.so using curl CMD: '${CURL_PATH}'. Trying again with ldconfig."
+
+  LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
+  if [ -z "$LIBCURL_SO" ]; then
+    echo "Error: Unable to find libcurl in ldconfig. Please install curl."
+    exit 1
+  fi
+fi
+
+#else
+
 LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
    echo "Error: Unable to find libcurl in ldconfig.  Please install curl."
    exit 1
 fi
+
+#endif
 
 ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.3
 ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.4
