@@ -31,7 +31,7 @@ def write_omsconfig_host_telemetry(message, pathToCurrentScript='', level = 'INF
 
     msg_template = '<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>'
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y/%m/%d %H:%M:%S')
-    msg_buffer = msg_template % (timestamp, os.getpid(), level, 0, pathToCurrentScript, 0, message)
+    msg_buffer = msg_template % (timestamp, os.getpid(), level, 0, pathToCurrentScript, 0, message.replace('"', '\\"'))
 
     host_telemetry_json['message'] += msg_buffer
 

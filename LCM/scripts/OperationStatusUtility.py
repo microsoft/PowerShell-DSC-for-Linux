@@ -203,10 +203,11 @@ def get_log_since_datetime(startDateTime):
     return logSinceDateTime
 
 def get_status_file_content(operation, success, message = ''):
+    escaped_message = message.replace('"', '\\"')
     status_file_content = {
         "operation": "Dsc" + str(operation),
         "success": str(success),
-        "message": str(message)
+        "message": str(escaped_message)
     }
 
     return status_file_content

@@ -177,6 +177,7 @@ def perform_inventory(args):
             flock(inventorylock_filehandle, LOCK_EX | LOCK_NB)
         except IOError:
             inventorylock_acquired = False
+            write_omsconfig_host_log('Failed to acquire inventory lock.', pathToCurrentScript, 'WARNING')
 
         if inventorylock_acquired:
             dschostlock_acquired = False
