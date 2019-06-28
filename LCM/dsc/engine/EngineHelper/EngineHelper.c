@@ -943,7 +943,9 @@ void DSC_WriteWarning1Param(_In_ MI_Context* context,
     GetResourceString1Param(messageID, param1, &pTempStr);
     if (pTempStr.str)
     {
+#if !defined(BUILD_OMS)
         MI_Context_WriteWarning(context, pTempStr.str);
+#endif
         DSC_EventWriteCUMethodWarning(pTempStr.str);
         Intlstr_Free(pTempStr);
     }
@@ -959,7 +961,9 @@ void DSC_WriteWarning2Param(_In_ MI_Context* context,
     GetResourceString2Param(messageID, param1, param2, &pTempStr);
     if (pTempStr.str)
     {
+#if !defined(BUILD_OMS)
         MI_Context_WriteWarning(context, pTempStr.str);
+#endif
         DSC_EventWriteCUMethodWarning(pTempStr.str);
         Intlstr_Free(pTempStr);
     }
@@ -983,7 +987,9 @@ void DSC_WriteWarningFromError1Param(_In_ MI_Context* context,
             GetResourceString2Param(messageID, param1, value.string, &pTempStr);
             if (pTempStr.str)
             {
+#if !defined(BUILD_OMS)
                 MI_Context_WriteWarning(context, pTempStr.str);
+#endif
                 DSC_EventWriteCUMethodWarning(pTempStr.str);
                 Intlstr_Free(pTempStr);
             }

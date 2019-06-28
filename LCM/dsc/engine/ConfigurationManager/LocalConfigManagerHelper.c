@@ -2029,7 +2029,11 @@ Cleanup:
         MI_Context* mi_context = (MI_Context*) lcmContext->context;
         Intlstr pTempStr = Intlstr_Null;
         GetResourceString1Param(ID_LCMHELPER_OVERWROTE_USER_SPECIFIED_REFRESH_FREQUENCY, overWroteUserSpecifiedRefreshFreqMins , &pTempStr);
+#if defined(BUILD_OMS)
+        DSC_LOG_WARNING("%s", pTempStr.str);
+#else
         MI_Context_WriteWarning(mi_context, pTempStr.str);
+#endif
         if(pTempStr.str)
         {
             Intlstr_Free(pTempStr);
@@ -2041,7 +2045,11 @@ Cleanup:
         MI_Context* mi_context = (MI_Context*) lcmContext->context;
         Intlstr pTempStr = Intlstr_Null;
         GetResourceString1Param(ID_LCMHELPER_OVERWROTE_USER_SPECIFIED_CONFMODE_FREQUENCY, overWroteUserSpecifiedConfModeFreqMins, &pTempStr);
+#if defined(BUILD_OMS)
+        DSC_LOG_WARNING("%s", pTempStr.str);
+#else
         MI_Context_WriteWarning(mi_context, pTempStr.str);
+#endif
         if (pTempStr.str)
         {
             Intlstr_Free(pTempStr);
@@ -3175,8 +3183,9 @@ void LCM_WriteMessage_Internal_TimeTaken(
             
         if (intlstr.str)
         {
-            //// No need when OMI is not in the picture
-            // MI_Context_WriteMessage(context, channel, intlstr.str);                
+#if !defined(BUILD_OMS)
+            MI_Context_WriteMessage(context, channel, intlstr.str);                
+#endif
             DSC_EventWriteMessageFromEngine(channel, resourceId, intlstr.str);
             Intlstr_Free(intlstr);
         }
@@ -3199,18 +3208,22 @@ void LCM_WriteMessage_Internal_Tokenized(
         GetFullMessageWithTokens(g_JobInformation.deviceName, resourceId, message, lcmContext, &intlstr);
         if (intlstr.str)
         { 
-            //// No need when OMI is not in the picture
-            // if (bRunWhatIf)
-            // { 
-            //     MI_Boolean flag=MI_FALSE;
-            //     //Messages from LCM are output to the user as the whatif prompt if whatif is enabled.
-            //     MI_Context_PromptUser((MI_Context*) lcmContext->context, intlstr.str, MI_PROMPTTYPE_NORMAL,&flag); 
-            // }
-            // else 
-            // {
-            //     MI_Context_WriteMessage((MI_Context*) lcmContext->context, channel, intlstr.str);
-            // }
-            // log to ETW
+#if defined(BUILD_OMS)
+            switch (channel)
+            {
+                case MI_WRITEMESSAGE_CHANNEL_DEBUG:
+                    DSC_LOG_DEBUG("%s", intlstr.str);
+                    break;
+                case MI_WRITEMESSAGE_CHANNEL_VERBOSE:
+                    DSC_LOG_VERBOSE("%s", intlstr.str);
+                    break;
+                case MI_WRITEMESSAGE_CHANNEL_WARNING:
+                    DSC_LOG_WARNING("%s", intlstr.str);
+                default:
+                    DSC_LOG_INFO("[channel=%d] %s", channel, intlstr.str);
+                    break;
+            }
+#else
             if(lcmContext->messageOperation==0 && lcmContext->messageItem==0) //There is no Action or Item only in the case of a provider message
             {
                 DSC_EventWriteDumpMessageFromBuiltinProvider(channel, resourceId, intlstr.str);
@@ -3222,7 +3235,7 @@ void LCM_WriteMessage_Internal_Tokenized(
             lcmContext->messageOperation=0;
             lcmContext->messageItem =0;
             Intlstr_Free(intlstr);
-            
+#endif
         }
         
     }
@@ -3266,18 +3279,19 @@ void LCM_WriteMessageInfo_Internal(
     _In_ MI_Uint32 channel, 
     _In_z_ const MI_Char *userSid)
 {
-    //// No need when OMI is not in the picture
-    // if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
-    // {
-    //     Intlstr resStr = Intlstr_Null;
-    //     const MI_Char *notNullComputerName = (computerName != NULL) ? computerName : g_JobInformation.deviceName;
-    //     GetResourceString2Param(ID_LCM_REPUDIATIONMSG, notNullComputerName, userSid, &resStr);
-    //     if (resStr.str )
-    //     {                  
-    //         MI_Context_WriteMessage((MI_Context*) lcmContext->context, channel, resStr.str);
-    //         Intlstr_Free(resStr);
-    //     }     
-    // }
+#if !defined(BUILD_OMS)
+    if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
+    {
+        Intlstr resStr = Intlstr_Null;
+        const MI_Char *notNullComputerName = (computerName != NULL) ? computerName : g_JobInformation.deviceName;
+        GetResourceString2Param(ID_LCM_REPUDIATIONMSG, notNullComputerName, userSid, &resStr);
+        if (resStr.str )
+        {                  
+            MI_Context_WriteMessage((MI_Context*) lcmContext->context, channel, resStr.str);
+            Intlstr_Free(resStr);
+        }     
+    }
+#endif
 }
 
 void LCM_BuildMessage(
@@ -3361,7 +3375,7 @@ void LCM_WriteMessageFromProvider(
 {
     LCM_WriteMessage_ProviderInternal(lcmContext, resourceId, channel, message);
 
-    
+
     return ;
 }
 
@@ -3375,29 +3389,28 @@ void LCM_WriteProgress(
     _In_ MI_Uint32 percentComplete,
     _In_ MI_Uint32 secondsRemaining)
 {
-    //// No need when OMI is not in the picture
-    // if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
-    // {
-    //     size_t targetLength=DEVICE_NAME_SIZE+Tcslen(currentOperation)+50; //+1 for "\0"
-    //     size_t result;
-    //     MI_Char* currentOpWithMachine= (MI_Char*) DSC_malloc(sizeof(MI_Char)*targetLength, NitsMakeCallSite(-3, NULL, NULL, 0));
-    //     if(currentOpWithMachine!=NULL)
-    //     {
-    //         result = Stprintf(currentOpWithMachine, targetLength,MI_T("[%T] %T") ,g_JobInformation.deviceName,currentOperation);
-    //         if (result != -1)
-    //         {
-    //             MI_Context_WriteProgress((MI_Context*) lcmContext->context, activity, currentOpWithMachine, statusDescroption, percentComplete, secondsRemaining);
+#if !defined(BUILD_OMS)
+    if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
+    {
+        size_t targetLength=DEVICE_NAME_SIZE+Tcslen(currentOperation)+50; //+1 for "\0"
+        size_t result;
+        MI_Char* currentOpWithMachine= (MI_Char*) DSC_malloc(sizeof(MI_Char)*targetLength, NitsMakeCallSite(-3, NULL, NULL, 0));
+        if(currentOpWithMachine!=NULL)
+        {
+            result = Stprintf(currentOpWithMachine, targetLength,MI_T("[%T] %T") ,g_JobInformation.deviceName,currentOperation);
+            if (result != -1)
+            {
+                MI_Context_WriteProgress((MI_Context*) lcmContext->context, activity, currentOpWithMachine, statusDescroption, percentComplete, secondsRemaining);
                                  
-    //         }
-    //         DSC_free(currentOpWithMachine);   
-    //     }
-    //     else
-    //     {
-    //         MI_Context_WriteProgress((MI_Context*) lcmContext->context, activity, currentOperation, statusDescroption, percentComplete, secondsRemaining);
-    //     }
-    // }
-
-    return ;
+            }
+            DSC_free(currentOpWithMachine);   
+        }
+        else
+        {
+            MI_Context_WriteProgress((MI_Context*) lcmContext->context, activity, currentOperation, statusDescroption, percentComplete, secondsRemaining);
+        }
+    }
+#endif
 }
 
 void LCM_WriteStreamParameter(
@@ -3407,10 +3420,12 @@ void LCM_WriteStreamParameter(
     _In_ MI_Type type,
     _In_ MI_Uint32 flags)
 {
+#if !defined(BUILD_OMS)
     if (lcmContext->context)
     {
         MI_Context_WriteStreamParameter(lcmContext->context, name, value, type, flags);
     }
+#endif
 }
 
 void LCM_WriteError(
@@ -3427,6 +3442,9 @@ void LCM_WriteError(
 
     ExtractCimErrorFields(instanceMIError, &result, &errorCategory, &errorCode, &errorMessage, &messageId, &errorType);
 
+#if defined(BUILD_OMS)
+    DSC_LOG_ERROR("Encounterd an error (%d) '%s'\n", errorCode, errorMessage);
+#else
     if (lcmContext != NULL && instanceMIError != NULL)
     {
         if((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
@@ -3438,12 +3456,8 @@ void LCM_WriteError(
                 // Ignore the failure, this doesn't impact the functionality.
             }
         }
-
-//        if (lcmContext->bReportErrorsToServer)
-//        {
-//            ReportStatusToServer(lcmContext, errorMessage, MI_T("LCM_WriteError"), MI_T("LCM_WriteError"), errorCode, MI_FALSE, /*isStatusReport*/ 0, instanceMIError);
-//        }
     }
+#endif
 }
 
 
@@ -3455,12 +3469,13 @@ void LCM_PromptUserFromProvider(
     _Out_ MI_Boolean *flag)
 {
     *flag = MI_TRUE;
+
+#if !defined(BUILD_OMS)
     if ((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context && promptType == MI_PROMPTTYPE_NORMAL)
     {
         MI_Context_PromptUser((MI_Context*) lcmContext->context, message,MI_PROMPTTYPE_NORMAL, flag);
     }
-
-    return ;
+#endif
 }
 
 
