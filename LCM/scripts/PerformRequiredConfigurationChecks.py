@@ -27,7 +27,7 @@ def main():
     except Exception:
         # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
         formattedExceptionMessage = format_exc()
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformRequiredConfigurationChecks.py: ' + formattedExceptionMessage)
+        write_omsconfig_host_log('Python exception raised from PerformRequiredConfigurationChecks.py: ' + formattedExceptionMessage, pathToCurrentScript, 'ERROR')
         raise
 
 def run_perform_required_configuration_checks():
@@ -67,9 +67,6 @@ def run_perform_required_configuration_checks():
         parameters.append("1")
         parameters.append("}")
 
-    # Save the starting timestamp without milliseconds
-    startDateTime = operationStatusUtility.get_current_time_no_ms()
-
     stdout = ''
     stderr = ''
 
@@ -108,13 +105,6 @@ def run_perform_required_configuration_checks():
         stdout, stderr = p.communicate()
 
     print(stdout)
-
-    # Python 3 returns an empty byte array into stderr on success
-    if stderr == '' or (version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == ''):
-        operationStatusUtility.write_success_to_status_file(operation)
-    else:
-        operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
-        print(stderr)
 
 if __name__ == "__main__":
     main()
