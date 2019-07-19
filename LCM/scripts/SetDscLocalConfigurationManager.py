@@ -22,7 +22,7 @@ operation = 'SetLCM'
 def usage():
     print("Usage:")
     print("    " + argv[0] + " -configurationmof FILE")
-    operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Incorrect parameters to SetDscLocalConfigurationManager.py: ' + str(argv))
+    write_omsconfig_host_log('Incorrect parameters to SetDscLocalConfigurationManager.py: ' + str(argv), pathToCurrentScript, 'WARNING')
     exit(1)
 
 def main(args):
@@ -33,7 +33,7 @@ def main(args):
     except Exception:
         # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
         formattedExceptionMessage = format_exc()
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from SetDscLocalConfigurationManager.py: ' + formattedExceptionMessage)
+        write_omsconfig_host_log('Python exception raised from SetDscLocalConfigurationManager.py: ' + formattedExceptionMessage, pathToCurrentScript, 'ERROR')
         raise
 
 def apply_meta_config(args):
@@ -46,7 +46,7 @@ def apply_meta_config(args):
     if (not isfile(args[2])):
         errorMessage = 'The provided configurationmof file does not exist: ' + str(args[2])
         print(errorMessage)
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Incorrect parameters to SetDscLocalConfigurationManager.py: ' + errorMessage)
+        write_omsconfig_host_log('Incorrect parameters to SetDscLocalConfigurationManager.py: ' + errorMessage, pathToCurrentScript, 'ERROR')
         exit(1)
 
     fileHandle = open(args[2], 'r')
@@ -96,10 +96,6 @@ def apply_meta_config(args):
             parameters.append("}")
 
         exit_code = 0
-
-        # Save the starting timestamp without milliseconds
-        startDateTime = operationStatusUtility.get_current_time_no_ms()
-
         stdout = ''
         stderr = ''
 
@@ -130,11 +126,12 @@ def apply_meta_config(args):
                 else:
                     print("dsc host lock already acuired by a different process")
             finally:
-                # Release dsc host file lock
-                flock(dschostlock_filehandle, LOCK_UN)
+                if dschostlock_filehandle:
+                    # Release dsc host file lock
+                    flock(dschostlock_filehandle, LOCK_UN)
 
-                # Close dsc host lock file handle
-                dschostlock_filehandle.close()
+                    # Close dsc host lock file handle
+                    dschostlock_filehandle.close()
         else:
             p = Popen(parameters, stdout=PIPE, stderr=PIPE)
             exit_code = p.wait()
@@ -145,13 +142,6 @@ def apply_meta_config(args):
         if ((exit_code != 0) or (stderr)):
             exit(1)
 
-        # Python 3 returns an empty byte array into stderr on success
-        if stderr == '' or (version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == ''):
-            operationStatusUtility.write_success_to_status_file(operation)
-            print("Successfully applied metaconfig.")
-        else:
-            operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
-            print(stderr)
     finally:
         fileHandle.close()
 

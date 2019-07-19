@@ -29,7 +29,7 @@ logger = nxDSCLog.ConsoleAndFileLogger()
 stdout = logger
 
 def usage():
-    operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Incorrect parameters to PerformInventory.py: ' + str(argv))
+    write_omsconfig_host_log('Incorrect parameters to PerformInventory.py: ' + str(argv), pathToCurrentScript, 'WARNING')
     print("""Usage: PerformInventory.py [OPTIONS]
 OPTIONS (case insensitive):
  --InMOF PATH_TO_INVENTORY.MOF
@@ -56,7 +56,7 @@ def main(args):
     except Exception:
         # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
         formattedExceptionMessage = format_exc()
-        operationStatusUtility.write_failure_to_status_file_no_log(operation, 'Python exception raised from PerformInventory.py: ' + formattedExceptionMessage)
+        write_omsconfig_host_log('Python exception raised from PerformInventory.py: ' + formattedExceptionMessage, pathToCurrentScript, 'ERROR')
         raise
 
 def perform_inventory(args):
@@ -204,9 +204,6 @@ def perform_inventory(args):
                 try:
                     system("rm -f " + dsc_reportdir + "/*")
 
-                    # Save the starting timestamp without milliseconds
-                    startDateTime = operationStatusUtility.get_current_time_no_ms()
-
                     process = Popen(parameters, stdout = PIPE, stderr = PIPE)
                     stdout, stderr = process.communicate()
                     retval = process.returncode
@@ -216,13 +213,6 @@ def perform_inventory(args):
                     if (retval > 0):
                         write_omsconfig_host_log('dsc_host failed with code = ' + str(retval), pathToCurrentScript)
                         exit(retval)
-
-                    # Python 3 returns an empty byte array into stderr on success
-                    if stderr == '' or (version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == ''):
-                        operationStatusUtility.write_success_to_status_file(operation)
-                    else:
-                        operationStatusUtility.write_failure_to_status_file(operation, startDateTime, stderr)
-                        printVerboseMessage(stderr)
 
                     # Combine reports together
                     reportFiles = listdir(dsc_reportdir)
