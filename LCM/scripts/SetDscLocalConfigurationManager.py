@@ -5,7 +5,7 @@ from subprocess           import PIPE, Popen
 from sys                  import argv, exc_info, exit, version_info
 from traceback            import format_exc
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
-from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
 
 pathToCurrentScript = realpath(__file__)
@@ -117,6 +117,7 @@ def apply_meta_config(args):
                     except IOError:
                         write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
                         sleep(60)
+                        stop_old_host_instances()
 
                 if dschostlock_acquired:
                     p = Popen(parameters, stdout=PIPE, stderr=PIPE)

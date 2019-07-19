@@ -6,7 +6,7 @@ from sys                  import argv
 from imp                  import load_source
 from os.path              import dirname, isfile, join, realpath
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
-from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
 
 pathToCurrentScript = realpath(__file__)
@@ -185,6 +185,7 @@ def main(argv):
                 except IOError:
                     write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
                     sleep(60)
+                    stop_old_host_instances()
 
             if dschostlock_acquired:
                 p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

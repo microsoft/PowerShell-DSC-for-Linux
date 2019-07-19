@@ -8,7 +8,7 @@ from subprocess           import Popen, PIPE
 from sys                  import argv, exc_info, exit, stdout, version_info
 from traceback            import format_exc
 from xml.dom.minidom      import parse
-from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
 
 pathToCurrentScript = realpath(__file__)
@@ -197,6 +197,7 @@ def perform_inventory(args):
                         except IOError:
                             write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
                             sleep(60)
+                            stop_old_host_instances()
                 else:
                     write_omsconfig_host_log('dsc_host lock file does not exist. Skipping this operation until next consistency hits.', pathToCurrentScript, 'WARNING')
 

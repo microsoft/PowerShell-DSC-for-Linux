@@ -102,7 +102,8 @@ def stop_old_host_instances():
     # If file was last modified more than 3 hours ago, we will kill the process
     if (timestamp_diff > 3600 * 3):
         try:
-            os.kill(last_host_pid, signal.SIGTERM)
             write_omsconfig_host_log('Killing dsc_host with pid = ' + str(last_host_pid) + ' since it is older than 3 hours.', 'stop_old_host_instances', 'WARNING')
+            os.kill(last_host_pid, signal.SIGTERM)
+            write_omsconfig_host_log('Killed dsc_host with pid = ' + str(last_host_pid) + ' since it was taking longer than 3 hours.', 'stop_old_host_instances', 'WARNING')
         except:
             pass
