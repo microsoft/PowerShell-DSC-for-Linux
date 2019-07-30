@@ -76,8 +76,8 @@ class JRDSClient:
                 locallogger.log_info("INFO: Could not deserialize get_sandbox_actions response body: %s" % str(response.deserialized_data))
                 return None
 
-        # success path
-        return response.deserialized_data["value"]
+            # success path
+            return response.deserialized_data["value"]
 
         raise Exception("Unable to get sandbox actions. [status=" + str(response.status_code) + "]")
 
