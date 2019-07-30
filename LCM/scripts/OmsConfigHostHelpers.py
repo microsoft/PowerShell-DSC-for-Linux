@@ -31,7 +31,7 @@ def write_omsconfig_host_telemetry(message, pathToCurrentScript='', level = 'INF
 
     msg_template = '<OMSCONFIGLOG>[%s] [%d] [%s] [%d] [%s:%d] %s</OMSCONFIGLOG>'
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y/%m/%d %H:%M:%S')
-    msg_buffer = msg_template % (timestamp, os.getpid(), level, 0, pathToCurrentScript, 0, message.replace('"', '\\"'))
+    msg_buffer = msg_template % (timestamp, os.getpid(), level, 0, pathToCurrentScript, 0, json.dumps(message))
 
     host_telemetry_json['message'] += msg_buffer
 
@@ -55,7 +55,7 @@ def write_omsconfig_host_switch_event(pathToCurrentScript, dsc_host_switch_exist
     write_omsconfig_host_telemetry(telemetry_message, pathToCurrentScript)
 
 def write_omsconfig_host_log(message, pathToCurrentScript, level = 'INFO'):
-    log_entry_template = '[%s] [%d] [%s] [%d] [%s:%d] %s'
+    log_entry_template = '[%s] [%d] [%s] [%d] [%s:%d] %s\n'
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y/%m/%d %H:%M:%S')
     log_entry = log_entry_template % (timestamp, os.getpid(), level, 0, pathToCurrentScript, 0, message)
 
