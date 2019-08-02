@@ -17,20 +17,29 @@
 #ifndef __EVENTWRAPPER_H_
 #define __EVENTWRAPPER_H_
 
-#if defined(_MSC_VER)
-#include "DscCoreREvents.h"
-#else
 #ifndef Hex_Int32
 #define Hex_Int32 int
 #endif
+
 #define NOTINCLUDE_OMILOGGING
 #include <base/paths.h>
-#endif 
-
 
 #define WIDEN(x) MI_T(x)
 #define __WFUNCTION__ WIDEN(__FUNCTION__)
 #define _STRINGEMPTY_ MI_T("")
+
+#define OMSCONFIG_HOST_TELEMETRY_PATH "/var/opt/microsoft/omsconfig/status/omsconfighost"
+
+typedef enum _DSC_Log_Level
+{
+    DSC_LOG_FATAL_LEVEL = 0,
+    DSC_LOG_ERROR_LEVEL,
+    DSC_LOG_WARNING_LEVEL,
+    DSC_LOG_INFO_LEVEL,
+    DSC_LOG_DEBUG_LEVEL,
+    DSC_LOG_VERBOSE_LEVEL
+}
+DSC_Log_Level;
 
 /*ErrorEventInfo */
 typedef struct _ErrorEventInfo
@@ -40,9 +49,7 @@ typedef struct _ErrorEventInfo
     const MI_Char * ErrorDetail ; 
 } ErrorEventInfo;
 
-
 #ifdef __cplusplus
-
 extern "C" {
 #endif
 
@@ -61,13 +68,8 @@ extern "C" {
 #endif
 
 unsigned long DSC_EventRegister();
-
 unsigned long DSC_EventUnRegister();
 
-#if defined(_MSC_VER)
-#define ExpandEvent(eventdefinition) EventWrite ## eventdefinition
-
-#else
 #define ExpandEvent(eventdefinition) eventdefinition
 
 #define FILE_EVENT0(eventId, eventName, priority, format)                                               \
@@ -144,8 +146,15 @@ void DSCFilePutLog(
     const PAL_Char* format,
     ...);
 
+void DSCFilePutTelemetry(
+    int priority,
+    int eventId,
+    const char * file,
+    int line,
+    const PAL_Char* format,
+    ...);
+
 #include <eventing/oidsc.h>
-#endif
 
 #define DSC_EventWriteLCMSendConfigurationError(ComponentName,ErrorId, ErrorDetail, ResourceId, SourceInfo, errorMessage) \
      ExpandEvent(LCMSendConfigurationError( g_ConfigurationDetails.jobGuidString, ComponentName, ErrorId, ErrorDetail, ResourceId, SourceInfo, errorMessage))
@@ -531,11 +540,59 @@ void DSCFilePutLog(
 
 //********************* End DscTimer Events ********************//
 
+//**************** Native Provider Manager *******************************//
+
+#define DSC_EventGettingTheClassDeclFailed(className) \
+    ExpandEvent(GettingTheClassDeclFailed(className))
+
+#define DSC_EventGettingTheMethodDeclSucceeded(MethodName) \
+    ExpandEvent(GettingTheMethodDeclSucceeded(MethodName))
+
+#define DSC_EventGettingTheHostNameFailed(ErrorCode) \
+    ExpandEvent(GettingTheHostNameFailed(ErrorCode))
+
+#define DSC_EventUnSupportedHostMethodCalled(MethodName) \
+    ExpandEvent(UnSupportedHostMethodCalled(MethodName))
+
+#define DSC_EventInvokingNativeResourceMethod(MethodName, ClassName, ProviderPath) \
+    ExpandEvent(InvokingNativeResourceMethod(MethodName, ClassName, ProviderPath))
+
+#define DSC_EventCreateHostContextSucceeded() \
+    ExpandEvent(CreateHostContextSucceeded())
+
+#define DSC_EventMIModuleVersionMisMatch(CurrentVersion, ProviderVersion) \
+    ExpandEvent(MIModuleVersionMisMatch(CurrentVersion, ProviderVersion))
+
+#define DSC_EventCreateHostContextFailed() \
+    ExpandEvent(CreateHostContextFailed())
+
+#define DSC_EventWriteLoadingDLLSucceeded(DllFullPath) \
+    ExpandEvent(LoadingDLLSucceeded(DllFullPath))
+
+#define DSC_EventGettingTheSchemaSucceeded(ClassName) \
+    ExpandEvent(GettingTheSchemaSucceeded(ClassName))
 
 #ifdef __cplusplus
-
 }
-
 #endif
+
+#define DSC_LOG(level, format, ...) DSCFilePutLog(level, 0, "", 0, format, ##__VA_ARGS__)
+
+#define DSC_LOG_FATAL(format, ...) DSCFilePutLog(DSC_LOG_FATAL_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_ERROR(format, ...) DSCFilePutLog(DSC_LOG_ERROR_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_WARNING(format, ...) DSCFilePutLog(DSC_LOG_WARNING_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_INFO(format, ...) DSCFilePutLog(DSC_LOG_INFO_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_DEBUG(format, ...) DSCFilePutLog(DSC_LOG_DEBUG_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_LOG_VERBOSE(format, ...) DSCFilePutLog(DSC_LOG_VERBOSE_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+
+#define DSC_TELEMETRY(level, event_id, file, line, format, ...) DSCFilePutTelemetry(level, event_id, file, line, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_WITHOUT_SOURCE_INFO(level, format, ...) DSCFilePutTelemetry(level, 0, "", 0, format, ##__VA_ARGS__)
+
+#define DSC_TELEMETRY_FATAL(format, ...) DSC_TELEMETRY(DSC_LOG_FATAL_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_ERROR(format, ...) DSC_TELEMETRY(DSC_LOG_ERROR_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_WARNING(format, ...) DSC_TELEMETRY(DSC_LOG_WARNING_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_INFO(format, ...) DSC_TELEMETRY(DSC_LOG_INFO_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_DEBUG(format, ...) DSC_TELEMETRY(DSC_LOG_DEBUG_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define DSC_TELEMETRY_VERBOSE(format, ...) DSC_TELEMETRY(DSC_LOG_VERBOSE_LEVEL, 0, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
 #endif //__EVENTWRAPPER_H_

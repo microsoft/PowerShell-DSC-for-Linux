@@ -5,10 +5,14 @@
 """JRDSClient class."""
 
 from datetime import datetime
+import time
+
 
 import configuration
+import locallogger
 from workerexception import *
 
+transient_status_codes = set([408, 429, 500, 502, 503, 504])
 
 class JRDSClient:
     def __init__(self, http_client):
@@ -20,9 +24,22 @@ class JRDSClient:
         self.machine_id = configuration.get_machine_id()
 
     @staticmethod
-    def issue_request(request_function):
+    def issue_request(request_function, url):
         """Invokes request_funtion."""
-        response = request_function
+        response = request_function(url)
+        tries = 1
+        max_tries = 5
+        while response.status_code in transient_status_codes:
+            if tries > max_tries:
+                break
+            locallogger.log_info("INFO: http code %d while trying to reach %s, retrying" %(response.status_code, url))
+            time_to_wait = 3 * (2 ** tries)
+            if time_to_wait > 60:
+                time_to_wait = 60
+            time.sleep(time_to_wait)
+            response = request_function(url)
+            tries += 1
+
         if response.status_code == 401:
             raise JrdsAuthorizationException()
         return response
@@ -48,9 +65,18 @@ class JRDSClient:
         url = self.base_uri + "/automationAccounts/" + self.account_id + \
               "/Sandboxes/GetSandboxActions?HybridWorkerGroupName=" + self.HybridWorkerGroupName + \
               "&api-version=" + self.protocol_version
-        response = self.issue_request(self.httpClient.get(url))
+        response = self.issue_request(lambda u: self.httpClient.get(u), url)
 
         if response.status_code == 200:
+            try:
+                if response.deserialized_data is None or "value" not in response.deserialized_data:
+                    locallogger.log_info("INFO: Could not deserialize get_sandbox_actions response body: %s" % str(response.deserialized_data))
+                    return None
+            except TypeError:
+                locallogger.log_info("INFO: Could not deserialize get_sandbox_actions response body: %s" % str(response.deserialized_data))
+                return None
+
+            # success path
             return response.deserialized_data["value"]
 
         raise Exception("Unable to get sandbox actions. [status=" + str(response.status_code) + "]")
@@ -82,11 +108,20 @@ class JRDSClient:
               "/jobs/getJobActions?api-version=" + self.protocol_version
 
         try:
-            response = self.issue_request(self.httpClient.get(url))
+            response = self.issue_request(lambda u: self.httpClient.get(u), url)
         except JrdsAuthorizationException:
             raise JrdsSandboxTerminated()
 
         if response.status_code == 200:
+            try:
+                if response.deserialized_data is None or "value" not in response.deserialized_data:
+                    locallogger.log_info(
+                        "INFO: Could not deserialize get_job_actions response body: %s" % str(response.deserialized_data))
+                    return []
+            except TypeError:
+                locallogger.log_info(
+                    "INFO: Could not deserialize get_job_actions response body: %s" % str(response.deserialized_data))
+                return []
             job_actions = response.deserialized_data["value"]
             if len(job_actions) != 0:
                 message_metadatas = [action["MessageMetadata"] for action in job_actions]
@@ -160,7 +195,7 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/jobs/" + job_id + "?api-version=" + \
               self.protocol_version
-        response = self.issue_request(self.httpClient.get(url))
+        response = self.issue_request(lambda u: self.httpClient.get(u), url)
 
         if response.status_code == 200:
             return JobData(response.deserialized_data)
@@ -206,7 +241,7 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/jobs/" + job_id + \
               "/getUpdatableData?api-version=" + self.protocol_version
-        response = self.issue_request(self.httpClient.get(url))
+        response = self.issue_request(lambda u: self.httpClient.get(u), url)
 
         if response.status_code == 200:
             return JobUpdatableData(response.deserialized_data)
@@ -237,7 +272,7 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/runbooks/" + runbook_version_id + \
               "?api-version=" + self.protocol_version
-        response = self.issue_request(self.httpClient.get(url))
+        response = self.issue_request(lambda u: self.httpClient.get(u), url)
 
         if response.status_code == 200:
             return RunbookData(response.deserialized_data)
@@ -255,7 +290,7 @@ class JRDSClient:
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/Sandboxes/" + sandbox_id + \
               "/jobs/AcknowledgeJobActions?api-version=" + self.protocol_version
-        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
+        response = self.issue_request(lambda u: self.httpClient.post(u, headers=headers, data=payload), url)
 
         if response.status_code == 200:
             return
@@ -278,7 +313,7 @@ class JRDSClient:
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/Sandboxes/" + sandbox_id + "/jobs/" + \
               job_id + "/changeStatus?api-version=" + self.protocol_version
-        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
+        response = self.issue_request(lambda u: self.httpClient.post(u, headers=headers, data=payload), url)
 
         if response.status_code == 200:
             return
@@ -306,7 +341,7 @@ class JRDSClient:
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/jobs/" + job_id + \
               "/postJobStream?api-version=" + self.protocol_version
-        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
+        response = self.issue_request(lambda u: self.httpClient.post(u, headers=headers, data=payload), url)
 
         if response.status_code == 200:
             return
@@ -328,7 +363,7 @@ class JRDSClient:
                    'logtype': log_type}
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/logs?api-version=" + self.protocol_version
-        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
+        response = self.issue_request(lambda u: self.httpClient.post(u, headers=headers, data=payload), url)
 
         if response.status_code == 200:
             return
@@ -353,7 +388,7 @@ class JRDSClient:
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/Sandboxes/" + sandbox_id + "/jobs/" + \
               job_id + "/unload?api-version=" + self.protocol_version
-        response = self.issue_request(self.httpClient.post(url, headers=headers, data=payload))
+        response = self.issue_request(lambda u: self.httpClient.post(u, headers=headers, data=payload), url)
 
         if response.status_code == 200:
             return
@@ -376,14 +411,17 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/variables/" + name + "?api-version=" \
               + self.protocol_version
-        response = self.issue_request(self.httpClient.get(url))
+        response = self.issue_request(lambda u: self.httpClient.get(u), url)
 
         if response.status_code == 200:
             return response.deserialized_data
         elif response.status_code == 404:
             raise AutomationAssetNotFound()
+        elif response.status_code == 503:
+            raise Jrds503Exception()
 
-        raise Exception("An unknown error occurred. Unable to get the requested variable asset.")
+        raise Exception("An unknown error occurred. Unable to get the requested variable asset. status code: "
+                        + str(response.status_code))
 
     def set_variable_asset(self, name, value, isEncrypted):
         """Sets the requested automation variable asset value. The specified variable has to exists for this request
@@ -406,14 +444,18 @@ class JRDSClient:
                    'isEncrypted': isEncrypted}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/variables/" + name + "?api-version=" \
               + self.protocol_version
-        response = self.issue_request(self.httpClient.post(url, data=payload))
+        response = self.issue_request(lambda u: self.httpClient.post( u, data=payload), url)
 
         if response.status_code == 200:
             return response.deserialized_data
         elif response.status_code == 404:
             raise AutomationAssetNotFound()
+        elif response.status_code == 503:
+            raise Jrds503Exception()
 
-        raise Exception("An unknown error occurred. Unable to set the value of the specified variable asset.")
+
+        raise Exception("An unknown error occurred. Unable to set the value of the specified variable asset. status code: "
+                        + str(response.status_code))
 
     def get_credential_asset(self, name):
         """Gets the requested automation credential asset.
@@ -432,7 +474,7 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/credentials/" + name + "?api-version=" \
               + self.protocol_version
-        response = self.issue_request(self.httpClient.get(url))
+        response = self.issue_request(lambda u: self.httpClient.get(u), url)
 
         if response.status_code == 200:
             return response.deserialized_data
@@ -459,7 +501,7 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/certificates/" + name + "?api-version=" \
               + self.protocol_version
-        response = self.issue_request(self.httpClient.get(url))
+        response = self.issue_request(lambda u: self.httpClient.get(u), url)
 
         if response.status_code == 200:
             return response.deserialized_data
@@ -483,7 +525,7 @@ class JRDSClient:
         """
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/connections/" + name + "?api-version=" \
               + self.protocol_version
-        response = self.issue_request(self.httpClient.get(url))
+        response = self.issue_request(lambda u: self.httpClient.get(u), url)
 
         if response.status_code == 200:
             return response.deserialized_data

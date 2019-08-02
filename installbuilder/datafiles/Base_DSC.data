@@ -20,6 +20,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/nxDSCLog.py; intermediate/Scripts/nxDSCLog.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/zipfile2.6.py; intermediate/Scripts/zipfile2.6.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/OmsConfigHostHelpers.py; intermediate/Scripts/OmsConfigHostHelpers.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/StartDscConfiguration.py; intermediate/Scripts/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/TestDscConfiguration.py; intermediate/Scripts/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscConfiguration.py; intermediate/Scripts/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
@@ -64,6 +65,8 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc; LCM/keys/msgpgkey.asc; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip; release/nxFileInventory_1.3.zip; 755; ${{RUN_AS_USER}}; root
 
+/opt/dsc/bin/dsc_host; omi-1.0.8/output/bin/dsc_host; 755; ${{RUN_AS_USER}}; root
+
 #else
 
 /opt/microsoft/${{SHORT_NAME}}/bin/omi_preexec.sh; intermediate/Scripts/omi_preexec.sh; 755; ${{RUN_AS_USER}}; root
@@ -100,6 +103,10 @@ SHLIB_EXT: 'so'
 
 #if BUILD_OMS == 1
 /etc/opt/microsoft/omsagent/conf/omsagent.d; 755; ${{RUN_AS_USER}}; root; sysdir
+/opt/dsc; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/bin; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/lib; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/output; 755; ${{RUN_AS_USER}}; root
 #endif
 
 %Links
@@ -107,16 +114,21 @@ SHLIB_EXT: 'so'
 
 %Dependencies
 #if BUILD_OMS == 1
+
 #if PACKAGE_TYPE == RPM
 omsagent >= 1.0.0
 #else
 omsagent (>= 1.0.0)
 #endif
-#endif
+
+#else
+
 #if PACKAGE_TYPE == RPM
 omi >= 1.0.8-6
 #else
 omi (>= 1.0.8.6)
+#endif
+
 #endif
 
 %Preinstall_10
@@ -168,6 +180,12 @@ if [ $cmdline_ctypes -ne 0 ]; then
     exit 1
 fi
 
+%Preinstall_300
+echo "Cleanning up existing dsc_hosts..."
+ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1 | xargs kill 2&>1 > /dev/null
+rm -f /opt/dsc/dsc_host_lock
+echo "Cleaned up existing dsc_hosts..."
+
 %Postinstall_10
 OMI_HOME=/opt/omi
 OMI_REGISTER_DIR=/etc/opt/omi/conf/omiregister/
@@ -213,6 +231,14 @@ fi
 chown omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
 chgrp omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
 chmod 644 /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+
+# Set up dsc_host use switch
+if [ ! -f /opt/dsc/dsc_host_ready ]; then
+    touch /opt/dsc/dsc_host_ready
+fi
+chown omsagent /opt/dsc/dsc_host_ready
+chgrp omsagent /opt/dsc/dsc_host_ready
+chmod 644 /opt/dsc/dsc_host_ready
 
 #endif
 
@@ -305,11 +331,31 @@ fi
 cp -R /opt/microsoft/${{SHORT_NAME}}/Scripts $OMI_LIB/Scripts
 
 # create symlink from /opt/omi/lib/libcurl.so.4 to wherever libcurl.so is on the system
+#if BUILD_OMS == 1
+
+CURL_PATH=`which curl`
+LIBCURL_SO=`ldd ${CURL_PATH} | grep libcurl.so | awk '{print $3}'`
+
+# if libcurl was not found (in case of libcurl-gnutls-dev package) let use ldconfig intead.
+if [ -z "$LIBCURL_SO" ]; then
+  echo "Warning: Unable to find libcurl.so using curl CMD: '${CURL_PATH}'. Trying again with ldconfig."
+
+  LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
+  if [ -z "$LIBCURL_SO" ]; then
+    echo "Error: Unable to find libcurl in ldconfig. Please install curl."
+    exit 1
+  fi
+fi
+
+#else
+
 LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
 if [ -z "$LIBCURL_SO" ]; then
    echo "Error: Unable to find libcurl in ldconfig.  Please install curl."
    exit 1
 fi
+
+#endif
 
 ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.3
 ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.4
@@ -353,6 +399,12 @@ chown omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 
 #endif
+
+%Preuninstall_899
+echo "Cleanning up existing dsc_hosts before uninstall..."
+ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1 | xargs kill 2&>1 > /dev/null
+rm -f /opt/dsc/dsc_host_lock
+echo "Cleaned up existing dsc_hosts before uninstall..."
 
 %Preuninstall_999
 # if this is a package removal, not an upgrade, remove the modules

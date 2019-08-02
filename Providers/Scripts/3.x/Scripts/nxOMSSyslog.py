@@ -190,7 +190,7 @@ def ReadSyslogConf(SyslogSource, WorkspaceID):
         return out
 
     # Find all lines sending to this workspace's port
-    port = ExtractPortFromFluentDConf(WorkspaceID)
+    port = ExtractFieldFromFluentDConf(WorkspaceID, 'port', default_port)
     facility_search = r'^([^#].*?)@.*?' + port + '$'
     facility_re = re.compile(facility_search, re.M)
     for line in facility_re.findall(txt):
@@ -224,7 +224,7 @@ def UpdateSyslogConf(SyslogSource, WorkspaceID):
         return False
 
     # Remove all lines related to this workspace ID (correlated by port)
-    port = ExtractPortFromFluentDConf(WorkspaceID)
+    port = ExtractFieldFromFluentDConf(WorkspaceID, 'port', default_port)
     protocol_type = ExtractFieldFromFluentDConf(WorkspaceID, 'protocol_type', default_protocol).replace('tcp', '@@').replace('udp', '@')
     bind_addr = ExtractFieldFromFluentDConf(WorkspaceID, 'bind', default_host)
 
@@ -331,7 +331,7 @@ def UpdateSyslogNGConf(SyslogSource, WorkspaceID):
     if source_result:
         source_expr = source_result.group(1)
 
-    port = ExtractPortFromFluentDConf(WorkspaceID)
+    port = ExtractFieldFromFluentDConf(WorkspaceID, 'port', default_port)
     protocol_type = ExtractFieldFromFluentDConf(WorkspaceID, 'protocol_type', default_protocol)
     bind_addr = ExtractFieldFromFluentDConf(WorkspaceID, 'bind', default_host)
 
@@ -436,6 +436,7 @@ def GetSyslogConfMultiHomedHeaderString(WorkspaceID):
 
 def ExtractFieldFromFluentDConf(WorkspaceID, field_name, default_field_value):
     """
+    Search only on the first <source>..</source> config.
     Returns the field used for this workspace's syslog collection from the
     FluentD configuration file:
     If multi-homed:
@@ -462,10 +463,11 @@ def ExtractFieldFromFluentDConf(WorkspaceID, field_name, default_field_value):
         LG().Log('ERROR', 'Unable to read ' + config_path + ': using default ' \
                           'syslog ' + field_name + ' "' + default_field_value + '".')
         return default_field_value
-
+    txt_list = txt.split('</source>')
+    first_source_txt = txt_list[0] + '</source>' if len(txt_list) >= 1 else txt
     field_search = r'^<source>.*type syslog[^#]*'+field_name+r' (.*?)\n.*</source>$'
     field_re = re.compile(field_search, re.M | re.S)
-    field_result = field_re.search(txt)
+    field_result = field_re.search(first_source_txt)
     if field_result:
         field_value = str(field_result.group(1))
     else:
@@ -473,47 +475,6 @@ def ExtractFieldFromFluentDConf(WorkspaceID, field_name, default_field_value):
                           'default syslog ' + field_name + ' "' + default_field_value + '".')
         field_value = default_field_value
     return field_value
-
-
-def ExtractPortFromFluentDConf(WorkspaceID):
-    """
-    Returns the port used for this workspace's syslog collection from the
-    FluentD configuration file:
-    If multi-homed:
-    /etc/opt/microsoft/omsagent/<workspace-ID>/conf/omsagent.d/syslog.conf
-    if not multi-homed:
-    /etc/opt/microsoft/omsagent/conf/omsagent.conf
-    """
-    global omsagent_dir
-    fluentd_syslog_conf = 'conf/omsagent.d/syslog.conf'
-    fluentd_omsagent_conf = 'conf/omsagent.conf'
-    if os.path.exists(omsagent_dir + WorkspaceID + '/' + fluentd_syslog_conf):
-        port_path = omsagent_dir + WorkspaceID + '/' + fluentd_syslog_conf
-    elif os.path.exists(omsagent_dir + fluentd_omsagent_conf):
-        port_path = omsagent_dir + fluentd_omsagent_conf
-    else:
-        LG().Log('ERROR', 'No FluentD syslog configuration found: using ' \
-                          'default syslog port ' + default_port + '.')
-        return default_port
-
-    try:
-        txt = codecs.open(port_path, 'r', 'utf8').read()
-        LG().Log('INFO', 'Succesfully read ' + port_path + ' for syslog port.')
-    except:
-        LG().Log('ERROR', 'Unable to read ' + port_path + ': using default ' \
-                          'syslog port ' + default_port + '.')
-        return default_port
-
-    port_search = r'^<source>.*type syslog[^#]*port ([0-9]*)\n.*</source>$'
-    port_re = re.compile(port_search, re.M | re.S)
-    port_result = port_re.search(txt)
-    if port_result:
-        port = str(port_result.group(1))
-    else:
-        LG().Log('ERROR', 'No port found in ' + port_path + ': using ' \
-                          'default syslog port ' + default_port + '.')
-        port = default_port
-    return port
 
 
 def GetSyslogConfPath():

@@ -5,8 +5,8 @@ import subprocess
 import shutil
 import platform
 import imp
-
 from os.path import dirname, join, realpath
+
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
@@ -15,7 +15,6 @@ fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
 nxDSCLog = imp.load_source('nxDSCLog', fullPathDSCLogger)
 logger = nxDSCLog.ConsoleAndFileLogger()
 sys.stdout = logger
-
 
 def usage():
     print("Usage:")
@@ -177,6 +176,13 @@ def main(args):
             os.remove(resourceLibraryFilePath)
         else:
             printVerboseMessage("Unable to find OMI library file for resource " + resource + " at the path " + resourceLibraryFilePath + ". Continuing with resource removal.")
+        
+        # Remove OMSCONFIG library file for the resource
+        if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+            resourceSharedObjectDestinationPath = join("/opt/dsc/lib", resource)
+
+            if os.path.isdir(resourceSharedObjectDestinationPath):
+                shutil.rmtree(resourceSharedObjectDestinationPath)
 
         # Remove OMI registration for the resource
         resourceOmiRegistrationFileName = resource + ".reg"
