@@ -14,10 +14,15 @@
    THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #ifndef _CAENGINE_H
+#define _CAENGINE_H
 #include <nits.h>
 
 #include "MI.h"
 #include <ModuleHandler.h>
+
+#if defined(BUILD_OMS)
+#include <signal.h>
+#endif
 
 typedef enum _ResourceStatus
 {
@@ -141,6 +146,9 @@ void SetMessageInContext(MI_Uint32 msgOperation,MI_Uint32 msgItem,LCMProviderCon
 
 MI_Result  MI_CALL StopCurrentConfiguration(_Outptr_result_maybenull_ MI_Instance **extendedError, BOOL force);
 
+#if defined(BUILD_OMS)
+void handleSIGCHLDSignal(int sig);
+#endif
 
 
 #ifdef __cplusplus

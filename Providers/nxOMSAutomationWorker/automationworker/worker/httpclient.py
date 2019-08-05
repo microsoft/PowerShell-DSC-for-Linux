@@ -9,6 +9,7 @@ import sys
 
 import configuration
 import serializerfactory
+import locallogger
 
 
 class HttpClient:

@@ -11,6 +11,7 @@ BUILD_OMS=
 DEBUG_FLAGS=""
 DSC_MODULES_PATH="/opt/microsoft/dsc/modules"
 DSC_SCRIPT_PATH="/opt/microsoft/dsc/Scripts"
+DSC_HOST_BASE_PATH="/opt/dsc"
 DSC_PATH_MODIFIER="/dsc"
 
 for opt
@@ -66,6 +67,7 @@ do
 	    BUILD_OMS=BUILD_OMS
 	    DSC_MODULES_PATH="/opt/microsoft/omsconfig/modules"
 	    DSC_SCRIPT_PATH="/opt/microsoft/omsconfig/Scripts"
+		DSC_HOST_BASE_PATH="/opt/dsc"
 	    DSC_PATH_MODIFIER="/omsconfig"
 	    ;;
 	
@@ -154,6 +156,7 @@ BUILD_LOCAL=$BUILD_LOCAL
 BUILD_OMS=$BUILD_OMS
 DSC_MODULES_PATH=$DSC_MODULES_PATH
 DSC_SCRIPT_PATH=$DSC_SCRIPT_PATH
+DSC_HOST_BASE_PATH=$DSC_HOST_BASE_PATH
 
 BUILD_DEBUG=$BUILD_DEBUG
 DEBUG_FLAGS=$DEBUG_FLAGS

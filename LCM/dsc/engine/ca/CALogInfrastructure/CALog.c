@@ -20,12 +20,8 @@
 
 
 
-#define _CA_IMPORT_ 1
+#define _CA_IMPORT_ 1 
 #include "CALog.h"
-
-#if defined(_MSC_VER)
-#include <sal.h>
-#endif
 
 CAJobInformation g_CAJobInformation={EMPTY_STRING};
 MI_Boolean CAWhatIfEnabled(_In_ void *provContext)
@@ -73,6 +69,19 @@ void LogCAWriteMIError(
     _In_ void *provContext,
     _In_ MI_Instance* instanceMIError)
 {
+#if defined(BUILD_OMS)
+    MI_Result result = MI_RESULT_OK;
+    MI_Boolean flag = FALSE;
+    MI_Uint32 errorCategory;
+    MI_Uint32 errorCode;
+    MI_ConstStringPtr errorMessage;
+    MI_ConstStringPtr messageId;
+    MI_ConstStringPtr errorType;
+
+    ExtractCimErrorFields(instanceMIError, &result, &errorCategory, &errorCode, &errorMessage, &messageId, &errorType);
+
+    DSC_LOG_ERROR("error code = %d, error message = %s", errorCode, errorMessage);
+#else
     MI_Result result = MI_RESULT_OK;
     MI_Boolean flag = FALSE;
 
@@ -91,6 +100,7 @@ void LogCAWriteMIError(
             }
         }
     }
+#endif
 }
 
 const MI_Char *  LogCADebugMessage(_In_ void *provContext,_In_opt_z_ const MI_Char *message)
@@ -113,12 +123,16 @@ const MI_Char *  LogCADebugMessage(_In_ void *provContext,_In_opt_z_ const MI_Ch
             {
                 if(Stprintf(fullMessage, msgLen,VERBOSE_FORMAT , g_CAJobInformation.deviceName, EMPTY_STRING, providerContext->resourceId, message) >0 )
                 {
+#if defined(BUILD_OMS)
+                    DSC_LOG_DEBUG("%s", fullMessage);
+#else
                     result = MI_Context_WriteDebug((MI_Context*) lcmContext->context, fullMessage);
 
                     if(result != MI_RESULT_OK)
                     {
                         // Ignore the failure, this doesn't impact the functionality.
                     }
+#endif
                 }
                 //Return the message since the event is output from the parent rfunction
                 return fullMessage;
@@ -147,6 +161,9 @@ const MI_Char *  LogCAVerboseMessage(_In_ void *provContext,_In_opt_z_ const MI_
             {
 				if (Stprintf(fullMessage, msgLen, VERBOSE_FORMAT,g_CAJobInformation.deviceName, EMPTY_STRING, providerContext->resourceId, message) >0)
                 {
+#if defined(BUILD_OMS)
+                    DSC_LOG_VERBOSE("%s", fullMessage);
+#else
                     if(!whatifEnabled)
                     {
                         result = MI_Context_WriteVerbose((MI_Context*) lcmContext->context, fullMessage);
@@ -155,6 +172,7 @@ const MI_Char *  LogCAVerboseMessage(_In_ void *provContext,_In_opt_z_ const MI_
                     {
                         // Ignore the failure, this doesn't impact the functionality.
                     }
+#endif
                 }
 
                 return fullMessage;
@@ -185,12 +203,16 @@ void LogCAWarningMessage(_In_ void *provContext,_In_opt_z_ const MI_Char *messag
             {                
                 if(Stprintf(fullMessage, msgLen,VERBOSE_FORMAT , g_CAJobInformation.deviceName, EMPTY_STRING, providerContext->resourceId, message) >0 )
                 {
+#if defined(BUILD_OMS)
+                    DSC_LOG_WARNING("%s", fullMessage);
+#else
                     result = MI_Context_WriteWarning((MI_Context*) lcmContext->context, fullMessage);
 
                     if(result != MI_RESULT_OK)
                     {
                         // Ignore the failure, this doesn't impact the functionality.
                     }
+#endif
                 }
 
                 DSC_free(fullMessage);
@@ -207,13 +229,13 @@ void LogCAProgressMessage(
     _In_ MI_Uint32 percentComplete,
     _In_ MI_Uint32 secondsRemaining)
 {
+#if !defined(BUILD_OMS)
     MI_Result result = MI_RESULT_OK;
         
     if(activity != NULL && currentOperation != NULL && statusDescroption != NULL)
     {
         ProviderCallbackContext *providerContext = (ProviderCallbackContext *) provContext;
         LCMProviderContext *lcmContext = providerContext->lcmProviderContext;
-
 
         if((lcmContext->executionMode & LCM_EXECUTIONMODE_ONLINE) && lcmContext->context)
         {
@@ -230,11 +252,9 @@ void LogCAProgressMessage(
                 // Ignore it...
             }
         }
-
     }
-
+#endif
 }
-
 
 const MI_Char * GetResourceIdFromConext(_In_ void *provContext)
 {
@@ -246,20 +266,12 @@ void CALogSetJobDeviceName()
    
     MI_Uint32 jobInfoCompNameLen=CA_DEVICE_NAME_SIZE;
     int result = 0;
-#if defined(_MSC_VER)
-    result = !GetComputerName(g_CAJobInformation.deviceName, (LPDWORD)&jobInfoCompNameLen);
-#else
+
     result = gethostname(g_CAJobInformation.deviceName, jobInfoCompNameLen); 
-#endif
 
     if (result != MI_FALSE) 
     {
             Stprintf(g_CAJobInformation.deviceName, CA_DEVICE_NAME_SIZE, EMPTY_STRING);
             return;
     }
-
-
 }
-
-
-

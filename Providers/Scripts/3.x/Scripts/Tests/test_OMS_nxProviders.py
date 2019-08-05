@@ -18,6 +18,7 @@ import hashlib
 import pickle
 from contextlib import contextmanager
 import time
+import uuid
 
 @contextmanager
 def opened_w_error(filename, mode="r"):
@@ -656,6 +657,7 @@ if nxOMSSyslog != None:
             """
             Setup test resources
             """
+            self.workspace_id = str(uuid.uuid4())
             os.system('/bin/echo -e "' + OMSSyslog_setup_txt + '" | sudo python')
             
         def tearDown(self):
@@ -664,7 +666,7 @@ if nxOMSSyslog != None:
             """
             os.system('/bin/echo -e "' + OMSSyslog_teardown_txt + '" | sudo python')
     
-        def make_MI(self,retval,SyslogSource):
+        def make_MI(self, retval, SyslogSource, WorkspaceID):
             d=dict()
             d.clear()
             if SyslogSource == None :
@@ -674,42 +676,46 @@ if nxOMSSyslog != None:
                     source['Severities'] = nxOMSSyslog.protocol.MI_StringA(source['Severities'])
                     source['Facility']=nxOMSSyslog.protocol.MI_String(source['Facility'])
                 d['SyslogSource'] = nxOMSSyslog.protocol.MI_InstanceA(SyslogSource)
-            return retval,d
+            d['WorkspaceID'] = nxOMSSyslog.protocol.MI_String(WorkspaceID)
+            return retval, d
         
         def testSetOMSSyslog_add(self):
             d={'SyslogSource': [{'Facility': 'kern','Severities': ['emerg','crit','warning']},{'Facility': 'auth','Severities': ['emerg','crit','warning']}] }
+            d['WorkspaceID'] = self.workspace_id
             self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
     
         def testTestSetOMSSyslog_add(self):
             d={'SyslogSource': [{'Facility': 'kern','Severities': ['emerg','crit','warning']},{'Facility': 'auth','Severities': ['emerg','crit','warning']}] }
+            d['WorkspaceID'] = self.workspace_id
             self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set_Marshall('+repr(d)+') should return == [0]') 
             self.assertTrue(nxOMSSyslog.Test_Marshall(**d) == [0],'Test_Marshall('+repr(d)+') should return == [0]') 
     
         def testGetOMSSyslog_add(self):
             d={'SyslogSource': [{'Facility': 'auth','Severities': ['crit','emerg','warning']},{'Facility': 'kern','Severities': ['crit','emerg','warning']}] }
+            d['WorkspaceID'] = self.workspace_id
             e=copy.deepcopy(d)
             t=copy.deepcopy(d)
             self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
             m=self.make_MI(0,**e)
             g=nxOMSSyslog.Get_Marshall(**t)
             print('GET '+ repr(g) )
-            self.assertTrue(check_values(g, m)  ==  True, \
-            'Get('+repr(g)+' should return ==['+repr(m)+']')
+            self.assertTrue(check_values(g, m)  ==  True, 'Get('+repr(g)+' should return ==['+repr(m)+']')
     
         def testSetOMSSyslog_del(self):
             d={'SyslogSource': [{'Facility': 'kern','Severities': None },{'Facility': 'auth','Severities': None }] }
+            d['WorkspaceID'] = self.workspace_id
             self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]') 
     
         def testGetOMSSyslog_del(self):
             d={'SyslogSource': [{'Facility': 'auth','Severities': None },{'Facility': 'kern','Severities': None }] }
+            d['WorkspaceID'] = self.workspace_id
             e=copy.deepcopy(d)
             t=copy.deepcopy(d)
             self.assertTrue(nxOMSSyslog.Set_Marshall(**d) == [0],'Set('+repr(d)+') should return == [0]')
             m=self.make_MI(0,**t)
             g=nxOMSSyslog.Get_Marshall(**e)
             print('GET '+ repr(g))
-            self.assertTrue(check_values(g, m)  ==  True, \
-            'Get('+repr(g)+' should return ==['+repr(m)+']')
+            self.assertTrue(check_values(g, m)  ==  True, 'Get('+repr(g)+' should return ==['+repr(m)+']')
 
 nxOMSCustomLog_setup_txt = """import os
 os.system('rm -rf ./ut_customlog.conf')

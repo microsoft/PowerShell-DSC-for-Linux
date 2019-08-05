@@ -112,6 +112,7 @@ dsc098: lcm098 providers
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
@@ -136,6 +137,7 @@ dsc100: lcm100 providers
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
@@ -159,6 +161,7 @@ dsc110: lcm110 providers
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
@@ -254,7 +257,7 @@ endif
 
 nxOMSAutomationWorker:
 	rm -rf output/staging; \
-	VERSION="1.6.3.0"; \
+	VERSION="1.6.8.0"; \
 	PROVIDERS="nxOMSAutomationWorker"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -361,7 +364,7 @@ nxOMSPerfCounter:
 
 nxOMSSyslog:
 	rm -rf output/staging; \
-        VERSION="2.2"; \
+        VERSION="2.3"; \
         PROVIDERS="nxOMSSyslog"; \
         STAGINGDIR="output/staging/$@/DSCResources"; \
         cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -425,7 +428,7 @@ nxOMSCustomLog:
 
 nxOMSSudoCustomLog:
 	rm -rf output/staging; \
-	VERSION="2.3"; \
+	VERSION="2.5"; \
 	PROVIDERS="nxOMSSudoCustomLog"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -469,7 +472,11 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
+<<<<<<< HEAD
 	VERSION="3.18"; \
+=======
+	VERSION="3.21"; \
+>>>>>>> master
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -514,7 +521,7 @@ nxFileInventory:
 
 nxOMSAgentNPMConfig:
 	rm -rf output/staging; \
-	VERSION="1.4"; \
+	VERSION="1.5"; \
 	PROVIDERS="nxOMSAgentNPMConfig"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -536,7 +543,7 @@ nxOMSAgentNPMConfig:
 
 nxOMSAuditdPlugin:
 	rm -rf output/staging; \
-	VERSION="1.6"; \
+	VERSION="1.7"; \
 	PROVIDERS="nxOMSAuditdPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -581,7 +588,7 @@ nxOMSContainers:
 
 nxOMSWLI:
 	rm -rf output/staging; \
-	VERSION="1.42"; \
+	VERSION="1.45"; \
 	PROVIDERS="nxOMSWLI"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -656,6 +663,7 @@ providersreg:
 	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
 	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
 	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(CONFIG_DATADIR)/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done 

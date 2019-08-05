@@ -21,13 +21,13 @@ from worker import httpclientfactory
 from worker import linuxutil
 from worker import serializerfactory
 from worker import util
+from worker import diydirs
 
 json = serializerfactory.get_serializer(sys.version_info)
 configuration.clear_config()
 configuration.set_config({configuration.PROXY_CONFIGURATION_PATH: "/etc/opt/microsoft/omsagent/proxy.conf",
                           configuration.WORKER_VERSION: "LinuxDIYRegister",
                           configuration.WORKING_DIRECTORY_PATH: "/tmp"})
-
 
 def get_ip_address():
     try:
@@ -36,36 +36,8 @@ def get_ip_address():
         return "127.0.0.1"
 
 
-def set_permission_recursive(permission, path):
-    """Sets the permission for a specific path and it's child items recursively.
-
-    Args:
-        permission  : string, linux permission (i.e 770).
-        path        : string, the target path.
-    """
-    cmd = ["chmod", "-R", permission, path]
-    process, output, error = linuxutil.popen_communicate(cmd)
-    if process.returncode != 0:
-        raise Exception(
-            "Unable to change permission of " + str(path) + " to " + str(permission) + ". Error : " + str(error))
-    print "Permission changed to " + str(permission) + " for " + str(path)
-
-
-def set_user_and_group_recursive(owning_username, owning_group_name, path):
-    """Sets the owner for a specific path and it's child items recursively.
-
-    Args:
-        owning_username     : string, the owning user
-        owning_group_name   : string, the owning group
-        path                : string, the target path.
-    """
-    owners = owning_username + ":" + owning_group_name
-    cmd = ["chown", "-R", owners, path]
-    process, output, error = linuxutil.popen_communicate(cmd)
-    if process.returncode != 0:
-        raise Exception("Unable to change owner of " + str(path) + " to " + str(owners) + ". Error : " + str(error))
-    print "Owner changed to " + str(owners) + " for " + str(path)
-
+DIY_STATE_PATH = diydirs.DIY_STATE_PATH
+DIY_WORKING_DIR = diydirs.DIY_WORKING_DIR
 
 def generate_self_signed_certificate(certificate_path, key_path):
     """Creates a self-signed x509 certificate and key pair in the spcified path.
@@ -125,7 +97,8 @@ def generate_hmac(str_to_sign, secret):
 
 def create_worker_configuration_file(jrds_uri, automation_account_id, worker_group_name, machine_id,
                                      working_directory_path, state_directory_path, cert_path, key_path,
-                                     registration_endpoint, workspace_id, thumbprint, vm_id, is_azure_vm, test_mode):
+                                     registration_endpoint, workspace_id, thumbprint, vm_id, is_azure_vm,
+                                     gpg_keyring_path, test_mode):
     """Creates the automation hybrid worker configuration file.
 
     Args:
@@ -140,7 +113,9 @@ def create_worker_configuration_file(jrds_uri, automation_account_id, worker_gro
         registration_endpoint   : string, the registration endpoint
         workspace_id            : string, the workspace id
         thumbprint              : string, the certificate thumbprint
-        test_mode               : bool  , test mode
+        is_azure_vm             : bool,   whether the VM is hosted in Azure
+        gpg_keyring_path        : string, path to the gpg keyring for verifying runbook signatures
+        test_mode               : bool,   test mode
 
     Note:
         The generated file has to match the latest worker.conf template.
@@ -169,6 +144,8 @@ def create_worker_configuration_file(jrds_uri, automation_account_id, worker_gro
     config.set(worker_optional_section, configuration.PROXY_CONFIGURATION_PATH,
                "/etc/opt/microsoft/omsagent/proxy.conf")
     config.set(worker_optional_section, configuration.STATE_DIRECTORY_PATH, state_directory_path)
+    if gpg_keyring_path is not None:
+        config.set(worker_optional_section, configuration.GPG_PUBLIC_KEYRING_PATH, gpg_keyring_path)
     if test_mode is True:
         config.set(worker_optional_section, configuration.BYPASS_CERTIFICATE_VERIFICATION, True)
         config.set(worker_optional_section, configuration.DEBUG_TRACES, True)
@@ -244,21 +221,20 @@ def register(options):
     if auto_registered_account_id != None and auto_registered_account_id != diy_account_id:
         raise Exception("Cannot register, conflicting worker already registered.")
 
-    diy_state_base_path = os.path.join(state_base_path, os.path.join("automationworker", "diy"))
-    diy_working_directory_base_path = os.path.join(working_directory_base_path, os.path.join("automationworker", "diy"))
-    worker_conf_path = os.path.join(diy_state_base_path, "worker.conf")
+
+    worker_conf_path = os.path.join(DIY_STATE_PATH, "worker.conf")
 
     if os.path.isfile(worker_conf_path) is True:
         raise Exception("Unable to register, an existing worker was found. Please deregister any existing worker and "
                         "try again.")
 
-    certificate_path = os.path.join(diy_state_base_path, "worker_diy.crt")
-    key_path = os.path.join(diy_state_base_path, "worker_diy.key")
+    certificate_path = os.path.join(DIY_STATE_PATH, "worker_diy.crt")
+    key_path = os.path.join(DIY_STATE_PATH, "worker_diy.key")
     machine_id = util.generate_uuid()
 
     # generate state path (certs/conf will be dropped in this path)
-    if os.path.isdir(diy_state_base_path) is False:
-        os.makedirs(diy_state_base_path)
+    if os.path.isdir(DIY_STATE_PATH) is False:
+        os.makedirs(DIY_STATE_PATH)
     generate_self_signed_certificate(certificate_path=certificate_path, key_path=key_path)
     issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
 
@@ -314,21 +290,12 @@ def register(options):
     registration_response = json.loads(response.raw_data)
     account_id = registration_response["AccountId"]
     create_worker_configuration_file(registration_response["jobRuntimeDataServiceUri"], account_id,
-                                     hybrid_worker_group_name, machine_id, diy_working_directory_base_path,
-                                     diy_state_base_path, certificate_path, key_path, registration_endpoint,
-                                     workspace_id, thumbprint, vm_id, is_azure_vm, options.test)
+                                     hybrid_worker_group_name, machine_id, DIY_WORKING_DIR,
+                                     DIY_STATE_PATH, certificate_path, key_path, registration_endpoint,
+                                     workspace_id, thumbprint, vm_id, is_azure_vm, options.gpg_keyring, options.test)
 
     # generate working directory path
-    if os.path.isdir(diy_working_directory_base_path) is False:
-        os.makedirs(diy_working_directory_base_path)
-
-    # set appropriate permission to the created directory
-    set_user_and_group_recursive(owning_username="omsagent", owning_group_name="omiusers", path=diy_state_base_path)
-    set_permission_recursive(permission="770", path=diy_state_base_path)
-
-    set_user_and_group_recursive(owning_username="nxautomation", owning_group_name="omiusers",
-                                 path=diy_working_directory_base_path)
-    set_permission_recursive(permission="770", path=diy_working_directory_base_path)
+    diydirs.create_persistent_diy_dirs()
 
     print "Registration successful!"
 
@@ -345,11 +312,9 @@ def deregister(options):
         raise Exception("Invalid workspace id. Is the specified workspace id registered as the OMSAgent "
                         "primary worksapce?")
 
-    diy_state_base_path = os.path.join(state_base_path, os.path.join("automationworker", "diy"))
-    diy_working_directory_base_path = os.path.join(working_directory_base_path, os.path.join("automationworker", "diy"))
-    worker_conf_path = os.path.join(diy_state_base_path, "worker.conf")
-    certificate_path = os.path.join(diy_state_base_path, "worker_diy.crt")
-    key_path = os.path.join(diy_state_base_path, "worker_diy.key")
+    worker_conf_path = os.path.join(DIY_STATE_PATH, "worker.conf")
+    certificate_path = os.path.join(DIY_STATE_PATH, "worker_diy.crt")
+    key_path = os.path.join(DIY_STATE_PATH, "worker_diy.key")
 
     if os.path.exists(worker_conf_path) is False:
         raise Exception("Unable to deregister, no worker configuration found on disk.")
@@ -404,13 +369,13 @@ def deregister(options):
     print "Cleaning up left over directories."
 
     try:
-        shutil.rmtree(diy_state_base_path)
+        shutil.rmtree(DIY_STATE_PATH)
         print "Removed state directory."
     except:
         raise Exception("Unable to remove state directory base path.")
 
     try:
-        shutil.rmtree(diy_working_directory_base_path)
+        shutil.rmtree(DIY_WORKING_DIR)
         print "Removed working directory."
     except:
         raise Exception("Unable to remove working directory base path.")
@@ -436,8 +401,9 @@ def environment_prerequisite_validation():
 
 
 def get_options_and_arguments():
-    parser = OptionParser(usage="usage: %prog [--register, --deregister] -e endpoint -k key -g groupname -w workspaceid",
-                          version="%prog " + str(configuration.get_worker_version()))
+    parser = OptionParser(
+        usage="usage: %prog [--register, --deregister] -e endpoint -k key -g groupname -w workspaceid [-p gpgkeyring]",
+        version="%prog " + str(configuration.get_worker_version()))
     parser.add_option("-e", "--endpoint", dest="registration_endpoint", help="Agent service registration endpoint.")
     parser.add_option("-k", "--key", dest="automation_account_key", help="Automation account primary/secondary key.")
     parser.add_option("-g", "--groupname", dest="hybrid_worker_group_name", help="Hybrid worker group name.")
@@ -445,6 +411,7 @@ def get_options_and_arguments():
     parser.add_option("-r", "--register", action="store_true", dest="register", default=False)
     parser.add_option("-d", "--deregister", action="store_true", dest="deregister", default=False)
     parser.add_option("-t", "--test", action="store_true", dest="test", default=False)
+    parser.add_option("-p", "--gpg-keyring", dest="gpg_keyring", help="GPG keyring path")
     (options, args) = parser.parse_args()
 
     if options.register is False and options.deregister is False:
@@ -459,9 +426,9 @@ def get_options_and_arguments():
         sys.exit(-1)
     # --deregister requirements
     elif options.deregister is True and (options.registration_endpoint is not None
-                                       and options.automation_account_key is not None
-                                       and options.hybrid_worker_group_name is not None
-                                       and options.workspace_id is not None) is False:
+                                         and options.automation_account_key is not None
+                                         and options.hybrid_worker_group_name is not None
+                                         and options.workspace_id is not None) is False:
         parser.print_help()
         sys.exit(-1)
     elif options.register is False and options.deregister is False:
@@ -487,8 +454,10 @@ if __name__ == "__main__":
         raise Exception("You need to run this script as root to register a new automation worker.")
 
     # requied for cases where the diy registration is trigger before the worker manager start (.pyc will be owned by root in that case and have to be owned by omsagent:omiusers)
-    proc = subprocess.Popen(["find", "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/",
-                     "-type",  "f", "-name", "*.pyc", "-exec", "rm", "{}", "+"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(["find",
+                             "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/",
+                             "-type", "f", "-name", "*.pyc", "-exec", "rm", "{}", "+"], stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     output, error = proc.communicate()
     if proc.returncode != 0:
         raise Exception("Unable to remove root-owned .pyc")

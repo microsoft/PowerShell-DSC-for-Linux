@@ -48,14 +48,18 @@ class Runtime:
         job_parameters = self.job_data.parameters
         if job_parameters is not None and len(job_parameters) > 0:
             for parameter in job_parameters:
-                cmd += [json.loads(parameter["Value"])]
+                tracer.log_debug_trace("Parameter is: \n" + str(parameter))
+                if self.runbook.definition_kind_str == "PowerShell" and parameter["Name"]:
+                    # Handle named parameters for PowerShell arriving out of order
+                    cmd += ["-%s" % parameter["Name"]]
+                cmd += [str(json.loads(parameter["Value"]))]
 
         # Do not copy current process env var to the sandbox process
         env = os.environ.copy()
         env.update({"AUTOMATION_JOB_ID": str(self.job_data.job_id),
                     "AUTOMATION_ACTIVITY_ID": str(tracer.u_activity_id),
-                    "PYTHONPATH": str(
-                        configuration.get_source_directory_path())})  # windows env have to be str (not unicode)
+                    "PYTHONPATH": str(configuration.get_source_directory_path()),
+                    "HOME": str(os.getcwd())})  # windows env have to be str (not unicode)
         self.runbook_subprocess = subprocessfactory.create_subprocess(cmd=cmd,
                                                                       env=env,
                                                                       stdout=subprocess.PIPE,
@@ -117,7 +121,7 @@ class PowerShellRuntime(Runtime):
         self.execution_alias = "pwsh"
         if linuxutil.is_posix_host() is False:
             self.execution_alias = "powershell"
-
+            
         self.base_cmd = [self.execution_alias, "-File"]
 
 

@@ -208,8 +208,8 @@ void MoveDirectory(_In_z_ MI_Char *from , _In_z_ MI_Char *to, NitsTrapHandle h)
     //The error might be caused by nits fault injection
     NitsIgnoringError();    
 }
-DWORD GetEventID(EVT_HANDLE hEvent, __deref_out LPWSTR *ActivityID,  
-                                      __deref_out LPWSTR *RelatedActivityID)
+DWORD GetEventID(EVT_HANDLE hEvent, LPWSTR *ActivityID,  
+                                      LPWSTR *RelatedActivityID)
 {
     if(ActivityID)
         *ActivityID = NULL;

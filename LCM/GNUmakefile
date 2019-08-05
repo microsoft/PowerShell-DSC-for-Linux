@@ -5,6 +5,7 @@ include $(TOP)/config.mak
 DIRECTORIES = omiutils
 DIRECTORIES += codec/mof
 DIRECTORIES += codec/mof/parser
+DIRECTORIES += json_parson
 DIRECTORIES += dsc/engine/EngineHelper
 DIRECTORIES += dsc/engine/ca/CAInfrastructure
 DIRECTORIES += dsc/engine/ca/CALogInfrastructure
@@ -12,6 +13,8 @@ DIRECTORIES += dsc/engine/ConfigurationManager
 DIRECTORIES += dsc/engine/ModuleLoader/ModuleLibrary
 DIRECTORIES += dsc/engine/lcm
 DIRECTORIES += dsc/engine/ConsistencyInvoker
+DIRECTORIES += dsc/engine/dsc_library
+DIRECTORIES += dsc/engine/dsc_host
 
 include $(OMI)/mak/rules.mak
 
