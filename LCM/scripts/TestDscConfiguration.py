@@ -50,6 +50,8 @@ stderr = ''
 if use_omsconfig_host:
     if isfile(dsc_host_lock_path):
         try:
+            stop_old_host_instances(dsc_host_lock_path)
+
             # Open the dsc host lock file. This also creates a file if it does not exist
             dschostlock_filehandle = open(dsc_host_lock_path, 'w')
             print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
@@ -65,7 +67,6 @@ if use_omsconfig_host:
                 except IOError:
                     write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
                     sleep(60)
-                    stop_old_host_instances()
 
             if dschostlock_acquired:
                 p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

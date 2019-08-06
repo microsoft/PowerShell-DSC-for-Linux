@@ -184,6 +184,7 @@ def perform_inventory(args):
             
             if use_omsconfig_host:
                 if isfile(dsc_host_lock_path):
+                    stop_old_host_instances(dsc_host_lock_path)
                     # Open the dsc host lock file. This also creates a file if it does not exist.
                     dschostlock_filehandle = open(dsc_host_lock_path, 'w')
                     printVerboseMessage("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
@@ -197,7 +198,6 @@ def perform_inventory(args):
                         except IOError:
                             write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
                             sleep(60)
-                            stop_old_host_instances()
                 else:
                     write_omsconfig_host_log('dsc_host lock file does not exist. Skipping this operation until next consistency hits.', pathToCurrentScript, 'WARNING')
 

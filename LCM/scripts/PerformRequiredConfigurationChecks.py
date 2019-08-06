@@ -87,7 +87,7 @@ def run_perform_required_configuration_checks():
                 except IOError:
                     write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
                     sleep(15)
-                    stop_old_host_instances()
+                    stop_old_host_instances(dsc_host_lock_path)
                 
             if dschostlock_acquired:
                 p = Popen(parameters, stdout=PIPE, stderr=PIPE)
