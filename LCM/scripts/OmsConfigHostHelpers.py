@@ -76,7 +76,7 @@ def write_omsconfig_host_log(message, pathToCurrentScript, level = 'INFO'):
     if (level == 'ERROR') or (level == 'WARNING') or (level == 'FATAL'):
         write_omsconfig_host_telemetry(message, pathToCurrentScript, level)
 
-def stop_old_host_instances():
+def stop_old_host_instances(dsc_host_lock_path):
     dsc_host_pid_path = '/opt/dsc/bin/dsc_host.pid'
 
     last_host_pid = 0
@@ -102,7 +102,10 @@ def stop_old_host_instances():
     # If file was last modified more than 3 hours ago, we will kill the process
     if (timestamp_diff > 3600 * 3):
         try:
-            os.kill(last_host_pid, signal.SIGTERM)
             write_omsconfig_host_log('Killing dsc_host with pid = ' + str(last_host_pid) + ' since it is older than 3 hours.', 'stop_old_host_instances', 'WARNING')
+            os.kill(last_host_pid, signal.SIGTERM)
+            if (os.path.exists(dsc_host_lock_path)):
+                os.remove(dsc_host_lock_path)
+            write_omsconfig_host_log('Killed dsc_host with pid = ' + str(last_host_pid) + ' since it was taking longer than 3 hours.', 'stop_old_host_instances', 'WARNING')
         except:
             pass
