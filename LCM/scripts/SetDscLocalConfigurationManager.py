@@ -5,7 +5,7 @@ from subprocess           import PIPE, Popen
 from sys                  import argv, exc_info, exit, version_info
 from traceback            import format_exc
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
-from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
 
 pathToCurrentScript = realpath(__file__)
@@ -102,6 +102,8 @@ def apply_meta_config(args):
         # Apply the metaconfig
         if use_omsconfig_host:
             try:
+                stop_old_host_instances(dsc_host_lock_path)
+
                 # Open the dsc host lock file. This also creates a file if it does not exist
                 dschostlock_filehandle = open(dsc_host_lock_path, 'w')
                 print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
