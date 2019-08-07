@@ -19,6 +19,10 @@
 #include <locale.h>
 #include <unistd.h>
 
+#define _POSIX_SOURCE
+#include <sys/stat.h>
+#undef _POSIX_SOURCE
+
 #include "DSC_Systemcalls.h"
 #include "Resources_LCM.h"
 #include "EngineHelper.h"
@@ -107,6 +111,9 @@ int main(int argc, char *argv[])
     JSON_Value *operation_result_root_value = NULL;
     JSON_Value *operation_error_root_value = NULL;
     char* operation_name;
+
+    // Set umask to 0022
+    umask(S_IWGRP | S_IWOTH);
 
     SaveCurrentPID();
 

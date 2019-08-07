@@ -445,6 +445,9 @@ fi
 
 #if BUILD_OMS == 1
 
+# Remove old output files from calling dsc_host
+rm -f /opt/dsc/output/*
+
 # Note that omsagent's service_control uses systemctl to kill agent (omsagent
 # still doesn't shut down in a controlled fashion). Two rapid 'kill -9'
 # operations can confuse systemctl, such that the second 'kill -9' operation
