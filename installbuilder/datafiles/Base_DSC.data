@@ -181,7 +181,7 @@ if [ $cmdline_ctypes -ne 0 ]; then
 fi
 
 %Preinstall_300
-echo "Cleanning up existing dsc_hosts..."
+echo "Cleaning up existing dsc_hosts..."
 ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1 | xargs kill 2&>1 > /dev/null
 rm -f /opt/dsc/dsc_host_lock
 echo "Cleaned up existing dsc_hosts..."
@@ -401,7 +401,7 @@ chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 #endif
 
 %Preuninstall_899
-echo "Cleanning up existing dsc_hosts before uninstall..."
+echo "Cleaning up existing dsc_hosts before uninstall..."
 ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1 | xargs kill 2&>1 > /dev/null
 rm -f /opt/dsc/dsc_host_lock
 echo "Cleaned up existing dsc_hosts before uninstall..."
