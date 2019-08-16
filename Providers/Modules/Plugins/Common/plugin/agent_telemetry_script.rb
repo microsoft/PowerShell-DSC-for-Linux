@@ -1,4 +1,5 @@
 require 'optparse'
+require 'open3'
 
 module OMS
 
@@ -6,6 +7,11 @@ module OMS
 
   # Operation Types
   SEND_BATCH = "SendBatch"
+  LOG_ERROR = "LogError"
+  LOG_FATAL = "LogFatal"
+
+  # Sources
+  INTERNAL = "INTERNAL"
 
   class AgentResourceUsage < StrongTypedClass
     strongtyped_accessor :OMSMaxMemory, Integer
@@ -48,7 +54,9 @@ module OMS
     strongtyped_accessor :OSType, String
     strongtyped_accessor :OSDistro, String
     strongtyped_accessor :OSVersion, String
+    strongtyped_accessor :ProcessorArchitecture, String
     strongtyped_accessor :Region, String
+    strongtyped_accessor :ResourceId, String
     strongtyped_accessor :ConfigMgrEnabled, String
     strongtyped_accessor :AgentResourceUsage, AgentResourceUsage
     strongtyped_accessor :AgentQoS, Array # of AgentQoS
@@ -77,8 +85,37 @@ module OMS
 
     @@qos_events = {}
 
+    # runs command out of proc, giving it timeout seconds before killing it
+    def run_command(command, timeout)
+      Open3.popen2(command, :pgroup=>true) do |_, stdout, wait_thr|
+        pid = wait_thr.pid
+        pgid = Process.getpgid(pid)
+        @omicli_pgids << pgid
+        deadline = Time.now + timeout
+        sleep 0.5 until Time.now > deadline or !wait_thr.status
+        if wait_thr.status
+          begin
+            `pkill -TERM -g #{pgid}`
+            sleep 1
+            if wait_thr.status
+              `pkill -KILL -g #{pgid}`
+            end
+          rescue => e
+            log_error("Failed to kill process(es) for command '#{command}'. #{e}")
+          end
+          OMS::Log.error_once("Telemetry failed with process timeout '#{command}'")
+          @omicli_pgids.pop
+          return ''
+        else
+          @omicli_pgids.pop
+          return stdout.read
+        end
+      end
+    end # run_command
+
     def initialize(omsadmin_conf_path, cert_path, key_path, pid_path, proxy_path, os_info, install_info, log = nil, verbose = false)
       @pids = {oms: 0, omi: 0}
+      @omicli_pgids = []
       @ru_points = {oms: {usr_cpu: [], sys_cpu: [], amt_mem: [], pct_mem: []},
                     omi: {usr_cpu: [], sys_cpu: [], amt_mem: [], pct_mem: []}}
 
@@ -102,9 +139,25 @@ module OMS
 
       @suppress_stdout = false
       @suppress_logging = false
+
+      @total_memory = 0
+      begin
+        run_command("/opt/omi/bin/omicli ei root/scx SCX_OperatingSystem | grep =", 5).each_line do |line|
+          @total_memory = line.sub("TotalVirtualMemorySize=","").strip.to_i if line =~ /TotalVirtualMemorySize/
+        end
+      rescue => e
+        log_error("Error finding max system memory. #{e}")
+      end
     end # initialize
 
-    # Logging methods
+    # ensure any remaining external processes spawned have been killed
+    def cleanup
+      @omicli_pgids.each do |pgid|
+        `pkill -KILL -g #{pgid}`
+      end
+      @omicli_pgids.clear
+    end # cleanup
+
     def log_info(message)
       print("info\t#{message}\n") if !@suppress_logging and !@suppress_stdout
       @log.info(message) if !@suppress_logging
@@ -120,38 +173,67 @@ module OMS
       @log.debug(message) if !@suppress_logging
     end
 
-    # Must be a class method in order to be exposed to all out_*.rb pushing qos events
-    def self.push_qos_event(operation, operation_success, message, source, batch, count, time)
-      begin
-        event = { op: operation, op_success: operation_success, m: message, c: count, t: time }
-        if batch.is_a? Hash and batch.has_key?('DataItems')
-          records = batch['DataItems']
-          if batch['DataItems'][0].has_key?('Timestamp')
-            now = Time.now
-            times = records.map { |record| now - Time.parse(record['Timestamp']) }
-            event[:min_l] = times[-1] # Records appear in order, so last record will have lowest latency
-            event[:max_l] = times[0]
-            event[:sum_l] = times.sum
-          end
-          sizes = records.map { |record| OMS::Common.parse_json_record_encoding(record) }.compact.map(&:bytesize) # Remove possible nil entries with compact
-        elsif batch.is_a? Array
-          # These other logs, such as custom logs, don't have a parsed timestamp
-          sizes = batch.map { |record| OMS::Common.parse_json_record_encoding(record) }.compact.map(&:bytesize)
-        else
-          return
+    def self.clear
+      @@qos_events.clear
+    end
+
+    # handle batch send operations
+    def self.handle_std_event(event, source, batch, time)
+      event[:t] = time
+      if batch.is_a? Hash and batch.has_key?('DataItems')
+        records = batch['DataItems']
+        if records[0].has_key?('Timestamp')
+          now = Time.now
+          times = records.map { |record| now - Time.parse(record['Timestamp']) }
+          event[:min_l] = times[-1] # Records appear in order, so last record will have lowest latency
+          event[:max_l] = times[0]
+          event[:sum_l] = times.sum
         end
+        sizes = records.map { |record| OMS::Common.parse_json_record_encoding(record) }.compact.map(&:bytesize) # Remove possible nil entries with compact
+      elsif batch.is_a? Array # These other logs, such as custom logs, don't have a parsed timestamp
+        sizes = batch.map { |record| OMS::Common.parse_json_record_encoding(record) }.compact.map(&:bytesize)
+      else
+        OMS::Log.warn_once("Unexpected record format encountered in QoS: #{records.to_s}")
+      end
 
-        event[:min_s] = sizes.min
-        event[:max_s] = sizes.max
-        event[:sum_s] = sizes.sum
+      event[:min_s] = sizes.min
+      event[:max_s] = sizes.max
+      event[:sum_s] = sizes.sum
 
-        if @@qos_events.has_key?(source)
-          if @@qos_events[source].size >= QOS_EVENTS_LIMIT
-            @@qos_events[source].shift # remove oldest qos event to cap memory use
-          end
-          @@qos_events[source] << event
+      if @@qos_events.has_key?(source)
+        if @@qos_events[source].size >= QOS_EVENTS_LIMIT
+          @@qos_events[source].shift # remove oldest qos event to cap memory use
+        end
+        @@qos_events[source] << event
+      else
+        @@qos_events[source] = [event]
+      end
+    end
+
+    # handle warn/error/fatal log messages
+    def self.handle_log_event(event, source)
+      if @@qos_events.has_key?(source)
+        if @@qos_events[source].size >= QOS_EVENTS_LIMIT
+          OMS::Log.warn_once("Incoming QoS log event dropped to obey memory cap.")
+          return
+        elsif @@qos_events[source].has_key?(event[:m]) # assume all duplicate messages will have the same severity
+          @@qos_events[source][event[:m]][:c] += 1
         else
-          @@qos_events[source] = [event]
+          @@qos_events[source][event[:m]] = event
+        end
+      else
+        @@qos_events[source] = { event[:m] => event }
+      end
+    end
+
+    # Must be a class method in order to be exposed to all *.rb pushing qos events
+    def self.push_qos_event(operation, operation_success, message, source, batch = [], count = 1, time = 0)
+      begin
+        event = { op: operation, op_success: operation_success, m: message, c: count }
+        if [LOG_ERROR, LOG_FATAL].include?(operation)
+          handle_log_event(event, source)
+        else
+          handle_std_event(event, source, batch, time)
         end
       rescue => e
         OMS::Log.error_once("Error pushing QoS event. #{e}")
@@ -178,7 +260,7 @@ module OMS
             log_error("Error reading omsagent pid file. #{e}")
           end
         when :omi
-          @pids[key] = `pgrep -U omsagent omiagent`.to_i
+          @pids[key] = `pgrep -U omsagent dsc_host`.to_i
         end
       end
     end
@@ -190,13 +272,17 @@ module OMS
       begin
         if ENV['TEST_WORKSPACE_ID'].nil? && ENV['TEST_SHARED_KEY'].nil? && File.exist?(@omsadmin_conf_path)
           @pids.each do |key, value|
+            amt_mem = 0
+            pct_mem = 0
             if !value.zero?
-              `#{command % value}`.each_line do |line|
+              run_command("#{command % value}", 5).each_line do |line|
                 @ru_points[key][:usr_cpu] << line.sub("PercentUserTime=","").strip.to_i if line =~ /PercentUserTime/
                 @ru_points[key][:sys_cpu] << line.sub("PercentPrivilegedTime=", "").strip.to_i if  line =~ /PercentPrivilegedTime/
-                @ru_points[key][:amt_mem] << line.sub("UsedMemory=", "").strip.to_i if line =~ / UsedMemory/
-                @ru_points[key][:pct_mem] << line.sub("PercentUsedMemory=", "").strip.to_i if line =~ /PercentUsedMemory/
+                amt_mem = line.sub("UsedMemory=", "").strip.to_i if line =~ / UsedMemory/
+                pct_mem = line.sub("PercentUsedMemory=", "").strip.to_i if line =~ /PercentUsedMemory/
               end
+              @ru_points[key][:amt_mem] << amt_mem
+              @ru_points[key][:pct_mem] << (@total_memory.zero? ? pct_mem : ((amt_mem.to_f / @total_memory) * 100).to_i)
             else # pad with zeros when OMI might not be running
               @ru_points[key][:usr_cpu] << 0
               @ru_points[key][:sys_cpu] << 0
@@ -251,35 +337,49 @@ module OMS
 
       begin
         @@qos_events.each do |source, batches|
-          qos_event = AgentQoS.new
-          qos_event.Source = source
-          qos_event.Message = batches[0][:m]
-          qos_event.OperationSuccess = batches[0][:op_success]
-          qos_event.BatchCount = batches.size
-          qos_event.Operation = batches[0][:op]
-
-          counts = batches.map { |batch| batch[:c] }
-          qos_event.MinBatchEventCount = counts.min
-          qos_event.MaxBatchEventCount = counts.max
-          qos_event.AvgBatchEventCount = Telemetry.array_avg(counts)
-
-          qos_event.MinEventSize = batches.map { |batch| batch[:min_s] }.min
-          qos_event.MaxEventSize = batches.map { |batch| batch[:max_s] }.max
-          qos_event.AvgEventSize = batches.map { |batch| batch[:sum_s] }.sum / counts.sum
-
-          if batches[0].has_key? :min_l
-            qos_event.MinLocalLatencyInMs = (batches[-1][:min_l] * 1000).to_i # Latest batch will have smallest minimum latency
-            qos_event.MaxLocalLatencyInMs = (batches[0][:max_l] * 1000).to_i
-            qos_event.AvgLocalLatencyInMs = (((batches.map { |batch| batch[:sum_l] }).sum / counts.sum.to_f) * 1000).to_i
+          if source == INTERNAL
+            top = batches.sort_by { |message, event| -event[:c] }[0 ... 5] # take up to the top 5 by message count
+            top.each do |pair|
+              event = pair[1] # sort_by returns length-two array with key, value
+              qos_event = AgentQoS.new
+              qos_event.Source = source
+              qos_event.Operation = event[:op]
+              qos_event.OperationSuccess = event[:op_success]
+              qos_event.Message = event[:m]
+              qos_event.BatchCount = event[:c]
+              qos << qos_event
+            end
           else
-            qos_event.MinLocalLatencyInMs = 0
-            qos_event.MaxLocalLatencyInMs = 0
-            qos_event.AvgLocalLatencyInMs = 0
+            qos_event = AgentQoS.new
+            qos_event.Source = source
+            qos_event.Message = batches[0][:m]
+            qos_event.OperationSuccess = batches[0][:op_success]
+            qos_event.BatchCount = batches.size
+            qos_event.Operation = batches[0][:op]
+
+            counts = batches.map { |batch| batch[:c] }
+            qos_event.MinBatchEventCount = counts.min
+            qos_event.MaxBatchEventCount = counts.max
+            qos_event.AvgBatchEventCount = Telemetry.array_avg(counts)
+
+            qos_event.MinEventSize = batches.map { |batch| batch[:min_s] }.min
+            qos_event.MaxEventSize = batches.map { |batch| batch[:max_s] }.max
+            qos_event.AvgEventSize = batches.map { |batch| batch[:sum_s] }.sum / counts.sum
+
+            if batches[0].has_key? :min_l
+              qos_event.MinLocalLatencyInMs = (batches[-1][:min_l] * 1000).to_i # Latest batch will have smallest minimum latency
+              qos_event.MaxLocalLatencyInMs = (batches[0][:max_l] * 1000).to_i
+              qos_event.AvgLocalLatencyInMs = (((batches.map { |batch| batch[:sum_l] }).sum / counts.sum.to_f) * 1000).to_i
+            else
+              qos_event.MinLocalLatencyInMs = 0
+              qos_event.MaxLocalLatencyInMs = 0
+              qos_event.AvgLocalLatencyInMs = 0
+            end
+
+            qos_event.NetworkLatencyInMs = (((batches.map { |batch| batch[:t] }).sum / batches.size.to_f) * 1000).to_i # average
+
+            qos << qos_event
           end
-
-          qos_event.NetworkLatencyInMs = (((batches.map { |batch| batch[:t] }).sum / batches.size.to_f) * 1000).to_i # average
-
-          qos << qos_event
         end
       rescue => e
         log_error("Error calculating QoS. #{e}")
@@ -298,8 +398,10 @@ module OMS
           agent_telemetry.OSDistro = line.sub("OSName=","").strip if line =~ /OSName/
           agent_telemetry.OSVersion = line.sub("OSVersion=","").strip if line =~ /OSVersion/
         end
+        agent_telemetry.ProcessorArchitecture = `uname -m`
         agent_telemetry.Region = OMS::Configuration.azure_region
-        agent_telemetry.ConfigMgrEnabled = File.exist?("/etc/opt/omi/conf/omsconfig/omshelper_disable").to_s
+        agent_telemetry.ResourceId = OMS::Configuration.azure_resource_id ? OMS::Configuration.azure_resource_id : ""
+        agent_telemetry.ConfigMgrEnabled = (!File.exist?("/etc/opt/omi/conf/omsconfig/omshelper_disable")).to_s
         agent_telemetry.AgentResourceUsage = calculate_resource_usage
         agent_telemetry.AgentQoS = calculate_qos
         return (!agent_telemetry.AgentResourceUsage.nil? and !agent_telemetry.AgentQoS.nil?) ? agent_telemetry : nil
