@@ -26,7 +26,7 @@ default_host = '127.0.0.1'
 default_protocol = 'udp'
 oms_wkspc_regex = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
 non_oms_wkspcs = ['LAD', 'scom']
-
+rsyslog_conf_separator = '\t'
 
 def init_vars(SyslogSource, WorkspaceID):
     """
@@ -188,10 +188,14 @@ def ReadSyslogConf(SyslogSource, WorkspaceID):
     except:
         LG().Log('ERROR', 'Unable to read ' + src_conf_path + '.')
         return out
-
-    # Find all lines sending to this workspace's port
+    # Find all lines sending to this workspace's port, protocol and addr
+    # Use port + protocol + addr to look for a match, ex: \t@127.0.0.1:25224
     port = ExtractFieldFromFluentDConf(WorkspaceID, 'port', default_port)
-    facility_search = r'^([^#].*?)@.*?' + port + '$'
+    protocol_type = ExtractFieldFromFluentDConf(WorkspaceID, 'protocol_type', default_protocol)
+    bind_addr = ExtractFieldFromFluentDConf(WorkspaceID, 'bind', default_host)
+    pattern_value = rsyslog_conf_separator + protocol_type.replace('tcp', '@@').replace('udp', '@') + bind_addr + ':' + port
+
+    facility_search = r'^([^#].*?)' + pattern_value + '$'
     facility_re = re.compile(facility_search, re.M)
     for line in facility_re.findall(txt):
         l = line.replace('=', '')
@@ -251,7 +255,7 @@ def UpdateSyslogConf(SyslogSource, WorkspaceID):
         facility_txt = ''
         for s in d['Severities']:
             facility_txt += d['Facility'] + '.=' + s + ';'
-        facility_txt = facility_txt[0:-1] + '\t' + protocol_type + bind_addr + ':' + port + '\n'
+        facility_txt = facility_txt[0:-1] + rsyslog_conf_separator + protocol_type + bind_addr + ':' + port + '\n'
         txt += facility_txt
 
     # Write the new complete txt to the conf file
@@ -288,6 +292,17 @@ def ReadSyslogNGConf(SyslogSource, WorkspaceID):
     except:
         LG().Log('ERROR', 'Unable to read ' + syslog_ng_conf_path + '.')
         return out
+
+    # Check if the destination for that workspace has identical protocol + addr + port
+    # Use port + protocol + addr to look for a match, ex: \t@127.0.0.1:25224
+    port = ExtractFieldFromFluentDConf(WorkspaceID, 'port', default_port)
+    protocol_type = ExtractFieldFromFluentDConf(WorkspaceID, 'protocol_type', default_protocol)
+    bind_addr = ExtractFieldFromFluentDConf(WorkspaceID, 'bind', default_host)
+    dest_config_search = r'^destination d_.*' + WorkspaceID + '.*' + protocol_type + '\("' + bind_addr + '" port\(' + port + '\)\).*'
+    dest_re = re.compile(dest_config_search, re.M)
+    # when there is no WorkspaceID destination that match protocol + addr + port, just return empty list
+    if len(dest_re.findall(txt)) == 0:
+        return []
 
     # Check first if there are conf lines labelled with this workspace ID
     wkspc_id_search = r'^filter f_.*' + WorkspaceID + '_oms'
