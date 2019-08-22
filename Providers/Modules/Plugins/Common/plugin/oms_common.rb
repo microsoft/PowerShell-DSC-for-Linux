@@ -1,4 +1,10 @@
+# frozen_string_literal: true
+
 module OMS
+
+  MSDockerCImprovHostnameFilePath = '/var/opt/microsoft/docker-cimprov/state/containerhostname'
+  IPV6_REGEX = '\h{4}:\h{4}:\h{4}:\h{4}:\h{4}:\h{4}:\h{4}:\h{4}'
+  IPV4_Approximate_REGEX = '\d+\.\d+\.\d+\.\d+'
 
   class RetryRequestException < Exception
     # Throw this exception to tell the fluentd engine to retry and
@@ -23,7 +29,7 @@ module OMS
     @@OSName = nil
     @@OSVersion = nil
     @@Hostname = nil
-    @@HostnameFilePath = '/var/opt/microsoft/docker-cimprov/state/containerhostname'
+    @@HostnameFilePath = MSDockerCImprovHostnameFilePath
     @@FQDN = nil
     @@InstalledDate = nil
     @@AgentVersion = nil
@@ -479,6 +485,111 @@ module OMS
     @@tzRightFolder = 'right/'
 
     class << self
+
+      # Internal methods
+      # (left public for easy testing, though protected may be better later)
+
+      def clean_hostname_string(hnBuffer)
+        return "" if hnBuffer.nil? # So give the rest of the program a string to deal with.
+        hostname_buffer = hnBuffer.strip
+        return hostname_buffer
+      end
+
+      def has_designated_hostnamefile?
+        return false if @@HostnameFilePath.nil?
+        return false unless @@HostnameFilePath =~ /\w/
+        return false unless File.exist?(@@HostnameFilePath)
+        return true
+      end
+
+      def is_dot_separated_string?(hnBuffer)
+        return true if /[^.]+\.[^.]+/ =~ hnBuffer
+        return false
+      end
+
+      def is_hostname_compliant?(hnBuffer)
+        # RFC 2181:
+        #   Size limit is 1 to 63 octets, so probably bytesize is appropriate method.
+        return false if hnBuffer.nil?
+        return false if /\./ =~ hnBuffer # Hostname by definition may not contain a dot.
+        return false if /:/ =~ hnBuffer # Hostname by definition may not contain a colon.
+        return false unless 1 <= hnBuffer.bytesize && hnBuffer.bytesize <= 63
+        return true
+      end
+
+      def is_like_ipv4_string?(hnBuffer)
+        return false unless /\A#{IPV4_Approximate_REGEX}\z/ =~ hnBuffer
+        qwa = hnBuffer.split('.')
+        return false unless qwa.length == 4
+        return false if qwa[0].to_i == 0
+        qwa.each do |quadwordstring|
+            bi = quadwordstring.to_i
+            # This may need more detail if 255 octets are sometimes allowed, but I don't think so.
+            return false unless 0 <= bi and bi < 255
+        end
+        return true
+      end
+
+      def is_like_ipv6_string?(hnBuffer)
+        return true if /\A#{IPV6_REGEX}\z/ =~ hnBuffer
+        return false
+      end
+
+      def look_for_socket_class_host_address
+        hostname_buffer = nil
+
+        begin
+          hostname_buffer = Socket.gethostname
+        rescue => error
+          OMS::Log.error_once("Unable to get the Host Name using socket facility: #{error}")
+          return
+        end
+        @@Hostname = clean_hostname_string(hostname_buffer)
+
+        return # Thwart accidental return to force correct use.
+      end
+
+      def look_in_designated_hostnamefile
+        # Issue:
+        #   When omsagent runs inside a container, gethostname returns the hostname of the container (random name)
+        #   not the actual machine hostname.
+        #   One way to solve this problem is to set the container hostname same as machine name, but this is not
+        #   possible when host-machine is a private VM inside a cluster.
+        # Solution:
+        #   Share/mount ‘/etc/hostname’ as '/var/opt/microsoft/omsagent/state/containername' with container and
+        #   omsagent will read hostname from shared file.
+        hostname_buffer = nil
+
+        unless File.readable?(@@HostnameFilePath)
+            OMS::Log.warn_once("File '#{@@HostnameFilePath}' exists but is not readable.")
+            return
+        end
+
+        begin
+          hostname_buffer = File.read(@@HostnameFilePath)
+        rescue => error
+          OMS::Log.warn_once("Unable to read the hostname from #{@@HostnameFilePath}: #{error}")
+        end
+        @@Hostname = clean_hostname_string(hostname_buffer)
+        return # Thwart accidental return to force correct use.
+      end
+
+      def validate_hostname_equivalent(hnBuffer)
+        # RFC 1123 and 2181
+        # Note that for now we are limiting the earlier maximum of 63 for fqdn labels and thus
+        # hostnames UNTIL we are assured azure will allow 255, as specified in RFC 1123, or
+        # we are otherwise instructed.
+        rfcl = "RFCs 1123, 2181 with hostname range of {1,63} octets for non-root item."
+        return if is_hostname_compliant?(hnBuffer)
+        return if is_like_ipv4_string?(hnBuffer) 
+        return if is_like_ipv6_string?(hnBuffer)
+        msg = "Hostname '#{hnBuffer}' not compliant (#{rfcl}).  Not IP Address Either."
+        OMS::Log.warn_once(msg)
+        raise NameError, msg
+      end
+
+      # End of Internal methods
+
       # get the unified timezone id by absolute file path of the timezone file
       # file path: the absolute path of the file
       def get_unified_timezoneid(filepath)
@@ -576,33 +687,19 @@ module OMS
         return @@OSVersion
       end
 
-      def get_hostname
-        return @@Hostname if !@@Hostname.nil?
+      def get_hostname(ignoreOldValue = false)
 
-        # Issue:
-        #   When omsagent runs inside a container, gethostname returns the hostname of the container (random name)
-        #   not the actual machine hostname.
-        #   One way to solve this problem is to set the container hostname same as machine name, but this is not
-        #   possible when host-machine is a private VM inside a cluster.
-        # Solution:
-        #   Share/mount ‘/etc/hostname’ as '/var/opt/microsoft/omsagent/state/containername' with container and
-        #   omsagent will read hostname from shared file.
+        if not is_hostname_compliant?(@@Hostname) or ignoreOldValue then
 
-        begin
-          if File.exist?(@@HostnameFilePath) && File.readable?(@@HostnameFilePath)
-            @@Hostname = File.read(@@HostnameFilePath).strip
-            return @@Hostname
-          end
-        rescue => error
-          OMS::Log.warn_once("Unable to read the hostname from #{@@HostnameFilePath}: #{error}")
+            look_in_designated_hostnamefile         if has_designated_hostnamefile?
+
+            look_for_socket_class_host_address  unless is_hostname_compliant?(@@Hostname)
         end
 
         begin
-          hostname = Socket.gethostname.split(".")[0]
+          validate_hostname_equivalent(@@Hostname)
         rescue => error
-          OMS::Log.error_once("Unable to get the Host Name: #{error}")
-        else
-          @@Hostname = hostname
+          OMS::Log.warn_once("Hostname '#{@@Hostname}' found, but did NOT validate as compliant.  #{error}.  Using anyway.")
         end
         return @@Hostname
       end
@@ -650,6 +747,10 @@ module OMS
           end
         end
         return @@AgentVersion
+      end
+
+      def fast_utc_to_iso8601_format(utctime, fraction_digits=3)
+        utctime.strftime("%FT%T.%#{fraction_digits}NZ")
       end
 
       def format_time(time)
@@ -806,7 +907,7 @@ module OMS
 
         return msg
       end # safe_dump_simple_hash_array
-      
+
       # start a request
       # parameters:
       #   req: HTTPRequest. request
@@ -917,5 +1018,192 @@ module OMS
         self
     end
   end
+
+
+  require 'singleton'
+  class BackgroundJobs
+    include Singleton
+
+    attr_reader :proc_cache
+    def initialize
+      @proc_cache = {}
+      @proc_cache_lock = Mutex.new
+      @master_process = Process.pid
+      @log = $log
+
+      ObjectSpace.define_finalizer(self, self.class.method(:finalize).to_proc)
+    end
+
+    private
+
+    def get_log_tag()
+      tag = "CHILD"
+      tag = "PARENT" if @master_process == Process.pid
+      return tag
+    end
+
+    def log(msg)
+      @log.info "#{self.class.name}:#{get_log_tag()} #{msg}"
+    end
+
+    def debug(msg)
+      @log.debug "#{self.class.name}:#{get_log_tag()} #{msg}"
+    end
+
+    def trace(msg)
+      @log.trace "#{self.class.name}:#{get_log_tag()} #{msg}"
+    end
+
+    def error(msg)
+      @log.error "#{self.class.name}:#{get_log_tag()} #{msg}"
+    end
+
+    def add_process_to_cache(pid)
+      @proc_cache_lock.synchronize {
+        @proc_cache[pid] = pid
+      }
+    end
+
+    def remove_process_from_cache(pid)
+      @proc_cache_lock.synchronize {
+        @proc_cache.delete(pid)
+      }
+    end
+
+    public
+
+    def self.finalize(object_id)
+      return if Process.ppid == 1 or Process.pid != self.instance.get_mpid
+      self.instance.cleanup
+    end
+
+    def get_mpid
+      return @master_process
+    end
+
+    def cleanup
+      return if @proc_cache.empty?
+      log "Cleanup jobs, pid=#{Process.pid} mpid=#{self.get_mpid} ppid=#{Process.ppid}"
+
+      @proc_cache.each do |pid, val|
+        Process.kill('SIGTERM', pid)
+      end
+
+      @proc_cache.each do |pid, val|
+        Process.kill('SIGKILL', pid)
+      end
+      @proc_cache_lock.synchronize {
+        @proc_cache.clear
+      }
+    end
+
+    def run_job_and_wait(&block)
+      read_io, write_io = IO.pipe
+
+      # read_s, write_s, = IO.select([read_io], [write_io])
+      # read_io = read_s[0]
+      # write_io = write_s[0]
+
+      pid = fork do
+        ["SIGHUP", "SIGTERM"].each do |sig|
+          Signal.trap(sig) { log "Child process ##{Process.pid} receiving #{sig}\n"; exit }
+        end
+
+        read_io.close # For parent's use, not child's use
+        result = {}
+        begin
+          yield_ret = yield
+          yield_results = {}
+          trace "yield_ret=#{yield_ret}"
+          if yield_ret.is_a?(Array)
+            yield_ret.each { |data|
+              operation, source, event = 'UNKOWN', 'UNKOWN', nil
+              event = data[:event] if data.is_a?(Hash) && data.key?(:event)
+              # event = event[0] if event.is_a?(Array)
+              source = data[:source] if data.is_a?(Hash) && data.key?(:source)
+              if event.is_a?(String)
+                operation = LOG_ERROR
+              elsif event.is_a?(Hash) && event.key?(:op)
+                operation = event[:op]
+              end
+
+              yield_results[:telemetry] = [] unless yield_results.key?(:telemetry)
+              yield_results[:telemetry].push({'operation': operation, 'event': event, 'source': source})
+            }
+          end
+          result[:return] = yield_results
+        rescue => e # We should catch any exception to pass it to parent
+          result[:exception] = {'class': e.class.name, 'msg': e.message, 'backtrace': e.backtrace}
+        end
+        # process is orphan
+        Process.exit(false) if Process.ppid == 1
+
+        write_io.write(result)
+        trace "write_io <= #{result}"
+      end
+
+      add_process_to_cache(pid)
+      write_io.close # For child use
+      # blocking read on pipe
+      results = eval(read_io.read)
+      trace "Receiving results=#{results}"
+
+      read_io.close
+      Process.waitpid(pid)
+      remove_process_from_cache(pid)
+
+      unless results.is_a?(Hash)
+        log "results is not a hash, results=#{results}"
+        return results
+      end
+
+      # Handling Exception
+      if results.key?(:exception) and results[:exception] != nil
+        ex_class_name = results[:exception][:class]
+        ex_msg = results[:exception][:msg]
+        ex_backtrace = results[:exception][:backtrace]
+        if Object.const_defined?(ex_class_name)
+          ex = Object.const_get(ex_class_name, Class.new).new(ex_msg)
+          ex.set_backtrace(ex_backtrace)
+          raise ex
+        else
+          error "exception not found '#{ex_class_name}', we will raise a generic exception with msg='#{ex_msg}'"
+          ex = StandardError.new(ex_msg)
+          ex.set_backtrace(ex_backtrace)
+          raise ex
+        end
+      end
+
+      # Handling Telemetry or simple return
+      if results.key?(:return) and results[:return] != nil
+        val = results[:return]
+
+        # Handling Telemetry
+        if val.key?(:telemetry) and val[:telemetry] != nil
+          val[:telemetry].each do |item|
+            operation, event, source = item[:operation], item[:event], item[:source]
+            log "Handling operation=#{operation}, source=#{source}, event=#{event}"
+            if operation === LOG_ERROR
+              @log.error(event)
+            else
+              OMS::Telemetry.push_back_qos_event(source, event)
+            end
+          end
+        end
+        # Simple return
+        return val
+      end
+
+      return nil
+    end
+
+    def run_job_async(callback, &block)
+      thread = Thread.new {
+        results = self.run_job_and_wait(&block)
+        callback.call(results) if callback != nil
+      }
+    end
+
+  end # BackgroundJobs
 
 end # module OMS
