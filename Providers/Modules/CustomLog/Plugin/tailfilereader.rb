@@ -188,7 +188,7 @@ module Tailscript
 
         def on_notify
           begin
-            @log.debug "Seeking to read file - #{@io.path} from #{@io.pos} position and file size is #{@io.stat.size}"
+            #@log.debug "Seeking to read file - #{@io.path} from #{@io.pos} position and file size is #{@io.stat.size}"
             read_more = false
             if @lines.empty?
               begin
@@ -198,7 +198,7 @@ module Tailscript
                   else
                     @buffer << @io.readpartial(2048, @iobuf)
                   end
-                  @log.debug "The buffer length is #{@buffer.length}"
+                  #@log.debug "The buffer length is #{@buffer.length}"
                   while idx = @buffer.index(@SEPARATOR)
                     @lines << @buffer.slice!(0, idx + 1)
                   end
