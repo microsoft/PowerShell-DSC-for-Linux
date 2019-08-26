@@ -317,6 +317,7 @@ if [ -f "/etc/opt/omi/conf/omsconfig/keymgmtring.gpg" ]; then chown omsagent:omi
 if [ -f "/etc/opt/omi/conf/omsconfig/keyring.gpg" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/keyring.gpg"; fi
 if [ -f "/etc/opt/omi/conf/omsconfig/last_statusreport" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/last_statusreport"; fi
 if [ -d "/var/opt/microsoft/omsconfig" ]; then chown -R omsagent:omiusers /var/opt/microsoft/omsconfig/*; fi
+if [ -d "/etc/opt/omi/conf/omsconfig" ]; then chown -R omsagent:omiusers /etc/opt/omi/conf/omsconfig/*; fi
 
 #else
 
