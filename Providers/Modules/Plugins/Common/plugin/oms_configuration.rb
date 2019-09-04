@@ -282,7 +282,7 @@ module OMS
               @@UUID = uuid_str
             else
               @@UUID = "00000000-0000-0000-0000-000000000000" 
-            end
+            end          
           end
         end
 
