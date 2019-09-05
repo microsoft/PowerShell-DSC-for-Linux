@@ -364,7 +364,7 @@ nxOMSPerfCounter:
 
 nxOMSSyslog:
 	rm -rf output/staging; \
-        VERSION="2.3"; \
+        VERSION="2.4"; \
         PROVIDERS="nxOMSSyslog"; \
         STAGINGDIR="output/staging/$@/DSCResources"; \
         cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -428,7 +428,7 @@ nxOMSCustomLog:
 
 nxOMSSudoCustomLog:
 	rm -rf output/staging; \
-	VERSION="2.5"; \
+	VERSION="2.6"; \
 	PROVIDERS="nxOMSSudoCustomLog"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -472,7 +472,7 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.21"; \
+	VERSION="3.22"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
