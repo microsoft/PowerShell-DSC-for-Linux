@@ -106,7 +106,8 @@ def main(argv):
     try:
         configurationFileContent = configurationFile.read()
     finally:
-        configurationFile.close()
+        if (configurationFile):
+            configurationFile.close()
 
     # Convert the file content to strings of integers representing unicode
     configurationData = []
@@ -195,11 +196,12 @@ def main(argv):
             else:
                 print("dsc host lock already acuired by a different process")
         finally:
-            # Release dsc host file lock
-            flock(dschostlock_filehandle, LOCK_UN)
+            if (dschostlock_filehandle):
+                # Release dsc host file lock
+                flock(dschostlock_filehandle, LOCK_UN)
 
-            # Close dsc host lock file handle
-            dschostlock_filehandle.close()
+                # Close dsc host lock file handle
+                dschostlock_filehandle.close()
     else:
         p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()

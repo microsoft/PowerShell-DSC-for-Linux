@@ -238,7 +238,8 @@ def perform_inventory(args):
                     try:
                         tempReportFileHandle.write(final_xml_report)
                     finally:
-                        tempReportFileHandle.close()
+                        if (tempReportFileHandle):
+                            tempReportFileHandle.close()
 
                     # Ensure temporary inventory report file permission is set correctly after opening
                     operationStatusUtility.ensure_file_permissions(temp_report_path, '644')
@@ -249,25 +250,28 @@ def perform_inventory(args):
                     # Ensure inventory report file permission is set correctly
                     operationStatusUtility.ensure_file_permissions(report_path, '644')
                 finally:
-                    # Release inventory file lock
-                    flock(inventorylock_filehandle, LOCK_UN)
+                    if (dschostlock_filehandle):
+                        # Release inventory file lock
+                        flock(inventorylock_filehandle, LOCK_UN)
 
-                    # Release dsc host file lock
-                    if isfile(dsc_host_lock_path) and use_omsconfig_host:
-                        try:
-                            flock(dschostlock_filehandle, LOCK_UN)
-                        except:
-                            pass
+                        # Release dsc host file lock
+                        if isfile(dsc_host_lock_path) and use_omsconfig_host:
+                            try:
+                                flock(dschostlock_filehandle, LOCK_UN)
+                            except:
+                                pass
     finally:
-        # Close inventory lock file handle
-        inventorylock_filehandle.close()
+        if (inventorylock_filehandle):
+            # Close inventory lock file handle
+            inventorylock_filehandle.close()
         
-        # Close dsc host lock file handle
-        if use_omsconfig_host:
-            try:
-                dschostlock_filehandle.close()
-            except:
-                pass
+        if (dschostlock_filehandle):
+            # Close dsc host lock file handle
+            if use_omsconfig_host:
+                try:
+                    dschostlock_filehandle.close()
+                except:
+                    pass
 
     # Ensure inventory lock file permission is set correctly after opening
     operationStatusUtility.ensure_file_permissions(inventorylock_path, '644')

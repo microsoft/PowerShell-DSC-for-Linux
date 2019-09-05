@@ -96,11 +96,12 @@ def run_perform_required_configuration_checks():
             else:
                 print("dsc host lock already acuired by a different process")
         finally:
-            # Release dsc host file lock
-            flock(dschostlock_filehandle, LOCK_UN)
+            if (dschostlock_filehandle):
+                # Release dsc host file lock
+                flock(dschostlock_filehandle, LOCK_UN)
 
-            # Close dsc host lock file handle
-            dschostlock_filehandle.close()
+                # Close dsc host lock file handle
+                dschostlock_filehandle.close()
     else:
         p = Popen(parameters, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
