@@ -80,11 +80,12 @@ if use_omsconfig_host:
             else:
                 print("dsc host lock already acuired by a different process")
         finally:
-            # Release dsc host file lock
-            flock(dschostlock_filehandle, LOCK_UN)
+            if (dschostlock_filehandle):
+                # Release dsc host file lock
+                flock(dschostlock_filehandle, LOCK_UN)
 
-            # Close dsc host lock file handle
-            dschostlock_filehandle.close()
+                # Close dsc host lock file handle
+                dschostlock_filehandle.close()
     else:
         write_omsconfig_host_log('dsc_host lock file does not exist. Skipping this operation until next consistency hits.', pathToCurrentScript, 'WARNING')
 else:
