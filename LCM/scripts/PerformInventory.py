@@ -170,6 +170,7 @@ def perform_inventory(args):
     printVerboseMessage("Opened the inventory lock file at the path '" + inventorylock_path + "'")
     retval = 0
     inventorylock_acquired = True
+    dschostlock_filehandle = None
 
     try:
         # Acquire inventory file lock
