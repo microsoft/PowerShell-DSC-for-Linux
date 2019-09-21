@@ -309,8 +309,8 @@ module NPMDConfig
                     _ruleHash["IngestionWorkspaceId"] = _iRule.has_key?("IngestionWorkspaceId") ? _iRule["IngestionWorkspaceId"] : String.new
                     _ruleHash["WorkspaceAlias"] = _iRule.has_key?("WorkspaceAlias") ? _iRule["WorkspaceAlias"] : String.new
                     _ruleHash["Redirect"] = "false"
-                    _ruleHash["NetTests"] = (_iRule.has_key?("NetworkThresholdLoss") and _iRule.has_key?("NetworkThresholdLatency")) ? "true" : "false"
-                    _ruleHash["AppTests"] = (_iRule.has_key?("AppThresholdLatency")) ? "true" : "false"
+                    _ruleHash["NetTests"] = (_iRule["NetworkThresholdLoss"] >= 0 and _iRule["NetworkThresholdLatency"] >= 0) ? "true" : "false"
+                    _ruleHash["AppTests"] = (_iRule["AppThresholdLatency"] >= 0) ? "true" : "false"
                     if (_ruleHash["NetTests"] == "true")
                         _ruleHash["NetworkThreshold"] = {"ChecksFailedPercent" => _iRule["NetworkThresholdLoss"], "RoundTripTimeMs" => _iRule["NetworkThresholdLatency"]}
                     end
@@ -319,7 +319,6 @@ module NPMDConfig
                         _ruleHash["AppThreshold"] = {"ChecksFailedPercent" => (_iRule.has_key?("AppThresholdLoss") ? _iRule["AppThresholdLoss"] : nil), "RoundTripTimeMs" => _iRule["AppThresholdLatency"]}
                     end
 
-                    _ruleHash["DiscoverPaths"] = _iRule["DiscoverPaths"]
                     # Fill endpoints
                     _epList = _iRule["Endpoints"]
                     _endpointList = Array.new
@@ -328,9 +327,9 @@ module NPMDConfig
                         _epHash["Name"] = _epList[j]["Name"]
                         _epHash["ID"] = _epList[j]["Id"]
                         _epHash["DestAddress"] = _epList[j]["URL"]
-                        _epHash["DestPort"] = _epList[j]["Port"].to_s
+                        _epHash["DestPort"] = _epList[j]["Port"]
                         _epHash["TestProtocol"] = _epList[j]["Protocol"]
-                        _epHash["MonitoringInterval"] = _iRule["Poll"].to_s
+                        _epHash["MonitoringInterval"] = _iRule["Poll"]
                         _epHash["TimeDrift"] = _epList[j]["TimeDrift"]
                         _endpointList.push(_epHash)
                     end
@@ -460,27 +459,17 @@ module NPMDConfig
                 end
                 
                 @agentData = JSON.parse(_config.elements[AgentInfoTag].text())
-		#Logger::logInfo "@agentData: #{@agentData.to_s}"
                 @metadata = JSON.parse(_config.elements[MetadataTag].text())
-		#Logger::logInfo "@metaData: #{@metadata.to_s}"
 
                 _h = Hash.new
                 _h[KeyMetadata] = @metadata
-		#Logger::logInfo "_h[KeyMetadata]: #{_h.to_s}"
                 _h[KeyNetworks] = getNetworkHashFromJson(_config.elements[NetworkInfoTag].text())
-		#Logger::logInfo "_h[KeyNetworks]: #{_h.to_s}"
                 _h[KeySubnets]  = getSubnetHashFromJson(_config.elements[SubnetInfoTag].text())
-		#Logger::logInfo "_h[KeySubnets]: #{_h.to_s}"
                 _h[KeyAgents]   = getAgentHashFromJson(_config.elements[AgentInfoTag].text())
-		#Logger::logInfo "_h[KeyAgents]: #{_h.to_s}"
                 _h[KeyRules]    = getRuleHashFromJson(_config.elements[RuleInfoTag].text()) unless _config.elements[RuleInfoTag].nil?
-		#Logger::logInfo "_h[KeyRules]: #{_h.to_s}"
                 _h[KeyEpm]      = getEpmHashFromJson(_config.elements[EpmInfoTag].text()) unless _config.elements[EpmInfoTag].nil?
-		Logger::logInfo "_h[KeyEpm]: #{_h.to_s}"
                 _h[KeyER]       = getERHashFromJson(_config.elements[ERInfoTag].text()) unless _config.elements[ERInfoTag].nil?
-		#Logger::logInfo "_h[KeyER]: #{_h.to_s}"
                 
-		#Logger::logInfo "_h: #{_h.to_s}"
                 _h = nil if (_h[KeyNetworks].nil? or _h[KeySubnets].nil? or _h[KeyAgents].nil?)
                 if _h == nil
                     Logger::logError "UI Config parsed as nil"
@@ -544,7 +533,6 @@ module NPMDConfig
                         for ipAddr in _ips
                             if ip["Value"] == ipAddr
                                 _agentId = key
-				Logger::logInfo "agent id = #{_agentId.to_s}"
                                 break
                             end
                         end
@@ -644,7 +632,7 @@ module NPMDConfig
                     _epmRules = {"Rules" => []}
                     # Check all tests related to current agent id and push their configurations to current agent
                     _testIds = _h[EpmAgentInfoTag][_agentId]
-		    return if _testIds.nil?
+                    return if _testIds.nil?
 
                     _testIds.each do |testId|
                         _test = _h[EpmTestInfoTag][testId]
@@ -652,20 +640,12 @@ module NPMDConfig
                         _rule["ID"] = testId
                         _rule["Name"] = _test["Name"]
                         _rule["Poll"] = _test["Poll"]
-                        _rule["AppThresholdLoss"] = _test["AppThreshold"].has_key?("Loss") ? _test["AppThreshold"]["Loss"] : "-2"
-                        _rule["AppThresholdLatency"] = _test["AppThreshold"]["Latency"]
-                        Logger::logError "NetworkThreshold #{ _test["NetworkThreshold"].to_s}"
-                        if  _test["NetworkThreshold"].nil?
-                            Logger::logInfo "vakarana: NIL #{_rule.to_s}"
-                            _rule["DiscoverPaths"] = "true"
-                        else
-                            Logger::logInfo "vakarana: No NIL #{_rule.to_s}"
-                            _rule["NetworkThresholdLoss"] = _test["NetworkThreshold"]["Loss"]
-                            _rule["NetworkThresholdLatency"] = _test["NetworkThreshold"]["Latency"]
-                            _rule["DiscoverPaths"] = "true"
-                        end
-                        Logger::logError "vakarana: Network thresh loss and altency #{_rule.to_s}"
+                        _rule["AppThresholdLoss"] = (!_test["AppThreshold"].nil? and _test["AppThreshold"].has_key?("Loss")) ? _test["AppThreshold"]["Loss"] : "-2"
+                        _rule["AppThresholdLatency"] = (!_test["AppThreshold"].nil? and _test["AppThreshold"].has_key?("Latency")) ? _test["AppThreshold"]["Latency"] : "-2.0"
+                        _rule["NetworkThresholdLoss"] = (!_test["NetworkThreshold"].nil? and _test["NetworkThreshold"].has_key?("Loss")) ? _test["NetworkThreshold"]["Loss"] : "-2"
+                        _rule["NetworkThresholdLatency"] = (!_test["NetworkThreshold"].nil? and _test["NetworkThreshold"].has_key?("Latency")) ? _test["NetworkThreshold"]["Latency"] : "-2.0"
                         _connectionMonitorId = _test.has_key?("ConnectionMonitorId") ? _test["ConnectionMonitorId"].to_s : String.new
+
                         # Iterate over ConnectionMonitorInfoMap to get following info
                         if !_connectionMonitorId.empty?
                             _cmMap = _h.has_key?(EpmCMInfoTag) ? _h[EpmCMInfoTag] : Hash.new
@@ -845,7 +825,6 @@ module NPMDConfig
         _uiHash = UIConfigParser.parse(uiXml)
         AgentConfigCreator.resetErrorCheck()
         _agentJson = AgentConfigCreator.createJsonFromUIConfigHash(_uiHash)
-	#Logger::logInfo "_agentJson: #{_agentJson.to_s}"
         _errorStr = AgentConfigCreator.getErrorSummary()
         return _agentJson, _errorStr
     end
@@ -940,8 +919,7 @@ module NPMContract
                                             "LatencyThreshold",
                                             "LatencyHealthState",
                                             "TimeGenerated",
-                                            "Computer",
-                                            "NetworkTestEnabled"]
+                                            "Computer"]
 
     CONTRACT_ENDPOINT_PATH_DATA_KEYS = ["SubType",
                                         "TestName",

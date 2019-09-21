@@ -285,14 +285,11 @@ module Fluent
                         Logger::logInfo "Exiting reader thread as npmdAgent found stopped"
                         break
                     end
-                    Logger::logInfo "Data Recived from npmd_agent is #{_line.to_s}"                    
-
                     @watch_dog_sync.synchronize do
                         @watch_dog_last_pet = Time.now
                     end
                     next if _line.nil? or _line.strip== ""
                     _json = check_and_get_json(_line.chomp)
-                    Logger::logInfo "json received from npmd_agent #{_json.to_s}"  
                     unless !_json.nil?
                         Logger::logWarn "Sent string to plugin is not a json string", Logger::loop
                         log_error "String received not json: #{_line[0..100]}" if _line.bytesize > 50
@@ -329,7 +326,6 @@ module Fluent
                                     end
                                 end
                             end
-                            Logger::logInfo "ValidUploadDataItems #{_validUploadDataItems.to_s}"            
                             emit_upload_data_dataitems(_validUploadDataItems) if !_validUploadDataItems.nil? and !_validUploadDataItems.empty?
                             emit_diag_log_dataitems_of_agent(_diagLogs) if !_diagLogs.nil? and !_diagLogs.empty?
                         end
@@ -710,7 +706,6 @@ module Fluent
 
                         # Read the UI configuration from file location
                         _uiXml = File.read(@location_control_data)
-			Logger::logInfo "_uiXml at #{@location_control_data} is #{_uiXml.to_s}"
                         if _uiXml.nil? or _uiXml == ""
                             Logger::logWarn "File read at #{@location_control_data} got nil or empty string"
                             return
@@ -726,8 +721,7 @@ module Fluent
                         if _errorSummary.strip != ""
                             log_error "Configuration drops: #{_errorSummary}"
                         end
-			
-			Logger::logInfo "_agentConfig: #{_agentConfig.to_s}"
+
                         @npmdClientSock.puts START_TEXT + _agentConfig + END_TEXT
                         @npmdClientSock.flush
                         @num_config_sent += 1 unless @num_config_sent.nil?
