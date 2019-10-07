@@ -1,0 +1,48 @@
+#!/bin/sh
+
+sessionId=$(cat /proc/sys/kernel/random/uuid)
+if [ $(expr length "$sessionId") -ne 36 ]
+then
+    sessionId="00000000-0000-0000-0000-000000000000"
+fi
+
+piCmd="/opt/microsoft/omsagent/plugin/pi --scanmode=periodic"
+
+# After 10s send SIGTERM, PI should handle that and exit gracefully.
+# If PI is not terminanted 5 seconds after SIGTERM send SIGKILL
+sleep 10 && pkill -f -x "$piCmd" && sleep 5 && pkill -9 -f -x "$piCmd" &
+
+pi_results=$($piCmd 2>&1)
+returnCode=$?
+
+errorMessage=""
+
+if [ $returnCode -ne 0 ]
+then
+    if [ $returnCode -eq 137 ]
+    then
+        errorMessage="Unhandled timeout in PI."
+    else
+        errorMessage="Failure in PI. ReturnCode: $returnCode."
+    fi
+fi
+
+if [ -z "$pi_results" ]
+then
+    if [ -z "$errorMessage" ]
+    then
+        errorMessage="Empty PI output."
+    else
+        errorMessage="$errorMessage Empty PI output."
+    fi
+fi
+
+if [ -n "$errorMessage" ]
+then
+    echo $sessionId $errorMessage
+fi
+
+if [ -n "$pi_results" ]
+then
+    echo $sessionId $pi_results
+fi
