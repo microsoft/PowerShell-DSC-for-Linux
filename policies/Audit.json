@@ -1,6 +1,6 @@
 {
     "properties": {
-        "displayName": "[Audit] [amits] Set Windows TimeZone.",
+        "displayName": "[Audit] [amits_set] Set Windows TimeZone.",
         "policyType": "Custom",
         "mode": "All",
         "description": "Policy to Set Windows TimeZone.",
@@ -29,6 +29,6 @@
             }
         }
     },
-    "id": "/providers/Microsoft.Authorization/policyDefinitions/126518a8-9ae7-4f52-aaa7-da6888dd7868",
-    "name": "126518a8-9ae7-4f52-aaa7-da6888dd7868"
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/f92959a3-214a-4642-8725-67aebb26d30c",
+    "name": "f92959a3-214a-4642-8725-67aebb26d30c"
 }

@@ -1,6 +1,6 @@
 {
     "properties": {
-        "displayName": "[Deploy] [amits] Set Windows TimeZone.",
+        "displayName": "[Deploy] [amits_set] Set Windows TimeZone.",
         "policyType": "Custom",
         "mode": "Indexed",
         "description": "Policy to Set Windows TimeZone.",
@@ -301,7 +301,7 @@
                             },
                             {
                                 "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/contentHash",
-                                "equals": "CC0A34E34FAF4173519873C840599DE928B97D1253065D36F6FA0560BA2ED2C3"
+                                "equals": "C658529E2010646C0C1326B5857A646BD2B7E7FC32C38D2B2E5ED50194845252"
                             }
                         ]
                     },
@@ -322,7 +322,7 @@
                                     "value": "https://github.com/microsoft/PowerShell-DSC-for-Linux/raw/amits/custompolicy/new_gc_policy/SetWindowsTimeZone_1.1.0.0.zip"
                                 },
                                 "contentHash": {
-                                    "value": "CC0A34E34FAF4173519873C840599DE928B97D1253065D36F6FA0560BA2ED2C3"
+                                    "value": "C658529E2010646C0C1326B5857A646BD2B7E7FC32C38D2B2E5ED50194845252"
                                 },
                                 "TimeZone": {
                                     "value": "[parameters('TimeZone')]"
@@ -362,8 +362,8 @@
                                                 "name": "[parameters('configurationName')]",
                                                 "contentUri": "[parameters('contentUri')]",
                                                 "contentHash": "[parameters('contentHash')]",
-												"assignmentType":"DeployAndAutoCorrect",
                                                 "version": "1.0.0.0",
+												"assignmentType":"DeployAndAutoCorrect",
                                                 "configurationParameter": [
                                                     {
                                                         "name": "[WindowsTimeZone]WindowsTimeZone1;TimeZone",
@@ -407,6 +407,6 @@
             }
         }
     },
-    "id": "/providers/Microsoft.Authorization/policyDefinitions/5fed1582-35c1-4547-a6bd-f4f3b23242d7",
-    "name": "5fed1582-35c1-4547-a6bd-f4f3b23242d7"
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/c0603463-cc71-4614-820a-7b13bfeb1326",
+    "name": "c0603463-cc71-4614-820a-7b13bfeb1326"
 }

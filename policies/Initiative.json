@@ -1,6 +1,6 @@
 {
     "properties": {
-        "displayName": "[Initiative] [amits] Set Windows TimeZone.",
+        "displayName": "[Initiative] [amits_set] Set Windows TimeZone.",
         "policyType": "Custom",
         "description": "Policy to Set Windows TimeZone.",
         "metadata": {
@@ -159,7 +159,7 @@
         },
         "policyDefinitions": [
             {
-                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5fed1582-35c1-4547-a6bd-f4f3b23242d7",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c0603463-cc71-4614-820a-7b13bfeb1326",
                 "policyDefinitionReferenceId": "Deploy_SetWindowsTimeZone",
                 "parameters": {
                     "TimeZone": {
@@ -168,11 +168,11 @@
                 }
             },
             {
-                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/126518a8-9ae7-4f52-aaa7-da6888dd7868",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f92959a3-214a-4642-8725-67aebb26d30c",
                 "policyDefinitionReferenceId": "Audit_SetWindowsTimeZone"
             }
         ]
     },
-    "id": "/providers/Microsoft.Authorization/policySetDefinitions/6bcfb6dc-c0e5-4049-bad5-5c7d375ee7a9",
-    "name": "6bcfb6dc-c0e5-4049-bad5-5c7d375ee7a9"
+    "id": "/providers/Microsoft.Authorization/policySetDefinitions/e513c799-61e6-42b6-9aa5-d87f559b294b",
+    "name": "e513c799-61e6-42b6-9aa5-d87f559b294b"
 }
