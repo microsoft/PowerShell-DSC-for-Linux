@@ -36,6 +36,7 @@ AGENT_SCRIPT_PATH = '/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh'
 
 # Constants
 X64 = '64bit'
+AGENT_BINARY_NAME = 'npmd_agent'
 def enum(**enums):
     return type('Enum', (), enums)
 Commands = enum(LogNPM = 'ErrorLog', StartNPM = 'StartNPM', StopNPM = 'StopNPM', Config = 'Config', Purge = 'Purge')
@@ -320,8 +321,9 @@ def UpdateAgentBinary(newVersion):
     # set capabilities to binary
     src_files = os.listdir(src)
     for file_name in src_files:
-        full_file_name = os.path.join(AGENT_BINARY_PATH, file_name) # assuming only file in directory
-        break
+        if AGENT_BINARY_NAME in file_name:
+            full_file_name = os.path.join(AGENT_BINARY_PATH, file_name) # assuming only file in directory
+            break
     retval &= NPM_ACTION.binary_setcap(full_file_name)
 
     # Notify ruby plugin
