@@ -1,0 +1,14 @@
+[ClassVersion("1.0.0.0")] 
+class Reason
+{
+    [Read] String Phrase;
+    [Read] String Code;
+};
+
+[ClassVersion("1.0.0.0"), FriendlyName("LogAnalyticsAgent")]
+class LogAnalyticsAgent : OMI_BaseResource
+{
+    [Key, Description("The workspace ID(s) to connect LogAnalyticsAgent to Automation Workspace.")] String WorkspaceId;
+	[Write, Description("The Azure Automation Workspace Key.")] String WorkspaceKey;
+    [Read, EmbeddedInstance("Reason")] String Reasons[];
+};
