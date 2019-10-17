@@ -311,8 +311,8 @@ module NPMDConfig
                     _ruleHash["Redirect"] = "false"
                     _ruleHash["WorkspaceResourceID"] = _iRule["WorkspaceResourceID"];
                     _ruleHash["DiscoverPaths"] = _iRule.has_key?("DiscoverPaths") ? _iRule["DiscoverPaths"].to_s : "true"
-                    _ruleHash["NetTests"] = (_iRule["NetworkThresholdLoss"] >= 0 and _iRule["NetworkThresholdLatency"] >= 0) ? "true" : "false"
-                    _ruleHash["AppTests"] = (_iRule["AppThresholdLatency"] >= 0) ? "true" : "false"
+                    _ruleHash["NetTests"] = (_iRule["NetworkThresholdLoss"].to_i >= -2 and _iRule["NetworkThresholdLatency"].to_i >= -2) ? "true" : "false"
+                    _ruleHash["AppTests"] = (_iRule["AppThresholdLatency"].to_i >= -2) ? "true" : "false"
 
                     if (_ruleHash["NetTests"] == "true")
                         _ruleHash["NetworkThreshold"] = {"ChecksFailedPercent" => _iRule["NetworkThresholdLoss"].to_s, "RoundTripTimeMs" => _iRule["NetworkThresholdLatency"].to_s}
@@ -645,10 +645,10 @@ module NPMDConfig
                         _rule["Poll"] = _test["Poll"]
                         _rule["WorkspaceResourceID"] = @metadata.has_key?("WorkspaceResourceID") ? @metadata["WorkspaceResourceID"] : String.new
                         _rule["DiscoverPaths"] = _test.has_key?("DiscoverPaths") ? _test["DiscoverPaths"].to_s : "true"
-                        _rule["AppThresholdLoss"] = (!_test["AppThreshold"].nil? and _test["AppThreshold"].has_key?("Loss")) ? _test["AppThreshold"]["Loss"] : "-2"
-                        _rule["AppThresholdLatency"] = (!_test["AppThreshold"].nil? and _test["AppThreshold"].has_key?("Latency")) ? _test["AppThreshold"]["Latency"] : "-2.0"
-                        _rule["NetworkThresholdLoss"] = (!_test["NetworkThreshold"].nil? and _test["NetworkThreshold"].has_key?("Loss")) ? _test["NetworkThreshold"]["Loss"] : "-2"
-                        _rule["NetworkThresholdLatency"] = (!_test["NetworkThreshold"].nil? and _test["NetworkThreshold"].has_key?("Latency")) ? _test["NetworkThreshold"]["Latency"] : "-2.0"
+                        _rule["AppThresholdLoss"] = _test["AppThreshold"].nil? ? "-3" : (_test["AppThreshold"].has_key?("Loss") ? _test["AppThreshold"]["Loss"] : "-2")
+                        _rule["AppThresholdLatency"] = _test["AppThreshold"].nil? ? "-3.0" : (_test["AppThreshold"].has_key?("Latency") ? _test["AppThreshold"]["Latency"] : "-2.0")
+                        _rule["NetworkThresholdLoss"] = _test["NetworkThreshold"].nil? ? "-3" : (_test["NetworkThreshold"].has_key?("Loss") ? _test["NetworkThreshold"]["Loss"] : "-2")
+                        _rule["NetworkThresholdLatency"] = _test["NetworkThreshold"].nil? ? "-3.0" : (_test["NetworkThreshold"].has_key?("Latency") ? _test["NetworkThreshold"]["Latency"] : "-2.0")
 
                         _connectionMonitorId = _test.has_key?("ConnectionMonitorId") ? _test["ConnectionMonitorId"].to_s : String.new
 
@@ -735,7 +735,7 @@ module NPMDConfig
                     _circuitIdMap = _h[ERCircuitInfoTag]
 
                     if _privateTestMap.empty? && _microsoftTestMap.empty?
-                        Logger::logError "ER configuration rules deserialization failed.", Logger::resc
+                        Logger::logInfo "ER configuration is not present"
                     end
 
                     # Private Peering Rules
@@ -893,11 +893,8 @@ module NPMContract
                                 "AvgHopLatencyList",
                                 "TraceRouteCompletionTime"]
 
-    CONTRACT_DIAG_DATA_KEYS  = ["TimeGenerated",
-                                "SubType",
-                                "NotificationCode",
-                                "NotificationType",
-                                "Computer"]
+    CONTRACT_DIAG_DATA_KEYS  = ["SubType",
+                                "Message"]
 
     CONTRACT_ENDPOINT_HEALTH_DATA_KEYS  =  ["SubType",
                                             "TestName",
