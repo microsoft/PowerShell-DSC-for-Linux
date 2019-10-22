@@ -591,7 +591,7 @@
       <check
         distro="*"
         command="CheckMatchingLines"
-        regex="^[\s\t]*Protocol\s+2$"
+        regex="^\s*Protocol\s+2$"
         path="/etc/ssh/sshd_config" />
     </audit>
     <audit
@@ -605,9 +605,54 @@
       <check
         distro="*"
         command="CheckMatchingLines"
-        regex="^[\s\t]*IgnoreRhosts\s+yes"
+        regex="^\s*IgnoreRhosts\s+yes"
         path="/etc/ssh/sshd_config" />
     </audit>
+    <audit
+    description="Ensure SSH LogLevel is set to INFO"
+    msid="106.5"
+    severity="Warning"
+    impact="SSH provides several logging levels with varying amounts of verbosity. `DEBUG `is specifically _not_ recommended other than strictly for debugging SSH communications since it provides so much data that it is difficult to identify important security information. `INFO `level is the basic level that only records login activity of SSH users. In many situations, such as Incident Response, it is important to determine when a particular user was active on a system. The logout record can eliminate those users who disconnected, which helps narrow the field."
+    remediation="Edit the `/etc/ssh/sshd_config` file to set the parameter as follows:
+```
+LogLevel INFO
+```"
+	ruleId="31f1a912-1b98-42fd-8381-1e8d1033bfd1">
+  <check distro="*" command="CheckNoMatchingLines" regex="^LogLevel (DEBUG[1-3]?|VERBOSE|QUIET|FATAL|ERROR)$" path="/etc/ssh/sshd_config" />
+  </audit>
+
+  <audit
+    description="Ensure SSH MaxAuthTries is set to 6 or less"
+    msid="106.7"
+    severity="Critical"
+    impact="Setting the `MaxAuthTries `parameter to a low number will minimize the risk of successful brute force attacks to the SSH server. While the recommended setting is 4, set the number based on site policy."
+    remediation="Ensure SSH MaxAuthTries is set to 6 or less
+
+Edit the `/etc/ssh/sshd_config` file to set the parameter as follows:
+```
+MaxAuthTries 6
+```"
+ruleId="e7708534-5d98-406f-83ae-1de835b2906e">
+    <check distro="*" command="CheckNoMatchingLines" regex="^\s*MaxAuthTries\s+[7-9]+[0-9]*$" path="/etc/ssh/sshd_config" />>
+  </audit>
+
+  <audit
+    description="Ensure SSH access is limited"
+    msid="106.11"
+    severity="Critical"
+    impact="Restricting which users can remotely access the system via SSH will help ensure that only authorized users access the system."
+    remediation="Ensure SSH access is limited
+
+Edit the `/etc/ssh/sshd_config` file to set one or more of the parameter as follows:
+```
+AllowUsers 
+AllowGroups 
+DenyUsers 
+DenyGroups 
+```"
+	ruleId="dc8da71d-aeba-4c03-8835-36fe158e372a">
+    <check distro="*" command="CheckMatchingLines" regex="^\s*(AllowUsers|AllowGroups|DenyUsers|DenyGroups)(\s+\S+)+" path="/etc/ssh/sshd_config" />
+  </audit>
     <audit
       description="Emulation of the rsh command through the ssh server should be disabled. - '/etc/ssh/sshd_config RhostsRSAAuthentication = no'"
       msid="107"
@@ -1036,6 +1081,87 @@
         regex="^games:"
         path="/etc/passwd" />
     </audit>
+     <audit
+    description="Ensure password hashing algorithm is SHA-512"
+    msid="157.11"
+    severity="Critical"
+    impact="The SHA-512 algorithm provides much stronger hashing than MD5, thus providing additional protection to the system by increasing the level of effort for an attacker to successfully determine passwords. Note that these change only apply to accounts configured on the local system."
+    remediation="Set password hashing algorithm to sha512. Many distributions provide tools for updating PAM configuration, consult your documentation for details. If no tooling is provided edit the appropriate `/etc/pam.d/` configuration file and add or modify the `pam_unix.so` lines to include the sha512 option:
+```
+password sufficient pam_unix.so sha512
+```"
+	ruleId="01ec5346-882b-485d-8960-01dedd608792">
+    <check distro="*" command="CheckMatchingLinesInFiles" regex="sha512" filter="^password\s.*\s*pam_unix.so\s+\S+" path="/etc/pam.d/common-password|/etc/pam.d/system-auth" />
+    <check distro="*" command="CheckMatchingLines" regex="^ENCRYPT_METHOD\s+SHA512" path="/etc/login.defs" />
+  </audit>
+   <audit
+  description="Ensure minimum days between password changes is 7 or more."
+  msid="157.12"
+  severity="Critical"
+  impact="By restricting the frequency of password changes, an administrator can prevent users from repeatedly changing their password in an attempt to circumvent password reuse controls."
+  remediation="Set the `PASS_MIN_DAYS` parameter to 7 in `/etc/login.defs` :
+```
+PASS_MIN_DAYS 7
+```
+Modify user parameters for all users with a password set to match:
+```
+# chage --mindays 7 
+```"
+	ruleId="50272a84-672d-4c11-a67e-9d058adaf67a">
+  <check distro="*" command="CheckMatchingLines" regex="^\s*PASS_MIN_DAYS\s+([7-9]|[1-9][0-9]+)\s*$" path="/etc/login.defs" />
+</audit>
+
+<audit
+  description="Ensure all users last password change date is in the past"
+  msid="157.14"
+  severity="Critical"
+  impact="If a users recorded password change date is in the future then they could bypass any set password expiration."
+  remediation="Ensure inactive password lock is 30 days or less
+
+Run the following command to set the default password inactivity period to 30 days:
+```
+# useradd -D -f 30
+```
+Modify user parameters for all users with a password set to match:
+```
+# chage --inactive 30 
+```"
+	ruleId="91fbaeac-f5d0-4ac9-aa1b-52215aef1ed8">
+<check distro="*" command="CheckShadowDate" key="2" expect="before" value="now" path="/etc/shadow" />
+</audit>
+
+<audit
+  description="Ensure system accounts are non-login"
+  msid="157.15"
+  severity="Critical"
+  impact="It is important to make sure that accounts that are not being used by regular users are prevented from being used to provide an interactive shell. By default, Ubuntu sets the password field for these accounts to an invalid string, but it is also recommended that the shell field in the password file be set to `/usr/sbin/nologin`. This prevents the account from potentially being used to run any commands."
+  remediation="Set the shell for any accounts returned by the audit script to `/sbin/nologin`"
+  ruleId="448b668a-738c-420b-b332-51ea49922933">
+  <check distro="*" command="CheckSystemAccounts" />
+</audit>
+
+<audit
+  description="Ensure default group for the root account is GID 0"
+  msid="157.16"
+  severity="Critical"
+  impact="Using GID 0 for the `_root_ `account helps prevent `_root_`-owned files from accidentally becoming accessible to non-privileged users."
+  remediation="Run the following command to set the `root` user default group to GID `0` :
+```
+# usermod -g 0 root
+```"
+	ruleId="732fa92f-647e-47b8-b5a4-fdf00b02d9e2">
+  <check distro="*" command="CheckMatchingLines" regex="^root:x:[0-9]+:0" path="/etc/passwd" />
+</audit>
+
+<audit
+  description="Ensure root is the only UID 0 account"
+  msid="157.18"
+  severity="Critical"
+  impact="This access must be limited to only the default `root `account and only from the system console. Administrative access must be through an unprivileged account using an approved mechanism."
+  remediation="Remove any users other than `root` with UID `0` or assign them a new UID if appropriate."
+  ruleId="b5845ff3-42f4-4112-b2a2-5b827232a053">
+  <check distro="*" command="CheckRootUID" path="/etc/passwd"/>
+</audit>
     <audit
       description="Accepting source routed packets should be disabled for all interfaces. (net.ipv6.conf.all.accept_source_route = 0)"
       msid="40.2"
@@ -1104,6 +1230,93 @@
         expect="running"
         service="auditd" />
     </audit>
+     <audit
+    description="Ensure SNMP Server is not enabled"
+    msid="179"
+    severity="Warning"
+    impact="The SNMP server can communicate using SNMP v1, which transmits data in the clear and does not require authentication to execute commands. Unless absolutely necessary, it is recommended that the SNMP service not be used. If SNMP is required the server should be configured to disallow SNMP v1."
+    remediation="Run one of the following commands to disable `snmpd`:
+```
+# chkconfig snmpd off
+```
+```
+# systemctl disable snmpd
+```
+```
+# update-rc.d snmpd disable
+```"
+	ruleId="ca1aea32-3969-49ab-abfc-2c5796a9a8bb">
+    <check distro="*" command="CheckServiceDisabled" service="snmpd" />
+  </audit>
+
+  <audit
+    description="Ensure rsync service is not enabled"
+    msid="181"
+    severity="Critical"
+    impact="The `rsyncd` service presents a security risk as it uses unencrypted protocols for communication."
+    remediation="Run one of the following commands to disable `rsyncd` :
+```
+# chkconfig rsyncd off
+```
+```
+# systemctl disable rsyncd
+```
+```
+# update-rc.d rsyncd disable
+```"
+	ruleId="63aba603-b1f8-40df-82c5-38915452ce23">
+    <check distro="*" command="CheckServiceDisabled" service="rsync" />
+  </audit>
+
+  <audit
+    description="Ensure NIS server is not enabled"
+    msid="182"
+    severity="Warning"
+    impact="The NIS service is inherently an insecure system that has been vulnerable to DOS attacks, buffer overflows and has poor authentication for querying NIS maps. NIS generally been replaced by such protocols as Lightweight Directory Access Protocol (LDAP). It is recommended that the service be disabled and other, more secure services be used"
+    remediation="Run one of the following commands to disable `ypserv` :
+```
+# chkconfig ypserv off
+```
+```
+# systemctl disable ypserv
+```
+```
+# update-rc.d ypserv disable
+```"
+	ruleId="b4ad3fdd-7b68-4b11-a3ed-84b37a68b995">
+    <check distro="*" command="CheckServiceDisabled" service="ypserv" />
+  </audit>
+
+  <audit
+    description="Ensure rsh client is not installed"
+    msid="183"
+    severity="Critical"
+    impact="These legacy clients contain numerous security exposures and have been replaced with the more secure SSH package. Even if the server is removed, it is best to ensure the clients are also removed to prevent users from inadvertently attempting to use these commands and therefore exposing their credentials. Note that removing the `rsh `package removes the clients for `rsh`, `rcp `and `rlogin`."
+    remediation="Uninstall `rsh` using the appropriate package manager or manual installation:
+```
+yum remove rsh
+```
+```
+apt-get remove rsh
+```
+```
+zypper remove rsh
+```"
+	ruleId="6d441f31-f888-4f4f-b1da-7cfc26263e3f">
+    <check distro="*" command="CheckPackageNotInstalled" packagename="rsh" />
+  </audit>
+
+  <audit
+    description="Disable SMB V1 with Samba"
+    msid="185"
+    severity="Critical"
+    impact="SMB v1 has well-known, serious vulnerabilities and does not encrypt data in transit. If it must be used for overriding business reasons, it is strongly recommended that other mitigations be identified to compensate for the use of this protocol. "
+	remediation="If Samba is running, there should be a line in the [global] section of /etc/samba/smb.conf: min protocol = SMB2"
+	ruleId="7624efb0-3026-4c72-8920-48d5be78a50e">
+    <check distro="*" command="CheckMatchingLinesSection" regex="^\s*min protocol\s+=\s+SMB2" expect="^\s*\[global\]" path="/etc/samba/smb.conf" key="^\s*\[.+\]">
+	    <dependency type="FileExists">/etc/samba/smb.conf</dependency>
+    </check>
+  </audit>
   </audits>
  <remediations>
   <!--
