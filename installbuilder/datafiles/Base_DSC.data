@@ -183,8 +183,9 @@ fi
 
 %Preinstall_300
 echo "Cleanning up existing dsc_hosts..."
-ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1 | xargs kill 2&>1 > /dev/null
-rm -f /opt/dsc/dsc_host_lock
+kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1) -9 2&>1 > /dev/null
+rm -rf /opt/dsc
+rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
 echo "Cleaned up existing dsc_hosts..."
 
 %Postinstall_10
@@ -405,8 +406,9 @@ chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 
 %Preuninstall_899
 echo "Cleanning up existing dsc_hosts before uninstall..."
-ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1 | xargs kill 2&>1 > /dev/null
-rm -f /opt/dsc/dsc_host_lock
+kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1) -9 2&>1 > /dev/null
+rm -rf /opt/dsc
+rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
 echo "Cleaned up existing dsc_hosts before uninstall..."
 
 %Preuninstall_999

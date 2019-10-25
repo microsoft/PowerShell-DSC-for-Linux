@@ -73,6 +73,7 @@ def run_perform_required_configuration_checks():
     if use_omsconfig_host:
         try:
             # Open the dsc host lock file. This also creates a file if it does not exist
+            dschostlock_filehandle = None
             dschostlock_filehandle = open(dsc_host_lock_path, 'w')
             print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
             
@@ -82,6 +83,7 @@ def run_perform_required_configuration_checks():
             for retry in range(60):
                 try:
                     flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                    write_omsconfig_host_log('dsc_host lock file is acquired by : PerformRequiredConfigurationChecks', pathToCurrentScript)
                     dschostlock_acquired = True
                     break
                 except IOError:

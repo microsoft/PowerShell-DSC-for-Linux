@@ -171,11 +171,15 @@ def perform_inventory(args):
     retval = 0
     inventorylock_acquired = True
     dschostlock_filehandle = None
+    inmof_file = ''
+    if "inmof" in Variables:
+        inmof_file = Variables["inmof"]
 
     try:
         # Acquire inventory file lock
         try:
             flock(inventorylock_filehandle, LOCK_EX | LOCK_NB)
+            write_omsconfig_host_log('Inventory lock is acquired by : ' + inmof_file, pathToCurrentScript)
         except IOError:
             inventorylock_acquired = False
             write_omsconfig_host_log('Failed to acquire inventory lock.', pathToCurrentScript, 'WARNING')
@@ -195,6 +199,7 @@ def perform_inventory(args):
                         try:
                             flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
                             dschostlock_acquired = True
+                            write_omsconfig_host_log('dsc_host lock file is acquired by : ' + inmof_file, pathToCurrentScript)
                             break
                         except IOError:
                             write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)

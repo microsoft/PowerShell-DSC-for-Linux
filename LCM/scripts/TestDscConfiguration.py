@@ -50,6 +50,7 @@ stderr = ''
 if use_omsconfig_host:
     if isfile(dsc_host_lock_path):
         try:
+            dschostlock_filehandle = None
             stop_old_host_instances(dsc_host_lock_path)
 
             # Open the dsc host lock file. This also creates a file if it does not exist
@@ -62,6 +63,7 @@ if use_omsconfig_host:
             for retry in range(10):
                 try:
                     flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                    write_omsconfig_host_log('dsc_host lock file is acquired by : TestConfiguration', pathToCurrentScript)
                     dschostlock_acquired = True
                     break
                 except IOError:
