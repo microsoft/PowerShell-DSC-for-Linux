@@ -60,7 +60,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip; release/nxOMSPerfCounter_2.2.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.4.zip; release/nxOMSSyslog_2.4.zip; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.6.zip; release/nxOMSSudoCustomLog_2.6.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip; release/nxOMSSudoCustomLog_2.7.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip; release/nxOMSKeyMgmt_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc; LCM/keys/dscgpgkey.asc; 644; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc; LCM/keys/msgpgkey.asc; 644; ${{RUN_AS_USER}}; root
