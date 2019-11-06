@@ -54,6 +54,7 @@ stderr = ''
 
 if use_omsconfig_host:
     try:
+        dschostlock_filehandle = None
         stop_old_host_instances(dsc_host_lock_path)
 
         # Open the dsc host lock file. This also creates a file if it does not exist

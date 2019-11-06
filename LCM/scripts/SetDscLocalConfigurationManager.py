@@ -102,6 +102,7 @@ def apply_meta_config(args):
         # Apply the metaconfig
         if use_omsconfig_host:
             try:
+                dschostlock_filehandle = None
                 stop_old_host_instances(dsc_host_lock_path)
 
                 # Open the dsc host lock file. This also creates a file if it does not exist
@@ -114,6 +115,7 @@ def apply_meta_config(args):
                 for retry in range(10):
                     try:
                         flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                        write_omsconfig_host_log('dsc_host lock file is acquired by : SendMetaConfigurationApply', pathToCurrentScript)
                         dschostlock_acquired = True
                         break
                     except IOError:

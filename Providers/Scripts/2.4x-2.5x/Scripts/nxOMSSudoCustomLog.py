@@ -139,10 +139,7 @@ def Test(EnableCustomLogConfiguration, Ensure, CustomLogObjects):
        
         if Ensure == "Absent":
             return [-1]
-        elif Ensure == "Present":
-            if (not(CompareFiles(PLUGIN, AGENT_PLUGIN)) or not(CompareFiles(SCRIPT, AGENT_SCRIPT))):
-                return [-1]
-         
+        
     return [0] 
 
 def Get(EnableCustomLogConfiguration, Ensure, CustomLogObjects):
@@ -175,7 +172,7 @@ def ReadConf():
     if not os.path.isfile(conf_path):
         return [];
     txt = codecs.open(conf_path, 'r', 'utf8').read().encode('ascii','ignore')
-    customlog_src_srch_str = r'\n<source>\n  type sudo_tail.*?path (.*?)\n.*?pos_file /var/opt/microsoft/omsagent/state/(.*?)\.pos.*?run_interval ([0-9]+[a-z]*).*?tag oms\.blob\.CustomLog\.(.*?)\.\*.*?format none.*?</source>\n'
+    customlog_src_srch_str = r'\n<source>\n  type sudo_tail.*?path (.*?)\n.*?pos_file /var/opt/microsoft/omsagent/state/(.*?)\.pos\n.*?run_interval ([0-9]+[a-z]*).*?tag oms\.blob\.CustomLog\.(.*?)\.\*.*?format none.*?</source>\n'
     customlog_src_srch = re.compile(customlog_src_srch_str, re.M|re.S)
     new_customlogs = []
     sources = customlog_src_srch.findall(txt)
