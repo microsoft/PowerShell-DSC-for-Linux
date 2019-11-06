@@ -18,7 +18,7 @@ module VMInsights
             raise ArgumentError, "config is not kind of #{Configuration}" unless config.kind_of? Configuration
             raise ArgumentError, 'proc required' if cb.nil?
             raise RuntimeError, 'already started' unless @thread.nil?
-            @thread = PollingThread.new config.poll, config.computer, config.log, config.data_collector, cb
+            @thread = PollingThread.new config.poll_interval, config.computer, config.log, config.data_collector, cb
             nil
         end
 
@@ -35,18 +35,18 @@ module VMInsights
             def initialize(computer, log, data_collector)
                 raise ArgumentError unless log
                 raise ArgumentError, "#{data_collector.class.name}" unless data_collector.kind_of? IDataCollector
-                @poll = 60 # seconds
+                @poll_interval = 60 # seconds
                 @computer = computer
                 @data_collector = data_collector
                 @log = log
             end
 
-            def poll=(v)
+            def poll_interval=(v)
                 raise ArgumentError unless (v.kind_of? Numeric) && (v.real?) && (v >= 1)
-                @poll = v
+                @poll_interval = v
             end
 
-            attr_reader :poll, :computer, :data_collector, :log
+            attr_reader :poll_interval, :computer, :data_collector, :log
 
         end # class Configuration
 
@@ -64,27 +64,29 @@ module VMInsights
                 @saved_cpu_exception = SavedException.new
                 @cummulative_data = CummulativeData.new
                 super() {
-                    abort_on_exception = false
-
                     @cummulative_data.initialize_from_baseline @data_collector.baseline
-                    mma_ids = @data_collector.get_mma_ids
-                    unless mma_ids
-                            @log.error "Unable to get MMA IDs. Terminating"
-                    else
-                        MetricTuple.mma_ids (if mma_ids.kind_of? Array then mma_ids.map { |g| "m-#{g}" } else "m-#{mma_ids}" end)
-                        MetricTuple.computer computer
-                        begin
-                                @log.info "Starting polling loop at #{interval} second interval"
-                                while @run do
-                                        @mutex.synchronize {
-                                                @condvar.wait(@mutex, interval) if @run
-                                        }
-                                        yield_metrics_message() if @run
-                                end
-                        ensure
-                                # protected_yield telemetry_message ConnectorStop
-                                @log.info "Stopping polling"
+                    MetricTuple.computer computer
+                    begin
+                        @log.info "Starting polling loop at #{interval} second interval"
+                        # try to keep as close to the polling interval, independent of
+                        # any delay waking up from the sleep, collecting data, or
+                        # emitting the message.
+                        expected_wakeup_time = Time.now
+                        while @run do
+                            expected_wakeup_time += interval
+                            now = Time.now
+                            if expected_wakeup_time <= now
+                                expected_wakeup_time = now
+                            else
+                                sleep_time = expected_wakeup_time - now
+                                @mutex.synchronize {
+                                    @condvar.wait(@mutex, sleep_time) if @run
+                                }
+                            end
+                            yield_metrics_message() if @run
                         end
+                    ensure
+                        @log.info "Stopping polling"
                     end
                 }
             end
@@ -183,14 +185,12 @@ module VMInsights
                 uptime, idle = @cummulative_data.get_cpu_time_delta uptime, idle
                 raise IDataCollector::Unavailable.new "uptime delta is zero" if uptime.zero?
 
-                cpu_count_tag = { }
                 begin
                     cpus =  @data_collector.get_number_of_cpus
                     yield MetricTuple.factory "Processor", "UtilizationPercentage",
                                     100.0 * (1.0 - ((idle * 1.0) / (uptime * 1.0 * cpus))),
                                     { "#{MetricTuple::Origin}/totalCpus" => cpus }
                 rescue => ex
-                    now = Time.now
                     unless @saved_cpu_exception.same(ex)
                         @log.error ex.message
                         @log.debug_backtrace
@@ -294,7 +294,6 @@ module VMInsights
                     result = {}
                     raise ArgumentError, "tags (#{tags.class}) must be a Hash" unless tags.kind_of? Hash
                     tags = Hash.new.merge! tags
-                    tags["#{Origin}/machineId"] = @@mma_ids
 
                     result[:Origin] = Origin
                     result[:Namespace] = namespace
@@ -312,13 +311,7 @@ module VMInsights
                     @@computer = name
                 end
 
-                def self.mma_ids(ids)
-                    raise ArgumentError, "MMA IDs cannot be nil" if ids.nil?
-                    @@mma_ids = ids
-                end
-
                 @@computer = nil
-                @@mma_ids = nil
 
                 Origin = "vm.azm.ms"
             end # class MetricTuple

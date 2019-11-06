@@ -6,17 +6,16 @@ module VMInsights
     require_relative 'VMInsightsIDataCollector.rb'
 
     class DataCollector < IDataCollector
-        def initialize(root_directory_name="/")
+        def initialize(log, root_directory_name="/")
+            @log = log
             @root = root_directory_name
             @baseline_exception = RuntimeError.new "baseline has not been called"
-            @mma_id = nil
             @cpu_count = nil
             @saved_net_data = nil
-            @saved_disk_data = DiskInventory.new(@root)
+            @saved_disk_data = DiskInventory.new(@log, @root)
         end
 
         def baseline
-            @mma_ids = load_mma_ids
             @baseline_exception = nil
             @cpu_count, is_64_bit = get_cpu_info_baseline
             DataWithWrappingCounter.set_32_bit(! is_64_bit)
@@ -30,12 +29,6 @@ module VMInsights
         end
 
         def end_sample
-        end
-
-        def get_mma_ids
-            raise @baseline_exception if @baseline_exception
-            raise IDataCollector::Unavailable, "no MMA ids found" unless @mma_ids
-            @mma_ids
         end
 
         def get_available_memory_kb
@@ -99,14 +92,15 @@ module VMInsights
         def get_filesystems
             result = []
             df = File.join(@root, "bin", "df")
-            IO.popen([df, "--block-size=1", "--output=fstype,source,target,size,avail" ], { :in => :close, :err => File::NULL }) { |io|
+            IO.popen([df, "--block-size=1", "-T"], { :in => :close, :err => File::NULL }) { |io|
                 while (line = io.gets)
-                    if (line =~ /ext[234]/)
+                    a = line.split(" ")
+                    if (a[1] =~ /^ext[234]$/)
                         begin
-                            a = line.split(" ")
-                            result << Fs.new(a[1], a[2], a[3], a[4]) if a.size == 5
+                            result << Fs.new(a[0], a[6], a[2], a[4]) if a.size == 7
                         rescue ArgumentError => ex
                             # malformed input
+                            @log.debug() { "#{__method__}: #{ex}: '#{line}'" }
                         end
                     end
                 end
@@ -140,7 +134,6 @@ module VMInsights
         end
 
         def get_disk_stats(dev)
-            raise ArgumentError, "#{dev} does not start with /dev" unless dev.start_with? "/dev"
             raise @baseline_exception if @baseline_exception
             @saved_disk_data.get_disk_stats(dev)
         end
@@ -163,7 +156,8 @@ module VMInsights
         end
 
         class DiskInventory
-            def initialize(root)
+            def initialize(log, root)
+                @log = log
                 @root = root
                 @sector_sizes = Hash.new() { |h, k| h[k] = get_sector_size(k) }
                 @saved_disk_data = { }
@@ -172,11 +166,11 @@ module VMInsights
             def baseline
                 @sector_sizes.replace(get_sector_sizes)
                 @saved_disk_data = { }
-                @sector_sizes.each_pair { |d, s| @saved_disk_data[d] = get_disk_data(d[5, d.length], s) }
+                @sector_sizes.each_pair { |d, s| @saved_disk_data[d] = get_disk_data(d, s) }
             end
 
             def get_disk_stats(dev)
-                current = get_disk_data dev[5, dev.length], get_sector_size(dev)
+                current = get_disk_data dev, get_sector_size(dev)
                 raise IDataCollector::Unavailable, "no data for #{dev}" if current.nil?
                 previous = @saved_disk_data[dev]
                 @saved_disk_data[dev] = current
@@ -193,15 +187,21 @@ module VMInsights
             end
 
             def get_sector_sizes(*devices)
-                cmd = [ File.join(@root, "bin", "lsblk"), "-psdJ", "-oNAME,FSTYPE,LOG-SEC" ].concat(devices)
+                cmd = [ File.join(@root, "bin", "lsblk"), "-sd", "-oNAME,LOG-SEC" ]
                 result = { }
                 begin
-                    IO.popen(cmd, { :in => :close, :err => File::NULL }) { |io|
-                        data = JSON.load(io)
-                        data["blockdevices"].each { |d| result[d["name"]] = d["log-sec"].to_i }
+                    IO.popen(cmd, { :in => :close }) { |io|
+                        io.gets # skips the header
+                        while (line = io.gets)
+                            s = line.split(" ")
+                            next if s.length < 2
+                            if (devices.empty? || devices.include?(s[0]))
+                                result[s[0]] = s[1].to_i
+                            end
+                        end
                     }
-                rescue Errno::ENOENT => ex
-                    # telemetry
+                rescue => ex
+                    @log.debug() { "#{__method__}: #{ex}" }
                 end
                 result
             end
@@ -215,10 +215,10 @@ module VMInsights
                     RawDiskData.new(
                                     dev,
                                     Time.now,
-                                    data[1 - 1].to_i,
-                                    data[3 - 1].to_i,
-                                    data[5 - 1].to_i,
-                                    data[7 - 1].to_i,
+                                    data[0].to_i,
+                                    data[2].to_i,
+                                    data[4].to_i,
+                                    data[6].to_i,
                                     sector_size
                                     )
                 }
@@ -334,15 +334,16 @@ module VMInsights
                     end
                 }
             rescue => ex
-                # need to log
+                @log.debug() { "#{__method__}: #{ex}" }
             end
             result
         end
 
         class Fs
             def initialize(device_name, mount_point, size_in_bytes, free_space_in_bytes)
-                raise ArgumentError, device_name unless device_name.start_with?("/dev/")
                 raise ArgumentError, mount_point unless mount_point.start_with? "/"
+                raise ArgumentError, device_name unless device_name.start_with?("/dev/")
+                device_name = device_name.sub(/^\/dev\//, '')
                 @device_name = device_name
                 @mount_point = mount_point
                 @size_in_bytes = Integer(size_in_bytes, 10)
@@ -362,40 +363,6 @@ module VMInsights
 
             attr_reader :device_name, :mount_point, :size_in_bytes, :free_space_in_bytes
             alias_method :to_s, :inspect
-        end
-
-        def load_mma_ids
-            multihome_capable = false
-            ids = []
-            oms_base_dir = File.join @root, "etc", "opt", "microsoft", "omsagent"
-            Dir.glob(File.join(oms_base_dir, "????????-????-????-????-????????????", "conf", "omsadmin.conf")) { |p|
-                multihome_capable = true
-                IO.foreach(p) { |s|
-                    if (s.start_with? "AGENT_GUID=")
-                        ids << s.chomp.split("=")[1]
-                        break
-                    end
-                }
-            }
-            # fallback for OMS Agent older versions that don't support multi-homing
-            unless multihome_capable
-                Dir.glob(File.join(oms_base_dir, "conf", "omsadmin.conf")) { |p|
-                    IO.foreach(p) { |s|
-                        if (s.start_with? "AGENT_GUID=")
-                            ids << s.chomp.split("=")[1]
-                            break
-                        end
-                    }
-                }
-            end
-            case ids.size
-                when 0
-                    nil
-                when 1
-                    ids[0]
-                else
-                    ids
-            end
         end
 
         def get_cpu_info_baseline
