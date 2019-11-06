@@ -1,7 +1,0 @@
-To run all unit tests:
-    ruby Unit_test.rb
-
-Individual test suites:
-    ruby in_vminsights_test.rb
-    ruby VMInsightsDataCollector_test.rb
-    ruby VMInsightsEngine_test.rb
