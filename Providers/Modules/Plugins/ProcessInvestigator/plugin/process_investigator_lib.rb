@@ -5,7 +5,7 @@ require 'socket'
 module OMS
     class ProcessInvestigator
 
-        @@PIVersion = "1.19.1018.0001"
+        @@PIVersion = "1.19.1110.0001"
 
         # The limit for event hub messages is 256k, assuming utf16, that's 128k characters.
         # Leaving some room for overhead, truncate at 100k characters.
@@ -66,7 +66,6 @@ module OMS
             if alerts.kind_of?(Array) and alerts.length > 0
                 for alert in alerts
                     begin
-                        alert["connections"] = []
                         alert_record = create_basic_record()
                         alert_record["PIEventType"] = "Alert"
                         alert_record["SessionId"] = record["SessionId"]
