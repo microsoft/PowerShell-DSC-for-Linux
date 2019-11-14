@@ -5,6 +5,7 @@
 """Curl CLI wrapper."""
 
 import base64
+import os.path
 import random
 import subprocess
 import time
@@ -175,6 +176,9 @@ class CurlHttpClient(HttpClient):
         cmd.append(url)
         return cmd
 
+    def os_is_redhat():
+        return os.path.exists("/etc/redhat-release")
+
     def issue_request(self, url, headers, method, data):
         data_file_path = None
         headers = self.merge_headers(self.default_headers, headers)
@@ -200,6 +204,8 @@ class CurlHttpClient(HttpClient):
             try:
                 cmd = self.build_request_cmd(url, headers, method=method, data_file_path=data_file_path)
                 env = os.environ.copy()
+                if os_is_redhat():
+                    env["NSS_SDB_USE_CACHE"] = "no"
                 p = subprocessfactory.create_subprocess(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err = p.communicate()
 
