@@ -176,7 +176,7 @@ class CurlHttpClient(HttpClient):
         cmd.append(url)
         return cmd
 
-    def os_is_redhat():
+    def os_is_redhat(self):
         return os.path.exists("/etc/redhat-release")
 
     def issue_request(self, url, headers, method, data):
@@ -204,7 +204,7 @@ class CurlHttpClient(HttpClient):
             try:
                 cmd = self.build_request_cmd(url, headers, method=method, data_file_path=data_file_path)
                 env = os.environ.copy()
-                if os_is_redhat():
+                if self.os_is_redhat():
                     env["NSS_SDB_USE_CACHE"] = "no"
                 p = subprocessfactory.create_subprocess(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err = p.communicate()
