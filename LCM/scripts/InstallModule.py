@@ -258,7 +258,7 @@ def main(args):
         # Copy the resource Python scripts to the DSC scripts directories
         resourceLibraryFolderPath = join(resourceFolderPath, resourceArchitectureFolderName)
         if not os.path.isdir(resourceLibraryFolderPath):
-            exitWithError("Unable to find the resource library folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceScriptsFolderPath + " in the extracted module.")
+            exitWithError("Unable to find the resource library folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceLibraryFolderPath + " in the extracted module.")
 
         resourceScriptsFolderPath = join(resourceLibraryFolderPath, 'Scripts')
         if not os.path.isdir(resourceLibraryFolderPath):
