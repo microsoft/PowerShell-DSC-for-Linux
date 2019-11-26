@@ -229,6 +229,7 @@ nx:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -274,6 +275,7 @@ nxOMSAutomationWorker:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done; \
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -295,6 +297,7 @@ nxComputerManagement:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -316,6 +319,7 @@ nxNetworking:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -337,6 +341,7 @@ nxMySQL:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -358,6 +363,7 @@ nxOMSPerfCounter:
                 cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
         done;\
         cd output/staging; \
+		cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
         zip -r $@_$${VERSION}.zip $@; \
         mkdir -p ../../release; \
         mv $@_$${VERSION}.zip ../../release/
@@ -379,6 +385,7 @@ nxOMSSyslog:
                 cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
         done;\
         cd output/staging; \
+		cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
         zip -r $@_$${VERSION}.zip $@; \
         mkdir -p ../../release; \
         mv $@_$${VERSION}.zip ../../release/
@@ -400,6 +407,7 @@ nxOMSKeyMgmt:
                 cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
         done;\
         cd output/staging; \
+		cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
         zip -r $@_$${VERSION}.zip $@; \
         mkdir -p ../../release; \
         mv $@_$${VERSION}.zip ../../release/
@@ -422,6 +430,7 @@ nxOMSCustomLog:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -444,6 +453,7 @@ nxOMSSudoCustomLog:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -466,6 +476,7 @@ nxOMSGenerateInventoryMof:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -490,6 +501,7 @@ nxOMSPlugin:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -511,6 +523,7 @@ nxFileInventory:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -533,6 +546,7 @@ nxOMSAgentNPMConfig:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -555,6 +569,7 @@ nxOMSAuditdPlugin:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done;\
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -578,6 +593,7 @@ nxOMSContainers:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done; \
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
@@ -600,6 +616,7 @@ nxOMSWLI:
 		cp Providers/Scripts/3.x/Scripts/$${current}.py $$STAGINGDIR/MSFT_$${current}Resource/$(PF_ARCH)/Scripts/3.x/Scripts; \
 	done; \
 	cd output/staging; \
+	cd $@; find . -type f -print0 | xargs -0 sha256sum |grep -v sha256sums > ./$@.sha256sums; cd ..;\
 	zip -r $@_$${VERSION}.zip $@; \
 	mkdir -p ../../release; \
 	mv $@_$${VERSION}.zip ../../release/
