@@ -1,7 +1,8 @@
 language: c
 dist: trusty   # Travis build machine is Ubuntu Trusty 14.04 x64
 sudo: required # A sudo enabled, full VM is used for building instead of a docker container
-
+services:
+  - docker
 branches:
   only:
     - master
@@ -36,14 +37,24 @@ script:
   - # Patch in the version of PowerShell-DSC-for-Linux that Travis gave to us
   - rm -rf dsc
   - cp -R ../Power?hell-DSC-for-Linux dsc
-  - cd ./dsc/build
+  - PS_DIR=$(cd .; pwd -P)
+  - DSC_DIR=$(cd ./dsc; pwd -P)
+  - OMI_ROOT=$(cd ./omi/Unix; pwd -P)
+  # BUILD default DSC 
+  - cd ${DSC_DIR}/build
   - ./configure --noenable-ulinux
   - make local
   - cd ../omi*
   - sudo make install
   - cd ../
   - sudo make reg
-  -
+  # Build DSC for OMS
+  #- docker pull abenbachir/oms-centos6-x64:latest || true
+  # - docker run --rm -t -v ${PS_DIR}:/OMS abenbachir/oms-centos6-x64:latest /bin/sh -c "cd /OMS/omi/Unix; ./configure --enable-microsoft --enable-ulinux; make all"
+  # - docker run --rm -t -v ${PS_DIR}:/OMS abenbachir/oms-centos6-x64:latest /bin/sh -c "cd /OMS/dsc; ./configure --oms; ln -fs /OMS/omi/Unix /OMS/dsc/omi-1.0.8; cd /OMS/omi/Unix; rm -rf output; ln -s output_openssl_1.0.0 output"
+  # - docker run --rm -t -v ${PS_DIR}:/OMS abenbachir/oms-centos6-x64:latest /bin/sh -c "cd /OMS/omi/Unix; make -C /OMS/dsc dsc100"
+  # - docker run --rm -t -v ${PS_DIR}:/OMS abenbachir/oms-centos6-x64:latest /bin/sh -c "cd /OMS/omi/Unix; make -C /OMS/dsc dsckit100"
+  # - docker run --rm -t -v ${PS_DIR}:/OMS abenbachir/oms-centos6-x64:latest /bin/sh -c "cd /OMS/dsc; make distclean"
   - # Python tests for 2.6x-2.7x
   - cd /opt/omi-*/share/dsc/Scripts/2.6x-2.7x/Scripts/Tests/
   - sudo python ./test_nxProviders.py 2> /dev/null

@@ -67,7 +67,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip; release/nxFileInventory_1.3.zip; 755; ${{RUN_AS_USER}}; root
 
 #if PFARCH == x86
-/opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.1.zip; release/nxOMSAgentNPMConfig_2.1.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip; release/nxOMSAgentNPMConfig_2.2.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip; release/nxOMSAuditdPlugin_1.7.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.0.zip; release/nxOMSAutomationWorker_1.6.9.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip; release/nxOMSContainers_1.0.zip; 755; ${{RUN_AS_USER}}; root
@@ -310,7 +310,7 @@ su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microso
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip 0"
 
 #if PFARCH == x86
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.1.zip 0"
+su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.0.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
