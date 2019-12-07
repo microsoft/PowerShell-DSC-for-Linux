@@ -543,6 +543,14 @@ PythonProvider::forkExec ()
                 char_array pyV (get_python_version ());
                 char_array fullName (get_script_path ());
                 char* args[] = { pyV.get (), fullName.get (), socketID, 0 };
+
+                // TODO print args 
+                SCX_BOOKEND_PRINT ("Printing out args");
+                SCX_BOOKEND_PRINT ("============================");
+                SCX_BOOKEND_PRINT (args[0]);
+                SCX_BOOKEND_PRINT (args[1]);
+                SCX_BOOKEND_PRINT ("============================");
+                
                 // exec
                 execvp (args[0], args);
                 SCX_BOOKEND_PRINT ("execvp - failed");
