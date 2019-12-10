@@ -375,7 +375,7 @@ def copy_all_files(src, dest, is_exec):
                 shutil.copy(full_src_file, dest)
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
-                    mode |= 0555
+                    mode |= 0o555
                     os.chmod(full_dest_file, mode)
     except:
         LG().Log('ERROR', 'copy_all_files failed for src: ' + src + ' dest: '
@@ -407,7 +407,7 @@ def check_all_files(src, dest, is_exec):
                     return False
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
-                    if mode & 0555 != 0555:
+                    if mode & 0o555 != 0o555:
                         return False
             else:
                 return False
