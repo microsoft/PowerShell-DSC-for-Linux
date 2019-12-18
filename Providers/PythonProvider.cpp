@@ -34,7 +34,11 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <array>
+#include <cstring>
 namespace
 {
 
@@ -43,22 +47,63 @@ typedef util::unique_ptr<char[]> char_array;
 
 
 char const OMI_PYTHON_VERSION_STR[] = "OMI_PYTHON_VERSION";
-char const DEFAULT_PYTHON_VERSION[] = "python3";
 char const DEFAULT_OMI_PATH[] = "/opt/omi/";
 char const SCRIPT_PATH_EXTENSION[] = "/lib/Scripts/";
 char const DEFAULT_DSC_SCRIPT[] = "client";
 char const PY_EXTENSION[] = ".py";
-
 void WriteLogsToFile(std::string msg)
 {
-  std::ofstream outfile;
-  outfile.open("/home/micy/omsconfig.txt", std::ios_base::app); // append instead of overwrite
-  outfile << msg; 
+    std::ofstream outfile;
+    outfile.open("/home/micy/omsconfig.txt", std::ios_base::app); // append instead of overwrite
+    outfile << msg; 
+}
+
+std::string determinePythonVersion(){
+    std::array<char, 128> buffer;
+    std::string result;
+    // Check for python2
+    FILE* pipe = popen("python --version 2>&1", "r");
+    if(!pipe) {
+        std::cout << "Couldn't start command." << std::endl;
+    }
+
+    while(fgets(buffer.data(), 128, pipe) != NULL) {
+        std::cout << "Reading" << std::endl;
+        result += buffer.data();
+    }
+    std::cout << "Result:" << std::endl;
+    std::cout << result << std::endl;
+
+    // If no instance of python2, check for python3
+    if(result.find("not found")) {
+        std::cout << "python2 not found. Looknig for python3" << std::endl;
+        pipe = popen("python3 --version 2>&1", "r");
+        if(!pipe) {
+	    std::cout << "Couldn't start command." << std::endl;
+        }
+        result = "";
+        while(fgets(buffer.data(), 128, pipe) != NULL) {
+	    std::cout << "Reading" << std::endl;
+            result += buffer.data();
+        }
+    
+        // If no instance of python3, set viersion number to nothing
+        if(result.find("not found")) {
+	    std::cout << "python3 not found." << std::endl;
+            return "";
+      
+        }
+        return "python3";
+    }
+    return "python";
 }
 
 char_array::move_type
 get_python_version ()
 {
+    std::string version = determinePythonVersion();
+    char DEFAULT_PYTHON_VERSION[version.size() + 1];
+    strcpy(DEFAULT_PYTHON_VERSION, version.c_str());
     char* sPath = getenv (OMI_PYTHON_VERSION_STR);
     char_array pyV;
     if (sPath == NULL)
