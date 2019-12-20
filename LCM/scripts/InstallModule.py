@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import imp
 import os
 import stat
@@ -62,6 +62,7 @@ def getPlatformArchitectureFolderName():
         platformArchitectureFolderName = "x86"
 
     return platformArchitectureFolderName
+
 
 def regenerateDscPythonScriptInitFiles():
     regenerateInitFilesResult = subprocess.call("(python3 /opt/microsoft/omsconfig/Scripts/RegenerateInitFiles.py)", shell=True)
