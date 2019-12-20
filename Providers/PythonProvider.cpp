@@ -74,28 +74,29 @@ std::string determinePythonVersion(){
     std::cout << "Result:" << std::endl;
     std::cout << result << std::endl;
 
-    // If no instance of python2, check for python3
-    if(result.find("not found")) {
-        std::cout << "python2 not found. Looknig for python3" << std::endl;
-        pipe = popen("python3 --version 2>&1", "r");
-        if(!pipe) {
-	    std::cout << "Couldn't start command." << std::endl;
-        }
-        result = "";
-        while(fgets(buffer.data(), 128, pipe) != NULL) {
-	    std::cout << "Reading" << std::endl;
-            result += buffer.data();
-        }
-    
-        // If no instance of python3, set viersion number to nothing
-        if(result.find("not found")) {
-	    std::cout << "python3 not found." << std::endl;
-            return "";
-      
-        }
-        return "python3";
+    // If python --version does not contain 'not found' return python2 
+    if(result.find("not found") == std::string::npos) {
+	std::cout << "Found python 2." << std::endl;
+    	return "python";
     }
-    return "python";
+
+    // Look for python3
+    result = "";
+    std::cout << "python2 not found. Looking for python3" << std::endl;
+    pipe = popen("python3 --version 2>&1", "r");
+    if(!pipe) {
+    	std::cout << "Couldn't start command." << std::endl;
+    }
+    while(fgets(buffer.data(), 128, pipe) != NULL) {
+    	std::cout << "Reading" << std::endl;
+        result += buffer.data();
+    }
+    
+    // If python3 --version does not contain 'not found' return python3
+    if(result.find("not found") == std::string::npos) {
+        std::cout << "Found python3." << std::endl;
+    }
+    return "";
 }
 
 char_array::move_type
