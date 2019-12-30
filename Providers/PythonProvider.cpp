@@ -95,6 +95,7 @@ std::string determinePythonVersion(){
     // If python3 --version does not contain 'not found' return python3
     if(result.find("not found") == std::string::npos) {
         std::cout << "Found python3." << std::endl;
+	return "python3";
     }
     return "";
 }
@@ -102,11 +103,17 @@ std::string determinePythonVersion(){
 char_array::move_type
 get_python_version ()
 {
+    std::cout << "inside get_python_version" << std::endl;
+    // Copy string version into char array
     std::string version = determinePythonVersion();
     char DEFAULT_PYTHON_VERSION[version.size() + 1];
     strcpy(DEFAULT_PYTHON_VERSION, version.c_str());
     char* sPath = getenv (OMI_PYTHON_VERSION_STR);
     char_array pyV;
+
+    std::cout << "Default python version:"  << std::endl;
+    std::cout << DEFAULT_PYTHON_VERSION << std::endl;
+    // Set python version
     if (sPath == NULL)
     {
         pyV.reset (strcpy (new char[1 + strlen (DEFAULT_PYTHON_VERSION)],
@@ -116,7 +123,8 @@ get_python_version ()
     {
         pyV.reset (strcpy (new char[1 + strlen (sPath)], sPath));
     }
-    return pyV.move ();
+    std::cout << "About to return:"  << std::endl;
+    return pyV.move(); 
 }
 
 
@@ -597,9 +605,12 @@ PythonProvider::forkExec ()
 
                 SCX_BOOKEND_PRINT ("Printing out args");
                 SCX_BOOKEND_PRINT ("============================");
+                SCX_BOOKEND_PRINT ("pyV:");
                 SCX_BOOKEND_PRINT (pyV);
-                WriteLogsToFile ("Printing out args");
-                WriteLogsToFile ("============================");
+                SCX_BOOKEND_PRINT ("pyV.get:");
+                SCX_BOOKEND_PRINT (pyV.get());
+                //WriteLogsToFile ("Printing out args");
+                //WriteLogsToFile ("============================");
 
                 char_array fullName (get_script_path ());
                 SCX_BOOKEND_PRINT (fullName);
@@ -607,13 +618,15 @@ PythonProvider::forkExec ()
                 char* args[] = { pyV.get (), fullName.get (), socketID, 0 };
 
                 // TODO print args 
+                SCX_BOOKEND_PRINT ("args0:");
                 SCX_BOOKEND_PRINT (args[0]);
+                SCX_BOOKEND_PRINT ("args1:");
                 SCX_BOOKEND_PRINT (args[1]);
                 SCX_BOOKEND_PRINT ("============================");
                 
-                WriteLogsToFile (args[0]);
-                WriteLogsToFile (args[1]);
-                WriteLogsToFile ("============================");
+                //WriteLogsToFile (args[0]);
+                //WriteLogsToFile (args[1]);
+                //WriteLogsToFile ("============================");
 
                 // exec
                 execvp (args[0], args);
