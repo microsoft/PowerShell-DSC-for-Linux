@@ -20,11 +20,9 @@ nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 try:
     import hashlib
-    md5const = hashlib.md5
+    hashconst = hashlib.sha256
 except ImportError:
-    import md5
-    md5const = md5.md5
-
+    print("Error while importing hashlib")
 
 class IOMSAgent:
     def restart_oms_agent(self):
@@ -403,7 +401,7 @@ def check_all_files(src, dest, is_exec):
             full_src_file = os.path.join(src, file_name)
             full_dest_file = os.path.join(dest, file_name)
             if os.path.isfile(full_dest_file):
-                if CompareFiles(full_dest_file, full_src_file, 'md5') == -1:
+                if CompareFiles(full_dest_file, full_src_file, 'sha256') == -1:
                     return False
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
@@ -430,11 +428,11 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
     stat_src = StatFile(SourcePath)
     if stat_src.st_size != stat_dest.st_size:
         return -1
-    if Checksum == 'md5':
+    if Checksum == 'sha256':
         src_error = None
         dest_error = None
-        src_hash = md5const()
-        dest_hash = md5const()
+        src_hash = hashconst()
+        dest_hash = hashconst()
         src_block = b'loopme'
         dest_block = b'loopme'
         with opened_bin_w_error(SourcePath, 'rb') as (src_file, src_error):
