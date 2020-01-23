@@ -36,7 +36,7 @@ def exitWithError(message, errorCode = 1):
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
-    verboseMessage = "VERBOSE from InstallModule.py: " + message
+    verboseMessage = "VERBOSE from InstallModule.py: " + message.decode()
     print(verboseMessage)
 
 def getDscRegistrationFileContent(resourceName):

@@ -28,12 +28,12 @@ logger = nxDSCLog.ConsoleAndFileLogger()
 sys.stdout = logger
 
 def exitWithError(message, errorCode = 1):
-    errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message
+    errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message.decode()
     print(errorMessage)
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
-    verboseMessage = "VERBOSE from OMS_MetaConfigHelper.py: " + message
+    verboseMessage = "VERBOSE from OMS_MetaConfigHelper.py: " + message.decode()
     print(verboseMessage)
 
 def generate_meta_mof(serverurl):

@@ -39,13 +39,13 @@ OPTIONS (case insensitive):
 
 def exitWithError(message, errorCode = 1):
     timestamp = operationStatusUtility.get_current_timestamp()
-    errorMessage = timestamp + ": ERROR from PerformInventory.py: " + message
+    errorMessage = timestamp + ": ERROR from PerformInventory.py: " + message.decode()
     print(errorMessage)
     exit(errorCode)
 
 def printVerboseMessage(message):
     timestamp = operationStatusUtility.get_current_timestamp()
-    verboseMessage = str(timestamp) + ": VERBOSE from PerformInventory.py: " + str(message)
+    verboseMessage = str(timestamp) + ": VERBOSE from PerformInventory.py: " + str(message.decode())
     print(verboseMessage)
 
 def main(args):
