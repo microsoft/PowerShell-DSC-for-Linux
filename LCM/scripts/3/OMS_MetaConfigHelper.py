@@ -28,12 +28,16 @@ logger = nxDSCLog.ConsoleAndFileLogger()
 sys.stdout = logger
 
 def exitWithError(message, errorCode = 1):
-    errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message.decode()
+    if (isinstance(message, byte)):
+        message = message.decode()
+    errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message
     print(errorMessage)
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
-    verboseMessage = "VERBOSE from OMS_MetaConfigHelper.py: " + message.decode()
+    if (isinstance(message, byte)):
+        message = message.decode()
+    verboseMessage = "VERBOSE from OMS_MetaConfigHelper.py: " + message
     print(verboseMessage)
 
 def generate_meta_mof(serverurl):
@@ -232,6 +236,7 @@ proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.
 exit_code = proc.wait()
 
 stdout, stderr = proc.communicate()
+stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
 printVerboseMessage("Output from: " + commandToRun + ": " + str(stdout))
 
 set_metaconfig_success_string = ""

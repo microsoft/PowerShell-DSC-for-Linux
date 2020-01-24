@@ -94,6 +94,7 @@ def run_perform_required_configuration_checks():
             if dschostlock_acquired:
                 p = Popen(parameters, stdout=PIPE, stderr=PIPE)
                 stdout, stderr = p.communicate()
+                stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
                 print(stdout)
             else:
                 print("dsc host lock already acuired by a different process")
@@ -107,7 +108,7 @@ def run_perform_required_configuration_checks():
     else:
         p = Popen(parameters, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
-
+    stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
     print(stdout)
 
 if __name__ == "__main__":

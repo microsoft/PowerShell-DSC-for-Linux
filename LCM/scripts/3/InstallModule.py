@@ -31,12 +31,16 @@ def usage():
     sys.exit(1)
 
 def exitWithError(message, errorCode = 1):
+    if (isinstance(message, byte)):
+        message = message.decode()
     errorMessage = "ERROR from InstallModule.py: " + message
     print(errorMessage)
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
-    verboseMessage = "VERBOSE from InstallModule.py: " + message.decode()
+    if (isinstance(message, byte)):
+        message = message.decode()
+    verboseMessage = "VERBOSE from InstallModule.py: " + message
     print(verboseMessage)
 
 def getDscRegistrationFileContent(resourceName):

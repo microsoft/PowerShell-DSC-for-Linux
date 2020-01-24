@@ -38,14 +38,18 @@ OPTIONS (case insensitive):
 """)
 
 def exitWithError(message, errorCode = 1):
+    if (isinstance(message, bytes)):
+        message = message.decode()
     timestamp = operationStatusUtility.get_current_timestamp()
-    errorMessage = timestamp + ": ERROR from PerformInventory.py: " + message.decode()
+    errorMessage = timestamp + ": ERROR from PerformInventory.py: " + message
     print(errorMessage)
     exit(errorCode)
 
 def printVerboseMessage(message):
+    if (isinstance(message, bytes)):
+        message = message.decode()
     timestamp = operationStatusUtility.get_current_timestamp()
-    verboseMessage = str(timestamp) + ": VERBOSE from PerformInventory.py: " + str(message.decode())
+    verboseMessage = str(timestamp) + ": VERBOSE from PerformInventory.py: " + str(message)
     print(verboseMessage)
 
 def main(args):
@@ -215,6 +219,8 @@ def perform_inventory(args):
                     stdout, stderr = process.communicate()
                     retval = process.returncode
 
+                    stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
+                    stderr = stderr.decode() if isinstance(stderr, bytes) else stderr
                     printVerboseMessage(stdout)
 
                     if (retval > 0):

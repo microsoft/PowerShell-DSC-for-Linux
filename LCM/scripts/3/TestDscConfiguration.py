@@ -74,6 +74,7 @@ if use_omsconfig_host:
                 p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = p.communicate()
                 exit_code = p.wait()
+                stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
                 print(stdout)
 
                 if (exit_code > 0):
@@ -94,6 +95,8 @@ else:
     p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
 
+stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
+stderr = stderr.decode() if isinstance(stderr, bytes) else stderr
 print(stdout)
 print(stderr)
 

@@ -76,6 +76,7 @@ if use_omsconfig_host:
         if dschostlock_acquired:
             p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = p.communicate()
+            stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
             print(stdout)
         else:
             print("dsc host lock already acuired by a different process")
@@ -90,6 +91,9 @@ else:
     p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
 
+
+stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
+stderr = stderr.decode() if isinstance(stderr, bytes) else stderr
 print(stdout)
 print(stderr)
 

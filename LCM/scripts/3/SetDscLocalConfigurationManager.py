@@ -126,6 +126,7 @@ def apply_meta_config(args):
                     p = Popen(parameters, stdout=PIPE, stderr=PIPE)
                     exit_code = p.wait()
                     stdout, stderr = p.communicate()
+                    stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
                     print(stdout)
                 else:
                     print("dsc host lock already acuired by a different process")
@@ -141,6 +142,7 @@ def apply_meta_config(args):
             exit_code = p.wait()
             stdout, stderr = p.communicate()
 
+        stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
         print(stdout)
 
         if ((exit_code != 0) or (stderr)):

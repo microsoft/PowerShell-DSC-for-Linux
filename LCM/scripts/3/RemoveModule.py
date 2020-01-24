@@ -22,12 +22,16 @@ def usage():
     sys.exit(1)
 
 def exitWithError(message, errorCode = 1):
-    errorMessage = "ERROR from RemoveModule.py: " + message.decode(
+    if (isinstance(message, bytes)):
+        message = message.decode()
+    errorMessage = "ERROR from RemoveModule.py: " + message
     print(errorMessage)
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
-    verboseMessage = "VERBOSE from RemoveModule.py: " + message.decode()
+    if (isinstance(message, bytes)):
+        message = message.decode()
+    verboseMessage = "VERBOSE from RemoveModule.py: " + message
     print(verboseMessage)
 
 def getPlatformArchitectureFolderName():
