@@ -4,8 +4,11 @@ include $(TOP)/build/dsc.version
 
 OUTPUT_DIR := $(TOP)/output
 STAGING_DIR := $(OUTPUT_DIR)/staging
+STAGING_DIR_3 := $(OUTPUT_DIR)/staging/3
 INTERMEDIATE_DIR := $(OUTPUT_DIR)/intermediate
+INTERMEDIATE_DIR_3 := $(OUTPUT_DIR)/intermediate/3
 RELEASE_DIR := $(OUTPUT_DIR)/release
+RELEASE_DIR := $(OUTPUT_DIR)/release/3
 
 IB_DIR := $(shell cd ../../pal/installer/InstallBuilder; pwd)
 UNAME_P := $(shell uname -p)
@@ -40,12 +43,13 @@ endif
 all:
 ifeq ($(BUILD_RPM),1)
 	@echo "========================= Make DSC installer"
-	sudo rm -rf $(STAGING_DIR) $(INTERMEDIATE_DIR) 
-	mkdir -p $(RELEASE_DIR) $(STAGING_DIR) $(INTERMEDIATE_DIR)
+	sudo rm -rf $(STAGING_DIR) $(INTERMEDIATE_DIR) $(INTERMEDIATE_DIR_3)  
+	mkdir -p $(RELEASE_DIR) $(STAGING_DIR) $(INTERMEDIATE_DIR) $(INTERMEDIATE_DIR3) 
 	python $(IB_DIR)/installbuilder.py \
 		--BASE_DIR=$(TOP) \
 		--TARGET_DIR=$(RELEASE_DIR) \
 		--INTERMEDIATE_DIR=$(INTERMEDIATE_DIR) \
+		--INTERMEDIATE_DIR3=$(INTERMEDIATE_DIR_3) \
 		--STAGING_DIR=$(STAGING_DIR) \
 		--PACKAGE_TYPE=RPM \
 		--PF=Linux \
@@ -72,12 +76,13 @@ ifeq ($(BUILD_DPKG),1)
 ifeq ($(BUILD_OMS_VAL),1)
 	egrep -q "^omsagent:" /etc/passwd; if [ $$? -ne 0 ]; then echo "Creating omsagent user ..."; sudo /usr/sbin/useradd -r -c "OMS agent" -d /var/opt/microsoft/omsagent/run -s /bin/bash omsagent; fi
 endif
-	sudo rm -rf $(STAGING_DIR) $(INTERMEDIATE_DIR) 
-	mkdir -p $(RELEASE_DIR) $(STAGING_DIR) $(INTERMEDIATE_DIR)
+	sudo rm -rf $(STAGING_DIR)  $(INTERMEDIATE_DIR) $(INTERMEDIATE_DIR_3) 
+	mkdir -p $(RELEASE_DIR) $(STAGING_DIR) $(INTERMEDIATE_DIR)  $(INTERMEDIATE_DIR_3)
 	python $(IB_DIR)/installbuilder.py \
 		--BASE_DIR=$(TOP) \
 		--TARGET_DIR=$(RELEASE_DIR) \
 		--INTERMEDIATE_DIR=$(INTERMEDIATE_DIR) \
+		--INTERMEDIATE_DIR3=$(INTERMEDIATE_DIR_3) \
 		--STAGING_DIR=$(STAGING_DIR) \
 		--PACKAGE_TYPE=DPKG \
 		--PF=Linux \
