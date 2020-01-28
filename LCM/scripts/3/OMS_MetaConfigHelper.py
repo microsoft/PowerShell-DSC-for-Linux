@@ -28,14 +28,14 @@ logger = nxDSCLog.ConsoleAndFileLogger()
 sys.stdout = logger
 
 def exitWithError(message, errorCode = 1):
-    if (isinstance(message, byte)):
+    if (isinstance(message, bytes)):
         message = message.decode()
     errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message
     print(errorMessage)
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
-    if (isinstance(message, byte)):
+    if (isinstance(message, bytes)):
         message = message.decode()
     verboseMessage = "VERBOSE from OMS_MetaConfigHelper.py: " + message
     print(verboseMessage)
