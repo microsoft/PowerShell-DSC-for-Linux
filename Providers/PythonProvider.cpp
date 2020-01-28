@@ -361,13 +361,10 @@ PythonProvider::test (
     strm << "name: \"" << m_Name << '\"';
     SCX_BOOKEND_EX ("PythonProvider::test", strm.str ());
 #endif
-    SCX_BOOKEND_PRINT ("Inside test!!");
     MI_Result rval = MI_RESULT_FAILED;
     int result = sendRequest (TEST, instance);
     if (EXIT_SUCCESS == result)
     {
-        SCX_BOOKEND_PRINT ("Inside test!!");
-        SCX_BOOKEND_PRINT ("send succeeded");
         result = recvResult (pTestResultOut);
         if (EXIT_SUCCESS == result)
         {
@@ -397,12 +394,10 @@ PythonProvider::set (
     strm << "name: \"" << m_Name << '\"';
     SCX_BOOKEND_EX ("PythonProvider::set", strm.str ());
 #endif
-    SCX_BOOKEND_PRINT ("Inside set!!");
     MI_Result rval = MI_RESULT_FAILED;
     int result = sendRequest (SET, instance);
     if (EXIT_SUCCESS == result)
     {
-        SCX_BOOKEND_PRINT ("Inside set!!");
         SCX_BOOKEND_PRINT ("send succeeded");
         MI_Boolean boolResult = MI_FALSE;
         result = recvResult (&boolResult);
@@ -450,13 +445,11 @@ PythonProvider::get (
     //     B: RESULT is negative (non-0)
     //         i: read (string) error msg
     //         ii: output error msg
-    SCX_BOOKEND_PRINT ("Inside get!!");
     MI_Result rval = MI_RESULT_FAILED;
     int getResult = -1;
     int result = sendRequest (GET, instance);
     if (EXIT_SUCCESS == result)
     {
-        SCX_BOOKEND_PRINT ("Inside get!!");
         SCX_BOOKEND_PRINT ("send succeeded");
         result = recv (&getResult);
         if (EXIT_SUCCESS == result)
@@ -527,13 +520,11 @@ PythonProvider::inventory (
     //     B: RESULT is negative (non-0)
     //         i: read (string) error msg
     //         ii: output error msg
-    SCX_BOOKEND_PRINT ("Inside inventory!!");
     MI_Result rval = MI_RESULT_FAILED;
     int inventoryResult = -1;
     int result = sendRequest (INVENTORY, instance);
     if (EXIT_SUCCESS == result)
     {
-        SCX_BOOKEND_PRINT ("Inside inventory!!");
         SCX_BOOKEND_PRINT ("send succeeded");
         result = recv (&inventoryResult);
         if (EXIT_SUCCESS == result)
