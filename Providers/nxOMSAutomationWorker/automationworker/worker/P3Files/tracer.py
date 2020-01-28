@@ -3,7 +3,7 @@
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
 """Tracer module."""
-
+from __future__ import print_function
 import inspect
 
 import os

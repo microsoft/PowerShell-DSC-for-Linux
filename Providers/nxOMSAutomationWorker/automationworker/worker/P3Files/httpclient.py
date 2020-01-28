@@ -12,7 +12,7 @@ import serializerfactory
 import locallogger
 
 
-class HttpClient:
+class HttpClient(object):
     """Base class to provide common attributes and functionality to all HttpClient implementation."""
     ACCEPT_HEADER_KEY = "Accept"
     CONTENT_TYPE_HEADER_KEY = "Content-Type"
@@ -115,7 +115,7 @@ class HttpClient:
         pass
 
 
-class RequestResponse:
+class RequestResponse(object):
     """Encapsulates all request response for http clients. Will also deserialize the response when the raw response
     data is deserializable.
     """

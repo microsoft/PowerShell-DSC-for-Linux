@@ -2,6 +2,7 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+from __future__ import print_function
 import os
 import subprocess
 import sys
@@ -442,7 +443,7 @@ def set_user_and_group_recursive(owning_username, owning_group_name, path):
     print("Owner changed to " + str(owners) + " for " + str(path))
 
 
-class ProcessModel:
+class ProcessModel(object):
     def __init__(self, process_info):
         """FORMAT : ['UID', 'PID', 'PPID', 'PGID', 'SID', 'C', 'STIME', 'TTY', 'TIME', 'CMD']"""
         self.uid = process_info[0]

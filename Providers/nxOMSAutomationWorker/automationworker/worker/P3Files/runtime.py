@@ -19,7 +19,7 @@ from workerexception import *
 json = serializerfactory.get_serializer(sys.version_info)
 
 
-class Runtime:
+class Runtime(object):
     """Runtime base class."""
 
     def __init__(self, job_data, runbook):
@@ -59,7 +59,7 @@ class Runtime:
         env.update({"AUTOMATION_JOB_ID": str(self.job_data.job_id),
                     "AUTOMATION_ACTIVITY_ID": str(tracer.u_activity_id),
                     "PYTHONPATH": str(configuration.get_source_directory_path()),
-                    "HOME": str(os.getcwd())})  # windows env have to be str (not unicode)
+                    "HOME": str(os.getcwdu())})  # windows env have to be str (not unicode)
         self.runbook_subprocess = subprocessfactory.create_subprocess(cmd=cmd,
                                                                       env=env,
                                                                       stdout=subprocess.PIPE,

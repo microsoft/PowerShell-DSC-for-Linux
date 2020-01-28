@@ -158,7 +158,7 @@ def generate_state_file():
             pass
 
 
-class Worker:
+class Worker(object):
     def __init__(self):
         tracer.log_worker_starting(configuration.get_worker_version())
         http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),

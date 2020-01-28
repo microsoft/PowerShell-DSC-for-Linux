@@ -3,7 +3,7 @@
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
 """Local Logger module."""
-
+from __future__ import print_function
 import configuration
 
 import sys

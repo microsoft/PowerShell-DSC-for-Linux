@@ -27,7 +27,7 @@ definition_kind_int_to_str = {0: "Unknown",
                               11: "Bash"}
 
 
-class Runbook:
+class Runbook(object):
     def __init__(self, runbook_data):
         """:type runbook_data: jrdsclient.RunbookData"""
         self.runbook_data = runbook_data

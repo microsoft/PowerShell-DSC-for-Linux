@@ -10,7 +10,7 @@
         When testing this module make sure to add MSFT_nxOMSAutomationWorkerResource as an argument to started
         worker processes.
 """
-
+from __future__ import print_function
 import configparser
 import os
 import subprocess
@@ -44,7 +44,7 @@ def exit_on_error(message, exit_code=1):
     util.exit_on_error(filename=crash_log_filename, message=message, exit_code=exit_code)
 
 
-class WorkerManager:
+class WorkerManager(object):
     def __init__(self, oms_configuration_path):
         self.oms_configuration = OMSConfiguration(oms_configuration_path)
 
@@ -278,7 +278,7 @@ class WorkerManager:
                 print("configuration path doesn't exist or worker already running configuration")
 
 
-class OMSConfiguration:
+class OMSConfiguration(object):
     SECTION_WORKER_CONF = "oms-worker-conf"
     KEY_AUTO_REGISTERED_WORKER_CONF_PATH = "auto_registered_worker_conf_path"
     KEY_MANUALLY_AUTO_REGISTERED_WORKER_CONF_PATH = "manually_registered_worker_conf_path"

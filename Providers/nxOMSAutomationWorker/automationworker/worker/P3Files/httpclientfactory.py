@@ -15,7 +15,7 @@ PY_MINOR_VERSION = 1
 PY_MICRO_VERSION = 2
 
 
-class HttpClientFactory:
+class HttpClientFactory(object):
     """Factory which returns the appropriate HttpClient based on the provided python version.
 
     Targets :
