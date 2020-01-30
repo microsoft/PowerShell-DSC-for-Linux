@@ -2,6 +2,7 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+from __future__ import print_function
 import os
 import subprocess
 import sys
@@ -30,7 +31,7 @@ PY_MICRO_VERSION = 2
 def posix_only(func):
     """Decorator to prevent linux specific methods to run on other OS."""
     if is_posix_host() is False:
-        print func.__name__ + " isn't supported on " + str(os.name) + " os."
+        print(func.__name__ + " isn't supported on " + str(os.name) + " os.")
         return bypass
     else:
         return func
@@ -55,7 +56,7 @@ def format_process_entries_to_list(process_list):
     """
     formatted_entries = []
     for entry in process_list:
-        sanitized_entry = filter(None, entry.split(" "))
+        sanitized_entry = [_f for _f in entry.split(" ") if _f]
         if len(sanitized_entry) < 1 or sanitized_entry == PS_FJH_HEADER:
             continue
         process = ProcessModel(sanitized_entry)
@@ -357,10 +358,10 @@ def fork_and_exit_parent():
     try:
         pid = os.fork()
         if pid > 0:
-            print "parent process " + str(os.getpid()) + " exiting"
+            print("parent process " + str(os.getpid()) + " exiting")
             sys.exit(0)
-    except OSError, e:
-        print "fork failed. " + str(e.message)
+    except OSError as e:
+        print("fork failed. " + str(e.message))
         sys.exit(1)
 
 
@@ -423,7 +424,7 @@ def set_permission_recursive(permission, path):
     if process.returncode != 0:
         raise Exception(
             "Unable to change permission of " + str(path) + " to " + str(permission) + ". Error : " + str(error))
-    print "Permission changed to " + str(permission) + " for " + str(path)
+    print("Permission changed to " + str(permission) + " for " + str(path))
 
 
 def set_user_and_group_recursive(owning_username, owning_group_name, path):
@@ -439,10 +440,10 @@ def set_user_and_group_recursive(owning_username, owning_group_name, path):
     process, output, error = popen_communicate(cmd)
     if process.returncode != 0:
         raise Exception("Unable to change owner of " + str(path) + " to " + str(owners) + ". Error : " + str(error))
-    print "Owner changed to " + str(owners) + " for " + str(path)
+    print("Owner changed to " + str(owners) + " for " + str(path))
 
 
-class ProcessModel:
+class ProcessModel(object):
     def __init__(self, process_info):
         """FORMAT : ['UID', 'PID', 'PPID', 'PGID', 'SID', 'C', 'STIME', 'TTY', 'TIME', 'CMD']"""
         self.uid = process_info[0]

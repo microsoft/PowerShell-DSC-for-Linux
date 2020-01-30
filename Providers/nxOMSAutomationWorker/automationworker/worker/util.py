@@ -2,6 +2,7 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+from __future__ import print_function
 import errno
 import os
 import random
@@ -18,7 +19,7 @@ PY_MICRO_VERSION = 2
 
 def exit_on_error(filename, message, exit_code=-1):
     """Generates a crash log on disk in the temp directory then kills the current process."""
-    print str(message)
+    print(str(message))
     try:
         crash_log = open(os.path.join(tempfile.gettempdir(), filename), "w")
         crash_log.write(message)
@@ -62,7 +63,7 @@ def assert_file_read_permission(file_path):
         f = open(file_path)
         f.close()
         return True
-    except IOError, e:
+    except IOError as e:
         if e.errno == errno.EACCES:
             return False
         raise

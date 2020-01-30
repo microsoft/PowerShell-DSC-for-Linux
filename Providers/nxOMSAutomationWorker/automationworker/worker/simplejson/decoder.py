@@ -1,6 +1,7 @@
 """
 Implementation of JSONDecoder
 """
+
 import re
 
 from scanner import Scanner, pattern

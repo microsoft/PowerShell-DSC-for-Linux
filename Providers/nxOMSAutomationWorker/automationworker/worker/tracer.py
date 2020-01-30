@@ -3,7 +3,7 @@
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
 """Tracer module."""
-
+from __future__ import print_function
 import inspect
 
 import os
@@ -38,8 +38,8 @@ def safe_trace(func):
             func(*args, **kwargs)
         except Exception:
             if locallogger.default_logger is None:
-                print traceback.format_exc()
-                print "Logger not defined."
+                print(traceback.format_exc())
+                print("Logger not defined.")
             else:
                 locallogger.default_logger.critical(traceback.format_exc())
 
@@ -207,12 +207,12 @@ def format_and_issue_generic_hybrid_worker_trace(event_id, task_name, message, t
 
 
 def issue_jrds_trace(event_id, activity_id, log_type, arg_array):
-    jrds_client.set_log(event_id, activity_id, log_type, map(str, arg_array))
+    jrds_client.set_log(event_id, activity_id, log_type, list(map(str, arg_array)))
 
 
 def dict_to_str(input_dict):
     output_str = ""
-    for key, value in input_dict.iteritems():
+    for key, value in input_dict.items():
         output_str = output_str + "[" + str(key) + "=" + str(value) + "]"
     return output_str
 

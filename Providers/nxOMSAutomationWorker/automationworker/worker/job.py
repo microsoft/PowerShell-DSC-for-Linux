@@ -4,7 +4,7 @@
 
 """Job module. Contains a class representation of an "automation" job."""
 
-import Queue
+import queue
 import sys
 import time
 import traceback
@@ -83,11 +83,11 @@ class Job(Thread):
             self.initialize_runtime()
             self.execute_runbook()
             self.unload_job()
-        except (WorkerUnsupportedRunbookType, OSUnsupportedRunbookType), e:
+        except (WorkerUnsupportedRunbookType, OSUnsupportedRunbookType) as e:
             tracer.log_sandbox_job_unsupported_runbook_type(self.job_id, e.message)
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
-        except (InvalidRunbookSignature, GPGKeyringNotConfigured), e:
+        except (InvalidRunbookSignature, GPGKeyringNotConfigured) as e:
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
         except Exception:
@@ -131,7 +131,7 @@ class Job(Thread):
                     self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.STOPPING, False)
                     self.runtime.kill_runbook_subprocess()
                     break
-            except Queue.Empty:
+            except queue.Empty:
                 pass
             time.sleep(0.2)
 

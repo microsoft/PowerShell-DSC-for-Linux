@@ -10,8 +10,12 @@
         When testing this module make sure to add MSFT_nxOMSAutomationWorkerResource as an argument to started
         worker processes.
 """
+from __future__ import print_function
 
-import ConfigParser
+import importHelper
+importHelper.install_aliases()
+
+import configparser
 import os
 import subprocess
 import sys
@@ -32,7 +36,7 @@ def loop(func):
                 func(*args, **kwargs)
             except Exception:
                 exception_trace = str(traceback.format_exc())
-                print exception_trace
+                print(exception_trace)
                 exit_on_error(exception_trace)
             time.sleep(30)
 
@@ -44,7 +48,7 @@ def exit_on_error(message, exit_code=1):
     util.exit_on_error(filename=crash_log_filename, message=message, exit_code=exit_code)
 
 
-class WorkerManager:
+class WorkerManager(object):
     def __init__(self, oms_configuration_path):
         self.oms_configuration = OMSConfiguration(oms_configuration_path)
 
@@ -122,9 +126,9 @@ class WorkerManager:
             The list of process has to be owned by the current user
         """
         for process in process_list:
-            print "killing " + str(process.pid)
+            print("killing " + str(process.pid))
             linuxutil.kill_current_user_process(process.pid)
-            print "killed " + str(process.pid)
+            print("killed " + str(process.pid))
 
     @staticmethod
     def get_configuration_path_to_be_started(worker_process_list, valid_configuration_paths):
@@ -219,28 +223,28 @@ class WorkerManager:
         2. Remove WORKER processes running outdated resource version (we do not care about sandbox processes)
         3. Start worker processes for configuration path that are not yet running
         """
-        print "in routine"
+        print("in routine")
         valid_configuration_paths = self.oms_configuration.get_active_worker_configuration_paths()
         current_resource_version = self.oms_configuration.get_current_resource_version()
 
         # kill workers running rogue config
         process_running_invalid_configuration = self.get_worker_and_sandbox_process_running_invalid_configuration(
             linuxutil.get_current_user_processes(), valid_configuration_paths=valid_configuration_paths)
-        print "removing " + str(len(process_running_invalid_configuration)) + " process running rogue config"
+        print("removing " + str(len(process_running_invalid_configuration)) + " process running rogue config")
         self.kill_process_list(process_running_invalid_configuration)
 
         # kill outdated worker
         worker_process_running_outdated_version = self.get_worker_process_running_outdated_resource_version(
             linuxutil.get_current_user_processes(), current_resource_version=current_resource_version)
-        print "removing " + str(
-            len(worker_process_running_outdated_version)) + " process running outdated resource version"
+        print("removing " + str(
+            len(worker_process_running_outdated_version)) + " process running outdated resource version")
         self.kill_process_list(worker_process_running_outdated_version)
 
         configuration_path_to_be_started = self.get_configuration_path_to_be_started(
             self.get_worker_processes(linuxutil.get_current_user_processes()),
             valid_configuration_paths=valid_configuration_paths)
 
-        print "worker to be started " + str(len(configuration_path_to_be_started))
+        print("worker to be started " + str(len(configuration_path_to_be_started)))
 
         if len(configuration_path_to_be_started) > 0 and linuxutil.get_current_username() == NXAUTOMATION_USERNAME:
             proc = subprocess.Popen(["sudo", "-u", NXAUTOMATION_USERNAME, "python", OMSUTIL_FILE_PATH, "--initialize"],
@@ -272,13 +276,13 @@ class WorkerManager:
                 resource_version_arg = "rversion:" + str(current_resource_version)
                 cmd.append(resource_version_arg)
 
-                print "starting worker process " + str(configuration_path)
+                print("starting worker process " + str(configuration_path))
                 subprocess.Popen(cmd)
             else:
-                print "configuration path doesn't exist or worker already running configuration"
+                print("configuration path doesn't exist or worker already running configuration")
 
 
-class OMSConfiguration:
+class OMSConfiguration(object):
     SECTION_WORKER_CONF = "oms-worker-conf"
     KEY_AUTO_REGISTERED_WORKER_CONF_PATH = "auto_registered_worker_conf_path"
     KEY_MANUALLY_AUTO_REGISTERED_WORKER_CONF_PATH = "manually_registered_worker_conf_path"
@@ -296,7 +300,7 @@ class OMSConfiguration:
         self.oms_configuration_path = oms_configuration_path
 
     def get_config_reader(self):
-        config = ConfigParser.SafeConfigParser({self.KEY_AUTO_REGISTERED_WORKER_CONF_PATH: self.DEFAULT_EMPTY_VALUE,
+        config = configparser.SafeConfigParser({self.KEY_AUTO_REGISTERED_WORKER_CONF_PATH: self.DEFAULT_EMPTY_VALUE,
                                                 self.KEY_MANUALLY_AUTO_REGISTERED_WORKER_CONF_PATH:
                                                     self.DEFAULT_EMPTY_VALUE,
                                                 self.KEY_HYBRID_WORKER_PATH: self.DEFAULT_HYBRID_WORKER_PATH,
@@ -316,16 +320,16 @@ class OMSConfiguration:
         try:
             worker_configuration_paths.append(config.get(self.SECTION_WORKER_CONF,
                                                          self.KEY_AUTO_REGISTERED_WORKER_CONF_PATH))
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+        except (configparser.NoOptionError, configparser.NoSectionError):
             pass
 
         try:
             worker_configuration_paths.append(config.get(self.SECTION_WORKER_CONF,
                                                          self.KEY_MANUALLY_AUTO_REGISTERED_WORKER_CONF_PATH))
-        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+        except (configparser.NoOptionError, configparser.NoSectionError):
             pass
 
-        print worker_configuration_paths
+        print(worker_configuration_paths)
         valid_worker_configuration_paths = []
         for path in worker_configuration_paths:
             if path != self.DEFAULT_EMPTY_VALUE and os.path.isfile(path):

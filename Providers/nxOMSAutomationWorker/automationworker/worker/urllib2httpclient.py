@@ -74,7 +74,7 @@ def request_retry_handler(func):
             try:
                 ret = func(*args, **kwargs)
                 return ret
-            except Exception, exception:
+            except Exception as exception:
                 if iteration >= max_retry_count - 1:
                     raise RetryAttemptExceededException(traceback.format_exc())
                 elif SSL_MODULE_NAME in sys.modules:
@@ -144,7 +144,7 @@ class Urllib2HttpClient(HttpClient):
 
         try:
             response = self.issue_request(url, headers=headers, method=self.GET)
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             if e is not None and e.code is not None:
                 return RequestResponse(e.code)
             else:
@@ -177,7 +177,7 @@ class Urllib2HttpClient(HttpClient):
 
         try:
             response = self.issue_request(url, headers=headers, method=self.POST, data=serial_data)
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             if e is not None and e.code is not None:
                 return RequestResponse(e.code)
             else:
@@ -210,7 +210,7 @@ class Urllib2HttpClient(HttpClient):
 
         try:
             response = self.issue_request(url, headers=headers, method=self.PUT, data=serial_data)
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             if e is not None and e.code is not None:
                 return RequestResponse(e.code)
             else:
@@ -243,7 +243,7 @@ class Urllib2HttpClient(HttpClient):
 
         try:
             response = self.issue_request(url, headers=headers, method=self.DELETE, data=serial_data)
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             if e is not None and e.code is not None:
                 return RequestResponse(e.code)
             else:

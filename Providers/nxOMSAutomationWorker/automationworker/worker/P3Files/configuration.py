@@ -2,7 +2,14 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-import configparser
+from __future__ import absolute_import
+from future.utils import PY2
+
+if PY2:
+    from ConfigParser import *
+else:
+    from configparser import *
+
 import os
 import sys
 
@@ -93,7 +100,7 @@ def read_and_set_configuration(configuration_file_path):
     clear_config()
 
     # init and set default values for optional configuration keys
-    config = configparser.SafeConfigParser({DEBUG_TRACES: DEFAULT_DEBUG_TRACES,
+    config = SafeConfigParser({DEBUG_TRACES: DEFAULT_DEBUG_TRACES,
                                             BYPASS_CERTIFICATE_VERIFICATION: DEFAUTL_BYPASS_CERTIFICATE_VERIFICATION,
                                             ENFORCE_RUNBOOK_SIGNATURE_VALIDATION: DEFAULT_ENFORCE_RUNBOOK_SIGNATURE_VALIDATION,
                                             GPG_PUBLIC_KEYRING_PATH: DEFAULT_GPG_PUBLIC_KEYRING_PATH,

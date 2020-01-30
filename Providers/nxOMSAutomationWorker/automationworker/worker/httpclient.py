@@ -12,7 +12,7 @@ import serializerfactory
 import locallogger
 
 
-class HttpClient:
+class HttpClient(object):
     """Base class to provide common attributes and functionality to all HttpClient implementation."""
     ACCEPT_HEADER_KEY = "Accept"
     CONTENT_TYPE_HEADER_KEY = "Content-Type"
@@ -36,7 +36,7 @@ class HttpClient:
         # validate presence of cert/key in case they were removed after process creation
         if (cert_path is not None and not os.path.isfile(self.cert_path)) or \
                 (key_path is not None and not os.path.isfile(self.key_path)):
-            print cert_path
+            print(cert_path)
             raise Exception("Invalid certificate or key file path.")
 
         self.default_headers = {self.ACCEPT_HEADER_KEY: self.APP_JSON_HEADER_VALUE,
@@ -115,7 +115,7 @@ class HttpClient:
         pass
 
 
-class RequestResponse:
+class RequestResponse(object):
     """Encapsulates all request response for http clients. Will also deserialize the response when the raw response
     data is deserializable.
     """

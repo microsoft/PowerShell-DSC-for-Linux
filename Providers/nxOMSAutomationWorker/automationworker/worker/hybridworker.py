@@ -2,7 +2,10 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-import ConfigParser
+import importHelper
+importHelper.install_aliases()
+
+import configparser
 import os
 import platform
 import shutil
@@ -121,7 +124,7 @@ def generate_state_file():
 
     section = "state"
     conf_file = open(state_file_path, 'wb')
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.add_section(section)
     config.set(section, configuration.STATE_PID, str(os.getpid()))
     config.set(section, configuration.WORKER_VERSION, str(configuration.get_worker_version()))
@@ -158,7 +161,7 @@ def generate_state_file():
             pass
 
 
-class Worker:
+class Worker(object):
     def __init__(self):
         tracer.log_worker_starting(configuration.get_worker_version())
         http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),
@@ -212,7 +215,7 @@ class Worker:
 
             try:
                 iohelper.assert_or_create_path(sandbox_working_dir)
-            except OSError, exception:
+            except OSError as exception:
                 tracer.log_worker_failed_to_create_sandbox_root_folder(sandbox_id, exception)
                 raise SystemExit("Sandbox folder creation failed.")
 
@@ -282,7 +285,7 @@ class Worker:
         terminated_sandbox_ids = []
 
         # detect terminated sandboxes
-        for sandbox_id, sandbox_process in self.running_sandboxes.items():
+        for sandbox_id, sandbox_process in list(self.running_sandboxes.items()):
             if sandbox_process.poll() is not None:
                 terminated_sandbox_ids.append(sandbox_id)
 

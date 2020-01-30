@@ -2,6 +2,7 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+from __future__ import print_function
 import os
 import sys
 from optparse import OptionParser
@@ -57,7 +58,7 @@ def initialize():
             else:
                 print_success_message = True
             if print_success_message:
-                print "Successfully added omsagent secondary group to nxautomation user."
+                print("Successfully added omsagent secondary group to nxautomation user.")
 
     # change permissions for the keyring.gpg
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+r",
@@ -65,7 +66,7 @@ def initialize():
     if process.returncode != 0:
         raise Exception("Unable set group permission to keyring. Error: " + str(error))
     else:
-        print "Successfully set group permissions to keyring.gpg."
+        print("Successfully set group permissions to keyring.gpg.")
 
     # change permission for the certificate folder, oms.crt and oms.key
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+rx", "-R",
@@ -73,7 +74,7 @@ def initialize():
     if process.returncode != 0:
         raise Exception("Unable set group permissions to certificate folder. Error: " + str(error))
     else:
-        print "Successfully set group permissions to certificate folder."
+        print("Successfully set group permissions to certificate folder.")
 
     # change owner for the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chown", "nxautomation:omiusers", "-R",
@@ -81,7 +82,7 @@ def initialize():
     if process.returncode != 0:
         raise Exception("Unable set group owner on working directory. Error: " + str(error))
     else:
-        print "Successfully set group permissions on working directory."
+        print("Successfully set group permissions on working directory.")
 
     # change permission for the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "gu=rwx", "-R",
@@ -89,7 +90,7 @@ def initialize():
     if process.returncode != 0:
         raise Exception("Unable set permissions on working directory. Error: " + str(error))
     else:
-        print "Successfully set permissions on working directory."
+        print("Successfully set permissions on working directory.")
 
     # explicitly prevent others from accessing the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "o=", "-R",
@@ -97,7 +98,7 @@ def initialize():
     if process.returncode != 0:
         raise Exception("Unable set permissions on working directory. Error: " + str(error))
     else:
-        print "Successfully set permissions on working directory."
+        print("Successfully set permissions on working directory.")
 
     proxy_paths = ["/etc/opt/microsoft/omsagent/conf/proxy.conf", "/etc/opt/microsoft/omsagent/proxy.conf"]
     for path in proxy_paths:
@@ -107,7 +108,7 @@ def initialize():
             if process.returncode != 0:
                 raise Exception("Unable set read permission to proxy configuration file. Error: " + str(error))
             else:
-                print "Successfully set read permission to proxy configuration file."
+                print("Successfully set read permission to proxy configuration file.")
 
     # create home dir for nxautomation
     diydirs.create_persistent_diy_dirs()
@@ -117,7 +118,7 @@ def initialize():
 
 def dmidecode():
     """Returns the content of dmidecode."""
-    print linuxutil.invoke_dmidecode()
+    print(linuxutil.invoke_dmidecode())
 
 
 def main():

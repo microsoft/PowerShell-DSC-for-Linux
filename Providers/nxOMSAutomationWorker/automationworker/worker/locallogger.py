@@ -3,7 +3,7 @@
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
 """Local Logger module."""
-
+from __future__ import print_function
 import configuration
 
 import sys
@@ -68,8 +68,8 @@ def log_warning(message):
         init_logger()
     try:
         default_logger.warning(message)
-    except Exception, e:
-        print "Exception %s while printing the log %s" %(str(e), message)
+    except Exception as e:
+        print("Exception %s while printing the log %s" %(str(e), message))
 
 
 def log_info(message):
@@ -77,5 +77,5 @@ def log_info(message):
         init_logger()
     try:
         default_logger.info(message)
-    except Exception, e:
-        print "Exception %s while printing the log %s" %(str(e), message)
+    except Exception as e:
+        print("Exception %s while printing the log %s" %(str(e), message))

@@ -2,10 +2,11 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-"""Urllib2 HttpClient."""
+"""Urllib3 HttpClient."""
 
-from future import standard_library
-standard_library.install_aliases()
+import sys
+
+
 
 import http.client
 import socket
@@ -13,8 +14,8 @@ import time
 import traceback
 import urllib.request, urllib.error, urllib.parse
 
-from httpclient import *
-from workerexception import *
+from .httpclient import *
+from .workerexception import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
@@ -51,7 +52,7 @@ class HttpsClientHandler(urllib.request.HTTPSHandler):
         return self.do_open(self.get_https_connection, req, context=self._context)
 
     def get_https_connection(self, host, context=None, timeout=180):
-        """urllib2's AbstractHttpHandler will invoke this method with the host/timeout parameter. See urllib2's
+        """urllib3's AbstractHttpHandler will invoke this method with the host/timeout parameter. See urllib3's
         AbstractHttpHandler for more details.
 
         Args:
@@ -92,8 +93,8 @@ def request_retry_handler(func):
     return decorated_func
 
 
-class Urllib2HttpClient(HttpClient):
-    """Urllib2 http client. Inherits from HttpClient.
+class Urllib3HttpClient(HttpClient):
+    """Urllib3 http client. Inherits from HttpClient.
 
     Targets:
         [2.7.9 - 2.7.9+] only due to the lack of strict certificate verification prior to this version.

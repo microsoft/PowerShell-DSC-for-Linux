@@ -159,7 +159,7 @@ class CurlHttpClient(HttpClient):
         cmd.append(STATUS_CODE_DELIMITER + CURL_HTTP_CODE_SPECIAL_VAR + "\n")
 
         if headers is not None:
-            for key, value in headers.iteritems():
+            for key, value in headers.items():
                 cmd.append(OPTION_HEADER)
                 cmd.append(key + ": " + value)
 
@@ -189,10 +189,10 @@ class CurlHttpClient(HttpClient):
 
             # write data to disk
             data_file_name = base64.standard_b64encode(str(time.time()) +
-                                                       str(random.randint(0, sys.maxint)) +
-                                                       str(random.randint(0, sys.maxint)) +
-                                                       str(random.randint(0, sys.maxint)) +
-                                                       str(random.randint(0, sys.maxint)))
+                                                       str(random.randint(0, sys.maxsize)) +
+                                                       str(random.randint(0, sys.maxsize)) +
+                                                       str(random.randint(0, sys.maxsize)) +
+                                                       str(random.randint(0, sys.maxsize)))
             data_file_path = os.path.join(configuration.get_temporary_request_directory_path(), data_file_name)
             iohelper.write_to_file(data_file_path, serialized_data)
 
@@ -214,7 +214,7 @@ class CurlHttpClient(HttpClient):
                                     "[stderr=" + str(err) + "]")
 
                 return self.parse_raw_output(out)
-            except Exception, e:
+            except Exception as e:
                 raise Exception("Unknown exception while issuing request. [exception=" + str(e) + "]" +
                                 "[stacktrace=" + str(traceback.format_exc()) + "]")
         finally:

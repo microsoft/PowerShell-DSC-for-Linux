@@ -8,6 +8,7 @@ import configuration
 import util
 from curlhttpclient import CurlHttpClient
 from urllib2httpclient import Urllib2HttpClient
+from urllib3HttpClient import Urllib2HttpClient
 from workerexception import *
 
 PY_MAJOR_VERSION = 0
@@ -15,7 +16,7 @@ PY_MINOR_VERSION = 1
 PY_MICRO_VERSION = 2
 
 
-class HttpClientFactory:
+class HttpClientFactory(object):
     """Factory which returns the appropriate HttpClient based on the provided python version.
 
     Targets :
@@ -57,6 +58,8 @@ class HttpClientFactory:
             An instance of CurlHttpClient if the installed Python version is below 2.7.9
             An instance of Urllib2 if the installed Python version is or is above 2.7.9
         """
+        if version_info[PY_MAJOR_VERSION] == 3:
+            return urllib3HttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)
         if version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] < 7:
             return CurlHttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)
         elif version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] <= 7 and version_info[

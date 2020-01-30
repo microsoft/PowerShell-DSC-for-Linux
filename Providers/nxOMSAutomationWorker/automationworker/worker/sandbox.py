@@ -8,7 +8,7 @@ import os
 import sys
 import time
 import traceback
-from Queue import Queue, Empty
+from queue import Queue, Empty
 
 import configuration
 import tracer
@@ -93,7 +93,7 @@ class Sandbox:
         terminated_job_ids = []
 
         # clean up finished jobs
-        for job_id, job_tuple in job_map.items():
+        for job_id, job_tuple in list(job_map.items()):
             if job_tuple[0].isAlive() is False:
                 try:
                     job_tuple[2].get(block=False)

@@ -6,7 +6,7 @@
 
 import os
 
-os.umask(077)
+os.umask(0o77)
 
 
 def write_to_file(file_path, data, mode="wb"):
