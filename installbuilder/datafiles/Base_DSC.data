@@ -13,7 +13,6 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_DSCMetaConfiguration.mof; LCM/dsc/mof/MSFT_DSCMetaConfiguration.mof; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.registration.mof; LCM/dsc/mof/MSFT_LogResource.registration.mof; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.schema.mof; LCM/dsc/mof/MSFT_LogResource.schema.mof; 755; ${{RUN_AS_USER}}; root
-
 /etc/opt/omi/conf/${{SHORT_NAME}}/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; ${{RUN_AS_USER}}; root
 
 /opt/microsoft/${{SHORT_NAME}}/Scripts/client.py; intermediate/Scripts/client.py; 755; ${{RUN_AS_USER}}; root
@@ -39,6 +38,24 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh; intermediate/Scripts/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
 
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/OmsConfigHostHelpers.py; intermediate/Scripts/3/OmsConfigHostHelpers.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/StartDscConfiguration.py; intermediate/Scripts/3/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/TestDscConfiguration.py; intermediate/Scripts/3/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/GetDscConfiguration.py; intermediate/Scripts/3/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/PerformInventory.py; intermediate/Scripts/3/PerformInventory.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/SetDscLocalConfigurationManager.py; intermediate/Scripts/3/SetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/GetDscLocalConfigurationManager.py; intermediate/Scripts/3/GetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/PerformRequiredConfigurationChecks.py; intermediate/Scripts/3/PerformRequiredConfigurationChecks.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/OperationStatusUtility.py; intermediate/Scripts/3/OperationStatusUtility.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RestoreConfiguration.py; intermediate/Scripts/3/RestoreConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/InstallModule.py; intermediate/Scripts/3/InstallModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RemoveModule.py; intermediate/Scripts/3/RemoveModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RegenerateInitFiles.py; intermediate/Scripts/3/RegenerateInitFiles.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RegisterHelper.sh; intermediate/Scripts/3/RegisterHelper.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/Register.py; intermediate/Scripts/3/Register.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/StatusReport.sh; intermediate/Scripts/3/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/ImportGPGKey.sh; intermediate/Scripts/3/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
+
 #if BUILD_OMS == 1
 
 /opt/microsoft/omsconfig/etc/logrotate.conf; Providers/Extras/Scripts/omsconfig_logrotate.conf; 644; root; root
@@ -57,6 +74,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh; intermediate/Scripts/NPMAgentBinaryCap.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh; intermediate/Scripts/OMSAuditdPlugin.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/3/OMS_MetaConfigHelper.py; intermediate/Scripts/3/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip; release/nxOMSPerfCounter_2.2.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.4.zip; release/nxOMSSyslog_2.4.zip; 755; ${{RUN_AS_USER}}; root
@@ -103,6 +121,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/module_packages;           755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/keys;                      755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts;                   755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3;                 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x;         755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x;         755; ${{RUN_AS_USER}}; root
@@ -167,7 +186,7 @@ if [ "$base64hmac" != "C9eHLPTYnXyrYXLzmMsya2FWfCFNRlaq75stOI2wbLw=" ]; then
     PREREQ_ERROR=1
     exit 1
 fi
-#else 
+#else
 
 # test for availablity of gpg
 which gpg 1> /dev/null 2> /dev/null
@@ -175,7 +194,7 @@ if [ $? -ne 0 ]; then
     echo "Error: gpg needs to be installed and available in PATH"
     PREREQ_ERROR=1
 fi
-       
+
 if [ $PREREQ_ERROR -eq 1 ]; then
     exit 1
 fi
@@ -185,6 +204,7 @@ fi
 %Preinstall_200
 
 echo "Current changes are being reflected."
+echo $(( -z $(python3 --version 2>&1 | grep 'not found') ))
 # Only check for ctypes if python2 is installed
 if [[ -z $(python --version 2>&1 | grep 'not found') ]]; then
    echo "python2 found."
@@ -192,12 +212,13 @@ if [[ -z $(python --version 2>&1 | grep 'not found') ]]; then
    echo "Checking for ctypes python module..."
    python -c "import ctypes" 1> /dev/null 2> /dev/null
    cmdline_ctypes=$?
-   if [ $cmdline_ctypes -ne 0 ]; then    
+   if [ $cmdline_ctypes -ne 0 ]; then
       echo "Error: Python does not support ctypes on this system.  Please install the ctypes module for Python or upgrade to a newer version of python that comes with the ctypes module."
       echo "Please remove the omi package and try again after installing the ctypes module or upgrading Python.  You can check if the ctypes module is installed by starting python and running the command: 'import ctypes'"
       exit 1
   fi
-elif [[ -z $(python3 --version 2>&1 | grep 'not found') ]]; then
+elif [[ -z $(python3 --version 2>&1 | grep 'not found') ]]
+then
     echo "python3 found."
     pythonVersion="python3"
 fi
@@ -312,12 +333,19 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 
 # Set up built-in resource modules for OMS DSC
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip 0"
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.4.zip 0"
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip 0"
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
-su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip 0"
+if [ $pythonVersion == "python3" ]
+then
+	echo "This should still run"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.4.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip 0"
+else
+	echo "wtf"
+	echo current pythonVersion: $(pythonVersion)
+fi
 #if PFARCH == x86
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
 su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
@@ -333,7 +361,7 @@ su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microso
 # This is a temporary workaround to prevent DIY DSC from breaking after the OMS Agent is updated from version 1.4.4-210 or below
 # This section can be removed when telemetry shows that customers no longer need to update from version 1.4.4-210 or below
 
-# Check if DIY DSC install module script is present on the machine 
+# Check if DIY DSC install module script is present on the machine
 if [ -f /opt/microsoft/dsc/Scripts/InstallModule.py ]; then
   # Check if nx module package is available in DIY DSC
   if [ -f /opt/microsoft/dsc/module_packages/nx_1.0.zip ]; then
@@ -402,13 +430,13 @@ su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/mi
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc keyring.gpg"
 
 
-# Set up a dsc cron job to run the ConsistencyInvoker every 30 minutes which is default freq, this is to fix dsc github issue no 322. 
-# It is a temporary workaround to create dsc DYI cron job as omsconfig upgrade removes dsc cron job. 
+# Set up a dsc cron job to run the ConsistencyInvoker every 30 minutes which is default freq, this is to fix dsc github issue no 322.
+# It is a temporary workaround to create dsc DYI cron job as omsconfig upgrade removes dsc cron job.
 
-# check if dsc consistency invoker is present on the machine 
-if [ -f /opt/omi/bin/ConsistencyInvoker ]; then 
+# check if dsc consistency invoker is present on the machine
+if [ -f /opt/omi/bin/ConsistencyInvoker ]; then
 
-  # check if we do not have dsc cron file on the box then create one. 
+  # check if we do not have dsc cron file on the box then create one.
   if [ ! -f /etc/cron.d/dsc ]; then
            	echo "*/30 * * * * root /opt/omi/bin/ConsistencyInvoker" > /etc/cron.d/dsc
   fi
@@ -474,11 +502,11 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
     rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
     rm -f $OMI_HOME/bin/ConsistencyInvoker
-    rm -f $OMI_LIB/libdsccore.so    
-    # Only to be removed for standalone DSC case 
+    rm -f $OMI_LIB/libdsccore.so
+    # Only to be removed for standalone DSC case
     rm -f /etc/cron.d/dsc
 #endif
-    
+
 fi
 
 #if BUILD_OMS == 1
@@ -511,4 +539,3 @@ ${{SHELL_HEADER}}
 ${{SHELL_HEADER}}
 %Postuninstall_0
 ${{SHELL_HEADER}}
-
