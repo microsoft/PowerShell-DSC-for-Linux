@@ -4,6 +4,9 @@
 
 """Sandbox module."""
 
+from . import importHelper
+importHelper.install_aliases
+
 import os
 import sys
 import time

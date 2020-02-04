@@ -1,8 +1,10 @@
 #!/usr/bin/env python2
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
+import importHelper
+importHelper.install_aliases()
 
-import ConfigParser
+import configparser
 import base64
 import datetime
 import os
@@ -53,7 +55,7 @@ def generate_self_signed_certificate(certificate_path, key_path):
     process, certificate_creation_output, error = linuxutil.popen_communicate(cmd)
     if process.returncode != 0:
         raise Exception("Unable to create certificate/key. " + str(error))
-    print "Certificate/Key created."
+    print ("Certificate/Key created.")
 
 
 def sha256_digest(payload):
@@ -122,7 +124,7 @@ def create_worker_configuration_file(jrds_uri, automation_account_id, worker_gro
     """
     worker_conf_path = os.path.join(state_directory_path, "worker.conf")
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     if os.path.isfile(worker_conf_path):
         config.read(worker_conf_path)
     conf_file = open(worker_conf_path, 'wb')
@@ -170,14 +172,14 @@ def create_worker_configuration_file(jrds_uri, automation_account_id, worker_gro
 
 def get_autoregistered_worker_account_id():
     autoregistered_worker_conf_path = "/var/opt/microsoft/omsagent/state/automationworker/worker.conf"
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     if os.path.isfile(autoregistered_worker_conf_path) is False:
-        print "No diy worker found. Account validation skipped."
+        print ("No diy worker found. Account validation skipped.")
         return None
 
     config.read(autoregistered_worker_conf_path)
     account_id = config.get("worker-required", "account_id")
-    print "Found existing worker for account id : " + str(account_id)
+    print ("Found existing worker for account id : " + str(account_id))
     return account_id
 
 
@@ -195,7 +197,7 @@ def invoke_dmidecode():
     dmidecode, error = proc.communicate()
     if proc.poll() != 0:
         raise Exception("Unable to get dmidecode output : " + str(error))
-    return dmidecode
+    return dmidecode.decode("utf-8")
 
 
 def register(options):
@@ -245,16 +247,21 @@ def register(options):
     is_azure_vm = False
     try:
         dmidecode = invoke_dmidecode()
+        print("checkpoint -1")
         is_azure_vm = linuxutil.is_azure_vm(dmidecode)
         if is_azure_vm:
+            print("checkpoint - 2")
             asset_tag = linuxutil.get_azure_vm_asset_tag()
         else:
             asset_tag = False
+
+        print("checkpoint - 3")
         vm_id = linuxutil.get_vm_unique_id_from_dmidecode(sys.byteorder, dmidecode)
-    except Exception, e:
-        print str(e)
+    except Exception as e:
+        print (str(e))
         pass
 
+    print("Checkpoint")
     # generate payload for registration request
     date = datetime.datetime.utcnow().isoformat() + "0-00:00"
     payload = {'RunbookWorkerGroup': hybrid_worker_group_name,
@@ -270,10 +277,10 @@ def register(options):
     # the signature generation is based on agent service contract
     payload_hash = sha256_digest(payload)
     b64encoded_payload_hash = base64.b64encode(payload_hash)
-    signature = generate_hmac(b64encoded_payload_hash + "\n" + date, automation_account_key)
+    signature = generate_hmac(b64encoded_payload_hash.decode("utf-8") + "\n" + date, automation_account_key)
     b64encoded_signature = base64.b64encode(signature)
 
-    headers = {'Authorization': 'Shared ' + b64encoded_signature,
+    headers = {'Authorization': 'Shared ' + b64encoded_signature.decode("utf-8"),
                'ProtocolVersion': "2.0",
                'x-ms-date': date,
                "Content-Type": "application/json"}
@@ -281,9 +288,10 @@ def register(options):
     # agent service registration request
     http_client_factory = httpclientfactory.HttpClientFactory(certificate_path, key_path, options.test)
     http_client = http_client_factory.create_http_client(sys.version_info)
-    url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
+    url = registration_endpoint + "/HybridV2(MachineId='" + machine_id.decode("utf-8") + "')"
     response = http_client.put(url, headers=headers, data=payload)
-
+    print("url requested : " + str(url))
+    print("payload sent : " + str(json.dumps(payload)))
     if response.status_code != 200:
         raise Exception("Failed to register worker. [response_status=" + str(response.status_code) + "]")
 
@@ -297,7 +305,7 @@ def register(options):
     # generate working directory path
     diydirs.create_persistent_diy_dirs()
 
-    print "Registration successful!"
+    print ("Registration successful!")
 
 
 def deregister(options):
@@ -333,7 +341,7 @@ def deregister(options):
     if os.path.exists(key_path) is False:
         raise Exception("Missing worker key.")
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read(worker_conf_path)
     machine_id = config.get("worker-required", "machine_id")
 
@@ -364,19 +372,19 @@ def deregister(options):
         raise Exception("Failed to deregister worker. [response_status=" + str(response.status_code) + "]")
     if response.status_code == 404:
         raise Exception("Unable to deregister. Worker not found.")
-    print "Successfuly deregistered worker."
+    print ("Successfuly deregistered worker.")
 
-    print "Cleaning up left over directories."
+    print ("Cleaning up left over directories.")
 
     try:
         shutil.rmtree(DIY_STATE_PATH)
-        print "Removed state directory."
+        print ("Removed state directory.")
     except:
         raise Exception("Unable to remove state directory base path.")
 
     try:
         shutil.rmtree(DIY_WORKING_DIR)
-        print "Removed working directory."
+        print ("Removed working directory.")
     except:
         raise Exception("Unable to remove working directory base path.")
 

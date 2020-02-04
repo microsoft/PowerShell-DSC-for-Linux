@@ -4,12 +4,9 @@
 
 import os
 
-import configuration
-import util
-from curlhttpclient import CurlHttpClient
-from urllib2httpclient import Urllib2HttpClient
-from urllib3HttpClient import Urllib2HttpClient
-from workerexception import *
+from . import configuration
+from . import util
+from .workerexception import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
@@ -59,11 +56,15 @@ class HttpClientFactory(object):
             An instance of Urllib2 if the installed Python version is or is above 2.7.9
         """
         if version_info[PY_MAJOR_VERSION] == 3:
-            return urllib3HttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)
+            from .urllib3HttpClient import Urllib3HttpClient
+            return Urllib3HttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)
         if version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] < 7:
+            from .curlhttpclient import CurlHttpClient
             return CurlHttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)
         elif version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] <= 7 and version_info[
             PY_MICRO_VERSION] < 9:
+            from .urllib2httpclient import Urllib2HttpClient
             return CurlHttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)
         else:
+            from .urllib2httpclient import Urllib2HttpClient
             return Urllib2HttpClient(self.cert, self.key, self.insecure, self.proxy_configuration)

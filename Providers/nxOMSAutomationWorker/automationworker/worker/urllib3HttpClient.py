@@ -126,7 +126,8 @@ class Urllib3HttpClient(HttpClient):
             proxy_handler = urllib.request.ProxyHandler({'http': self.proxy_configuration,
                                                   'https': self.proxy_configuration})
             opener.add_handler(proxy_handler)
-        req = urllib.request.Request(url, data=data, headers=headers)
+        encoded_data = urllib.parse.urlencode(data).encode("utf-8")
+        req = urllib.request.Request(url, data=encoded_data, headers=headers)
         req.get_method = lambda: method
         response = opener.open(req, timeout=30)
         opener.close()
@@ -209,7 +210,7 @@ class Urllib3HttpClient(HttpClient):
         if data is None:
             serial_data = ""
         else:
-            serial_data = self.json.dumps(data)
+            serial_data = data
             headers.update({self.CONTENT_TYPE_HEADER_KEY: self.APP_JSON_HEADER_VALUE})
 
         try:

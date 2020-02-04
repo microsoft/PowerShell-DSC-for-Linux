@@ -8,8 +8,8 @@ import codecs
 import traceback
 from threading import Thread
 
-import jrdsclient
-import tracer
+from . import jrdsclient
+from . import tracer
 
 PREFIX_DEBUG = "DEBUG:"
 PREFIX_ERROR = "ERROR:"

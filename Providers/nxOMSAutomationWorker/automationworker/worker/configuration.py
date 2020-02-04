@@ -2,14 +2,16 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-import importHelper
+from __future__ import absolute_import
+
+from . import importHelper
 importHelper.install_aliases()
 
 import configparser
 import os
 import sys
 
-import serializerfactory
+from . import serializerfactory
 
 json = serializerfactory.get_serializer(sys.version_info)
 

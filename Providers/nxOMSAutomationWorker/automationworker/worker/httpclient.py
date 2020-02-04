@@ -7,9 +7,9 @@
 import os
 import sys
 
-import configuration
-import serializerfactory
-import locallogger
+from . import configuration
+from . import serializerfactory
+from . import locallogger
 
 
 class HttpClient(object):

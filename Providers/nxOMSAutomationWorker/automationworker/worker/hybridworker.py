@@ -2,7 +2,7 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-import importHelper
+from . import importHelper
 importHelper.install_aliases()
 
 import configparser

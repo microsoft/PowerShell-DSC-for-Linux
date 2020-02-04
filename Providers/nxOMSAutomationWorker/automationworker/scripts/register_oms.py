@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
-
-import ConfigParser
+import importHelper
+importHelper.install_aliases()
+import configparser
 import datetime
 import getopt
 import os
@@ -15,7 +16,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # since we are using the worker httpclient, some configuration values are expected
 from worker import configuration
-
 from worker import httpclientfactory
 from worker import simplejson as json
 from worker import linuxutil
@@ -257,7 +257,7 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
 
     worker_conf_path = os.path.join(state_directory, "worker.conf")
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     if os.path.isfile(worker_conf_path):
         config.read(worker_conf_path)
     conf_file = open(worker_conf_path, 'wb')
@@ -327,15 +327,15 @@ def main(argv):
                                     "gpgkeyringpath=", "diyaccountid=", "mock_powershelldsc_test=", "vmid=",
                                     "azureresourceid="])
     except getopt.GetoptError:
-        print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
+        print (__file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
                          "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
-                         "-y <diyaccountid> -i <vmid>"
+                         "-y <diyaccountid> -i <vmid>")
         sys.exit(2)
     for opt, arg in opts:
         if opt == ("-h", "--help"):
-            print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
+            print (__file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
                              "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
-                             "-y <diyaccountid> -i <vmid>"
+                             "-y <diyaccountid> -i <vmid>")
             sys.exit()
         elif opt in ("-r", "--register"):
             operation = REGISTER
@@ -377,8 +377,8 @@ def main(argv):
     if workspace_id is None or agent_id is None or oms_cert_path is None or oms_key_path is None \
             or endpoint is None or gpg_keyring_path is None or proxy_configuration_path is None \
             or working_directory is None or state_directory is None or vm_id is None:
-        print "Missing mandatory arguments."
-        print "Use -h or --help for usage."
+        print ("Missing mandatory arguments.")
+        print ("Use -h or --help for usage.")
         sys.exit(1)
     else:
         if mock_powershelldsc_test is True:

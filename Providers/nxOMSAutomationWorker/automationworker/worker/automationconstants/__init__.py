@@ -1,2 +1,2 @@
-from jobstatus import *
-from pendingactions import *
+from .jobstatus import *
+from .pendingactions import *

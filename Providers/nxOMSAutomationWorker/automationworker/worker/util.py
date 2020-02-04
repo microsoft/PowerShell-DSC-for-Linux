@@ -9,8 +9,8 @@ import random
 import sys
 import tempfile
 
-import linuxutil
-from workerexception import *
+from . import linuxutil
+from .workerexception import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
@@ -41,6 +41,13 @@ def generate_uuid():
             uuid = str(uuid.uuid4())
         elif linuxutil.is_posix_host():
             uuid = linuxutil.generate_uuid()
+        else:
+            uuid = [random.randint(10000000, 99999999),
+                random.randint(1000, 9999),
+                random.randint(1000, 9999),
+                random.randint(1000, 9999),
+                random.randint(100000000000, 999999999999)]
+            uuid = '-'.join(map(str, uuid))
     except:
         uuid = [random.randint(10000000, 99999999),
                 random.randint(1000, 9999),

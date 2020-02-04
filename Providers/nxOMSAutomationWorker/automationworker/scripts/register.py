@@ -11,7 +11,6 @@ import json
 import hmac
 import socket
 import argparse
-
 import requests
 import requests.packages.urllib3
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -73,15 +72,15 @@ class AgentService:
                            data=json.dumps(payload))
 
         if req.status_code is not 200:
-            print "Agentservice : Failed to register worker. Status [{0}], Reason [{1}]".format(req.status_code,
-                                                                                                req.reason)
+            print ("Agentservice : Failed to register worker. Status [{0}], Reason [{1}]".format(req.status_code,
+                                                                                                req.reason))
             return
 
-        print "Agentservice : Registration complete, status [" + str(req.status_code) + "]"
-        print "Machine name : " + str(socket.gethostname())
-        print "Machine id : " + str(self.machine_id)
-        print "Worker group name : " + str(self.worker_group_name)
-        print "Certificate thumbprint : " + str(cert_thumbprint)
+        print ("Agentservice : Registration complete, status [" + str(req.status_code) + "]")
+        print ("Machine name : " + str(socket.gethostname()))
+        print ("Machine id : " + str(self.machine_id))
+        print ("Worker group name : " + str(self.worker_group_name))
+        print ("Certificate thumbprint : " + str(cert_thumbprint))
 
     def deregister_worker(self):
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(self.cert_path).read())
@@ -105,11 +104,11 @@ class AgentService:
                               data=json.dumps(payload))
 
         if req.status_code is not 200:
-            print "Agent service : Failed to de-register worker. Status [{0}], Reason [{1}]".format(req.status_code,
-                                                                                                    req.reason)
+            print ("Agent service : Failed to de-register worker. Status [{0}], Reason [{1}]".format(req.status_code,
+                                                                                                    req.reason))
             return
 
-        print "Agent service : De-registration complete, status [" + str(req.status_code) + "]"
+        print ("Agent service : De-registration complete, status [" + str(req.status_code) + "]")
 
 
 def main():

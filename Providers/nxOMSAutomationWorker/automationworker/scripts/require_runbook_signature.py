@@ -1,8 +1,10 @@
+import importHelper
+importHelper.install_aliases()
+
 from optparse import OptionParser
 import os
 import sys
-import ConfigParser
-
+import configparser
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,7 +25,7 @@ def set_signature_enforcement_policy(config_file_path, node_locked):
     worker_optional_section = configuration.WORKER_OPTIONAL_CONFIG_SECTION
     enforce_runbook_signature_validation = configuration.ENFORCE_RUNBOOK_SIGNATURE_VALIDATION
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read(config_file_path)
     config.set(worker_optional_section, enforce_runbook_signature_validation, node_locked)
     config_file_handle = open(config_file_path, 'wb')
@@ -54,10 +56,10 @@ def main():
     config_file_path = get_config_file_path()
     if options.f is True:
         set_signature_enforcement_policy(config_file_path, False)
-        print "Successfully configured this host to execute both signed and unsigned runbooks."
+        print ("Successfully configured this host to execute both signed and unsigned runbooks.")
     elif options.t is True:
         set_signature_enforcement_policy(config_file_path, True)
-        print "Successfully configured this host to execute signed runbook exclusively."
+        print ("Successfully configured this host to execute signed runbook exclusively.")
 
 
 if __name__ == "__main__":

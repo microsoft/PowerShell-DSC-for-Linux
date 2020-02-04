@@ -12,15 +12,15 @@
 """
 from __future__ import print_function
 
-import importHelper
+from . import importHelper
 importHelper.install_aliases()
 
-import configparser
-import os
-import subprocess
-import sys
-import time
-import traceback
+from . import configparser
+from . import os
+from . import subprocess
+from . import sys
+from . import time
+from . import traceback
 
 # import worker module after linuxutil.daemonize() call
 

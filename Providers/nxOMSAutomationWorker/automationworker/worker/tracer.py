@@ -12,11 +12,11 @@ import threading
 
 import traceback
 
-import configuration
-import locallogger
-import util
-from httpclientfactory import HttpClientFactory
-from jrdsclient import JRDSClient
+from . import configuration
+from . import locallogger
+from . import util
+from .httpclientfactory import HttpClientFactory
+from .jrdsclient import JRDSClient
 
 jrds_client = None
 jrds_cert_path = None

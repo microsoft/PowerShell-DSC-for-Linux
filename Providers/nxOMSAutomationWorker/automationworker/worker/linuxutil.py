@@ -95,6 +95,7 @@ def is_azure_vm(dmidecode_output):
     Returns:
         bool, true if the host is an azure vm.
     """
+    #print("linux util dmidecode : "+ str(dmidecode_output))
     asset_tags = re.findall(get_azure_vm_asset_tag(), dmidecode_output)
 
     for tag in asset_tags:
@@ -124,6 +125,7 @@ def get_vm_unique_id_from_dmidecode(byteorder, dmidecode_output):
         return uuid
 
     uuid_part = uuid.split("-")
+    print(uuid_part[0])
     big_endian_uuid = "-".join([convert_to_big_endian(uuid_part[0]),
                                 convert_to_big_endian(uuid_part[1]),
                                 convert_to_big_endian(uuid_part[2]),
@@ -299,9 +301,9 @@ def get_cert_info(certificate_path):
     if p.poll() != 0:
         raise Exception("Unable to get certificate subject.")
 
-    return parse_issuer_from_openssl_output(raw_issuer), \
-           parse_subject_from_openssl_output(raw_subject), \
-           parse_thumbprint_from_openssl_output(raw_fingerprint)
+    return parse_issuer_from_openssl_output(raw_issuer.decode("utf-8")), \
+           parse_subject_from_openssl_output(raw_subject.decode("utf-8")), \
+           parse_thumbprint_from_openssl_output(raw_fingerprint.decode("utf-8"))
 
 
 def parse_thumbprint_from_openssl_output(raw_fingerprint):

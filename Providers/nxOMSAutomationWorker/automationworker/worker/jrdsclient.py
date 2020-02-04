@@ -8,9 +8,9 @@ from datetime import datetime
 import time
 
 
-import configuration
-import locallogger
-from workerexception import *
+from . import configuration
+from . import locallogger
+from .workerexception import *
 
 transient_status_codes = set([408, 429, 500, 502, 503, 504])
 

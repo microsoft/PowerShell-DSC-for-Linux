@@ -4,6 +4,9 @@
 
 """Job module. Contains a class representation of an "automation" job."""
 
+from . import importHelper
+importHelper.install_aliases
+
 import queue
 import sys
 import time
@@ -11,14 +14,14 @@ import traceback
 from datetime import datetime
 from threading import Thread
 
-import jrdsclient
-import runbook
-import runtime
-import runtimefactory
-import tracer
-from automationconstants import pendingactions, jobstatus, jobtriggersource
-from streamhandler import StreamHandler
-from workerexception import *
+from . import jrdsclient
+from . import runbook
+from . import runtime
+from . import runtimefactory
+from . import tracer
+from .automationconstants import pendingactions, jobstatus, jobtriggersource
+from .streamhandler import StreamHandler
+from .workerexception import *
 
 EXIT_SUCCESS = 0
 
