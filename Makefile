@@ -32,6 +32,7 @@ endif
 all:
 	rm -rf release/*.rpm release/*.deb
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Scripts/3
 	mkdir -p intermediate/Modules
 ifeq ($(BUILD_LOCAL),1)
 	$(MAKE) local
@@ -166,7 +167,7 @@ dsc110: lcm110 providers
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
-
+	
 	for f in LCM/scripts/3/*.py LCM/scripts/3/*.sh; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
@@ -185,7 +186,6 @@ dsc110: lcm110 providers
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/3/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/3/`basename $$f`; \
 	done
-
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 
