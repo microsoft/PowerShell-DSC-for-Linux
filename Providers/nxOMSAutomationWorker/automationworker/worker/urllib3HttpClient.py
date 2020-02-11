@@ -209,7 +209,7 @@ class Urllib3HttpClient(HttpClient):
         if data is None:
             serial_data = ""
         else:
-            serial_data = data
+            serial_data = self.json.dumps(data)
             headers.update({self.CONTENT_TYPE_HEADER_KEY: self.APP_JSON_HEADER_VALUE})
 
         try:
