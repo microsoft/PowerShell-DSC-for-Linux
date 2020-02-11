@@ -88,7 +88,7 @@ def generate_hmac(str_to_sign, secret):
     """
     message = str_to_sign.encode('utf-8')
     secret = secret.encode('utf-8')
-    cmd = ['echo -n "' + str(message) + '" | openssl dgst -sha256 -binary -hmac "' + str(secret) + '"']
+    cmd = ['echo -n "' + str(message.decode("utf-8")) + '" | openssl dgst -sha256 -binary -hmac "' + str(secret.decode("utf-8")) + '"']
     process, signed_message, error = linuxutil.popen_communicate(cmd, shell=True)
 
     if process.returncode != 0:
@@ -127,7 +127,7 @@ def create_worker_configuration_file(jrds_uri, automation_account_id, worker_gro
     config = configparser.ConfigParser()
     if os.path.isfile(worker_conf_path):
         config.read(worker_conf_path)
-    conf_file = open(worker_conf_path, 'wb')
+    conf_file = open(worker_conf_path, 'w')
 
     worker_required_section = configuration.WORKER_REQUIRED_CONFIG_SECTION
     if not config.has_section(worker_required_section):
@@ -288,7 +288,7 @@ def register(options):
     # agent service registration request
     http_client_factory = httpclientfactory.HttpClientFactory(certificate_path, key_path, options.test)
     http_client = http_client_factory.create_http_client(sys.version_info)
-    url = registration_endpoint + "/HybridV2(MachineId='" + machine_id.decode("utf-8") + "')"
+    url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
     response = http_client.put(url, headers=headers, data=payload)
     print("url requested : " + str(url))
     print("payload sent : " + str(json.dumps(payload)))
@@ -354,10 +354,10 @@ def deregister(options):
     # the signature generation is based on agent service contract
     payload_hash = sha256_digest(payload)
     b64encoded_payload_hash = base64.b64encode(payload_hash)
-    signature = generate_hmac(b64encoded_payload_hash + "\n" + date, automation_account_key)
+    signature = generate_hmac(b64encoded_payload_hash.decode("utf-8") + '\n' + date, automation_account_key)
     b64encoded_signature = base64.b64encode(signature)
 
-    headers = {'Authorization': 'Shared ' + b64encoded_signature,
+    headers = {'Authorization': 'Shared ' + b64encoded_signature.decode("utf-8"),
                'ProtocolVersion': "2.0",
                'x-ms-date': date,
                "Content-Type": "application/json"}

@@ -136,9 +136,9 @@ def get_vm_unique_id_from_dmidecode(byteorder, dmidecode_output):
 
 def convert_to_big_endian(little_endian_value):
     """Converts the little endian representation of the value into a big endian representation of the value"""
-    hex = little_endian_value.decode('hex')
-    reordered_hex = hex[::-1]
-    return reordered_hex.encode('hex')
+    codecs_decoded =  codecs.decode(little_endian_value, "hex")
+    codecs_reordered = codecs_decoded[::-1]
+    return codecs.encode(codecs_reordered, "hex").decode("utf-8")
 
 
 @posix_only
@@ -149,6 +149,7 @@ def generate_uuid():
     """
     proc = subprocess.Popen(["cat", "/proc/sys/kernel/random/uuid"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     uuid, error = proc.communicate()
+    uuid = uuid.decode("utf-8")
     if proc.poll() != 0:
         raise Exception("Unable to get uuid from /proc/sys/kernel/random/uuid : " + str(error))
     return uuid.strip()
@@ -203,6 +204,7 @@ def get_current_user_processes():
     current_username = get_current_username()
     proc = subprocess.Popen(["ps", "-fjH", "-u", current_username], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = proc.communicate()
+    output = output.decode("utf-8")
     if proc.poll() != 0:
         raise Exception("Unable to get processes : " + str(error))
     formatted_entries = format_process_entries_to_list(output.split("\n"))
@@ -218,6 +220,7 @@ def get_lsb_release():
     """
     proc = subprocess.Popen(["lsb_release", "-i", "-d", "-r", "-c"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = proc.communicate()
+    output = output.decode("utf-8")
     if proc.poll() != 0:
         raise Exception("Unable to get lsb_release info. Error : " + str(error))
 

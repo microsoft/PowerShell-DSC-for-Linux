@@ -27,8 +27,8 @@ def set_signature_enforcement_policy(config_file_path, node_locked):
 
     config = configparser.ConfigParser()
     config.read(config_file_path)
-    config.set(worker_optional_section, enforce_runbook_signature_validation, node_locked)
-    config_file_handle = open(config_file_path, 'wb')
+    config.set(worker_optional_section, enforce_runbook_signature_validation, str(node_locked))
+    config_file_handle = open(config_file_path, 'w')
     config.write(config_file_handle)
     config_file_handle.close()
 

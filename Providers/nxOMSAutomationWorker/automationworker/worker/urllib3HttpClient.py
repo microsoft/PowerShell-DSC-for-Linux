@@ -126,8 +126,7 @@ class Urllib3HttpClient(HttpClient):
             proxy_handler = urllib.request.ProxyHandler({'http': self.proxy_configuration,
                                                   'https': self.proxy_configuration})
             opener.add_handler(proxy_handler)
-        encoded_data = urllib.parse.urlencode(data).encode("utf-8")
-        req = urllib.request.Request(url, data=encoded_data, headers=headers)
+        req = urllib.request.Request(url, data=data.encode("utf-8"), headers=headers)
         req.get_method = lambda: method
         response = opener.open(req, timeout=30)
         opener.close()
