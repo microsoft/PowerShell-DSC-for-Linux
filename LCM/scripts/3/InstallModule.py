@@ -31,14 +31,14 @@ def usage():
     sys.exit(1)
 
 def exitWithError(message, errorCode = 1):
-    if (isinstance(message, byte)):
+    if (isinstance(message, bytes)):
         message = message.decode()
     errorMessage = "ERROR from InstallModule.py: " + message
     print(errorMessage)
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
-    if (isinstance(message, byte)):
+    if (isinstance(message, bytes)):
         message = message.decode()
     verboseMessage = "VERBOSE from InstallModule.py: " + message
     print(verboseMessage)
