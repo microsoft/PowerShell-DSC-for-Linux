@@ -4,7 +4,7 @@
 
 """Local Logger module."""
 from __future__ import print_function
-from . import configuration
+import configuration
 
 import sys
 import os

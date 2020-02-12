@@ -10,11 +10,11 @@ import sys
 import time
 import os
 
-from . import serializerfactory
-from . import subprocessfactory
-from . import tracer
-from .runbook import *
-from .workerexception import *
+import serializerfactory
+import subprocessfactory
+import tracer
+from runbook import *
+from workerexception import *
 
 json = serializerfactory.get_serializer(sys.version_info)
 

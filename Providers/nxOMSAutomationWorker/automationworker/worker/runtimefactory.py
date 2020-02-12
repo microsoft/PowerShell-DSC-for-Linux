@@ -4,8 +4,8 @@
 
 """Runtime factory module."""
 
-from .runtime import *
-from .workerexception import *
+from runtime import *
+from workerexception import *
 
 # This has to map with JRDS : RunbookDefinitionKind enum
 PowerShell = 5

@@ -247,21 +247,16 @@ def register(options):
     is_azure_vm = False
     try:
         dmidecode = invoke_dmidecode()
-        print("checkpoint -1")
         is_azure_vm = linuxutil.is_azure_vm(dmidecode)
         if is_azure_vm:
-            print("checkpoint - 2")
             asset_tag = linuxutil.get_azure_vm_asset_tag()
         else:
             asset_tag = False
-
-        print("checkpoint - 3")
         vm_id = linuxutil.get_vm_unique_id_from_dmidecode(sys.byteorder, dmidecode)
     except Exception as e:
         print (str(e))
         pass
-
-    print("Checkpoint")
+    
     # generate payload for registration request
     date = datetime.datetime.utcnow().isoformat() + "0-00:00"
     payload = {'RunbookWorkerGroup': hybrid_worker_group_name,
@@ -290,8 +285,6 @@ def register(options):
     http_client = http_client_factory.create_http_client(sys.version_info)
     url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
     response = http_client.put(url, headers=headers, data=payload)
-    print("url requested : " + str(url))
-    print("payload sent : " + str(json.dumps(payload)))
     if response.status_code != 200:
         raise Exception("Failed to register worker. [response_status=" + str(response.status_code) + "]")
 

@@ -4,7 +4,6 @@
 
 """Curl CLI wrapper."""
 
-from __future__ import absolute_import
 import base64
 import os.path
 import random
@@ -12,9 +11,9 @@ import subprocess
 import time
 import traceback
 
-from . import iohelper
-from . import subprocessfactory
-from .httpclient import *
+import iohelper
+import subprocessfactory
+from httpclient import *
 
 json = serializerfactory.get_serializer(sys.version_info)
 

@@ -6,12 +6,12 @@
 
 import os
 
-from . import configuration
-from . import gpg
-from . import iohelper
-from . import jrdsclient
-from . import linuxutil
-from .workerexception import *
+import configuration
+import gpg
+import iohelper
+import jrdsclient
+import linuxutil
+from workerexception import *
 
 definition_kind_int_to_str = {0: "Unknown",
                               1: "Script",

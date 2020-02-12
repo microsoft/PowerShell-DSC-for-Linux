@@ -7,10 +7,10 @@
 import os
 import subprocess
 
-from . import configuration
-from . import subprocessfactory
-from . import tracer
-from .workerexception import *
+import configuration
+import subprocessfactory
+import tracer
+from workerexception import *
 
 GPG = "gpg"
 GPG_BATCH_OPTION = "--batch"
