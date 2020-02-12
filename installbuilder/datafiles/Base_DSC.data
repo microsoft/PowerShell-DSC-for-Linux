@@ -42,24 +42,24 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3/nxDSCLog.py; intermediate/Scripts/nxDSCLog.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3/zipfile2.6.py; intermediate/Scripts/zipfile2.6.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/OmsConfigHostHelpers.py; intermediate/Scripts/OmsConfigHostHelpers.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/StartDscConfiguration.py; intermediate/Scripts/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/TestDscConfiguration.py; intermediate/Scripts/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/GetDscConfiguration.py; intermediate/Scripts/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/PerformInventory.py; intermediate/Scripts/PerformInventory.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/SetDscLocalConfigurationManager.py; intermediate/Scripts/SetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/GetDscLocalConfigurationManager.py; intermediate/Scripts/GetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/PerformRequiredConfigurationChecks.py; intermediate/Scripts/PerformRequiredConfigurationChecks.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/OperationStatusUtility.py; intermediate/Scripts/OperationStatusUtility.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RestoreConfiguration.py; intermediate/Scripts/RestoreConfiguration.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/InstallModule.py; intermediate/Scripts/InstallModule.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RemoveModule.py; intermediate/Scripts/RemoveModule.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RegenerateInitFiles.py; intermediate/Scripts/RegenerateInitFiles.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RegisterHelper.sh; intermediate/Scripts/RegisterHelper.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/Register.py; intermediate/Scripts/Register.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/StatusReport.sh; intermediate/Scripts/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/OmsConfigHostHelpers.py; intermediate/Scripts/3/OmsConfigHostHelpers.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/StartDscConfiguration.py; intermediate/Scripts/3/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/TestDscConfiguration.py; intermediate/Scripts/3/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/GetDscConfiguration.py; intermediate/Scripts/3/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/PerformInventory.py; intermediate/Scripts/3/PerformInventory.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/SetDscLocalConfigurationManager.py; intermediate/Scripts/3/SetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/GetDscLocalConfigurationManager.py; intermediate/Scripts/3/GetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/PerformRequiredConfigurationChecks.py; intermediate/Scripts/3/PerformRequiredConfigurationChecks.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/OperationStatusUtility.py; intermediate/Scripts/3/OperationStatusUtility.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RestoreConfiguration.py; intermediate/Scripts/3/RestoreConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/InstallModule.py; intermediate/Scripts/3/InstallModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RemoveModule.py; intermediate/Scripts/3/RemoveModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RegenerateInitFiles.py; intermediate/Scripts/3/RegenerateInitFiles.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RegisterHelper.sh; intermediate/Scripts/3/RegisterHelper.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/Register.py; intermediate/Scripts/3/Register.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/StatusReport.sh; intermediate/Scripts/3/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/ImportGPGKey.sh; intermediate/Scripts/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3/ImportGPGKey.sh; intermediate/Scripts/3/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
 
 #if BUILD_OMS == 1
 
@@ -209,7 +209,7 @@ fi
 %Preinstall_200
 
 echo "Current changes are being reflected."
-
+# This needs to be repeated for the new section
 if  [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python3"
   echo "sanity check"
@@ -403,12 +403,14 @@ fi
 # Check if DIY DSC install module script is present on the machine
 if [ -f /opt/microsoft/dsc/Scripts/InstallModule.py ]; then
   # Check if nx module package is available in DIY DSC
-  if [ "$pythonVersion" = "python3" ]; then
-    echo "Running python3"
-    /opt/microsoft/dsc/Scripts/3/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
-  else
-    echo "Running python2 in Check if DIY DSC install... python version is ", $pythonVersion
-    /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
+  if [ -f /opt/microsoft/dsc/module_packages/nx_1.0.zip ]; then
+    if [ "$pythonVersion" = "python3" ]; then
+      echo "Running python3"
+      /opt/microsoft/dsc/Scripts/3/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
+    else
+      echo "Running python2 in Check if DIY DSC install... python version is ", $pythonVersion
+      /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
+    fi
   fi
 fi
 
@@ -532,15 +534,15 @@ echo "Cleaned up existing dsc_hosts before uninstall..."
 # if this is a package removal, not an upgrade, remove the modules
 if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
   # Remove all DSC specific data
-  if [ "$pythonVersion = "python3" ]; then
-    echo "Running python3"
+  if [ "$pythonVersion" = "python3" ]; then
+     echo "Running python3"
      for module in `ls /opt/microsoft/${{SHORT_NAME}}/modules`; do
-         /opt/microsoft/${{SHORT_NAME}}/Scripts/3/RemoveModule.py $module
+       /opt/microsoft/${{SHORT_NAME}}/Scripts/3/RemoveModule.py $module
      done
    else
      echo "Running python2 in remove all DSC specific data python version is ", $pythonVersion
      for module in `ls /opt/microsoft/${{SHORT_NAME}}/modules`; do
-         /opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py $module
+       /opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py $module
      done
   fi
 fi
