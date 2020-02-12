@@ -247,7 +247,7 @@ else:
         exit_code = 1
 
     if (stderr != ''):
-        exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr.decode()), exit_code)
+        exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr), exit_code)
     elif ((sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') != '')):
         exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr.decode(encoding = 'UTF-8')), exit_code)
     else:
