@@ -9,8 +9,8 @@ import random
 import sys
 import tempfile
 
-from . import linuxutil
-from .workerexception import *
+import linuxutil
+from workerexception import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1

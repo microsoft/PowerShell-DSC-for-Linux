@@ -90,8 +90,10 @@ def Set_Marshall(ResourceSettings):
             os.chmod(WORKER_STATE_DIR, PERMISSION_LEVEL_0770)
 
         # set cert permissions
-        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--initialize"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python3", OMS_UTIL_FILE_PATH, "--initialize"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
+        stdout = stdout.decode('utf-8')
+        stderr = stderr.decode('utf-8')
         if proc.returncode != 0:
             raise Exception("call to omsutil.py --initialize failed. %s, %s" % (stdout, stderr))
 
@@ -120,7 +122,7 @@ def Set_Marshall(ResourceSettings):
             if not os.path.isfile(PROXY_CONF_PATH_NEW) and os.path.isfile(PROXY_CONF_PATH_LEGACY):
                 proxy_conf_path = PROXY_CONF_PATH_LEGACY
 
-            args = ["python", REGISTRATION_FILE_PATH, "--register", "-w", settings.workspace_id, "-a", agent_id,
+            args = ["python3", REGISTRATION_FILE_PATH, "--register", "-w", settings.workspace_id, "-a", agent_id,
                     "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
                     WORKER_STATE_DIR, "-e", settings.azure_dns_agent_svc_zone, "-p", proxy_conf_path, "-g",
                     KEYRING_PATH]
@@ -204,8 +206,8 @@ def Test_Marshall(ResourceSettings):
             return [0]
 
         if not nxautomation_user_exists():
-            log(ERROR, "Test_Marshall skipped: please update omsagent to the latest version")
-            return [0]
+            log(INFO, "Test_Marshall skipped: please update omsagent to the latest version")
+            return [-1]
 
         if get_stray_worker_and_manager_wsids(get_nxautomation_ps_output(), settings.workspace_id):
             log(INFO, "Test_Marshall returned [-1]: process started by other workspaces detected")
@@ -358,6 +360,7 @@ def get_optional_metadata():
         proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--dmidecode"],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         dmidecode, error = proc.communicate()
+        dmidecode = dmidecode.decode("utf-8")
         if proc.returncode != 0 or not dmidecode:
             raise Exception("Unable to invoke omsutil.py --dmidecode: %s" % error)
         is_azure_vm = linuxutil.is_azure_vm(dmidecode)
@@ -607,7 +610,7 @@ def config_file_to_kv_pair(filename):
 def start_worker_manager_process(workspace_id):
     """
     Start the worker_manager_process
-    :param workspace_id:
+    :param workspace_id: 
     :return: the pid of the worker manager process
     """
     proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", WORKER_MANAGER_START_PATH, OMS_CONF_FILE_PATH,

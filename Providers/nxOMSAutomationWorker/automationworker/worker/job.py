@@ -4,8 +4,8 @@
 
 """Job module. Contains a class representation of an "automation" job."""
 
-from . import importHelper
-importHelper.install_aliases
+import importHelper
+importHelper.install_aliases()
 
 import queue
 import sys
