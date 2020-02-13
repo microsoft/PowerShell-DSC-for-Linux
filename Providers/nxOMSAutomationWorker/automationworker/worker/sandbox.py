@@ -4,8 +4,8 @@
 
 """Sandbox module."""
 
-from . import importHelper
-importHelper.install_aliases
+import importHelper
+importHelper.install_aliases()
 
 import os
 import sys
