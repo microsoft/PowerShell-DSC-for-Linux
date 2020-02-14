@@ -40,9 +40,7 @@ class HttpsClientHandler(urllib.request.HTTPSHandler):
         self.key_path = key_path
 
         ssl_context = None
-        if insecure and SSL_MODULE_NAME in sys.modules and (sys.version_info[PY_MAJOR_VERSION] == 2 and
-                                                                    sys.version_info[PY_MINOR_VERSION] >= 7 and
-                                                                    sys.version_info[PY_MICRO_VERSION] >= 9):
+        if insecure and SSL_MODULE_NAME in sys.modules and (sys.version_info[PY_MAJOR_VERSION] == 3):
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE

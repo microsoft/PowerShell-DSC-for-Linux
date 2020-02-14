@@ -207,7 +207,7 @@ def Test_Marshall(ResourceSettings):
 
         if not nxautomation_user_exists():
             log(INFO, "Test_Marshall skipped: please update omsagent to the latest version")
-            return [-1]
+            return [0]
 
         if get_stray_worker_and_manager_wsids(get_nxautomation_ps_output(), settings.workspace_id):
             log(INFO, "Test_Marshall returned [-1]: process started by other workspaces detected")
@@ -239,6 +239,9 @@ def Test_Marshall(ResourceSettings):
                 # worker.conf file is present, check if the certificates are most recent
                 log(INFO, "Test_Marshall returned [-1]: certificate mismatch for auto registered worker")
                 return [-1]
+        if not is_any_worker_process_running(get_nxautomation_ps_output(), settings.workspace_id):
+            log(INFO, "Test_marshall returned [-1]: as no worker process is running")
+            return [-1]
 
     except Exception:
         log(INFO, "Test_Marshall returned [-1]: %s" % traceback.format_exc())
@@ -632,6 +635,13 @@ def is_any_1_4_process_running(processes, workspace_id):
         if ps:
             version = ps.split(" ")[-1]
             if WORKER_MANAGER_START_PATH in ps and workspace_id in ps and version == "1.4":
+                return True
+    return False
+
+def is_any_worker_process_running(processes, workspace_id):
+    for ps in processes:
+        if ps:
+            if WORKER_MANAGER_START_PATH in ps and workspace_id in ps:
                 return True
     return False
 
