@@ -94,7 +94,7 @@ class Runtime(object):
         env.update({"AUTOMATION_JOB_ID": str(self.job_data.job_id),
                     "AUTOMATION_ACTIVITY_ID": str(tracer.u_activity_id),
                     "PYTHONPATH": str(configuration.get_source_directory_path()),
-                    "HOME": str(os.getcwdu())})  # windows env have to be str (not unicode)
+                    "HOME": str(os.getcwd())})  # windows env have to be str (not unicode)
         self.runbook_subprocess = subprocessfactory.create_subprocess(cmd=cmd,
                                                                       env=env,
                                                                       stdout=subprocess.PIPE,
@@ -207,6 +207,6 @@ def get_default_python_interpreter_major_version():
     p = subprocessfactory.create_subprocess(cmd=cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     default_interpreter_version, error = p.communicate()
     if p.returncode == 0:
-        return int(default_interpreter_version.strip())
+        return int(default_interpreter_version.decode("utf-8").strip())
     else:
         return None

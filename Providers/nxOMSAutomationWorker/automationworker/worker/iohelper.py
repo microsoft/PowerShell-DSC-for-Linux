@@ -9,7 +9,7 @@ import os
 os.umask(0o77)
 
 
-def write_to_file(file_path, data, mode="wb"):
+def write_to_file(file_path, data, mode="w"):
     """Writes the data to the specified file_path. If the path doesn't exist, it will be created.
 
     Args:

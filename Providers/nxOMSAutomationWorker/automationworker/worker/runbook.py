@@ -52,7 +52,7 @@ class Runbook(object):
         if linuxutil.is_posix_host() is True:
             # replace dos end of line to unix end of line
             runbook_definition = runbook_definition.replace("\r\n", "\n")
-        iohelper.write_to_file(self.runbook_file_path, data=runbook_definition, mode="w+b")
+        iohelper.write_to_file(self.runbook_file_path, data=runbook_definition, mode="w")
 
     def validate_signature(self):
         """Validates that the runbook signature is valid.

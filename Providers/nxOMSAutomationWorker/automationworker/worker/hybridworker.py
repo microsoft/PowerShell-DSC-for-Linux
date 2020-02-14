@@ -240,7 +240,7 @@ class Worker(object):
     @background_thread
     def monitor_sandbox_process_outputs(self, sandbox_id, process):
         while process.poll() is None:
-            output = process.stdout.readline().replace("\n", "")
+            output = process.stdout.readline().decode("utf-8").replace("\n", "")
             if output == '':
                 continue
             if output != '':
@@ -249,7 +249,7 @@ class Worker(object):
         if process.poll() != 0:
             full_error_output = ""
             while True:
-                error_output = process.stderr.readline()
+                error_output = process.stderr.readline().decode("utf-8")
                 if error_output is None or error_output == '':
                     break
                 full_error_output += error_output
