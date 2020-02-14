@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #============================================================================
 # Copyright (C) Microsoft Corporation, All rights reserved.
 #============================================================================
@@ -111,10 +111,10 @@ def init_vars(Plugins, WorkspaceID):
 
     global MULTI_HOMED
     global CONF_PATH
-    mh_conf_dir = os.path.join(ETC_OMSAGENT_DIR, WorkspaceID, CONF_PATH_SUFFIX)
+    mh_conf_dir = os.path.join(ETC_OMSAGENT_DIR, WorkspaceID.decode(), CONF_PATH_SUFFIX)
     MULTI_HOMED = os.path.isdir(mh_conf_dir)
     if MULTI_HOMED and WorkspaceID: # only log this if WorkspaceID is not None or empty
-        LG().Log('INFO', 'OMSAgent is multi-homed and resource is updating workspace ' + WorkspaceID)
+        LG().Log('INFO', 'OMSAgent is multi-homed and resource is updating workspace ' + WorkspaceID.decode())
         CONF_PATH = mh_conf_dir
 
 

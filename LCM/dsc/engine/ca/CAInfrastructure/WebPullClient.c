@@ -2066,7 +2066,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             return r;
         }
 
-        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
+        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/3/InstallModule.py", zipPath, verifyFlag);
         DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
         DSC_LOG_INFO("Executed '%T', returned %d\n", stringBuffer, retval);
@@ -2080,7 +2080,8 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             else
             {
                 // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
-                Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/RemoveModule.py", current->moduleName);
+		// TODO: use bash script
+                Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/3/RemoveModule.py", current->moduleName);
                 retval = system(stringBuffer); 
                 DSC_LOG_INFO("Executed '%T', returned %d\n", stringBuffer, retval);
                 if ( retval == 0 || (retval == -1 && errno == ECHILD) )
