@@ -650,7 +650,7 @@ module NPMDConfig
                         _rule["AppThresholdLatency"] = _test["AppThreshold"].nil? ? "-3.0" : (_test["AppThreshold"].has_key?("Latency") ? _test["AppThreshold"]["Latency"] : "-2.0")
                         _rule["NetworkThresholdLoss"] = _test["NetworkThreshold"].nil? ? "-3" : (_test["NetworkThreshold"].has_key?("Loss") ? _test["NetworkThreshold"]["Loss"] : "-2")
                         _rule["NetworkThresholdLatency"] = _test["NetworkThreshold"].nil? ? "-3.0" : (_test["NetworkThreshold"].has_key?("Latency") ? _test["NetworkThreshold"]["Latency"] : "-2.0")
-                        _rule["ValidStatusCodeRanges"] = _test.has_key?["ValidStatusCodeRanges"] ? _test["ValidStatusCodeRanges"] : nil
+                        _rule["ValidStatusCodeRanges"] = _test.has_key?("ValidStatusCodeRanges") ? _test["ValidStatusCodeRanges"] : String.new
 
                         _connectionMonitorId = _test.has_key?("ConnectionMonitorId") ? _test["ConnectionMonitorId"].to_s : String.new
 
