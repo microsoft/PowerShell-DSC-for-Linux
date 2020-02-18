@@ -36,6 +36,11 @@ If you encounter challenges with either scenario
 and would like to evaluate if the latest code will resolve your issue,
 the best option is to download the latest release,
 then distribute it using custom tools (such as Azure Custom Script Extension).
+
+Please note that
+[per the documentation for DSC Linux Extension](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/dsc-linux),
+the extensions for DSC Linux and Monitoring cannot be used
+together on the same machine.
  
 The future roadmap for this solution is to move to
 [Azure Policy Guest Configuration](https://aka.ms/gcpol)
