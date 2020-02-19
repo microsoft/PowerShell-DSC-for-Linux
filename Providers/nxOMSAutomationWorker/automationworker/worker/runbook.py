@@ -48,7 +48,7 @@ class Runbook(object):
         """Writes the runbook's definition to disk."""
         file_name = self.runbook_data.name + self.runbook_data.runbook_version_id + self.file_extension
         self.runbook_file_path = os.path.join(configuration.get_working_directory_path(), file_name)
-        runbook_definition = str(self.runbook_data.definition.encode("utf-8"))
+        runbook_definition = str(self.runbook_data.definition)
         if linuxutil.is_posix_host() is True:
             # replace dos end of line to unix end of line
             runbook_definition = runbook_definition.replace("\r\n", "\n")
