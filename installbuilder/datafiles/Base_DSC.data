@@ -37,6 +37,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/StatusReport.sh; intermediate/Scripts/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh; intermediate/Scripts/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/calcPythonPath.sh; intermediate/Scripts/calcPythonPath.sh; 755; ${{RUN_AS_USER}}; root
 
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3/client.py; intermediate/Scripts/client.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
@@ -260,8 +261,6 @@ mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration
 mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration/schema
 mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration/registration
 chmod 700 $CONFIG_SYSCONFDIR/${{SHORT_NAME}}
-
-echo "Check 2: python version is" $pythonVersion
 
 #if BUILD_OMS == 1
 
@@ -531,6 +530,15 @@ rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
 echo "Cleaned up existing dsc_hosts before uninstall..."
 
 %Preuninstall_999
+# This needs to be repeated for the new section
+if  [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python3"
+  echo "sanity check"
+  pythonVersion="python3"
+else
+  echo "Using python"
+  pythonVersion="python"
+fi
 # if this is a package removal, not an upgrade, remove the modules
 if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
   # Remove all DSC specific data
