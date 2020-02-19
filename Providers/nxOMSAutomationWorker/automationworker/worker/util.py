@@ -2,7 +2,6 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-from __future__ import print_function
 import errno
 import os
 import random
