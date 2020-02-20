@@ -326,15 +326,14 @@ def main():
 if __name__ == "__main__":
     # daemonize before loading the logging library to prevent deadlock in 2.4 (see: http://bugs.python.org/issue6721)
     import linuxutil
-
     linuxutil.daemonize()
 
+    import util
     try:
         import configuration
         import iohelper
         import subprocessfactory
         import tracer
-        import util
         from httpclientfactory import HttpClientFactory
         from jrdsclient import JRDSClient
         from workerexception import *

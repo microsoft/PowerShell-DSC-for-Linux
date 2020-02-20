@@ -70,7 +70,7 @@ class WorkerManager(object):
         """
         worker_and_sandbox_processes = []
         for process in process_list:
-            if "python" in process.cmd and ("hybridworker.py" in process.cmd or "sandbox.py" in process.cmd) \
+            if ("python" in process.cmd or "python3" in process.cmd) and ("hybridworker.py" in process.cmd or "sandbox.py" in process.cmd) \
                     and "MSFT_nxOMSAutomationWorkerResource" in process.cmd:
                 worker_and_sandbox_processes.append(process)
         return worker_and_sandbox_processes
@@ -93,7 +93,7 @@ class WorkerManager(object):
         """
         worker_processes = []
         for process in process_list:
-            if "python" in process.cmd and "hybridworker.py" in process.cmd \
+            if ("python" in process.cmd or "python3" in process.cmd) and "hybridworker.py" in process.cmd \
                     and "MSFT_nxOMSAutomationWorkerResource" in process.cmd:
                 worker_processes.append(process)
         return worker_processes
@@ -251,7 +251,7 @@ class WorkerManager(object):
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, error = proc.communicate()
             if proc.returncode != 0:
-                raise Exception("Initialization failed (omsutil.py --initialize). Error : " + str(error))
+                raise Exception("Initialization failed (omsutil.py --initialize). Error : " + str(error.decode("utf-8")))
 
         for configuration_path in configuration_path_to_be_started:
             start_worker_for_path = True
@@ -368,12 +368,10 @@ def main():
 if __name__ == "__main__":
     # daemonize before loading the logging library to prevent deadlock in 2.4 (see: http://bugs.python.org/issue6721)
     import linuxutil
-
     linuxutil.daemonize()
 
+    import util
     try:
-        import util
-
         main()
     except:
         exit_on_error(traceback.format_exc())
