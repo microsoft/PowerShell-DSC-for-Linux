@@ -16,10 +16,10 @@ nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 try:
     import hashlib
-    md5const = hashlib.md5
-except ImportError:
-    import md5
-    md5const = md5.md5
+    sha256const = hashlib.sha256
+except ImportError: # Only sha-1 is available for python2.4.
+    import sha
+    sha256const = sha.sha
 
 inventoryMof_path = '/etc/opt/microsoft/omsagent/conf/omsagent.d/'
 outputxml_path = '/var/opt/microsoft/omsagent/tmp/'
@@ -225,10 +225,10 @@ def GenerateInventoyMOF(FeatureName, Instances, RunIntervalInSeconds, Tag, Forma
 
 
 def GetFileChecksum(FilePath):
-    checksum = md5const(open(FilePath, 'rb').read()).hexdigest()
+    checksum = sha256const(open(FilePath, 'rb').read()).hexdigest()
     return checksum
 
 def GetStringChecksum(inputString):
-    checksum = md5const(inputString.encode('utf-8')).hexdigest()
+    checksum = sha256const(inputString.encode('utf-8')).hexdigest()
     return checksum
 
