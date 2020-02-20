@@ -47,7 +47,7 @@ def getPlatformArchitectureFolderName():
     return platformArchitectureFolderName
 
 def regenerateDscPythonScriptInitFiles():
-    regenerateInitFilesScriptPath = join(helperlib.DSC_SCRIPT_PATH, 'RegenerateInitFiles.py')
+    regenerateInitFilesScriptPath = join(helperlib.DSC_SCRIPT_PATH, '3/RegenerateInitFiles.py')
     regenerateInitFilesResult = subprocess.call(regenerateInitFilesScriptPath)
     if regenerateInitFilesResult != 0:
         exitWithError("Failed to regenerate the DSC __init__.py files with the result code " + regenerateInitFilesResult)
