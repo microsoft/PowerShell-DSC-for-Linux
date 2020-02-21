@@ -221,9 +221,9 @@ def GenerateInventoyMOF(FeatureName, Instances, RunIntervalInSeconds, Tag, Forma
 
 
 def GetFileChecksum(FilePath):
-    checksum = hashlib.md5(open(FilePath, 'rb').read()).hexdigest()
+    checksum = hashlib.sha256(open(FilePath, 'rb').read()).hexdigest()
     return checksum
 
 def GetStringChecksum(inputString):
-    checksum = hashlib.md5(inputString.encode('utf-8')).hexdigest()
+    checksum = hashlib.sha256(inputString.encode('utf-8')).hexdigest()
     return checksum

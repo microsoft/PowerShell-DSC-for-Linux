@@ -163,7 +163,7 @@ def Set(WorkspaceID, Plugins):
         # Case 1: The IP has both plugin and conf directories
         # Case 2: The IP has only plugin(s)
         # Case 3: The IP has only conf
-        # Case 4: The IP does not have either plugin or conf directory - this is invalid!
+        # Case 4: The IP has neither plugin nor conf directory, which is invalid if the MOF has "ensure: present"
         if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # copy all files under conf and plugin
@@ -199,9 +199,17 @@ def Set(WorkspaceID, Plugins):
                 LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
         else:
-            # log error - neither conf nor plugin directory was found in IP to set
-            LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
-            return [-1]
+            if plugin['Ensure'] == 'Present':
+                # log error - neither conf nor plugin directory was found in IP to set
+                LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
+                return [-1]
+            elif plugin['Ensure'] == 'Absent':
+                # log warning - this scenario is unexpected but should not cause plugin set to fail 
+                LG().LOG('WARN', plugin['PluginName'] + ' contains neither plugin nor conf, but was not to be installed anyways')
+            else:
+                # log error Ensure value not expected
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
+                return [-1]
 
         # Some Plugins (e.g. Security Baseline) have arch specific files
         if os.path.isdir(plugin_arch_dir):
@@ -248,7 +256,7 @@ def Test(Plugins):
         # Case 1: The IP has both plugin and conf directories
         # Case 2: The IP has only plugin(s)
         # Case 3: The IP has only conf
-        # Case 4: The IP does not have either plugin or conf directory - this is invalid!
+        # Case 4: The IP has neither plugin nor conf directory, which is invalid if the MOF has "ensure: present"
         if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
@@ -289,9 +297,17 @@ def Test(Plugins):
                 LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
         else:
-            # log error - neither conf nor plugin directory was found in IP
-            LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
-            return [-1]
+            if plugin['Ensure'] == 'Present':
+                # log error - neither conf nor plugin directory was found in IP to set
+                LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
+                return [-1]
+            elif plugin['Ensure'] == 'Absent':
+                # log warning - this scenario is unexpected but should not cause plugin test to fail 
+                LG().LOG('WARN', plugin['PluginName'] + ' contains neither plugin nor conf, but was not to be installed anyways')
+            else:
+                # log error Ensure value not expected
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
+                return [-1]
 
         # Some Plugins (e.g. Security Baseline) have arch specific files
         if os.path.isdir(plugin_arch_dir):
