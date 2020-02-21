@@ -23,7 +23,7 @@ def add_all_packages_under_worker_to_sys_path():
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-add_all_packages_under_automationworker_to_sys_path()
+add_all_packages_under_worker_to_sys_path()
 
 import configuration
 import tracer
