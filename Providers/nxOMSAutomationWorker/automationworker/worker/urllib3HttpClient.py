@@ -14,8 +14,8 @@ import time
 import traceback
 import urllib.request, urllib.error, urllib.parse
 
-from .httpclient import *
-from .workerexception import *
+from httpclient import *
+from workerexception import *
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
@@ -124,6 +124,8 @@ class Urllib3HttpClient(HttpClient):
             proxy_handler = urllib.request.ProxyHandler({'http': self.proxy_configuration,
                                                   'https': self.proxy_configuration})
             opener.add_handler(proxy_handler)
+        if data is not None:
+            data = data.encode("utf-8")
         req = urllib.request.Request(url, data=data.encode("utf-8"), headers=headers)
         req.get_method = lambda: method
         response = opener.open(req, timeout=30)

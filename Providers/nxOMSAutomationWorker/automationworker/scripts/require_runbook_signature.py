@@ -6,8 +6,17 @@ import os
 import sys
 import configparser
 
+def add_all_packages_under_automationworker_to_sys_path():
+    automationworker_path = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker"
+    list_of_directories = next(os.walk(automationworker_path))[1]
+    for dire in list_of_directories:
+        imm_direc = str(automationworker_path + "/" + dire)
+        print(imm_direc)
+        sys.path.append(imm_direc)
+
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+add_all_packages_under_automationworker_to_sys_path()
 
 # since we are using the worker httpclient, some configuration values are expected
 from worker import configuration

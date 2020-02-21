@@ -214,6 +214,14 @@ class WorkerManager(object):
             worker_processes, current_resource_version=current_resource_version)
         return set(worker_processes).difference(worker_process_running_up_to_date_version)
 
+    def get_python_to_be_used(self):
+        import sys
+        python_version = int(sys.version[0])
+        python_to_be_used = "python"
+        if python_version == 3:
+            python_to_be_used = "python3"
+        return python_to_be_used
+
     @loop
     def routine(self):
         """Main OMS worker manager routine.
@@ -245,9 +253,10 @@ class WorkerManager(object):
             valid_configuration_paths=valid_configuration_paths)
 
         print("worker to be started " + str(len(configuration_path_to_be_started)))
-
+        
+        python_to_be_used = self.get_python_to_be_used()
         if len(configuration_path_to_be_started) > 0 and linuxutil.get_current_username() == NXAUTOMATION_USERNAME:
-            proc = subprocess.Popen(["sudo", "-u", NXAUTOMATION_USERNAME, "python", OMSUTIL_FILE_PATH, "--initialize"],
+            proc = subprocess.Popen(["sudo", "-u", NXAUTOMATION_USERNAME, python_to_be_used, OMSUTIL_FILE_PATH, "--initialize"],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, error = proc.communicate()
             if proc.returncode != 0:
@@ -265,7 +274,7 @@ class WorkerManager(object):
             # create a new worker if needed
             if os.path.isfile(configuration_path) and start_worker_for_path is True and \
                             self.oms_configuration.get_disable_worker_creation() is False:
-                cmd = ["python", self.oms_configuration.get_hybrid_worker_source_path(), configuration_path, "managed"]
+                cmd = [python_to_be_used, self.oms_configuration.get_hybrid_worker_source_path(), configuration_path, "managed"]
 
                 # workspace id arg is used by the oms uninstall script
                 workspace_id = self.oms_configuration.get_workspace_id()
@@ -369,7 +378,6 @@ if __name__ == "__main__":
     # daemonize before loading the logging library to prevent deadlock in 2.4 (see: http://bugs.python.org/issue6721)
     import linuxutil
     linuxutil.daemonize()
-
     import util
     try:
         main()
