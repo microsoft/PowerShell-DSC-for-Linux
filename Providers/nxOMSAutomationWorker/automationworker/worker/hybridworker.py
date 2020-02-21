@@ -123,7 +123,7 @@ def generate_state_file():
         os.remove(state_file_path)
 
     section = "state"
-    conf_file = open(state_file_path, 'wb')
+    conf_file = open(state_file_path, 'w')
     config = configparser.ConfigParser()
     config.add_section(section)
     config.set(section, configuration.STATE_PID, str(os.getpid()))
@@ -189,6 +189,14 @@ class Worker(object):
             if util.assert_file_read_permission(proxy_conf_path) is False:
                 raise InvalidFilePermissionException(proxy_conf_path)
 
+    def get_python_to_be_used(self):
+        import sys
+        python_version = int(sys.version[0])
+        python_to_be_used = "python"
+        if python_version == 3:
+            python_to_be_used = "python3"
+        return python_to_be_used
+
     @safe_loop
     def routine(self):
         self.assert_environment_prerequisite()
@@ -223,7 +231,9 @@ class Worker(object):
             process_env_variables = os.environ.copy()
             process_env_variables["sandbox_id"] = sandbox_id
 
-            cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
+            python_to_be_used = self.get_python_to_be_used()
+
+            cmd = [python_to_be_used, os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
                    configuration.get_worker_configuration_file_path()]
             tracer.log_worker_starting_sandbox(sandbox_id)
             sandbox_process = subprocessfactory.create_subprocess(cmd=cmd,

@@ -179,7 +179,7 @@ class Job(Thread):
     def get_full_stderr_content(stderr):
         full_error_output = ""
         while True:
-            error_output = stderr.readline()
+            error_output = stderr.readline().decode("utf-8")
             if error_output is None or error_output == '':
                 break
             full_error_output = "\n".join([full_error_output, error_output])
