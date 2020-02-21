@@ -138,7 +138,7 @@ def convert_to_big_endian(little_endian_value):
     """Converts the little endian representation of the value into a big endian representation of the value"""
     codecs_decoded =  codecs.decode(little_endian_value, "hex")
     codecs_reordered = codecs_decoded[::-1]
-    return codecs.encode(codecs_reordered, "hex").decode("utf-8")
+    return codecs.encode(codecs_reordered, "hex").decode()
 
 
 @posix_only
@@ -149,7 +149,7 @@ def generate_uuid():
     """
     proc = subprocess.Popen(["cat", "/proc/sys/kernel/random/uuid"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     uuid, error = proc.communicate()
-    uuid = uuid.decode("utf-8")
+    uuid = uuid.decode()
     if proc.poll() != 0:
         raise Exception("Unable to get uuid from /proc/sys/kernel/random/uuid : " + str(error))
     return uuid.strip()
@@ -204,7 +204,7 @@ def get_current_user_processes():
     current_username = get_current_username()
     proc = subprocess.Popen(["ps", "-fjH", "-u", current_username], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = proc.communicate()
-    output = output.decode("utf-8")
+    output = output.decode()
     if proc.poll() != 0:
         raise Exception("Unable to get processes : " + str(error))
     formatted_entries = format_process_entries_to_list(output.split("\n"))
@@ -220,7 +220,7 @@ def get_lsb_release():
     """
     proc = subprocess.Popen(["lsb_release", "-i", "-d", "-r", "-c"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = proc.communicate()
-    output = output.decode("utf-8")
+    output = output.decode()
     if proc.poll() != 0:
         raise Exception("Unable to get lsb_release info. Error : " + str(error))
 
@@ -304,9 +304,9 @@ def get_cert_info(certificate_path):
     if p.poll() != 0:
         raise Exception("Unable to get certificate subject.")
 
-    return parse_issuer_from_openssl_output(raw_issuer.decode("utf-8")), \
-           parse_subject_from_openssl_output(raw_subject.decode("utf-8")), \
-           parse_thumbprint_from_openssl_output(raw_fingerprint.decode("utf-8"))
+    return parse_issuer_from_openssl_output(raw_issuer.decode()), \
+           parse_subject_from_openssl_output(raw_subject.decode()), \
+           parse_thumbprint_from_openssl_output(raw_fingerprint.decode())
 
 
 def parse_thumbprint_from_openssl_output(raw_fingerprint):

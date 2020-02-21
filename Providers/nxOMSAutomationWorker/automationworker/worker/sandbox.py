@@ -12,22 +12,14 @@ import sys
 import time
 import traceback
 from queue import Queue, Empty
-
-def add_all_packages_under_worker_to_sys_path():
-    worker = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker"
-    list_of_directories = next(os.walk(worker))[1]
-    for dire in list_of_directories:
-        imm_direc = str(worker + "/" + dire)
-        print(imm_direc)
-        sys.path.append(imm_direc)
+import util
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-add_all_packages_under_worker_to_sys_path()
+util.add_all_packages_under_automationworker_to_sys_path()
 
 import configuration
 import tracer
-import util
 from automationconstants import jobstatus
 from automationconstants import pendingactions
 from httpclientfactory import HttpClientFactory

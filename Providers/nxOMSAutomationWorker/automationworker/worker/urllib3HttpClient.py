@@ -126,7 +126,7 @@ class Urllib3HttpClient(HttpClient):
             opener.add_handler(proxy_handler)
         if data is not None:
             data = data.encode("utf-8")
-        req = urllib.request.Request(url, data=data.encode("utf-8"), headers=headers)
+        req = urllib.request.Request(url, data=data, headers=headers)
         req.get_method = lambda: method
         response = opener.open(req, timeout=30)
         opener.close()

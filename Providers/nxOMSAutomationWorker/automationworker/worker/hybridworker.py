@@ -189,14 +189,6 @@ class Worker(object):
             if util.assert_file_read_permission(proxy_conf_path) is False:
                 raise InvalidFilePermissionException(proxy_conf_path)
 
-    def get_python_to_be_used(self):
-        import sys
-        python_version = int(sys.version[0])
-        python_to_be_used = "python"
-        if python_version == 3:
-            python_to_be_used = "python3"
-        return python_to_be_used
-
     @safe_loop
     def routine(self):
         self.assert_environment_prerequisite()
@@ -231,7 +223,7 @@ class Worker(object):
             process_env_variables = os.environ.copy()
             process_env_variables["sandbox_id"] = sandbox_id
 
-            python_to_be_used = self.get_python_to_be_used()
+            python_to_be_used = util.get_python_to_be_used()
 
             cmd = [python_to_be_used, os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
                    configuration.get_worker_configuration_file_path()]
@@ -250,7 +242,7 @@ class Worker(object):
     @background_thread
     def monitor_sandbox_process_outputs(self, sandbox_id, process):
         while process.poll() is None:
-            output = process.stdout.readline().decode("utf-8").replace("\n", "")
+            output = process.stdout.readline().decode().replace("\n", "")
             if output == '':
                 continue
             if output != '':
@@ -259,7 +251,7 @@ class Worker(object):
         if process.poll() != 0:
             full_error_output = ""
             while True:
-                error_output = process.stderr.readline().decode("utf-8")
+                error_output = process.stderr.readline().decode()
                 if error_output is None or error_output == '':
                     break
                 full_error_output += error_output

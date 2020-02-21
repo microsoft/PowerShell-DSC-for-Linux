@@ -207,6 +207,6 @@ def get_default_python_interpreter_major_version():
     p = subprocessfactory.create_subprocess(cmd=cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     default_interpreter_version, error = p.communicate()
     if p.returncode == 0:
-        return int(default_interpreter_version.decode("utf-8").strip())
+        return int(default_interpreter_version.decode().strip())
     else:
         return None

@@ -48,6 +48,8 @@ class Runbook(object):
         """Writes the runbook's definition to disk."""
         file_name = self.runbook_data.name + self.runbook_data.runbook_version_id + self.file_extension
         self.runbook_file_path = os.path.join(configuration.get_working_directory_path(), file_name)
+        # In python2 strings and bytes are treated the same. Hence the encoding had no affect on the string to be written. But in python3 encoding changes the string to bytes.
+        # So there is no need because it is already encoded.
         runbook_definition = str(self.runbook_data.definition)
         if linuxutil.is_posix_host() is True:
             # replace dos end of line to unix end of line

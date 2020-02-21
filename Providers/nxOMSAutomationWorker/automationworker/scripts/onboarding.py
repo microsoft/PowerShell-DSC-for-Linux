@@ -14,18 +14,11 @@ import socket
 import subprocess
 import sys
 from optparse import OptionParser
-
-def add_all_packages_under_automationworker_to_sys_path():
-    automationworker_path = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker"
-    list_of_directories = next(os.walk(automationworker_path))[1]
-    for dire in list_of_directories:
-        imm_direc = str(automationworker_path + "/" + dire)
-        print(imm_direc)
-        sys.path.append(imm_direc)
+import packagesimportutil
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-add_all_packages_under_automationworker_to_sys_path()
+packagesimportutil.add_all_packages_under_automationworker_to_sys_path()
 
 
 from worker import configuration
@@ -207,7 +200,7 @@ def invoke_dmidecode():
     dmidecode, error = proc.communicate()
     if proc.poll() != 0:
         raise Exception("Unable to get dmidecode output : " + str(error))
-    return dmidecode.decode("utf-8")
+    return dmidecode.decode()
 
 
 def register(options):
@@ -357,10 +350,10 @@ def deregister(options):
     # the signature generation is based on agent service contract
     payload_hash = sha256_digest(payload)
     b64encoded_payload_hash = base64.b64encode(payload_hash)
-    signature = generate_hmac(b64encoded_payload_hash.decode("utf-8") + '\n' + date, automation_account_key)
+    signature = generate_hmac(b64encoded_payload_hash.decode() + '\n' + date, automation_account_key)
     b64encoded_signature = base64.b64encode(signature)
 
-    headers = {'Authorization': 'Shared ' + b64encoded_signature.decode("utf-8"),
+    headers = {'Authorization': 'Shared ' + b64encoded_signature.decode(),
                'ProtocolVersion': "2.0",
                'x-ms-date': date,
                "Content-Type": "application/json"}

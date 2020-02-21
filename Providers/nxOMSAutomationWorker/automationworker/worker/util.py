@@ -35,18 +35,11 @@ def generate_uuid():
     """
     version_info = sys.version_info
     try:
-        if version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] >= 5:
+        if (version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] >= 5) or version_info[PY_MAJOR_VERSION] == 3:
             import uuid
             uuid = str(uuid.uuid4())
         elif linuxutil.is_posix_host():
             uuid = linuxutil.generate_uuid()
-        else:
-            uuid = [random.randint(10000000, 99999999),
-                random.randint(1000, 9999),
-                random.randint(1000, 9999),
-                random.randint(1000, 9999),
-                random.randint(100000000000, 999999999999)]
-            uuid = '-'.join(map(str, uuid))
     except:
         uuid = [random.randint(10000000, 99999999),
                 random.randint(1000, 9999),
@@ -75,3 +68,22 @@ def assert_file_read_permission(file_path):
         raise
     except:
         raise
+
+def get_python_to_be_used(self):
+        import sys
+        python_version = int(sys.version[0])
+        python_to_be_used = "python"
+        if python_version == 3:
+            python_to_be_used = "python3"
+        return python_to_be_used
+
+WORKER_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker"
+
+def add_directories_under_to_sys_path(list_of_directories, directory_path):
+    for dire in list_of_directories:
+        imm_direc = str(directory_path + "/" + dire)
+        sys.path.append(imm_direc)
+
+def add_all_packages_under_automationworker_to_sys_path():
+    list_of_directories_under_worker = next(os.walk(WORKER_PATH))[1]
+    add_directories_under_to_sys_path(list_of_directories_under_worker, WORKER_PATH)    
