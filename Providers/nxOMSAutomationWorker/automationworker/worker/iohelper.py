@@ -6,6 +6,7 @@
 
 import os
 
+# octal numbers in python3 now must be specified using "0o" or "0O" according to "https://www.python.org/dev/peps/pep-3127/#id19"
 os.umask(0o77)
 
 
