@@ -2,16 +2,17 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-from __future__ import print_function
 import os
 import sys
 from optparse import OptionParser
 
 import grp
 import pwd
+import util
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+util.add_all_packages_under_automationworker_to_sys_path()
 
 from worker import configuration
 from worker import serializerfactory

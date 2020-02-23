@@ -69,7 +69,7 @@ def assert_file_read_permission(file_path):
     except:
         raise
 
-def get_python_to_be_used(self):
+def get_python_to_be_used():
         import sys
         python_version = int(sys.version[0])
         python_to_be_used = "python"
