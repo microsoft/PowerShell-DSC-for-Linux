@@ -3,7 +3,7 @@
 
    Copyright (c) Microsoft Corporation
 
-   All rights reserved. 
+   All rights reserved.
 
    MIT License
 
@@ -56,7 +56,7 @@ void WriteLogsToFile(std::string msg)
 {
     std::ofstream outfile;
     outfile.open("/home/micy/omsconfig.txt", std::ios_base::app); // append instead of overwrite
-    outfile << msg; 
+    outfile << msg;
 }
 
 std::string determinePythonVersion(){
@@ -69,34 +69,27 @@ std::string determinePythonVersion(){
     }
 
     while(fgets(buffer.data(), 128, pipe) != NULL) {
-        std::cout << "Reading" << std::endl;
         result += buffer.data();
     }
-    std::cout << "Result:" << std::endl;
-    std::cout << result << std::endl;
 
-    // If python --version does not contain 'not found' return python2 
+    // If python --version does not contain 'not found' return python2
     if(result.find("not found") == std::string::npos) {
-	std::cout << "Found python 2." << std::endl;
     	return "python";
     }
 
     // Look for python3
     result = "";
-    std::cout << "python2 not found. Looking for python3" << std::endl;
     pipe = popen("python3 --version 2>&1", "r");
     if(!pipe) {
     	std::cout << "Couldn't start command." << std::endl;
     }
     while(fgets(buffer.data(), 128, pipe) != NULL) {
-    	std::cout << "Reading" << std::endl;
-        result += buffer.data();
+      result += buffer.data();
     }
-    
+
     // If python3 --version does not contain 'not found' return python3
     if(result.find("not found") == std::string::npos) {
-        std::cout << "Found python3." << std::endl;
-	return "python3";
+	    return "python3";
     }
     return "python";
 }
@@ -104,28 +97,12 @@ std::string determinePythonVersion(){
 char_array::move_type
 get_python_version ()
 {
-    std::cout << "inside get_python_version" << std::endl;
     char_array pyV;
 
-    char* sPath = getenv (OMI_PYTHON_VERSION_STR);
-    if (sPath == NULL)
-    {
-        std::cout << "Default python version:"  << std::endl;
-        std::cout << DEFAULT_PYTHON_VERSION << std::endl;
-        pyV.reset (strcpy (new char[1 + strlen (DEFAULT_PYTHON_VERSION)],
-                           DEFAULT_PYTHON_VERSION));
-    }
-    else
-    {
-
-        // Set python version
-        std::string version = determinePythonVersion();
-        std::cout << "Calculated python version:"  << std::endl;
-        std::cout << version << std::endl;
-        pyV.reset (strcpy (new char[1 + version.length()], version.c_str()));
-    }
-    std::cout << "About to return:"  << std::endl;
-    return pyV.move(); 
+    // Set python version
+    std::string version = determinePythonVersion();
+    pyV.reset (strcpy (new char[1 + version.length()], version.c_str()));
+    return pyV.move();
 }
 
 
@@ -480,7 +457,7 @@ PythonProvider::get (
                         SCX_BOOKEND_PRINT ("no error msg");
                     }
                 }
-                else 
+                else
                 {
                     SCX_BOOKEND_PRINT ("failed to receive error msg");
                 }
@@ -555,7 +532,7 @@ PythonProvider::inventory (
                         SCX_BOOKEND_PRINT ("no error msg");
                     }
                 }
-                else 
+                else
                 {
                     SCX_BOOKEND_PRINT ("failed to receive error msg");
                 }
@@ -605,28 +582,16 @@ PythonProvider::forkExec ()
 
                 SCX_BOOKEND_PRINT ("Printing out args");
                 SCX_BOOKEND_PRINT ("============================");
-                SCX_BOOKEND_PRINT ("pyV:");
-                SCX_BOOKEND_PRINT (pyV);
-                SCX_BOOKEND_PRINT ("pyV.get:");
-                SCX_BOOKEND_PRINT (pyV.get());
-                //WriteLogsToFile ("Printing out args");
-                //WriteLogsToFile ("============================");
 
                 char_array fullName (get_script_path ());
                 SCX_BOOKEND_PRINT (fullName);
 
                 char* args[] = { pyV.get (), fullName.get (), socketID, 0 };
 
-                // TODO print args 
-                SCX_BOOKEND_PRINT ("args0:");
-                SCX_BOOKEND_PRINT (args[0]);
-                SCX_BOOKEND_PRINT ("args1:");
+                // TODO print args
+                SCX_BOOKEND_PRINT ("In PythonProvider, using:");
                 SCX_BOOKEND_PRINT (args[1]);
                 SCX_BOOKEND_PRINT ("============================");
-                
-                //WriteLogsToFile (args[0]);
-                //WriteLogsToFile (args[1]);
-                //WriteLogsToFile ("============================");
 
                 // exec
                 execvp (args[0], args);
@@ -643,7 +608,7 @@ PythonProvider::forkExec ()
             }
             else if (-1 != pid)
             {
-	    	m_pid=pid;
+	    	        m_pid=pid;
                 // fork succeeded, this is the parent process
                 SCX_BOOKEND_PRINT ("fork - succeeded: this is the parent");
                 close (sockets[0]);
@@ -1254,7 +1219,7 @@ PythonProvider::recvResult (
                     SCX_BOOKEND_PRINT ("no error msg");
                 }
             }
-            else 
+            else
             {
                 SCX_BOOKEND_PRINT ("failed to receive error msg");
             }
@@ -1592,7 +1557,7 @@ PythonProvider::recv_MI_Value (
     {
         SCX_BOOKEND_PRINT ("Failed to read name");
     }
-    return rval; 
+    return rval;
 }
 
 

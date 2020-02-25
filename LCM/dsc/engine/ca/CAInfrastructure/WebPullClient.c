@@ -2071,30 +2071,29 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
         // Determine Python version
         char data[BUFSIZ];
         int isPython2 = 1;
-        DSC_LOG_INFO("Assuming python2 in WebPullClient");
 
+        DSC_LOG_INFO("Assuming python2 in WebPullClient\n");
         FILE * pipe = popen("python3 --version 2>&1", "r");
         fgets(data, BUFSIZ, pipe);
 
-        DSC_LOG_INFO("Result: %s.\n", data);
-        fprintf(stdout, "Result in webpullclient: %s.\n", data);
+        DSC_LOG_INFO("python3 popen result: %s.\n", data);
 
       	// If python3 --version does not contain 'not found' return python2
   	    if (!strstr(data, "not found")) {
-          	DSC_LOG_INFO("Found python3 in WebPullClient!\n");
+          	DSC_LOG_INFO("Found python3 in WebPullClient.\n");
           	isPython2 = 0;
       	}
-        DSC_LOG_INFO("isPython value is : %d.\n", isPython2);
+        DSC_LOG_INFO("isPython value: %d.\n", isPython2);
 
       	if (isPython2 == 1)
       	{
-          DSC_LOG_INFO("Assuming python2 in WebPullClient - Calling install ");
+          DSC_LOG_INFO("Calling InstallModule with python2");
       		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
       	}
       	else
       	{
-          DSC_LOG_INFO("Assuming python3 in WebPullClient - Calling install ");
-          Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/3/InstallModule.py", zipPath, verifyFlag);
+          DSC_LOG_INFO("Calling InstallModule with python3");
+          Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/3/InstallModule.py", zipPath, verifyFlag, " 2>&1 | sudo tee /home/micy/install-output.txt");
       	}
         DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
@@ -2109,19 +2108,18 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             else
             {
                 // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
-            		// TODO: use bash script
+            		// TODO: use bash script?
                 if (isPython2 == 1)
                 {
-                    DSC_LOG_INFO("Assuming python2 in WebPullClient - Calling remove ");
-
+                    DSC_LOG_INFO("Calling RemoveModule with python2");
                     Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/RemoveModule.py", current->moduleName);
                 }
                 else
                 {
-                    DSC_LOG_INFO("Assuming python3 in WebPullClient - Calling remove ");
-
-                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/3/RemoveModule.py", current->moduleName);
+                    DSC_LOG_INFO("Calling RemoveModule with python3");
+                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/3/RemoveModule.py", current->moduleName, " 2>&1 | sudo tee /home/micy/remove-output.txt");
                 }
+
                 retval = system(stringBuffer);
                 DSC_LOG_INFO("Executed '%T', returned %d\n", stringBuffer, retval);
                 if ( retval == 0 || (retval == -1 && errno == ECHILD) )
