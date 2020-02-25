@@ -152,7 +152,7 @@ def Set_Marshall(ResourceSettings):
                 log(INFO, "Worker manager with be started without auto registered worker")
             elif proc.returncode != 0:
                 raise Exception("Linux Hybrid Worker registration failed: Return code %s :" % str(proc.returncode)
-                                + stderr + "\n" + stdout)
+                                + stderr.decode() + "\n" + stdout.decode())
 
             elif not os.path.isfile(AUTO_REGISTERED_WORKER_CONF_PATH):
                 raise Exception("Linux Hybrid Worker registration file could not be created")
@@ -365,7 +365,7 @@ def get_optional_metadata():
         dmidecode, error = proc.communicate()
         dmidecode = dmidecode.decode("utf-8")
         if proc.returncode != 0 or not dmidecode:
-            raise Exception("Unable to invoke omsutil.py --dmidecode: %s" % error)
+            raise Exception("Unable to invoke omsutil.py --dmidecode: %s" % error.decode())
         is_azure_vm = linuxutil.is_azure_vm(dmidecode)
         if is_azure_vm:
             asset_tag = linuxutil.get_azure_vm_asset_tag()
@@ -486,7 +486,7 @@ def write_omsconf_file(workspace_id, updates_enabled, diy_enabled):
     oms_config.set(SECTION_OMS_GLOBAL, OPTION_WORKSPACE_ID, workspace_id)
     if not oms_config.has_option(SECTION_OMS_GLOBAL, OPTION_DISABLE_WORKER_CREATION):
         oms_config.set(SECTION_OMS_GLOBAL, OPTION_DISABLE_WORKER_CREATION, "False")
-    oms_config_fp = open(OMS_CONF_FILE_PATH, 'wb')
+    oms_config_fp = open(OMS_CONF_FILE_PATH, 'w')
     oms_config.write(oms_config_fp)
     oms_config_fp.close()
 
@@ -499,7 +499,7 @@ def move_diy_settings_to_new_location():
         stdout, stderr = proc.communicate()
         if proc.returncode != 0:
             raise OSError(
-                "Copying old diy directory to new diy directory failed\nstdout: " + stdout + "\nstderr: " + stderr)
+                "Copying old diy directory to new diy directory failed\nstdout: " + stdout.decode() + "\nstderr: " + stderr.decode())
 
         if os.path.isfile(DIY_WORKER_CONF_PATH_OLD):
             worker_config = configparser.ConfigParser()
@@ -524,7 +524,7 @@ def move_diy_settings_to_new_location():
 
             if os.path.isfile(DIY_WORKER_CONF_PATH):
                 os.remove(DIY_WORKER_CONF_PATH)
-            with open(DIY_WORKER_CONF_PATH, 'wb') as fp:
+            with open(DIY_WORKER_CONF_PATH, 'w') as fp:
                 worker_config.write(fp)
 
         # remove old config file when copy is complete
@@ -616,7 +616,7 @@ def start_worker_manager_process(workspace_id):
     :param workspace_id: 
     :return: the pid of the worker manager process
     """
-    proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", WORKER_MANAGER_START_PATH, OMS_CONF_FILE_PATH,
+    proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python3", WORKER_MANAGER_START_PATH, OMS_CONF_FILE_PATH,
                              WORKSPACE_ID_PREFIX + workspace_id, get_module_version()])
     for i in range(0, 5):
         time.sleep(3)
@@ -694,7 +694,7 @@ def get_nxautomation_ps_output():
         log(INFO, "Failed to read nxautomation user processes")
         return []
 
-    command = command.strip()
+    command = command.decode().strip()
     if command:
         processes = [x.strip() for x in command.split('\n')]
     else:
@@ -763,7 +763,7 @@ def kill_process_by_pattern_string(pattern_match_string):
 def kill_any_worker_running_as_omsagent(worker_pgrep_pattern):
     proc = subprocess.Popen(["pgrep", "-u", OMSAGENT_USER, "-f", worker_pgrep_pattern], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     result, error = proc.communicate()
-    result = str(result)
+    result = str(result.decode())
     result = result.replace('\n', ' ')
     if proc.returncode == 0:
         log(DEBUG, "The following old worker processes will be terminated: %s" % result)
@@ -777,7 +777,7 @@ def run_pgrep_command(pattern_match_string):
     proc = subprocess.Popen(["pgrep", "-u", AUTOMATION_USER, "-f", pattern_match_string], stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
     result, error = proc.communicate()
-    result = str(result)
+    result = str(result.decode())
     result = result.replace('\n', ' ')
     return result, proc.returncode
 
