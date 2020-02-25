@@ -1,0 +1,190 @@
+#!/bin/bash
+
+BUILD_RPM=1
+BUILD_DPKG=1
+BUILD_SSL_098=1
+BUILD_SSL_100=1
+BUILD_SSL_110=1
+BUILD_SSL_SYSTEM=0
+BUILD_DEBUG=0
+BUILD_OMS=
+DEBUG_FLAGS=""
+DSC_MODULES_PATH="/opt/microsoft/dsc/modules"
+DSC_SCRIPT_PATH="/opt/microsoft/dsc/Scripts"
+DSC_SCRIPT_PATH_3="/opt/microsoft/dsc/Scripts/3"
+DSC_HOST_BASE_PATH="/opt/dsc"
+DSC_PATH_MODIFIER="/dsc"
+
+for opt
+do
+    
+    arg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
+    
+    case $opt in
+	-h | --help)
+	    help=1
+	    ;;
+	--enable-debug)
+	    if [ "$build_type" = "Bullseye" ]; then
+		echo "Cannot build debug if Bullseye is enabled"
+		exit 1
+	    fi
+	    BUILD_DEBUG=1
+	    DEBUG_FLAGS="--enable-debug"
+	    ;;
+	
+	
+	--no-rpm)
+	    BUILD_RPM=0
+	    ;;
+	--no-dpkg)
+	    BUILD_DPKG=0
+	    ;;
+	
+	--local)
+	    if [ "$BUILD_OMS" = "BUILD_OMS" ]; then
+		echo "Error: options --oms and --local conflict."
+		exit 1
+	    fi
+	    BUILD_LOCAL=1
+	    DSC_MODULES_PATH="\$(CONFIG_DATADIR)/dsc/modules"
+	    DSC_SCRIPT_PATH="\$(CONFIG_DATADIR)/dsc/Scripts"
+	    DSC_SCRIPT_PATH_3="\$(CONFIG_DATADIR)/dsc/Scripts/3"
+	    ;;
+	
+	--no-ssl-098)
+	    BUILD_SSL_098=0
+	    ;;
+	--no-ssl-100)
+	    BUILD_SSL_100=0
+		;;
+	--no-ssl-110)
+	    BUILD_SSL_110=0
+	    ;;
+	--oms)
+	    if [ "$BUILD_LOCAL" = "1" ]; then
+		echo "Error: options --oms and --local conflict."
+		exit 1
+	    fi
+	    BUILD_OMS=BUILD_OMS
+	    DSC_MODULES_PATH="/opt/microsoft/omsconfig/modules"
+	    DSC_SCRIPT_PATH="/opt/microsoft/omsconfig/Scripts"
+	    DSC_SCRIPT_PATH_3="/opt/microsoft/omsconfig/Scripts/3"
+	    DSC_HOST_BASE_PATH="/opt/dsc"
+	    DSC_PATH_MODIFIER="/omsconfig"
+	    ;;
+	
+	*)
+	    echo "configure: invalid option '$opt'"
+	    echo "Try configure --help' for more information."
+	    exit 1
+	    ;;
+	
+    esac
+    
+done
+
+if [ "$help" = "1" ]; then
+    
+    cat<<EOF
+
+Usage: ./configure [OPTIONS]
+
+OVERVIEW:
+
+This script configures DSC for Linux for building.
+
+OPTIONS:
+    -h, --help                  Print this help message.
+    --enable-debug              Perform a debug build.
+
+    --no-rpm                    Do not build an RPM package
+    --no-dpkg                   Do not build a DEB package
+    --no-ssl-098                Do not build for OpenSSL 0.9.8x
+    --no-ssl-100                Do not build for OpenSSL 1.0.x
+	--no-ssl-110                Do not build for OpenSSL 1.1.x
+
+    --local                     Build without packages and for the OpenSSL installed to the system.
+EOF
+    exit 0
+fi
+
+
+pkgconfig=`which pkg-config`
+
+if [ -d "/usr/local_ssl_0.9.8" ] || [ -d "/usr/local_ssl_1.0.0" ] || [ -d "/usr/local_ssl_1.1.0" ]; then
+    if [ -d "/usr/local_ssl_0.9.8" ]; then
+        if [ "`uname -m`" == "x86_64" ]; then
+            openssl098_libdir=/usr/local_ssl_0.9.8/lib
+        else
+            openssl098_libdir=/usr/local_ssl_0.9.8/lib
+        fi
+        openssl098_cflags=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --cflags openssl`
+        openssl098_libs=`PKG_CONFIG_PATH=$openssl098_libdir/pkgconfig $pkgconfig --libs openssl`
+    else
+        echo -e "\e[33mYellow SSL version 0.9.8 is not found at path /usr/local_ssl_0.9.8. Skipping build for SSL 0.9.8.\e[0m"
+        BUILD_SSL_098=0
+    fi
+    if [ -d "/usr/local_ssl_1.0.0" ]; then
+        if [ "`uname -m`" == "x86_64" ]; then
+            openssl100_libdir=/usr/local_ssl_1.0.0/lib64
+        else
+            openssl100_libdir=/usr/local_ssl_1.0.0/lib
+        fi
+        openssl100_cflags=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --cflags openssl`
+        openssl100_libs=`PKG_CONFIG_PATH=$openssl100_libdir/pkgconfig $pkgconfig --libs openssl`
+    else
+        echo -e "\e[33mYellow SSL version 1.0.0 is not found at path /usr/local_ssl_1.0.0. Skipping build for SSL 1.0.0.\e[0m"
+        BUILD_SSL_100=0
+    fi
+    if [ -d "/usr/local_ssl_1.1.0" ]; then
+        if [ "`uname -m`" == "x86_64" ]; then
+            openssl110_libdir=/usr/local_ssl_1.1.0/lib
+        fi
+        openssl110_cflags=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --cflags openssl`
+        openssl110_libs=`PKG_CONFIG_PATH=$openssl110_libdir/pkgconfig $pkgconfig --libs openssl`
+    else
+        echo -e "\e[33mYellow SSL version 1.1.0 is not found at path /usr/local_ssl_1.1.0. Skipping build for SSL 1.1.0.\e[0m"
+        BUILD_SSL_110=0
+    fi
+fi
+
+cat <<EOF > config.mak
+BUILD_RPM=$BUILD_RPM
+BUILD_DPKG=$BUILD_DPKG
+BUILD_SSL_098=$BUILD_SSL_098
+BUILD_SSL_100=$BUILD_SSL_100
+BUILD_SSL_110=$BUILD_SSL_110
+BUILD_LOCAL=$BUILD_LOCAL
+BUILD_OMS=$BUILD_OMS
+DSC_MODULES_PATH=$DSC_MODULES_PATH
+DSC_SCRIPT_PATH=$DSC_SCRIPT_PATH
+DSC_SCRIPT_PATH_3=$DSC_SCRIPT_PATH_3
+DSC_HOST_BASE_PATH=$DSC_HOST_BASE_PATH
+
+BUILD_DEBUG=$BUILD_DEBUG
+DEBUG_FLAGS=$DEBUG_FLAGS
+# DSC cannot build with -Werror
+ENABLE_WERROR=0
+
+openssl098_cflags=$openssl098_cflags
+openssl098_libs=$openssl098_libs
+openssl098_libdir=$openssl098_libdir
+openssl100_cflags=$openssl100_cflags
+openssl100_libs=$openssl100_libs
+openssl100_libdir=$openssl100_libdir
+openssl110_cflags=$openssl110_cflags
+openssl110_libs=$openssl110_libs
+openssl110_libdir=$openssl110_libdir
+
+EOF
+
+cat <<EOF > dsc_config.h
+#pragma once
+#include "config.h"
+
+#define DSC_ETC_PATH CONFIG_SYSCONFDIR "$DSC_PATH_MODIFIER"
+
+EOF
+
+echo "Configured DSC"
