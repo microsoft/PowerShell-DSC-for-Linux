@@ -343,12 +343,15 @@ def UpdateSyslogNGConf(SyslogSource, WorkspaceID):
         return False
 
     # Extract the correct source from the conf file
-    source_search = r'^source (.*?src).*$'
+    # Different distros may use different source name:
+    # in redhat 7.4 the source is 's_sys'
+    # in ubuntu/debian the source is 's_src'
+    source_search = r'^source (.*){$'
     source_re = re.compile(source_search, re.M)
     source_result = source_re.search(txt)
     source_expr = 'src'
     if source_result:
-        source_expr = source_result.group(1)
+        source_expr = source_result.group(1).strip()
 
     port = ExtractFieldFromFluentDConf(WorkspaceID, 'port', default_port)
     protocol_type = ExtractFieldFromFluentDConf(WorkspaceID, 'protocol_type', default_protocol)
