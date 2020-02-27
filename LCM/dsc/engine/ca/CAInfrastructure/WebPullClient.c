@@ -1353,6 +1353,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
     list = curl_slist_append(list, "ProtocolVersion: 2.0");
 
+    res = curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyContent);
     res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -1516,6 +1517,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     list = curl_slist_append(list, "ProtocolVersion: 2.0");
 
 
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
@@ -1846,6 +1848,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     agentIdHeader[100] = '\0';
     list = curl_slist_append(list, agentIdHeader);
 
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
@@ -2638,6 +2641,7 @@ MI_Result Pull_Register(MI_Char* serverURL,
     list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
     list = curl_slist_append(list, "ProtocolVersion: 2.0");
 
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -2830,6 +2834,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         dataChunk.data = (char *)malloc(1);
         dataChunk.size = 0;
         
+        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, reportText);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
