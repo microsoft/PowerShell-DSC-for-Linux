@@ -360,7 +360,7 @@ def get_optional_metadata():
     vm_id = unknown
     is_azure_vm = False
     try:
-        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python", OMS_UTIL_FILE_PATH, "--dmidecode"],
+        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python3", OMS_UTIL_FILE_PATH, "--dmidecode"],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         dmidecode, error = proc.communicate()
         dmidecode = dmidecode.decode("utf-8")
