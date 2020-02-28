@@ -2068,32 +2068,29 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             CleanupModuleTable(moduleTable);
             return r;
         }
-        // Determine Python version
+        // Determine python version
         char data[BUFSIZ];
         int isPython2 = 1;
-
         DSC_LOG_INFO("Assuming python2 in WebPullClient\n");
         FILE * pipe = popen("python3 --version 2>&1", "r");
         fgets(data, BUFSIZ, pipe);
-
         DSC_LOG_INFO("python3 popen result: %s.\n", data);
 
-      	// If python3 --version does not contain 'not found' return python2
-  	    if (!strstr(data, "not found")) {
-          	DSC_LOG_INFO("Found python3 in WebPullClient.\n");
+	// If python3 --version does not contain 'not found' return python2
+	if (!strstr(data, "not found")) {
+		DSC_LOG_INFO("Found python3 in WebPullClient.\n");
           	isPython2 = 0;
       	}
-        DSC_LOG_INFO("isPython value: %d.\n", isPython2);
 
       	if (isPython2 == 1)
       	{
-          DSC_LOG_INFO("Calling InstallModule with python2");
+        	DSC_LOG_INFO("Calling InstallModule with python2");
       		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
       	}
       	else
       	{
-          DSC_LOG_INFO("Calling InstallModule with python3");
-          Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/3/InstallModule.py", zipPath, verifyFlag, " 2>&1 | sudo tee /home/micy/install-output.txt");
+		DSC_LOG_INFO("Calling InstallModule with python3");
+		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/3/InstallModule.py", zipPath, verifyFlag, " 2>&1 | sudo tee /home/micy/install-output.txt");
       	}
         DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
@@ -2108,7 +2105,6 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             else
             {
                 // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
-            		// TODO: use bash script?
                 if (isPython2 == 1)
                 {
                     DSC_LOG_INFO("Calling RemoveModule with python2");

@@ -14,10 +14,7 @@
    THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "PythonProvider.hpp"
-
-
 #include "debug_tags.hpp"
-
 
 #include <algorithm>
 #include <cstdlib>
@@ -28,7 +25,6 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -52,12 +48,6 @@ char const DEFAULT_OMI_PATH[] = "/opt/omi/";
 char const SCRIPT_PATH_EXTENSION[] = "/lib/Scripts/";
 char const DEFAULT_DSC_SCRIPT[] = "client";
 char const PY_EXTENSION[] = ".py";
-void WriteLogsToFile(std::string msg)
-{
-    std::ofstream outfile;
-    outfile.open("/home/micy/omsconfig.txt", std::ios_base::app); // append instead of overwrite
-    outfile << msg;
-}
 
 std::string determinePythonVersion(){
     std::array<char, 128> buffer;
@@ -101,7 +91,6 @@ get_python_version ()
 {
     char_array pyV;
     std::cout << "In PythonProvider." << std::endl;
-    // Set python version
     std::string version = determinePythonVersion();
     pyV.reset (strcpy (new char[1 + version.length()], version.c_str()));
     return pyV.move();
@@ -344,18 +333,19 @@ PythonProvider::test (
     int result = sendRequest (TEST, instance);
     if (EXIT_SUCCESS == result)
     {
+	SCX_BOOKEND_PRINT ("send succeeded");
         result = recvResult (pTestResultOut);
         if (EXIT_SUCCESS == result)
         {
             SCX_BOOKEND_PRINT ("recv succeeded");
             rval = MI_RESULT_OK;
         }
-        else
+        else 
         {
             SCX_BOOKEND_PRINT ("recv failed");
         }
     }
-    else
+    else 
     {
         SCX_BOOKEND_PRINT ("send failed");
     }
@@ -572,7 +562,7 @@ PythonProvider::forkExec ()
             if (0 == pid)
             {
                 // fork succeded, this is the child process
-                SCX_BOOKEND_PRINT ("fork - succeeded: this is the child - new code");
+                SCX_BOOKEND_PRINT ("fork - succeeded: this is the childe");
                 // close the parent socket
                 close (sockets[1]);
                 // create the argument list including the child socket name as a
@@ -611,7 +601,7 @@ PythonProvider::forkExec ()
             }
             else if (-1 != pid)
             {
-	    	        m_pid=pid;
+	    	m_pid=pid;
                 // fork succeeded, this is the parent process
                 SCX_BOOKEND_PRINT ("fork - succeeded: this is the parent");
                 close (sockets[0]);

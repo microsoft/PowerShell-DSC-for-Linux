@@ -19,7 +19,6 @@ DIRECTORIES += dsc/engine/dsc_host
 include $(OMI)/mak/rules.mak
 
 deploydsc:
-	echo "inside LCM Makefile right now"
 	mkdir -p $(CONFIG_SYSCONFDIR)/dsc
 	mkdir -p $(CONFIG_SYSCONFDIR)/dsc/configuration
 	mkdir -p $(CONFIG_SYSCONFDIR)/dsc/configuration/schema

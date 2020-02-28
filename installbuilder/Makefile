@@ -41,7 +41,7 @@ all:
 ifeq ($(BUILD_RPM),1)
 	@echo "========================= Make DSC installer"
 	sudo rm -rf $(STAGING_DIR) $(INTERMEDIATE_DIR) 
-	mkdir -p $(RELEASE_DIR) $(STAGING_DIR) $(INTERMEDIATE_DIR) 
+	mkdir -p $(RELEASE_DIR) $(STAGING_DIR) $(INTERMEDIATE_DIR)
 	python $(IB_DIR)/installbuilder.py \
 		--BASE_DIR=$(TOP) \
 		--TARGET_DIR=$(RELEASE_DIR) \
@@ -72,7 +72,7 @@ ifeq ($(BUILD_DPKG),1)
 ifeq ($(BUILD_OMS_VAL),1)
 	egrep -q "^omsagent:" /etc/passwd; if [ $$? -ne 0 ]; then echo "Creating omsagent user ..."; sudo /usr/sbin/useradd -r -c "OMS agent" -d /var/opt/microsoft/omsagent/run -s /bin/bash omsagent; fi
 endif
-	# sudo rm -rf $(STAGING_DIR) $(INTERMEDIATE_DIR) 
+	sudo rm -rf $(STAGING_DIR) $(INTERMEDIATE_DIR) 
 	mkdir -p $(RELEASE_DIR) $(STAGING_DIR) $(INTERMEDIATE_DIR)
 	python $(IB_DIR)/installbuilder.py \
 		--BASE_DIR=$(TOP) \
