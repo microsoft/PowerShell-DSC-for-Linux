@@ -562,7 +562,7 @@ PythonProvider::forkExec ()
             if (0 == pid)
             {
                 // fork succeded, this is the child process
-                SCX_BOOKEND_PRINT ("fork - succeeded: this is the childe");
+                SCX_BOOKEND_PRINT ("fork - succeeded: this is the child");
                 // close the parent socket
                 close (sockets[1]);
                 // create the argument list including the child socket name as a
