@@ -372,27 +372,27 @@ else
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip 0"
 fi
 #if PFARCH == x86
-if [ "$pythonVersion" = "python3" ]; then
-  echo "Running python3 python version is ", $pythonVersion
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.3.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.29.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.45.zip 0"
-else
-  echo "Running python2 python version is ", $pythonVersion
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.3.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.29.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.45.zip 0"
-fi
+## if [ "$pythonVersion" = "python3" ]; then
+#   echo "Running python3 python version is ", $pythonVersion
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.3.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.29.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.45.zip 0"
+# else
+#   echo "Running python2 python version is ", $pythonVersion
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.3.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.29.zip 0"
+# 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.45.zip 0"
+# fi
 #endif
 
 # Set up a built-in resource module for DIY DSC that was removed during OMS Agent update

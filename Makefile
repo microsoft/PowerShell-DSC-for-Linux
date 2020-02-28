@@ -187,7 +187,6 @@ dsc100: lcm100 providers
 
 dsc110: lcm110 providers
 	@echo "================================= in dsc110 right now"
-	ll intermediate/Scripts
 	mkdir -p intermediate/Scripts
 	mkdir -p intermediate/Scripts/3
 	mkdir -p intermediate/Modules
@@ -230,7 +229,6 @@ dsc110: lcm110 providers
 	  chmod a+x intermediate/Scripts/3/`basename $$f`; \
 	done
 	@echo "================================ Scripts folder now looks like:"
-	ll intermediate/Scripts
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 
@@ -729,7 +727,6 @@ lcmreg:
 providersreg:
 	@echo "================================ Inside providers reg!!! "
 	.  omi-1.0.8/output/config.mak; \
-	ll intermediate/Scripts
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$(CONFIG_BINDIR)@" | \
@@ -767,5 +764,4 @@ providersreg:
 	  chmod a+x intermediate/Scripts/3/`basename $$f`; \
 	done
 	@echo "================================ Scripts folder now looks like:"
-	ll intermediate/Scripts
 	$(MAKE) -C Providers reg

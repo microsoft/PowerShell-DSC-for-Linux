@@ -74,6 +74,7 @@ std::string determinePythonVersion(){
 
     // If python --version does not contain 'not found' return python2
     if(result.find("not found") == std::string::npos) {
+      std::cout << "Found python2." << std::endl;
     	return "python";
     }
 
@@ -89,6 +90,7 @@ std::string determinePythonVersion(){
 
     // If python3 --version does not contain 'not found' return python3
     if(result.find("not found") == std::string::npos) {
+      std::cout << "Found python3." << std::endl;
 	    return "python3";
     }
     return "python";
@@ -98,7 +100,7 @@ char_array::move_type
 get_python_version ()
 {
     char_array pyV;
-
+    std::cout << "In PythonProvider." << std::endl;
     // Set python version
     std::string version = determinePythonVersion();
     pyV.reset (strcpy (new char[1 + version.length()], version.c_str()));
@@ -590,6 +592,7 @@ PythonProvider::forkExec ()
 
                 // TODO print args
                 SCX_BOOKEND_PRINT ("In PythonProvider, using:");
+                SCX_BOOKEND_PRINT (args[0]);
                 SCX_BOOKEND_PRINT (args[1]);
                 SCX_BOOKEND_PRINT ("============================");
 
