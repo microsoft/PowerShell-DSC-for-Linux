@@ -90,6 +90,7 @@ dsckit110: nx nxOMSPerfCounter nxOMSSyslog nxOMSKeyMgmt nxOMSPlugin nxOMSCustomL
 else
 dsckit110: nx nxNetworking nxComputerManagement nxMySQL
 endif
+	@echo "in dsckit110 right now"
 	$(MAKE) -C $(INSTALLBUILDER_DIR) SSL_VERSION=110 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) BUILD_OMS_VAL=$(BUILD_OMS_VAL)
 
 	-mkdir -p release; \
@@ -97,7 +98,9 @@ endif
 
 dsc098: lcm098 providers
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Scripts/3
 	mkdir -p intermediate/Modules
+	@echo "================================= in dsc098 right now"
 	.  omi-1.0.8/output_openssl_0.9.8/config.mak; \
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
@@ -117,12 +120,32 @@ dsc098: lcm098 providers
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
+	for f in LCM/scripts/3/*.py LCM/scripts/3/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/3/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/3/`basename $$f`; \
+	done
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 
 dsc100: lcm100 providers
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Scripts/3
 	mkdir -p intermediate/Modules
+	@echo "================================= in dsc100 right now"
 	.  omi-1.0.8/output_openssl_1.0.0/config.mak; \
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
@@ -142,9 +165,29 @@ dsc100: lcm100 providers
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
+	for f in LCM/scripts/3/*.py LCM/scripts/3/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/3/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/3/`basename $$f`; \
+	done
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 dsc110: lcm110 providers
+	@echo "================================= in dsc110 right now"
+	ll intermediate/Scripts
 	mkdir -p intermediate/Scripts
 	mkdir -p intermediate/Scripts/3
 	mkdir -p intermediate/Modules
@@ -186,6 +229,8 @@ dsc110: lcm110 providers
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/3/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/3/`basename $$f`; \
 	done
+	@echo "================================ Scripts folder now looks like:"
+	ll intermediate/Scripts
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 
@@ -204,6 +249,7 @@ omi100:
 	$(MAKE) -C omi-1.0.8/installbuilder SSL_VERSION=100 BUILD_RPM=$(BUILD_RPM) BUILD_DPKG=$(BUILD_DPKG) SSL_BUILD=1.0.0
 
 omi110:
+	@echo "in omi110 right now"
 	$(MAKE) configureomi110
 	rm -rf omi-1.0.8/output
 	ln -s output_openssl_1.1.0 omi-1.0.8/output
@@ -681,7 +727,9 @@ lcmreg:
 	$(MAKE) -C LCM deploydsc
 
 providersreg:
+	@echo "================================ Inside providers reg!!! "
 	.  omi-1.0.8/output/config.mak; \
+	ll intermediate/Scripts
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
 	  cat $$f | \
 	  sed "s@<CONFIG_BINDIR>@$(CONFIG_BINDIR)@" | \
@@ -700,4 +748,24 @@ providersreg:
 	  sed "s@<DSC_MODULES_PATH>@$(CONFIG_DATADIR)/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done 
+	for f in LCM/scripts/3/*.py LCM/scripts/3/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/3/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/3/`basename $$f`; \
+	done
+	@echo "================================ Scripts folder now looks like:"
+	ll intermediate/Scripts
 	$(MAKE) -C Providers reg
