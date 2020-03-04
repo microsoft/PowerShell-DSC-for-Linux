@@ -53,7 +53,7 @@ def initialize():
                 process, output, error = linuxutil.popen_communicate(["sudo", "/usr/sbin/usermod", "-g", "nxautomation",
                                                                       "-A", "omsagent,omiusers", "nxautomation"])
                 if process.returncode != 0:
-                    raise Exception("Unable to add nxautomation to omsagent group. Error: " + str(error))
+                    raise Exception("Unable to add nxautomation to omsagent group. Error: " + str(error.decode()))
                 else:
                     print_success_message = True
             else:
@@ -65,7 +65,7 @@ def initialize():
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+r",
                                                           "/etc/opt/omi/conf/omsconfig/keyring.gpg"])
     if process.returncode != 0:
-        raise Exception("Unable set group permission to keyring. Error: " + str(error))
+        raise Exception("Unable set group permission to keyring. Error: " + str(error.decode()))
     else:
         print("Successfully set group permissions to keyring.gpg.")
 
@@ -73,7 +73,7 @@ def initialize():
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+rx", "-R",
                                                           "/etc/opt/microsoft/omsagent/certs"])
     if process.returncode != 0:
-        raise Exception("Unable set group permissions to certificate folder. Error: " + str(error))
+        raise Exception("Unable set group permissions to certificate folder. Error: " + str(error.decode()))
     else:
         print("Successfully set group permissions to certificate folder.")
 
@@ -81,7 +81,7 @@ def initialize():
     process, output, error = linuxutil.popen_communicate(["sudo", "chown", "nxautomation:omiusers", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
-        raise Exception("Unable set group owner on working directory. Error: " + str(error))
+        raise Exception("Unable set group owner on working directory. Error: " + str(error.decode()))
     else:
         print("Successfully set group permissions on working directory.")
 
@@ -89,7 +89,7 @@ def initialize():
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "gu=rwx", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
-        raise Exception("Unable set permissions on working directory. Error: " + str(error))
+        raise Exception("Unable set permissions on working directory. Error: " + str(error.decode()))
     else:
         print("Successfully set permissions on working directory.")
 
@@ -97,7 +97,7 @@ def initialize():
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "o=", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
-        raise Exception("Unable set permissions on working directory. Error: " + str(error))
+        raise Exception("Unable set permissions on working directory. Error: " + str(error.decode()))
     else:
         print("Successfully set permissions on working directory.")
 
@@ -107,7 +107,7 @@ def initialize():
             process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+r", path])
 
             if process.returncode != 0:
-                raise Exception("Unable set read permission to proxy configuration file. Error: " + str(error))
+                raise Exception("Unable set read permission to proxy configuration file. Error: " + str(error.decode()))
             else:
                 print("Successfully set read permission to proxy configuration file.")
 
