@@ -572,9 +572,6 @@ PythonProvider::forkExec ()
                 snprintf (socketID, SOCK_ID_BUF_LEN, "%d", sockets[0]);
                 char_array pyV (get_python_version ());
 
-                SCX_BOOKEND_PRINT ("Printing out args");
-                SCX_BOOKEND_PRINT ("============================");
-
                 char_array fullName (get_script_path ());
                 SCX_BOOKEND_PRINT (fullName);
 
@@ -583,8 +580,6 @@ PythonProvider::forkExec ()
                 // TODO print args
                 SCX_BOOKEND_PRINT ("In PythonProvider, using:");
                 SCX_BOOKEND_PRINT (args[0]);
-                SCX_BOOKEND_PRINT (args[1]);
-                SCX_BOOKEND_PRINT ("============================");
 
                 // exec
                 execvp (args[0], args);

@@ -300,10 +300,8 @@ module Fluent
                             _uploadData = _json["DataItems"].reject {|x| x["SubType"] == NPM_DIAG}
                             _diagLogs   = _json["DataItems"].select {|x| x["SubType"] == NPM_DIAG}
                             _validUploadDataItems = Array.new
-                            _batchTime = Time.now.utc.strftime("%Y-%m-%d %H:%M:%SZ")
-                            _subtypeList = ["EndpointHealth", "EndpointPath", "ExpressRoutePath", "EndpointDiagnostics", "ConnectionMonitorTestResult", "ConnectionMonitorPath"]
+                            _subtypeList = ["EndpointHealth", "EndpointPath", "ExpressRoutePath", "EndpointDiagnostics", "ConnectionMonitorTestResult", "ConnectionMonitorPath", "NetworkAgentDiagnostics"]
                             _uploadData.each do |item|
-                                item["TimeGenerated"] = _batchTime
                                 if item.key?("SubType")
                                     # Append FQDN to path data
                                     if !@fqdn.nil? and item["SubType"] == "NetworkPath"
@@ -362,6 +360,8 @@ module Fluent
                 _itemType = NPMContract::DATAITEM_CONNECTIONMONITOR_TEST
             elsif item["SubType"] == "ConnectionMonitorPath"
                 _itemType = NPMContract::DATAITEM_CONNECTIONMONITOR_PATH
+            elsif item["SubType"] == "NetworkAgentDiagnostics"
+                _itemType = NPMContract::DATAITEM_AGENT_DIAGNOSTICS
             end
 
             return false if _itemType.empty?
@@ -675,11 +675,15 @@ module Fluent
                 unless is_npmd_seen_in_ps()
                     @npmdIntendedStop = false
                     _stderrFileName = "#{File.dirname(@location_unix_endpoint)}/stderror_#{SecureRandom.uuid}.log"
-                    @npmdProcessId = Process.spawn(@binary_invocation_cmd, :err=>_stderrFileName)
-                    @last_npmd_start = Time.now
-                    @stderrFileNameHash[@npmdProcessId] = _stderrFileName
-                    _t = Thread.new {handle_exit(@npmdProcessId)}
-                    Logger::logInfo "NPMD Agent running with process id #{@npmdProcessId}"
+                    begin
+                        @npmdProcessId = Process.spawn(@binary_invocation_cmd, :err=>_stderrFileName)
+                        @last_npmd_start = Time.now
+                        @stderrFileNameHash[@npmdProcessId] = _stderrFileName
+                        _t = Thread.new {handle_exit(@npmdProcessId)}
+                        Logger::logInfo "NPMD Agent running with process id #{@npmdProcessId}"
+                    rescue
+                        log_error "Unable to spawn NPMD Agent binary"
+                    end
                 else
                     Logger::logInfo "Npmd already seen in PS"
                 end
