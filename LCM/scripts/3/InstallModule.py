@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import imp
 import os
 import stat
@@ -31,11 +31,15 @@ def usage():
     sys.exit(1)
 
 def exitWithError(message, errorCode = 1):
+    if (isinstance(message, bytes)):
+        message = message.decode()
     errorMessage = "ERROR from InstallModule.py: " + message
     print(errorMessage)
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
+    if (isinstance(message, bytes)):
+        message = message.decode()
     verboseMessage = "VERBOSE from InstallModule.py: " + message
     print(verboseMessage)
 
@@ -65,7 +69,7 @@ def getPlatformArchitectureFolderName():
 
 
 def regenerateDscPythonScriptInitFiles():
-    regenerateInitFilesResult = subprocess.call("(python /opt/microsoft/omsconfig/Scripts/RegenerateInitFiles.py)", shell=True)
+    regenerateInitFilesResult = subprocess.call("(python3 /opt/microsoft/omsconfig/Scripts/3/RegenerateInitFiles.py)", shell=True)
     print("The result code is", regenerateInitFilesResult)
     if regenerateInitFilesResult != 0:
         exitWithError("Failed to regenerate the DSC __init__.py files with the result code", regenerateInitFilesResult)
