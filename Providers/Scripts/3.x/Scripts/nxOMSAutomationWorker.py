@@ -23,18 +23,18 @@ protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 try:
     serializerfactory = imp.load_source('serializerfactory',
-                                        '../../modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/serializerfactory.py')
+                                        '../../modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker/serializerfactory.py')
 except:
     # this is the path when running tests
     serializerfactory = imp.load_source('serializerfactory',
-                                        '../../nxOMSAutomationWorker/automationworker/worker/serializerfactory.py')
+                                        '../../nxOMSAutomationWorker/automationworker/3.x/worker/serializerfactory.py')
 
 try:
     linuxutil = imp.load_source('linuxutil',
-                                '../../modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/linuxutil.py')
+                                '../../modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker/linuxutil.py')
 except:
     linuxutil = imp.load_source('linuxutil',
-                                '../../nxOMSAutomationWorker/automationworker/worker/linuxutil.py')
+                                '../../nxOMSAutomationWorker/automationworker/3.x/worker/linuxutil.py')
 
 LG = nxDSCLog.DSCLog
 
@@ -63,7 +63,7 @@ def Set_Marshall(ResourceSettings):
 
         try:
             kill_any_worker_running_as_omsagent(
-                worker_pgrep_pattern="/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py")
+                worker_pgrep_pattern="/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker/main.py")
         except:
             log(INFO, "Unable to kill old omsagent worker")
             pass
@@ -318,15 +318,15 @@ OMS_ADMIN_CONFIG_FILE = os.path.join(OMS_PRIMARY_WORKSPACE_CONF_DIR, "omsadmin.c
 OMS_AGENTID_FILE= "/etc/opt/microsoft/omsagent/agentid"
 WORKING_DIRECTORY_PATH = "/var/opt/microsoft/omsagent/run/automationworker"
 DIY_WORKING_DIRECTORY_PATH = "/home/nxautomation/run"
-WORKER_MANAGER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py"
-HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/hybridworker.py"
+WORKER_MANAGER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker/main.py"
+HYBRID_WORKER_START_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker/hybridworker.py"
 PROXY_CONF_PATH_LEGACY = os.path.join(OMS_PRIMARY_WORKSPACE_CONF_DIR, "proxy.conf")
 PROXY_CONF_PATH_NEW = "/etc/opt/microsoft/omsagent/proxy.conf"
-REGISTRATION_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/scripts/register_oms.py"
+REGISTRATION_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/scripts/register_oms.py"
 OMS_CERTIFICATE_PATH = "/etc/opt/microsoft/omsagent/certs/oms.crt"
 OMS_CERT_KEY_PATH = "/etc/opt/microsoft/omsagent/certs/oms.key"
 KEYRING_PATH = "/etc/opt/omi/conf/omsconfig/keyring.gpg"
-OMS_UTIL_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/omsutil.py"
+OMS_UTIL_FILE_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker/omsutil.py"
 
 # permission level rwx rwx ---
 # leading zero is necessary because this is an octal number
