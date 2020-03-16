@@ -2087,7 +2087,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
 	else
 	{
 		// If python2 does not exist, look for python3
-		memset(&data[0], 0, sizeoff(data));	
+		memset(&data[0], 0, sizeof(data));	
         	pipe = popen("python3 --version 2>&1", "r");
         	fgets(data, BUFSIZ, pipe);
 		if (!strstr(data, "not found")) {
