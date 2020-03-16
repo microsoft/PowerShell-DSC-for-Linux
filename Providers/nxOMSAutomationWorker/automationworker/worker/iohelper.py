@@ -6,11 +6,10 @@
 
 import os
 
-# octal numbers in python3 now must be specified using "0o" or "0O" according to "https://www.python.org/dev/peps/pep-3127/#id19"
-os.umask(0o77)
+os.umask(077)
 
 
-def write_to_file(file_path, data, mode="w"):
+def write_to_file(file_path, data, mode="wb"):
     """Writes the data to the specified file_path. If the path doesn't exist, it will be created.
 
     Args:

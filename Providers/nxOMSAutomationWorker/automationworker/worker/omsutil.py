@@ -8,11 +8,9 @@ from optparse import OptionParser
 
 import grp
 import pwd
-import util
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-util.add_all_packages_under_automationworker_to_sys_path()
 
 from worker import configuration
 from worker import serializerfactory
@@ -53,53 +51,53 @@ def initialize():
                 process, output, error = linuxutil.popen_communicate(["sudo", "/usr/sbin/usermod", "-g", "nxautomation",
                                                                       "-A", "omsagent,omiusers", "nxautomation"])
                 if process.returncode != 0:
-                    raise Exception("Unable to add nxautomation to omsagent group. Error: " + str(error.decode()))
+                    raise Exception("Unable to add nxautomation to omsagent group. Error: " + str(error))
                 else:
                     print_success_message = True
             else:
                 print_success_message = True
             if print_success_message:
-                print("Successfully added omsagent secondary group to nxautomation user.")
+                print "Successfully added omsagent secondary group to nxautomation user."
 
     # change permissions for the keyring.gpg
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+r",
                                                           "/etc/opt/omi/conf/omsconfig/keyring.gpg"])
     if process.returncode != 0:
-        raise Exception("Unable set group permission to keyring. Error: " + str(error.decode()))
+        raise Exception("Unable set group permission to keyring. Error: " + str(error))
     else:
-        print("Successfully set group permissions to keyring.gpg.")
+        print "Successfully set group permissions to keyring.gpg."
 
     # change permission for the certificate folder, oms.crt and oms.key
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+rx", "-R",
                                                           "/etc/opt/microsoft/omsagent/certs"])
     if process.returncode != 0:
-        raise Exception("Unable set group permissions to certificate folder. Error: " + str(error.decode()))
+        raise Exception("Unable set group permissions to certificate folder. Error: " + str(error))
     else:
-        print("Successfully set group permissions to certificate folder.")
+        print "Successfully set group permissions to certificate folder."
 
     # change owner for the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chown", "nxautomation:omiusers", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
-        raise Exception("Unable set group owner on working directory. Error: " + str(error.decode()))
+        raise Exception("Unable set group owner on working directory. Error: " + str(error))
     else:
-        print("Successfully set group permissions on working directory.")
+        print "Successfully set group permissions on working directory."
 
     # change permission for the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "gu=rwx", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
-        raise Exception("Unable set permissions on working directory. Error: " + str(error.decode()))
+        raise Exception("Unable set permissions on working directory. Error: " + str(error))
     else:
-        print("Successfully set permissions on working directory.")
+        print "Successfully set permissions on working directory."
 
     # explicitly prevent others from accessing the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "o=", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
     if process.returncode != 0:
-        raise Exception("Unable set permissions on working directory. Error: " + str(error.decode()))
+        raise Exception("Unable set permissions on working directory. Error: " + str(error))
     else:
-        print("Successfully set permissions on working directory.")
+        print "Successfully set permissions on working directory."
 
     proxy_paths = ["/etc/opt/microsoft/omsagent/conf/proxy.conf", "/etc/opt/microsoft/omsagent/proxy.conf"]
     for path in proxy_paths:
@@ -107,9 +105,9 @@ def initialize():
             process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+r", path])
 
             if process.returncode != 0:
-                raise Exception("Unable set read permission to proxy configuration file. Error: " + str(error.decode()))
+                raise Exception("Unable set read permission to proxy configuration file. Error: " + str(error))
             else:
-                print("Successfully set read permission to proxy configuration file.")
+                print "Successfully set read permission to proxy configuration file."
 
     # create home dir for nxautomation
     diydirs.create_persistent_diy_dirs()
@@ -119,7 +117,7 @@ def initialize():
 
 def dmidecode():
     """Returns the content of dmidecode."""
-    print(linuxutil.invoke_dmidecode())
+    print linuxutil.invoke_dmidecode()
 
 
 def main():

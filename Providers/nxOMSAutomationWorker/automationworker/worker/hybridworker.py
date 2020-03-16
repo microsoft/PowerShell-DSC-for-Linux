@@ -2,10 +2,7 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-import importHelper
-importHelper.install_aliases()
-
-import configparser
+import ConfigParser
 import os
 import platform
 import shutil
@@ -123,8 +120,8 @@ def generate_state_file():
         os.remove(state_file_path)
 
     section = "state"
-    conf_file = open(state_file_path, 'w')
-    config = configparser.ConfigParser()
+    conf_file = open(state_file_path, 'wb')
+    config = ConfigParser.ConfigParser()
     config.add_section(section)
     config.set(section, configuration.STATE_PID, str(os.getpid()))
     config.set(section, configuration.WORKER_VERSION, str(configuration.get_worker_version()))
@@ -161,7 +158,7 @@ def generate_state_file():
             pass
 
 
-class Worker(object):
+class Worker:
     def __init__(self):
         tracer.log_worker_starting(configuration.get_worker_version())
         http_client_factory = HttpClientFactory(configuration.get_jrds_cert_path(), configuration.get_jrds_key_path(),
@@ -215,7 +212,7 @@ class Worker(object):
 
             try:
                 iohelper.assert_or_create_path(sandbox_working_dir)
-            except OSError as exception:
+            except OSError, exception:
                 tracer.log_worker_failed_to_create_sandbox_root_folder(sandbox_id, exception)
                 raise SystemExit("Sandbox folder creation failed.")
 
@@ -223,9 +220,7 @@ class Worker(object):
             process_env_variables = os.environ.copy()
             process_env_variables["sandbox_id"] = sandbox_id
 
-            python_to_be_used = util.get_python_to_be_used()
-
-            cmd = [python_to_be_used, os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
+            cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
                    configuration.get_worker_configuration_file_path()]
             tracer.log_worker_starting_sandbox(sandbox_id)
             sandbox_process = subprocessfactory.create_subprocess(cmd=cmd,
@@ -242,7 +237,7 @@ class Worker(object):
     @background_thread
     def monitor_sandbox_process_outputs(self, sandbox_id, process):
         while process.poll() is None:
-            output = process.stdout.readline().decode().replace("\n", "")
+            output = process.stdout.readline().replace("\n", "")
             if output == '':
                 continue
             if output != '':
@@ -251,7 +246,7 @@ class Worker(object):
         if process.poll() != 0:
             full_error_output = ""
             while True:
-                error_output = process.stderr.readline().decode()
+                error_output = process.stderr.readline()
                 if error_output is None or error_output == '':
                     break
                 full_error_output += error_output
@@ -287,7 +282,7 @@ class Worker(object):
         terminated_sandbox_ids = []
 
         # detect terminated sandboxes
-        for sandbox_id, sandbox_process in list(self.running_sandboxes.items()):
+        for sandbox_id, sandbox_process in self.running_sandboxes.items():
             if sandbox_process.poll() is not None:
                 terminated_sandbox_ids.append(sandbox_id)
 
@@ -328,14 +323,15 @@ def main():
 if __name__ == "__main__":
     # daemonize before loading the logging library to prevent deadlock in 2.4 (see: http://bugs.python.org/issue6721)
     import linuxutil
+
     linuxutil.daemonize()
 
-    import util
     try:
         import configuration
         import iohelper
         import subprocessfactory
         import tracer
+        import util
         from httpclientfactory import HttpClientFactory
         from jrdsclient import JRDSClient
         from workerexception import *

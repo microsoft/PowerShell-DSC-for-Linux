@@ -4,10 +4,7 @@
 
 """Job module. Contains a class representation of an "automation" job."""
 
-import importHelper
-importHelper.install_aliases()
-
-import queue
+import Queue
 import sys
 import time
 import traceback
@@ -86,11 +83,11 @@ class Job(Thread):
             self.initialize_runtime()
             self.execute_runbook()
             self.unload_job()
-        except (WorkerUnsupportedRunbookType, OSUnsupportedRunbookType) as e:
+        except (WorkerUnsupportedRunbookType, OSUnsupportedRunbookType), e:
             tracer.log_sandbox_job_unsupported_runbook_type(self.job_id, e.message)
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
-        except (InvalidRunbookSignature, GPGKeyringNotConfigured) as e:
+        except (InvalidRunbookSignature, GPGKeyringNotConfigured), e:
             self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
             self.unload_job()
         except Exception:
@@ -134,7 +131,7 @@ class Job(Thread):
                     self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.STOPPING, False)
                     self.runtime.kill_runbook_subprocess()
                     break
-            except queue.Empty:
+            except Queue.Empty:
                 pass
             time.sleep(0.2)
 
@@ -179,7 +176,7 @@ class Job(Thread):
     def get_full_stderr_content(stderr):
         full_error_output = ""
         while True:
-            error_output = stderr.readline().decode()
+            error_output = stderr.readline()
             if error_output is None or error_output == '':
                 break
             full_error_output = "\n".join([full_error_output, error_output])

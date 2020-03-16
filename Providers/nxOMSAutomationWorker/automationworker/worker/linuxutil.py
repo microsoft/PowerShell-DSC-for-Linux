@@ -2,7 +2,6 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-from __future__ import print_function
 import os
 import subprocess
 import sys
@@ -31,7 +30,7 @@ PY_MICRO_VERSION = 2
 def posix_only(func):
     """Decorator to prevent linux specific methods to run on other OS."""
     if is_posix_host() is False:
-        print(func.__name__ + " isn't supported on " + str(os.name) + " os.")
+        print func.__name__ + " isn't supported on " + str(os.name) + " os."
         return bypass
     else:
         return func
@@ -56,7 +55,7 @@ def format_process_entries_to_list(process_list):
     """
     formatted_entries = []
     for entry in process_list:
-        sanitized_entry = [_f for _f in entry.split(" ") if _f]
+        sanitized_entry = filter(None, entry.split(" "))
         if len(sanitized_entry) < 1 or sanitized_entry == PS_FJH_HEADER:
             continue
         process = ProcessModel(sanitized_entry)
@@ -95,7 +94,6 @@ def is_azure_vm(dmidecode_output):
     Returns:
         bool, true if the host is an azure vm.
     """
-    #print("linux util dmidecode : "+ str(dmidecode_output))
     asset_tags = re.findall(get_azure_vm_asset_tag(), dmidecode_output)
 
     for tag in asset_tags:
@@ -125,7 +123,6 @@ def get_vm_unique_id_from_dmidecode(byteorder, dmidecode_output):
         return uuid
 
     uuid_part = uuid.split("-")
-    print(uuid_part[0])
     big_endian_uuid = "-".join([convert_to_big_endian(uuid_part[0]),
                                 convert_to_big_endian(uuid_part[1]),
                                 convert_to_big_endian(uuid_part[2]),
@@ -136,9 +133,9 @@ def get_vm_unique_id_from_dmidecode(byteorder, dmidecode_output):
 
 def convert_to_big_endian(little_endian_value):
     """Converts the little endian representation of the value into a big endian representation of the value"""
-    codecs_decoded =  codecs.decode(little_endian_value, "hex")
-    codecs_reordered = codecs_decoded[::-1]
-    return codecs.encode(codecs_reordered, "hex").decode()
+    hex = little_endian_value.decode('hex')
+    reordered_hex = hex[::-1]
+    return reordered_hex.encode('hex')
 
 
 @posix_only
@@ -149,7 +146,6 @@ def generate_uuid():
     """
     proc = subprocess.Popen(["cat", "/proc/sys/kernel/random/uuid"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     uuid, error = proc.communicate()
-    uuid = uuid.decode()
     if proc.poll() != 0:
         raise Exception("Unable to get uuid from /proc/sys/kernel/random/uuid : " + str(error))
     return uuid.strip()
@@ -204,7 +200,6 @@ def get_current_user_processes():
     current_username = get_current_username()
     proc = subprocess.Popen(["ps", "-fjH", "-u", current_username], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = proc.communicate()
-    output = output.decode()
     if proc.poll() != 0:
         raise Exception("Unable to get processes : " + str(error))
     formatted_entries = format_process_entries_to_list(output.split("\n"))
@@ -220,7 +215,6 @@ def get_lsb_release():
     """
     proc = subprocess.Popen(["lsb_release", "-i", "-d", "-r", "-c"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = proc.communicate()
-    output = output.decode()
     if proc.poll() != 0:
         raise Exception("Unable to get lsb_release info. Error : " + str(error))
 
@@ -304,9 +298,9 @@ def get_cert_info(certificate_path):
     if p.poll() != 0:
         raise Exception("Unable to get certificate subject.")
 
-    return parse_issuer_from_openssl_output(raw_issuer.decode()), \
-           parse_subject_from_openssl_output(raw_subject.decode()), \
-           parse_thumbprint_from_openssl_output(raw_fingerprint.decode())
+    return parse_issuer_from_openssl_output(raw_issuer), \
+           parse_subject_from_openssl_output(raw_subject), \
+           parse_thumbprint_from_openssl_output(raw_fingerprint)
 
 
 def parse_thumbprint_from_openssl_output(raw_fingerprint):
@@ -363,10 +357,10 @@ def fork_and_exit_parent():
     try:
         pid = os.fork()
         if pid > 0:
-            print("parent process " + str(os.getpid()) + " exiting")
+            print "parent process " + str(os.getpid()) + " exiting"
             sys.exit(0)
-    except OSError as e:
-        print("fork failed. " + str(e.message))
+    except OSError, e:
+        print "fork failed. " + str(e.message)
         sys.exit(1)
 
 
@@ -429,7 +423,7 @@ def set_permission_recursive(permission, path):
     if process.returncode != 0:
         raise Exception(
             "Unable to change permission of " + str(path) + " to " + str(permission) + ". Error : " + str(error))
-    print("Permission changed to " + str(permission) + " for " + str(path))
+    print "Permission changed to " + str(permission) + " for " + str(path)
 
 
 def set_user_and_group_recursive(owning_username, owning_group_name, path):
@@ -445,10 +439,10 @@ def set_user_and_group_recursive(owning_username, owning_group_name, path):
     process, output, error = popen_communicate(cmd)
     if process.returncode != 0:
         raise Exception("Unable to change owner of " + str(path) + " to " + str(owners) + ". Error : " + str(error))
-    print("Owner changed to " + str(owners) + " for " + str(path))
+    print "Owner changed to " + str(owners) + " for " + str(path)
 
 
-class ProcessModel(object):
+class ProcessModel:
     def __init__(self, process_info):
         """FORMAT : ['UID', 'PID', 'PPID', 'PGID', 'SID', 'C', 'STIME', 'TTY', 'TIME', 'CMD']"""
         self.uid = process_info[0]

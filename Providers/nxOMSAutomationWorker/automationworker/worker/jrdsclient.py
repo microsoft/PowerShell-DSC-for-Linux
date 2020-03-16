@@ -14,7 +14,7 @@ from workerexception import *
 
 transient_status_codes = set([408, 429, 500, 502, 503, 504])
 
-class JRDSClient(object):
+class JRDSClient:
     def __init__(self, http_client):
         self.httpClient = http_client
         self.protocol_version = "1.0"
@@ -535,7 +535,7 @@ class JRDSClient(object):
         raise AutomationAssetException("An unknown error occurred. Unable to get the requested connection asset.")
 
 
-class JobData(object):
+class JobData:
     """JRDS JobData model."""
 
     def __init__(self, deserialized_response):
@@ -575,7 +575,7 @@ class JobData(object):
         self.trigger_source = deserialized_response["triggerSource"]
 
 
-class JobUpdatableData(object):
+class JobUpdatableData:
     """JRDS JobUpdatableData model."""
 
     def __init__(self, deserialized_response):
@@ -604,7 +604,7 @@ class JobUpdatableData(object):
         self.runbook_key = deserialized_response["RunbookKey"]
 
 
-class RunbookData(object):
+class RunbookData:
     """JRDS RunbookData model."""
 
     def __init__(self, deserialized_response):

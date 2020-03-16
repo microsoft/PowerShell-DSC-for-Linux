@@ -4,22 +4,15 @@
 
 """Sandbox module."""
 
-import importHelper
-importHelper.install_aliases()
-
 import os
 import sys
 import time
 import traceback
-from queue import Queue, Empty
-import util
-
-# append worker binary source path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-util.add_all_packages_under_automationworker_to_sys_path()
+from Queue import Queue, Empty
 
 import configuration
 import tracer
+import util
 from automationconstants import jobstatus
 from automationconstants import pendingactions
 from httpclientfactory import HttpClientFactory
@@ -100,7 +93,7 @@ class Sandbox:
         terminated_job_ids = []
 
         # clean up finished jobs
-        for job_id, job_tuple in list(job_map.items()):
+        for job_id, job_tuple in job_map.items():
             if job_tuple[0].isAlive() is False:
                 try:
                     job_tuple[2].get(block=False)

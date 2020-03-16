@@ -18,7 +18,7 @@ PY_MICRO_VERSION = 2
 
 def exit_on_error(filename, message, exit_code=-1):
     """Generates a crash log on disk in the temp directory then kills the current process."""
-    print(str(message))
+    print str(message)
     try:
         crash_log = open(os.path.join(tempfile.gettempdir(), filename), "w")
         crash_log.write(message)
@@ -35,7 +35,7 @@ def generate_uuid():
     """
     version_info = sys.version_info
     try:
-        if (version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] >= 5) or version_info[PY_MAJOR_VERSION] == 3:
+        if version_info[PY_MAJOR_VERSION] == 2 and version_info[PY_MINOR_VERSION] >= 5:
             import uuid
             uuid = str(uuid.uuid4())
         elif linuxutil.is_posix_host():
@@ -62,31 +62,9 @@ def assert_file_read_permission(file_path):
         f = open(file_path)
         f.close()
         return True
-    except IOError as e:
+    except IOError, e:
         if e.errno == errno.EACCES:
             return False
         raise
     except:
         raise
-
-def get_python_to_be_used():
-        import sys
-        python_version = int(sys.version[0])
-        python_to_be_used = "python"
-        if python_version == 3:
-            python_to_be_used = "python3"
-        return python_to_be_used
-
-WORKER_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker"
-
-def add_directories_under_to_sys_path(list_of_directories, directory_path):
-    for dire in list_of_directories:
-        imm_direc = str(directory_path + "/" + dire)
-        sys.path.append(imm_direc)
-
-def add_all_packages_under_automationworker_to_sys_path():
-    if(os.path.isdir(WORKER_PATH)):
-        list_of_directories_under_worker = next(os.walk(WORKER_PATH))[1]
-    else:
-        print("Worker path is incorrect")
-    add_directories_under_to_sys_path(list_of_directories_under_worker, WORKER_PATH)    

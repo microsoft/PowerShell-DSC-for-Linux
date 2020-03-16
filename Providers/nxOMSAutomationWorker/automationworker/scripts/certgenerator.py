@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """Script to generate certificate and key file."""
+
 from OpenSSL import crypto
 from socket import gethostname
 import argparse
@@ -27,9 +28,9 @@ def generate_cert_and_key(cert_name, key_name):
     open(cert_name, "wt").write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
     open(key_name, "wt").write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pub_key))
 
-    print ("Certificate thumprint : " + str(cert.digest("sha1").replace(":", "")))
-    print (cert_name + " created")
-    print (key_name + " created")
+    print "Certificate thumprint : " + str(cert.digest("sha1").replace(":", ""))
+    print cert_name + " created"
+    print key_name + " created"
 
 
 def main():

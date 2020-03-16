@@ -49,7 +49,7 @@ class StreamHandler(Thread):
         stream_count = 0
         while True:
             try:
-                output = codecs.getwriter('utf8')(self.runtime_process.stdout).readline().decode()
+                output = codecs.getwriter('utf8')(self.runtime_process.stdout).readline()
                 if output == '' and self.runtime_process.poll() is not None:
                     break
                 elif output:

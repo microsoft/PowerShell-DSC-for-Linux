@@ -8,7 +8,7 @@ import signal
 import subprocess
 import sys
 import time
-import os
+from distutils.spawn import find_executable
 
 import serializerfactory
 import subprocessfactory
@@ -19,42 +19,7 @@ from workerexception import *
 json = serializerfactory.get_serializer(sys.version_info)
 
 
-def find_executable(executable, path=None):
-    """Tries to find 'executable' in the directories listed in 'path'.
-    A string listing directories separated by 'os.pathsep'; defaults to
-    os.environ['PATH'].  Returns the complete filename or None if not found.
-    """
-    _, ext = os.path.splitext(executable)
-    if (sys.platform == 'win32') and (ext != '.exe'):
-        executable = executable + '.exe'
-
-    if os.path.isfile(executable):
-        return executable
-
-    if path is None:
-        path = os.environ.get('PATH', None)
-        if path is None:
-            try:
-                path = os.confstr("CS_PATH")
-            except (AttributeError, ValueError):
-                # os.confstr() or CS_PATH is not available
-                path = os.defpath
-        # bpo-35755: Don't use os.defpath if the PATH environment variable is
-        # set to an empty string
-
-    # PATH='' doesn't match, whereas PATH=':' looks in the current directory
-    if not path:
-        return None
-
-    paths = path.split(os.pathsep)
-    for p in paths:
-        f = os.path.join(p, executable)
-        if os.path.isfile(f):
-            # the file exists, we have a shot at spawn working
-            return f
-    return None
-
-class Runtime(object):
+class Runtime:
     """Runtime base class."""
 
     def __init__(self, job_data, runbook):
@@ -207,6 +172,6 @@ def get_default_python_interpreter_major_version():
     p = subprocessfactory.create_subprocess(cmd=cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     default_interpreter_version, error = p.communicate()
     if p.returncode == 0:
-        return int(default_interpreter_version.decode().strip())
+        return int(default_interpreter_version.strip())
     else:
         return None
