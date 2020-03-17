@@ -2079,7 +2079,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
 	// Look for python2
         FILE * pipe = popen("python --version 2>&1", "r");
         fgets(data, BUFSIZ, pipe);
-	if (!strstr(data, "not found")) 
+	if (!strstr(data, "not found"))
 	{
 		DSC_LOG_INFO("Found python2 in WebPullClient.\n");
           	isPython2 = 1;
@@ -2087,7 +2087,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
 	else
 	{
 		// If python2 does not exist, look for python3
-		memset(&data[0], 0, sizeof(data));	
+		memset(&data[0], 0, sizeof(data));
         	pipe = popen("python3 --version 2>&1", "r");
         	fgets(data, BUFSIZ, pipe);
 		if (!strstr(data, "not found")) {
@@ -2104,7 +2104,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
       	else
       	{
 		DSC_LOG_INFO("Calling InstallModule with python3");
-		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/3/InstallModule.py", zipPath, verifyFlag, " 2>&1 | sudo tee /home/micy/install-output.txt");
+		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/InstallModule.py", zipPath, verifyFlag, " 2>&1 | sudo tee /home/micy/install-output.txt");
       	}
         DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
@@ -2127,7 +2127,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
                 else
                 {
                     DSC_LOG_INFO("Calling RemoveModule with python3");
-                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/3/RemoveModule.py", current->moduleName, " 2>&1 | sudo tee /home/micy/remove-output.txt");
+                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/RemoveModule.py", current->moduleName, " 2>&1 | sudo tee /home/micy/remove-output.txt");
                 }
 
                 retval = system(stringBuffer);
@@ -2879,7 +2879,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         headerChunk.size = 0;
         dataChunk.data = (char *)malloc(1);
         dataChunk.size = 0;
-        
+
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, reportText);

@@ -39,28 +39,28 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh; intermediate/Scripts/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/calcPythonPath.sh; intermediate/Scripts/calcPythonPath.sh; 755; ${{RUN_AS_USER}}; root
 
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/client.py; intermediate/Scripts/client.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/nxDSCLog.py; intermediate/Scripts/nxDSCLog.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/zipfile2.6.py; intermediate/Scripts/zipfile2.6.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/OmsConfigHostHelpers.py; intermediate/Scripts/3/OmsConfigHostHelpers.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/StartDscConfiguration.py; intermediate/Scripts/3/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/TestDscConfiguration.py; intermediate/Scripts/3/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/GetDscConfiguration.py; intermediate/Scripts/3/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/PerformInventory.py; intermediate/Scripts/3/PerformInventory.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/SetDscLocalConfigurationManager.py; intermediate/Scripts/3/SetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/GetDscLocalConfigurationManager.py; intermediate/Scripts/3/GetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/PerformRequiredConfigurationChecks.py; intermediate/Scripts/3/PerformRequiredConfigurationChecks.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/OperationStatusUtility.py; intermediate/Scripts/3/OperationStatusUtility.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RestoreConfiguration.py; intermediate/Scripts/3/RestoreConfiguration.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/InstallModule.py; intermediate/Scripts/3/InstallModule.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RemoveModule.py; intermediate/Scripts/3/RemoveModule.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RegenerateInitFiles.py; intermediate/Scripts/3/RegenerateInitFiles.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/RegisterHelper.sh; intermediate/Scripts/3/RegisterHelper.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/Register.py; intermediate/Scripts/3/Register.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/StatusReport.sh; intermediate/Scripts/3/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3/ImportGPGKey.sh; intermediate/Scripts/3/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/client.py; intermediate/Scripts/client.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/nxDSCLog.py; intermediate/Scripts/nxDSCLog.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/zipfile2.6.py; intermediate/Scripts/zipfile2.6.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/OmsConfigHostHelpers.py; intermediate/Scripts/python3/OmsConfigHostHelpers.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/StartDscConfiguration.py; intermediate/Scripts/python3/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/TestDscConfiguration.py; intermediate/Scripts/python3/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/GetDscConfiguration.py; intermediate/Scripts/python3/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/PerformInventory.py; intermediate/Scripts/python3/PerformInventory.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/SetDscLocalConfigurationManager.py; intermediate/Scripts/python3/SetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/GetDscLocalConfigurationManager.py; intermediate/Scripts/python3/GetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/PerformRequiredConfigurationChecks.py; intermediate/Scripts/python3/PerformRequiredConfigurationChecks.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/OperationStatusUtility.py; intermediate/Scripts/python3/OperationStatusUtility.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RestoreConfiguration.py; intermediate/Scripts/python3/RestoreConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/InstallModule.py; intermediate/Scripts/python3/InstallModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RemoveModule.py; intermediate/Scripts/python3/RemoveModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RegenerateInitFiles.py; intermediate/Scripts/python3/RegenerateInitFiles.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RegisterHelper.sh; intermediate/Scripts/python3/RegisterHelper.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/Register.py; intermediate/Scripts/python3/Register.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/StatusReport.sh; intermediate/Scripts/python3/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/ImportGPGKey.sh; intermediate/Scripts/python3/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
 
 #if BUILD_OMS == 1
 
@@ -80,7 +80,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh; intermediate/Scripts/NPMAgentBinaryCap.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh; intermediate/Scripts/OMSAuditdPlugin.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/Scripts/3/OMS_MetaConfigHelper.py; intermediate/Scripts/3/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/python3/OMS_MetaConfigHelper.py; intermediate/Scripts/python3/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nx_1.0.zip; release/nx_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip; release/nxOMSPerfCounter_2.2.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.5.zip; release/nxOMSSyslog_2.5.zip; 755; ${{RUN_AS_USER}}; root
@@ -128,7 +128,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/module_packages;           755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/keys;                      755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts;                   755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/Scripts/3;                 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3;                 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x;         755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x;         755; ${{RUN_AS_USER}}; root
@@ -349,12 +349,12 @@ fi
 # Set up built-in resource modules for OMS DSC
 if [ "$pythonVersion" = "python3" ]; then
 	echo "Running python3, python version is ", $pythonVersion
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.4.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.4.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip 0"
 else
   echo "Running  python version is ", $pythonVersion
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
@@ -368,14 +368,14 @@ fi
 #if PFARCH == x86
 if [ "$pythonVersion" = "python3" ]; then
   echo "Running python3 python version is ", $pythonVersion
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.3.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.29.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.45.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.3.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.29.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.45.zip 0"
 else
   echo "Running python2 python version is ", $pythonVersion
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
@@ -398,7 +398,7 @@ if [ -f /opt/microsoft/dsc/Scripts/InstallModule.py ]; then
   if [ -f /opt/microsoft/dsc/module_packages/nx_1.0.zip ]; then
     if [ "$pythonVersion" = "python3" ]; then
       echo "Running python3"
-      /opt/microsoft/dsc/Scripts/3/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
+      /opt/microsoft/dsc/Scripts/python3/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
     else
       echo "Running python2 in Check if DIY DSC install... python version is ", $pythonVersion
       /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
@@ -424,7 +424,7 @@ if [ -d "/etc/opt/omi/conf/omsconfig" ]; then chown -R omsagent:omiusers /etc/op
 # Set up built-in resource module for DIY DSC
 if [ "$pythonVersion" = "python3" ]; then
   echo "Running python3"
-	/opt/microsoft/dsc/Scripts/3/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
+	/opt/microsoft/dsc/Scripts/python3/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
 else
   echo "Running python2 in set up built in python version is ", $pythonVersion
 	/opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.0.zip 0
@@ -501,7 +501,7 @@ mv /etc/crontabtmp /etc/crontab
 if [ -f /etc/opt/microsoft/omsagent/conf/omsadmin.conf ]; then
   if [ "$pythonVersion" = "python3" ]; then
     echo "Running python3"
-    su - omsagent -c "/opt/microsoft/omsconfig/Scripts/3/OMS_MetaConfigHelper.py"
+    su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/OMS_MetaConfigHelper.py"
   else
     echo "Running python2 if omsadmin.conf exists python version is ", $pythonVersion
     su - omsagent -c "/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py"
@@ -538,7 +538,7 @@ if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
   if [ "$pythonVersion" = "python3" ]; then
      echo "Running python3"
      for module in `ls /opt/microsoft/${{SHORT_NAME}}/modules`; do
-       /opt/microsoft/${{SHORT_NAME}}/Scripts/3/RemoveModule.py $module
+       /opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RemoveModule.py $module
      done
    else
      echo "Running python2 in remove all DSC specific data python version is ", $pythonVersion

@@ -227,10 +227,9 @@ finally:
 os.system("chown omsagent " + metamof_path)
 
 if os.geteuid() == 0:
-    # TODO: Should we use script here?
-    commandToRun = "su - omsagent -c '/opt/microsoft/omsconfig/Scripts/3/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path + "'"
+    commandToRun = "su - omsagent -c '/opt/microsoft/omsconfig/Scripts/python3/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path + "'"
 else:
-    commandToRun = "/opt/microsoft/omsconfig/Scripts/3/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
+    commandToRun = "/opt/microsoft/omsconfig/Scripts/python3/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
 
 # Apply the metaconfig using SetDscLocalConfiguration
 proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True)
