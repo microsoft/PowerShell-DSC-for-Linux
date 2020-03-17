@@ -7,7 +7,7 @@
 import os
 import sys
 
-import configuration
+import configuration3 as configuration
 import serializerfactory
 import locallogger
 

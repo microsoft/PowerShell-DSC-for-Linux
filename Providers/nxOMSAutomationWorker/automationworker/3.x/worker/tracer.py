@@ -11,7 +11,7 @@ import threading
 
 import traceback
 
-import configuration
+import configuration3 as configuration
 import locallogger
 import util
 from httpclientfactory import HttpClientFactory

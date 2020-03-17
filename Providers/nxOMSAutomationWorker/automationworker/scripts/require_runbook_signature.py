@@ -24,7 +24,7 @@ def main():
         sys.exit(1)
 
     version_info = sys.version
-    if int(version_info[PY_MAJOR_VERSION]) == 2 and int(version_info[PY_MINOR_VERSION]) <= 5:
+    if int(version_info[PY_MAJOR_VERSION]) == 2 and int(version_info[PY_MINOR_VERSION]) <= 7:
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         import require_runbook_signature2
         if options.f is True:
@@ -34,8 +34,10 @@ def main():
             require_runbook_signature2.set_signature_enforcement_policy(True)
             print ("Successfully configured this host to execute signed runbook exclusively.")
     else:
-        AUTOMATIONWORKER_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/scripts"
+        AUTOMATIONWORKER_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker"
+        AUTOMATIONSCRIPTS_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/scripts"
         sys.path.insert(1,AUTOMATIONWORKER_PATH)
+        sys.path.insert(2, AUTOMATIONSCRIPTS_PATH)
         import require_runbook_signature3
         if options.f is True:
             require_runbook_signature3.set_signature_enforcement_policy(False)

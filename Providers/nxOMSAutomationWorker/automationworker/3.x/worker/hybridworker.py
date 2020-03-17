@@ -332,7 +332,7 @@ if __name__ == "__main__":
 
     import util
     try:
-        import configuration
+        import configuration3 as configuration
         import iohelper
         import subprocessfactory
         import tracer

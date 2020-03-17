@@ -18,7 +18,7 @@ import util
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 util.add_all_packages_under_automationworker_to_sys_path()
 
-import configuration
+import configuration3 as configuration
 import tracer
 from automationconstants import jobstatus
 from automationconstants import pendingactions

@@ -3,7 +3,7 @@
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
 """Local Logger module."""
-import configuration
+import configuration3 as configuration
 
 import sys
 import os

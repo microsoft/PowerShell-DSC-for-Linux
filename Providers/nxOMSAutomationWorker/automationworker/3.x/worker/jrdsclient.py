@@ -8,7 +8,7 @@ from datetime import datetime
 import time
 
 
-import configuration
+import configuration3 as configuration
 import locallogger
 from workerexception import *
 

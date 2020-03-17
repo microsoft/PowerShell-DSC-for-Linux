@@ -7,7 +7,7 @@
 import os
 import subprocess
 
-import configuration
+import configuration3 as configuration
 import subprocessfactory
 import tracer
 from workerexception import *

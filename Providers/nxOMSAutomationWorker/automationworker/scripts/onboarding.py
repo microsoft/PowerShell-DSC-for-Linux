@@ -67,7 +67,7 @@ def get_options_and_arguments():
 
 def register(options):
     version_info = sys.version
-    if int(version_info[PY_MAJOR_VERSION]) == 2 and int(version_info[PY_MINOR_VERSION]) <= 5:
+    if int(version_info[PY_MAJOR_VERSION]) == 2 and int(version_info[PY_MINOR_VERSION]) <= 7:
         import onboarding2
         onboarding2.register(options)
     else:
@@ -78,7 +78,7 @@ def register(options):
 
 def deregister(options):
     version_info = sys.version
-    if int(version_info[PY_MAJOR_VERSION]) == 2 and int(version_info[PY_MINOR_VERSION]) <= 5:
+    if int(version_info[PY_MAJOR_VERSION]) == 2 and int(version_info[PY_MINOR_VERSION]) <= 7:
         import onboarding2
         onboarding2.deregister(options)
     else:

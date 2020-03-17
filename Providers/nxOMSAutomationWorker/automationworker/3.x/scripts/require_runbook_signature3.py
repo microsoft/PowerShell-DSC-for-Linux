@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 packagesimportutil.add_all_packages_under_automationworker_to_sys_path()
 
 # since we are using the worker httpclient, some configuration values are expected
-from worker import configuration
+from worker import configuration3 as configuration
 from worker import diydirs
 
 

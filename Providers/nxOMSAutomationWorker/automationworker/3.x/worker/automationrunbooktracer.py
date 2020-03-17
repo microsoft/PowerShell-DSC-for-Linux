@@ -4,7 +4,7 @@
 
 import os
 
-import configuration
+import configuration3 as configuration
 import tracer
 
 configuration.set_config({configuration.COMPONENT: "runbook"})

@@ -6,7 +6,7 @@
 
 import os
 
-import configuration
+import configuration3 as configuration
 import gpg
 import iohelper
 import jrdsclient

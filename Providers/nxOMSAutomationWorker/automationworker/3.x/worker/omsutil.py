@@ -14,7 +14,7 @@ import util
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 util.add_all_packages_under_automationworker_to_sys_path()
 
-from worker import configuration
+from worker import configuration3 as configuration
 from worker import serializerfactory
 from worker import linuxutil
 from worker import diydirs
