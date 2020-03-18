@@ -3,6 +3,7 @@
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
 import sys
+import time 
 
 import binascii
 import configuration
@@ -34,6 +35,10 @@ def get_automation_variable_with_retry(name, retry_count=2):
         variable = jrds_client.get_variable_asset(name)
         if variable is not None:
             return json.loads(variable[KEY_VALUE])
+        time_to_wait = 3 * (2 ** tries)
+        if time_to_wait > 60:
+            time_to_wait = 60
+        time.sleep(time_to_wait)
         tries = tries + 1
     # log not able to retrieve data
     log_error("Retrieval of automation variable failed for " + str(name) +".")
@@ -55,6 +60,10 @@ def get_automation_credential_with_retry(name, retry_count=2):
         credential = jrds_client.get_credential_asset(name)
         if credential is not None:
             return {"username": credential[KEY_USERNAME], "password": credential[KEY_VALUE]}
+        time_to_wait = 3 * (2 ** tries)
+        if time_to_wait > 60:
+            time_to_wait = 60
+        time.sleep(time_to_wait)
         tries = tries + 1
     # log not able to retrieve data
     log_error("Retrieval of automation credential failed for " + str(name) +".")
@@ -73,6 +82,10 @@ def get_automation_connection_with_retry(name, retry_count=2):
         connection = jrds_client.get_connection_asset(name)
         if connection is not None:
             return connection[KEY_CONNECTION_FIELDS]
+        time_to_wait = 3 * (2 ** tries)
+        if time_to_wait > 60:
+            time_to_wait = 60
+        time.sleep(time_to_wait)
         tries = tries + 1
     # log not able to retrieve data
     log_error("Retrieval of automation connection failed for " + str(name) +".")
@@ -92,6 +105,10 @@ def get_automation_certificate_with_retry(name, retry_count = 2):
         certificate = jrds_client.get_certificate_asset(name)
         if certificate is not None:
             return binascii.a2b_base64(certificate[KEY_VALUE])
+        time_to_wait = 3 * (2 ** tries)
+        if time_to_wait > 60:
+            time_to_wait = 60
+        time.sleep(time_to_wait)
         tries = tries + 1
     # log not able to retrieve data
     log_error("Retrieval of automation certificate failed for " + str(name) +".")
