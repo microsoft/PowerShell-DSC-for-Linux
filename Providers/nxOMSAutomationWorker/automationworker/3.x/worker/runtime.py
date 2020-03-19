@@ -203,7 +203,7 @@ def get_default_python_interpreter_major_version():
         int, the interpreter major version
         None, if the default interpreter version cannot be detected
     """
-    cmd = ["python", "-c", "import sys;print(sys.version[0])"]  # need to use print() for python3 compatibility
+    cmd = ["python3", "-c", "import sys;print(sys.version[0])"]  # need to use print() for python3 compatibility
     p = subprocessfactory.create_subprocess(cmd=cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     default_interpreter_version, error = p.communicate()
     if p.returncode == 0:
