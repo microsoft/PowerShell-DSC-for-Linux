@@ -118,21 +118,21 @@ class RequestResponse:
     """Encapsulates all request response for http clients. Will also deserialize the response when the raw response
     data is deserializable.
     """
-    SERVICE_UNAVAILABLE_STR = 'Service Unavailable'
-    HTML_HEADER_TAG_REGEX = '<h[0-9]+>(.*?)</h[0-9]+>'
-    HTML_BODY_TAG_REGEX = '<BODY>(.*?)</BODY>'
-    HTML_PARAGRAPH_TAG_REGEX = '<p>(.*?)</p>'
 
     @staticmethod
     def check_if_service_unavailable_response_is_received(response_body):
-        response_body = regex.compile(RequestResponse.HTML_BODY_TAG_REGEX).findall(response_body)
+        SERVICE_UNAVAILABLE_STR = 'Service Unavailable'
+        HTML_HEADER_TAG_REGEX = '<h[0-9]+>(.*?)</h[0-9]+>'
+        HTML_BODY_TAG_REGEX = '<BODY>(.*?)</BODY>'
+        HTML_PARAGRAPH_TAG_REGEX = '<p>(.*?)</p>'
+        response_body = regex.compile(HTML_BODY_TAG_REGEX).findall(response_body)
 
         if len(response_body) >= 1:
             response_body = response_body[0]
-            headers = regex.compile(RequestResponse.HTML_HEADER_TAG_REGEX).findall(response_body)
+            headers = regex.compile(HTML_HEADER_TAG_REGEX).findall(response_body)
             # explicit check of service unavailable
-            if len(headers) >= 1 and headers.__contains__(RequestResponse.SERVICE_UNAVAILABLE_STR):
-                detailed_response = regex.compile(RequestResponse.HTML_PARAGRAPH_TAG_REGEX).findall(response_body)
+            if len(headers) >= 1 and headers.__contains__(SERVICE_UNAVAILABLE_STR):
+                detailed_response = regex.compile(HTML_PARAGRAPH_TAG_REGEX).findall(response_body)
                 resultant_response = ""
                 if detailed_response is not None:
                     for response in detailed_response:
