@@ -46,7 +46,7 @@ def get_automation_variable_with_retry(name, retry_count=2):
 def get_automation_variable(name):
     variable = jrds_client.get_variable_asset(name)
     if variable is None:
-        get_automation_variable_with_retry(name, 2)    
+        return get_automation_variable_with_retry(name, 2)    
     else:
         return json.loads(variable[KEY_VALUE])
 
@@ -71,7 +71,7 @@ def get_automation_credential_with_retry(name, retry_count=2):
 def get_automation_credential(name):
     credential = jrds_client.get_credential_asset(name)
     if credential is None:
-        get_automation_credential_with_retry(name, 2)
+        return get_automation_credential_with_retry(name, 2)
     else:
         return {"username": credential[KEY_USERNAME], "password": credential[KEY_VALUE]}
 
@@ -93,7 +93,7 @@ def get_automation_connection_with_retry(name, retry_count=2):
 def get_automation_connection(name):
     connection = jrds_client.get_connection_asset(name)
     if connection is None:
-        get_automation_connection_with_retry(name, 2)
+        return get_automation_connection_with_retry(name, 2)
     else:
         return connection[KEY_CONNECTION_FIELDS]
         
@@ -116,7 +116,7 @@ def get_automation_certificate_with_retry(name, retry_count = 2):
 def get_automation_certificate(name):
     certificate = jrds_client.get_certificate_asset(name)
     if certificate is None:
-        get_automation_certificate_with_retry(name, 2)
+        return get_automation_certificate_with_retry(name, 2)
     else:
         return binascii.a2b_base64(certificate[KEY_VALUE])
  
