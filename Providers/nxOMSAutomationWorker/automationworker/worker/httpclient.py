@@ -116,7 +116,7 @@ class HttpClient:
 
 class RequestResponse:
     """Encapsulates all request response for http clients. Will also deserialize the response when the raw response
-    data is deserializable
+    data is deserializable.
     """
     @staticmethod
     def check_if_service_unavailable_response_is_received(response_body):
