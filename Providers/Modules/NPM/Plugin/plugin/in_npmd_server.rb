@@ -675,11 +675,15 @@ module Fluent
                 unless is_npmd_seen_in_ps()
                     @npmdIntendedStop = false
                     _stderrFileName = "#{File.dirname(@location_unix_endpoint)}/stderror_#{SecureRandom.uuid}.log"
-                    @npmdProcessId = Process.spawn(@binary_invocation_cmd, :err=>_stderrFileName)
-                    @last_npmd_start = Time.now
-                    @stderrFileNameHash[@npmdProcessId] = _stderrFileName
-                    _t = Thread.new {handle_exit(@npmdProcessId)}
-                    Logger::logInfo "NPMD Agent running with process id #{@npmdProcessId}"
+                    begin
+                        @npmdProcessId = Process.spawn(@binary_invocation_cmd, :err=>_stderrFileName)
+                        @last_npmd_start = Time.now
+                        @stderrFileNameHash[@npmdProcessId] = _stderrFileName
+                        _t = Thread.new {handle_exit(@npmdProcessId)}
+                        Logger::logInfo "NPMD Agent running with process id #{@npmdProcessId}"
+                    rescue
+                        log_error "Unable to spawn NPMD Agent binary"
+                    end
                 else
                     Logger::logInfo "Npmd already seen in PS"
                 end
