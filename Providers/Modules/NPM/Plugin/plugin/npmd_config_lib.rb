@@ -279,7 +279,15 @@ module NPMDConfig
                 _rule["AlertConfiguration"] = Hash.new;
                 _rule["Exceptions"] = createActOnElements(x["Exceptions"], subnetIdHash);
                 _rule["DiscoverPaths"] = x["DiscoverPaths"].to_s
-                
+                _rule["Port"] = x["Port"].to_s
+                _rule["ListenOnPort"] = x["ListenOnPort"]
+                _rule["BiDirectional"] = x["BiDirectional"]
+                _rule["TestFrequencyInSec"] = x["Frequency"]
+                _rule["CMResourceId"] = x.has_key?("CMResourceId") ? x["CMResourceId"] : String.new
+                _rule["IngestionWorkspaceId"] = x.has_key?("IngestionWorkspaceId") ? x["IngestionWorkspaceId"] : String.new
+                _rule["WorkspaceAlias"] = x.has_key?("WorkspaceAlias") ? x["WorkspaceAlias"] : String.new
+                _rule["WorkspaceResourceId"] = x["WorkspaceResourceID"]
+
                 if _rule["NetworkTestMatrix"].empty?
                     Logger::logWarn "Skipping rule #{x["Name"]} as network test matrix is empty", Logger::loop
                     @@rule_drops += 1
@@ -309,7 +317,7 @@ module NPMDConfig
                     _ruleHash["IngestionWorkspaceId"] = _iRule.has_key?("IngestionWorkspaceId") ? _iRule["IngestionWorkspaceId"] : String.new
                     _ruleHash["WorkspaceAlias"] = _iRule.has_key?("WorkspaceAlias") ? _iRule["WorkspaceAlias"] : String.new
                     _ruleHash["Redirect"] = "false"
-                    _ruleHash["WorkspaceResourceId"] = _iRule["WorkspaceResourceID"];
+                    _ruleHash["WorkspaceResourceID"] = _iRule["WorkspaceResourceID"]
                     _ruleHash["DiscoverPaths"] = _iRule.has_key?("DiscoverPaths") ? _iRule["DiscoverPaths"].to_s : "true"
                     _ruleHash["NetTests"] = (_iRule["NetworkThresholdLoss"].to_i >= -2 and _iRule["NetworkThresholdLatency"].to_i >= -2) ? "true" : "false"
                     _ruleHash["AppTests"] = (_iRule["AppThresholdLatency"].to_i >= -2) ? "true" : "false"
@@ -335,6 +343,8 @@ module NPMDConfig
                         _epHash["TestProtocol"] = _epList[j]["Protocol"]
                         _epHash["MonitoringInterval"] = _iRule["Poll"].to_s
                         _epHash["TimeDrift"] = _epList[j]["TimeDrift"].to_s
+                        _epHash["Type"] = _epList[j]["Type"].to_s
+                        _epHash["ListenOnPort"] = _epList[j]["ListenOnPort"]
                         _endpointList.push(_epHash)
                     end
                     _ruleHash["Endpoints"] = _endpointList
@@ -617,6 +627,24 @@ module NPMDConfig
                     _rule["DiscoverPaths"] = value.has_key?("DiscoverPaths") ? value["DiscoverPaths"].to_s : "true"
                     _rule["Description"] = value["Description"]
                     _rule["Enabled"] = value["Enabled"]
+                    _rule["Port"] = value["port"]
+                    _rule["ListenOnPort"] = value["listenOnPort"]
+                    _rule["BiDirectional"] = value["bidirectional"]
+                    _rule["Frequency"] = value["frequency"]
+                    _rule["WorkspaceResourceID"] = @metadata.has_key?("WorkspaceResourceID") ? @metadata["WorkspaceResourceID"] : String.new
+                    _connectionMonitorId = value.has_key?("ConnectionMonitorId") ? value["ConnectionMonitorId"].to_s : String.new
+
+                    # Iterate over ConnectionMonitorInfoMap to get following info
+                    if !_connectionMonitorId.empty?
+                        _cmMap = _h.has_key?(EpmCMInfoTag) ? _h[EpmCMInfoTag] : Hash.new
+                        if !_cmMap.empty?
+                            _cmId = _cmMap[_connectionMonitorId.to_s]
+                            _rule["CMResourceId"] = _cmId["resourceId"]
+                            _rule["IngestionWorkspaceId"] = _cmId["ingestionWorkspaceId"]
+                            _rule["WorkspaceAlias"] = _cmId["workspaceAlias"]
+                        end
+                    end
+
                     _a << _rule
                 end
                 _a
@@ -629,62 +657,57 @@ module NPMDConfig
         def self.getEpmHashFromJson(text)
             begin
                 _h = JSON.parse(text)
-                _agentId = getCurrentAgentId()
-                if _agentId.empty?
-                    return nil
-                else
-                    _epmRules = {"Rules" => []}
-                    # Check all tests related to current agent id and push their configurations to current agent
-                    _testIds = _h[EpmAgentInfoTag][_agentId]
-                    return if _testIds.nil?
+                _epmRules = {"Rules" => []}
+                _testIds = _h[EpmTestInfoTag]
+                _testIds.each_key do |testId|
+                    _test = _h[EpmTestInfoTag][testId]
+                    _rule = Hash.new
+                    _rule["ID"] = testId
+                    _rule["Name"] = _test["Name"]
+                    _rule["Poll"] = _test["Poll"]
+                    _rule["WorkspaceResourceID"] = @metadata.has_key?("WorkspaceResourceID") ? @metadata["WorkspaceResourceID"] : String.new
+                    _rule["DiscoverPaths"] = _test.has_key?("DiscoverPaths") ? _test["DiscoverPaths"].to_s : "true"
+                    _rule["AppThresholdLoss"] = _test["AppThreshold"].nil? ? "-3" : (_test["AppThreshold"].has_key?("Loss") ? _test["AppThreshold"]["Loss"] : "-2")
+                    _rule["AppThresholdLatency"] = _test["AppThreshold"].nil? ? "-3.0" : (_test["AppThreshold"].has_key?("Latency") ? _test["AppThreshold"]["Latency"] : "-2.0")
+                    _rule["NetworkThresholdLoss"] = _test["NetworkThreshold"].nil? ? "-3" : (_test["NetworkThreshold"].has_key?("Loss") ? _test["NetworkThreshold"]["Loss"] : "-2")
+                    _rule["NetworkThresholdLatency"] = _test["NetworkThreshold"].nil? ? "-3.0" : (_test["NetworkThreshold"].has_key?("Latency") ? _test["NetworkThreshold"]["Latency"] : "-2.0")
+                    _rule["ValidStatusCodeRanges"] = _test.has_key?("ValidStatusCodeRanges") ? _test["ValidStatusCodeRanges"] : nil
+                    _rule["SourceAgentId"] = _test.has_key?("SourceAgentId") ? _test["SourceAgentId"] : nil
+                    _connectionMonitorId = _test.has_key?("ConnectionMonitorId") ? _test["ConnectionMonitorId"].to_s : String.new
 
-                    _testIds.each do |testId|
-                        _test = _h[EpmTestInfoTag][testId]
-                        _rule = Hash.new
-                        _rule["ID"] = testId
-                        _rule["Name"] = _test["Name"]
-                        _rule["Poll"] = _test["Poll"]
-                        _rule["WorkspaceResourceID"] = @metadata.has_key?("WorkspaceResourceID") ? @metadata["WorkspaceResourceID"] : String.new
-                        _rule["DiscoverPaths"] = _test.has_key?("DiscoverPaths") ? _test["DiscoverPaths"].to_s : "true"
-                        _rule["AppThresholdLoss"] = _test["AppThreshold"].nil? ? "-3" : (_test["AppThreshold"].has_key?("Loss") ? _test["AppThreshold"]["Loss"] : "-2")
-                        _rule["AppThresholdLatency"] = _test["AppThreshold"].nil? ? "-3.0" : (_test["AppThreshold"].has_key?("Latency") ? _test["AppThreshold"]["Latency"] : "-2.0")
-                        _rule["NetworkThresholdLoss"] = _test["NetworkThreshold"].nil? ? "-3" : (_test["NetworkThreshold"].has_key?("Loss") ? _test["NetworkThreshold"]["Loss"] : "-2")
-                        _rule["NetworkThresholdLatency"] = _test["NetworkThreshold"].nil? ? "-3.0" : (_test["NetworkThreshold"].has_key?("Latency") ? _test["NetworkThreshold"]["Latency"] : "-2.0")
-                        _rule["ValidStatusCodeRanges"] = _test.has_key?("ValidStatusCodeRanges") ? _test["ValidStatusCodeRanges"] : String.new
-
-                        _connectionMonitorId = _test.has_key?("ConnectionMonitorId") ? _test["ConnectionMonitorId"].to_s : String.new
-
-                        # Iterate over ConnectionMonitorInfoMap to get following info
-                        if !_connectionMonitorId.empty?
-                            _cmMap = _h.has_key?(EpmCMInfoTag) ? _h[EpmCMInfoTag] : Hash.new
-                            if !_cmMap.empty?
-                                _cmId = _cmMap[_connectionMonitorId.to_s]
-                                _rule["CMResourceId"] = _cmId["resourceId"]
-                                _rule["IngestionWorkspaceId"] = _cmId["ingestionWorkspaceId"]
-                                _rule["WorkspaceAlias"] = _cmId["workspaceAlias"]
-                            end
+                    # Iterate over ConnectionMonitorInfoMap to get following info
+                    if !_connectionMonitorId.empty?
+                        _cmMap = _h.has_key?(EpmCMInfoTag) ? _h[EpmCMInfoTag] : Hash.new
+                        if !_cmMap.empty?
+                            _cmId = _cmMap[_connectionMonitorId.to_s]
+                            _rule["CMResourceId"] = _cmId["resourceId"]
+                            _rule["IngestionWorkspaceId"] = _cmId["ingestionWorkspaceId"]
+                            _rule["WorkspaceAlias"] = _cmId["workspaceAlias"]
                         end
-
-                        # Collect endpoints details
-                        _rule["Endpoints"] = []
-
-                        # Get the list of endpoint ids
-                        _endpoints = _test["Endpoints"]
-                        _endpoints.each do |ep|
-                            _endpointHash = Hash.new
-                            _endpoint = _h[EpmEndpointInfoTag][ep]
-                            _endpointHash["Id"] = ep
-                            _endpointHash["Name"] = _endpoint.has_key?("name") ? _endpoint["name"] : String.new
-                            _endpointHash["URL"] = _endpoint["url"]
-                            _endpointHash["Port"] = _endpoint["port"]
-                            _endpointHash["Protocol"] = _endpoint["protocol"]
-                            _endpointHash["TimeDrift"] = getEndpointTimedrift(testId, ep, _test["Poll"], getWorkspaceId()) #TODO
-                            _rule["Endpoints"].push(_endpointHash)
-                        end
-                        _epmRules["Rules"].push(_rule)
                     end
+
+                    # Collect endpoints details
+                    _rule["Endpoints"] = []
+
+                    # Get the list of endpoint ids
+                    _endpoints = _test["Endpoints"]
+                    _endpoints.each do |ep|
+                        _endpointHash = Hash.new
+                        _endpoint = _h[EpmEndpointInfoTag][ep]
+                        _endpointHash["Id"] = ep
+                        _endpointHash["Name"] = _endpoint.has_key?("name") ? _endpoint["name"] : String.new
+                        _endpointHash["URL"] = _endpoint["url"]
+                        _endpointHash["Port"] = _endpoint["port"]
+                        _endpointHash["Protocol"] = _endpoint["protocol"]
+                        _endpointHash["ListenOnPort"] = _endpoint["listenOnPort"]
+                        _endpointHealth["Type"] = _endpoint["type"]
+                        _endpointHash["TimeDrift"] = getEndpointTimedrift(testId, ep, _test["Poll"], getWorkspaceId()) #TODO
+                        _rule["Endpoints"].push(_endpointHash)
+                    end
+                    _epmRules["Rules"].push(_rule)
                 end
-                    _epmRules
+
+				_epmRules
             rescue JSON::ParserError => e
                 Logger::logError "Error in Json Parse in EPM data: #{e}", Logger::resc
                 raise "Got exception in EPM parsing: #{e}"
@@ -1068,7 +1091,6 @@ module NPMContract
                                                     "HopAddresses",
                                                     "HopTypes",
                                                     "HopLinkTypes",
-                                                    "HopLinkLatencies",
                                                     "HopResourceIds",
                                                     "Issues",
                                                     "Hops",
