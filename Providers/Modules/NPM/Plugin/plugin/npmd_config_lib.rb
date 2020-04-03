@@ -322,6 +322,7 @@ module NPMDConfig
                     _ruleHash["NetTests"] = (_iRule["NetworkThresholdLoss"].to_i >= -2 and _iRule["NetworkThresholdLatency"].to_i >= -2) ? "true" : "false"
                     _ruleHash["AppTests"] = (_iRule["AppThresholdLatency"].to_i >= -2) ? "true" : "false"
                     _ruleHash["ValidStatusCodeRanges"] = _iRule.has_key?("ValidStatusCodeRanges") ? _iRule["ValidStatusCodeRanges"] : nil;
+                    _ruleHash["SourceAgentId"] = _iRule["SourceAgentId"]
 
                     if (_ruleHash["NetTests"] == "true")
                         _ruleHash["NetworkThreshold"] = {"ChecksFailedPercent" => _iRule["NetworkThresholdLoss"].to_s, "RoundTripTimeMs" => _iRule["NetworkThresholdLatency"].to_s}
@@ -658,6 +659,7 @@ module NPMDConfig
             begin
                 _h = JSON.parse(text)
                 _epmRules = {"Rules" => []}
+                _testAgentMap = getTestAgents(_h[EpmAgentInfoTag])
                 _testIds = _h[EpmTestInfoTag]
                 _testIds.each_key do |testId|
                     _test = _h[EpmTestInfoTag][testId]
@@ -672,7 +674,7 @@ module NPMDConfig
                     _rule["NetworkThresholdLoss"] = _test["NetworkThreshold"].nil? ? "-3" : (_test["NetworkThreshold"].has_key?("Loss") ? _test["NetworkThreshold"]["Loss"] : "-2")
                     _rule["NetworkThresholdLatency"] = _test["NetworkThreshold"].nil? ? "-3.0" : (_test["NetworkThreshold"].has_key?("Latency") ? _test["NetworkThreshold"]["Latency"] : "-2.0")
                     _rule["ValidStatusCodeRanges"] = _test.has_key?("ValidStatusCodeRanges") ? _test["ValidStatusCodeRanges"] : nil
-                    _rule["SourceAgentId"] = _test.has_key?("SourceAgentId") ? _test["SourceAgentId"] : nil
+                    _rule["SourceAgentId"] = _testAgentMap[testId]
                     _connectionMonitorId = _test.has_key?("ConnectionMonitorId") ? _test["ConnectionMonitorId"].to_s : String.new
 
                     # Iterate over ConnectionMonitorInfoMap to get following info
@@ -712,6 +714,13 @@ module NPMDConfig
                 Logger::logError "Error in Json Parse in EPM data: #{e}", Logger::resc
                 raise "Got exception in EPM parsing: #{e}"
                 nil
+            end
+        end
+
+        def self.getTestAgents(agentTestIdMap)
+            begin
+                h = agentTestIdMap.each_with_object({}) { |(k,v),g| (v.each{ |item| g.has_key?(item) ? g[item].push(k) : g[item] ||= [] << k}) }
+                return h
             end
         end
 
