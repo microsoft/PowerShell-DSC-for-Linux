@@ -1,6 +1,7 @@
-#!/usr/bin/env python2
-#
-# Copyright (C) Microsoft Corporation, All rights reserved.
+#!/usr/bin/env python
+# ====================================
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+# ====================================
 
 """Stream handler module. Is used to process output from stdout and stderr"""
 

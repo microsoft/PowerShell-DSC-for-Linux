@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# ====================================
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+# ====================================
+
 import importHelper
 importHelper.install_aliases()
 

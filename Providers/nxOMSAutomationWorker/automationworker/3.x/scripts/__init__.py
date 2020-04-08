@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
-#
-# Copyright (C) Microsoft Corporation, All rights reserved.
-
+#!/usr/bin/env python
+# ====================================
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+# ====================================
 
 # this init file exists for unit tests for the unlock_node method
 from scripts import require_runbook_signature

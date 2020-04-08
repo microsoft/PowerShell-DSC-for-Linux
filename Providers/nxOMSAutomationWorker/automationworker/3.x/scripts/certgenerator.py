@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# ====================================
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+# ====================================
 
 """Script to generate certificate and key file."""
 from OpenSSL import crypto

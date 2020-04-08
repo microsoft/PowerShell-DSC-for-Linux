@@ -1,6 +1,7 @@
-#!/usr/bin/env python2
-#
-# Copyright (C) Microsoft Corporation, All rights reserved.
+#!/usr/bin/env python
+# ====================================
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+# ====================================
 
 """Process factory which returns a process enforcing the preexec_fn."""
 

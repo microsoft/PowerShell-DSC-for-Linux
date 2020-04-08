@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
-#
-# Copyright (C) Microsoft Corporation, All rights reserved.
-
+#!/usr/bin/env python
+# ====================================
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+# ====================================
 """Runtime module. Contains runtime base class and language specific runtime classes."""
 
 import signal
