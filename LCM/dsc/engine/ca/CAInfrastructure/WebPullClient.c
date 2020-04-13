@@ -2104,7 +2104,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
       	else
       	{
 		DSC_LOG_INFO("Calling InstallModule with python3");
-		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/InstallModule.py", zipPath, verifyFlag, " 2>&1 | sudo tee /home/micy/install-output.txt");
+		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/InstallModule.py", zipPath, verifyFlag, " 2>&1");
       	}
         DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
@@ -2127,7 +2127,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
                 else
                 {
                     DSC_LOG_INFO("Calling RemoveModule with python3");
-                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/RemoveModule.py", current->moduleName, " 2>&1 | sudo tee /home/micy/remove-output.txt");
+                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/RemoveModule.py", current->moduleName, " 2>&1");
                 }
 
                 retval = system(stringBuffer);
