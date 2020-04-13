@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
 from imp                  import load_source
 from os.path              import dirname, isfile, join, realpath
 from subprocess           import PIPE, Popen

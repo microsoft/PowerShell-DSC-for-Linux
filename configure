@@ -67,7 +67,7 @@ do
 	    BUILD_OMS=BUILD_OMS
 	    DSC_MODULES_PATH="/opt/microsoft/omsconfig/modules"
 	    DSC_SCRIPT_PATH="/opt/microsoft/omsconfig/Scripts"
-		DSC_HOST_BASE_PATH="/opt/dsc"
+	    DSC_HOST_BASE_PATH="/opt/dsc"
 	    DSC_PATH_MODIFIER="/omsconfig"
 	    ;;
 	
