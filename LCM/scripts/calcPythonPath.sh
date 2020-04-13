@@ -4,7 +4,7 @@ if [ "$#" -ne 0 ]
 then
 	# Checking which python version is available 
 	# python3
-	if [[ -z $(python --version 2>&1 | grep 'not found') ]]
+	if [[ -z $(python2 --version 2>&1 | grep 'not found') ]]
 	then
 		#echo "python exists"; 
 		pythonVer="python"
@@ -23,7 +23,7 @@ then
 	then
 		filePath="/opt/microsoft/omsconfig/Scripts/"
 	else
-		filePath="/opt/microsoft/omsconfig/Scripts/3/"
+		filePath="/opt/microsoft/omsconfig/Scripts/python3/"
 	fi
 
 	# Construct command from arguments
