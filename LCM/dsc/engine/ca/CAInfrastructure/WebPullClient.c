@@ -2077,7 +2077,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
         DSC_LOG_INFO("Assuming python2 in WebPullClient\n");
 
 	// Look for python2
-        FILE * pipe = popen("python --version 2>&1", "r");
+        FILE * pipe = popen("python2 --version 2>&1", "r");
         fgets(data, BUFSIZ, pipe);
 	if (!strstr(data, "not found"))
 	{

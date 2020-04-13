@@ -214,11 +214,9 @@ def main(args):
     # Install the module's resources
     moduleResources = os.listdir(moduleDscResourcesDestinationPath)
 
-    # Python 2.4 and 3 recognize different formats for octal
-    if sys.version_info >= (3, 0):
-        strMode = "0o777"
-    else:
-        strMode = "0777"
+    # Note: Python 2.4 and 3 recognize different formats for octal
+    strMode = "0o777"
+   
 
     octMode = int(strMode, base=8)
 

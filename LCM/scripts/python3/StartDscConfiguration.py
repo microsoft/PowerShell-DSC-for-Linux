@@ -15,14 +15,6 @@ pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
 
-try:
-    # Used by Python 2.7+
-    from argparse import ArgumentParser
-    useArgParse = True
-except:
-    # Used by Python 2.4-2.6
-    from optparse import OptionParser
-    useArgParse = False
 
 def main(argv):
     """StartDscConfiguration"""
@@ -62,32 +54,6 @@ def main(argv):
         # Remove -configurationmof and its argument from the list so it doesn't error in the arugment parser
         argv.pop(configmofIndex)
         argv.pop(configmofIndex)
-
-    # Parse arguments
-    if (useArgParse):
-        # Used by Python 2.7+
-        parser = ArgumentParser(description = description)
-
-        for parameter in parameters.keys():
-            parameterInfo = parameters[parameter]
-            parser.add_argument('-' + parameterInfo['shortForm'], '--' + parameter, required = parameterInfo['required'], help = parameterInfo['helpText'], action = parameterInfo['action'])
-
-        parsedArguments = parser.parse_args(argv)
-    else:
-        # Used by Python 2.4-2.6
-        parser = OptionParser(description = description)
-
-        for parameter in parameters.keys():
-            parameterInfo = parameters[parameter]
-            parser.add_option('-' + parameterInfo['shortForm'], '--' + parameter, help = parameterInfo['helpText'], action = parameterInfo['action'])
-
-        (parsedArguments, extraArguments) = parser.parse_args(argv)
-
-        for parameter in parameters.keys():
-            if parameters[parameter]['required']:
-                if not getattr(parsedArguments, parameter):
-                    print 'StartDscConfiguration.py: error: argument -' + parameters[parameter]['shortForm'] + '/--' + parameter + ' is required.'
-                    exit(1)
 
     # Check that we don't have two configuration mofs defined
     if configmofArgument and parsedArguments.configurationmof:

@@ -53,7 +53,7 @@ std::string determinePythonVersion(){
     std::array<char, 128> buffer;
     std::string result;
     // Check for python2
-    FILE* pipe = popen("python --version 2>&1", "r");
+    FILE* pipe = popen("python2 --version 2>&1", "r");
     if(!pipe) {
         std::cout << "Couldn't start command." << std::endl;
     }
@@ -62,7 +62,7 @@ std::string determinePythonVersion(){
         result += buffer.data();
     }
 
-    // If python --version does not contain 'not found' return python2
+    // If python2 --version does not contain 'not found' return python2
     if(result.find("not found") == std::string::npos) {
       std::cout << "Found python2." << std::endl;
     	return "python";
@@ -577,7 +577,6 @@ PythonProvider::forkExec ()
 
                 char* args[] = { pyV.get (), fullName.get (), socketID, 0 };
 
-                // TODO print args
                 SCX_BOOKEND_PRINT ("In PythonProvider, using:");
                 SCX_BOOKEND_PRINT (args[0]);
 
