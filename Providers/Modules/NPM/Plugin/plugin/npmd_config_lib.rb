@@ -1107,7 +1107,8 @@ module NPMContract
                                                     "Protocol",
                                                     "PathTestResult",
                                                     "AdditionalData",
-                                                    "IngestionWorkspaceResourceId"]
+                                                    "IngestionWorkspaceResourceId",
+                                                    "UploadDirectly"]
 
     def self.IsValidDataitem(item, itemType)
         _contract=[]
