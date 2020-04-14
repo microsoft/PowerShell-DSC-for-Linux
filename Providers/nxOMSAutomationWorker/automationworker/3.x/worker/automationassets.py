@@ -13,7 +13,7 @@ if sys.version_info[0] == 3:
 
 
 import binascii
-import configuration
+import configuration3 as configuration
 import serializerfactory
 from httpclientfactory import HttpClientFactory
 from jrdsclient import JRDSClient
