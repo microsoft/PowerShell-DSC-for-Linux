@@ -8,6 +8,9 @@ from os.path              import dirname, isfile, join, realpath
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
+import subprocess
+import codecs 
+
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -15,6 +18,14 @@ pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
 
+try:
+    # Used by Python 2.7+
+    from argparse import ArgumentParser
+    useArgParse = True
+except:
+    # Used by Python 2.4-2.6
+    from optparse import OptionParser
+    useArgParse = False
 
 def main(argv):
     """StartDscConfiguration"""
@@ -45,7 +56,7 @@ def main(argv):
         try:
             configmofArgument = argv[configmofIndex + 1]
         except:
-            print 'StartDscConfiguration.py: error: Please provide a valid path argument for -configurationmof'
+            print('StartDscConfiguration.py: error: Please provide a valid path argument for -configurationmof')
             exit(1)
 
         # Set the configuration mof parameter to no longer be required so it doesn't error in the arugment parser
@@ -55,9 +66,35 @@ def main(argv):
         argv.pop(configmofIndex)
         argv.pop(configmofIndex)
 
+    # Parse arguments
+    if (useArgParse):
+        # Used by Python 2.7+
+        parser = ArgumentParser(description = description)
+
+        for parameter in parameters.keys():
+            parameterInfo = parameters[parameter]
+            parser.add_argument('-' + parameterInfo['shortForm'], '--' + parameter, required = parameterInfo['required'], help = parameterInfo['helpText'], action = parameterInfo['action'])
+
+        parsedArguments = parser.parse_args(argv)
+    else:
+        # Used by Python 2.4-2.6
+        parser = OptionParser(description = description)
+
+        for parameter in parameters.keys():
+            parameterInfo = parameters[parameter]
+            parser.add_option('-' + parameterInfo['shortForm'], '--' + parameter, help = parameterInfo['helpText'], action = parameterInfo['action'])
+
+        (parsedArguments, extraArguments) = parser.parse_args(argv)
+
+        for parameter in parameters.keys():
+            if parameters[parameter]['required']:
+                if not getattr(parsedArguments, parameter):
+                    print ('StartDscConfiguration.py: error: argument -', parameters[parameter]['shortForm'], '/--', parameter, ' is required.')
+                    exit(1)
+
     # Check that we don't have two configuration mofs defined
     if configmofArgument and parsedArguments.configurationmof:
-        print 'StartDscConfiguration.py: error: Two configuration mof arguments were found. Please provide only one.'
+        print('StartDscConfiguration.py: error: Two configuration mof arguments were found. Please provide only one.')
         exit(1)
     
     if configmofArgument:
@@ -65,9 +102,9 @@ def main(argv):
 
     # Read the configuration mof
     try:
-        configurationFile = open(parsedArguments.configurationmof, 'r')
+        configurationFile = codecs.open(parsedArguments.configurationmof, 'r', encoding= 'utf-16')
     except:
-        configurationFile = open(parsedArguments.configurationmof, 'r', encoding = 'utf-16')
+        configurationFile = codecs.open(parsedArguments.configurationmof, 'r', encoding = 'utf-16')
 
     try:
         configurationFileContent = configurationFile.read()
@@ -175,7 +212,7 @@ def main(argv):
 
     stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
     stderr = stderr.decode() if isinstance(stderr, bytes) else stderr
-    print(stdout)
+    print(stdout)   
     print(stderr)
 
 main(argv[1:])
