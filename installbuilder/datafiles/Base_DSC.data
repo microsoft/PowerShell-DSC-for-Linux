@@ -209,13 +209,12 @@ fi
 
 %Preinstall_200
 # pythonVersion check must be repeated for each section
-if  [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python3"
-  echo "sanity check"
-  pythonVersion="python3"
-else
+if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python"
   pythonVersion="python"
+else
+  echo "Using python3"
+  pythonVersion="python3"
 fi
 # Only check for ctypes if python2 is installed
 if [ "$pythonVersion" = "python" ]; then
@@ -338,12 +337,12 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 
 # pythonVersion check must be repeated for each section
-if  [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python3"
-  pythonVersion="python3"
-else
+if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python"
   pythonVersion="python"
+else
+  echo "Using python3"
+  pythonVersion="python3"
 fi
 
 # Set up built-in resource modules for OMS DSC
@@ -524,13 +523,12 @@ echo "Cleaned up existing dsc_hosts before uninstall..."
 
 %Preuninstall_999
 # pythonVersion check must be repeated for each section
-if  [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python3"
-  echo "sanity check"
-  pythonVersion="python3"
-else
+if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python"
   pythonVersion="python"
+else
+  echo "Using python3"
+  pythonVersion="python3"
 fi
 # if this is a package removal, not an upgrade, remove the modules
 if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
