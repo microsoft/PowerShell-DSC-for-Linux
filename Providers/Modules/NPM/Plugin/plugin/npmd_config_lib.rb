@@ -701,8 +701,8 @@ module NPMDConfig
                         _endpointHash["URL"] = _endpoint["url"]
                         _endpointHash["Port"] = _endpoint["port"]
                         _endpointHash["Protocol"] = _endpoint["protocol"]
-                        _endpointHash["ListenOnPort"] = _endpoint["listenOnPort"]
-                        _endpointHealth["Type"] = _endpoint["type"]
+                        _endpointHash["ListenOnPort"] = _endpoint.has_key?("listenOnPort") ? _endpoint["listenOnPort"] : String.new
+                        _endpointHash["Type"] = endpoint.has_key?("type") ? _endpoint["type"] : String.new
                         _endpointHash["TimeDrift"] = getEndpointTimedrift(testId, ep, _test["Poll"], getWorkspaceId()) #TODO
                         _rule["Endpoints"].push(_endpointHash)
                     end
