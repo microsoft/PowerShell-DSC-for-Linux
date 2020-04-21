@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
@@ -11,8 +11,6 @@
         When testing this module make sure to add MSFT_nxOMSAutomationWorkerResource as an argument to started
         worker processes.
 """
-import importHelper
-importHelper.install_aliases()
 
 import configparser
 import os
@@ -246,6 +244,7 @@ class WorkerManager(object):
         print("worker to be started " + str(len(configuration_path_to_be_started)))
         
         python_to_be_used = util.get_python_to_be_used()
+        print("Using %s" %(python_to_be_used))
         if len(configuration_path_to_be_started) > 0 and linuxutil.get_current_username() == NXAUTOMATION_USERNAME:
             proc = subprocess.Popen(["sudo", "-u", NXAUTOMATION_USERNAME, python_to_be_used, OMSUTIL_FILE_PATH, "--initialize"],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)

@@ -9,10 +9,12 @@ import time
 if sys.version_info[0] == 3:
     AUTOMATIONWORKER_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker"
     sys.path.insert(1,AUTOMATIONWORKER_PATH)
+    import configuration3 as configuration
+else:
+    import configuration
 
 
 import binascii
-import configuration
 import serializerfactory
 from httpclientfactory import HttpClientFactory
 from jrdsclient import JRDSClient

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
@@ -126,7 +126,6 @@ def get_vm_unique_id_from_dmidecode(byteorder, dmidecode_output):
         return uuid
 
     uuid_part = uuid.split("-")
-    print(uuid_part[0])
     big_endian_uuid = "-".join([convert_to_big_endian(uuid_part[0]),
                                 convert_to_big_endian(uuid_part[1]),
                                 convert_to_big_endian(uuid_part[2]),
@@ -137,6 +136,11 @@ def get_vm_unique_id_from_dmidecode(byteorder, dmidecode_output):
 
 def convert_to_big_endian(little_endian_value):
     """Converts the little endian representation of the value into a big endian representation of the value"""
+    """
+    Little and big endian are two ways of storing multibyte data-types ( int, float, etc). 
+    In little endian machines, last byte of binary representation of the multibyte data-type is stored first. 
+    On the other hand, in big endian machines, first byte of binary representation of the multibyte data-type is stored first.
+    """
     codecs_decoded =  codecs.decode(little_endian_value, "hex")
     codecs_reordered = codecs_decoded[::-1]
     return codecs.encode(codecs_reordered, "hex").decode()
@@ -150,7 +154,8 @@ def generate_uuid():
     """
     proc = subprocess.Popen(["cat", "/proc/sys/kernel/random/uuid"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     uuid, error = proc.communicate()
-    uuid = uuid.decode()
+    uuid = uuid.decode() if isinstance(uuid, bytes) else uuid
+    error = error.decode() if isinstance(error, bytes) else error
     if proc.poll() != 0:
         raise Exception("Unable to get uuid from /proc/sys/kernel/random/uuid : " + str(error))
     return uuid.strip()
@@ -205,7 +210,8 @@ def get_current_user_processes():
     current_username = get_current_username()
     proc = subprocess.Popen(["ps", "-fjH", "-u", current_username], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = proc.communicate()
-    output = output.decode()
+    output = output.decode() if isinstance(output, bytes) else output
+    error = error.decode() if isinstance(error, bytes) else error
     if proc.poll() != 0:
         raise Exception("Unable to get processes : " + str(error))
     formatted_entries = format_process_entries_to_list(output.split("\n"))
@@ -427,6 +433,7 @@ def set_permission_recursive(permission, path):
     """
     cmd = ["sudo", "chmod", "-R", permission, path]
     process, output, error = popen_communicate(cmd)
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception(
             "Unable to change permission of " + str(path) + " to " + str(permission) + ". Error : " + str(error))
@@ -444,6 +451,7 @@ def set_user_and_group_recursive(owning_username, owning_group_name, path):
     owners = owning_username + ":" + owning_group_name
     cmd = ["sudo", "chown", "-R", owners, path]
     process, output, error = popen_communicate(cmd)
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable to change owner of " + str(path) + " to " + str(owners) + ". Error : " + str(error))
     print("Owner changed to " + str(owners) + " for " + str(path))

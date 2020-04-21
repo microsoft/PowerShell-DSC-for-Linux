@@ -2,10 +2,8 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-import importHelper
-importHelper.install_aliases()
 
-import configparser
+import ConfigParser
 import os
 import sys
 
@@ -96,7 +94,7 @@ def read_and_set_configuration(configuration_file_path):
     clear_config()
 
     # init and set default values for optional configuration keys
-    config = configparser.SafeConfigParser({DEBUG_TRACES: DEFAULT_DEBUG_TRACES,
+    config = ConfigParser.SafeConfigParser({DEBUG_TRACES: DEFAULT_DEBUG_TRACES,
                                             BYPASS_CERTIFICATE_VERIFICATION: DEFAUTL_BYPASS_CERTIFICATE_VERIFICATION,
                                             ENFORCE_RUNBOOK_SIGNATURE_VALIDATION: DEFAULT_ENFORCE_RUNBOOK_SIGNATURE_VALIDATION,
                                             GPG_PUBLIC_KEYRING_PATH: DEFAULT_GPG_PUBLIC_KEYRING_PATH,

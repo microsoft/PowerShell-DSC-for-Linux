@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
@@ -209,7 +209,9 @@ class CurlHttpClient(HttpClient):
                     env["NSS_SDB_USE_CACHE"] = "no"
                 p = subprocessfactory.create_subprocess(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err = p.communicate()
-
+                
+                out = out.decode if isinstance(out, bytes) else out
+                err = err.decode() if isinstance(err, bytes) else err 
                 if p.returncode != EXIT_SUCCESS:
                     raise Exception("Http request failed due to curl error. [returncode=" + str(p.returncode) + "]" +
                                     "[stderr=" + str(err) + "]")

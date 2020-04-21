@@ -1,12 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
 
 """Sandbox module."""
-
-import importHelper
-importHelper.install_aliases()
 
 import os
 import sys

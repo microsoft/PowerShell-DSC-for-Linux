@@ -1,12 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
 
 """Job module. Contains a class representation of an "automation" job."""
-
-import importHelper
-importHelper.install_aliases()
 
 import queue
 import sys

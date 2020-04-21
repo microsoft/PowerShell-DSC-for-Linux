@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
@@ -53,6 +53,7 @@ def initialize():
                 # try again with -A instead of -a for SUSE Linux
                 process, output, error = linuxutil.popen_communicate(["sudo", "/usr/sbin/usermod", "-g", "nxautomation",
                                                                       "-A", "omsagent,omiusers", "nxautomation"])
+                error = error.decode() if isinstance(error, bytes) else error
                 if process.returncode != 0:
                     raise Exception("Unable to add nxautomation to omsagent group. Error: " + str(error))
                 else:
@@ -73,6 +74,7 @@ def initialize():
     # change permission for the certificate folder, oms.crt and oms.key
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+rx", "-R",
                                                           "/etc/opt/microsoft/omsagent/certs"])
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable set group permissions to certificate folder. Error: " + str(error))
     else:
@@ -81,6 +83,8 @@ def initialize():
     # change owner for the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chown", "nxautomation:omiusers", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
+    
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable set group owner on working directory. Error: " + str(error))
     else:
@@ -89,6 +93,7 @@ def initialize():
     # change permission for the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "gu=rwx", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable set permissions on working directory. Error: " + str(error))
     else:
@@ -97,6 +102,7 @@ def initialize():
     # explicitly prevent others from accessing the worker working directory
     process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "o=", "-R",
                                                           "/var/opt/microsoft/omsagent/run/automationworker"])
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable set permissions on working directory. Error: " + str(error))
     else:
@@ -106,7 +112,7 @@ def initialize():
     for path in proxy_paths:
         if os.path.exists(path):
             process, output, error = linuxutil.popen_communicate(["sudo", "chmod", "g+r", path])
-
+            error = error.decode() if isinstance(error, bytes) else error
             if process.returncode != 0:
                 raise Exception("Unable set read permission to proxy configuration file. Error: " + str(error))
             else:

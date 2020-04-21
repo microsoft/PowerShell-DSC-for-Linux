@@ -1,10 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
-
-import importHelper
-importHelper.install_aliases()
 
 import configparser
 import os
@@ -226,6 +223,7 @@ class Worker(object):
 
             python_to_be_used = util.get_python_to_be_used()
 
+            print("Using %s" %(python_to_be_used))
             cmd = [python_to_be_used, os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
                    configuration.get_worker_configuration_file_path()]
             tracer.log_worker_starting_sandbox(sandbox_id)

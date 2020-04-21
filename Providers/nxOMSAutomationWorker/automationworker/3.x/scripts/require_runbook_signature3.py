@@ -1,10 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
-
-import importHelper
-importHelper.install_aliases()
 
 from optparse import OptionParser
 import os

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
@@ -61,6 +61,7 @@ def verify_signature(signed_file_path, output_file_path):
         proc = subprocessfactory.create_subprocess(cmd=cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
 
+        stderr = stderr.decode() if isinstance(stderr, bytes) else stderr
         if proc.poll() == 0:
             tracer.log_sandbox_job_runbook_signature_validation_succeeded(keyring_path)
             return True

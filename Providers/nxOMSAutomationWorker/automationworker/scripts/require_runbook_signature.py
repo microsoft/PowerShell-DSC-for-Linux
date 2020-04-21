@@ -1,3 +1,7 @@
+#!/usr/bin/env python2
+#
+# Copyright (C) Microsoft Corporation, All rights reserved.
+
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 2
 

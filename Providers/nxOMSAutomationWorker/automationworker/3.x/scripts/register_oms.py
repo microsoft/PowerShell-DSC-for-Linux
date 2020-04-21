@@ -1,10 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
 
-import importHelper
-importHelper.install_aliases()
 import configparser
 import datetime
 import getopt
@@ -43,6 +41,8 @@ def get_hostname():
     # Use the ruby util OMS agent uses to get hostname
     try:
         process, output, error = linuxutil.popen_communicate(oms_agent_hostname_command)
+        output = output.decode() if isinstance(output, bytes) else output
+        error = error.decode() if isinstance(error, bytes) else error
         if process.returncode == 0 and not error:
             return output.strip()
     except OSError:

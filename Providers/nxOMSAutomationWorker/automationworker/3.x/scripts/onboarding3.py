@@ -1,10 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 # ====================================
-
-import importHelper
-importHelper.install_aliases()
 
 import configparser
 import base64
@@ -58,6 +55,7 @@ def generate_self_signed_certificate(certificate_path, key_path):
            "-new", "-newkey", "rsa:2048", "-days", "365", "-nodes", "-x509", "-keyout", key_path, "-out",
            certificate_path]
     process, certificate_creation_output, error = linuxutil.popen_communicate(cmd)
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable to create certificate/key. " + str(error))
     print ("Certificate/Key created.")
@@ -75,6 +73,7 @@ def sha256_digest(payload):
     cmd = ['echo -n "' + str(json.dumps(json.dumps(payload))) + '" | openssl dgst -sha256 -binary']
     process, payload_hash, error = linuxutil.popen_communicate(cmd, shell=True)
 
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable to generate payload hash. " + str(error))
 
@@ -95,7 +94,8 @@ def generate_hmac(str_to_sign, secret):
     secret = secret.encode('utf-8')
     cmd = ['echo -n "' + str(message.decode("utf-8")) + '" | openssl dgst -sha256 -binary -hmac "' + str(secret.decode("utf-8")) + '"']
     process, signed_message, error = linuxutil.popen_communicate(cmd, shell=True)
-
+    
+    error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable to generate signature. " + str(error))
 
