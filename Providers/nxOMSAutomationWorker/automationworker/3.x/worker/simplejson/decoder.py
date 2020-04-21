@@ -3,18 +3,19 @@ Implementation of JSONDecoder
 """
 import re
 
-from scanner import Scanner, pattern
+from .scanner import Scanner, pattern
 
 FLAGS = re.VERBOSE | re.MULTILINE | re.DOTALL
 
 def _floatconstants():
     import struct
     import sys
-    _BYTES = '7FF80000000000007FF0000000000000'.decode('hex')
+    import codecs
+    _BYTES = codecs.decode('7FF80000000000007FF0000000000000', 'hex')
     if sys.byteorder != 'big':
         # slicing not available in Python 2.2
         #_BYTES = _BYTES[:8][::-1] + _BYTES[8:][::-1]
-        _BYTES = '000000000000f87f000000000000f07f'.decode('hex')
+        _BYTES = codecs.decode('000000000000f87f000000000000f07f', 'hex')
     nan, inf = struct.unpack('dd', _BYTES)
     return nan, inf, -inf
 
@@ -73,8 +74,8 @@ pattern(r'(-?(?:0|[1-9]\d*))(\.\d+)?([eE][-+]?\d+)?')(JSONNumber)
 STRINGCHUNK = re.compile(r'("|\\|[^"\\]+)', FLAGS)
 STRINGBACKSLASH = re.compile(r'([\\/bfnrt"]|u[A-Fa-f0-9]{4})', FLAGS)
 BACKSLASH = {
-    '"': u'"', '\\': u'\\', '/': u'/',
-    'b': u'\b', 'f': u'\f', 'n': u'\n', 'r': u'\r', 't': u'\t',
+    '"': '"', '\\': '\\', '/': '/',
+    'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t',
 }
 
 DEFAULT_ENCODING = "utf-8"
@@ -98,11 +99,11 @@ def scanstring(s, end, encoding=None):
             try:
                 m = BACKSLASH[esc]
             except KeyError:
-                m = unichr(int(esc[1:], 16))
-        if not isinstance(m, unicode):
-            m = unicode(m, encoding)
+                m = chr(int(esc[1:], 16))
+        if not isinstance(m, str):
+            m = str(m, encoding)
         chunks.append(m)
-    return u''.join(chunks), end
+    return ''.join(chunks), end
 
 def JSONString(match, context):
     encoding = getattr(context, 'encoding', None)
@@ -136,7 +137,7 @@ def JSONObject(match, context):
             raise ValueError(errmsg("Expecting : delimiter", s, end))
         end = skipwhitespace(s, end + 1)
         try:
-            value, end = JSONScanner.iterscan(s, idx=end).next()
+            value, end = next(JSONScanner.iterscan(s, idx=end))
         except StopIteration:
             raise ValueError(errmsg("Expecting object", s, end))
         pairs[key] = value
@@ -165,7 +166,7 @@ def JSONArray(match, context):
         return values, end + 1
     while True:
         try:
-            value, end = JSONScanner.iterscan(s, idx=end).next()
+            value, end = next(JSONScanner.iterscan(s, idx=end))
         except StopIteration:
             raise ValueError(errmsg("Expecting object", s, end))
         values.append(value)
@@ -261,7 +262,7 @@ class JSONDecoder(object):
         """
         kw.setdefault('context', self)
         try:
-            obj, end = self._scanner.iterscan(s, **kw).next()
+            obj, end = next(self._scanner.iterscan(s, **kw))
         except StopIteration:
             raise ValueError("No JSON object could be decoded")
         return obj, end

@@ -10,15 +10,18 @@ import os
 import socket
 import sys
 import re
+import packagesimportutil
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+packagesimportutil.add_all_packages_under_automationworker_to_sys_path()
+
 
 # since we are using the worker httpclient, some configuration values are expected
-from worker import configuration3 as configuration
-from worker import httpclientfactory
-from worker import simplejson as json
-from worker import linuxutil
+import configuration3 as configuration
+import httpclientfactory
+import simplejson as json
+import linuxutil
 
 REGISTER = "register"
 DEREGISTER = "deregister"

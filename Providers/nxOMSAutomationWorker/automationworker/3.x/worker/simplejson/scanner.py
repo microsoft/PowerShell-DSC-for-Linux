@@ -1,13 +1,13 @@
 """
 Iterator based sre token scanner
 """
-from __future__ import generators
-import __builtin__
-__builtin__.enumerate = lambda seq:  zip(xrange(len(seq)), seq)
+
+import builtins
+builtins.enumerate = lambda seq:  list(zip(list(range(len(seq))), seq))
 
 import sre_parse, sre_compile, sre_constants
 from sre_constants import BRANCH, SUBPATTERN
-from sre import VERBOSE, MULTILINE, DOTALL
+from re import VERBOSE, MULTILINE, DOTALL
 import re
 
 __all__ = ['Scanner', 'pattern']

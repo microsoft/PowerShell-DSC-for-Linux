@@ -1,7 +1,7 @@
 """
 Implementation of JSONEncoder
 """
-from __future__ import generators
+
 import re
 
 # this should match any kind of infinity
@@ -158,14 +158,14 @@ class JSONEncoder(object):
         else:
             encoder = encode_basestring
         allow_nan = self.allow_nan
-        for key, value in dct.iteritems():
-            if isinstance(key, (str, unicode)):
+        for key, value in dct.items():
+            if isinstance(key, str):
                 pass
             # JavaScript is weakly typed for these, so it makes sense to
             # also allow them.  Many encoders seem to do something like this.
             elif isinstance(key, float):
                 key = floatstr(key, allow_nan)
-            elif isinstance(key, (int, long)):
+            elif isinstance(key, int):
                 key = str(key)
             elif key is True:
                 key = 'true'
@@ -190,7 +190,7 @@ class JSONEncoder(object):
             del markers[markerid]
 
     def _iterencode(self, o, markers=None):
-        if isinstance(o, (str, unicode)):
+        if isinstance(o, str):
             if self.ensure_ascii:
                 encoder = encode_basestring_ascii
             else:
@@ -202,7 +202,7 @@ class JSONEncoder(object):
             yield 'true'
         elif o is False:
             yield 'false'
-        elif isinstance(o, (int, long)):
+        elif isinstance(o, int):
             yield str(o)
         elif isinstance(o, float):
             yield floatstr(o, self.allow_nan)
