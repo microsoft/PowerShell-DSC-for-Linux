@@ -7,6 +7,7 @@ from traceback            import format_exc
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
+import codecs 
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -40,6 +41,8 @@ def apply_meta_config(args):
     if len(args) != 3:
         usage()
 
+
+
     if args[1].lower() != '-configurationmof':
         usage()
 
@@ -49,7 +52,7 @@ def apply_meta_config(args):
         write_omsconfig_host_log('Incorrect parameters to SetDscLocalConfigurationManager.py: ' + errorMessage, pathToCurrentScript, 'ERROR')
         exit(1)
 
-    fileHandle = open(args[2], 'r')
+    fileHandle = open(args[2], 'rb')
     try:
         fileContent = fileHandle.read()
         outtokens = []
