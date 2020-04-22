@@ -11,6 +11,7 @@ BUILD_OMS=
 DEBUG_FLAGS=""
 DSC_MODULES_PATH="/opt/microsoft/dsc/modules"
 DSC_SCRIPT_PATH="/opt/microsoft/dsc/Scripts"
+DSC_SCRIPT_PATH_Python3 = "/opt/microsoft/dsc/Scripts/Python3"
 DSC_HOST_BASE_PATH="/opt/dsc"
 DSC_PATH_MODIFIER="/dsc"
 

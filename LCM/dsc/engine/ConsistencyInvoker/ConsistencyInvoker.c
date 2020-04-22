@@ -14,22 +14,83 @@
    THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define PYTHON_COMMAND "python"
+#define PYTHON3_COMMAND "python3"
 #define PYTHON_SCRIPT_NAME "PerformRequiredConfigurationChecks.py"
+
+char* getPythonProvider();
 
 int main(int argc, char *argv[])
 {
-    int fullCommandLength = strlen(PYTHON_COMMAND) + 1 + strlen(DSC_SCRIPT_PATH) + 1 + strlen(PYTHON_SCRIPT_NAME) + 1;
+    char* python = getPythonProvider();
+    char* dscScriptPath;
+
+    if(strcmp(python, PYTHON_COMMAND)==0)
+    {
+        dscScriptPath = DSC_SCRIPT_PATH;
+    }
+    else
+    {
+        dscScriptPath = DSC_SCRIPT_PATH_Python3;
+    }
+
+
+    int fullCommandLength = strlen(python) + 1 + strlen(dscScriptPath) + 1 + strlen(PYTHON_SCRIPT_NAME) + 1;
     char fullCommand[fullCommandLength];
 
-    strcpy(fullCommand, PYTHON_COMMAND);
+    strcpy(fullCommand, python);
     strcat(fullCommand, " ");
-    strcat(fullCommand, DSC_SCRIPT_PATH);
+    strcat(fullCommand, dscScriptPath);
     strcat(fullCommand, "/");
     strcat(fullCommand, PYTHON_SCRIPT_NAME);
 
     int returnValue = system(fullCommand);
     return returnValue;
+}
+
+
+// I may need to move this method in some file which is accessible to all other files in the project.
+char* getPythonProvider()
+{
+    int buffer_length = 128;
+    char buffer[buffer_length]; 
+    char* result = malloc(1);
+    *result = 0; 
+
+    FILE* pipe = popen("python2 --version 2>&1", "r");   
+    if(!pipe) {
+        printf("Cant start command.");
+    }
+    while(fgets(buffer, 128, pipe) != NULL) {
+        result = realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        strcat(result,buffer);
+    }
+
+    // If python2 --version does not contain 'not found' return python2
+    if(strstr(result, "not found") == NULL) {
+    	return PYTHON_COMMAND;
+    }
+
+    // Look for python3
+    result = malloc(1);
+    *result = 0;
+    pipe = popen("python3 --version 2>&1", "r");
+    if(!pipe) {
+    	printf("Cant start command.");
+    }
+    while(fgets(buffer, 128, pipe) != NULL) {
+        result = realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        strcat(result,buffer);
+    }
+
+    // If python3 --version does not contain 'not found' return python3
+    if(strstr(result, "not found") == NULL) {
+	    return PYTHON3_COMMAND;
+    }
+    return PYTHON_COMMAND;
+
 }
