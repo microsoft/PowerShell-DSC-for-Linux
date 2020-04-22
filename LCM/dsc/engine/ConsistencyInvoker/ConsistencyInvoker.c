@@ -26,8 +26,12 @@ char* getPythonProvider();
 
 int main(int argc, char *argv[])
 {
-    char* python = getPythonProvider();
+    char * python;
+    
     char* dscScriptPath;
+    
+    //if oms config check to be added
+    python = getPythonProvider();
 
     if(strcmp(python, PYTHON_COMMAND)==0)
     {
@@ -35,7 +39,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        dscScriptPath = DSC_SCRIPT_PATH_Python3;
+        dscScriptPath = DSC_SCRIPT_PATH;
     }
 
 
