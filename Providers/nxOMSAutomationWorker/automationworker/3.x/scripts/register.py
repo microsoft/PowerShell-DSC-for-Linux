@@ -33,24 +33,24 @@ class AgentService:
 
     @staticmethod
     def encode_base64_sha256(key, msg):
-        message = bytes(msg).encode('utf-8')
-        secret = bytes(key).encode('utf-8')
+        message = bytes(msg, encoding='utf-8')
+        secret = bytes(key, encoding='utf-8')
 
         signature = base64.b64encode(hmac.new(secret, message, digestmod=hashlib.sha256).digest())
-        return signature
+        return signature.decode()
 
     def compute_hmac(self, date, key, payload):
         sha256_hash = hashlib.sha256()
-        sha256_hash.update(json.dumps(payload))
+        sha256_hash.update(json.dumps(payload).encode())
         encoded_payload = base64.b64encode(sha256_hash.digest())
-        str_to_sign = encoded_payload + "\n" + date  # Based on AgentService contract
-
+        str_to_sign = encoded_payload.decode() + "\n" + date  # Based on AgentService contract
         signature = self.encode_base64_sha256(key, str_to_sign)
         return signature
 
+
     def register_worker(self):
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(self.cert_path).read())
-        cert_thumbprint = cert.digest("sha1").replace(":", "")
+        cert_thumbprint = cert.digest("sha1").decode().replace(":", "")
 
         date = datetime.datetime.utcnow().isoformat() + "0-00:00"
         payload = {'RunbookWorkerGroup': self.worker_group_name,
@@ -85,7 +85,7 @@ class AgentService:
 
     def deregister_worker(self):
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(self.cert_path).read())
-        cert_thumbprint = cert.digest("sha1").replace(":", "")
+        cert_thumbprint = cert.digest("sha1").decode().replace(":", "")
 
         date = datetime.datetime.utcnow().isoformat() + "0-00:00"
         payload = {"Thumbprint": cert_thumbprint,
