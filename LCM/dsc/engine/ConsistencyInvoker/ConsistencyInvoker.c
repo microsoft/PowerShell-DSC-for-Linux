@@ -26,27 +26,26 @@ char* getPythonProvider();
 
 int main(int argc, char *argv[])
 {
-    char * python;
+    char * pythonCommand = PYTHON_COMMAND ;
     
-    char* dscScriptPath;
+    char* dscScriptPath = DSC_SCRIPT_PATH;
     
     //if oms config check to be added
-    python = getPythonProvider();
-
-    if(strcmp(python, PYTHON_COMMAND)==0)
+    if(strstr(dscScriptPath, "omsconfig")!= NULL)
     {
-        dscScriptPath = DSC_SCRIPT_PATH;
-    }
-    else
-    {
-        dscScriptPath = DSC_SCRIPT_PATH;
+        pythonCommand = getPythonProvider();
+
+        if(strcmp(pythonCommand, PYTHON_COMMAND)!=0)
+        {
+            dscScriptPath = strcat(dscScriptPath, "/python3");
+        }
     }
 
 
-    int fullCommandLength = strlen(python) + 1 + strlen(dscScriptPath) + 1 + strlen(PYTHON_SCRIPT_NAME) + 1;
+    int fullCommandLength = strlen(pythonCommand) + 1 + strlen(dscScriptPath) + 1 + strlen(PYTHON_SCRIPT_NAME) + 1;
     char fullCommand[fullCommandLength];
 
-    strcpy(fullCommand, python);
+    strcpy(fullCommand, pythonCommand);
     strcat(fullCommand, " ");
     strcat(fullCommand, dscScriptPath);
     strcat(fullCommand, "/");
