@@ -12,6 +12,10 @@ import sys
 import re
 import packagesimportutil
 
+
+PY_MAJOR_VERSION = 0
+PY_MINOR_VERSION = 1
+
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 packagesimportutil.add_all_packages_under_automationworker_to_sys_path()
@@ -20,8 +24,14 @@ packagesimportutil.add_all_packages_under_automationworker_to_sys_path()
 # since we are using the worker httpclient, some configuration values are expected
 import configuration3 as configuration
 import httpclientfactory
-import simplejson as json
 import linuxutil
+
+''''An instance of simplejson module if the installed Python version is below 2.6
+An instance of json module if the installed Python version is or is above 2.6'''
+if sys.version_info[PY_MAJOR_VERSION] == 2 and sys.version_info[PY_MINOR_VERSION] < 6:
+    import simplejson as json
+else:
+    import json
 
 REGISTER = "register"
 DEREGISTER = "deregister"

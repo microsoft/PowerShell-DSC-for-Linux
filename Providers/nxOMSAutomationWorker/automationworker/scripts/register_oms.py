@@ -10,6 +10,10 @@ import socket
 import sys
 import re
 
+
+PY_MAJOR_VERSION = 0
+PY_MINOR_VERSION = 1
+
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -17,8 +21,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from worker import configuration
 
 from worker import httpclientfactory
-from worker import simplejson as json
 from worker import linuxutil
+
+''''An instance of simplejson module if the installed Python version is below 2.6
+An instance of json module if the installed Python version is or is above 2.6'''
+if sys.version_info[PY_MAJOR_VERSION] == 2 and sys.version_info[PY_MINOR_VERSION] < 6:
+    import simplejson as json
+else:
+    import json
 
 REGISTER = "register"
 DEREGISTER = "deregister"
