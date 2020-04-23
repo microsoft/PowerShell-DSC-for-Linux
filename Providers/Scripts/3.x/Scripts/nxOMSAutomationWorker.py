@@ -122,9 +122,11 @@ def Set_Marshall(ResourceSettings):
             if not os.path.isfile(PROXY_CONF_PATH_NEW) and os.path.isfile(PROXY_CONF_PATH_LEGACY):
                 proxy_conf_path = PROXY_CONF_PATH_LEGACY
 
-            args = ["python3", REGISTRATION_FILE_PATH, "--register", "-w", settings.workspace_id, "-a", agent_id,
+            workspace_id = settings.workspace_id.decode() if isinstance(settings.workspace_id, bytes) else settings.workspace_id
+            azure_dns_agent_svc_zone = settings.azure_dns_agent_svc_zone.decode() is isinstance(settings.azure_dns_agent_svc_zone, bytes) else settings.azure_dns_agent_svc_zone
+            args = ["python3", REGISTRATION_FILE_PATH, "--register", "-w", workspace_id, "-a", agent_id,
                     "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
-                    WORKER_STATE_DIR, "-e", settings.azure_dns_agent_svc_zone, "-p", proxy_conf_path, "-g",
+                    WORKER_STATE_DIR, "-e", azure_dns_agent_svc_zone, "-p", proxy_conf_path, "-g",
                     KEYRING_PATH]
 
             diy_account_id = get_diy_account_id()
@@ -409,8 +411,8 @@ class Settings:
     diy_enabled = ""
 
     def __init__(self, workpsace_id, azure_dns_agent_svc_zone, updates_enabled, diy_enabled):
-        self.workspace_id = workpsace_id
-        self.azure_dns_agent_svc_zone = azure_dns_agent_svc_zone
+        self.workspace_id = workpsace_id.decode() if isinstance(workpsace_id, bytes) else workpsace_id
+        self.azure_dns_agent_svc_zone = azure_dns_agent_svc_zone.decode() if isinstance(azure_dns_agent_svc_zone, bytes) else azure_dns_agent_svc_zone
         self.auto_register_enabled = updates_enabled
         self.diy_enabled = diy_enabled
 
@@ -435,6 +437,7 @@ def read_settings_from_mof_json(json_serialized_string):
 
 
 def is_hybrid_worker_or_manager_running(workspace_id):
+    workspace_id = workspace_id.decode() if isinstance(workspace_id, bytes) else workspace_id
     search_expression = WORKSPACE_ID_PREFIX + workspace_id
     result, retcode = run_pgrep_command(search_expression)
     if result and retcode == 0:
@@ -460,6 +463,7 @@ def is_oms_config_consistent_with_mof(updates_enabled, diy_enabled, oms_conf_fil
 
 
 def write_omsconf_file(workspace_id, updates_enabled, diy_enabled):
+    workspace_id = workspace_id.decode() if isinstance(workspace_id, bytes) else workspace_id
     oms_config = configparser.ConfigParser()
     if os.path.isfile(OMS_CONF_FILE_PATH):
         oms_config.read(OMS_CONF_FILE_PATH)
@@ -543,6 +547,7 @@ def is_oms_primary_workspace(workspace_id):
     workspace id found in the oms config file in the old style path
     :return: True, if the given workspace id belongs to the primary OMS workspace, False otherwise
     """
+    workspace_id = workspace_id.decode() if isinstance(workspace_id, bytes) else workspace_id
     if not os.path.exists(OMS_PRIMARY_WORKSPACE_CONF_DIR):
         log(INFO, "Primary workspace conf directory not found")
         return False
@@ -736,6 +741,7 @@ def kill_worker_manager(workspace_id):
     Exceptions:
         throws exception if process was running and could not be killed
     """
+    workspace_id = workspace_id.decode() if isinstance(workspace_id, bytes) else workspace_id
     pattern_match_string = "python\s.*main\.py.*%s%s\s" % (WORKSPACE_ID_PREFIX, workspace_id)
 
     retval = kill_process_by_pattern_string(pattern_match_string)
@@ -763,7 +769,8 @@ def kill_process_by_pattern_string(pattern_match_string):
 def kill_any_worker_running_as_omsagent(worker_pgrep_pattern):
     proc = subprocess.Popen(["pgrep", "-u", OMSAGENT_USER, "-f", worker_pgrep_pattern], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     result, error = proc.communicate()
-    result = str(result.decode())
+    result = result.decode() if isinstance(result, bytes) else result
+    result = str(result)
     result = result.replace('\n', ' ')
     if proc.returncode == 0:
         log(DEBUG, "The following old worker processes will be terminated: %s" % result)
@@ -788,7 +795,9 @@ def get_module_version():
     :return: str: module version number
     """
     version_file_handle = open(DSC_RESOURCE_VERSION_FILE, 'r')
-    version = version_file_handle.read().strip()
+    file_read = version_file_handle.read()
+    file_read = file_read.decode() if isinstance(file_read, bytes) else file_read
+    version = file_read.strip()
     version_file_handle.close()
     return version
 
@@ -814,6 +823,7 @@ def config_file_to_kv_pair(filename):
     retval = dict()
     f = open(filename, "r")
     contents = f.read()
+    contents = contents.decode() if isinstance(contents, bytes) else contents
     f.close()
     lines = contents.splitlines()
     for line in lines:
