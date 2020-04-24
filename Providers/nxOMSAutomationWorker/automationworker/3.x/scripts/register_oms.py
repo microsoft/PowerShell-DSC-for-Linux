@@ -275,7 +275,7 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
     config = configparser.ConfigParser()
     if os.path.isfile(worker_conf_path):
         config.read(worker_conf_path)
-    conf_file = open(worker_conf_path, 'wb')
+    conf_file = open(worker_conf_path, 'w')
 
     worker_required_section = configuration.WORKER_REQUIRED_CONFIG_SECTION
     if not config.has_section(worker_required_section):
