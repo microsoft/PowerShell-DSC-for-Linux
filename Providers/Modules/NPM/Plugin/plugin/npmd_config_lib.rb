@@ -136,7 +136,7 @@ module NPMDConfig
                 _doc["Configuration"] ["Agents"] = createAgentElements(configHash["Agents"], _subnetInfo["Masks"])
                 _doc["Configuration"] ["Networks"] = createNetworkElements(configHash["Networks"], _subnetInfo["IDs"])
                 _doc["Configuration"] ["Rules"] = createRuleElements(configHash["Rules"], _subnetInfo["IDs"]) unless !configHash.has_key?("Rules")
-                _doc["Configuration"] ["EPM"] = createEpmElements(configHash["Epm"]) unless !configHash.has_key?("Epm")
+                _doc["Configuration"] ["Epm"] = createEpmElements(configHash["Epm"]) unless !configHash.has_key?("Epm")
                 _doc["Configuration"] ["ER"] = createERElements(configHash["ER"]) unless !configHash.has_key?("ER")
 
                 _configJson = _doc.to_json
