@@ -123,7 +123,10 @@ def Set_Marshall(ResourceSettings):
                 proxy_conf_path = PROXY_CONF_PATH_LEGACY
 
             workspace_id = settings.workspace_id.decode() if isinstance(settings.workspace_id, bytes) else settings.workspace_id
-            azure_dns_agent_svc_zone = settings.azure_dns_agent_svc_zone.decode() is isinstance(settings.azure_dns_agent_svc_zone, bytes) else settings.azure_dns_agent_svc_zone
+            
+            agent_service_zone = settings.azure_dns_agent_svc_zone
+            azure_dns_agent_svc_zone = agent_service_zone.decode() if isinstance(agent_service_zone, bytes) else agent_service_zone
+            
             args = ["python3", REGISTRATION_FILE_PATH, "--register", "-w", workspace_id, "-a", agent_id,
                     "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
                     WORKER_STATE_DIR, "-e", azure_dns_agent_svc_zone, "-p", proxy_conf_path, "-g",
