@@ -41,6 +41,7 @@ LG = nxDSCLog.DSCLog
 def Set_Marshall(ResourceSettings):
     try:
         settings = read_settings_from_mof_json(ResourceSettings)
+        settings.workspace_id = settings.workspace_id.decode() if isinstance(settings.workspace_id, bytes) else settings.workspace_id
         if not is_oms_primary_workspace(settings.workspace_id):
             # not primary workspace
             # return unconditional [0] for a NOOP on non-primary workspace
@@ -204,6 +205,7 @@ def Test_Marshall(ResourceSettings):
     try:
         settings = read_settings_from_mof_json(ResourceSettings)
         log(DEBUG, "UpdatesEnabled is %s; AutomationWorkerEnabled is %s" % (settings.auto_register_enabled, settings.diy_enabled))
+        settings.workspace_id = settings.workspace_id.decode() if isinstance(settings.workspace_id, bytes) else settings.workspace_id
         if not is_oms_primary_workspace(settings.workspace_id):
             # not primary workspace
             # return unconditional [0] for a NOOP on non-primary workspace
