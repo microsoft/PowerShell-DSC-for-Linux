@@ -35,16 +35,21 @@ RESOURCE_OMSAGENT_CONF = MODULE_RESOURCE_DIR + '/conf/auditd_plugin.conf'
 RESOURCE_AUOMS_V1_CONF = MODULE_RESOURCE_DIR + '/conf/auoms_v1.conf'
 RESOURCE_AUOMS_V2_CONF = MODULE_RESOURCE_DIR + '/conf/auoms_v2.conf'
 RESOURCE_AUOMS_V3_CONF = MODULE_RESOURCE_DIR + '/conf/auoms_v3.conf'
+RESOURCE_AUOMS_V4_CONF = MODULE_RESOURCE_DIR + '/conf/auoms_v4.conf'
 RESOURCE_AUOMSCOLLECT_V3_CONF = MODULE_RESOURCE_DIR + '/conf/auomscollect_v3.conf'
 RESOURCE_OUTPUT_V1_CONF = MODULE_RESOURCE_DIR + '/conf/output_v1.conf'
 RESOURCE_OUTPUT_V2_CONF = MODULE_RESOURCE_DIR + '/conf/output_v2.conf'
 RESOURCE_OUTPUT_V3_CONF = MODULE_RESOURCE_DIR + '/conf/output_v3.conf'
+RESOURCE_OUTPUT_V4_CONF = MODULE_RESOURCE_DIR + '/conf/output_v4.conf'
 RESOURCE_AUDIT_RULES_V1 = MODULE_RESOURCE_DIR + '/rules/oms-security-audit-v1.rules'
 RESOURCE_AUDIT_RULES_V2 = MODULE_RESOURCE_DIR + '/rules/oms-security-audit-v2.rules'
 RESOURCE_SUDO_SCRIPT = MODULE_RESOURCE_DIR + '/Scripts/OMSAuditdPlugin.sh'
 
 MIN_AUOMS_VER_FOR_V2_CONFIG = '1.2'
 MIN_AUOMS_VER_FOR_V3_CONFIG = '2.0'
+MIN_AUOMS_VER_FOR_V2_RULES = '2.0'
+MIN_AUOMS_VER_FOR_V3_COLLECT_CONFIG = '2.0'
+MIN_AUOMS_VER_FOR_V4_CONFIG = '2.1'
 
 AUOMS_BIN = '/opt/microsoft/auoms/bin/auoms'
 AUOMSCTL_BIN = '/opt/microsoft/auoms/bin/auomsctl'
@@ -266,7 +271,7 @@ def Set(WorkspaceId, Ensure):
     rules_diff = ""
     rules_diff_path = ""
     # Only do loaded rules check if auoms version < 2.0
-    if CompareVersion(auoms_version, MIN_AUOMS_VER_FOR_V3_CONFIG) < 0:
+    if CompareVersion(auoms_version, '2.0') < 0:
         # On some systems the auditd reload will cause rule load as well
         # So, to prevent trying to load rules twice (and getting an error as a result)
         # Only check loaded rules if rules file already contains the rules
@@ -508,7 +513,7 @@ def HasExecveat():
     
 
 def GetDesiredAuditRules(AuditVersion, AuomsVersion):
-    if CompareVersion(AuomsVersion, MIN_AUOMS_VER_FOR_V3_CONFIG) >= 0:
+    if CompareVersion(AuomsVersion, MIN_AUOMS_VER_FOR_V2_RULES) >= 0:
         desired_rules = ReadFile(RESOURCE_AUDIT_RULES_V2)
         return desired_rules
 
@@ -579,7 +584,11 @@ def GetDesiredAuomsConf(AuomsVersion):
     conf_path = RESOURCE_AUOMS_V1_CONF
     outconf_path = RESOURCE_OUTPUT_V1_CONF
     collectconf_path = None
-    if CompareVersion(AuomsVersion, MIN_AUOMS_VER_FOR_V3_CONFIG) >= 0:
+    if CompareVersion(AuomsVersion, MIN_AUOMS_VER_FOR_V4_CONFIG) >= 0:
+        conf_path = RESOURCE_AUOMS_V4_CONF
+        outconf_path = RESOURCE_OUTPUT_V4_CONF
+        collectconf_path = RESOURCE_AUOMSCOLLECT_V3_CONF
+    elif CompareVersion(AuomsVersion, MIN_AUOMS_VER_FOR_V3_CONFIG) >= 0:
         conf_path = RESOURCE_AUOMS_V3_CONF
         outconf_path = RESOURCE_OUTPUT_V3_CONF
         collectconf_path = RESOURCE_AUOMSCOLLECT_V3_CONF
@@ -628,7 +637,7 @@ def GetDesiredState(WorkspaceId, Ensure, AuditVersion, CurrentAuomsState, AuomsV
             LG().Log(LOG_FATAL, "Failed to determine desired plugin conf")
             return (None, None, None, None, None, None)
         
-        if CompareVersion(AuomsVersion, MIN_AUOMS_VER_FOR_V3_CONFIG) >= 0:
+        if CompareVersion(AuomsVersion, MIN_AUOMS_VER_FOR_V3_COLLECT_CONFIG) >= 0:
             if desired_collect_conf is None:
                 LG().Log(LOG_FATAL, "Failed to determine desired auomscollect conf")
                 return (None, None, None, None, None, None)
