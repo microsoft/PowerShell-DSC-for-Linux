@@ -275,9 +275,6 @@ ERROR = logging.ERROR
 DEBUG = logging.DEBUG
 INFO = logging.INFO
 
-# ###########################################################
-# Begin user defined DSC functions
-# ###########################################################
 WORKSPACE_ID_PREFIX = "rworkspace:"
 
 ERROR = logging.ERROR
