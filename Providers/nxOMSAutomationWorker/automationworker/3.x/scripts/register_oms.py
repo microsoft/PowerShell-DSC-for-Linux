@@ -1,14 +1,16 @@
-#!/usr/bin/env python2
-#
-# Copyright (C) Microsoft Corporation, All rights reserved.
+#!/usr/bin/env python3
+# ====================================
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+# ====================================
 
-import ConfigParser
+import configparser
 import datetime
 import getopt
 import os
 import socket
 import sys
 import re
+import packagesimportutil
 
 
 PY_MAJOR_VERSION = 0
@@ -16,12 +18,13 @@ PY_MINOR_VERSION = 1
 
 # append worker binary source path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+packagesimportutil.add_all_packages_under_automationworker_to_sys_path()
+
 
 # since we are using the worker httpclient, some configuration values are expected
-from worker import configuration
-
-from worker import httpclientfactory
-from worker import linuxutil
+import configuration3 as configuration
+import httpclientfactory
+import linuxutil
 
 ''''An instance of simplejson module if the installed Python version is below 2.6
 An instance of json module if the installed Python version is or is above 2.6'''
@@ -51,6 +54,8 @@ def get_hostname():
     # Use the ruby util OMS agent uses to get hostname
     try:
         process, output, error = linuxutil.popen_communicate(oms_agent_hostname_command)
+        output = output.decode() if isinstance(output, bytes) else output
+        error = error.decode() if isinstance(error, bytes) else error
         if process.returncode == 0 and not error:
             return output.strip()
     except OSError:
@@ -267,10 +272,10 @@ def create_worker_configuration_file(working_directory, jrds_uri, registration_e
 
     worker_conf_path = os.path.join(state_directory, "worker.conf")
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     if os.path.isfile(worker_conf_path):
         config.read(worker_conf_path)
-    conf_file = open(worker_conf_path, 'wb')
+    conf_file = open(worker_conf_path, 'w')
 
     worker_required_section = configuration.WORKER_REQUIRED_CONFIG_SECTION
     if not config.has_section(worker_required_section):
@@ -337,15 +342,15 @@ def main(argv):
                                     "gpgkeyringpath=", "diyaccountid=", "mock_powershelldsc_test=", "vmid=",
                                     "azureresourceid="])
     except getopt.GetoptError:
-        print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
+        print (__file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
                          "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
-                         "-y <diyaccountid> -i <vmid>"
+                         "-y <diyaccountid> -i <vmid>")
         sys.exit(2)
     for opt, arg in opts:
         if opt == ("-h", "--help"):
-            print __file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
+            print (__file__ + "[--register, --deregister] -w <workspaceid> -a <agentid> -c <certhpath> -k <keypath> " \
                              "-e <endpoint> -f <workingdirpath> -s <statepath> -p <proxyconfpath> -g <gpgkeyringpath>" \
-                             "-y <diyaccountid> -i <vmid>"
+                             "-y <diyaccountid> -i <vmid>")
             sys.exit()
         elif opt in ("-r", "--register"):
             operation = REGISTER
@@ -387,8 +392,8 @@ def main(argv):
     if workspace_id is None or agent_id is None or oms_cert_path is None or oms_key_path is None \
             or endpoint is None or gpg_keyring_path is None or proxy_configuration_path is None \
             or working_directory is None or state_directory is None or vm_id is None:
-        print "Missing mandatory arguments."
-        print "Use -h or --help for usage."
+        print ("Missing mandatory arguments.")
+        print ("Use -h or --help for usage.")
         sys.exit(1)
     else:
         if mock_powershelldsc_test is True:

@@ -1,6 +1,7 @@
-#!/usr/bin/env python2
-#
-# Copyright (C) Microsoft Corporation, All rights reserved.
+#!/usr/bin/env python3
+# ====================================
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+# ====================================
 
 import sys
 import time 
@@ -9,12 +10,10 @@ import time
 if sys.version_info[0] == 3:
     AUTOMATIONWORKER_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker"
     sys.path.insert(1,AUTOMATIONWORKER_PATH)
-    import configuration3 as configuration
-else:
-    import configuration
 
 
 import binascii
+import configuration3 as configuration
 import serializerfactory
 from httpclientfactory import HttpClientFactory
 from jrdsclient import JRDSClient

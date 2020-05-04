@@ -2,7 +2,6 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-
 import ConfigParser
 import os
 import sys
@@ -251,7 +250,7 @@ def get_enforce_runbook_signature_validation():
 def get_gpg_public_keyrings_path():
     """Return a list of string representing keyring path."""
     keyring_list = str(get_value(GPG_PUBLIC_KEYRING_PATH)).split(",")
-    sanitized_list = list(map(str.strip, keyring_list))
+    sanitized_list = map(str.strip, keyring_list)
     return sanitized_list
 
 
