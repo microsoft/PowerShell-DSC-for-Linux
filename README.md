@@ -17,6 +17,37 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 The latest release packages for PowerShell DSC for Linux can be downloaded here:
 [Releases](https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases)
 
+## Current status and roadmap for Linux DSC
+This repo is the home for the source code and development
+of Desired State Configuration for Linux.
+There are three solutions where releases from this repo
+are expected to be consumed:
+ 
+- As a stand-alone installation on support Linux distros and versions
+- Within Microsoft Azure using the Linux DSC extension for virtual machines
+- Within Microsoft Azure as a component of Microsoft Monitoring Agent solutions on Linux virtual machines (aka OMS Linux)
+ 
+The codebase in this repo has been updated with fixes based on customer
+incidents reported for Microsoft Monitoring Agent.
+Therefore, the Microsoft Monitoring Agent already utilizes the latest release.
+Unfortunately, it has not been possible to publish new releases
+for either standalone installations or DSC extension.
+If you encounter challenges with either scenario
+and would like to evaluate if the latest code will resolve your issue,
+the best option is to download the latest release,
+then distribute it using custom tools (such as Azure Custom Script Extension).
+
+Please note that
+[per the documentation for DSC Linux Extension](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/dsc-linux),
+the extensions for DSC Linux and Monitoring cannot be used
+together on the same machine.
+ 
+The future roadmap for this solution is to move to
+[Azure Policy Guest Configuration](https://aka.ms/gcpol)
+when it is capable of deploying configurations.
+Currently, Guest Configuration is only able to audit server configurations.
+Many more details including timing and migration
+will be available later in calendar year 2020.
 
 ## Supported Linux operating systems
 The following Linux operating system versions are supported by DSC for Linux. 
