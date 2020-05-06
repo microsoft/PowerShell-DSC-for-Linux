@@ -189,7 +189,7 @@ def get_autoregistered_worker_account_id():
 
 
 def extract_account_id_from_registration_endpoint(registration_endpoint):
-    account_id = re.findall("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}",
+    account_id = re.findall("\/accounts\/([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})",
                             registration_endpoint.lower())
     if len(account_id) != 1:
         raise Exception("Invalid registration endpoint format.")
