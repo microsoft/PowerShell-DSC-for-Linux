@@ -136,7 +136,7 @@ module NPMDConfig
                 _doc["Configuration"] ["Agents"] = createAgentElements(configHash["Agents"], _subnetInfo["Masks"])
                 _doc["Configuration"] ["Networks"] = createNetworkElements(configHash["Networks"], _subnetInfo["IDs"])
                 _doc["Configuration"] ["Rules"] = createRuleElements(configHash["Rules"], _subnetInfo["IDs"]) unless !configHash.has_key?("Rules")
-                _doc["Configuration"] ["EPM"] = createEpmElements(configHash["Epm"]) unless !configHash.has_key?("Epm")
+                _doc["Configuration"] ["Epm"] = createEpmElements(configHash["Epm"]) unless !configHash.has_key?("Epm")
                 _doc["Configuration"] ["ER"] = createERElements(configHash["ER"]) unless !configHash.has_key?("ER")
 
                 _configJson = _doc.to_json
@@ -286,7 +286,7 @@ module NPMDConfig
                 _rule["CMResourceId"] = x.has_key?("CMResourceId") ? x["CMResourceId"] : String.new
                 _rule["IngestionWorkspaceId"] = x.has_key?("IngestionWorkspaceId") ? x["IngestionWorkspaceId"] : String.new
                 _rule["WorkspaceAlias"] = x.has_key?("WorkspaceAlias") ? x["WorkspaceAlias"] : String.new
-                _rule["WorkspaceResourceId"] = x["WorkspaceResourceID"]
+                _rule["WorkspaceResourceId"] = x["WorkspaceResourceId"]
 
                 if _rule["NetworkTestMatrix"].empty?
                     Logger::logWarn "Skipping rule #{x["Name"]} as network test matrix is empty", Logger::loop
@@ -317,7 +317,7 @@ module NPMDConfig
                     _ruleHash["IngestionWorkspaceId"] = _iRule.has_key?("IngestionWorkspaceId") ? _iRule["IngestionWorkspaceId"] : String.new
                     _ruleHash["WorkspaceAlias"] = _iRule.has_key?("WorkspaceAlias") ? _iRule["WorkspaceAlias"] : String.new
                     _ruleHash["Redirect"] = "false"
-                    _ruleHash["WorkspaceResourceID"] = _iRule["WorkspaceResourceID"]
+                    _ruleHash["WorkspaceResourceId"] = _iRule["WorkspaceResourceId"]
                     _ruleHash["DiscoverPaths"] = _iRule.has_key?("DiscoverPaths") ? _iRule["DiscoverPaths"].to_s : "true"
                     _ruleHash["NetTests"] = (_iRule["NetworkThresholdLoss"].to_i >= -2 and _iRule["NetworkThresholdLatency"].to_i >= -2) ? "true" : "false"
                     _ruleHash["AppTests"] = (_iRule["AppThresholdLatency"].to_i >= -2) ? "true" : "false"
@@ -632,7 +632,7 @@ module NPMDConfig
                     _rule["ListenOnPort"] = value["listenOnPort"]
                     _rule["BiDirectional"] = value["bidirectional"]
                     _rule["Frequency"] = value["frequency"]
-                    _rule["WorkspaceResourceID"] = @metadata.has_key?("WorkspaceResourceID") ? @metadata["WorkspaceResourceID"] : String.new
+                    _rule["WorkspaceResourceId"] = @metadata.has_key?("WorkspaceResourceID") ? @metadata["WorkspaceResourceID"] : String.new
                     _connectionMonitorId = value.has_key?("ConnectionMonitorId") ? value["ConnectionMonitorId"].to_s : String.new
 
                     # Iterate over ConnectionMonitorInfoMap to get following info
@@ -667,7 +667,7 @@ module NPMDConfig
                     _rule["ID"] = testId
                     _rule["Name"] = _test["Name"]
                     _rule["Poll"] = _test["Poll"]
-                    _rule["WorkspaceResourceID"] = @metadata.has_key?("WorkspaceResourceID") ? @metadata["WorkspaceResourceID"] : String.new
+                    _rule["WorkspaceResourceId"] = @metadata.has_key?("WorkspaceResourceID") ? @metadata["WorkspaceResourceID"] : String.new
                     _rule["DiscoverPaths"] = _test.has_key?("DiscoverPaths") ? _test["DiscoverPaths"].to_s : "true"
                     _rule["AppThresholdLoss"] = _test["AppThreshold"].nil? ? "-3" : (_test["AppThreshold"].has_key?("Loss") ? _test["AppThreshold"]["Loss"] : "-2")
                     _rule["AppThresholdLatency"] = _test["AppThreshold"].nil? ? "-3.0" : (_test["AppThreshold"].has_key?("Latency") ? _test["AppThreshold"]["Latency"] : "-2.0")
@@ -1089,6 +1089,7 @@ module NPMContract
                                                     "DestinationResourceId",
                                                     "DestinationAddress",
                                                     "DestinationName",
+                                                    "DestinationIP",
                                                     "DestinationAgentId",
                                                     "ChecksTotal",
                                                     "ChecksFailed",

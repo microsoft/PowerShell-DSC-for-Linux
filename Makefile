@@ -258,7 +258,7 @@ endif
 
 nxOMSAutomationWorker:
 	rm -rf output/staging; \
-	VERSION="1.6.9.2"; \
+	VERSION="1.6.10.1"; \
 	PROVIDERS="nxOMSAutomationWorker"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -483,7 +483,7 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.35"; \
+	VERSION="3.36"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -530,7 +530,7 @@ nxFileInventory:
 
 nxOMSAgentNPMConfig:
 	rm -rf output/staging; \
-	VERSION="2.6"; \
+	VERSION="2.8"; \
 	PROVIDERS="nxOMSAgentNPMConfig"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
