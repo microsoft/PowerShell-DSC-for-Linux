@@ -5,8 +5,16 @@
 import sys
 import time 
 
+# for python 3 runbook execution in a python2 runtime of Sandbox we need to use httpclient and jrdsclient of python3 automation worker
+if sys.version_info[0] == 3:
+    AUTOMATIONWORKER_PATH = "/opt/microsoft/omsconfig/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker"
+    sys.path.insert(1,AUTOMATIONWORKER_PATH)
+    import configuration3 as configuration
+else:
+    import configuration
+
+
 import binascii
-import configuration
 import serializerfactory
 from httpclientfactory import HttpClientFactory
 from jrdsclient import JRDSClient

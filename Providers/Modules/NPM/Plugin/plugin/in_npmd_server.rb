@@ -318,6 +318,10 @@ module Fluent
                                     # Append EPM, CM and ER data
                                     elsif _subtypeList.include?item["SubType"]
                                         Logger::logInfo "#{item["SubType"]} is uploaded"
+                                        #Append UploadDirectly Flag to true for ConnectionMonitorPath as this flag will be used at NPM service
+                                        if item["SubType"] == "ConnectionMonitorPath"
+                                            item["UploadDirectly"] = "true"
+                                        end
                                         _validUploadDataItems << item if is_valid_dataitem(item)
                                     else
                                         log_error "Invalid Subtype data received"
