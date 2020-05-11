@@ -3,6 +3,7 @@ import os
 import sys
 import imp
 import subprocess
+import signal
 from os.path import basename, dirname, join, realpath, split
 from imp                import load_source
 from os.path            import dirname, isfile, join, realpath
@@ -26,6 +27,19 @@ fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
 nxDSCLog = imp.load_source('nxDSCLog', fullPathDSCLogger)
 logger = nxDSCLog.ConsoleAndFileLogger()
 sys.stdout = logger
+proc = None
+
+# function to handle ternimation signals received from omsagent.
+# Child process are created by with a new group id.
+# We issue termination signal together to all childprocesses with group id.
+def sigterm_handler(_signo, _stack_frame):
+    printVerboseMessage("OMS_MetaconfigHelper.py script received SIGTERM signal.")
+
+    if proc is not None:
+        printVerboseMessage("Terminating child process by sending SIGTERM signal.")
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+    else:
+        printVerboseMessage("There is no child process running. It is either completed execution or has not been invoked.")
 
 def exitWithError(message, errorCode = 1):
     errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message
@@ -136,6 +150,9 @@ def source_file(filename):
 Variables = dict()
 Defines = []
 
+# register the SIGTERM handler
+signal.signal(signal.SIGTERM, sigterm_handler)
+
 # Parse command line arguments
 args = []
 optlist = []
@@ -228,7 +245,7 @@ else:
     commandToRun = "/opt/microsoft/omsconfig/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
 
 # Apply the metaconfig using SetDscLocalConfiguration
-proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True)
+proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True, preexec_fn=os.setsid)
 exit_code = proc.wait()
 
 stdout, stderr = proc.communicate()
