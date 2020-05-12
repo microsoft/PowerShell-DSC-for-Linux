@@ -154,7 +154,7 @@ def apply_meta_config(args):
 
 # function to handle ternimation signals received from omsagent.
 # we kill the child dsc_host process if it is invoked and exit current script.
-def sigterm_handler(_signo, _stack_frame):
+def signal_handler(signalNumber, frame):
     global proc
     write_omsconfig_host_log("SIGTERM signal received. Trying to kill any child process...", pathToCurrentScript)
 
@@ -167,8 +167,7 @@ def sigterm_handler(_signo, _stack_frame):
     write_omsconfig_host_log("Script exiting...", pathToCurrentScript)
     exit(1)
 
-# register the SIGTERM handler
-signal.signal(signal.SIGTERM, sigterm_handler)
-
 if __name__ == "__main__":
+    # register the SIGTERM handler
+    signal.signal(signal.SIGTERM, signal_handler)
     main(argv)

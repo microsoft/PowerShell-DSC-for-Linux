@@ -32,7 +32,7 @@ proc = None
 # function to handle ternimation signals received from omsagent.
 # Child process are created by with a new group id.
 # We issue termination signal together to all childprocesses with group id.
-def sigterm_handler(_signo, _stack_frame):
+def signal_handler(signalNumber, frame):
     printVerboseMessage("OMS_MetaconfigHelper.py script received SIGTERM signal.")
 
     if proc is not None:
@@ -151,7 +151,7 @@ Variables = dict()
 Defines = []
 
 # register the SIGTERM handler
-signal.signal(signal.SIGTERM, sigterm_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 # Parse command line arguments
 args = []
