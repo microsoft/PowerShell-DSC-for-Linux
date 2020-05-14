@@ -350,18 +350,20 @@ if [ "$pythonVersion" = "python3" ]; then
 	echo "Running python3, python version is ", $pythonVersion
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.4.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.5.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip 0"
+  su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.4.zip 0"
 else
   echo "Running  python version is ", $pythonVersion
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.2.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.4.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.5.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.3.zip 0"
+  su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.4.zip 0"
 fi
 
 #if PFARCH == x86
