@@ -212,7 +212,7 @@ fi
 if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python2"
   pythonVersion="python2"
-else [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python3"
   pythonVersion="python3"
 else
@@ -342,7 +342,7 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python2"
   pythonVersion="python2"
-else [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python3"
   pythonVersion="python3"
 else
@@ -532,7 +532,7 @@ echo "Cleaned up existing dsc_hosts before uninstall..."
 if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python2"
   pythonVersion="python2"
-else [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python3"
   pythonVersion="python3"
 else
