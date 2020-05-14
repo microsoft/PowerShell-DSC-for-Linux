@@ -316,6 +316,7 @@ def UpdateAgentBinary(newVersion):
         src = RESOURCE_MODULE_PATH.__add__(DSC_X86_AGENT_PATH)
         retval &= DeleteAllFiles(src, AGENT_BINARY_PATH)
         retval &= CopyAllFiles(src, AGENT_BINARY_PATH)
+        LOG_ACTION.log(LogType.Error, 'npmd agent binary do not support 32-bit.')
 
     #Update version number after deleting and copying new agent files
     if retval == True:
