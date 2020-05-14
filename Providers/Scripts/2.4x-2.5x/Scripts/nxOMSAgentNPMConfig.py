@@ -319,20 +319,21 @@ def UpdateAgentBinary(newVersion):
         retval &= DeleteAllFiles(src, AGENT_BINARY_PATH)
         retval &= CopyAllFiles(src, AGENT_BINARY_PATH)
 
+    #Update version number after deleting and copying new agent files
+    if retval == True:
+        WriteFile(AGENT_RESOURCE_VERSION_PATH, newVersion)
+
     # set capabilities to binary
     src_files = os.listdir(src)
     for file_name in src_files:
         if AGENT_BINARY_NAME in file_name:
             full_file_name = os.path.join(AGENT_BINARY_PATH, file_name)
             break
-    retval &= NPM_ACTION.binary_setcap(full_file_name)
+    NPM_ACTION.binary_setcap(full_file_name)
 
     # Notify ruby plugin
     #retval &= NotifyServer(Commands.RestartNPM)
 
-    #Update version number
-    if retval == True:
-        WriteFile(AGENT_RESOURCE_VERSION_PATH, newVersion)
     return retval
 
 def UpdatePluginFiles():
