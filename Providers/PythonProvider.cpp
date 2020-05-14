@@ -65,7 +65,7 @@ std::string determinePythonVersion(){
     // If python2 --version does not contain 'not found' return python2
     if(result.find("not found") == std::string::npos) {
       std::cout << "Found python2." << std::endl;
-    	return "python";
+    	return "python2";
     }
 
     // Look for python3

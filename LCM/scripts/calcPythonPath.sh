@@ -7,7 +7,7 @@ then
 	if [[ -z $(python2 --version 2>&1 | grep 'not found') ]]
 	then
 		#echo "python exists"; 
-		pythonVer="python"
+		pythonVer="python2"
 	elif [[ -z $(python3 --version 2>&1 | grep 'not found') ]]
 	then
 		#echo "python3 exists"; 
@@ -19,7 +19,7 @@ then
 
 	# Detemine file location
 	echo "You provided the following argument(s): $@"
-	if [ "$pythonVer" == "python" ] 
+	if [ "$pythonVer" == "python2" ] 
 	then
 		filePath="/opt/microsoft/omsconfig/Scripts/"
 	else

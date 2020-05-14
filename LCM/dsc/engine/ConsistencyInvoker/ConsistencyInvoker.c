@@ -19,6 +19,7 @@
 #include <string.h>
 
 #define PYTHON_COMMAND "python"
+#define PYTHON2_COMMAND "python2"
 #define PYTHON3_COMMAND "python3"
 #define PYTHON_SCRIPT_NAME "PerformRequiredConfigurationChecks.py"
 
@@ -26,7 +27,7 @@ char* getPythonProvider();
 
 int main(int argc, char *argv[])
 {
-    char * pythonCommand = PYTHON_COMMAND;
+    char * pythonCommand = PYTHON2_COMMAND;
     
     char* dscScriptPath = malloc(1);
     dscScriptPath = 0;
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
     {
         pythonCommand = getPythonProvider();
 
-        if(strcmp(pythonCommand, PYTHON_COMMAND)!=0)
+        if(strcmp(pythonCommand, PYTHON3_COMMAND) == 0)
         {
             dscScriptPath = realloc(dscScriptPath, strlen(dscScriptPath) + strlen("/python3") + 1 );
             dscScriptPath = strcat(dscScriptPath, "/python3");
@@ -79,7 +80,7 @@ char* getPythonProvider()
 
     // If python2 --version does not contain 'not found' return python2
     if(strstr(result, "not found") == NULL) {
-    	return PYTHON_COMMAND;
+    	return PYTHON2_COMMAND;
     }
 
     // Look for python3

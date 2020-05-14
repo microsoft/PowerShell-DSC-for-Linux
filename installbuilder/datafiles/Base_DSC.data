@@ -210,14 +210,16 @@ fi
 %Preinstall_200
 # pythonVersion check must be repeated for each section
 if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python"
-  pythonVersion="python"
-else
+  echo "Using python2"
+  pythonVersion="python2"
+else [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python3"
   pythonVersion="python3"
+else
+  echo "Python not found."
 fi
 # Only check for ctypes if python2 is installed
-if [ "$pythonVersion" = "python" ]; then
+if [ "$pythonVersion" = "python2" ]; then
    echo "Checking for ctypes python module..."
    python -c "import ctypes" 1> /dev/null 2> /dev/null
    cmdline_ctypes=$?
@@ -338,11 +340,13 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 
 # pythonVersion check must be repeated for each section
 if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python"
-  pythonVersion="python"
-else
+  echo "Using python2"
+  pythonVersion="python2"
+else [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python3"
   pythonVersion="python3"
+else
+  echo "Python not found."
 fi
 
 # Set up built-in resource modules for OMS DSC
@@ -526,11 +530,13 @@ echo "Cleaned up existing dsc_hosts before uninstall..."
 %Preuninstall_999
 # pythonVersion check must be repeated for each section
 if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python"
-  pythonVersion="python"
-else
+  echo "Using python2"
+  pythonVersion="python2"
+else [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
   echo "Using python3"
   pythonVersion="python3"
+else
+  echo "Python not found"
 fi
 # if this is a package removal, not an upgrade, remove the modules
 if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
