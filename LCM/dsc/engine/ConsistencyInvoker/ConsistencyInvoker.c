@@ -80,7 +80,6 @@ char* getPythonProvider()
 
     // If python2 --version does not contain 'not found' return python2
     if(strstr(result, "not found") == NULL) {
-        //DSC_LOG_INFO("Using python2 for ConsistencyInvoker");
     	return PYTHON2_COMMAND;
     }
 
@@ -98,11 +97,9 @@ char* getPythonProvider()
 
     // If python3 --version does not contain 'not found' return python3
     if(strstr(result, "not found") == NULL) {
-        //DSC_LOG_INFO("Using python3 for ConsistencyInvoker");
 	    return PYTHON3_COMMAND;
     }
 
-    //DSC_LOG_ERROR("Python2 or Python3 not found");
     return PYTHON_COMMAND;
 
 }
