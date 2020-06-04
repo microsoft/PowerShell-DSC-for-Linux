@@ -242,6 +242,7 @@ def perform_inventory(args):
 
                     tempReportFileHandle = open(temp_report_path, 'w')
                     try:
+                        final_xml_report = final_xml_report.encode("utf-8")
                         tempReportFileHandle.write(final_xml_report)
                     finally:
                         if (tempReportFileHandle):
