@@ -199,7 +199,7 @@ def Set(WorkspaceID, Plugins):
                 return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # log warning - this scenario is unexpected but should not cause plugin set to fail 
-                LG().LOG('WARN', plugin['PluginName'] + ' contains neither plugin nor conf, but was not to be installed anyways')
+                LG().Log('WARN', plugin['PluginName'] + ' contains neither plugin nor conf, but was not to be installed anyways')
             else:
                 # log error Ensure value not expected
                 LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
@@ -291,7 +291,7 @@ def Test(Plugins):
                 return [-1]
             elif plugin['Ensure'] == 'Absent':
                 # log warning - this scenario is unexpected but should not cause plugin test to fail 
-                LG().LOG('WARN', plugin['PluginName'] + ' contains neither plugin nor conf, but was not to be installed anyways')
+                LG().Log('WARN', plugin['PluginName'] + ' contains neither plugin nor conf, but was not to be installed anyways')
             else:
                 # log error Ensure value not expected
                 LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
