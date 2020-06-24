@@ -1071,6 +1071,7 @@ module NPMContract
                                                     "MaxRoundTripTimeMs",
                                                     "AvgRoundTripTimeMs",
                                                     "TestResult",
+                                                    "TestResultCriterion",
                                                     "AdditionalData",
                                                     "IngestionWorkspaceResourceId"]
 
@@ -1109,6 +1110,7 @@ module NPMContract
                                                     "DestinationPort",
                                                     "Protocol",
                                                     "PathTestResult",
+                                                    "PathTestResultCriterion",
                                                     "AdditionalData",
                                                     "IngestionWorkspaceResourceId",
                                                     "UploadDirectly"]
