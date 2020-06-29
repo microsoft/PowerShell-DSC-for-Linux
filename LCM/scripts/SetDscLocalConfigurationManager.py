@@ -7,6 +7,7 @@ from traceback            import format_exc
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
+import signal
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -18,6 +19,7 @@ operationStatusUtilityPath = join(pathToCommonScriptsFolder, 'OperationStatusUti
 operationStatusUtility = load_source('operationStatusUtility', operationStatusUtilityPath)
 
 operation = 'SetLCM'
+proc = None
 
 def usage():
     print("Usage:")
@@ -50,6 +52,7 @@ def apply_meta_config(args):
         exit(1)
 
     fileHandle = open(args[2], 'r')
+    global proc
     try:
         fileContent = fileHandle.read()
         outtokens = []
@@ -123,9 +126,9 @@ def apply_meta_config(args):
                         sleep(60)
 
                 if dschostlock_acquired:
-                    p = Popen(parameters, stdout=PIPE, stderr=PIPE)
-                    exit_code = p.wait()
-                    stdout, stderr = p.communicate()
+                    proc = Popen(parameters, stdout=PIPE, stderr=PIPE)
+                    exit_code = proc.wait()
+                    stdout, stderr = proc.communicate()
                     print(stdout)
                 else:
                     print("dsc host lock already acuired by a different process")
@@ -137,9 +140,9 @@ def apply_meta_config(args):
                     # Close dsc host lock file handle
                     dschostlock_filehandle.close()
         else:
-            p = Popen(parameters, stdout=PIPE, stderr=PIPE)
-            exit_code = p.wait()
-            stdout, stderr = p.communicate()
+            proc = Popen(parameters, stdout=PIPE, stderr=PIPE)
+            exit_code = proc.wait()
+            stdout, stderr = proc.communicate()
 
         print(stdout)
 
@@ -149,5 +152,22 @@ def apply_meta_config(args):
     finally:
         fileHandle.close()
 
+# function to handle ternimation signals received from omsagent.
+# we kill the child dsc_host process if it is invoked and exit current script.
+def signal_handler(signalNumber, frame):
+    global proc
+    write_omsconfig_host_log("SIGTERM signal received. Trying to kill any child process...", pathToCurrentScript)
+
+    if proc is not None:
+        write_omsconfig_host_log("Terminating child process (ID = " + str(proc.pid) + ") by sending SIGTERM signal.", pathToCurrentScript)
+        proc.terminate()
+    else:
+        write_omsconfig_host_log("There is no child process running. It has either completed execution or has not been started.", pathToCurrentScript)
+    
+    write_omsconfig_host_log("Script exiting...", pathToCurrentScript)
+    exit(1)
+
 if __name__ == "__main__":
+    # register the SIGTERM handler
+    signal.signal(signal.SIGTERM, signal_handler)
     main(argv)
