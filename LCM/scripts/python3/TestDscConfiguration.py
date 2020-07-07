@@ -77,7 +77,7 @@ if use_omsconfig_host:
                 stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
                 print(stdout)
 
-                if (exit_code > 0):
+                if (isinstance(exit_code, int) and exit_code > 0):
                     write_omsconfig_host_log('dsc_host failed with code = ' + str(exit_code), pathToCurrentScript)
                     exit(exit_code)
             else:

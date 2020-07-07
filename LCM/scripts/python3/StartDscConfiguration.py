@@ -102,7 +102,7 @@ def main(argv):
 
     # Read the configuration mof
     try:
-        configurationFile = codecs.open(parsedArguments.configurationmof, 'r', encoding= 'utf-16')
+        configurationFile = codecs.open(parsedArguments.configurationmof, 'r')
     except:
         configurationFile = codecs.open(parsedArguments.configurationmof, 'r', encoding = 'utf-16')
 

@@ -32,6 +32,8 @@ def exitWithError(message, errorCode = 1):
         message = message.decode()
     errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message
     print(errorMessage)
+    if (isinstance(errorCode, bytes)):
+        errorCode = errorCode.decode()
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
