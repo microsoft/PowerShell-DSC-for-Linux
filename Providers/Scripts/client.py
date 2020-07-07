@@ -176,6 +176,7 @@ try:
         else:
             trace (ScriptsDir + '/3.x')
             os.chdir (ScriptsDir + '/3.x')
+            sys.path.append(ScriptsDir + '/3.x/Scripts')
         from Scripts import *
         
         if __name__ == '__main__':
