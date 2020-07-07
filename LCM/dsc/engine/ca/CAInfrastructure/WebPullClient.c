@@ -3,7 +3,7 @@
 
    Copyright (c) Microsoft Corporation
 
-   All rights reserved. 
+   All rights reserved.
 
    MIT License
 
@@ -29,6 +29,9 @@
 #include <openssl/err.h>
 #include <curl/curl.h>
 #include <base/conf.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 #include "WebPullClient.h"
 
@@ -56,7 +59,7 @@ struct ModuleTable {
     ModuleTableEntry* first;
 };
 
-static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation, 
+static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
                                            ModuleTable* table,
                                            _Outptr_result_maybenull_ MI_Instance **extendedError);
 
@@ -66,13 +69,13 @@ struct ReadChunk
     size_t last_char;
 };
 
-struct Chunk 
+struct Chunk
 {
     size_t size;
     char * data;
 };
 
-struct HeaderChunk 
+struct HeaderChunk
 {
     size_t size;
     char ** headerKeys;
@@ -106,7 +109,7 @@ static void CleanupHeaderChunk(struct HeaderChunk * chunk)
     free(chunk->headerValues);
     chunk->headerKeys = NULL;
     chunk->headerValues = NULL;
-    
+
 }
 
 struct SSLOptions g_sslOptions;
@@ -122,7 +125,7 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
     g_sslOptions.cipherList[0] = '\0';
     g_sslOptions.CABundle[0] = '\0';
     g_sslOptions.Proxy[0] = '\0';
-    
+
     conf = Conf_Open(OMI_CONF_FILE_PATH);
     if (!conf)
     {
@@ -153,7 +156,7 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
             }
             else if (strcasecmp(value, "false") == 0)
             {
-                g_sslOptions.DoNotCheckCertificate = MI_FALSE;           
+                g_sslOptions.DoNotCheckCertificate = MI_FALSE;
             }
             else
             {
@@ -169,7 +172,7 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
             }
             else if (strcasecmp(value, "false") == 0)
             {
-                g_sslOptions.NoSSLv3 = MI_FALSE;         
+                g_sslOptions.NoSSLv3 = MI_FALSE;
             }
             else
             {
@@ -261,12 +264,12 @@ static MI_Result GetSSLOptions(_Outptr_result_maybenull_ MI_Instance **extendedE
 static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
-  struct HeaderChunk *chunk = (struct HeaderChunk *)userp; 
+  struct HeaderChunk *chunk = (struct HeaderChunk *)userp;
   char* colonPointer = NULL;
   long key_length = 0;
   long value_length = 0;
   char *charContents = (char*)calloc(realsize, 1);
-  
+
   // We have to do a silly memcpy here because there's no safe version of "strstr", used below.
   memcpy(charContents, contents, realsize);
 
@@ -294,7 +297,7 @@ static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *us
 
   chunk->headerKeys[chunk->size] = malloc( key_length + 1 );
   chunk->headerValues[chunk->size] = malloc( value_length + 1);
-  
+
   memcpy(chunk->headerKeys[chunk->size], charContents, key_length);
   chunk->headerKeys[chunk->size][key_length] = '\0';
   memcpy(chunk->headerValues[chunk->size], colonPointer + 2, value_length);
@@ -304,23 +307,23 @@ static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *us
   free(charContents);
   return realsize;
 }
- 
+
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct Chunk *mem = (struct Chunk *)userp;
- 
+
   mem->data = realloc(mem->data, mem->size + realsize + 1);
   memcpy(&(mem->data[mem->size]), contents, realsize);
   mem->size += realsize;
   mem->data[mem->size] = 0;
- 
+
   return realsize;
 }
 
 
 MI_Char *GetSystemUuid();
-MI_Boolean EscapeValue (_In_reads_z_(size) char *tokenValue, int startValue, int size, 
+MI_Boolean EscapeValue (_In_reads_z_(size) char *tokenValue, int startValue, int size,
                     _Inout_ int *currentTokenStartValue,
                     _Inout_ int *currentTokenEndValue,
                     _Inout_ int *nextTokenValue);
@@ -415,7 +418,7 @@ static ModuleTableEntry** ModuleTableContainsKey(ModuleTable* table, MI_Char* mo
     {
         return NULL;
     }
-    
+
     current = &table->first;
     while (*current != NULL)
     {
@@ -459,12 +462,12 @@ MI_Boolean ValidateChecksum(_In_z_ MI_Char *checksum, _In_z_ const MI_Char* path
     size_t bytesRead;
     SHA256_CTX Ctx;
     char const alphabet[] = "0123456789ABCDEF";
-    unsigned char hashedValue[SHA256TRANSFORM_DIGEST_LEN];    
+    unsigned char hashedValue[SHA256TRANSFORM_DIGEST_LEN];
     int iCount = 0;
     FILE * fp = NULL;
     if( checksum == NULL)
         return MI_FALSE;
-    
+
     fp = File_OpenT(path, MI_T("r"));
     if( fp == NULL )
         return MI_FALSE;
@@ -485,9 +488,9 @@ MI_Boolean ValidateChecksum(_In_z_ MI_Char *checksum, _In_z_ const MI_Char* path
         }
     }
     while( bytesRead >= BUFFER_SIZE_1KB );
-    
+
     SHA256_Final(hashedValue, &Ctx);
-    
+
     File_Close(fp);
     // validate the checksum.
     // Use the buffer for memory
@@ -497,19 +500,19 @@ MI_Boolean ValidateChecksum(_In_z_ MI_Char *checksum, _In_z_ const MI_Char* path
     {
         computedHash[2*iCount] = alphabet[ hashedValue[iCount]/16];
         computedHash[2*iCount+1] = alphabet[ hashedValue[iCount]%16];
-    }    
+    }
 
     if( Tcscasecmp(checksum, (const MI_Char*)computedHash) != 0 )
         return MI_FALSE;
 
     return MI_TRUE;
-    
+
 }
 
 MI_INLINE MI_Boolean IsValidUuid(_In_z_ MI_Char* systemUuid)
 {
     MI_Uint32 len = 0;
-    MI_Uint32 xCount = 0;     
+    MI_Uint32 xCount = 0;
     if( systemUuid == NULL)
     {
         return MI_FALSE;
@@ -517,7 +520,7 @@ MI_INLINE MI_Boolean IsValidUuid(_In_z_ MI_Char* systemUuid)
     len = (MI_Uint32)Tcslen(systemUuid);
     if( len != 36 )
         return MI_FALSE;
-    //pattern 8-13-19-24 and all characters are hexadecimal. 
+    //pattern 8-13-19-24 and all characters are hexadecimal.
     for(xCount = 0; xCount <8; xCount++)
     {
         if(!isxdigit((unsigned char)systemUuid[xCount]))
@@ -575,18 +578,18 @@ MI_Boolean ConnectionAllowed(_In_ MI_InstanceA *customParam, _In_z_ const MI_Cha
     //only https is allowed.
     if( Tcsncasecmp(serverName, MI_T("https"), 5) == 0 )
         return MI_TRUE;
-    
+
     return MI_FALSE;
 }
-MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig, 
+MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
                                   _In_ MI_Char* partialConfigName,
                                   _Outptr_opt_result_maybenull_    MI_Instance **credential,
                                   _Inout_    MI_InstanceA *customParam,
                                   _Outptr_result_maybenull_z_ MI_Char **configurationID,
                                   _Outptr_result_maybenull_z_ MI_Char **certificateID,
-                                  _Inout_updates_(URL_SIZE) MI_Char *url, 
-                                  _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl, 
-                                  _Out_ MI_Uint32 *port, 
+                                  _Inout_updates_(URL_SIZE) MI_Char *url,
+                                  _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl,
+                                  _Out_ MI_Uint32 *port,
                                   _Out_ MI_Boolean *bIsHttps,
                                   _Out_ MI_Uint32* getActionStatusCode,
                                   _Outptr_result_maybenull_ MI_Instance **extendedError)
@@ -626,7 +629,7 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
     {
         *getActionStatusCode = InvalidConfigurationIdInMetaConfig;
         r = GetCimMIError(MI_RESULT_SERVER_LIMITS_EXCEEDED, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-        return r;              
+        return r;
     }
     memcpy(*configurationID, value.string, Tcslen(value.string)* sizeof(MI_Char));
     /* Validate the Uuid.*/
@@ -635,18 +638,18 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
     {
         *getActionStatusCode = InvalidConfigurationIdFormat;
         r = GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDCONFIGURATIONIDFORMAT, *configurationID);
-        DSC_free(*configurationID);             
-        return r;            
+        DSC_free(*configurationID);
+        return r;
     }
 */
-    
+
     // 2. Get Credential.
     r = MI_Instance_GetElement(metaConfig, MetaConfig_Credential, &value, NULL, &flags, NULL);
     if( r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
     {
         *credential = value.instance;
-    }     
-    
+    }
+
 
 
     // If partialConfigName is defined, get the ConfigurationDownloadManagers, else get the DownloadManagerCustomData
@@ -691,11 +694,11 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
 
         for (xCount = 0; xCount < value.instancea.size; ++xCount)
         {
-            MI_Instance_GetElement(value.instancea.data[xCount], OMI_MetaConfigurationResource_ResourceId, &value2, &miType, &flags, NULL);   
+            MI_Instance_GetElement(value.instancea.data[xCount], OMI_MetaConfigurationResource_ResourceId, &value2, &miType, &flags, NULL);
             if ( Tcscasecmp(value2.string, configurationSource) == 0 )
             {
                 // Found the WebDownloadManager with the proper resource ID.
-                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("ServerURL"), &value2, &miType, &flags, NULL);   
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("ServerURL"), &value2, &miType, &flags, NULL);
                 if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
                 {
                     return GetCimMIError1Param(MI_RESULT_NO_SUCH_PROPERTY, extendedError, ID_PULL_NOSERVERURL, value3.string);
@@ -703,13 +706,13 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
 
                 memcpy(serverURL, value2.string, (Tcslen(value2.string) + 1) * sizeof(MI_Char));
 
-                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("CertificateID"), &value2, &miType, &flags, NULL);   
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("CertificateID"), &value2, &miType, &flags, NULL);
                 if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
                 {
-                    memcpy(*certificateID, value2.string, Tcslen(value2.string) * sizeof(MI_Char));  
+                    memcpy(*certificateID, value2.string, Tcslen(value2.string) * sizeof(MI_Char));
                 }
 
-                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("AllowUnsecureConnection"), &value2, &miType, &flags, NULL);   
+                MI_Instance_GetElement(value.instancea.data[xCount], MI_T("AllowUnsecureConnection"), &value2, &miType, &flags, NULL);
                 if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
                 {
                     allowUnsecureConnection = value2.boolean;
@@ -720,7 +723,7 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
                 {
                     *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
                     r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, serverURL);
-                    return r;     
+                    return r;
                 }
                 // Found the WebDownloadManager, stop searching.
                 break;
@@ -737,7 +740,7 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
             customParam->data = value.instancea.data;
         }
 
-        
+
         // 4. Get certificate ID.
         for( xCount =0; xCount < customParam->size; xCount++)
         {
@@ -757,13 +760,13 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
                         if( *configurationID )
                             DSC_free(*configurationID);
                         *configurationID = NULL;
-                        return r;              
+                        return r;
                     }
-                    memcpy(*certificateID, value.string, Tcslen(value.string)* sizeof(MI_Char));  
+                    memcpy(*certificateID, value.string, Tcslen(value.string)* sizeof(MI_Char));
                     break;
                 }
             }
-        }         
+        }
     }
 
     if (*serverURL == '\0')
@@ -787,20 +790,20 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
                     {
                         // Found ServerUrl in value.string
                         memcpy(serverURL, value.string, (Tcslen(value.string) + 1) * sizeof(MI_Char));
-                        
+
                         //Check if connection is secure and if unsecure user explicitly asks for it.
                         if( !ConnectionAllowed(&customData, serverURL) )
                         {
                             *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
                             r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, serverURL);
                             return r;
-                        }   
-                        
+                        }
+
                         break;
                     }
                 }
             }
-        }      
+        }
         else
         {
             // There's no DownloadManagerCustomData, AND there's no partial configuration.  We should be able to find WebDownloadManager, and only one!
@@ -810,31 +813,31 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
                 // Unable to get the config download managers
                 return GetCimMIError(MI_RESULT_NO_SUCH_PROPERTY, extendedError, ID_PULL_NOCONFIGDOWNLOADMANAGERS);
             }
-         
+
             if (value.instancea.size > 1)
             {
                 // Too many download managers defined, please set up partial configuration for this.
                 return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_TOOMANYCONFIGDOWNLOADMANAGERS);
             }
 
-            MI_Instance_GetElement(value.instancea.data[0], OMI_MetaConfigurationResource_ResourceId, &value3, NULL, &flags, NULL);   
+            MI_Instance_GetElement(value.instancea.data[0], OMI_MetaConfigurationResource_ResourceId, &value3, NULL, &flags, NULL);
 
             // Found the WebDownloadManager with the proper resource ID.
-            MI_Instance_GetElement(value.instancea.data[0], MI_T("ServerURL"), &value2, NULL, &flags, NULL);   
+            MI_Instance_GetElement(value.instancea.data[0], MI_T("ServerURL"), &value2, NULL, &flags, NULL);
             if (r != MI_RESULT_OK || (flags & MI_FLAG_NULL))
             {
                 return GetCimMIError1Param(MI_RESULT_NO_SUCH_PROPERTY, extendedError, ID_PULL_NOSERVERURL, value3.string);
             }
-            
+
             memcpy(serverURL, value2.string, (Tcslen(value2.string) + 1) * sizeof(MI_Char));
 
-            MI_Instance_GetElement(value.instancea.data[0], MI_T("CertificateID"), &value2, NULL, &flags, NULL);   
+            MI_Instance_GetElement(value.instancea.data[0], MI_T("CertificateID"), &value2, NULL, &flags, NULL);
             if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
             {
-                memcpy(*certificateID, value2.string, Tcslen(value2.string) * sizeof(MI_Char));  
+                memcpy(*certificateID, value2.string, Tcslen(value2.string) * sizeof(MI_Char));
             }
-            
-            MI_Instance_GetElement(value.instancea.data[0], MI_T("AllowUnsecureConnection"), &value2, NULL, &flags, NULL);   
+
+            MI_Instance_GetElement(value.instancea.data[0], MI_T("AllowUnsecureConnection"), &value2, NULL, &flags, NULL);
             if (r == MI_RESULT_OK && !(flags & MI_FLAG_NULL))
             {
                 allowUnsecureConnection = value2.boolean;
@@ -844,13 +847,13 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
 
     if (*serverURL != '\0')
     {
-        if( sscanf(serverURL, MI_T("http://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
+        if( sscanf(serverURL, MI_T("http://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 ||
             sscanf(serverURL, MI_T("http://%99[^/]/%199[^\n]"), url, subUrl) == 2 )
         {
             //success
         }
         //format is: http://server:port/suburl or http://server/suburl
-        else if( sscanf(serverURL, MI_T("https://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
+        else if( sscanf(serverURL, MI_T("https://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 ||
                  sscanf(serverURL, MI_T("https://%99[^/]/%199[^\n]"), url, subUrl) == 2 )
         {
             //success
@@ -865,14 +868,14 @@ MI_Result GetMetaConfigParameters(_In_ MI_Instance *metaConfig,
     {
         // Not found
         *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
-        return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);   
+        return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
     }
-    
+
     return MI_RESULT_OK;
-   
+
 }
 
-MI_Char * GetGetActionBodyContent(_In_z_ const MI_Char *checksum, MI_Boolean nodeCompliant, 
+MI_Char * GetGetActionBodyContent(_In_z_ const MI_Char *checksum, MI_Boolean nodeCompliant,
                                 _In_z_ const MI_Char *checksumAlgorithm, MI_Uint32 statusCode)
 {
     const MI_Char *checksumName = MI_T("Checksum");
@@ -885,7 +888,7 @@ MI_Char * GetGetActionBodyContent(_In_z_ const MI_Char *checksum, MI_Boolean nod
     MI_Char statusCodeValue[MAX_STATUSCODE_SIZE];
     size_t length;
     MI_Char *content = NULL;
-    
+
     if( nodeCompliant == MI_TRUE)
     {
         complianceStatus = MI_T("TRUE");
@@ -897,7 +900,7 @@ MI_Char * GetGetActionBodyContent(_In_z_ const MI_Char *checksum, MI_Boolean nod
     Stprintf(statusCodeValue, MAX_STATUSCODE_SIZE, MI_T("%d"), statusCode);
 
     length = 50 + Tcslen(clientStatusName) + Tcslen(checksumName) + Tcslen(algorithmName) + Tcslen(checksum) + Tcslen(checksumAlgorithm);
-    
+
     content = (MI_Char *)DSC_malloc(length * sizeof(MI_Char), NitsHere());
     if( content == NULL )
     {
@@ -914,7 +917,7 @@ MI_Char * GetGetActionBodyContent(_In_z_ const MI_Char *checksum, MI_Boolean nod
 int EscapeString(_In_reads_z_(size) char *tokenValue, int startValue, int size)
 {
     int xCount = startValue;
-    char *start = tokenValue;    
+    char *start = tokenValue;
     while( xCount < size)
     {
         if( *(start+xCount) == '"')
@@ -923,16 +926,16 @@ int EscapeString(_In_reads_z_(size) char *tokenValue, int startValue, int size)
         }
         if( (*(start+xCount) == '\\') && (xCount+1 < size) && (*(start+xCount+1) == '"'))
         xCount++;
-    
+
         xCount++;
-    }    
+    }
     return -1;
 }
 
 int EscapeArray (_In_reads_z_(size) char *tokenValue, int startValue, int size)
 {
     int xCount = startValue;
-    char *start = tokenValue; 
+    char *start = tokenValue;
     int currentTokenStartValue = 0;
     int currentTokenEndValue = 0;
     int nextTokenValue = 0;
@@ -953,16 +956,16 @@ int EscapeArray (_In_reads_z_(size) char *tokenValue, int startValue, int size)
             }
             xCount = nextTokenValue;
         }
-    }    
+    }
     return -1;
 }
 
 int EscapeObject (_In_reads_z_(size) char *tokenValue, int startValue, int size)
 {
     int xCount = startValue;
-    char *start = tokenValue; 
+    char *start = tokenValue;
     int currentTokenStartValue = 0;
-    int currentTokenEndValue = 0;    
+    int currentTokenEndValue = 0;
     int nextTokenValue = 0;
     // escape until we get '}'. it will be in format {string:value};
     while( xCount < size)
@@ -979,18 +982,18 @@ int EscapeObject (_In_reads_z_(size) char *tokenValue, int startValue, int size)
             {
                 return -1;
             }
-            xCount = nextTokenValue;            
+            xCount = nextTokenValue;
         }
         xCount++;
-    }    
+    }
     return -1;
 }
 
 int EscapeNumber (_In_reads_z_(size) char *tokenValue, int startValue, int size)
 {
     int xCount = startValue;
-    char *start = tokenValue;  
-    // escape until we get ":",",","}",}]". 
+    char *start = tokenValue;
+    // escape until we get ":",",","}",}]".
     while( xCount < size)
     {
         if( *(start+xCount) == ',' ||
@@ -1000,17 +1003,17 @@ int EscapeNumber (_In_reads_z_(size) char *tokenValue, int startValue, int size)
           return xCount-1;
         }
         xCount++;
-    }    
+    }
     return -1;
 }
 
-MI_Boolean EscapeValue (_In_reads_z_(size) char *tokenValue, int startValue, int size, 
+MI_Boolean EscapeValue (_In_reads_z_(size) char *tokenValue, int startValue, int size,
                     _Inout_ int *currentTokenStartValue,
                     _Inout_ int *currentTokenEndValue,
                     _Inout_ int *nextTokenValue)
 {
     int xCount = startValue;
-    char *start = tokenValue;     
+    char *start = tokenValue;
     if( xCount < size)
         {
         if( *(start+xCount) == '"' ) // it is a string
@@ -1028,44 +1031,44 @@ MI_Boolean EscapeValue (_In_reads_z_(size) char *tokenValue, int startValue, int
         }
         else if( *(start+xCount) == '{' ) // it is an object
         {
-            *currentTokenStartValue = xCount +1;        
+            *currentTokenStartValue = xCount +1;
             *currentTokenEndValue = EscapeObject(tokenValue, *currentTokenStartValue, size);
             *nextTokenValue = *currentTokenEndValue + 2;
-        }    
+        }
         else if( Strcasecmp(start+xCount, "true")) // it is value true
         {
-            *currentTokenStartValue = xCount;        
+            *currentTokenStartValue = xCount;
             *currentTokenEndValue = xCount + 3;
             *nextTokenValue = *currentTokenEndValue + 1;
-        }    
+        }
         else if( Strcasecmp(start+xCount, "false")) // it is value false
         {
-            *currentTokenStartValue = xCount;        
+            *currentTokenStartValue = xCount;
             *currentTokenEndValue = xCount + 4;
             *nextTokenValue = *currentTokenEndValue + 1;
-        }        
+        }
         else if( Strcasecmp(start+xCount, "null")) // it is value true
         {
-            *currentTokenStartValue = xCount;        
+            *currentTokenStartValue = xCount;
             *currentTokenEndValue = xCount + 3;
             *nextTokenValue = *currentTokenEndValue + 1;
-        }  
+        }
         else // it is a number
         {
-            *currentTokenStartValue = xCount;    
+            *currentTokenStartValue = xCount;
             *currentTokenEndValue = EscapeNumber(tokenValue, *currentTokenStartValue, size);
             *nextTokenValue = *currentTokenEndValue + 2;
-        }   
+        }
         if (*currentTokenEndValue == -1 || *currentTokenStartValue == -1)
-            return MI_FALSE;     
-        return MI_TRUE;        
+            return MI_FALSE;
+        return MI_TRUE;
     }
     return MI_FALSE;
 }
 
 
 
-MI_Boolean GetNextToken(_In_reads_z_(size) char *tokenValue, int startValue, int size, 
+MI_Boolean GetNextToken(_In_reads_z_(size) char *tokenValue, int startValue, int size,
                     _Inout_ int *currentTokenStart,
                     _Inout_ int *currentTokenEnd,
                     _Inout_ int *currentTokenStartValue,
@@ -1083,13 +1086,13 @@ MI_Boolean GetNextToken(_In_reads_z_(size) char *tokenValue, int startValue, int
         //TokenEnd
         *currentTokenEnd = EscapeString(tokenValue, *currentTokenStart, size);
         if (*currentTokenEnd == -1)
-            return MI_FALSE; 
-        
+            return MI_FALSE;
+
           break;
         }
         if( (*(start+xCount) == '\\') && (xCount+1 < size) && (*(start+xCount+1) == '"'))
         xCount++;
-    
+
         xCount++;
     }
     if( xCount >= size )
@@ -1102,9 +1105,9 @@ MI_Boolean GetNextToken(_In_reads_z_(size) char *tokenValue, int startValue, int
 
     if(!EscapeValue(tokenValue, xCount, size, currentTokenStartValue , currentTokenEndValue, nextTokenValue))
         return MI_FALSE;
-    
-    return MI_TRUE;    
-  
+
+    return MI_TRUE;
+
 }
 
 
@@ -1125,7 +1128,7 @@ MI_Boolean GetGetActionData( _In_reads_z_(size) char *start,
     char* ptr2_end = NULL;
     *serverAssignedConfigurations = (OverAllGetActionResponse *) DSC_malloc(sizeof(OverAllGetActionResponse), NitsHere());
     *serverResponse = NULL;
-    
+
     ptr1 = strstr(start, "NodeStatus\":");
     if (ptr1 == NULL)
     {
@@ -1143,7 +1146,7 @@ MI_Boolean GetGetActionData( _In_reads_z_(size) char *start,
     *serverResponse = (char*) DSC_malloc(ptr1_end - ptr1 + 1, NitsHere());
     memcpy(*serverResponse, ptr1, ptr1_end - ptr1);
     (*serverResponse)[ptr1_end - ptr1] = '\0';
-    
+
 
     if (ptr2 != NULL)
     {
@@ -1185,7 +1188,7 @@ MI_Boolean ValidateContentTypeHeader(_Inout_updates_z_(size)  MI_Char *buffer, M
                 return MI_TRUE;
             }
             return MI_FALSE;
-        }        
+        }
         if( (firstOccurancePointer - start >= size-1) ||  firstOccurancePointer < start)
         {
             return MI_FALSE;
@@ -1214,12 +1217,12 @@ MI_Char *GetSystemUuid()
     {
         File_Close(fp);
         return NULL;
-    }  
+    }
     // Caller will validate the contents.
     fread(systemUUid , 1, JOB_UUID_LENGTH, fp);
-            File_Close(fp);        
+            File_Close(fp);
     return systemUUid;
-        }      
+        }
 
 MI_Result SetGeneralCurlOptions(CURL* curl,
 				_Outptr_result_maybenull_ MI_Instance **extendedError)
@@ -1234,7 +1237,7 @@ MI_Result SetGeneralCurlOptions(CURL* curl,
         Setting operation timeout to 10 minutes.
     */
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 600);
-    
+
     if (g_sslOptions.DoNotCheckCertificate == MI_TRUE)
     {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -1263,9 +1266,9 @@ MI_Result SetGeneralCurlOptions(CURL* curl,
     }
 
     return MI_RESULT_OK;
-}  
+}
 
-MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID, 
+MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
                                   _In_z_ const MI_Char *certificateID,
                                   _In_z_ const MI_Char *checkSum,
                                   _In_ MI_Boolean complianceStatus,
@@ -1296,7 +1299,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 
     requestParam.serverOperation = OPERATION_GETACTION;
     if( checkSum != NULL)
-        checkSumFinalValue = checkSum;  
+        checkSumFinalValue = checkSum;
 
     *result = NULL;
 
@@ -1307,7 +1310,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     }
 
     DSC_EventWriteWebDownloadManagerDoActionServerUrl(configurationID, url);
-    
+
     // Get body for GetAction request
     bodyContent = GetGetActionBodyContent(checkSumFinalValue, complianceStatus, AllowedChecksumAlgorithm, lastGetActionStatusCode);
 
@@ -1315,7 +1318,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     {
         *getActionStatusCode = DownloadManagerInitializationFailure;
         return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-    }    
+    }
 
     curl = curl_easy_init();
     if (!curl)
@@ -1340,7 +1343,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 	curl_easy_cleanup(curl);
 	return r;
     }
-    
+
     curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
 
     headerChunk.data = (char *)malloc(1);
@@ -1353,6 +1356,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
     list = curl_slist_append(list, "ProtocolVersion: 2.0");
 
+    res = curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     res = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyContent);
     res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -1367,7 +1371,7 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
     }
     res = curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
-    
+
     if (g_sslOptions.cipherList[0] != '\0')
     {
         res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, g_sslOptions.cipherList);
@@ -1418,19 +1422,19 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         *getActionStatusCode = GetDscActionCommandFailure;
         free(headerChunk.data);
         free(dataChunk.data);
-        return GetCimMIError1Param(r, extendedError, ID_PULL_GETACTIONFAILED, webPulginName); 
-    }    
+        return GetCimMIError1Param(r, extendedError, ID_PULL_GETACTIONFAILED, webPulginName);
+    }
 
     GetGetActionData(dataChunk.data, dataChunk.size, &getActionStatus, serverAssignedConfigurations);
-    
+
     free(headerChunk.data);
     free(dataChunk.data);
 
     if( getActionStatus == NULL)
     {
         *getActionStatusCode = GetDscActionCommandFailure;
-        return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_GETACTIONFAILED, webPulginName);         
-    }    
+        return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_GETACTIONFAILED, webPulginName);
+    }
     if (! (Strcasecmp( getActionStatus, GetActionResultOk) == 0 ||
         Strcasecmp( getActionStatus, GetActionResultGetConfiguration) == 0 ) )
     {
@@ -1442,15 +1446,15 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
     }
 
     *result = getActionStatus;
-    *getActionStatusCode = Success;       
+    *getActionStatusCode = Success;
     DSC_EventWriteWebDownloadManagerDoActionGetCall(configurationID, requestParam.u.action.getActionStatus);
-    
+
     return MI_RESULT_OK;
 }
 
 MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
                                          _In_z_ const MI_Char *certificateID,
-                                         _In_z_ const MI_Char *directoryPath, 
+                                         _In_z_ const MI_Char *directoryPath,
                                          _Outptr_result_maybenull_z_  MI_Char** result,
                                          _Out_ MI_Uint32* getActionStatusCode,
                                          _In_reads_z_(URL_SIZE) const MI_Char *url,
@@ -1481,8 +1485,8 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     {
         *getActionStatusCode = GetConfigurationCommandFailure;
         return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
-    }    
-    DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);    
+    }
+    DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);
     Stprintf(outputResult,3, MI_T("OK"));
 
     curl = curl_easy_init();
@@ -1506,7 +1510,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         curl_easy_cleanup(curl);
         return r;
     }
-    
+
     curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
 
     InitHeaderChunk(&headerChunk);
@@ -1516,6 +1520,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     list = curl_slist_append(list, "ProtocolVersion: 2.0");
 
 
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
@@ -1531,7 +1536,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     }
     curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
 
-    
+
     if (g_sslOptions.cipherList[0] != '\0')
     {
         res = curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, g_sslOptions.cipherList);
@@ -1571,7 +1576,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         curl_easy_cleanup(curl);
 
         return GetCimMIError2Params(MI_RESULT_FAILED, extendedError, ID_PULL_CURLPERFORMFAILED, url, curl_easy_strerror(res));
-    }      
+    }
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
     curl_easy_cleanup(curl);
@@ -1595,7 +1600,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         {
             break;
         }
-        
+
         if ( Tcscasecmp(headerChunk.headerKeys[i], "Checksum") == 0 )
         {
             checksumResponse = headerChunk.headerValues[i];
@@ -1610,7 +1615,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         *getActionStatusCode = InvalidChecksumAlgorithm;
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDRESPONSEFROMSERVER);
     }
-    
+
     if( Tcscasecmp(checksumAlgorithmResponse, AllowedChecksumAlgorithm) != 0 )
     {
         *getActionStatusCode = InvalidChecksumAlgorithm;
@@ -1623,22 +1628,22 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         if(fp == NULL)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
-            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, 
+            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError,
                                        ID_PULL_CONFIGURATIONSAVEFAILED, directoryPath);
         }
         fwrite( dataChunk.data, 1, dataChunk.size, fp);
         File_Close(fp);
     }
-    
+
     if( !ValidateChecksum(checksumResponse, directoryPath) )
     {
         DSC_EventWriteWebDownloadManagerGetDocChecksumValidation(NULL, NULL);
         *getActionStatusCode = ConfigurationChecksumValidationFailure;
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CHECKSUMMISMATCH);
     }
-    
+
     DSC_EventWriteLCMPullConfigurationChecksumValidationResult(configurationID, (MI_Uint32)MI_RESULT_OK);
-    
+
     //Create checksumFile
     {
         MI_Char checksumFileName[MAX_URL_LENGTH];
@@ -1654,7 +1659,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
             DSC_free(outputResult);
-            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED, checksumFileName);            
+            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED, checksumFileName);
         }
     }
 
@@ -1667,10 +1672,10 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
     return MI_RESULT_OK;
 }
 
-MI_Result GetUrlParam(_In_ MI_InstanceA *customData, 
-    _Inout_updates_(URL_SIZE) MI_Char *url, 
-    _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl, 
-    _Out_ MI_Uint32 *port, 
+MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
+    _Inout_updates_(URL_SIZE) MI_Char *url,
+    _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl,
+    _Out_ MI_Uint32 *port,
     _Out_ MI_Boolean *bIsHttps,
     _Out_ MI_Uint32* getActionStatusCode,
     _Outptr_result_maybenull_ MI_Instance **extendedError)
@@ -1698,16 +1703,16 @@ MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
                 {
                     *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
                     r = GetCimMIError1Param( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_UNSECURECONNECTIONNOTALLOWED, value.string);
-                    return r;   
+                    return r;
                 }
-                
-                if( sscanf(value.string, MI_T("http://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
+
+                if( sscanf(value.string, MI_T("http://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 ||
                     sscanf(value.string, MI_T("http://%99[^/]/%199[^\n]"), url, subUrl) == 2 )
                 {
                     //success
                 }
                 //format is: http://server:port/suburl or http://server/suburl
-                else if( sscanf(value.string, MI_T("https://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 || 
+                else if( sscanf(value.string, MI_T("https://%99[^:]:%d/%199[^\n]"), url, port, subUrl) == 3 ||
                     sscanf(value.string, MI_T("https://%99[^/]/%199[^\n]"), url, subUrl) == 2 )
                 {
                     //success
@@ -1721,12 +1726,12 @@ MI_Result GetUrlParam(_In_ MI_InstanceA *customData,
     if(  xCount >= customData->size ) // Not found
     {
         *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
-        return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);   
+        return GetCimMIError(r, extendedError, ID_ENGINEHELPER_MEMORY_ERROR);
     }
     return MI_RESULT_OK;
 }
 
-MI_Result GetRequestParam(_In_ MI_Instance *metaConfig, 
+MI_Result GetRequestParam(_In_ MI_Instance *metaConfig,
                           _In_ MI_Char * partialConfigName,
                           _Inout_updates_(URL_SIZE) MI_Char *url,
                           _Inout_updates_(SUBURL_SIZE) MI_Char *subUrl,
@@ -1751,9 +1756,9 @@ MI_Result CreateTmpDirectoryPath(_Outptr_result_maybenull_z_  MI_Char** director
     MI_Char *path;
    if( TempnamT(&path) )
        return MI_RESULT_FAILED;
-   
+
    if( path != NULL)
-   { 
+   {
        int result = MkdirT(path, S_IRWXU);
        if( result == 0 )
        {
@@ -1774,7 +1779,7 @@ MI_Result CreateTmpDirectoryPath(_Outptr_result_maybenull_z_  MI_Char** director
    return MI_RESULT_FAILED;
 }
 
-MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID, 
+MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
                                   _In_z_ const MI_Char *moduleName,
                                   _In_z_ const MI_Char *moduleVersion,
                                   _In_z_ const MI_Char *certificateID,
@@ -1810,7 +1815,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     }
     DSC_EventWriteGetDscDocumentWebDownloadManagerServerUrl(configurationID, url);
     Stprintf(outputResult,3, MI_T("OK"));
-    
+
     curl = curl_easy_init();
     if (!curl)
     {
@@ -1834,11 +1839,11 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
 	curl_easy_cleanup(curl);
 	return r;
     }
-        
+
     InitHeaderChunk(&headerChunk);
     dataChunk.data = (char *)malloc(1);
     dataChunk.size = 0;
-    
+
     curl_easy_setopt(curl, CURLOPT_URL, configurationUrl);
 
     list = curl_slist_append(list, "ProtocolVersion: 2.0");
@@ -1846,6 +1851,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     agentIdHeader[100] = '\0';
     list = curl_slist_append(list, agentIdHeader);
 
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
@@ -1934,18 +1940,18 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     }
 
     if( Tcscasecmp(checksumAlgorithmResponse, AllowedChecksumAlgorithm) != 0 )
-    {      
+    {
         *getActionStatusCode = InvalidChecksumAlgorithm;
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_INVALIDCHECKSUMALGORITHM);
     }
-    
+
     if( dataChunk.size > 0 )
     {
         FILE *fp = File_OpenT(filePath, MI_T("a"));
         if(fp == NULL)
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
-            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, 
+            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError,
                                        ID_PULL_CONFIGURATIONSAVEFAILED, filePath);
         }
         fwrite( dataChunk.data, 1, dataChunk.size, fp);
@@ -1960,9 +1966,9 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     }
 
 
-    
+
     DSC_EventWriteLCMPullConfigurationChecksumValidationResult(configurationID, (MI_Uint32)MI_RESULT_OK);
-  
+
     //Create checksumFile
     {
         MI_Char checksumFileName[MAX_URL_LENGTH];
@@ -1978,7 +1984,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
         {
             *getActionStatusCode = GetConfigurationCommandFailure;
             DSC_free(outputResult);
-            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED, checksumFileName);            
+            return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULLGETCONFIGURATION_CHECKSUMSAVEFAILED, checksumFileName);
         }
     }
 
@@ -1992,11 +1998,11 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
 }
 
 MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
-                                  const MI_Char *configurationID, 
+                                  const MI_Char *configurationID,
                                   const MI_Char *certificateID,
                                   MI_Char* directoryPath,
                                   MI_Char* fileName,
-                                  MI_Char** result,                               
+                                  MI_Char** result,
                                   MI_Uint32* getActionStatusCode,
                                   MI_Boolean bAllowedModuleOverride,
                                   _In_reads_z_(URL_SIZE) const MI_Char *url,
@@ -2047,8 +2053,8 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
     while (current != NULL)
     {
         Snprintf(zipPath, MAX_URL_LENGTH, "%s/%s_%s.zip", directoryPath, current->moduleName, current->moduleVersionClassTuple->moduleVersion);
-        r = IssueGetModuleRequest(configurationID, 
-                                  current->moduleName, 
+        r = IssueGetModuleRequest(configurationID,
+                                  current->moduleName,
                                   current->moduleVersionClassTuple->moduleVersion,
                                   certificateID,
                                   zipPath,
@@ -2065,12 +2071,45 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             CleanupModuleTable(moduleTable);
             return r;
         }
+        // Determine python version
+        char data[BUFSIZ];
+        int isPython2 = 1;
+        DSC_LOG_INFO("Assuming python2 in WebPullClient\n");
 
-        Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
+	// Look for python2
+        FILE * pipe = popen("python2 --version 2>&1", "r");
+        fgets(data, BUFSIZ, pipe);
+	if (!strstr(data, "not found"))
+	{
+		DSC_LOG_INFO("Found python2 in WebPullClient.\n");
+          	isPython2 = 1;
+      	}
+	else
+	{
+		// If python2 does not exist, look for python3
+		memset(&data[0], 0, sizeof(data));
+        	pipe = popen("python3 --version 2>&1", "r");
+        	fgets(data, BUFSIZ, pipe);
+		if (!strstr(data, "not found")) {
+			DSC_LOG_INFO("Found python3 in WebPullClient.\n");
+          		isPython2 = 0;
+      		}
+	}
+
+      	if (isPython2 == 1)
+      	{
+        	DSC_LOG_INFO("Calling InstallModule with python2");
+      		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
+      	}
+      	else
+      	{
+		DSC_LOG_INFO("Calling InstallModule with python3");
+		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/InstallModule.py", zipPath, verifyFlag, " 2>&1");
+      	}
         DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
         DSC_LOG_INFO("Executed '%T', returned %d\n", stringBuffer, retval);
-        
+
         if (retval != 0)
         {
             if (retval == -1 && errno == ECHILD)
@@ -2080,8 +2119,18 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             else
             {
                 // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
-                Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/RemoveModule.py", current->moduleName);
-                retval = system(stringBuffer); 
+                if (isPython2 == 1)
+                {
+                    DSC_LOG_INFO("Calling RemoveModule with python2");
+                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/RemoveModule.py", current->moduleName);
+                }
+                else
+                {
+                    DSC_LOG_INFO("Calling RemoveModule with python3");
+                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/RemoveModule.py", current->moduleName, " 2>&1");
+                }
+
+                retval = system(stringBuffer);
                 DSC_LOG_INFO("Executed '%T', returned %d\n", stringBuffer, retval);
                 if ( retval == 0 || (retval == -1 && errno == ECHILD) )
                 {
@@ -2149,7 +2198,7 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
         *getActionStatusCode = InvalidDownloadManagerCustomDataInMetaConfig;
         r = GetCimMIError( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_INVALIDURLINCUSTOMDATA);
         return r;
-    }    
+    }
     r = CreateTmpDirectoryPath(directoryName, &fileName);
     if( r != MI_RESULT_OK)
     {
@@ -2163,19 +2212,19 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
     if( r != MI_RESULT_OK)
     {
         DSC_free(configurationID);
-        DSC_free(fileName);  
+        DSC_free(fileName);
         return r;
     }
 
-    DSC_EventWriteLCMPullGetConfigAttempt( webPulginName, configurationID);    
+    DSC_EventWriteLCMPullGetConfigAttempt( webPulginName, configurationID);
     // Issue Get Action Request
-    r = IssueGetConfigurationRequest( configurationID,  certificateID, fileName, result, 
+    r = IssueGetConfigurationRequest( configurationID,  certificateID, fileName, result,
                                       getActionStatusCode, url, port, subUrl, bIsHttps, assignedConfiguration, extendedError);
-      
+
     if( r != MI_RESULT_OK)
     {
         DSC_free(configurationID);
-        DSC_free(fileName);  
+        DSC_free(fileName);
         return r;
     }
 
@@ -2195,12 +2244,12 @@ MI_Result MI_CALL Pull_GetConfigurationWebDownloadManager(_In_ LCMProviderContex
 
     DSC_free(configurationID);
     *mofFileName = fileName;
-    DSC_EventWriteLCMPullGetConfigSuccess(webPulginName);    
+    DSC_EventWriteLCMPullGetConfigSuccess(webPulginName);
     return MI_RESULT_OK;
 }
 
 
-                                 
+
 MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmContext,
                                                    _In_ MI_Instance *metaConfig,
                                                    _In_opt_z_ MI_Char *partialConfigName,
@@ -2220,7 +2269,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     MI_Uint32 port = DEFAULT_SERVERPORT;
     MI_Boolean bIsHttps = MI_FALSE;
     MI_Char *tmpChecksum = NULL;
-    
+
     if( metaConfig == NULL)
     {
         return MI_RESULT_INVALID_PARAMETER;
@@ -2247,7 +2296,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
         r = GetCimMIError( MI_RESULT_INVALID_PARAMETER, extendedError, ID_PULL_INVALIDURLINCUSTOMDATA);
         DSC_free(tmpChecksum);
         return r;
-    }    
+    }
 
     // Get our supported SSL options if there are any
     r = GetSSLOptions(extendedError);
@@ -2258,7 +2307,7 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
         return r;
     }
 
-    DSC_EventWriteLCMPullGetActionAttempt( webPulginName, configurationID, tmpChecksum, complianceStatus);    
+    DSC_EventWriteLCMPullGetActionAttempt( webPulginName, configurationID, tmpChecksum, complianceStatus);
     // Issue Get Action Request
     r = IssueGetActionRequest( configurationID, certificateID, tmpChecksum, complianceStatus, lastGetActionStatusCode, result, getActionStatusCode, url, port, subUrl, bIsHttps, serverAssignedConfigurations, extendedError);
 
@@ -2267,9 +2316,9 @@ MI_Result MI_CALL Pull_GetActionWebDownloadManager(_In_ LCMProviderContext *lcmC
     if( r != MI_RESULT_OK)
     {
         return r;
-    }     
-    DSC_EventWriteLCMPullGetActionSuccess(*result, webPulginName);    
-    
+    }
+    DSC_EventWriteLCMPullGetActionSuccess(*result, webPulginName);
+
     return MI_RESULT_OK;
 }
 
@@ -2323,7 +2372,7 @@ static int IsModuleInstalled(MI_Char* moduleName, MI_Char* moduleVersion)
     FILE * fp = NULL;
 
     Snprintf(buffer, MAX_URL_LENGTH, DSC_MODULES_PATH "/%s/VERSION", moduleName);
-    
+
     fp = File_OpenT(buffer, MI_T("r"));
     if( fp == NULL )
     {
@@ -2346,12 +2395,12 @@ static int IsModuleInstalled(MI_Char* moduleName, MI_Char* moduleVersion)
         // Invalid version size.  It shouldn't be this long!
         return 0;
     }
-    
+
     // Since we're going to be tokenizing moduleVersion, we should make a copy of it.
     tmpLength = Tcslen(moduleVersion) + 1;
     memcpy(buffer2, moduleVersion, tmpLength);
 
-    // If the installed version (buffer) is less than the parsed moduleVersion, we need the latest version.    
+    // If the installed version (buffer) is less than the parsed moduleVersion, we need the latest version.
     if (CompareVersions(buffer, buffer2) < 0)
     {
         return 0;
@@ -2387,7 +2436,7 @@ static MI_Result FilterUsingCachedModules(ModuleTable* table)
     return MI_RESULT_OK;
 }
 
-static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation, 
+static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
                                            ModuleTable* table,
                                            _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
@@ -2407,17 +2456,17 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
     ModuleTableEntry* current;
     ModuleTableEntry** foundEntry;
     ModuleClassList** foundClassEntry;
-    
+
     miApp = (MI_Application *) DSC_malloc( sizeof(MI_Application), NitsHere());
     memset(miApp,  0, sizeof(MI_Application));
-    r = DSC_MI_Application_Initialize(0, NULL, NULL, miApp);   
+    r = DSC_MI_Application_Initialize(0, NULL, NULL, miApp);
     if( r != MI_RESULT_OK)
     {
         DSC_free(miApp);
         return GetCimMIError1Param(MI_RESULT_FAILED, extendedError, ID_PULL_INITIALIZEMODULETABLEFAILED, "App Init failed");
-    }      
-    
-    memset(&deserializer, 0, sizeof(MI_Deserializer));    
+    }
+
+    memset(&deserializer, 0, sizeof(MI_Deserializer));
     memset(&options, 0, sizeof(MI_OperationOptions));
 
     r = DSC_MI_Application_NewOperationOptions(miApp, MI_FALSE, &options);
@@ -2450,7 +2499,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
         MI_Application_Close(miApp);
         DSC_free(miApp);
         return r;
-    }   
+    }
     miClassArray.size = 0;
     miClassArray.data = NULL;
 
@@ -2488,7 +2537,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
 
             if ( IsModuleVersionValidFormat(moduleVersion.string) == 1 )
             {
-                
+
                 // foundEntry will be a pointer to the "next" or "first" pointer that points to the ModuleTableEntry we want
                 foundEntry = ModuleTableContainsKey(table, moduleName.string);
                 if ( *foundEntry != NULL )
@@ -2531,7 +2580,7 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
 
                     current->moduleVersionClassTuple->first = (ModuleClassList*) DSC_malloc(sizeof(ModuleClassList), NitsHere());
                     current->moduleVersionClassTuple->first->next = NULL;
-                    
+
                     // Copy class name
                     tmpLength = Tcslen(miInstanceArray->data[i]->classDecl->name) + 1;
                     current->moduleVersionClassTuple->first->moduleClass = (MI_Char*)DSC_malloc(sizeof(MI_Char) * tmpLength, NitsHere());
@@ -2573,7 +2622,7 @@ size_t read_callback(char *buffer, size_t size, size_t nitems, void *instream)
     {
         return 0;
     }
-    
+
     len = strlen(&readChunk->data[readChunk->last_char]);
 
     if (len <= (size * nitems))
@@ -2615,29 +2664,30 @@ MI_Result Pull_Register(MI_Char* serverURL,
     {
         return r;
     }
-    
+
     curl = curl_easy_init();
     if (!curl)
     {
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
     }
-    
+
     Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')", serverURL, agentId);
     curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
-    
+
     headerChunk.data = (char *)malloc(1);
     headerChunk.size = 0;
     dataChunk.data = (char *)malloc(1);
     dataChunk.size = 0;
     readChunk.data = requestBody;
     readChunk.last_char = 0;
-    
+
     list = curl_slist_append(list, x_ms_header);
     list = curl_slist_append(list, auth_header);
     list = curl_slist_append(list, "Accept: application/json");
     list = curl_slist_append(list, "Content-Type: application/json; charset=utf-8");
     list = curl_slist_append(list, "ProtocolVersion: 2.0");
 
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataChunk);
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -2716,14 +2766,14 @@ MI_Result Pull_Register(MI_Char* serverURL,
 
 extern MI_Char* RunCommand(const MI_Char* command);
 
-MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext, 
+MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
                                                       _In_ MI_Instance *metaConfig,
                                                       _In_ MI_Instance *statusReport,
                                                       _In_ MI_Uint32 isStatusReport,
                                                       _Out_ MI_Uint32* getActionStatusCode,
                                                       _Outptr_result_maybenull_ MI_Instance **extendedError)
 {
-    
+
     MI_Result r = MI_RESULT_OK;
     const char *emptyString = "";
     MI_Char actionUrl[MAX_URL_LENGTH];
@@ -2731,7 +2781,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
 
     char * getActionStatus = NULL;
     long responseCode = 0;
-    
+
     CURL *curl = NULL;
     CURLcode res = CURLE_OK;
     struct Chunk headerChunk;
@@ -2801,13 +2851,13 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
                              g_rnids->ModuleVersion, g_rnids->RebootRequested, g_rnids->ResourceId, g_rnids->ConfigurationName, g_rnids->InDesiredState);
                     Destroy_StatusReport_RNIDS(g_rnids);
                     g_rnids = NULL;
-                    
+
                 }
             }
         }
 
         reportText = RunCommand(dataBuffer);
-        
+
         curl = curl_easy_init();
         if (!curl)
         {
@@ -2824,12 +2874,13 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
 
         Snprintf(actionUrl, MAX_URL_LENGTH, "%s/Nodes(AgentId='%s')/SendReport", serverURL.string, agentId.string);
         curl_easy_setopt(curl, CURLOPT_URL, actionUrl);
-        
+
         headerChunk.data = (char *)malloc(1);
         headerChunk.size = 0;
         dataChunk.data = (char *)malloc(1);
         dataChunk.size = 0;
-        
+
+        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, reportText);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -2844,7 +2895,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
         }
         curl_easy_setopt(curl, CURLOPT_SSLKEY, OAAS_KEYPATH);
-        
+
         res = curl_easy_perform(curl);
 
         if (res != CURLE_OK)
@@ -2858,9 +2909,9 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
             free(dataChunk.data);
             continue;
         }
-        
+
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
-        
+
         if (responseCode != 200 && responseCode != 201 && responseCode != 204)
         {
             // Error on register
@@ -2878,11 +2929,11 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         bAtLeastOneReportSuccess = 1;
 
         curl_easy_cleanup(curl);
-        
+
         DSC_free(reportText);
         free(headerChunk.data);
         free(dataChunk.data);
-        
+
     }
 
     curl_slist_free_all(list);

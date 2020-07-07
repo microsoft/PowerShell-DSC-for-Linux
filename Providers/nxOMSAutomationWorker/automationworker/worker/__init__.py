@@ -3,7 +3,7 @@
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
 from worker import *
-from worker.configuration import *
+from worker.configuration2 import *
 from worker.curlhttpclient import *
 from worker.httpclient import *
 from worker.httpclientfactory import *

@@ -332,10 +332,12 @@ module Fluent
       dataItems = {}
       if records.has_key?("DataItems")
         dataItems = records["DataItems"]
-        dataItems.each {|item| 
+        dataItems.each {|item|
           if item.has_key?("ConfigChangeType") and item["ConfigChangeType"] == "Files" and item.has_key?("Collections")
              item["Collections"].each {|collection|
-                if !@@ContentlocationUri.nil? and !@@ContentlocationUri.empty? and !collection.empty?
+              contentLength = collection["Contents"].to_i
+              fileSize = collection["Size"].to_i 
+              if contentLength != "0" and contentLength >= fileSize and !@@ContentlocationUri.nil? and !@@ContentlocationUri.empty? and !collection.empty?
                    key = collection["CollectionName"]
                    date = collection["DateModified"]
                    fileName = date + '-' + File.basename(key)
@@ -347,7 +349,7 @@ module Fluent
           end
         }
       end
-      return records 
+      return records
     end
 
     def upload_file_to_azure_storage(collections)
@@ -383,7 +385,10 @@ module Fluent
 
     def handle_record_internal(key, record)
       @log.trace "Handling record : #{key}"
-      req = OMS::Common.create_ods_request(OMS::Configuration.ods_endpoint.path, record, @compress)
+      extra_headers = {
+        OMS::CaseSensitiveString.new('x-ms-client-request-retry-count') => "#{@num_errors}"
+      }
+      req = OMS::Common.create_ods_request(OMS::Configuration.ods_endpoint.path, record, @compress, extra_headers)
       unless req.nil?
         http = OMS::Common.create_ods_http(OMS::Configuration.ods_endpoint, @proxy_config)
         start = Time.now
@@ -605,3 +610,4 @@ module Fluent
  end #class UploadFileContent
 
 end # Module
+

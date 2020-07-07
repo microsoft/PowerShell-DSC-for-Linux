@@ -152,7 +152,7 @@ def GenerateInventoyConfContents(FeatureName, Instances, RunIntervalInSeconds, T
 </filter> \n \
 <match ' + Tag + '> \n \
   type out.' + Tag + '\n \
-  log_level trace \n \
+  log_level info \n \
   num_threads 5 \n \
   buffer_chunk_limit 5m \n \
   buffer_type file \n \
@@ -160,9 +160,9 @@ def GenerateInventoyConfContents(FeatureName, Instances, RunIntervalInSeconds, T
   buffer_queue_limit 10 \n \
   buffer_queue_full_action drop_oldest_chunk \n \
   flush_interval 20s \n \
-  retry_limit 10 \n \
+  retry_limit 6 \n \
   retry_wait 30s \n \
-  max_retry_wait 9m \n \
+  max_retry_wait 30m \n \
 ' + configurations + ' \n \
 </match> \n'
 
@@ -221,9 +221,9 @@ def GenerateInventoyMOF(FeatureName, Instances, RunIntervalInSeconds, Tag, Forma
 
 
 def GetFileChecksum(FilePath):
-    checksum = hashlib.md5(open(FilePath, 'rb').read()).hexdigest()
+    checksum = hashlib.sha256(open(FilePath, 'rb').read()).hexdigest()
     return checksum
 
 def GetStringChecksum(inputString):
-    checksum = hashlib.md5(inputString.encode('utf-8')).hexdigest()
+    checksum = hashlib.sha256(inputString.encode('utf-8')).hexdigest()
     return checksum

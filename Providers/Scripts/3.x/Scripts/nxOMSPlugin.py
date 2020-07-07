@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #============================================================================
 # Copyright (C) Microsoft Corporation, All rights reserved.
 #============================================================================
@@ -20,11 +20,9 @@ nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 try:
     import hashlib
-    md5const = hashlib.md5
+    hashconst = hashlib.sha256
 except ImportError:
-    import md5
-    md5const = md5.md5
-
+    print("Error while importing hashlib")
 
 class IOMSAgent:
     def restart_oms_agent(self):
@@ -111,10 +109,10 @@ def init_vars(Plugins, WorkspaceID):
 
     global MULTI_HOMED
     global CONF_PATH
-    mh_conf_dir = os.path.join(ETC_OMSAGENT_DIR, WorkspaceID, CONF_PATH_SUFFIX)
+    mh_conf_dir = os.path.join(ETC_OMSAGENT_DIR, WorkspaceID.decode(), CONF_PATH_SUFFIX)
     MULTI_HOMED = os.path.isdir(mh_conf_dir)
     if MULTI_HOMED and WorkspaceID: # only log this if WorkspaceID is not None or empty
-        LG().Log('INFO', 'OMSAgent is multi-homed and resource is updating workspace ' + WorkspaceID)
+        LG().Log('INFO', 'OMSAgent is multi-homed and resource is updating workspace ' + WorkspaceID.decode())
         CONF_PATH = mh_conf_dir
 
 
@@ -165,7 +163,7 @@ def Set(WorkspaceID, Plugins):
         # Case 1: The IP has both plugin and conf directories
         # Case 2: The IP has only plugin(s)
         # Case 3: The IP has only conf
-        # Case 4: The IP does not have either plugin or conf directory - this is invalid!
+        # Case 4: The IP has neither plugin nor conf directory, which is invalid if the MOF has "ensure: present"
         if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # copy all files under conf and plugin
@@ -201,9 +199,17 @@ def Set(WorkspaceID, Plugins):
                 LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
         else:
-            # log error - neither conf nor plugin directory was found in IP to set
-            LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
-            return [-1]
+            if plugin['Ensure'] == 'Present':
+                # log error - neither conf nor plugin directory was found in IP to set
+                LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
+                return [-1]
+            elif plugin['Ensure'] == 'Absent':
+                # log warning - this scenario is unexpected but should not cause plugin set to fail 
+                LG().LOG('WARN', plugin['PluginName'] + ' contains neither plugin nor conf, but was not to be installed anyways')
+            else:
+                # log error Ensure value not expected
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
+                return [-1]
 
         # Some Plugins (e.g. Security Baseline) have arch specific files
         if os.path.isdir(plugin_arch_dir):
@@ -250,7 +256,7 @@ def Test(Plugins):
         # Case 1: The IP has both plugin and conf directories
         # Case 2: The IP has only plugin(s)
         # Case 3: The IP has only conf
-        # Case 4: The IP does not have either plugin or conf directory - this is invalid!
+        # Case 4: The IP has neither plugin nor conf directory, which is invalid if the MOF has "ensure: present"
         if os.path.isdir(plugin_dir) and os.path.isdir(conf_dir):
             if plugin['Ensure'] == 'Present':
                 # check all files exist under conf and dir
@@ -291,9 +297,17 @@ def Test(Plugins):
                 LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
                 return [-1]
         else:
-            # log error - neither conf nor plugin directory was found in IP
-            LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
-            return [-1]
+            if plugin['Ensure'] == 'Present':
+                # log error - neither conf nor plugin directory was found in IP to set
+                LG().Log('ERROR', plugin['PluginName'] + ' contains neither plugin nor conf')
+                return [-1]
+            elif plugin['Ensure'] == 'Absent':
+                # log warning - this scenario is unexpected but should not cause plugin test to fail 
+                LG().LOG('WARN', plugin['PluginName'] + ' contains neither plugin nor conf, but was not to be installed anyways')
+            else:
+                # log error Ensure value not expected
+                LG().Log('ERROR', 'Ensure value: ' + plugin['Ensure'] + ' not expected')
+                return [-1]
 
         # Some Plugins (e.g. Security Baseline) have arch specific files
         if os.path.isdir(plugin_arch_dir):
@@ -375,7 +389,7 @@ def copy_all_files(src, dest, is_exec):
                 shutil.copy(full_src_file, dest)
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
-                    mode |= 0555
+                    mode |= 0o555
                     os.chmod(full_dest_file, mode)
     except:
         LG().Log('ERROR', 'copy_all_files failed for src: ' + src + ' dest: '
@@ -403,11 +417,11 @@ def check_all_files(src, dest, is_exec):
             full_src_file = os.path.join(src, file_name)
             full_dest_file = os.path.join(dest, file_name)
             if os.path.isfile(full_dest_file):
-                if CompareFiles(full_dest_file, full_src_file, 'md5') == -1:
+                if CompareFiles(full_dest_file, full_src_file, 'sha256') == -1:
                     return False
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
-                    if mode & 0555 != 0555:
+                    if mode & 0o555 != 0o555:
                         return False
             else:
                 return False
@@ -430,11 +444,11 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
     stat_src = StatFile(SourcePath)
     if stat_src.st_size != stat_dest.st_size:
         return -1
-    if Checksum == 'md5':
+    if Checksum == 'sha256':
         src_error = None
         dest_error = None
-        src_hash = md5const()
-        dest_hash = md5const()
+        src_hash = hashconst()
+        dest_hash = hashconst()
         src_block = b'loopme'
         dest_block = b'loopme'
         with opened_bin_w_error(SourcePath, 'rb') as (src_file, src_error):

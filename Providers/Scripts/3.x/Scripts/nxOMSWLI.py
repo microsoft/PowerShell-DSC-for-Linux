@@ -196,7 +196,7 @@ def Check_All_Files(wid, src, dest):
             dest_file_path = os.path.join(dest, file_name)
             tmp_file_path = '/tmp/wli_' + wid + '/' + file_name       
             if os.path.isfile(dest_file_path):
-                if Compare_Files(wid, dest_file_path, src_file_path, 'md5', tmp_file_path) == -1:
+                if Compare_Files(wid, dest_file_path, src_file_path, 'sha256', tmp_file_path) == -1:
                     if (os.path.isfile(tmp_file_path)):
                         os.remove(tmp_file_path)
                     return False
@@ -243,11 +243,9 @@ def Compare_Files(wid, DestinationPath, SourcePath, Checksum, TmpPath):
     if stat_src.st_size != stat_dest.st_size:
         LG().Log('INFO', 'Size src: ' + str(SourcePath) + ' dest: ' + str(DestinationPath))
         return -1
-    if Checksum == 'md5':
+    if Checksum == 'sha256':
         src_error = None
         dest_error = None
-        src_block = b'loopme'
-        dest_block = b'loopme'
         with opened_bin_w_error(SourcePath, 'rb') as (src_file, src_error):
             if src_error:
                 print_error('Exception opening source file ' + SourcePath
@@ -261,15 +259,7 @@ def Compare_Files(wid, DestinationPath, SourcePath, Checksum, TmpPath):
                                 + str(dest_error.errno) + ' Error: '
                                 + dest_error.strerror)
                     return -1
-                while src_block and dest_block:
-                    src_block = src_file.read(BLOCK_SIZE)
-                    dest_block = dest_file.read(BLOCK_SIZE)
-                    hashlib.md5().update(src_block)
-                    hashlib.md5().update(dest_block)
-                    if hashlib.md5().hexdigest() != hashlib.md5().hexdigest():
-                        return -1  
-                    if hashlib.md5().hexdigest() == hashlib.md5().hexdigest():
-                        return 0   
+                return are_binary_file_contents_same(src_file, dest_file)
     elif Checksum == 'ctime':
         if stat_src.st_ctime != stat_dest.st_ctime:
             return -1
@@ -280,6 +270,17 @@ def Compare_Files(wid, DestinationPath, SourcePath, Checksum, TmpPath):
             return -1
         else:
             return 0
+
+def are_binary_file_contents_same(f1, f2):
+    while True:
+        block1 = f1.read(BLOCK_SIZE)
+        block2 = f2.read(BLOCK_SIZE)
+        # both at EOF is success
+        if block1 == '' and block2 == '':
+            return 0
+        # bytewise mismatch is failure
+        if block1 != block2:
+            return -1
 
 def StatFile(path):
     """

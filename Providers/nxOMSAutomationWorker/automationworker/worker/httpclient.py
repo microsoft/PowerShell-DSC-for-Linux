@@ -10,7 +10,7 @@ import sys
 import configuration
 import serializerfactory
 import locallogger
-
+import re as regex
 
 class HttpClient:
     """Base class to provide common attributes and functionality to all HttpClient implementation."""
@@ -114,18 +114,43 @@ class HttpClient:
         """
         pass
 
-
 class RequestResponse:
     """Encapsulates all request response for http clients. Will also deserialize the response when the raw response
     data is deserializable.
     """
+
+    @staticmethod
+    def check_if_service_unavailable_response_is_received(response_body):
+        SERVICE_UNAVAILABLE_STR = 'Service Unavailable'
+        HTML_HEADER_TAG_REGEX = '<h[0-9]+>(.*?)</h[0-9]+>'
+        HTML_BODY_TAG_REGEX = '<BODY>(.*?)</BODY>'
+        HTML_PARAGRAPH_TAG_REGEX = '<p>(.*?)</p>'
+        response_body = regex.compile(HTML_BODY_TAG_REGEX).findall(response_body)
+
+        if len(response_body) >= 1:
+            response_body = response_body[0]
+            headers = regex.compile(HTML_HEADER_TAG_REGEX).findall(response_body)
+            # explicit check of service unavailable
+            if len(headers) >= 1 and headers.__contains__(SERVICE_UNAVAILABLE_STR):
+                detailed_response = regex.compile(HTML_PARAGRAPH_TAG_REGEX).findall(response_body)
+                resultant_response = ""
+                if detailed_response is not None:
+                    for response in detailed_response:
+                        resultant_response = resultant_response + response + "\n"
+                return resultant_response
+        return None
+
+
     def __init__(self, status_code, raw_response_data=None):
         self.status_code = int(status_code)
         self.raw_data = raw_response_data
-
         self.json = serializerfactory.get_serializer(sys.version_info)
         if raw_response_data is not None:
             try:
                 self.deserialized_data = self.json.loads(self.raw_data)
             except ValueError:
+                import tracer
                 self.deserialized_data = None
+                service_unavailable_check_result = self.check_if_service_unavailable_response_is_received(self.raw_data)
+                if service_unavailable_check_result is not None:
+                    tracer.log_warning_trace("Request to service failed because the service was unavailable. Detailed response is %s" %(service_unavailable_check_result))

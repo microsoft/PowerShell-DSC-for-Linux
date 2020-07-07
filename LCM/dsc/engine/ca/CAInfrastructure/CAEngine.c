@@ -1728,7 +1728,7 @@ MI_Result Exec_NativeProvider(_In_ ProviderCallbackContext *provContext,
     {
         SetMessageInContext(ID_OUTPUT_OPERATION_SKIP,ID_OUTPUT_ITEM_SET,provContext->lcmProviderContext);
         LogCAMessage(provContext->lcmProviderContext, ID_OUTPUT_EMPTYSTRING, provContext->resourceId);
-        DSC_LOG_INFO("TestTargetResource returned TRUE, so we are skipping SetTargetResource\n");
+        DSC_LOG_INFO("TestTargetResource returned TRUE, so we are skipping SetTargetResource...\n");
         goto cleanup;
     }
 

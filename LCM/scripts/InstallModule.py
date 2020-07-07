@@ -63,11 +63,11 @@ def getPlatformArchitectureFolderName():
 
     return platformArchitectureFolderName
 
+
 def regenerateDscPythonScriptInitFiles():
-    regenerateInitFilesScriptPath = join(helperlib.DSC_SCRIPT_PATH, 'RegenerateInitFiles.py')
-    regenerateInitFilesResult = subprocess.call(regenerateInitFilesScriptPath)
+    regenerateInitFilesResult = subprocess.call("(python /opt/microsoft/omsconfig/Scripts/RegenerateInitFiles.py)", shell=True)
     if regenerateInitFilesResult != 0:
-        exitWithError("Failed to regenerate the DSC __init__.py files with the result code " + regenerateInitFilesResult)
+        exitWithError("Failed to regenerate the DSC __init__.py files with the result code", regenerateInitFilesResult)
 
 def main(args):
     '''
@@ -209,11 +209,8 @@ def main(args):
     # Install the module's resources
     moduleResources = os.listdir(moduleDscResourcesDestinationPath)
 
-    # Python 2.4 and 3 recognize different formats for octal
-    if sys.version_info >= (3, 0):
-        strMode = "0o777"
-    else:
-        strMode = "0777"
+    # Note: Python 2.4 and 3 recognize different formats for octal
+    strMode = "0777"
 
     octMode = int(strMode, base=8)
 

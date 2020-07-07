@@ -25,11 +25,8 @@ def get_current_timestamp():
     return str(currentDateTimeFormattedString)
 
 def get_permission_in_oct(threeDigitString):
-    # Python 2.4 and 3 recognize different formats for octal
-    if version_info >= (3, 0):
-        strMode = "0o" + threeDigitString
-    else:
-        strMode = "0" + threeDigitString
+    # Note: Python 2.4 and 3 recognize different formats for octal
+    strMode = "0" + threeDigitString
 
     octMode = int(strMode, base = 8)
     return octMode
