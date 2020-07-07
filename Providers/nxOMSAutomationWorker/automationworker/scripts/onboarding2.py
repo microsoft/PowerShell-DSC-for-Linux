@@ -197,6 +197,15 @@ def invoke_dmidecode():
         raise Exception("Unable to get dmidecode output : " + str(error))
     return dmidecode
 
+def check_if_conf_file_can_be_written():
+    worker_conf_path = os.path.join(DIY_STATE_PATH, "worker.conf")
+    try:
+        conf_file = open(worker_conf_path, 'wb')
+        conf_file.close()
+        return True
+    except Exception, ex:
+        print("The following exception encountered while creating worker.conf file : " + str(ex))
+        return False
 
 def register(options):
     environment_prerequisite_validation()
@@ -235,7 +244,12 @@ def register(options):
 
     # generate state path (certs/conf will be dropped in this path)
     if os.path.isdir(DIY_STATE_PATH) is False:
-        os.makedirs(DIY_STATE_PATH)
+        try:
+            os.makedirs(DIY_STATE_PATH)
+        except Exception, ex:            
+            print("Registration unsuccessful.")
+            print("Cannot create directory for certs/conf. Because of the following exception : " + str(ex))
+            return
     generate_self_signed_certificate(certificate_path=certificate_path, key_path=key_path)
     issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
 
@@ -279,26 +293,33 @@ def register(options):
                'x-ms-date': date,
                "Content-Type": "application/json"}
 
-    # agent service registration request
-    http_client_factory = httpclientfactory.HttpClientFactory(certificate_path, key_path, options.test)
-    http_client = http_client_factory.create_http_client(sys.version_info)
-    url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
-    response = http_client.put(url, headers=headers, data=payload)
+    is_conf_file_writable = check_if_conf_file_can_be_written()
 
-    if response.status_code != 200:
-        raise Exception("Failed to register worker. [response_status=" + str(response.status_code) + "]")
+    if is_conf_file_writable:
+        # agent service registration request
+        http_client_factory = httpclientfactory.HttpClientFactory(certificate_path, key_path, options.test)
+        http_client = http_client_factory.create_http_client(sys.version_info)
+        url = registration_endpoint + "/HybridV2(MachineId='" + machine_id + "')"
+        response = http_client.put(url, headers=headers, data=payload)
 
-    registration_response = json.loads(response.raw_data)
-    account_id = registration_response["AccountId"]
-    create_worker_configuration_file(registration_response["jobRuntimeDataServiceUri"], account_id,
-                                     hybrid_worker_group_name, machine_id, DIY_WORKING_DIR,
-                                     DIY_STATE_PATH, certificate_path, key_path, registration_endpoint,
-                                     workspace_id, thumbprint, vm_id, is_azure_vm, options.gpg_keyring, options.test)
+        if response.status_code != 200:
+            raise Exception("Failed to register worker. [response_status=" + str(response.status_code) + "]")
 
-    # generate working directory path
-    diydirs.create_persistent_diy_dirs()
+        registration_response = json.loads(response.raw_data)
+        account_id = registration_response["AccountId"]
+        create_worker_configuration_file(registration_response["jobRuntimeDataServiceUri"], account_id,
+                                        hybrid_worker_group_name, machine_id, DIY_WORKING_DIR,
+                                        DIY_STATE_PATH, certificate_path, key_path, registration_endpoint,
+                                        workspace_id, thumbprint, vm_id, is_azure_vm, options.gpg_keyring, options.test)
 
-    print "Registration successful!"
+        # generate working directory path
+        diydirs.create_persistent_diy_dirs()
+        print "Registration successful!"
+
+    else:
+        raise Exception("Registration cannot be completed because the configuration file could not be written. Please check the file permissions for /home/nxautomation folder")
+
+
 
 
 def deregister(options):
