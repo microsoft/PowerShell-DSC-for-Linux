@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 from datetime   import datetime
 from errno      import EINVAL
 from imp        import load_source
@@ -26,8 +26,8 @@ def get_current_timestamp():
 
 def get_permission_in_oct(threeDigitString):
     # Note: Python 2.4 and 3 recognize different formats for octal
-    strMode = "0" + threeDigitString
-
+    strMode = "0o" + threeDigitString
+    
     octMode = int(strMode, base = 8)
     return octMode
 

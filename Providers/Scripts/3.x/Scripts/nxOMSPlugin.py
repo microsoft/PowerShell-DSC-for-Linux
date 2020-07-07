@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #============================================================================
 # Copyright (C) Microsoft Corporation, All rights reserved.
 #============================================================================
@@ -109,10 +109,10 @@ def init_vars(Plugins, WorkspaceID):
 
     global MULTI_HOMED
     global CONF_PATH
-    mh_conf_dir = os.path.join(ETC_OMSAGENT_DIR, WorkspaceID, CONF_PATH_SUFFIX)
+    mh_conf_dir = os.path.join(ETC_OMSAGENT_DIR, WorkspaceID.decode(), CONF_PATH_SUFFIX)
     MULTI_HOMED = os.path.isdir(mh_conf_dir)
     if MULTI_HOMED and WorkspaceID: # only log this if WorkspaceID is not None or empty
-        LG().Log('INFO', 'OMSAgent is multi-homed and resource is updating workspace ' + WorkspaceID)
+        LG().Log('INFO', 'OMSAgent is multi-homed and resource is updating workspace ' + WorkspaceID.decode())
         CONF_PATH = mh_conf_dir
 
 
@@ -389,7 +389,7 @@ def copy_all_files(src, dest, is_exec):
                 shutil.copy(full_src_file, dest)
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
-                    mode |= 0555
+                    mode |= 0o555
                     os.chmod(full_dest_file, mode)
     except:
         LG().Log('ERROR', 'copy_all_files failed for src: ' + src + ' dest: '
@@ -421,7 +421,7 @@ def check_all_files(src, dest, is_exec):
                     return False
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
-                    if mode & 0555 != 0555:
+                    if mode & 0o555 != 0o555:
                         return False
             else:
                 return False
