@@ -6,6 +6,7 @@ import shutil
 import platform
 import imp
 from os.path import dirname, join, realpath
+from traceback  import format_exc
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -53,147 +54,158 @@ def main(args):
     Removes all the resources in the named module from DSC and OMI.
     '''
 
-    # Parameter validation
-    if len(args) != 1:
-        usage()
+    try:
+        # Parameter validation
+        if len(args) != 1:
+            usage()
 
-    moduleName = args[0]
-    modulePath = join(helperlib.DSC_MODULES_PATH, moduleName)
-    
-    if os.path.isdir(modulePath):
-        printVerboseMessage("Found installed module " + moduleName + " at the path " + modulePath + ". Removing module.")
-    else:
-        exitWithError("Unable to find installed module " + moduleName + " at the path " + modulePath)
+        moduleName = args[0]
+        modulePath = join(helperlib.DSC_MODULES_PATH, moduleName)
+        
+        if os.path.isdir(modulePath):
+            printVerboseMessage("Found installed module " + moduleName + " at the path " + modulePath + ". Removing module.")
+        else:
+            exitWithError("Unable to find installed module " + moduleName + " at the path " + modulePath)
 
-    # TODO: Move this module-specifc section out of this generic script.
-    # Special section for nxOMSAutomationWorker module.
-    # The Linux Hybrid worker and manager needs to be killed before the module is removed.
-    # Also a good idea to remove the state and working directories.
-    if moduleName == "nxOMSAutomationWorker":
-        # Invoke deregister when it becomes available.
-        # Kill all processes running under the nxOMSAutomationWorker user.
-        # In some cases, there might be no processes to kill, and the return code of the following command might be non-zero.
-        # We make a best attempt to terminate the processes and don't care about its return code.
-        nxOMSAutomationWorkerUserName = "nxautomation"
-        subprocess.call(["sudo", "pkill", "-u", nxOMSAutomationWorkerUserName, ".*"])
+        # TODO: Move this module-specifc section out of this generic script.
+        # Special section for nxOMSAutomationWorker module.
+        # The Linux Hybrid worker and manager needs to be killed before the module is removed.
+        # Also a good idea to remove the state and working directories.
+        if moduleName == "nxOMSAutomationWorker":
+            # Invoke deregister when it becomes available.
+            # Kill all processes running under the nxOMSAutomationWorker user.
+            # In some cases, there might be no processes to kill, and the return code of the following command might be non-zero.
+            # We make a best attempt to terminate the processes and don't care about its return code.
+            nxOMSAutomationWorkerUserName = "nxautomation"
+            subprocess.call(["sudo", "pkill", "-u", nxOMSAutomationWorkerUserName, ".*"])
 
-        # Remove the state directory for nxOMSAutomationWorker
-        nxOMSAutomationWorkerStateFolderPath = "/var/opt/microsoft/omsagent/state/automationworker"
-        shutil.rmtree(nxOMSAutomationWorkerStateFolderPath, ignore_errors=True)
+            # Remove the state directory for nxOMSAutomationWorker
+            nxOMSAutomationWorkerStateFolderPath = "/var/opt/microsoft/omsagent/state/automationworker"
+            shutil.rmtree(nxOMSAutomationWorkerStateFolderPath, ignore_errors=True)
 
-        # Remove the working directory for nxOMSAutomationWorker
-        nxOMSAutomationWorkerWorkingFolderPath = "/var/opt/microsoft/omsagent/run/automationworker"
-        shutil.rmtree(nxOMSAutomationWorkerWorkingFolderPath, ignore_errors=True)
+            # Remove the working directory for nxOMSAutomationWorker
+            nxOMSAutomationWorkerWorkingFolderPath = "/var/opt/microsoft/omsagent/run/automationworker"
+            shutil.rmtree(nxOMSAutomationWorkerWorkingFolderPath, ignore_errors=True)
 
-    # Populate common DSC paths
-    dscMainFolderPath = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
-    dscConfigurationFolderPath = join (dscMainFolderPath, 'configuration')
-    dscConfigurationRegistrationFolderPath = join(dscConfigurationFolderPath, 'registration')
-    dscConfigurationSchemaFolderPath = join(dscConfigurationFolderPath, 'schema')
-
-    # Populate common OMI namespace path
-    omiNamespaceFolderName = helperlib.DSC_NAMESPACE.replace('/', '-')
-    omiRegistrationFolderPath = join(helperlib.CONFIG_SYSCONFDIR, 'omiregister')
-    omiNamespaceFolderPath = join(omiRegistrationFolderPath, omiNamespaceFolderName)
-
-    # Populate common platform architecture
-    resourceArchitectureFolderName = getPlatformArchitectureFolderName()
-
-    # Remove all the resources in the module from DSC and OMI
-    moduleResourcePath = join(modulePath, 'DSCResources')
-    moduleResources = os.listdir(moduleResourcePath)
-
-    for resource in moduleResources:
-        resourceFolderPath = join(moduleResourcePath, resource)
-
-        # Skip anything that is not a directory
-        if not os.path.isdir(resourceFolderPath):
-            continue
-
-        printVerboseMessage("Removing resource " + resource)
-
-        # Remove DSC schema for the resource
+        # Populate common DSC paths
+        dscMainFolderPath = join(helperlib.CONFIG_SYSCONFDIR, helperlib.CONFIG_SYSCONFDIR_DSC)
+        dscConfigurationFolderPath = join (dscMainFolderPath, 'configuration')
+        dscConfigurationRegistrationFolderPath = join(dscConfigurationFolderPath, 'registration')
         dscConfigurationSchemaFolderPath = join(dscConfigurationFolderPath, 'schema')
-        resourceDscSchemaFolderPath = join(dscConfigurationSchemaFolderPath, resource)
 
-        if os.path.isdir(resourceDscSchemaFolderPath):
-            shutil.rmtree(resourceDscSchemaFolderPath)
-        else:
-            printVerboseMessage("Unable to find DSC schema folder for resource " + resource + " at the path " + resourceDscSchemaFolderPath + ". Continuing with resource removal.")
+        # Populate common OMI namespace path
+        omiNamespaceFolderName = helperlib.DSC_NAMESPACE.replace('/', '-')
+        omiRegistrationFolderPath = join(helperlib.CONFIG_SYSCONFDIR, 'omiregister')
+        omiNamespaceFolderPath = join(omiRegistrationFolderPath, omiNamespaceFolderName)
 
-        # Remove DSC registration for the resource
-        resourceDscRegistrationFolderPath = join(dscConfigurationRegistrationFolderPath, resource)
+        # Populate common platform architecture
+        resourceArchitectureFolderName = getPlatformArchitectureFolderName()
 
-        if os.path.isdir(resourceDscRegistrationFolderPath):
-            shutil.rmtree(resourceDscRegistrationFolderPath)
-        else:
-            printVerboseMessage("Unable to find DSC registration folder for resource " + resource + " at the path " + resourceDscRegistrationFolderPath + ". Continuing with resource removal.")
+        # Remove all the resources in the module from DSC and OMI
+        moduleResourcePath = join(modulePath, 'DSCResources')
+        moduleResources = os.listdir(moduleResourcePath)
 
-        # Remove the resource Python scripts from the DSC scripts directories
-        resourceLibraryFolderPath = join(resourceFolderPath, resourceArchitectureFolderName)
-        if not os.path.isdir(resourceLibraryFolderPath):
-            exitWithError("Unable to find the resource library folder for the " + resourceArchitectureFolderName + " architecture in the module at " + resourceLibraryFolderPath)
+        for resource in moduleResources:
+            resourceFolderPath = join(moduleResourcePath, resource)
 
-        resourceScriptsFolderPath = join(resourceLibraryFolderPath, 'Scripts')
-        if not os.path.isdir(resourceLibraryFolderPath):
-            exitWithError("Unable to find the resource library scripts folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceScriptsFolderPath + " in the extracted module.")
+            # Skip anything that is not a directory
+            if not os.path.isdir(resourceFolderPath):
+                continue
+
+            printVerboseMessage("Removing resource " + resource)
+
+            # Remove DSC schema for the resource
+            dscConfigurationSchemaFolderPath = join(dscConfigurationFolderPath, 'schema')
+            resourceDscSchemaFolderPath = join(dscConfigurationSchemaFolderPath, resource)
+
+            if os.path.isdir(resourceDscSchemaFolderPath):
+                shutil.rmtree(resourceDscSchemaFolderPath)
+            else:
+                printVerboseMessage("Unable to find DSC schema folder for resource " + resource + " at the path " + resourceDscSchemaFolderPath + ". Continuing with resource removal.")
+
+            # Remove DSC registration for the resource
+            resourceDscRegistrationFolderPath = join(dscConfigurationRegistrationFolderPath, resource)
+
+            if os.path.isdir(resourceDscRegistrationFolderPath):
+                shutil.rmtree(resourceDscRegistrationFolderPath)
+            else:
+                printVerboseMessage("Unable to find DSC registration folder for resource " + resource + " at the path " + resourceDscRegistrationFolderPath + ". Continuing with resource removal.")
+
+            # Remove the resource Python scripts from the DSC scripts directories
+            resourceLibraryFolderPath = join(resourceFolderPath, resourceArchitectureFolderName)
+            if not os.path.isdir(resourceLibraryFolderPath):
+                exitWithError("Unable to find the resource library folder for the " + resourceArchitectureFolderName + " architecture in the module at " + resourceLibraryFolderPath)
+
+            resourceScriptsFolderPath = join(resourceLibraryFolderPath, 'Scripts')
+            if not os.path.isdir(resourceLibraryFolderPath):
+                exitWithError("Unable to find the resource library scripts folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceScriptsFolderPath + " in the extracted module.")
 
 
-        pythonVersionFileNames = ['2.4x-2.5x', '2.6x-2.7x', '3.x']
+            pythonVersionFileNames = ['2.4x-2.5x', '2.6x-2.7x', '3.x']
 
-        for pythonVersionFileName in pythonVersionFileNames:
-            resourceScriptsPythonVersionFolderPath = join(resourceScriptsFolderPath, pythonVersionFileName)
-            if not os.path.isdir(resourceScriptsPythonVersionFolderPath):
-                exitWithError("Unable to find the version-specific Python folder under the resource library scripts folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceScriptsPythonVersionFolderPath + " in the extracted module.")
+            for pythonVersionFileName in pythonVersionFileNames:
+                resourceScriptsPythonVersionFolderPath = join(resourceScriptsFolderPath, pythonVersionFileName)
+                if not os.path.isdir(resourceScriptsPythonVersionFolderPath):
+                    exitWithError("Unable to find the version-specific Python folder under the resource library scripts folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceScriptsPythonVersionFolderPath + " in the extracted module.")
 
-            resourceScriptsPythonVersionScriptsFolderPath = join(resourceScriptsPythonVersionFolderPath, 'Scripts')
-            if not os.path.isdir(resourceScriptsPythonVersionScriptsFolderPath):
-                exitWithError("Unable to find the version-specific Python scripts folder under the resource library scripts folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceScriptsPythonVersionScriptsFolderPath + " in the extracted module.")
+                resourceScriptsPythonVersionScriptsFolderPath = join(resourceScriptsPythonVersionFolderPath, 'Scripts')
+                if not os.path.isdir(resourceScriptsPythonVersionScriptsFolderPath):
+                    exitWithError("Unable to find the version-specific Python scripts folder under the resource library scripts folder for the resource " + resource + " and platform architecture " + resourceArchitectureFolderName + " at the path " + resourceScriptsPythonVersionScriptsFolderPath + " in the extracted module.")
 
-            resourceScriptFileNames = os.listdir(resourceScriptsPythonVersionScriptsFolderPath)
+                resourceScriptFileNames = os.listdir(resourceScriptsPythonVersionScriptsFolderPath)
 
-            dscScriptsPythonVersionFolderPath = join(helperlib.DSC_SCRIPT_PATH, pythonVersionFileName)
-            dscScriptsPythonVersionScriptsFolderPath = join(dscScriptsPythonVersionFolderPath, 'Scripts')
+                dscScriptsPythonVersionFolderPath = join(helperlib.DSC_SCRIPT_PATH, pythonVersionFileName)
+                dscScriptsPythonVersionScriptsFolderPath = join(dscScriptsPythonVersionFolderPath, 'Scripts')
 
-            for resourceScriptFileName in resourceScriptFileNames:
-                resourceScriptFilePath = join(dscScriptsPythonVersionScriptsFolderPath, resourceScriptFileName)
-                if os.path.isfile(resourceScriptFilePath):
-                    os.remove(resourceScriptFilePath)
-                else:
-                    printVerboseMessage("Unable to find resource script " + resourceScriptFileName + " under the DSC scripts folder at the path " + resourceScriptFilePath + ". Continuing with resource removal.")
+                for resourceScriptFileName in resourceScriptFileNames:
+                    resourceScriptFilePath = join(dscScriptsPythonVersionScriptsFolderPath, resourceScriptFileName)
+                    if os.path.isfile(resourceScriptFilePath):
+                        os.remove(resourceScriptFilePath)
+                    else:
+                        printVerboseMessage("Unable to find resource script " + resourceScriptFileName + " under the DSC scripts folder at the path " + resourceScriptFilePath + ". Continuing with resource removal.")
 
-        # Remove OMI library file for the resource
-        resourceLibraryOriginalName = "lib" + resource + ".so"
-        
-        if helperlib.DSC_NAMESPACE == "root/Microsoft/DesiredStateConfiguration":
-            resourceLibraryFileName = resourceLibraryOriginalName
-        else:
-            resourceLibraryFileName = resourceLibraryOriginalName.replace('.so', "_" + omiNamespaceFolderName + ".so")
+            # Remove OMI library file for the resource
+            resourceLibraryOriginalName = "lib" + resource + ".so"
+            
+            if helperlib.DSC_NAMESPACE == "root/Microsoft/DesiredStateConfiguration":
+                resourceLibraryFileName = resourceLibraryOriginalName
+            else:
+                resourceLibraryFileName = resourceLibraryOriginalName.replace('.so', "_" + omiNamespaceFolderName + ".so")
 
-        resourceLibraryFilePath = join(helperlib.CONFIG_LIBDIR, resourceLibraryFileName)
+            resourceLibraryFilePath = join(helperlib.CONFIG_LIBDIR, resourceLibraryFileName)
 
-        if os.path.isfile(resourceLibraryFilePath):
-            os.remove(resourceLibraryFilePath)
-        else:
-            printVerboseMessage("Unable to find OMI library file for resource " + resource + " at the path " + resourceLibraryFilePath + ". Continuing with resource removal.")
-        
-        # Remove OMSCONFIG library file for the resource
-        if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
-            resourceSharedObjectDestinationPath = join("/opt/dsc/lib", resource)
+            if os.path.isfile(resourceLibraryFilePath):
+                os.remove(resourceLibraryFilePath)
+            else:
+                printVerboseMessage("Unable to find OMI library file for resource " + resource + " at the path " + resourceLibraryFilePath + ". Continuing with resource removal.")
+            
+            # Remove OMSCONFIG library file for the resource
+            if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
+                resourceSharedObjectDestinationPath = join("/opt/dsc/lib", resource)
 
-            if os.path.isdir(resourceSharedObjectDestinationPath):
-                shutil.rmtree(resourceSharedObjectDestinationPath)
+                if os.path.isdir(resourceSharedObjectDestinationPath):
+                    shutil.rmtree(resourceSharedObjectDestinationPath)
 
-        # Remove OMI registration for the resource
-        resourceOmiRegistrationFileName = resource + ".reg"
-        resourceOmiRegistrationFilePath = join(omiNamespaceFolderPath, resourceOmiRegistrationFileName)
-        os.remove(resourceOmiRegistrationFilePath)
+            # Remove OMI registration for the resource
+            resourceOmiRegistrationFileName = resource + ".reg"
+            resourceOmiRegistrationFilePath = join(omiNamespaceFolderPath, resourceOmiRegistrationFileName)
+            if os.path.isfile(resourceOmiRegistrationFilePath):
+                os.remove(resourceOmiRegistrationFilePath)
+            else:
+                printVerboseMessage("Unable to find OMI registration file for resource " + resource + " at the path " + resourceOmiRegistrationFilePath + ". Continuing with resource removal.")
 
-    # Regenerate the DSC Python scripts init files
-    regenerateDscPythonScriptInitFiles()
+            # Regenerate the DSC Python scripts init files
+        regenerateDscPythonScriptInitFiles()
 
-    # Remove the extracted module directory and everything in it   
-    shutil.rmtree(modulePath)
+        # Remove the extracted module directory and everything in it   
+        shutil.rmtree(modulePath)
+
+        printVerboseMessage("Succesfully Removed Module " + moduleName)       
+    
+    except Exception:
+        # Python 2.4-2.7 and 2.6-3 recognize different formats for exceptions. This methods works in all versions.
+        formattedExceptionMessage = format_exc()
+        exitWithError('Python exception raised from RemoveModule.py: ' + formattedExceptionMessage)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
