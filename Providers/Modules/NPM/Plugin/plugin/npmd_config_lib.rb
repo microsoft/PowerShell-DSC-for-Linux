@@ -189,6 +189,7 @@ module NPMDConfig
                 _agent = Hash.new
                 _agent["Name"] = x["Guid"];
                 _agent["Capabilities"] = x["Capability"].to_s;
+                _agent["ResourceId"] = x["ResourceId"].to_s;
                 _agent["IPConfiguration"] = [];
                 
                 x["IPs"].each do |ip|
@@ -593,6 +594,7 @@ module NPMDConfig
                     _agent = Hash.new
                     _agent["Guid"] = key
                     _agent["Capability"] = value["Protocol"] unless value["Protocol"].nil?
+                    _agent["ResourceId"] = value["ResourceId"] unless value["ResourceId"].nil?
                     _agent["IPs"] = Array.new
                     value["IPs"].each do |ip|
                         _tempIp = Hash.new
@@ -1069,6 +1071,7 @@ module NPMContract
                                                     "MaxRoundTripTimeMs",
                                                     "AvgRoundTripTimeMs",
                                                     "TestResult",
+                                                    "TestResultCriterion",
                                                     "AdditionalData",
                                                     "IngestionWorkspaceResourceId"]
 
@@ -1107,6 +1110,7 @@ module NPMContract
                                                     "DestinationPort",
                                                     "Protocol",
                                                     "PathTestResult",
+                                                    "PathTestResultCriterion",
                                                     "AdditionalData",
                                                     "IngestionWorkspaceResourceId",
                                                     "UploadDirectly"]

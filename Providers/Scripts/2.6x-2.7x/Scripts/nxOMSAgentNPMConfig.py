@@ -328,7 +328,7 @@ def UpdateAgentBinary(newVersion):
         if AGENT_BINARY_NAME in file_name:
             full_file_name = os.path.join(AGENT_BINARY_PATH, file_name)
             break
-    retval &= NPM_ACTION.binary_setcap(full_file_name)
+    NPM_ACTION.binary_setcap(full_file_name)
 
     # Notify ruby plugin
     #retval &= NotifyServer(Commands.RestartNPM)
