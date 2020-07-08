@@ -33,7 +33,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <array>
+#include <string.h>
+//#include <array>
 #include <cstring>
 namespace
 {
@@ -50,37 +51,44 @@ char const DEFAULT_DSC_SCRIPT[] = "client";
 char const PY_EXTENSION[] = ".py";
 
 std::string determinePythonVersion(){
-    std::array<char, 128> buffer;
-    std::string result;
+    
+    int buffer_length = 128;
+    char buffer[buffer_length]; 
+    char* result = (char*)malloc(1);
+    *result = 0; 
+
     // Check for python2
     FILE* pipe = popen("python2 --version 2>&1", "r");
     if(!pipe) {
         std::cout << "Couldn't start command." << std::endl;
     }
 
-    while(fgets(buffer.data(), 128, pipe) != NULL) {
-        result += buffer.data();
+    while(fgets(buffer, 128, pipe) != NULL) {
+        result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        strcat(result,buffer);
     }
 
     // If python2 --version does not contain 'not found' return python2
-    if(result.find("not found") == std::string::npos) {
-      std::cout << "Found python2." << std::endl;
-    	return "python2";
+    if(strstr(result, "not found") == NULL) {
+        std::cout << "Found python2." << std::endl;
+    	return "python";
     }
 
     // Look for python3
-    result = "";
+    result = (char*)malloc(1);
+    *result = 0;
     pipe = popen("python3 --version 2>&1", "r");
     if(!pipe) {
     	std::cout << "Couldn't start command." << std::endl;
     }
-    while(fgets(buffer.data(), 128, pipe) != NULL) {
-      result += buffer.data();
+    while(fgets(buffer, 128, pipe) != NULL) {
+        result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        strcat(result,buffer);
     }
 
     // If python3 --version does not contain 'not found' return python3
-    if(result.find("not found") == std::string::npos) {
-      std::cout << "Found python3." << std::endl;
+    if(strstr(result, "not found") == NULL) {
+        std::cout << "Found python3." << std::endl;
 	    return "python3";
     }
     return "python";
@@ -111,7 +119,7 @@ get_script_path ()
     if(strcmp( determinePythonVersion().c_str(), "python3"))
     {
         strcat(fullPath.get (), "python3/");
-    }
+    }    
     strcat (fullPath.get (), fileName);
     strcat (fullPath.get (), PY_EXTENSION);
     return fullPath.move ();
