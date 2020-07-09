@@ -55,6 +55,7 @@ def apply_meta_config(args):
     fileHandle = open(args[2], 'rb')
     try:
         fileContent = fileHandle.read()
+        fileContent = fileContent.decode() if isinstance(fileContent, bytes) else fileContent
         outtokens = []
         for char in fileContent:
             outtokens.append(str(ord(char)))
