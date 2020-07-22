@@ -841,6 +841,6 @@ def config_file_to_kv_pair(filename):
 
 def log(level, message):
     try:
-        LG().Log(logging._levelNames[level], message)
+        LG().Log(logging.getLevelName(level), message)
     except:
         pass
