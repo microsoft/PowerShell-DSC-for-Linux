@@ -116,10 +116,6 @@ get_script_path ()
     len += strlen (PY_EXTENSION);
     fullPath.reset (strcpy (new char[len], fullPath.get ()));
     strcat (fullPath.get (), "/");
-    if(strcmp( determinePythonVersion().c_str(), "python3"))
-    {
-        strcat(fullPath.get (), "python3/");
-    }    
     strcat (fullPath.get (), fileName);
     strcat (fullPath.get (), PY_EXTENSION);
     return fullPath.move ();
