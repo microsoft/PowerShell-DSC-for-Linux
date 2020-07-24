@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #============================================================================
 # Copyright (C) Microsoft Corporation, All rights reserved.
 #============================================================================
@@ -36,7 +36,7 @@ class OMSAgentUtil(IOMSAgent):
         if workspace_id_to_add is not None:
             cmd += ' ' + workspace_id_to_add
             process_to_restart += '-' + workspace_id_to_add
-        if os.system(cmd) is 0:
+        if os.system(cmd) == 0:
             return True
         else:
             LG().Log('ERROR', 'Error restarting ' + process_to_restart + '.')
@@ -102,9 +102,7 @@ def init_vars(Plugins, WorkspaceID):
             if 'value' in dir(plugin['Ensure']):
                 plugin['Ensure'] = plugin['Ensure'].value
             plugin['Ensure'] = plugin['Ensure'].encode('ascii', 'ignore')
-    if WorkspaceID is not None:
-         WorkspaceID = WorkspaceID.encode('ascii', 'ignore')
-    else:
+    if WorkspaceID is None:
          WorkspaceID = ''
 
     global MULTI_HOMED
@@ -389,7 +387,7 @@ def copy_all_files(src, dest, is_exec):
                 shutil.copy(full_src_file, dest)
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
-                    mode |= 0555
+                    mode |= 0o555
                     os.chmod(full_dest_file, mode)
     except:
         LG().Log('ERROR', 'copy_all_files failed for src: ' + src + ' dest: '
@@ -421,7 +419,7 @@ def check_all_files(src, dest, is_exec):
                     return False
                 if is_exec:
                     mode = os.stat(full_dest_file).st_mode
-                    if mode & 0555 != 0555:
+                    if mode & 0o555 != 0o555:
                         return False
             else:
                 return False
