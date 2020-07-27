@@ -36,6 +36,7 @@ If you encounter challenges with either scenario
 and would like to evaluate if the latest code will resolve your issue,
 the best option is to download the latest release,
 then distribute it using custom tools (such as Azure Custom Script Extension).
+This is not intended to expand upon the supported OS coverage.
 
 Please note that
 [per the documentation for DSC Linux Extension](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/dsc-linux),
