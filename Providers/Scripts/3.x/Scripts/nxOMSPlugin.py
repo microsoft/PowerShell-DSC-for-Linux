@@ -36,7 +36,7 @@ class OMSAgentUtil(IOMSAgent):
         if workspace_id_to_add is not None:
             cmd += ' ' + workspace_id_to_add
             process_to_restart += '-' + workspace_id_to_add
-        if os.system(cmd) is 0:
+        if os.system(cmd) == 0:
             return True
         else:
             LG().Log('ERROR', 'Error restarting ' + process_to_restart + '.')
@@ -102,9 +102,7 @@ def init_vars(Plugins, WorkspaceID):
             if 'value' in dir(plugin['Ensure']):
                 plugin['Ensure'] = plugin['Ensure'].value
             plugin['Ensure'] = plugin['Ensure'].encode('ascii', 'ignore')
-    if WorkspaceID is not None:
-         WorkspaceID = WorkspaceID.encode('ascii', 'ignore')
-    else:
+    if WorkspaceID is None:
          WorkspaceID = ''
 
     global MULTI_HOMED
