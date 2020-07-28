@@ -96,7 +96,7 @@ def run_perform_required_configuration_checks():
                 stdout, stderr = p.communicate()
                 print(stdout)
             else:
-                print("dsc host lock already acuired by a different process")
+                print("dsc host lock already acquired by a different process")
         finally:
             if (dschostlock_filehandle):
                 # Release dsc host file lock

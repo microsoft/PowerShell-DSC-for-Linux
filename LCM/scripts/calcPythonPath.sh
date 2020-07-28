@@ -13,7 +13,7 @@ then
 		#echo "python3 exists"; 
 		pythonVer="python3"
 	else 
-		echo "You do not have python on this machine"
+		echo "'python2' or 'python3' not found on this machine. Please install python."
 		exit 1
 	fi
 
