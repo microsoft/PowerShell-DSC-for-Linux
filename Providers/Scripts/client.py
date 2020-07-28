@@ -144,14 +144,7 @@ def main (argv):
             else:
                 trace ('Main: request len is '+str(len (req)))
                 if sys.version < '3':
-                    try:
-                        handle_request (fd, req)
-                    except Exception:
-                        trace ("Handle request failed for a python 2 resource provider.")
-                        sys.stderr.write ('\nException in resource provider: ')
-                        sys.stderr.write (repr(sys.exc_info()) + "\n")
-                        t, e, tb = sys.exc_info()
-                        raise t, e, tb
+                    handle_request (fd, req)
                 else:
                     try:
                         handle_request (fd, req)
