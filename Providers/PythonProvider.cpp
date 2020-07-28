@@ -116,8 +116,16 @@ get_script_path ()
     len += strlen (PY_EXTENSION);
     fullPath.reset (strcpy (new char[len], fullPath.get ()));
     strcat (fullPath.get (), "/");
+    if(strcmp( determinePythonVersion().c_str(), "python3"))	
+    {	
+        len += "python3/";
+        fullPath.reset (strcpy (new char[len], fullPath.get ()));
+        strcat(fullPath.get (), "python3/");	
+    }    
     strcat (fullPath.get (), fileName);
     strcat (fullPath.get (), PY_EXTENSION);
+    std::cout << "Script path: "<< std::endl;
+    std::cout << fullPath.get() << std::endl;
     return fullPath.move ();
 }
 
