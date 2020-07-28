@@ -118,7 +118,7 @@ get_script_path ()
     strcat (fullPath.get (), "/");
     if(strcmp( determinePythonVersion().c_str(), "python3"))	
     {	
-        len += "python3/";
+        len +=  strlen ("python3/");
         fullPath.reset (strcpy (new char[len], fullPath.get ()));
         strcat(fullPath.get (), "python3/");	
     }    
