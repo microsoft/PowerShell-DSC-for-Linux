@@ -149,7 +149,8 @@ def main (argv):
                     try:
                         handle_request (fd, req)
                     except Exception as e:
-                        trace ("Handle request failed for a python 3 resource provider.")
+                        trace ("Handle request failed for a python 3 resource provider. Exception from the resource provider: ")
+                        trace (repr(e))
                         sys.stderr.write ('\nException in resource provider: ')
                         sys.stderr.write (repr(e) + "\n")
                         raise e 
@@ -189,6 +190,7 @@ try:
         try:
             from Scripts import *
         except:
+            trace ("Exception while Import: " + repr(sys.exc_info()))
             sys.stderr.write ('\nException while Import: ')
             sys.stderr.write (repr(sys.exc_info())+'\n')
             traceback.print_tb (sys.exc_info()[2])
