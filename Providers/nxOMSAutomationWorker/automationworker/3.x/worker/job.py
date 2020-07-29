@@ -105,6 +105,7 @@ class Job(Thread):
         time_taken_to_start_td = datetime.utcnow() - datetime.fromtimestamp(time.mktime(start_request_time))
         time_taken_to_start_in_seconds = (time_taken_to_start_td.microseconds + (time_taken_to_start_td.seconds +
                                                                                  time_taken_to_start_td.days * 24 * 3600) * 10 ** 6) / 10 ** 6
+        time_taken_to_start_in_seconds = self.take_out_seconds(time_taken_to_start_in_seconds)
         tracer.log_etw_job_status_changed_running(self.job_data.subscription_id, self.job_data.account_id,
                                                   self.job_data.account_name, self.sandbox_id, self.job_data.job_id,
                                                   self.runbook.definition_kind_str, self.runbook_data.name,
@@ -166,12 +167,19 @@ class Job(Thread):
         duration_td = datetime.utcnow() - datetime.fromtimestamp(time.mktime(start_request_time))
         duration_seconds = (duration_td.microseconds + (
                             duration_td.seconds + duration_td.days * 24 * 3600) * 10 ** 6) / 10 ** 6
+        duration_seconds = self.take_out_seconds(duration_seconds)
         tracer.log_etw_job_duration(self.job_data.subscription_id, self.job_data.account_id, self.sandbox_id,
                                     self.job_id, str(duration_td), duration_seconds, self.job_data.tier_name,
                                     self.job_data.account_name, jobtriggersource.mapping[self.job_data.trigger_source],
                                     "Unknown",  # TODO(dalbe): fix runbook source
                                     self.runbook.definition_kind_str, self.runbook_data.name, self.job_data.run_on)
         tracer.log_sandbox_job_unloaded(self.job_id)
+
+    @staticmethod
+    def take_out_seconds(seconds_decimal):
+        round_of_val = round(seconds_decimal, 0)
+        rounded_seconds_as_str = str(round_of_val).split('.')[0]
+        return rounded_seconds_as_str
 
     @staticmethod
     def get_full_stderr_content(stderr):
