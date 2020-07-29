@@ -635,7 +635,7 @@ def log_etw_user_requested_start_or_resume(account_id, sandbox_id, job_id, runbo
                           job_id,
                           runbook_name,
                           account_name,
-                          time_taken_to_start_running_in_seconds,
+                          str(time_taken_to_start_running_in_seconds),
                           runbook_definition_kind]
     local_message = "The user requested job state has changed to running. [accountId=" + str(account_id) + \
                     "][sandboxId=" + str(sandbox_id) + "][jobId=" + str(job_id) + "][runbookName=" + \
