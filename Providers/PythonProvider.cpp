@@ -122,7 +122,7 @@ get_script_path ()
         len +=  strlen (PYTHON3_COMMAND) + strlen ("/");
         fullPath.reset (strcpy (new char[len], fullPath.get ()));
         strcat(fullPath.get (), PYTHON3_COMMAND);
-        strcat(fullPath.get (), "/")	
+        strcat(fullPath.get (), "/");
     }    
     strcat (fullPath.get (), fileName);
     strcat (fullPath.get (), PY_EXTENSION);
