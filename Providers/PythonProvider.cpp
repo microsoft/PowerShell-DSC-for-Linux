@@ -49,6 +49,7 @@ char const DEFAULT_OMI_PATH[] = "/opt/omi/";
 char const SCRIPT_PATH_EXTENSION[] = "/lib/Scripts/";
 char const DEFAULT_DSC_SCRIPT[] = "client";
 char const PY_EXTENSION[] = ".py";
+char const PYTHON3_COMMAND[] =  "python3"
 
 std::string determinePythonVersion(){
     
@@ -116,11 +117,12 @@ get_script_path ()
     len += strlen (PY_EXTENSION);
     fullPath.reset (strcpy (new char[len], fullPath.get ()));
     strcat (fullPath.get (), "/");
-    if(strcmp( determinePythonVersion().c_str(), "python3"))	
+    if(strcmp( determinePythonVersion().c_str(), PYTHON3_COMMAND) == 0)	
     {	
-        len +=  strlen ("python3/");
+        len +=  strlen (PYTHON3_COMMAND) + strlen ("/");
         fullPath.reset (strcpy (new char[len], fullPath.get ()));
-        strcat(fullPath.get (), "python3/");	
+        strcat(fullPath.get (), PYTHON3_COMMAND);
+        strcat(fullPath.get (), "/")	
     }    
     strcat (fullPath.get (), fileName);
     strcat (fullPath.get (), PY_EXTENSION);
