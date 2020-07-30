@@ -310,6 +310,7 @@ def register(options):
         if response.status_code != 200:
             raise Exception("Failed to register worker. [response_status=" + str(response.status_code) + "]")
 
+        response.raw_data = response.raw_data.decode() if isinstance(response.raw_data, bytes) else response.raw_data
         registration_response = json.loads(response.raw_data)
         account_id = registration_response["AccountId"]
         create_worker_configuration_file(registration_response["jobRuntimeDataServiceUri"], account_id,
@@ -317,7 +318,7 @@ def register(options):
                                         DIY_STATE_PATH, certificate_path, key_path, registration_endpoint,
                                         workspace_id, thumbprint, vm_id, is_azure_vm, options.gpg_keyring, options.test)
 
-        # generate working directory path
+        # generate working directory pathresponse.raw_data
         diydirs.create_persistent_diy_dirs()
 
         print ("Registration successful!")
