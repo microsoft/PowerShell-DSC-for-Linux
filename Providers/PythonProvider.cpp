@@ -49,7 +49,7 @@ char const DEFAULT_OMI_PATH[] = "/opt/omi/";
 char const SCRIPT_PATH_EXTENSION[] = "/lib/Scripts/";
 char const DEFAULT_DSC_SCRIPT[] = "client";
 char const PY_EXTENSION[] = ".py";
-char const PYTHON3_COMMAND[] =  "python3"
+char const PYTHON3_COMMAND[] =  "python3";
 
 std::string determinePythonVersion(){
     
