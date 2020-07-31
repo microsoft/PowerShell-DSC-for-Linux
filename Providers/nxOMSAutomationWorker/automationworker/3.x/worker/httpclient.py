@@ -150,10 +150,12 @@ class RequestResponse(object):
         self.json = serializerfactory.get_serializer(sys.version_info)
         if raw_response_data is not None:
             try:
+                self.raw_data = self.raw_data.decode() if isinstance(self.raw_data, bytes) else self.raw_data   
                 self.deserialized_data = self.json.loads(self.raw_data)
             except ValueError:
                 import tracer
                 self.deserialized_data = None
+                self.raw_data = self.raw_data.decode() if isinstance(self.raw_data, bytes) else self.raw_data
                 service_unavailable_check_result = self.check_if_service_unavailable_response_is_received(self.raw_data)
                 if service_unavailable_check_result is not None:
                     tracer.log_warning_trace("Request to service failed because the service was unavailable. Detailed response is %s" %(service_unavailable_check_result))
