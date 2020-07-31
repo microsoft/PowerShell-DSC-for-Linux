@@ -318,7 +318,7 @@ def register(options):
                                         DIY_STATE_PATH, certificate_path, key_path, registration_endpoint,
                                         workspace_id, thumbprint, vm_id, is_azure_vm, options.gpg_keyring, options.test)
 
-        # generate working directory pathresponse.raw_data
+        # generate working directory path
         diydirs.create_persistent_diy_dirs()
 
         print ("Registration successful!")
