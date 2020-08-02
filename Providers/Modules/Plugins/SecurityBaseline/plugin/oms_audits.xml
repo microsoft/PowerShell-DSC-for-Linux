@@ -160,20 +160,6 @@
         path="/proc/cpuinfo" />
     </audit>
     <audit
-      description="IP forwarding should be disabled. (net.ipv4.ip_forward = 0)"
-      msid="37"
-      cceid="CCE-3561-8"
-      severity="Important"
-      impact="An attacker could use this system to perform IP routing functions"
-      remediation="Run the command '/opt/microsoft/omsagent/plugin/omsremediate -r disable-ip-forward'"
-      ruleId="5971bbd2-1977-4652-bd85-a38a8f780052">
-      <check
-        distro="*"
-        command="CheckMatchingLines"
-        regex="^0$"
-        path="/proc/sys/net/ipv4/ip_forward" />
-    </audit>
-    <audit
       description="Accepting source routed packets should be disabled for all interfaces. (net.ipv4.conf.all.accept_source_route = 0)"
       msid="40.1"
       cceid="CCE-4236-6"
@@ -541,13 +527,18 @@
       cceid="CCE-14054-1"
       severity="Critical"
       impact="An attacker could use abuse this to gain information on network systems, or spoof DNS requests due to flaws in its trust model"
-      remediation="Remove any 'ipv4ll' entries in the file '/etc/network/interfaces'"
+      remediation="For RedHat and CentOS: Add `NOZEROCONF=yes or no` to /etc/sysconfig/network. For all other distros: Remove any 'ipv4ll' entries in the file '/etc/network/interfaces'"
       ruleId="083550af-f4fe-4e1a-a304-dac894d58908">
       <check
-        distro="*"
+        distro="and|!RedHat|!CentOS"
         command="CheckNoMatchingLines"
         regex="ipv4ll"
         path="/etc/network/interfaces" />
+        <check
+          distro="RedHat|CentOS"
+          command="CheckMatchingLines"
+          regex="^NOZEROCONF=\w+\s*$"
+          path="/etc/sysconfig/network" />
     </audit>
     <audit
       description="The crond service should be enabled."
@@ -662,7 +653,7 @@ DenyGroups
       remediation="Run the command '/opt/microsoft/omsagent/plugin/omsremediate -r disable-ssh-rhost-rsa-auth'. This will add the line 'RhostsRSAAuthentication no' to the file '/etc/ssh/sshd_config'"
       ruleId="c0b75409-01e3-4428-9a32-bfcdb42afcb5">
       <check
-        distro="*"
+        distro="and|!Ubuntu>=18.04|!RedHat>=7|!Debian>=9|!Oracle>=7|!CentOS>=7"
         command="CheckMatchingLines"
         regex="^[\s\t]*RhostsRSAAuthentication\s+no"
         path="/etc/ssh/sshd_config" />
@@ -736,7 +727,7 @@ DenyGroups
         service="cups" />
     </audit>
     <audit
-      description="The dhcpd service should be disabled."
+      description="The isc-dhcpd service should be disabled."
       msid="116"
       cceid="CCE-4336-4"
       severity="Important"
@@ -747,6 +738,10 @@ DenyGroups
         distro="*"
         command="CheckServiceDisabled"
         service="isc-dhcp-server" />
+    <check
+        distro="*"
+        command="CheckServiceDisabled"
+        service="dhcpd" />
     </audit>
     <audit
       description="The isc-dhcp-server package should be uninstalled."
@@ -1172,7 +1167,7 @@ Modify user parameters for all users with a password set to match:
       ruleId="b659c9f6-a076-4886-9048-db10c349b9fe">
       <check
         distro="*"
-        command="CheckMatchingLines"
+        command="CheckMatchingLinesIfExists"
         regex="^0$"
         path="/proc/sys/net/ipv6/conf/all/accept_source_route" />
     </audit>
@@ -1317,7 +1312,7 @@ zypper remove rsh
 	    <dependency type="FileExists">/etc/samba/smb.conf</dependency>
     </check>
   </audit>
-  </audits>
+ </audits>
  <remediations>
   <!--
     Remediations are preformed in the order they appear in this file.
@@ -1381,7 +1376,7 @@ rm -fr /etc/init/atd.conf /etc/init.d/atd
   </remediation>
 
   <remediation id="disable-ssh-rhost-rsa-auth" msids="107" description="Disable RhostsRSAAuthentication in ssh">
-    <action distro="*" action="ActionEditConfig" name="RhostsRSAAuthentication" value="no" value-regex="[a-z-]+" path="/etc/ssh/sshd_config"/>
+    <action distro="and|!Ubuntu>=18.04|!RedHat>=7|!Debian>=9|!Oracle>=7|!CentOS>=7" action="ActionEditConfig" name="RhostsRSAAuthentication" value="no" value-regex="[a-z-]+" path="/etc/ssh/sshd_config"/>
   </remediation>
 
   <remediation id="disable-ssh-host-based-auth" msids="108" description="Disable HostbasedAuthentication in ssh">

@@ -20,7 +20,7 @@
       impact="Docker depends on `/var/lib/docker` as the default directory where all Docker related files, including the images, are stored. This directory might fill up fast and soon Docker and the host could become unusable. So, it is advisable to create a separate partition (logical volume) for storing Docker files."
       remediation="For new installations, create a separate partition for `/var/lib/docker` mount point. For systems that were previously installed, use the Logical Volume Manager (LVM) to create partitions."
       ruleId="7315f615-566c-4f93-b6d2-ee29c5549581">
-	  <check distro="*" command="CheckMatchingLines" path="/proc/mounts" regex="^\S+\s+/var/lib/docker\+" />
+	  <check distro="*" command="CheckMatchingLines" path="/proc/mounts" regex="^\S+\s+\/var\/lib\/docker(?:\/|\s+)" />
     </audit>
     <audit
       description="Ensure the container host has been hardened (Not Scored)"
