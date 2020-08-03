@@ -310,6 +310,7 @@ def register(options):
         if response.status_code != 200:
             raise Exception("Failed to register worker. [response_status=" + str(response.status_code) + "]")
 
+        response.raw_data = response.raw_data.decode() if isinstance(response.raw_data, bytes) else response.raw_data
         registration_response = json.loads(response.raw_data)
         account_id = registration_response["AccountId"]
         create_worker_configuration_file(registration_response["jobRuntimeDataServiceUri"], account_id,
