@@ -1,9 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import os
 import sys
 import imp
 import subprocess
-import signal
 from os.path import basename, dirname, join, realpath, split
 from imp                import load_source
 from os.path            import dirname, isfile, join, realpath
@@ -27,26 +26,19 @@ fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
 nxDSCLog = imp.load_source('nxDSCLog', fullPathDSCLogger)
 logger = nxDSCLog.ConsoleAndFileLogger()
 sys.stdout = logger
-proc = None
-
-# function to handle ternimation signals received from omsagent.
-# Child process are created by with a new group id.
-# We issue termination signal together to all childprocesses with group id.
-def signal_handler(signalNumber, frame):
-    printVerboseMessage("OMS_MetaconfigHelper.py script received SIGTERM signal.")
-
-    if proc is not None:
-        printVerboseMessage("Terminating child process by sending SIGTERM signal.")
-        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-    else:
-        printVerboseMessage("There is no child process running. It is either completed execution or has not been invoked.")
 
 def exitWithError(message, errorCode = 1):
+    if (isinstance(message, bytes)):
+        message = message.decode()
     errorMessage = "ERROR from OMS_MetaConfigHelper.py: " + message
     print(errorMessage)
+    if (isinstance(errorCode, bytes)):
+        errorCode = errorCode.decode()
     sys.exit(errorCode)
 
 def printVerboseMessage(message):
+    if (isinstance(message, bytes)):
+        message = message.decode()
     verboseMessage = "VERBOSE from OMS_MetaConfigHelper.py: " + message
     print(verboseMessage)
 
@@ -150,9 +142,6 @@ def source_file(filename):
 Variables = dict()
 Defines = []
 
-# register the SIGTERM handler
-signal.signal(signal.SIGTERM, signal_handler)
-
 # Parse command line arguments
 args = []
 optlist = []
@@ -240,16 +229,17 @@ finally:
 os.system("chown omsagent " + metamof_path)
 
 if os.geteuid() == 0:
-    commandToRun = "su - omsagent -c '/opt/microsoft/omsconfig/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path + "'"
+    commandToRun = "su - omsagent -c '/opt/microsoft/omsconfig/Scripts/python3/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path + "'"
 else:
-    commandToRun = "/opt/microsoft/omsconfig/Scripts/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
+    commandToRun = "/opt/microsoft/omsconfig/Scripts/python3/SetDscLocalConfigurationManager.py -configurationmof " + metamof_path
 
 # Apply the metaconfig using SetDscLocalConfiguration
-proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True, preexec_fn=os.setsid)
+proc = subprocess.Popen(commandToRun, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True)
 exit_code = proc.wait()
 
 stdout, stderr = proc.communicate()
-printVerboseMessage("Output from: " + commandToRun + ": " + str(stdout))
+stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
+printVerboseMessage("Output from3: " + commandToRun + ": " + str(stdout))
 
 set_metaconfig_success_string = ""
 if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
@@ -257,14 +247,14 @@ if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
 else:
     set_metaconfig_success_string = "ReturnValue=0"
 
-if ((exit_code == 0) and (stderr.decode(encoding = 'UTF-8') == '') and (set_metaconfig_success_string in str(stdout))):
+if ((exit_code == 0) and (stderr == '' or (sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == '')) and (set_metaconfig_success_string in str(stdout))):
     printVerboseMessage('Successfully configured omsconfig.')
 else:
     if exit_code == 0:
         exit_code = 1
 
     if (stderr != ''):
-        exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr), exit_code)
+        exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr.decode()), exit_code)
     elif ((sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') != '')):
         exitWithError(("Error on running command: " + commandToRun + " Error Message: " + stderr.decode(encoding = 'UTF-8')), exit_code)
     else:

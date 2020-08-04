@@ -143,7 +143,17 @@ def main (argv):
                 read = -1
             else:
                 trace ('Main: request len is '+str(len (req)))
-                handle_request (fd, req)
+                if sys.version < '3':
+                    handle_request (fd, req)
+                else:
+                    try:
+                        handle_request (fd, req)
+                    except Exception as e:
+                        trace ("Handle request failed for a python 3 resource provider. Exception from the resource provider: ")
+                        trace (repr(e))
+                        sys.stderr.write ('\nException in resource provider: ')
+                        sys.stderr.write (repr(e) + "\n")
+                        raise e 
         except socket.error:
             read = -1;
             sys.stderr.write('exception encountered')
@@ -176,8 +186,15 @@ try:
         else:
             trace (ScriptsDir + '/3.x')
             os.chdir (ScriptsDir + '/3.x')
-        from Scripts import *
-        
+            sys.path.append(ScriptsDir + '/3.x/Scripts')
+        try:
+            from Scripts import *
+        except:
+            trace ("Exception while Import: " + repr(sys.exc_info()))
+            sys.stderr.write ('\nException while Import: ')
+            sys.stderr.write (repr(sys.exc_info())+'\n')
+            traceback.print_tb (sys.exc_info()[2])
+            sys.stderr.write ('\n') 
         if __name__ == '__main__':
             main (sys.argv)
     

@@ -3,7 +3,7 @@
 
    Copyright (c) Microsoft Corporation
 
-   All rights reserved. 
+   All rights reserved.
 
    MIT License
 
@@ -14,10 +14,7 @@
    THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "PythonProvider.hpp"
-
-
 #include "debug_tags.hpp"
-
 
 #include <algorithm>
 #include <cstdlib>
@@ -33,7 +30,12 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+//#include <array>
+#include <cstring>
 namespace
 {
 
@@ -47,23 +49,60 @@ char const DEFAULT_OMI_PATH[] = "/opt/omi/";
 char const SCRIPT_PATH_EXTENSION[] = "/lib/Scripts/";
 char const DEFAULT_DSC_SCRIPT[] = "client";
 char const PY_EXTENSION[] = ".py";
+char const PYTHON3_COMMAND[] =  "python3";
 
+std::string determinePythonVersion(){
+    
+    int buffer_length = 128;
+    char buffer[buffer_length]; 
+    char* result = (char*)malloc(1);
+    *result = 0; 
+
+    // Check for python2
+    FILE* pipe = popen("python2 --version 2>&1", "r");
+    if(!pipe) {
+        std::cout << "Couldn't start command." << std::endl;
+    }
+
+    while(fgets(buffer, 128, pipe) != NULL) {
+        result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        strcat(result,buffer);
+    }
+
+    // If python2 --version does not contain 'not found' return python2
+    if(strstr(result, "not found") == NULL) {
+        std::cout << "Found python2." << std::endl;
+    	return "python2";
+    }
+
+    // Look for python3
+    result = (char*)malloc(1);
+    *result = 0;
+    pipe = popen("python3 --version 2>&1", "r");
+    if(!pipe) {
+    	std::cout << "Couldn't start command." << std::endl;
+    }
+    while(fgets(buffer, 128, pipe) != NULL) {
+        result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        strcat(result,buffer);
+    }
+
+    // If python3 --version does not contain 'not found' return python3
+    if(strstr(result, "not found") == NULL) {
+        std::cout << "Found python3." << std::endl;
+	    return "python3";
+    }
+    return "python";
+}
 
 char_array::move_type
 get_python_version ()
 {
-    char* sPath = getenv (OMI_PYTHON_VERSION_STR);
     char_array pyV;
-    if (sPath == NULL)
-    {
-        pyV.reset (strcpy (new char[1 + strlen (DEFAULT_PYTHON_VERSION)],
-                           DEFAULT_PYTHON_VERSION));
-    }
-    else
-    {
-        pyV.reset (strcpy (new char[1 + strlen (sPath)], sPath));
-    }
-    return pyV.move ();
+    std::cout << "In PythonProvider." << std::endl;
+    std::string version = determinePythonVersion();
+    pyV.reset (strcpy (new char[1 + version.length()], version.c_str()));
+    return pyV.move();
 }
 
 
@@ -78,8 +117,17 @@ get_script_path ()
     len += strlen (PY_EXTENSION);
     fullPath.reset (strcpy (new char[len], fullPath.get ()));
     strcat (fullPath.get (), "/");
+    if(strcmp( determinePythonVersion().c_str(), PYTHON3_COMMAND) == 0)	
+    {	
+        len +=  strlen (PYTHON3_COMMAND) + strlen ("/");
+        fullPath.reset (strcpy (new char[len], fullPath.get ()));
+        strcat(fullPath.get (), PYTHON3_COMMAND);
+        strcat(fullPath.get (), "/");
+    }    
     strcat (fullPath.get (), fileName);
     strcat (fullPath.get (), PY_EXTENSION);
+    std::cout << "Script path: "<< std::endl;
+    std::cout << fullPath.get() << std::endl;
     return fullPath.move ();
 }
 
@@ -303,19 +351,19 @@ PythonProvider::test (
     int result = sendRequest (TEST, instance);
     if (EXIT_SUCCESS == result)
     {
-        SCX_BOOKEND_PRINT ("send succeeded");
+	SCX_BOOKEND_PRINT ("send succeeded");
         result = recvResult (pTestResultOut);
         if (EXIT_SUCCESS == result)
         {
             SCX_BOOKEND_PRINT ("recv succeeded");
             rval = MI_RESULT_OK;
         }
-        else
+        else 
         {
             SCX_BOOKEND_PRINT ("recv failed");
         }
     }
-    else
+    else 
     {
         SCX_BOOKEND_PRINT ("send failed");
     }
@@ -419,7 +467,7 @@ PythonProvider::get (
                         SCX_BOOKEND_PRINT ("no error msg");
                     }
                 }
-                else 
+                else
                 {
                     SCX_BOOKEND_PRINT ("failed to receive error msg");
                 }
@@ -494,7 +542,7 @@ PythonProvider::inventory (
                         SCX_BOOKEND_PRINT ("no error msg");
                     }
                 }
-                else 
+                else
                 {
                     SCX_BOOKEND_PRINT ("failed to receive error msg");
                 }
@@ -541,8 +589,15 @@ PythonProvider::forkExec ()
                 char socketID[SOCK_ID_BUF_LEN];
                 snprintf (socketID, SOCK_ID_BUF_LEN, "%d", sockets[0]);
                 char_array pyV (get_python_version ());
+
                 char_array fullName (get_script_path ());
+                SCX_BOOKEND_PRINT (fullName);
+
                 char* args[] = { pyV.get (), fullName.get (), socketID, 0 };
+
+                SCX_BOOKEND_PRINT ("In PythonProvider, using:");
+                SCX_BOOKEND_PRINT (args[0]);
+
                 // exec
                 execvp (args[0], args);
                 SCX_BOOKEND_PRINT ("execvp - failed");
@@ -1169,7 +1224,7 @@ PythonProvider::recvResult (
                     SCX_BOOKEND_PRINT ("no error msg");
                 }
             }
-            else 
+            else
             {
                 SCX_BOOKEND_PRINT ("failed to receive error msg");
             }
