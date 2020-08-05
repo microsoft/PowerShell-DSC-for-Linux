@@ -32,6 +32,7 @@ endif
 all:
 	rm -rf release/*.rpm release/*.deb
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Scripts/python3
 	mkdir -p intermediate/Modules
 ifeq ($(BUILD_LOCAL),1)
 	$(MAKE) local
@@ -96,6 +97,7 @@ endif
 
 dsc098: lcm098 providers
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Scripts/python3
 	mkdir -p intermediate/Modules
 	.  omi-1.0.8/output_openssl_0.9.8/config.mak; \
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
@@ -116,11 +118,30 @@ dsc098: lcm098 providers
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
+	for f in LCM/scripts/python3/*.py LCM/scripts/python3/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/python3/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/python3/`basename $$f`; \
+	done
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 
 dsc100: lcm100 providers
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Scripts/python3
 	mkdir -p intermediate/Modules
 	.  omi-1.0.8/output_openssl_1.0.0/config.mak; \
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
@@ -141,10 +162,29 @@ dsc100: lcm100 providers
 	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
+	for f in LCM/scripts/python3/*.py LCM/scripts/python3/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/python3/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/python3/`basename $$f`; \
+	done
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 dsc110: lcm110 providers
 	mkdir -p intermediate/Scripts
+	mkdir -p intermediate/Scripts/python3
 	mkdir -p intermediate/Modules
 	.  omi-1.0.8/output_openssl_1.1.0/config.mak; \
 	for f in LCM/scripts/*.py LCM/scripts/*.sh Providers/Scripts/*.py Providers/Scripts/*.sh; do \
@@ -166,6 +206,24 @@ dsc110: lcm110 providers
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
 	done
 
+	for f in LCM/scripts/python3/*.py LCM/scripts/python3/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/python3/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/python3/`basename $$f`; \
+	done
 	if [ -f ../dsc.version ]; then cp -f ../dsc.version build/dsc.version; else cp -f build/Makefile.version build/dsc.version; fi
 
 
@@ -483,7 +541,7 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.44"; \
+	VERSION="3.44"; \ 
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -646,7 +704,7 @@ endif
 
 
 # To build DSC without making kits (i.e. the old style), run 'make local'
-local: 
+local:
 	rm -rf release/*.rpm release/*.deb
 	mkdir -p intermediate/Scripts
 	mkdir -p intermediate/Modules
@@ -679,5 +737,23 @@ providersreg:
 	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
 	  sed "s@<DSC_MODULES_PATH>@$(CONFIG_DATADIR)/dsc/modules@" > intermediate/Scripts/`basename $$f`; \
 	  chmod a+x intermediate/Scripts/`basename $$f`; \
-	done 
+	done
+	for f in LCM/scripts/python3/*.py LCM/scripts/python3/*.sh; do \
+	  cat $$f | \
+	  sed "s@<CONFIG_BINDIR>@$$CONFIG_BINDIR@" | \
+	  sed "s@<CONFIG_LIBDIR>@$$CONFIG_LIBDIR@" | \
+	  sed "s@<CONFIG_LOCALSTATEDIR>@$$CONFIG_LOCALSTATEDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR>@$$CONFIG_SYSCONFDIR@" | \
+	  sed "s@<CONFIG_SYSCONFDIR_DSC>@$(CONFIG_SYSCONFDIR_DSC)@" | \
+	  sed "s@<OAAS_CERTPATH>@$(OAAS_CERTPATH)@" | \
+	  sed "s@<OAAS_KEYPATH>@$(OAAS_KEYPATH)@" | \
+	  sed "s@<OAAS_THUMBPRINT>@$(OAAS_THUMBPRINT)@" | \
+	  sed "s@<OMI_LIB_SCRIPTS>@$$CONFIG_LIBDIR/Scripts@" | \
+	  sed "s@<PYTHON_PID_DIR>@$(PYTHON_PID_DIR)@" | \
+	  sed "s@<DSC_NAMESPACE>@$(DSC_NAMESPACE)@" | \
+	  sed "s@<DSC_SCRIPT_PATH>@$(DSC_SCRIPT_PATH)@" | \
+	  sed "s@<DSC_HOST_BASE_PATH>@$(DSC_HOST_BASE_PATH)@" | \
+	  sed "s@<DSC_MODULES_PATH>@$(DSC_MODULES_PATH)@" > intermediate/Scripts/python3/`basename $$f`; \
+	  chmod a+x intermediate/Scripts/python3/`basename $$f`; \
+	done
 	$(MAKE) -C Providers reg

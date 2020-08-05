@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+import fileinput
+import sys
+import subprocess
+from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
+from imp                  import load_source
+from os.path              import dirname, isfile, join, realpath
+from time                 import sleep
+from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
+
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
+helperlib = load_source('helperlib', helperLibPath)
+
+omi_bindir = "<CONFIG_BINDIR>"
+omicli_path = omi_bindir + "/omicli"
+dsc_host_base_path = helperlib.DSC_HOST_BASE_PATH
+dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
+dsc_host_output_path = join(dsc_host_base_path, 'output')
+dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
+dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
+
+if ("omsconfig" in helperlib.DSC_SCRIPT_PATH):
+    write_omsconfig_host_switch_event(pathToCurrentScript, isfile(dsc_host_switch_path))
+
+if ("omsconfig" in helperlib.DSC_SCRIPT_PATH) and (isfile(dsc_host_switch_path)):
+    use_omsconfig_host = True
+else:
+    use_omsconfig_host = False
+
+parameters = []
+if use_omsconfig_host:
+    parameters.append(dsc_host_path)
+    parameters.append(dsc_host_output_path)
+    parameters.append("TestConfiguration")
+else:
+    parameters.append(omicli_path)
+    parameters.append("iv")
+    parameters.append("<DSC_NAMESPACE>")
+    parameters.append("{")
+    parameters.append("MSFT_DSCLocalConfigurationManager")
+    parameters.append("}")
+    parameters.append("TestConfiguration")
+
+stdout = ''
+stderr = ''
+
+if use_omsconfig_host:
+    if isfile(dsc_host_lock_path):
+        try:
+            dschostlock_filehandle = None
+            stop_old_host_instances(dsc_host_lock_path)
+
+            # Open the dsc host lock file. This also creates a file if it does not exist
+            dschostlock_filehandle = open(dsc_host_lock_path, 'w')
+            print("Opened the dsc host lock file at the path '" + dsc_host_lock_path + "'")
+            
+            dschostlock_acquired = False
+
+            # Acquire dsc host file lock
+            for retry in range(10):
+                try:
+                    flock(dschostlock_filehandle, LOCK_EX | LOCK_NB)
+                    write_omsconfig_host_log('dsc_host lock file is acquired by : TestConfiguration', pathToCurrentScript)
+                    dschostlock_acquired = True
+                    break
+                except IOError:
+                    write_omsconfig_host_log('dsc_host lock file not acquired. retry (#' + str(retry) + ') after 60 seconds...', pathToCurrentScript)
+                    sleep(60)
+
+            if dschostlock_acquired:
+                p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = p.communicate()
+                exit_code = p.wait()
+                stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
+                print(stdout)
+
+                if (isinstance(exit_code, int) and exit_code > 0):
+                    write_omsconfig_host_log('dsc_host failed with code = ' + str(exit_code), pathToCurrentScript)
+                    exit(exit_code)
+            else:
+                print("dsc host lock already acuired by a different process")
+        finally:
+            if (dschostlock_filehandle):
+                # Release dsc host file lock
+                flock(dschostlock_filehandle, LOCK_UN)
+
+                # Close dsc host lock file handle
+                dschostlock_filehandle.close()
+    else:
+        write_omsconfig_host_log('dsc_host lock file does not exist. Skipping this operation until next consistency hits.', pathToCurrentScript, 'WARNING')
+else:
+    p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+
+stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
+stderr = stderr.decode() if isinstance(stderr, bytes) else stderr
+print(stdout)
+print(stderr)
+
+

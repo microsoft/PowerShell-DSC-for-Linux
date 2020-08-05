@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 from imp        import load_source
 from os.path    import dirname, join, realpath, isfile
 from subprocess import PIPE, Popen
@@ -94,6 +94,7 @@ def run_perform_required_configuration_checks():
             if dschostlock_acquired:
                 p = Popen(parameters, stdout=PIPE, stderr=PIPE)
                 stdout, stderr = p.communicate()
+                stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
                 print(stdout)
             else:
                 print("dsc host lock already acquired by a different process")
@@ -107,7 +108,7 @@ def run_perform_required_configuration_checks():
     else:
         p = Popen(parameters, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
-
+    stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
     print(stdout)
 
 if __name__ == "__main__":
