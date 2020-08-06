@@ -137,6 +137,7 @@ module NPMDConfig
                 _doc["Configuration"] ["Networks"] = createNetworkElements(configHash["Networks"], _subnetInfo["IDs"])
                 _doc["Configuration"] ["Rules"] = createRuleElements(configHash["Rules"], _subnetInfo["IDs"]) unless !configHash.has_key?("Rules")
                 _doc["Configuration"] ["Epm"] = createEpmElements(configHash["Epm"]) unless !configHash.has_key?("Epm")
+                _doc["Configuration"] ["ConnectionMonitorConfiguration"] = configHash["ConnectionMonitorConfiguration"] unless !configHash.has_key?("ConnectionMonitorConfiguration")
                 _doc["Configuration"] ["ER"] = createERElements(configHash["ER"]) unless !configHash.has_key?("ER")
 
                 _configJson = _doc.to_json
@@ -191,7 +192,7 @@ module NPMDConfig
                 _agent["Capabilities"] = x["Capability"].to_s;
                 _agent["ResourceId"] = x["ResourceId"].to_s;
                 _agent["IPConfiguration"] = [];
-                
+
                 x["IPs"].each do |ip|
                     _ipConfig = Hash.new
                     _ipConfig["IP"] = ip["IP"];
@@ -233,7 +234,7 @@ module NPMDConfig
                 end
                 _networks.push(_network);
                 if _networks.empty?
-                    @@network_drops += 1                    
+                    @@network_drops += 1
                 end
             end
             _networks
@@ -473,7 +474,7 @@ module NPMDConfig
                     Logger::logWarn "found nothing for path #{RootConfigTag}/#{SolnConfigV3Tag} in config string"
                     return nil
                 end
-                
+
                 @agentData = JSON.parse(_config.elements[AgentInfoTag].text())
                 @metadata = JSON.parse(_config.elements[MetadataTag].text())
 
@@ -484,8 +485,8 @@ module NPMDConfig
                 _h[KeyAgents]   = getAgentHashFromJson(_config.elements[AgentInfoTag].text())
                 _h[KeyRules]    = getRuleHashFromJson(_config.elements[RuleInfoTag].text()) unless _config.elements[RuleInfoTag].nil?
                 _h[KeyEpm]      = getEpmHashFromJson(_config.elements[EpmInfoTag].text()) unless _config.elements[EpmInfoTag].nil?
+                _h[KeyCM]       = JSON.parse(_config.elements[EpmInfoTag].text())[KeyCM] unless _config.elements[EpmInfoTag].nil?
                 _h[KeyER]       = getERHashFromJson(_config.elements[ERInfoTag].text()) unless _config.elements[ERInfoTag].nil?
-                
                 _h = nil if (_h[KeyNetworks].nil? or _h[KeySubnets].nil? or _h[KeyAgents].nil?)
                 if _h == nil
                     Logger::logError "UI Config parsed as nil"
@@ -525,6 +526,7 @@ module NPMDConfig
         KeyRules                = "Rules"
         KeyEpm                  = "Epm"
         KeyER                   = "ER"
+        KeyCM                   = "ConnectionMonitorConfiguration"
 
         # Hash of {AgentID => {AgentContract}}
         @agentData = {}
@@ -711,7 +713,7 @@ module NPMDConfig
                     _epmRules["Rules"].push(_rule)
                 end
 
-				_epmRules
+                                _epmRules
             rescue JSON::ParserError => e
                 Logger::logError "Error in Json Parse in EPM data: #{e}", Logger::resc
                 raise "Got exception in EPM parsing: #{e}"
@@ -828,7 +830,7 @@ module NPMDConfig
             rescue JSON::ParserError => e
                 Logger::logError "Error in Json Parse in ER data: #{e}", Logger::resc
                 nil
-            end 
+            end
         end
 
         def self.getERPrivateRuleFromUIConfig(key, value, _circuitIdMap)
