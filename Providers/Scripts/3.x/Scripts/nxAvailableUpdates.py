@@ -132,7 +132,7 @@ def GetYumUpdates(Name):
     LG().Log('DEBUG', "Retrieving update package list using cmd: " + cmd)
     retcode, pkg_list = RunGetOutput(cmd, False, False)
     LG().Log('DEBUG', "Cmd execution time: " + str((time.time() - start_time) / 60))
-    LG().Log('DEBUG', "Cmd output for update list : " + pkg_list)    
+    #LG().Log('DEBUG', "Cmd output for update list : " + pkg_list)    
 
     # Sample output from OMSYumUpdates.sh
     #   ca-certificates.noarch
@@ -150,6 +150,7 @@ def GetYumUpdates(Name):
         param_list = ""
         for pkg in pkg_list.splitlines():
             if pkg == "Obsoleting":
+                LG().Log('DEBUG', "List including obsolete packages: " + pkg_list)
                 break
             param_list = param_list + " " + pkg
 
