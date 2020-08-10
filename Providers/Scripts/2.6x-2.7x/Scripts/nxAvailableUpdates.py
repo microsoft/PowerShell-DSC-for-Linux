@@ -151,6 +151,9 @@ def GetYumUpdates(Name):
 
         param_list = ""
         for pkg in pkg_list.splitlines():
+            if pkg == "Obsoleting":
+                LG().Log('DEBUG', "List including obsolete packages: " + str(pkg_list))
+                break
             param_list = param_list + " " + pkg
 
         cmd = "LANG=en_US.UTF8 " + yum_info + param_list
