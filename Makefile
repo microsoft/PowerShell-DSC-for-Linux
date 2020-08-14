@@ -588,7 +588,7 @@ nxFileInventory:
 
 nxOMSAgentNPMConfig:
 	rm -rf output/staging; \
-	VERSION="3.3"; \
+	VERSION="3.4"; \
 	PROVIDERS="nxOMSAgentNPMConfig"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
