@@ -485,7 +485,7 @@ module NPMDConfig
                 _h[KeyAgents]   = getAgentHashFromJson(_config.elements[AgentInfoTag].text())
                 _h[KeyRules]    = getRuleHashFromJson(_config.elements[RuleInfoTag].text()) unless _config.elements[RuleInfoTag].nil?
                 _h[KeyEpm]      = getEpmHashFromJson(_config.elements[EpmInfoTag].text()) unless _config.elements[EpmInfoTag].nil?
-                _h[KeyCM]       = JSON.parse(_config.elements[EpmInfoTag].text())[KeyCM] unless _config.elements[EpmInfoTag].nil?
+                _h[KeyCM]       = getCMHashFromJson(_config.elements[EpmInfoTag].text()) unless _config.elements[EpmInfoTag].nil?
                 _h[KeyER]       = getERHashFromJson(_config.elements[ERInfoTag].text()) unless _config.elements[ERInfoTag].nil?
                 _h = nil if (_h[KeyNetworks].nil? or _h[KeySubnets].nil? or _h[KeyAgents].nil?)
                 if _h == nil
@@ -655,6 +655,16 @@ module NPMDConfig
                 _a
             rescue JSON::ParserError => e
                 Logger::logError "Error in Json Parse in rule data: #{e}", Logger::resc
+                nil
+            end
+        end
+
+        def self.getCMHashFromJson(text)
+            begin
+                _h = JSON.parse(text)
+                _cmConfiguration = _h[KeyCM]
+            rescue JSON::ParserError => e
+                Logger::logError "Error in Json Parse in ConnectionMonitorConfiguration data: #{e}", Logger::resc
                 nil
             end
         end
