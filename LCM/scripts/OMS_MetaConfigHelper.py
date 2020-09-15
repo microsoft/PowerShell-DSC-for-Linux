@@ -257,7 +257,8 @@ if "omsconfig" in helperlib.DSC_SCRIPT_PATH:
 else:
     set_metaconfig_success_string = "ReturnValue=0"
 
-if ((exit_code == 0) and (stderr.decode(encoding = 'UTF-8') == '') and (set_metaconfig_success_string in str(stdout))):
+# This file is only for python 2 
+if ((exit_code == 0) and (stderr == '' or (sys.version_info >= (3, 0) and stderr.decode(encoding = 'UTF-8') == '') and (set_metaconfig_success_string in str(stdout))):
     printVerboseMessage('Successfully configured omsconfig.')
 else:
     if exit_code == 0:
