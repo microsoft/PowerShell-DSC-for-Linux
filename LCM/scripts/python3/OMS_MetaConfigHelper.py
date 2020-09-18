@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import os
 import sys
-import imp
 import subprocess
 from os.path import basename, dirname, join, realpath, split
 import warnings
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=DeprecationWarning)
+    import imp
     from imp        import load_source
 from os.path            import dirname, isfile, join, realpath
 
