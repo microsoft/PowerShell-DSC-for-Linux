@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-from imp        import load_source
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore",category=DeprecationWarning)
+    from imp        import load_source
 from os.path    import dirname, join, realpath, isfile
 from subprocess import PIPE, Popen
 from sys        import exc_info, exit, version_info

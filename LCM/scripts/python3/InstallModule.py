@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-import imp
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore",category=DeprecationWarning)
+    import imp
 import os
 import stat
 import shutil
