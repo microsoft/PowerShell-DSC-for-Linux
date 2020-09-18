@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
-from imp                  import load_source
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore",category=DeprecationWarning)
+    from imp        import load_source
 from os                   import listdir, system
 from os.path              import dirname, isfile, join, realpath
 from shutil               import move

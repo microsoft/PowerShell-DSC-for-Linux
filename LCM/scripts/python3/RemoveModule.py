@@ -4,7 +4,10 @@ import os
 import subprocess
 import shutil
 import platform
-import imp
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore",category=DeprecationWarning)
+    import imp
 from os.path import dirname, join, realpath
 
 pathToCurrentScript = realpath(__file__)

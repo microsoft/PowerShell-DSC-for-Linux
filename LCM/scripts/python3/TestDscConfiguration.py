@@ -3,7 +3,10 @@ import fileinput
 import sys
 import subprocess
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
-from imp                  import load_source
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore",category=DeprecationWarning)
+    from imp                  import load_source
 from os.path              import dirname, isfile, join, realpath
 from time                 import sleep
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
