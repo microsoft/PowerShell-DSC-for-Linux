@@ -29,10 +29,13 @@ int main(int argc, char *argv[])
 {
     char * pythonCommand = PYTHON2_COMMAND;
     
-    char* dscScriptPath = malloc(1);
-    dscScriptPath = 0;
-    dscScriptPath = realloc(dscScriptPath, strlen(DSC_SCRIPT_PATH) + 1 );
-    dscScriptPath = strcat(dscScriptPath, DSC_SCRIPT_PATH);
+    // char* dscScriptPath = malloc(1);
+    // dscScriptPath = 0;
+    // dscScriptPath = realloc(dscScriptPath, strlen(DSC_SCRIPT_PATH) + 1 );
+    // dscScriptPath = strcat(dscScriptPath, DSC_SCRIPT_PATH);
+
+    char* dscScriptPath = malloc(strlen(DSC_SCRIPT_PATH) + 1);
+    dscScriptPath = strcpy(dscScriptPath, DSC_SCRIPT_PATH);
     
     //if oms config check to be added
     if(strstr(dscScriptPath, "omsconfig")!= NULL)
