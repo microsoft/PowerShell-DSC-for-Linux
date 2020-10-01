@@ -161,7 +161,7 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             cmd = kwargs.get("args")
             if cmd is None:
                 cmd = popenargs[0]
-            raise subprocess.CalledProcessError(retcode, cmd, output=output)
+            raise CalledProcessError(retcode, cmd, output=output)
         return output
 
     # Exception classes used by this module.
@@ -176,15 +176,12 @@ def RunGetOutput(cmd, no_output, chk_err=True):
             return "Command '%s' returned non-zero exit status %d" \
                    % (self.cmd, self.returncode)
 
-    subprocess.check_output = check_output
-    subprocess.CalledProcessError = CalledProcessError
     output=b''
     try:
-        output = subprocess.check_output(
-            no_output, cmd, stderr=subprocess.STDOUT, shell=True)
+        output = check_output(no_output, cmd, stderr=subprocess.STDOUT, shell=True)
         if output is None:
             output=b''
-    except subprocess.CalledProcessError as e:
+    except CalledProcessError as e:
         if chk_err:
             print('CalledProcessError.  Error Code is ' +
                   str(e.returncode), file=sys.stdout)
