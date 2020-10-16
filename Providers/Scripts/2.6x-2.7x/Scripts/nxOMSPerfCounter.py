@@ -68,7 +68,7 @@ def init_vars(WorkspaceID, HeartbeatIntervalSeconds, PerfCounterObject):
             if len(perf['PerformanceCounter'].value):
                 for perf_counter in perf['PerformanceCounter'].value:
                     new_perfs.append(perf_counter.encode('ascii', 'ignore'))
-                perf['PerformanceCounter'] = new_perfs
+            perf['PerformanceCounter'] = new_perfs
             if perf['InstanceName'].value is None:
                 perf['InstanceName'] = ''
             else:
