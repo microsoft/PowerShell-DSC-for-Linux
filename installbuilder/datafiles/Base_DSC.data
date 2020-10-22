@@ -221,7 +221,7 @@ fi
 # Only check for ctypes if python2 is installed
 if [ "$pythonVersion" = "python2" ]; then
    echo "Checking for ctypes python module..."
-   python -c "import ctypes" 1> /dev/null 2> /dev/null
+   python2 -c "import ctypes" 1> /dev/null 2> /dev/null
    cmdline_ctypes=$?
    if [ $cmdline_ctypes -ne 0 ]; then
       echo "Error: Python does not support ctypes on this system.  Please install the ctypes module for Python or upgrade to a newer version of python that comes with the ctypes module."
