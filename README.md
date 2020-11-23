@@ -43,7 +43,6 @@ Please note that
 the extensions for DSC Linux and Monitoring cannot be used
 together on the same machine.
  
-
 ## Supported Linux operating systems
 The following Linux operating system versions are supported by DSC for Linux. 
 - CentOS 5, 6, and 7 (x86/x64)
