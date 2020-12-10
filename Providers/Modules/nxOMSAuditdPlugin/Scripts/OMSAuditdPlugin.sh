@@ -479,11 +479,6 @@ case $1 in
                             exit 13
                             ;;
                     esac
-                    if [ $RET -eq 2 ]; then
-                        exit 6
-                    else
-                        exit 13
-                    fi
                 fi
             else
                 if [ $AUOMS_RESTART -eq 1 ]; then
