@@ -87,7 +87,10 @@ class Runtime(object):
                 if self.runbook.definition_kind_str == "PowerShell" and parameter["Name"]:
                     # Handle named parameters for PowerShell arriving out of order
                     cmd += ["-%s" % parameter["Name"]]
-                cmd += [str(json.loads(parameter["Value"]))]
+                try:
+                    cmd += [str(json.loads(parameter["Value"]))]
+                except:
+                    cmd += [str(parameter["Value"])]
 
         # Do not copy current process env var to the sandbox process
         env = os.environ.copy()
