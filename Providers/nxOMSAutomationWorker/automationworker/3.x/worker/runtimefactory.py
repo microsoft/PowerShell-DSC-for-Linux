@@ -4,7 +4,6 @@
 # ====================================
 
 """Runtime factory module."""
-import sys
 from runtime import *
 from workerexception import *
 
@@ -37,7 +36,6 @@ def create_runtime(job_data, runbook_data):
         So it won't work on the python2 machine so fixing that case.
     """
     if runbook_data.name == "PatchMicrosoftOMSLinuxComputer":
-        sys.modules.pop("sys")
         import sys
         if sys.version_info[0] >= 3:
             runbook_data.runbook_definition_kind = PYTHON3
