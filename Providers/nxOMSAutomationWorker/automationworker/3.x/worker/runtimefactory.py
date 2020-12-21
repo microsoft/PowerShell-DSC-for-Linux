@@ -33,7 +33,7 @@ def create_runtime(job_data, runbook_data):
     """
         Special case handling for update management.
         Currently update management runbook comes runbook kind as python2
-        So it won't work on the python2 machine so fixing that case.
+        So it won't work on the python3 only machine so fixing that case.
     """
     if runbook_data.name == "PatchMicrosoftOMSLinuxComputer":
         import sys
