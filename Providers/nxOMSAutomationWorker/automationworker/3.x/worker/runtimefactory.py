@@ -4,7 +4,6 @@
 # ====================================
 
 """Runtime factory module."""
-
 from runtime import *
 from workerexception import *
 
@@ -31,6 +30,16 @@ def create_runtime(job_data, runbook_data):
     Throws:
         UnsupportedRunbookType : If the OS or the worker doesn't support the specified runbook_definition_kind.
     """
+    """
+        Special case handling for update management.
+        Currently update management runbook comes runbook kind as python2
+        So it won't work on the python3 only machine so fixing that case.
+    """
+    if runbook_data.name == "PatchMicrosoftOMSLinuxComputer":
+        import sys
+        if sys.version_info[0] >= 3:
+            runbook_data.runbook_definition_kind = PYTHON3
+    
     runbook_definition_kind = runbook_data.runbook_definition_kind
 
     if runbook_definition_kind == PowerShell:
