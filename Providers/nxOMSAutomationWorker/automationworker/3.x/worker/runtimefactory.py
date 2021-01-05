@@ -6,6 +6,7 @@
 """Runtime factory module."""
 from runtime import *
 from workerexception import *
+import configuration3 as configuration
 
 # This has to map with JRDS : RunbookDefinitionKind enum
 PowerShell = 5
@@ -35,7 +36,7 @@ def create_runtime(job_data, runbook_data):
         Currently update management runbook comes runbook kind as python2
         So it won't work on the python3 only machine so fixing that case.
     """
-    if runbook_data.name == "PatchMicrosoftOMSLinuxComputer":
+    if runbook_data.name == "PatchMicrosoftOMSLinuxComputer" and configuration.get_worker_type() == "auto-registered":
         import sys
         if sys.version_info[0] >= 3:
             runbook_data.runbook_definition_kind = PYTHON3
