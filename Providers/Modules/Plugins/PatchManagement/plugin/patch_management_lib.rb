@@ -85,7 +85,7 @@ class LinuxUpdates
                 version = "5.0" 
             elsif  @os_major_version == "6"
                 version = "6.0"
-			elsif  @os_major_version == "7"
+            elsif  @os_major_version == "7"
                 version = "7.0"
             elsif  @os_major_version == "8"
                 version = "8.0"
@@ -99,7 +99,7 @@ class LinuxUpdates
                 version = "6.0"
             elsif  @os_major_version == "7"
                 version = "7.0"
-			elsif  @os_major_version == "8"
+            elsif  @os_major_version == "8"
                 version = "8.0"
             else
                 version = @default_version
