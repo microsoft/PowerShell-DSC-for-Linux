@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ===================================
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # See license.txt for license information.
@@ -184,8 +184,6 @@ def get_yum_updates_list(yum_pkg_info_list, Name):
         d['Version'] = d['Version'].replace('(none)', '0')  # Handle the Epoch '(none)'.
         d['Repository'] = yum_pkg_info.group(5)
         d['BuildDate'] = ''
-        if len(yum_pkg_info.groups()) == 6:  # Buildtime
-            d['BuildDate'] = time.asctime(time.gmtime(int(yum_pkg_info.group(6))))
         updates_list.append(copy.deepcopy(d))
     return updates_list
 
