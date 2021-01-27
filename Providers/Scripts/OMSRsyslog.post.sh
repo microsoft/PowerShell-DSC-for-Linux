@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ "$1" = "1" ]; then
-    if [ ! -d /etc/rsylog.d ]; then 
+    if [ ! -d /etc/rsyslog.d ]; then 
         cp --force /etc/opt/omi/conf/omsconfig/rsyslog-oms.conf /etc/rsyslog.conf
     fi
 else
