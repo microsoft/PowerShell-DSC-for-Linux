@@ -145,7 +145,9 @@ def GenerateInventoyConfContents(FeatureName, Instances, RunIntervalInSeconds, T
 <source> \n \
   type exec \n \
   tag ' + Tag + ' \n \
-  command /opt/microsoft/omsconfig/Scripts/PerformInventory.py --InMOF ' + mof_file_path + ' --OutXML ' + outputxml_path + FeatureName + '.xml > /dev/null && /opt/microsoft/omsagent/ruby/bin/ruby /opt/microsoft/omsagent/plugin/change_tracking_runner.rb ' + outputxml_path + FeatureName + '.xml \n \
+  command ((which python2 > /dev/null 2>&1 && python2 /opt/microsoft/omsconfig/Scripts/PerformInventory.py --InMOF ' + mof_file_path + ' --OutXML ' + outputxml_path + FeatureName + '.xml > /dev/null) || \
+       (which python3 > /dev/null 2>&1 && python3 /opt/microsoft/omsconfig/Scripts/python3/PerformInventory.py --InMOF ' + mof_file_path + ' --OutXML ' + outputxml_path + FeatureName + '.xml > /dev/null)) \
+            && /opt/microsoft/omsagent/ruby/bin/ruby /opt/microsoft/omsagent/plugin/change_tracking_runner.rb ' + outputxml_path + FeatureName + '.xml \n \
   format '+ Format + '\n \
   run_interval ' + str(RunIntervalInSeconds) + 's \n \
 </source> \n \
