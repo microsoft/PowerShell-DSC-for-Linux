@@ -120,7 +120,7 @@ module OMS
             end
 
             @log.info "Processed PI output"
-            @log.info process_investigator_blob
+            @log.debug process_investigator_blob
 
             return process_investigator_blob
         end # transform_and_wrap
