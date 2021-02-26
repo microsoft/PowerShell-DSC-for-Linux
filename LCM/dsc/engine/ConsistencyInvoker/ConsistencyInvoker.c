@@ -31,20 +31,15 @@ int main(int argc, char *argv[])
 
     char* dscScriptPath = malloc(strlen(DSC_SCRIPT_PATH) + 1);
     dscScriptPath = strcpy(dscScriptPath, DSC_SCRIPT_PATH);
-    
-    //if oms config check to be added
-    if(strstr(dscScriptPath, "omsconfig")!= NULL)
+
+    pythonCommand = getPythonProvider();
+
+    if(strcmp(pythonCommand, PYTHON3_COMMAND) == 0)
     {
-        pythonCommand = getPythonProvider();
-
-        if(strcmp(pythonCommand, PYTHON3_COMMAND) == 0)
-        {
-            dscScriptPath = realloc(dscScriptPath, strlen(dscScriptPath) + strlen("/python3") + 1 );
-            dscScriptPath = strcat(dscScriptPath, "/python3");
-        }
+        dscScriptPath = realloc(dscScriptPath, strlen(dscScriptPath) + strlen("/python3") + 1 );
+        dscScriptPath = strcat(dscScriptPath, "/python3");
     }
-
-
+    
     int fullCommandLength = strlen(pythonCommand) + 1 + strlen(dscScriptPath) + 1 + strlen(PYTHON_SCRIPT_NAME) + 1;
     char fullCommand[fullCommandLength];
 
@@ -59,7 +54,6 @@ int main(int argc, char *argv[])
 }
 
 
-// I may need to move this method in some file which is accessible to all other files in the project.
 char* getPythonProvider()
 {
     int buffer_length = 128;
