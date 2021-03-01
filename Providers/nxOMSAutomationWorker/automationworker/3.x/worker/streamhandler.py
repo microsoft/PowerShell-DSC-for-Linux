@@ -39,6 +39,18 @@ class StreamHandler(Thread):
         self.runtime_process = runtime_process
         self.jrds_client = jrds_client
 
+    def get_job_extended_properties(self):
+        return {
+            'accountid': str(self.job_data.account_id),
+            'accountname': str(self.job_data.account_name),
+            'trackingid': str(self.job_data.tracking_id),
+            'jobid': str(self.job_data.job_id),
+            'resourcegroup': str(self.job_data.resource_group_name),
+            'runbookname': str(self.job_data.runbook_name),
+            'subscriptionid': str(self.job_data.subscription_id),
+            'runon': str(self.job_data.run_on)
+        }
+
     def run(self):
         """Monitor the job's subprocess for output (which will be uploaded as streams).
 
@@ -104,4 +116,4 @@ class StreamHandler(Thread):
 
     def set_stream(self, stream_count, stream_type, output):
         self.jrds_client.set_stream(self.job_data.job_id, self.job_data.runbook_version_id, output.strip(),
-                                    stream_type, stream_count)
+                                    stream_type, stream_count, self.get_job_extended_properties())
