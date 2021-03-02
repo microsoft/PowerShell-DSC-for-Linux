@@ -58,6 +58,18 @@ class Job(Thread):
         self.runbook_data = None  # type: jrdsclient.RunbookData
         tracer.log_sandbox_job_created(self.job_id)
 
+    def get_job_extended_properties(self):
+        return {
+            'accountid': str(self.job_data.account_id),
+            'accountname': str(self.job_data.account_name),
+            'trackingid': str(self.job_data.tracking_id),
+            'jobid': str(self.job_data.job_id),
+            'resourcegroup': str(self.job_data.resource_group_name),
+            'runbookname': str(self.job_data.runbook_name),
+            'subscriptionid': str(self.job_data.subscription_id),
+            'runon': str(self.job_data.run_on)
+        }
+
     def load_job(self):
         """Load all required artifact for the job to be executed."""
         self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.ACTIVATING, False)
@@ -85,10 +97,10 @@ class Job(Thread):
             self.unload_job()
         except (WorkerUnsupportedRunbookType, OSUnsupportedRunbookType), e:
             tracer.log_sandbox_job_unsupported_runbook_type(self.job_id, e.message)
-            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
+            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, self.get_job_extended_properties(), exception=e.message)
             self.unload_job()
         except (InvalidRunbookSignature, GPGKeyringNotConfigured), e:
-            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, exception=e.message)
+            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, self.get_job_extended_properties(), exception=e.message)
             self.unload_job()
         except Exception:
             tracer.log_sandbox_job_unhandled_exception(self.job_id, traceback.format_exc())
@@ -111,7 +123,7 @@ class Job(Thread):
         tracer.log_etw_user_requested_start_or_resume(self.job_data.account_id, self.sandbox_id, self.job_data.job_id,
                                                       self.runbook_data.name, self.job_data.account_name,
                                                       time_taken_to_start_in_seconds, self.runbook.definition_kind_str)
-        self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.RUNNING, False)
+        self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.RUNNING, False, self.get_job_extended_properties())
 
         # create runbook subprocess
         self.runtime.start_runbook_subprocess()
@@ -137,20 +149,19 @@ class Job(Thread):
 
         # handle terminal state changes
         if pending_action == pendingactions.STOP_ENUM_INDEX:
-            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.STOPPED, True)
+            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.STOPPED, True, self.get_job_extended_properties())
             tracer.log_etw_job_status_changed_stopped(self.job_data.subscription_id, self.job_data.account_id,
                                                       self.job_data.account_name, self.sandbox_id, self.job_data.job_id,
                                                       self.runbook.definition_kind_str, self.runbook_data.name)
         elif self.runtime.runbook_subprocess.poll() is not None and self.runtime.runbook_subprocess.poll() == EXIT_SUCCESS:
-            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.COMPLETED, True)
+            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.COMPLETED, True, self.get_job_extended_properties())
             tracer.log_etw_job_status_changed_completed(self.job_data.subscription_id, self.job_data.account_id,
                                                         self.job_data.account_name, self.sandbox_id,
                                                         self.job_data.job_id, self.runbook.definition_kind_str,
                                                         self.runbook_data.name)
         else:
             full_error_output = self.get_full_stderr_content(self.runtime.runbook_subprocess.stderr)
-            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True,
-                                            exception=full_error_output)
+            self.jrds_client.set_job_status(self.sandbox_id, self.job_id, jobstatus.FAILED, True, self.get_job_extended_properties(), exception=full_error_output)
             tracer.log_etw_job_status_changed_failed(self.job_data.subscription_id, self.job_data.account_id,
                                                      self.job_data.account_name, self.sandbox_id, self.job_id,
                                                      self.runbook.definition_kind_str, self.runbook_data.name,
