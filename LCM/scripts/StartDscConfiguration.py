@@ -190,7 +190,7 @@ def main(argv):
                     sleep(60)
 
             if dschostlock_acquired:
-                p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                p = subprocess.Popen(host_parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = p.communicate()
                 print(stdout)
             else:
@@ -203,7 +203,7 @@ def main(argv):
                 # Close dsc host lock file handle
                 dschostlock_filehandle.close()
     else:
-        p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(host_parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
 
     print(stdout)

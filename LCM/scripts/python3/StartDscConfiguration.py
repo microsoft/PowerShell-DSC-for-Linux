@@ -121,8 +121,7 @@ def main(argv):
         configurationData.append(str(ord(char)))
 
     # # OMI CLI location
-    omiBinDir = "<CONFIG_BINDIR>"
-    omiCliPath = omiBinDir + "/omicli"
+    omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
     dsc_host_base_path = helperlib.DSC_HOST_BASE_PATH
     dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
     dsc_host_output_path = join(dsc_host_base_path, 'output')
@@ -148,7 +147,7 @@ def main(argv):
         if parsedArguments.force:
             host_parameters.append("force")
     else:
-        host_parameters.append(omiCliPath)
+        host_parameters.append(omicli_path)
         host_parameters.append("iv")
         host_parameters.append("<DSC_NAMESPACE>")
         host_parameters.append("{")
@@ -210,7 +209,7 @@ def main(argv):
                 # Close dsc host lock file handle
                 dschostlock_filehandle.close()
     else:
-        p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(host_parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
 
     stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
