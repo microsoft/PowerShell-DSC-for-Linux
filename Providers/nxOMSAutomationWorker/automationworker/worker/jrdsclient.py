@@ -58,7 +58,8 @@ class JRDSClient:
                     "ConnectionEndpoint": "",
                     "ConnectionPort": 0,
                     "SandboxCookie": "nQwdpZ3MK5s=",
-                    "CredentialName": null
+                    "CredentialName": null,
+                    "MSISecret": "NullableMSISecret"
                 }
             ]
         """

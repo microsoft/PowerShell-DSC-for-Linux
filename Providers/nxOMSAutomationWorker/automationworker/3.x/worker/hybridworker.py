@@ -186,6 +186,13 @@ class Worker(object):
         if proxy_conf_path != configuration.DEFAULT_PROXY_CONFIGURATION_PATH and os.path.isfile(proxy_conf_path):
             if util.assert_file_read_permission(proxy_conf_path) is False:
                 raise InvalidFilePermissionException(proxy_conf_path)
+    
+
+    @staticmethod
+    def construct_jrds_msi_endpoint(sandbox_id):
+        url = configuration.get_jrds_base_uri() + "/automationAccounts/" + configuration.get_account_id() + \
+              "/Sandboxes/" + sandbox_id + "/metadata/identity/oauth2/token"
+        return url
 
     @safe_loop
     def routine(self):
@@ -220,6 +227,13 @@ class Worker(object):
             # copy current process env variable (contains configuration) and add the sanbox_id key
             process_env_variables = os.environ.copy()
             process_env_variables["sandbox_id"] = sandbox_id
+
+            msi_secret = str(action["MSISecret"])
+
+            if (msi_secret and msi_secret != "None"):
+                process_env_variables["MSI_SECRET"] = msi_secret
+                process_env_variables["MSI_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
+
 
             python_to_be_used = util.get_python_to_be_used()
 
