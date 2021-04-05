@@ -21,8 +21,7 @@ pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
 
-omi_bindir = "<CONFIG_BINDIR>"
-omicli_path = omi_bindir + "/omicli"
+omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
 dsc_host_base_path = helperlib.DSC_HOST_BASE_PATH
 dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
 dsc_host_output_path = join(dsc_host_base_path, 'output')

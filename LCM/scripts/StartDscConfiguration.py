@@ -115,8 +115,7 @@ def main(argv):
         configurationData.append(str(ord(char)))
 
     # # OMI CLI location
-    omiBinDir = "<CONFIG_BINDIR>"
-    omiCliPath = omiBinDir + "/omicli"
+    omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
     dsc_host_base_path = helperlib.DSC_HOST_BASE_PATH
     dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
     dsc_host_output_path = join(dsc_host_base_path, 'output')
