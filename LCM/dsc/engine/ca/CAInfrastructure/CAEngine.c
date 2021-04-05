@@ -1300,6 +1300,11 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
         }
 
         r = Exec_WMIv2Provider(provContext, miApp, miSession, instance, regInstance, flags, resultStatus, canceled, resourceErrorList, extendedError);
+        
+        if (r == MI_RESULT_OK)
+        {
+            return r;
+        }
     }
 #if defined(BUILD_OMS)
     else
