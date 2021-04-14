@@ -5,11 +5,15 @@ with warnings.catch_warnings():
     from imp        import load_source
 from os.path    import dirname, join, realpath, isfile
 from subprocess import PIPE, Popen
-from sys        import exc_info, exit, version_info
+from sys        import exc_info, exit, version_info, argv
 from traceback  import format_exc
 from fcntl      import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time       import sleep
+import sys
+
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -115,4 +119,6 @@ def run_perform_required_configuration_checks():
     print(stdout)
 
 if __name__ == "__main__":
+    LG().Log("DEBUG", "Starting Main method for " + argv[0])
     main()
+    LG().Log("DEBUG", "End of Main method for " +  argv[0])

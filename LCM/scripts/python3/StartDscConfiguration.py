@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Standard library imports
+import sys
 from subprocess           import Popen, PIPE
 from sys                  import argv
 import warnings
@@ -14,6 +15,9 @@ from time                 import sleep
 import subprocess
 import codecs 
 
+
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -217,4 +221,6 @@ def main(argv):
     print(stdout)   
     print(stderr)
 
+LG().Log("DEBUG", "Starting Main method for " + argv[0])
 main(argv[1:])
+LG().Log("DEBUG", "End of Main method for " +  argv[0])

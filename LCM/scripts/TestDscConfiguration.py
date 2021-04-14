@@ -7,6 +7,10 @@ from imp                  import load_source
 from os.path              import dirname, isfile, join, realpath
 from time                 import sleep
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
+from sys                  import argv
+
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -20,6 +24,8 @@ dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
 dsc_host_output_path = join(dsc_host_base_path, 'output')
 dsc_host_lock_path = join(dsc_host_base_path, 'dsc_host_lock')
 dsc_host_switch_path = join(dsc_host_base_path, 'dsc_host_ready')
+
+LG().Log("DEBUG", "Starting script logic for " + argv[0])
 
 if ("omsconfig" in helperlib.DSC_SCRIPT_PATH):
     write_omsconfig_host_switch_event(pathToCurrentScript, isfile(dsc_host_switch_path))
@@ -96,4 +102,4 @@ else:
 print(stdout)
 print(stderr)
 
-
+LG().Log("DEBUG", "End of script logic for " +  argv[0])

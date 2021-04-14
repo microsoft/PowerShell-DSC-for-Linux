@@ -8,6 +8,10 @@ from os.path              import dirname, isfile, join, realpath
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
+import sys
+
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -141,7 +145,7 @@ def main(argv):
         if parsedArguments.force:
             host_parameters.append("force")
     else:
-        host_parameters.append(omiCliPath)
+        host_parameters.append(omicli_path)
         host_parameters.append("iv")
         host_parameters.append("<DSC_NAMESPACE>")
         host_parameters.append("{")
@@ -202,10 +206,12 @@ def main(argv):
                 # Close dsc host lock file handle
                 dschostlock_filehandle.close()
     else:
-        p = subprocess.Popen(host_parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = Popen(host_parameters, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
 
     print(stdout)
     print(stderr)
 
+LG().Log("DEBUG", "Starting Main method for " + argv[0])
 main(argv[1:])
+LG().Log("DEBUG", "End of Main method for " +  argv[0])

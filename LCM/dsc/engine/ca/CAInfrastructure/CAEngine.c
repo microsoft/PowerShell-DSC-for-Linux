@@ -1286,10 +1286,10 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
     if (
 #if defined(BUILD_OMS)
         g_DscHost == MI_FALSE ||
-        Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
 #else
         Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
 #endif
+        Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0
         )
     {

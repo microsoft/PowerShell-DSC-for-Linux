@@ -8,7 +8,11 @@ import warnings
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=DeprecationWarning)
     import imp
-from os.path import dirname, join, realpath
+from os.path    import dirname, join, realpath
+from sys        import argv
+
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)

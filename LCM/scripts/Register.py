@@ -4,6 +4,7 @@ import os
 import os.path
 import tempfile
 import shutil
+from sys                  import argv
 
 def usage():
    print("""Usage: Register.py [OPTIONS]
@@ -17,6 +18,12 @@ OPTIONS (case insensitive):
  --RefreshMode (Pull|Push)                                           default=Pull
  --Help
 """)
+
+
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
+
+LG().Log("DEBUG", "Starting script logic for " + argv[0])
 
 # Apply a DSC meta configuration based on a template
 Variables = dict()
@@ -217,3 +224,5 @@ if RegenerateCert == True:
 os.system("<DSC_SCRIPT_PATH>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
 shutil.rmtree(tempdir)
+
+LG().Log("DEBUG", "End of script logic for " +  argv[0])

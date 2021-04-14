@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 import glob
 import os.path
+import sys
+from sys                  import argv
+
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 
 omi_libdir = "<DSC_SCRIPT_PATH>"
 
 script_dirs=[omi_libdir + "/2.4x-2.5x/Scripts",
              omi_libdir + "/2.6x-2.7x/Scripts",
              omi_libdir + "/3.x/Scripts"]
+
+LG().Log("DEBUG", "Starting script logic for " + argv[0])
 
 for current_dir in script_dirs:
     out_init = "__all__="
@@ -26,3 +33,4 @@ for current_dir in script_dirs:
     out_init = out_init + str(py_files_basename)
     open(current_dir + "/__init__.py", "w").write(out_init)
         
+LG().Log("DEBUG", "End of script logic for " +  argv[0])

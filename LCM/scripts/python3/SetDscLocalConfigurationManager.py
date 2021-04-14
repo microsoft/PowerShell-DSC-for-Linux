@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import warnings
+import sys
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=DeprecationWarning)
     from imp                  import load_source
@@ -11,6 +12,9 @@ from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig_host_switch_event, write_omsconfig_host_log, stop_old_host_instances
 from time                 import sleep
 import codecs 
+
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -159,4 +163,6 @@ def apply_meta_config(args):
         fileHandle.close()
 
 if __name__ == "__main__":
+    LG().Log("DEBUG", "Starting Main method for " + argv[0])
     main(argv)
+    LG().Log("DEBUG", "End of Main method for " +  argv[0])
