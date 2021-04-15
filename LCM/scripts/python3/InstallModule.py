@@ -370,6 +370,6 @@ def main(args):
     regenerateDscPythonScriptInitFiles()
 
 if __name__ == "__main__":
-    LG().Log("DEBUG", "Starting Main method for " + argv[0])
+    LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info.major))
     main(sys.argv[1:])
-    LG().Log("DEBUG", "End of Main method for " +  argv[0])
+    LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info.major))

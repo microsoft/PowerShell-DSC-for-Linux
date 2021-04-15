@@ -212,6 +212,6 @@ def main(argv):
     print(stdout)
     print(stderr)
 
-LG().Log("DEBUG", "Starting Main method for " + argv[0])
+LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info.major))
 main(argv[1:])
-LG().Log("DEBUG", "End of Main method for " +  argv[0])
+LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info.major))

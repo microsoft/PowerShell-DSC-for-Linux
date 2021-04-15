@@ -23,7 +23,7 @@ OPTIONS (case insensitive):
 nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
-LG().Log("DEBUG", "Starting script logic for " + argv[0])
+LG().Log("DEBUG", "Starting script logic for " + argv[0]+ " runing with python " + str(sys.version_info.major))
 
 # Apply a DSC meta configuration based on a template
 Variables = dict()
@@ -225,4 +225,4 @@ os.system("<DSC_SCRIPT_PATH>/SetDscLocalConfigurationManager.py -configurationmo
 
 shutil.rmtree(tempdir)
 
-LG().Log("DEBUG", "End of script logic for " +  argv[0])
+LG().Log("DEBUG", "End of script logic for " +  argv[0] + " runing with python " + str(sys.version_info.major))

@@ -175,6 +175,6 @@ def signal_handler(signalNumber, frame):
 if __name__ == "__main__":
     # register the SIGTERM handler
     signal.signal(signal.SIGTERM, signal_handler)
-    LG().Log("DEBUG", "Starting Main method for " + argv[0])
+    LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info.major))
     main(argv)
-    LG().Log("DEBUG", "End of Main method for " +  argv[0])
+    LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info.major))

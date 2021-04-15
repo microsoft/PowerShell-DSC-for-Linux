@@ -22,7 +22,7 @@ OPTIONS (case insensitive):
  --Help
 """)
 
-LG().Log("DEBUG", "Starting script logic for " + argv[0])
+LG().Log("DEBUG", "Starting script logic for " + argv[0]+ " runing with python " + str(sys.version_info.major))
 
 # Apply a DSC meta configuration based on a template
 Variables = dict()
@@ -223,4 +223,4 @@ if RegenerateCert == True:
 os.system("<DSC_SCRIPT_PATH>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
 shutil.rmtree(tempdir)
-LG().Log("DEBUG", "End of script logic for " +  argv[0])
+LG().Log("DEBUG", "End of script logic for " +  argv[0] + " runing with python " + str(sys.version_info.major))
