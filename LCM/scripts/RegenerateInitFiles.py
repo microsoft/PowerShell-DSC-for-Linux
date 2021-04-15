@@ -8,7 +8,6 @@ script_dirs=[omi_libdir + "/2.4x-2.5x/Scripts",
              omi_libdir + "/2.6x-2.7x/Scripts",
              omi_libdir + "/3.x/Scripts"]
 
-LG().Log("DEBUG", "Starting script logic for " + argv[0]+ " runing with python " + str(sys.version_info.major))
 
 for current_dir in script_dirs:
     out_init = "__all__="
