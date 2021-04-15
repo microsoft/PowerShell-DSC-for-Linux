@@ -10,10 +10,6 @@ import subprocess
 import sys
 import platform
 from os.path import basename, dirname, join, realpath, split
-from sys                  import argv
-
-nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
-LG = nxDSCLog.DSCLog
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
@@ -370,6 +366,4 @@ def main(args):
     regenerateDscPythonScriptInitFiles()
 
 if __name__ == "__main__":
-    LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info.major))
     main(sys.argv[1:])
-    LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info.major))
