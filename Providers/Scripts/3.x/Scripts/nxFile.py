@@ -431,16 +431,19 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
                     src_hash.update(src_block)
                     dest_hash.update(dest_block)
                     if src_hash.hexdigest() != dest_hash.hexdigest():
+                        LG().Log('ERROR', "Exception comparing destination file using hexdigest : " + DestinationPath)
                         return -1
         if src_hash.hexdigest() == dest_hash.hexdigest():
             return 0
     elif Checksum == "ctime":
         if stat_src.st_ctime != stat_dest.st_ctime:
+            LG().Log('ERROR', "Exception comparing destination file using st_ctime : " + DestinationPath)
             return -1
         else:
             return 0
     elif Checksum == "mtime":
         if stat_src.st_mtime != stat_dest.st_mtime:
+            LG().Log('ERROR', "Exception comparing destination file using st_mtime : " + DestinationPath)
             return -1
         else:
             return 0
