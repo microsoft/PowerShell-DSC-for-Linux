@@ -1,11 +1,6 @@
 #!/usr/bin/python
 import glob
 import os.path
-import sys
-from sys                  import argv
-
-nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
-LG = nxDSCLog.DSCLog
 
 omi_libdir = "<DSC_SCRIPT_PATH>"
 
@@ -32,5 +27,3 @@ for current_dir in script_dirs:
 
     out_init = out_init + str(py_files_basename)
     open(current_dir + "/__init__.py", "w").write(out_init)
-        
-LG().Log("DEBUG", "End of script logic for " +  argv[0] + " runing with python " + str(sys.version_info.major))
