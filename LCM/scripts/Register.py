@@ -4,7 +4,8 @@ import os
 import os.path
 import tempfile
 import shutil
-from sys                  import argv
+from sys                import argv
+from imp                import load_source
 
 def usage():
    print("""Usage: Register.py [OPTIONS]

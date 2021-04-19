@@ -5,6 +5,9 @@ import os.path
 import tempfile
 import shutil
 from sys                  import argv
+with warnings.catch_warnings():
+   warnings.filterwarnings("ignore",category=DeprecationWarning)
+   from imp        import load_source
 
 nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
 LG = nxDSCLog.DSCLog

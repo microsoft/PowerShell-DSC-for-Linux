@@ -7,6 +7,7 @@ import platform
 import imp
 from os.path import dirname, join, realpath
 from sys                  import argv
+from imp        import load_source
 
 nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
 LG = nxDSCLog.DSCLog
