@@ -59,7 +59,8 @@ class JRDSClient(object):
                     "ConnectionEndpoint": "",
                     "ConnectionPort": 0,
                     "SandboxCookie": "nQwdpZ3MK5s=",
-                    "CredentialName": null
+                    "CredentialName": null,
+                    "MSISecret": "NullableMSISecret"
                 }
             ]
         """
@@ -298,7 +299,7 @@ class JRDSClient(object):
 
         raise Exception("Unable to acknowledge job action. [status=" + str(response.status_code) + "]")
 
-    def set_job_status(self, sandbox_id, job_id, job_status, is_terminal, exception=None):
+    def set_job_status(self, sandbox_id, job_id, job_status, is_terminal, extended_property=None,exception=None):
         """Set the job status of the given job id (and exception if needed).
 
         Args:
@@ -308,9 +309,12 @@ class JRDSClient(object):
             is_terminal : boolean   , is the job status terminal value.
             exception   : string    , the exception details (optional).
         """
-        payload = {'exception': exception,
-                   'isFinalStatus': is_terminal,
-                   'jobStatus': job_status}
+        payload = {
+            'exception': exception,
+            'isFinalStatus': is_terminal,
+            'jobStatus': job_status,
+            'extendedProperty': extended_property
+        }
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/Sandboxes/" + sandbox_id + "/jobs/" + \
               job_id + "/changeStatus?api-version=" + self.protocol_version
@@ -321,7 +325,7 @@ class JRDSClient(object):
 
         raise Exception("Unable to set job status. [status=" + str(response.status_code) + "]")
 
-    def set_stream(self, job_id, runbook_version_id, stream_text, stream_type, sequence_number):
+    def set_stream(self, job_id, runbook_version_id, stream_text, stream_type, sequence_number, extended_property):
         """Set the streams for the given job id.
 
         Args:
@@ -331,14 +335,17 @@ class JRDSClient(object):
             stream_type         : string, the stream type (Progress, Output, Warning, Error, Debug, Verbose, Any).
             sequence_number     : int   , the stream index in sequence.
         """
-        payload = {'AccountId': self.account_id,
-                   'JobId': job_id,
-                   'RecordTime': datetime.now().isoformat(),
-                   'RunbookVersionId': runbook_version_id,
-                   'SequenceNumber': sequence_number,
-                   'StreamRecord': None,
-                   'StreamRecordText': stream_text,
-                   'Type': stream_type}
+        payload = {
+            'AccountId': self.account_id,
+            'JobId': job_id,
+            'RecordTime': datetime.now().isoformat(),
+            'RunbookVersionId': runbook_version_id,
+            'SequenceNumber': sequence_number,
+            'StreamRecord': None,
+            'StreamRecordText': stream_text,
+            'Type': stream_type,
+            'extendedProperty': extended_property
+        }
         headers = {"Content-Type": "application/json"}
         url = self.base_uri + "/automationAccounts/" + self.account_id + "/jobs/" + job_id + \
               "/postJobStream?api-version=" + self.protocol_version
@@ -574,6 +581,8 @@ class JobData(object):
         self.tier_name = deserialized_response["tierName"]
         self.account_name = deserialized_response["accountName"]
         self.trigger_source = deserialized_response["triggerSource"]
+        self.resource_group_name = deserialized_response["resourceGroupName"]
+        self.runbook_name = deserialized_response["runbookName"]
 
 
 class JobUpdatableData(object):
