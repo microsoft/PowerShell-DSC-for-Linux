@@ -6,6 +6,7 @@ import tempfile
 import shutil
 from sys                import argv
 from imp                import load_source
+from os.path import dirname, join, realpath
 
 def usage():
    print("""Usage: Register.py [OPTIONS]
@@ -21,7 +22,11 @@ OPTIONS (case insensitive):
 """)
 
 
-nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', DSCLogPath)
 LG = nxDSCLog.DSCLog
 
 LG().Log("DEBUG", "Starting script logic for " + argv[0]+ " runing with python " + str(sys.version_info.major))

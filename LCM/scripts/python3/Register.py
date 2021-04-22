@@ -5,12 +5,18 @@ import os.path
 import tempfile
 import shutil
 from sys                  import argv
+from os.path import dirname, join, realpath
 with warnings.catch_warnings():
    warnings.filterwarnings("ignore",category=DeprecationWarning)
    from imp        import load_source
 
-nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', DSCLogPath)
 LG = nxDSCLog.DSCLog
+
 
 def usage():
    print("""Usage: Register.py [OPTIONS]
