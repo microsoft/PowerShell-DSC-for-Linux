@@ -20,7 +20,7 @@ pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
 DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
-nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', DSCLogPath)
 LG = nxDSCLog.DSCLog
 
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
