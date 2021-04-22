@@ -13,11 +13,12 @@ from OmsConfigHostHelpers import write_omsconfig_host_telemetry, write_omsconfig
 from time                 import sleep
 import codecs 
 
-nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
-LG = nxDSCLog.DSCLog
-
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)

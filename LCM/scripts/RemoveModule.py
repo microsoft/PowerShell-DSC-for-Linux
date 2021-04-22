@@ -9,12 +9,13 @@ from os.path import dirname, join, realpath
 from sys                  import argv
 from imp        import load_source
 
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
 nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
 LG = nxDSCLog.DSCLog
 
-
-pathToCurrentScript = realpath(__file__)
-pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = imp.load_source('helperlib', helperLibPath)
 fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')

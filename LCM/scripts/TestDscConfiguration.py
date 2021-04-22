@@ -9,12 +9,12 @@ from time                 import sleep
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from sys                  import argv
 
-nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
-LG = nxDSCLog.DSCLog
-
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
 
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', 'nxDSCLog.py')
+LG = nxDSCLog.DSCLog
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
 
