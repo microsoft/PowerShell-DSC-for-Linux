@@ -6,6 +6,7 @@ import tempfile
 import shutil
 from sys                  import argv
 from os.path import dirname, join, realpath
+import warnings
 with warnings.catch_warnings():
    warnings.filterwarnings("ignore",category=DeprecationWarning)
    from imp        import load_source
