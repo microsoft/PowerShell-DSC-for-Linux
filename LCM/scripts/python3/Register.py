@@ -230,7 +230,7 @@ if RegenerateCert == True:
    os.system("openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " + OAAS_KEYPATH + "_old -out " + OAAS_CERTPATH + " && openssl rsa -in " +  OAAS_KEYPATH + "_old -out " + OAAS_KEYPATH + " && rm -f " +  OAAS_KEYPATH + "_old");
    os.system("openssl x509 -noout -in " + OAAS_CERTPATH + " -fingerprint | sed 's/^.*=//' > " + OAAS_THUMBPRINT);
 
-os.system("<DSC_SCRIPT_PATH>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
+os.system("<DSC_SCRIPT_PATH>/python3/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
 shutil.rmtree(tempdir)
 LG().Log("DEBUG", "End of script logic for " +  argv[0] + " runing with python " + str(sys.version_info.major))
