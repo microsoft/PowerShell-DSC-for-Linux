@@ -1,0 +1,614 @@
+%Variables
+SHELL_HEADER: '#!/bin/sh'
+SHORT_NAME_PREFIX: 'MSFT'
+VENDOR: 'MSFT'
+GROUP: 'MSFT'
+LICENSE: 'MSFT'
+MAINTAINER: 'Microsoft'
+COPYRIGHT_FILE: 'Copyright Microsoft'
+SHLIB_EXT: 'so'
+
+%Files
+/opt/microsoft/${{SHORT_NAME}}/mof/OMI_BaseResourceUE.mof; LCM/dsc/mof/OMI_BaseResourceUE.mof; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_DSCMetaConfiguration.mof; LCM/dsc/mof/MSFT_DSCMetaConfiguration.mof; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.registration.mof; LCM/dsc/mof/MSFT_LogResource.registration.mof; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.schema.mof; LCM/dsc/mof/MSFT_LogResource.schema.mof; 755; ${{RUN_AS_USER}}; root
+/etc/opt/omi/conf/${{SHORT_NAME}}/dsc.conf; Providers/Extras/Scripts/base_dsc.conf; 755; ${{RUN_AS_USER}}; root
+
+/opt/microsoft/${{SHORT_NAME}}/Scripts/client.py; intermediate/Scripts/client.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/nxDSCLog.py; intermediate/Scripts/nxDSCLog.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/zipfile2.6.py; intermediate/Scripts/zipfile2.6.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/OmsConfigHostHelpers.py; intermediate/Scripts/OmsConfigHostHelpers.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/StartDscConfiguration.py; intermediate/Scripts/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/TestDscConfiguration.py; intermediate/Scripts/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscConfiguration.py; intermediate/Scripts/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/PerformInventory.py; intermediate/Scripts/PerformInventory.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/SetDscLocalConfigurationManager.py; intermediate/Scripts/SetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/GetDscLocalConfigurationManager.py; intermediate/Scripts/GetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/PerformRequiredConfigurationChecks.py; intermediate/Scripts/PerformRequiredConfigurationChecks.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/OperationStatusUtility.py; intermediate/Scripts/OperationStatusUtility.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/RestoreConfiguration.py; intermediate/Scripts/RestoreConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/InstallModule.py; intermediate/Scripts/InstallModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py; intermediate/Scripts/RemoveModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/RegenerateInitFiles.py; intermediate/Scripts/RegenerateInitFiles.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/RegisterHelper.sh; intermediate/Scripts/RegisterHelper.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/Register.py; intermediate/Scripts/Register.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/StatusReport.sh; intermediate/Scripts/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh; intermediate/Scripts/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/calcPythonPath.sh; intermediate/Scripts/calcPythonPath.sh; 755; ${{RUN_AS_USER}}; root
+
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/client.py; intermediate/Scripts/client.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/protocol.py; intermediate/Scripts/protocol.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/nxDSCLog.py; intermediate/Scripts/nxDSCLog.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/zipfile2.6.py; intermediate/Scripts/zipfile2.6.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/OmsConfigHostHelpers.py; intermediate/Scripts/python3/OmsConfigHostHelpers.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/StartDscConfiguration.py; intermediate/Scripts/python3/StartDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/TestDscConfiguration.py; intermediate/Scripts/python3/TestDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/GetDscConfiguration.py; intermediate/Scripts/python3/GetDscConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/PerformInventory.py; intermediate/Scripts/python3/PerformInventory.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/SetDscLocalConfigurationManager.py; intermediate/Scripts/python3/SetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/GetDscLocalConfigurationManager.py; intermediate/Scripts/python3/GetDscLocalConfigurationManager.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/PerformRequiredConfigurationChecks.py; intermediate/Scripts/python3/PerformRequiredConfigurationChecks.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/OperationStatusUtility.py; intermediate/Scripts/python3/OperationStatusUtility.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RestoreConfiguration.py; intermediate/Scripts/python3/RestoreConfiguration.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/InstallModule.py; intermediate/Scripts/python3/InstallModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RemoveModule.py; intermediate/Scripts/python3/RemoveModule.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RegenerateInitFiles.py; intermediate/Scripts/python3/RegenerateInitFiles.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RegisterHelper.sh; intermediate/Scripts/python3/RegisterHelper.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/Register.py; intermediate/Scripts/python3/Register.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/StatusReport.sh; intermediate/Scripts/python3/StatusReport.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/helperlib.py; intermediate/Scripts/helperlib.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3/ImportGPGKey.sh; intermediate/Scripts/python3/ImportGPGKey.sh; 755; ${{RUN_AS_USER}}; root
+
+#if BUILD_OMS == 1
+
+/opt/microsoft/omsconfig/etc/logrotate.conf; Providers/Extras/Scripts/omsconfig_logrotate.conf; 644; root; root
+/opt/microsoft/omsconfig/bin/OMSConsistencyInvoker; omi-1.0.8/output/bin/OMSConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/etc/Inventory.mof; LCM/Base_Inventory.mof; 644; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/lib/libomsconfig.so; omi-1.0.8/output/lib/libomsconfig.so; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/etc/omsconfig.reg; LCM/omsconfig.reg; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/OMSRsyslog.post.sh; intermediate/Scripts/OMSRsyslog.post.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSSysklog.post.sh; intermediate/Scripts/OMSSysklog.post.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSSyslog-ng.post.sh; intermediate/Scripts/OMSSyslog-ng.post.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSServiceStat.sh; intermediate/Scripts/OMSServiceStat.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSServiceStatAll.sh; intermediate/Scripts/OMSServiceStatAll.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh; intermediate/Scripts/OMSYumUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh; intermediate/Scripts/OMSZypperUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh; intermediate/Scripts/OMSAptUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh; intermediate/Scripts/NPMAgentBinaryCap.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh; intermediate/Scripts/OMSAuditdPlugin.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/Scripts/python3/OMS_MetaConfigHelper.py; intermediate/Scripts/python3/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nx_1.1.zip; release/nx_1.1.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.3.zip; release/nxOMSPerfCounter_2.3.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.5.zip; release/nxOMSSyslog_2.5.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip; release/nxOMSSudoCustomLog_2.7.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip; release/nxOMSKeyMgmt_1.0.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc; LCM/keys/dscgpgkey.asc; 644; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc; LCM/keys/msgpgkey.asc; 644; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxFileInventory_1.4.zip; release/nxFileInventory_1.4.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip; release/nxOMSGenerateInventoryMof_1.5.zip; 755; ${{RUN_AS_USER}}; root
+
+#if PFARCH == x86
+/opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip; release/nxOMSAgentNPMConfig_2.2.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip; release/nxOMSAuditdPlugin_1.7.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip; release/nxOMSAutomationWorker_1.6.9.1.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip; release/nxOMSContainers_1.0.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip; release/nxOMSGenerateInventoryMof_1.5.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.58.zip; release/nxOMSPlugin_3.58.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip; release/nxOMSWLI_1.46.zip; 755; ${{RUN_AS_USER}}; root
+#endif
+
+/opt/dsc/bin/dsc_host; omi-1.0.8/output/bin/dsc_host; 755; ${{RUN_AS_USER}}; root
+
+#else
+
+/opt/microsoft/${{SHORT_NAME}}/bin/omi_preexec.sh; intermediate/Scripts/omi_preexec.sh; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/etc/logrotate.conf; Providers/Extras/Scripts/logrotate.conf; 644; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg; LCM/dsccore.reg; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/bin/ConsistencyInvoker; omi-1.0.8/output/bin/ConsistencyInvoker; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/lib/libdsccore.so; omi-1.0.8/output/lib/libdsccore.so; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/module_packages/nx_1.1.zip; release/nx_1.1.zip; 755; ${{RUN_AS_USER}}; root
+
+
+#endif
+
+
+%Directories
+/opt/microsoft;                                           755; root; root; sysdir
+/opt/microsoft/${{SHORT_NAME}};                           755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/etc;                       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/mof;                       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/lib;                       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/bin;                       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/modules;                   755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/module_packages;           755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/keys;                      755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts;                   755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/python3;                 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x;         755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x/Scripts; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x;         755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x;               755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts;       755; ${{RUN_AS_USER}}; root
+/etc/opt/omi/conf;                                        755; root; root; sysdir
+/etc/opt/omi/conf/${{SHORT_NAME}};                        755; ${{RUN_AS_USER}}; root
+/etc/logrotate.d;                                         755; root; root; sysdir
+
+#if BUILD_OMS == 1
+/etc/opt/microsoft/omsagent/conf/omsagent.d; 755; ${{RUN_AS_USER}}; root; sysdir
+/opt/dsc; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/bin; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/lib; 755; ${{RUN_AS_USER}}; root
+/opt/dsc/output; 755; ${{RUN_AS_USER}}; root
+#endif
+
+%Links
+/etc/logrotate.d/${{SHORT_NAME}}; /opt/microsoft/${{SHORT_NAME}}/etc/logrotate.conf; 644; root; root
+
+%Dependencies
+#if BUILD_OMS == 1
+
+#if PACKAGE_TYPE == RPM
+omsagent >= 1.0.0
+#else
+omsagent (>= 1.0.0)
+#endif
+
+#else
+
+#if PACKAGE_TYPE == RPM
+omi >= 1.0.8-6
+#else
+omi (>= 1.0.8.6)
+#endif
+
+#endif
+
+%Preinstall_10
+PREREQ_ERROR=0
+
+LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
+if [ -z "$LIBCURL_SO" ]; then
+   echo "Error: Please install curl."
+   PREREQ_ERROR=1
+fi
+
+#if BUILD_OMS != 1
+# test if able to perform an hmac sha256 hash
+hmacSHA256=`echo -n "TestPlaintext" | openssl dgst -binary -sha256 -hmac "mykey"`
+if [ $? -ne 0 ]; then
+   echo "Error: Unable to perform a SHA256 HMAC operation.  Please install a more recent version of OpenSSL that supports this operation."
+   PREREQ_ERROR=1
+   exit 1
+fi
+
+base64hmac=`echo -n "TestPlaintext" | openssl dgst -binary -sha256 -hmac "mykey" | openssl enc -base64 | tr -d "\n"`
+if [ "$base64hmac" != "C9eHLPTYnXyrYXLzmMsya2FWfCFNRlaq75stOI2wbLw=" ]; then
+    echo "Error: The SHA256 HMAC operation did not create proper output on this system.  Please ensure that your openssl libraries are working properly (you may need to reinstall or upgrade them) and then reinstall this agent."
+    PREREQ_ERROR=1
+    exit 1
+fi
+#else
+
+# test for availablity of gpg
+which gpg 1> /dev/null 2> /dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: gpg needs to be installed and available in PATH"
+    PREREQ_ERROR=1
+fi
+
+if [ $PREREQ_ERROR -eq 1 ]; then
+    exit 1
+fi
+#endif
+
+%Preinstall_200
+# pythonVersion check must be repeated for each section
+if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python2"
+  pythonVersion="python2"
+elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python3"
+  pythonVersion="python3"
+else
+  echo "Python not found."
+fi
+# Only check for ctypes if python2 is installed
+if [ "$pythonVersion" = "python2" ]; then
+   echo "Checking for ctypes python module..."
+   python2 -c "import ctypes" 1> /dev/null 2> /dev/null
+   cmdline_ctypes=$?
+   if [ $cmdline_ctypes -ne 0 ]; then
+      echo "Error: Python does not support ctypes on this system.  Please install the ctypes module for Python or upgrade to a newer version of python that comes with the ctypes module."
+      echo "Please remove the omi package and try again after installing the ctypes module or upgrading Python.  You can check if the ctypes module is installed by starting python and running the command: 'import ctypes'"
+      exit 1
+   fi
+fi
+
+%Preinstall_300
+echo "Cleanning up existing dsc_hosts..."
+kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1) -9 2&>1 > /dev/null
+chmod -R 777 /opt/dsc
+rm -rfv /opt/dsc
+rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
+echo "Cleaned up existing dsc_hosts..."
+
+%Postinstall_10
+OMI_HOME=/opt/omi
+OMI_REGISTER_DIR=/etc/opt/omi/conf/omiregister/
+CONFIG_SYSCONFDIR=/etc/opt/omi/conf
+CONFIG_DATADIR=$OMI_HOME/share
+OMI_LIB=$OMI_HOME/lib
+
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/InventoryReports
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema/MSFT_LogResource
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/baseregistration
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration/MSFT_LogResource
+mkdir -p $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/BuiltinProvCache
+mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}
+mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration
+mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration/schema
+mkdir -p $CONFIG_DATADIR/${{SHORT_NAME}}/configuration/registration
+chmod 700 $CONFIG_SYSCONFDIR/${{SHORT_NAME}}
+
+#if BUILD_OMS == 1
+
+# Set up logging directory
+mkdir -p /var/opt/microsoft/omsconfig
+chown omsagent /var/opt/microsoft/omsconfig
+chgrp omsagent /var/opt/microsoft/omsconfig
+chmod 755 /var/opt/microsoft/omsconfig
+
+# Set up log file
+if [ ! -f /var/opt/microsoft/omsconfig/omsconfig.log ]; then
+    touch /var/opt/microsoft/omsconfig/omsconfig.log
+fi
+chown omsagent /var/opt/microsoft/omsconfig/omsconfig.log
+chgrp omsagent /var/opt/microsoft/omsconfig/omsconfig.log
+chmod 644 /var/opt/microsoft/omsconfig/omsconfig.log
+
+# Set up detailed log file
+if [ ! -f /var/opt/microsoft/omsconfig/omsconfigdetailed.log ]; then
+    touch /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+fi
+chown omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+chgrp omsagent /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+chmod 644 /var/opt/microsoft/omsconfig/omsconfigdetailed.log
+
+# Set up dsc_host use switch
+if [ ! -f /opt/dsc/dsc_host_ready ]; then
+    touch /opt/dsc/dsc_host_ready
+fi
+chown omsagent /opt/dsc/dsc_host_ready
+chgrp omsagent /opt/dsc/dsc_host_ready
+chmod 644 /opt/dsc/dsc_host_ready
+
+#endif
+
+
+# Create links in omi's directories for DSC data
+
+#if BUILD_OMS == 1
+mkdir -p $OMI_REGISTER_DIR/root-oms
+chmod 755 $OMI_REGISTER_DIR/root-oms
+cp -f /opt/microsoft/${{SHORT_NAME}}/etc/*.reg $OMI_REGISTER_DIR/root-oms
+cp -f /opt/microsoft/${{SHORT_NAME}}/etc/omsconfig.reg $OMI_REGISTER_DIR/root-oms
+ln -fs /opt/microsoft/${{SHORT_NAME}}/lib/libomsconfig.so $OMI_HOME/lib/libomsconfig.so
+ln -fs /opt/microsoft/${{SHORT_NAME}}/bin/OMSConsistencyInvoker $OMI_HOME/bin/OMSConsistencyInvoker
+#else
+
+# Make OMI listen on the standard DSC port
+$OMI_HOME/bin/omiconfigeditor httpsport -a 5986 < $CONFIG_SYSCONFDIR/omiserver.conf > $CONFIG_SYSCONFDIR/omiserver.conf_temp
+mv $CONFIG_SYSCONFDIR/omiserver.conf_temp $CONFIG_SYSCONFDIR/omiserver.conf
+
+mkdir -p $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
+cp -f /opt/microsoft/${{SHORT_NAME}}/etc/*.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
+cp -f /opt/microsoft/${{SHORT_NAME}}/etc/dsccore.reg $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration/
+ln -fs /opt/microsoft/${{SHORT_NAME}}/lib/libdsccore.so $OMI_HOME/lib/libdsccore.so
+ln -fs /opt/microsoft/${{SHORT_NAME}}/bin/ConsistencyInvoker $OMI_HOME/bin/ConsistencyInvoker
+ln -fs $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
+#endif
+
+cp -f /opt/microsoft/${{SHORT_NAME}}/mof/OMI_BaseResourceUE.mof $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/baseregistration/baseresource.schema.mof
+cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_DSCMetaConfiguration.mof $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/baseregistration/MSFT_DSCMetaConfiguration.mof
+cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.registration.mof  $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration/MSFT_LogResource
+cp -f /opt/microsoft/${{SHORT_NAME}}/mof/MSFT_LogResource.schema.mof  $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema/MSFT_LogResource
+
+chmod a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/
+chmod a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration
+chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/schema
+chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/baseregistration
+chmod -R a+rx $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration/registration
+
+#if BUILD_OMS == 1
+chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/modules
+chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
+chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
+chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
+
+# If this is ever changed/removed, coordinate with nxOMSAuditdPlugin author/maintainer(s)
+chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
+
+# pythonVersion check must be repeated for each section
+if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python2"
+  pythonVersion="python2"
+elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python3"
+  pythonVersion="python3"
+else
+  echo "Python not found."
+fi
+
+# Set up built-in resource modules for OMS DSC
+if [ "$pythonVersion" = "python3" ]; then
+	echo "Running python3, python version is ", $pythonVersion
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.1.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.3.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.5.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.4.zip 0"
+  su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip 0"
+else
+  echo "Running  python version is ", $pythonVersion
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nx_1.1.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPerfCounter_2.3.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.5.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.4.zip 0"
+  su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip 0"
+fi
+
+#if PFARCH == x86
+if [ "$pythonVersion" = "python3" ]; then
+  echo "Running python3 python version is ", $pythonVersion
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.58.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip 0"
+else
+  echo "Running python2 python version is ", $pythonVersion
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.58.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip 0"
+#endif
+
+# Set up a built-in resource module for DIY DSC that was removed during OMS Agent update
+# This is a temporary workaround to prevent DIY DSC from breaking after the OMS Agent is updated from version 1.4.4-210 or below
+# This section can be removed when telemetry shows that customers no longer need to update from version 1.4.4-210 or below
+
+# Check if DIY DSC install module script is present on the machine
+if [ -f /opt/microsoft/dsc/Scripts/InstallModule.py ]; then
+  # Check if nx module package is available in DIY DSC
+  if [ -f /opt/microsoft/dsc/module_packages/nx_1.1.zip ]; then
+    if [ "$pythonVersion" = "python3" ]; then
+      echo "Running python3"
+      /opt/microsoft/dsc/Scripts/python3/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.1.zip 0
+    else
+      echo "Running python2 in Check if DIY DSC install... python version is ", $pythonVersion
+      /opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.1.zip 0
+    fi
+  fi
+fi
+
+# Ensure .reg files all have correct permissions
+chmod 644 $OMI_REGISTER_DIR/root-oms/*.reg
+
+if [ -f "/etc/opt/omi/conf/omsconfig/agentid" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/agentid"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/generated_meta_config.mof"; fi
+if [ -d "/etc/opt/omi/conf/omsconfig/.gnupg" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/.gnupg"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/inventory_lock" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/inventory_lock"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/keymgmtring.gpg" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/keymgmtring.gpg"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/keyring.gpg" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/keyring.gpg"; fi
+if [ -f "/etc/opt/omi/conf/omsconfig/last_statusreport" ]; then chown omsagent:omiusers "/etc/opt/omi/conf/omsconfig/last_statusreport"; fi
+if [ -d "/var/opt/microsoft/omsconfig" ]; then chown -R omsagent:omiusers /var/opt/microsoft/omsconfig/*; fi
+if [ -d "/etc/opt/omi/conf/omsconfig" ]; then chown -R omsagent:omiusers /etc/opt/omi/conf/omsconfig/*; fi
+
+#else
+
+# Set up built-in resource module for DIY DSC
+if [ "$pythonVersion" = "python3" ]; then
+  echo "Running python3"
+	/opt/microsoft/dsc/Scripts/python3/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.1.zip 0
+else
+  echo "Running python2 in set up built in python version is ", $pythonVersion
+	/opt/microsoft/dsc/Scripts/InstallModule.py /opt/microsoft/dsc/module_packages/nx_1.1.zip 0
+fi
+
+
+#endif
+
+if [ -d  $OMI_LIB/Scripts ]; then
+    rm -rf $OMI_LIB/Scripts
+fi
+cp -R /opt/microsoft/${{SHORT_NAME}}/Scripts $OMI_LIB/Scripts
+
+# create symlink from /opt/omi/lib/libcurl.so.4 to wherever libcurl.so is on the system
+#if BUILD_OMS == 1
+
+CURL_PATH=`which curl`
+LIBCURL_SO=`ldd ${CURL_PATH} | grep libcurl.so | awk '{print $3}'`
+
+# if libcurl was not found (in case of libcurl-gnutls-dev package) let use ldconfig intead.
+if [ -z "$LIBCURL_SO" ]; then
+  echo "Warning: Unable to find libcurl.so using curl CMD: '${CURL_PATH}'. Trying again with ldconfig."
+
+  LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
+  if [ -z "$LIBCURL_SO" ]; then
+    echo "Error: Unable to find libcurl in ldconfig. Please install curl."
+    exit 1
+  fi
+fi
+
+#else
+
+LIBCURL_SO=`ldconfig -p | grep "libcurl" | awk -F ">" '{print $2}' | awk -F " " '{print $1; exit 0}'`
+if [ -z "$LIBCURL_SO" ]; then
+   echo "Error: Unable to find libcurl in ldconfig.  Please install curl."
+   exit 1
+fi
+
+#endif
+
+ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.3
+ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.4
+
+#if BUILD_OMS == 1
+chown -R omsagent /opt/microsoft/${{SHORT_NAME}}/Scripts
+su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc keymgmtring.gpg"
+su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc keyring.gpg"
+
+
+# Set up a dsc cron job to run the ConsistencyInvoker every 30 minutes which is default freq, this is to fix dsc github issue no 322.
+# It is a temporary workaround to create dsc DYI cron job as omsconfig upgrade removes dsc cron job.
+
+# check if dsc consistency invoker is present on the machine
+if [ -f /opt/omi/bin/ConsistencyInvoker ]; then
+
+  # check if we do not have dsc cron file on the box then create one.
+  if [ ! -f /etc/cron.d/dsc ]; then
+    echo "*/30 * * * * root /opt/omi/bin/ConsistencyInvoker" > /etc/cron.d/dsc
+  fi
+fi
+
+#else
+cat /etc/crontab | awk '{ if ($7 != "/opt/omi/bin/ConsistencyInvoker") { print $0 } }' > /etc/crontabtmp
+cat /etc/crontab | awk '{ if ($7 == "/opt/omi/bin/ConsistencyInvoker") { print $0 } }' > /etc/cron.d/dsc
+mv /etc/crontabtmp /etc/crontab
+#endif
+
+
+/opt/omi/bin/service_control restart
+
+#if BUILD_OMS == 1
+
+# If omsadmin.conf exists, let's apply the metaconfig
+if [ -f /etc/opt/microsoft/omsagent/conf/omsadmin.conf ]; then
+  if [ "$pythonVersion" = "python3" ]; then
+    echo "Running python3"
+    su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/OMS_MetaConfigHelper.py"
+  else
+    echo "Running python2 if omsadmin.conf exists python version is ", $pythonVersion
+    su - omsagent -c "/opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py"
+  fi
+fi
+
+cp -f /opt/microsoft/omsconfig/etc/Inventory.mof /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
+chown omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
+chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
+
+#endif
+
+%Preuninstall_899
+echo "Cleanning up existing dsc_hosts before uninstall..."
+kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1) -9 2&>1 > /dev/null
+chmod -R 777 /opt/dsc
+rm -rfv /opt/dsc
+rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
+echo "Cleaned up existing dsc_hosts before uninstall..."
+
+%Preuninstall_999
+# pythonVersion check must be repeated for each section
+if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python2"
+  pythonVersion="python2"
+elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python3"
+  pythonVersion="python3"
+else
+  echo "Python not found"
+fi
+# if this is a package removal, not an upgrade, remove the modules
+if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
+  # Remove all DSC specific data
+  if [ "$pythonVersion" = "python3" ]; then
+     echo "Running python3"
+     for module in `ls /opt/microsoft/${{SHORT_NAME}}/modules`; do
+       /opt/microsoft/${{SHORT_NAME}}/Scripts/python3/RemoveModule.py $module
+     done
+   else
+     echo "Running python2 in remove all DSC specific data python version is ", $pythonVersion
+     for module in `ls /opt/microsoft/${{SHORT_NAME}}/modules`; do
+       /opt/microsoft/${{SHORT_NAME}}/Scripts/RemoveModule.py $module
+     done
+  fi
+fi
+
+%Postuninstall_999
+OMI_HOME=/opt/omi
+OMI_REGISTER_DIR=/etc/opt/omi/conf/omiregister
+CONFIG_SYSCONFDIR=/etc/opt/omi/conf
+CONFIG_DATADIR=$OMI_HOME/share
+OMI_LIB=$OMI_HOME/lib
+
+# if this is a package removal, not an upgrade, remove the modules
+if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
+    rm -rf $CONFIG_SYSCONFDIR/${{SHORT_NAME}}/configuration
+    rm -rf $CONFIG_DATADIR/${{SHORT_NAME}}/
+    rm -rf $OMI_LIB/Scripts
+    rm -rf /opt/microsoft/${{SHORT_NAME}}/
+#if BUILD_OMS == 1
+    rm -rf $OMI_REGISTER_DIR/root-oms
+    rm -f $OMI_HOME/bin/OMSConsistencyInvoker
+    rm -f $OMI_LIB/libomsconfig.so
+#else
+    rm -rf $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
+    rm -rf $OMI_REGISTER_DIR/root-Microsoft-Windows-DesiredStateConfiguration
+    rm -f $OMI_HOME/bin/ConsistencyInvoker
+    rm -f $OMI_LIB/libdsccore.so
+    # Only to be removed for standalone DSC case
+    rm -f /etc/cron.d/dsc
+#endif
+
+fi
+
+#if BUILD_OMS == 1
+
+# Remove old output files from calling dsc_host
+rm -f /opt/dsc/output/*
+
+# Note that omsagent's service_control uses systemctl to kill agent (omsagent
+# still doesn't shut down in a controlled fashion). Two rapid 'kill -9'
+# operations can confuse systemctl, such that the second 'kill -9' operation
+# is not completed. This will happen during removal of the shell bundle. End
+# result is that the omsagent binary is kept running after the second kill
+# operation.
+#
+# Add a 'sleep' operation (ugly, I know) to try and avoid this race condition.
+
+/opt/microsoft/omsagent/bin/service_control reload
+if pidof systemd 1> /dev/null 2> /dev/null; then
+    echo "Pausing briefly for systemctl synchronization ..."
+    sleep 5
+fi
+
+#endif
+
+%Preinstall_0
+${{SHELL_HEADER}}
+%Postinstall_0
+${{SHELL_HEADER}}
+%Preuninstall_0
+${{SHELL_HEADER}}
+%Postuninstall_0
+${{SHELL_HEADER}}
