@@ -98,7 +98,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip; release/nxOMSContainers_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip; release/nxOMSGenerateInventoryMof_1.5.zip; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.57.zip; release/nxOMSPlugin_3.57.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.59.zip; release/nxOMSPlugin_3.59.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip; release/nxOMSWLI_1.46.zip; 755; ${{RUN_AS_USER}}; root
 #endif
 
@@ -379,7 +379,7 @@ if [ "$pythonVersion" = "python3" ]; then
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.57.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.59.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip 0"
 else
   echo "Running python2 python version is ", $pythonVersion
@@ -389,7 +389,7 @@ else
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.57.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.59.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip 0"
 #endif
 
