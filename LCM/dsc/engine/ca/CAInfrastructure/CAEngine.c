@@ -1909,6 +1909,7 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
     const MI_Instance *completionDetails = NULL;
     MI_Value value;
 
+    DSC_LOG_INFO("inside GetGetMethodResult");
     if (extendedError == NULL)
     {
         return MI_RESULT_INVALID_PARAMETER;
@@ -1916,15 +1917,17 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     *outputInstance = NULL;
-
+    DSC_LOG_INFO("startting MI_Operation_GetInstance");
     /*Get the operation result*/
     r = MI_Operation_GetInstance(operation, &outInstance, &moreResults, &result, &errorMessage, &completionDetails);
     if( result != MI_RESULT_OK)
     {
+        DSC_LOG_INFO("MI_Operation_GetInstance failed result not ok");
         r = result;
     }
     if( r != MI_RESULT_OK)
     {
+        DSC_LOG_INFO("MI_Operation_GetInstance failed r not ok");
         if( completionDetails != NULL)
         {
             innerR = DSC_MI_Instance_Clone( completionDetails, extendedError);
@@ -1933,22 +1936,28 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
         {
             r = GetCimMIError(r, extendedError,ID_CAINFRA_GETINSTANCE_FAILED);
         }
+        DSC_LOG_INFO("MI_Operation_GetInstance returning r");
         return r;
     }
 
+    DSC_LOG_INFO("startimggg DSC_MI_Instance_GetElement");
     /*Get configurations  property*/
     r = DSC_MI_Instance_GetElement(outInstance, OMI_BaseResource_Method_OutputResource, &value, NULL, NULL, NULL);
     if( r != MI_RESULT_OK )
     {
+        DSC_LOG_INFO("DSC_MI_Instance_GetElement failed r not ok");
         return GetCimMIError(r, extendedError,ID_CAINFRA_GET_OUTPUTRES_FAILED);
     }
     /*Clone the object*/
 
+    DSC_LOG_INFO("DSC_MI_Instance_Clone sarting");
     r = DSC_MI_Instance_Clone(value.instance, outputInstance);
     if( r != MI_RESULT_OK )
     {
+        DSC_LOG_INFO("DSC_MI_Instance_Clone failed r not ok");
         return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
     }
+    DSC_LOG_INFO("returning");
     return r;
 }
 
@@ -2004,64 +2013,83 @@ MI_Result Get_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
 
     if( Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0 )
     {
+        DSC_LOG_INFO("inside MSFT_LOGRESOURCENAME for Get_WMIv2Provider and starting DSC_MI_Instance_Clone");
         r = DSC_MI_Instance_Clone(instance, outputInstance);
         if( r != MI_RESULT_OK)
         {
+            DSC_LOG_INFO("DSC_MI_Instance_Clone r is not OK.");
             return GetCimMIError(r, extendedError, ID_CAINFRA_CLONE_FAILED);
         }
     }
     else
     {
+        DSC_LOG_INFO("inside else or Get_WMIv2Provider and starting DSC_MI_Instance_GetElement");
         /*Get target namespace*/
         r = DSC_MI_Instance_GetElement(regInstance, MSFT_CimConfigurationProviderRegistration_Namespace, &value, NULL, NULL, NULL);
         if( r != MI_RESULT_OK )
         {
+            DSC_LOG_INFO("DSC_MI_Instance_GetElement r is not OK");
             return GetCimMIError(r, extendedError,ID_CAINFRA_GET_NAMESPACE_FAILED);
         }
         provNamespace = value.string;
 
         /*Set input parameters*/
+        DSC_LOG_INFO("starting DSC_MI_Application_NewInstance.");
         r = DSC_MI_Application_NewInstance(miApp, MI_T("__Parameters"), NULL, &params);
         if( r != MI_RESULT_OK )
         {
+            DSC_LOG_INFO("DSC_MI_Application_NewInstance is not ok.");
             return GetCimMIError(r, extendedError,ID_CAINFRA_GET_NEWAPPLICATIONINSTANCE_FAILED);
         }
         value.instance = instance;
+        
+        DSC_LOG_INFO("starting DSC_MI_Instance_AddElement");
         r = DSC_MI_Instance_AddElement(params, OMI_BaseResource_Method_InputResource, &value, MI_INSTANCE, 0 );
         if( r != MI_RESULT_OK)
         {
+            DSC_LOG_INFO("DSC_MI_Instance_AddElement r is not ok");
             MI_Instance_Delete(params);
             return GetCimMIError(r, extendedError,ID_CAINFRA_GET_ADDELEM_FAILED);
         }
+        
+        DSC_LOG_INFO("startting MI_Application_NewOperationOptions");
         r = MI_Application_NewOperationOptions(miApp, MI_FALSE, &sessionOptions);
         if( r != MI_RESULT_OK )
         {
+            DSC_LOG_INFO("MI_Application_NewOperationOptions r is not ok");
             return GetCimMIError(r, extendedError,ID_CAINFRA_GET_NEWOPERATIONOPTIONS_FAILED);
         }
         valueOperationOptions.string=g_ConfigurationDetails.jobGuidString;
+        
+        DSC_LOG_INFO("starting MI_OperationOptions_SetCustomOption");
         r =MI_OperationOptions_SetCustomOption(&sessionOptions,DSC_JOBIDSTRING,MI_STRING,&valueOperationOptions,MI_FALSE);
         if( r != MI_RESULT_OK)
         {
+            DSC_LOG_INFO("MI_OperationOptions_SetCustomOption r is not ok");
             MI_OperationOptions_Delete(&sessionOptions);
             return GetCimMIError(r, extendedError,ID_CAINFRA_GET_SETCUSTOMOPTION_FAILED);
         }
 
         /* Perform Get*/
-
+        DSC_LOG_INFO("starting MI_Session_Invoke");
         MI_Session_Invoke(miSession, 0, &sessionOptions, provNamespace,
                              instance->classDecl->name, OMI_BaseResource_GetMethodName,
                              NULL, params, &callbacks,&operation);
-
+        DSC_LOG_INFO("done MI_Session_Invoke and starting GetGetMethodResult");
         r = GetGetMethodResult(&operation, outputInstance , extendedError);
+        DSC_LOG_INFO("done GetGetMethodResult and starting MI_Instance_Delete");
         MI_Instance_Delete(params);
         MI_OperationOptions_Delete(&sessionOptions);
         MI_Operation_Close(&operation);
+        DSC_LOG_INFO("Done cleanup and MI_Instance_Delete");
         if( r != MI_RESULT_OK)
         {
+            DSC_LOG_INFO("GetGetMethodResult r is not ok");
             return r;
         }
     }
     //Stop timer for get
+    DSC_LOG_INFO("Reached near the end.");
     finish=CPU_GetTimeStamp();
     duration = (MI_Real64)(finish- start) / TIME_PER_SECONND;
     SetMessageInContext(ID_OUTPUT_OPERATION_END,ID_OUTPUT_ITEM_GET,provContext->lcmProviderContext);
