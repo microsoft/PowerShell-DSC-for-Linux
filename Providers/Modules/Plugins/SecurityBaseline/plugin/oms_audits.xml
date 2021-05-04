@@ -556,8 +556,8 @@
       remediation="Add a boot loader password to the file '/boot/grub/grub.cfg'"
       ruleId="8a4f5ce8-41c4-710c-631e-fbc36a2fa53e">
       <check distro="*" command="CheckMatchingLinesIfExists" regex="^password\s+--encrypted\s+\S+" path="/boot/grub/grub.conf"/>
-      <check distro="*" command="CheckMatchingLinesIfExists" regex="^password\s+--encrypted\s+\S+" path="/boot/grub/grub.cfg"/>
-      <check distro="*" command="CheckMatchingLinesIfExists" regex="^password\s+--encrypted\s+\S+" path="/boot/grub2/grub.cfg"/>
+      <check distro="*" command="CheckMatchingLinesIfExists" regex="^[\s]*password(?:(?:_pbkdf2\s+\S+)|(?:\s+--encrypted))\s+\S+" path="/boot/grub/grub.cfg"/>
+      <check distro="*" command="CheckMatchingLinesIfExists" regex="^[\s]*password(?:(?:_pbkdf2\s+\S+)|(?:\s+--encrypted))\s+\S+" path="/boot/grub2/grub.cfg"/>
     </audit>
     <audit
       description="Ensure permissions on bootloader config are configured"
@@ -1206,7 +1206,7 @@
       impact="An attacker could use this system to send emails with malicious content to other users"
       remediation="Add the line 'inet_interfaces localhost' to the file '/etc/postfix/main.cf'"
       ruleId="d0cc4e35-70a1-4ee5-b572-3b969201562e">
-      <check distro="*" command="CheckMatchingLinesIfExists" regex="^[\s\t]*inet_interfaces\s+localhost\s*$" path="/etc/postfix/main.cf" />
+      <check distro="*" command="CheckMatchingLinesIfExists" regex="^[\s\t]*inet_interfaces\s*=\s*localhost\s*$" path="/etc/postfix/main.cf" />
     </audit>
     <audit
       description="The ldap service should be disabled."
