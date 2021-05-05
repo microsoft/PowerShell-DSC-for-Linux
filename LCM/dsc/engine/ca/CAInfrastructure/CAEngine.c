@@ -1938,24 +1938,19 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
         return r;
     }
 
-    DSC_LOG_INFO("startimggg DSC_MI_Instance_GetElement");
     /*Get configurations  property*/
     r = DSC_MI_Instance_GetElement(outInstance, OMI_BaseResource_Method_OutputResource, &value, NULL, NULL, NULL);
     if( r != MI_RESULT_OK )
     {
-        DSC_LOG_INFO("DSC_MI_Instance_GetElement failed r not ok");
         return GetCimMIError(r, extendedError,ID_CAINFRA_GET_OUTPUTRES_FAILED);
     }
     /*Clone the object*/
 
-    DSC_LOG_INFO("DSC_MI_Instance_Clone sarting");
     r = DSC_MI_Instance_Clone(value.instance, outputInstance);
     if( r != MI_RESULT_OK )
     {
-        DSC_LOG_INFO("DSC_MI_Instance_Clone failed r not ok");
         return GetCimMIError(r, extendedError,ID_CAINFRA_CLONE_FAILED);
     }
-    DSC_LOG_INFO("returning");
     return r;
 }
 
