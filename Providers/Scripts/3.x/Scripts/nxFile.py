@@ -94,6 +94,7 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     Ensure = protocol.MI_String(Ensure)
     Type = protocol.MI_String(Type)
     Force = protocol.MI_Boolean(Force)
+    Contents = Contents.decode("ISO-8859-1") if isinstance(Contents, bytes) else Contents
     Contents = protocol.MI_String(Contents)
     Checksum = protocol.MI_String(Checksum)
     Recurse = protocol.MI_Boolean(Recurse)
