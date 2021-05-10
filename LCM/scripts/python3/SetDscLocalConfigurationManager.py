@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import warnings
+import sys
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=DeprecationWarning)
     from imp                  import load_source
@@ -14,6 +15,10 @@ import codecs
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', DSCLogPath)
+LG = nxDSCLog.DSCLog
 
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
@@ -159,4 +164,6 @@ def apply_meta_config(args):
         fileHandle.close()
 
 if __name__ == "__main__":
+    LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info.major))
     main(argv)
+    LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info.major))

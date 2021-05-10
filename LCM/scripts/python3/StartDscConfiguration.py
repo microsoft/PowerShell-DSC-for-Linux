@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Standard library imports
+import sys
 from subprocess           import Popen, PIPE
 from sys                  import argv
 import warnings
@@ -14,9 +15,12 @@ from time                 import sleep
 import subprocess
 import codecs 
 
-
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', DSCLogPath)
+LG = nxDSCLog.DSCLog
 
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = load_source('helperlib', helperLibPath)
@@ -121,8 +125,7 @@ def main(argv):
         configurationData.append(str(ord(char)))
 
     # # OMI CLI location
-    omiBinDir = "<CONFIG_BINDIR>"
-    omiCliPath = omiBinDir + "/omicli"
+    omicli_path = join(helperlib.CONFIG_BINDIR, 'omicli')
     dsc_host_base_path = helperlib.DSC_HOST_BASE_PATH
     dsc_host_path = join(dsc_host_base_path, 'bin/dsc_host')
     dsc_host_output_path = join(dsc_host_base_path, 'output')
@@ -148,7 +151,7 @@ def main(argv):
         if parsedArguments.force:
             host_parameters.append("force")
     else:
-        host_parameters.append(omiCliPath)
+        host_parameters.append(omicli_path)
         host_parameters.append("iv")
         host_parameters.append("<DSC_NAMESPACE>")
         host_parameters.append("{")
@@ -210,7 +213,7 @@ def main(argv):
                 # Close dsc host lock file handle
                 dschostlock_filehandle.close()
     else:
-        p = subprocess.Popen(parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(host_parameters, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
 
     stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
@@ -218,4 +221,6 @@ def main(argv):
     print(stdout)   
     print(stderr)
 
+LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info.major))
 main(argv[1:])
+LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info.major))

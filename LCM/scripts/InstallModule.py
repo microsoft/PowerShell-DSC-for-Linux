@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 import platform
-from os.path import basename, dirname, join, realpath, split
+from os.path    import basename, dirname, join, realpath, split
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)

@@ -25,4 +25,3 @@ for current_dir in script_dirs:
 
     out_init = out_init + str(py_files_basename)
     open(current_dir + "/__init__.py", "w").write(out_init)
-        

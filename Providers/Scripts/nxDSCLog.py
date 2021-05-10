@@ -50,7 +50,7 @@ class DSCLog(object):
         last_frame = inspect.currentframe().f_back
         place = last_frame.f_globals['__file__'] + \
             '('+str(last_frame.f_lineno)+')'
-        if message is None or len(message) is 0:
+        if message == None or len(message) == 0:
             return
         if log_level is None:
             log_level = self.current_level

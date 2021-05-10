@@ -469,7 +469,6 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
 #if defined(BUILD_OMS)
     if (g_DscHost == MI_FALSE)
     {
-#endif
         // Get the Registration information from shared objects
         r = GetRegistrationInstanceFromSharedObjects(NULL, miApp, de, options, strictOptions, &miClassArray, &miInstanceArray, extendedError);
         if( r != MI_RESULT_OK)
@@ -482,6 +481,7 @@ MI_Result GetModuleLoader( _In_ MI_Application *miApp,
             CleanUpInstanceCache(&miInstanceArray);
             return r;
         }
+#endif
 
         // No need to do this after removing OMI since we will discover resources directly from shared objects (except for DIY DSC)
         /*Perform registration against schema validation*/

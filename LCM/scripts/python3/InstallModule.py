@@ -72,7 +72,8 @@ def getPlatformArchitectureFolderName():
 
 
 def regenerateDscPythonScriptInitFiles():
-    regenerateInitFilesResult = subprocess.call("(python3 /opt/microsoft/omsconfig/Scripts/python3/RegenerateInitFiles.py)", shell=True)
+    regenerateInitFilesScriptPath = join(helperlib.DSC_SCRIPT_PATH, 'RegenerateInitFiles.py')
+    regenerateInitFilesResult = subprocess.call("(python3 " + regenerateInitFilesScriptPath + ")", shell=True)
     print("The result code is", regenerateInitFilesResult)
     if regenerateInitFilesResult != 0:
         exitWithError("Failed to regenerate the DSC __init__.py files with the result code", regenerateInitFilesResult)

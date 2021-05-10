@@ -4,6 +4,20 @@ import os
 import os.path
 import tempfile
 import shutil
+from sys                  import argv
+from os.path import dirname, join, realpath
+import warnings
+with warnings.catch_warnings():
+   warnings.filterwarnings("ignore",category=DeprecationWarning)
+   from imp        import load_source
+
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', DSCLogPath)
+LG = nxDSCLog.DSCLog
+
 
 def usage():
    print("""Usage: Register.py [OPTIONS]
@@ -17,6 +31,8 @@ OPTIONS (case insensitive):
  --RefreshMode (Pull|Push)                                           default=Pull
  --Help
 """)
+
+LG().Log("DEBUG", "Starting script logic for " + argv[0]+ " runing with python " + str(sys.version_info.major))
 
 # Apply a DSC meta configuration based on a template
 Variables = dict()
@@ -214,6 +230,7 @@ if RegenerateCert == True:
    os.system("openssl req -subj '/CN=DSC-OaaS' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout " + OAAS_KEYPATH + "_old -out " + OAAS_CERTPATH + " && openssl rsa -in " +  OAAS_KEYPATH + "_old -out " + OAAS_KEYPATH + " && rm -f " +  OAAS_KEYPATH + "_old");
    os.system("openssl x509 -noout -in " + OAAS_CERTPATH + " -fingerprint | sed 's/^.*=//' > " + OAAS_THUMBPRINT);
 
-os.system("<DSC_SCRIPT_PATH>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
+os.system("<DSC_SCRIPT_PATH>/python3/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
 shutil.rmtree(tempdir)
+LG().Log("DEBUG", "End of script logic for " +  argv[0] + " runing with python " + str(sys.version_info.major))

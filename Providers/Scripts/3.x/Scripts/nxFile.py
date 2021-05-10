@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 #  See license.txt for license information.
@@ -94,6 +94,7 @@ def Get_Marshall(DestinationPath, SourcePath, Ensure, Type, Force, Contents, Che
     Ensure = protocol.MI_String(Ensure)
     Type = protocol.MI_String(Type)
     Force = protocol.MI_Boolean(Force)
+    Contents = Contents.decode("ISO-8859-1") if isinstance(Contents, bytes) else Contents
     Contents = protocol.MI_String(Contents)
     Checksum = protocol.MI_String(Checksum)
     Recurse = protocol.MI_Boolean(Recurse)
@@ -431,16 +432,19 @@ def CompareFiles(DestinationPath, SourcePath, Checksum):
                     src_hash.update(src_block)
                     dest_hash.update(dest_block)
                     if src_hash.hexdigest() != dest_hash.hexdigest():
+                        LG().Log('ERROR', "Exception comparing destination file using hexdigest : " + DestinationPath)
                         return -1
         if src_hash.hexdigest() == dest_hash.hexdigest():
             return 0
     elif Checksum == "ctime":
         if stat_src.st_ctime != stat_dest.st_ctime:
+            LG().Log('ERROR', "Exception comparing destination file using st_ctime : " + DestinationPath)
             return -1
         else:
             return 0
     elif Checksum == "mtime":
         if stat_src.st_mtime != stat_dest.st_mtime:
+            LG().Log('ERROR', "Exception comparing destination file using st_mtime : " + DestinationPath)
             return -1
         else:
             return 0
@@ -949,7 +953,7 @@ def TestFile(DestinationPath, SourcePath, fc):
 
     elif fc.Contents:
         dest_file, error = ReadFile(DestinationPath)
-        if fc.Contents.encode('utf8') != dest_file:
+        if fc.Contents != dest_file:
             return False
 
     return True

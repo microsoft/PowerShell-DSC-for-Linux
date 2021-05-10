@@ -4,6 +4,9 @@ import os
 import os.path
 import tempfile
 import shutil
+from sys                import argv
+from imp                import load_source
+from os.path import dirname, join, realpath
 
 def usage():
    print("""Usage: Register.py [OPTIONS]
@@ -17,6 +20,16 @@ OPTIONS (case insensitive):
  --RefreshMode (Pull|Push)                                           default=Pull
  --Help
 """)
+
+
+pathToCurrentScript = realpath(__file__)
+pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', DSCLogPath)
+LG = nxDSCLog.DSCLog
+
+LG().Log("DEBUG", "Starting script logic for " + argv[0]+ " runing with python " + str(sys.version_info.major))
 
 # Apply a DSC meta configuration based on a template
 Variables = dict()
@@ -217,3 +230,5 @@ if RegenerateCert == True:
 os.system("<DSC_SCRIPT_PATH>/SetDscLocalConfigurationManager.py -configurationmof " + meta_path)
 
 shutil.rmtree(tempdir)
+
+LG().Log("DEBUG", "End of script logic for " +  argv[0] + " runing with python " + str(sys.version_info.major))

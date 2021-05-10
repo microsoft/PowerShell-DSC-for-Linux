@@ -6,9 +6,16 @@ import shutil
 import platform
 import imp
 from os.path import dirname, join, realpath
+from sys                  import argv
+from imp        import load_source
 
 pathToCurrentScript = realpath(__file__)
 pathToCommonScriptsFolder = dirname(pathToCurrentScript)
+
+DSCLogPath = join(pathToCommonScriptsFolder, 'nxDSCLog.py')
+nxDSCLog = load_source('nxDSCLog', DSCLogPath)
+LG = nxDSCLog.DSCLog
+
 helperLibPath = join(pathToCommonScriptsFolder, 'helperlib.py')
 helperlib = imp.load_source('helperlib', helperLibPath)
 fullPathDSCLogger = os.path.join(pathToCommonScriptsFolder, 'nxDSCLog.py')
@@ -196,4 +203,6 @@ def main(args):
     shutil.rmtree(modulePath)
 
 if __name__ == "__main__":
+    LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info.major))
     main(sys.argv[1:])
+    LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info.major))

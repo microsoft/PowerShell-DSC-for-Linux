@@ -1286,10 +1286,11 @@ MI_Result MoveToDesiredState(_In_ ProviderCallbackContext *provContext,
     if (
 #if defined(BUILD_OMS)
         g_DscHost == MI_FALSE ||
+        Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
 #else
+        Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
         Tcscasecmp(regInstance->classDecl->name, BASE_REGISTRATION_WMIV2PROVIDER) == 0 ||
 #endif
-        Tcscasecmp(instance->classDecl->name, METACONFIG_CLASSNAME) == 0 || // put special cases to wmiv2 code
         Tcscasecmp(MSFT_LOGRESOURCENAME, instance->classDecl->name) == 0
         )
     {
@@ -1910,15 +1911,16 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
     *extendedError = NULL;  // Explicitly set *extendedError to NULL as _Outptr_ requires setting this at least once.
 
     *outputInstance = NULL;
-
     /*Get the operation result*/
     r = MI_Operation_GetInstance(operation, &outInstance, &moreResults, &result, &errorMessage, &completionDetails);
     if( result != MI_RESULT_OK)
     {
+        DSC_LOG_INFO("MI_Operation_GetInstance inside GetGetMethodResult failed result not ok");
         r = result;
     }
     if( r != MI_RESULT_OK)
     {
+        DSC_LOG_INFO("MI_Operation_GetInstance inside GetGetMethodResult failed r not ok");
         if( completionDetails != NULL)
         {
             innerR = DSC_MI_Instance_Clone( completionDetails, extendedError);
@@ -1927,6 +1929,7 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
         {
             r = GetCimMIError(r, extendedError,ID_CAINFRA_GETINSTANCE_FAILED);
         }
+
         return r;
     }
 
@@ -2021,18 +2024,21 @@ MI_Result Get_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
             return GetCimMIError(r, extendedError,ID_CAINFRA_GET_NEWAPPLICATIONINSTANCE_FAILED);
         }
         value.instance = instance;
+        
         r = DSC_MI_Instance_AddElement(params, OMI_BaseResource_Method_InputResource, &value, MI_INSTANCE, 0 );
         if( r != MI_RESULT_OK)
         {
             MI_Instance_Delete(params);
             return GetCimMIError(r, extendedError,ID_CAINFRA_GET_ADDELEM_FAILED);
         }
+        
         r = MI_Application_NewOperationOptions(miApp, MI_FALSE, &sessionOptions);
         if( r != MI_RESULT_OK )
         {
             return GetCimMIError(r, extendedError,ID_CAINFRA_GET_NEWOPERATIONOPTIONS_FAILED);
         }
         valueOperationOptions.string=g_ConfigurationDetails.jobGuidString;
+        
         r =MI_OperationOptions_SetCustomOption(&sessionOptions,DSC_JOBIDSTRING,MI_STRING,&valueOperationOptions,MI_FALSE);
         if( r != MI_RESULT_OK)
         {
@@ -2041,17 +2047,16 @@ MI_Result Get_WMIv2Provider(_In_ ProviderCallbackContext *provContext,
         }
 
         /* Perform Get*/
-
         MI_Session_Invoke(miSession, 0, &sessionOptions, provNamespace,
                              instance->classDecl->name, OMI_BaseResource_GetMethodName,
                              NULL, params, &callbacks,&operation);
-
         r = GetGetMethodResult(&operation, outputInstance , extendedError);
         MI_Instance_Delete(params);
         MI_OperationOptions_Delete(&sessionOptions);
         MI_Operation_Close(&operation);
         if( r != MI_RESULT_OK)
         {
+            DSC_LOG_INFO("GetGetMethodResult r is not ok");
             return r;
         }
     }

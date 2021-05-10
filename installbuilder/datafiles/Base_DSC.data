@@ -426,6 +426,17 @@ if [ -d "/etc/opt/omi/conf/omsconfig" ]; then chown -R omsagent:omiusers /etc/op
 
 #else
 
+# pythonVersion check must be repeated for each section
+if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python2"
+  pythonVersion="python2"
+elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python3"
+  pythonVersion="python3"
+else
+  echo "Python not found."
+fi
+
 # Set up built-in resource module for DIY DSC
 if [ "$pythonVersion" = "python3" ]; then
   echo "Running python3"
@@ -501,6 +512,17 @@ mv /etc/crontabtmp /etc/crontab
 /opt/omi/bin/service_control restart
 
 #if BUILD_OMS == 1
+
+# pythonVersion check must be repeated for each section
+if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python2"
+  pythonVersion="python2"
+elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
+  echo "Using python3"
+  pythonVersion="python3"
+else
+  echo "Python not found"
+fi
 
 # If omsadmin.conf exists, let's apply the metaconfig
 if [ -f /etc/opt/microsoft/omsagent/conf/omsadmin.conf ]; then
