@@ -553,7 +553,8 @@ def GetSystemdState(sc):
     (process_stdout, process_stderr, retval) = Process(
         [systemctl_path, "status", sc.Name])
     if retval is 0:
-        if '(running)' in process_stdout:
+        process_stdout_str = process_stdout.decode() if isinstance(process_stdout, bytes) else process_stdout
+        if '(running)' in process_stdout_str:
             return "running"
     return "stopped"
 
@@ -602,7 +603,8 @@ def GetUpstartState(sc):
                  " failed: " + process_stderr)
         return ""
 
-    if (sc.Name + " start") in process_stdout:
+    process_stdout_str = process_stdout.decode() if isinstance(process_stdout, bytes) else process_stdout
+    if (sc.Name + " start") in process_stdout_str:
         return "running"
     else:
         return "stopped"
@@ -678,7 +680,8 @@ def GetUpstartEnabled(sc):
             (process_stdout, process_stderr, retval) = Process(
                 ['chkconfig', sc.Name, ''])  # try init style
             if retval is 0:
-                if 'off' not in process_stdout:
+                process_stdout_str = process_stdout.decode() if isinstance(process_stdout, bytes) else process_stdout
+                if 'off' not in process_stdout_str:
                     return True
             return False
         if start_on_exists and start_on_is_enabled:
@@ -855,7 +858,8 @@ def ServiceExistsInSystemd(sc):
     (process_stdout, process_stderr, retval) = Process(
         [systemctl_path, "status", sc.Name])
     if retval is not 0:
-        if "Loaded: loaded" in process_stdout:
+        process_stdout_str = process_stdout.decode() if isinstance(process_stdout, bytes) else process_stdout
+        if "Loaded: loaded" in process_stdout_str:
             return True
         else:
             return False
@@ -926,13 +930,14 @@ def ModifySystemdService(sc):
     (process_stdout, process_stderr, retval) = Process(
         [systemctl_path, "status", sc.Name + '.service'])
     # retval may be non zero even if service exists for 'status'.
-    if 'No such file or directory' in process_stdout:
+    process_stdout_str = process_stdout.decode() if isinstance(process_stdout, bytes) else process_stdout
+    if 'No such file or directory' in process_stdout_str:
         Print("Error: " + systemctl_path + " status " + sc.Name +
               " failed: " + process_stderr, file=sys.stderr)
         LG().Log('ERROR', "Error: " + systemctl_path +
                  " status " + sc.Name + " failed: " + process_stderr)
         return [-1]
-    if 'Active: active' in process_stdout:
+    if 'Active: active' in process_stdout_str:
         Print("Running", file=sys.stderr)
         LG().Log('INFO', "Running")
         if sc.State and sc.State != "running":
@@ -1132,7 +1137,8 @@ def ModifyInitService(sc):
                     LG().Log('ERROR', "Error: " + check_enabled_program +
                              " -f " + sc.Name + " defaults failed: " + process_stderr)
                     return [-1]
-                if 'already exist' in process_stdout:  # we need to remove them first
+                process_stdout_str = process_stdout.decode() if isinstance(process_stdout, bytes) else process_stdout
+                if 'already exist' in process_stdout_str:  # we need to remove them first
                     (process_stdout, process_stderr, retval) = Process(
                         [check_enabled_program, "-f", sc.Name, "remove"])
                     if retval is not 0:
@@ -1190,7 +1196,8 @@ def ModifyInitService(sc):
                     LG().Log('ERROR', "Error: " + check_enabled_program +
                              " -f " + sc.Name + " defaults failed: " + process_stderr)
                     return [-1]
-                if 'already exist' in process_stdout:  # we need to remove them first
+                process_stdout_str = process_stdout.decode() if isinstance(process_stdout, bytes) else process_stdout
+                if 'already exist' in process_stdout_str:  # we need to remove them first
                     (process_stdout, process_stderr, retval) = Process(
                         [check_enabled_program, "-f", sc.Name, "remove"])
                     if retval is not 0:
