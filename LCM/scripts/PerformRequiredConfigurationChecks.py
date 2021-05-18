@@ -116,6 +116,6 @@ def run_perform_required_configuration_checks():
     print(stdout)
 
 if __name__ == "__main__":
-    LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info.major))
+    LG().Log("DEBUG", "Starting Main method for " + argv[0] + " runing with python " + str(sys.version_info))
     main()
-    LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info.major))
+    LG().Log("DEBUG", "End of Main method for " +  argv[0] + " runing with python " + str(sys.version_info))
