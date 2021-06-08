@@ -25,7 +25,8 @@ definition_kind_int_to_str = {0: "Unknown",
                               8: "GraphPowerShellWorkflow",
                               9: "Python2",
                               10: "Python3",
-                              11: "Bash"}
+                              11: "Bash",
+                              13: "PowerShell7"}
 
 
 class Runbook(object):
@@ -95,6 +96,13 @@ class BashRunbook(Runbook):
 
 
 class PowerShellRunbook(Runbook):
+    def __init__(self, runbook_data):
+        Runbook.__init__(self, runbook_data)
+        self.file_extension = ".ps1"
+        self.initialize()
+
+
+class PowerShell7Runbook(Runbook):
     def __init__(self, runbook_data):
         Runbook.__init__(self, runbook_data)
         self.file_extension = ".ps1"
