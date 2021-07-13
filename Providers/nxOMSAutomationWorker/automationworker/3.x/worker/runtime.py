@@ -84,7 +84,7 @@ class Runtime(object):
         if job_parameters is not None and len(job_parameters) > 0:
             for parameter in job_parameters:
                 tracer.log_debug_trace("Parameter is: \n" + str(parameter))
-                if self.runbook.definition_kind_str == "PowerShell" and parameter["Name"]:
+                if (self.runbook.definition_kind_str == "PowerShell" or self.runbook.definition_kind_str == "PowerShell7") and parameter["Name"]:
                     # Handle named parameters for PowerShell arriving out of order
                     cmd += ["-%s" % parameter["Name"]]
                 try:
@@ -160,7 +160,7 @@ class PowerShellRuntime(Runtime):
         if linuxutil.is_posix_host() is False:
             self.execution_alias = "powershell"
             
-        self.base_cmd = [self.execution_alias, "-File"]
+        self.base_cmd = [self.execution_alias, "-command"]
 
 
 class Python2Runtime(Runtime):
@@ -205,7 +205,7 @@ class PowerShell7Runtime(Runtime):
         Runtime.__init__(self, job_data, runbook)
 
         self.execution_alias = "pwsh"
-        self.base_cmd = [self.execution_alias, "-File"]
+        self.base_cmd = [self.execution_alias, "-command"]
 
 
 def get_default_python_interpreter_major_version():
