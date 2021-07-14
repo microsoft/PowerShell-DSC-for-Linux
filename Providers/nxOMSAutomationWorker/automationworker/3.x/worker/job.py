@@ -95,6 +95,8 @@ class Job(Thread):
         try:
             self.load_job()
             self.initialize_runtime()
+            if (self.runbook.definition_kind_str == "PowerShell" or self.runbook.definition_kind_str == "PowerShell7"):
+                self.__process_job_parameters()
             self.execute_runbook()
             self.unload_job()
         except (WorkerUnsupportedRunbookType, OSUnsupportedRunbookType) as e:
@@ -201,11 +203,12 @@ class Job(Thread):
                         # string with white spaces should be wrapped in single quotes
                         if " " in parameter_value:
                             parameter_value = "'%s'" % parameter_value
-                    if bool_parameter_type.lower() == parameter_type.lower():
-                        # Boolean value should start with $
-                        if not parameter_value.startswith("$"):
-                            parameter_value = ("$" + parameter_value)
-                    if string_array_parameter_type.lower() == parameter_type.lower():
+                    elif bool_parameter_type.lower() == parameter_type.lower():
+                        # Boolean value should start with $, skip for 0 and 1
+                        if (parameter_value != "0" and parameter_value != "1"):
+                            if not parameter_value.startswith("$"):
+                                parameter_value = ("$" + parameter_value)
+                    elif string_array_parameter_type.lower() == parameter_type.lower():
                         # split the string by separator and wrap the strings with white spaces in single quotes
                         values_list = (parameter_value.split(","))
                         updated_list = []
