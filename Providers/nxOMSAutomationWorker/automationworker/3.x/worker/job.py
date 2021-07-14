@@ -77,7 +77,6 @@ class Job(Thread):
         self.job_data = self.jrds_client.get_job_data(self.job_id)
         self.job_updatable_data = self.jrds_client.get_job_updatable_data(self.job_id)
         self.runbook_data = self.jrds_client.get_runbook_data(self.job_data.runbook_version_id)
-        self.__process_job_parameters()
         tracer.log_sandbox_job_loaded(self.job_id)
 
     def initialize_runtime(self):
