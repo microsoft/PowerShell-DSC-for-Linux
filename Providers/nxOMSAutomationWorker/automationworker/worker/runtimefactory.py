@@ -12,6 +12,7 @@ PowerShell = 5
 PYTHON2 = 9
 PYTHON3 = 10
 BASH = 11
+PowerShell7 = 13
 
 
 def create_runtime(job_data, runbook_data):
@@ -26,6 +27,7 @@ def create_runtime(job_data, runbook_data):
         An instance of Python2Runtime if the runbook_definition_kind parameter is "Python2".
         An instance of Python3Runtime if the runbook_definition_kind parameter is "Python3".
         An instance of BashRuntime if the runbook_definition_kind parameter is "Bash".
+        An instance of PowerShell7 if the runbook_definition_kind parameter is "PowerShell7".
 
     Throws:
         UnsupportedRunbookType : If the OS or the worker doesn't support the specified runbook_definition_kind.
@@ -44,6 +46,9 @@ def create_runtime(job_data, runbook_data):
     elif runbook_definition_kind == BASH:
         runbook = BashRunbook(runbook_data)
         runtime = BashRuntime(job_data, runbook)
+    elif runbook_definition_kind == PowerShell7:
+        runbook = PowerShell7Runbook(runbook_data)
+        runtime = PowerShell7Runtime(job_data, runbook)
     else:
         raise WorkerUnsupportedRunbookType()
 

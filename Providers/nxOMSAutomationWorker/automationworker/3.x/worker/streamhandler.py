@@ -63,9 +63,10 @@ class StreamHandler(Thread):
         while True:
             try:
                 output = codecs.getwriter('utf8')(self.runtime_process.stdout).readline().decode()
-                if output == '' and self.runtime_process.poll() is not None:
+                error_output = codecs.getwriter('utf8')(self.runtime_process.stderr).readline().decode()
+                if output == '' and error_output == '' and self.runtime_process.poll() is not None:
                     break
-                elif output:
+                if output:
                     if output.startswith(PREFIX_DEBUG.lower()) or \
                             output.startswith(PREFIX_DEBUG.upper()) or \
                             output.startswith(PREFIX_DEBUG.capitalize()):
@@ -89,6 +90,10 @@ class StreamHandler(Thread):
                     # leave trace at the end to prevent encoding issue from pushing streams to cloud
                     # leave this as debug trace to prevent logging customer streams to automation logs
                     tracer.log_debug_trace("STDOUT : " + str(output.strip()))
+                if error_output:
+                    self.process_error_stream(stream_count, error_output)
+                    stream_count += 1
+                    tracer.log_debug_trace("STDERR : " + str(error_output.strip()))
             except:
                 tracer.log_sandbox_job_streamhandler_unhandled_exception(self.job_data.job_id, traceback.format_exc())
                 continue
