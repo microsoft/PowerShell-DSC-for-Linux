@@ -43,13 +43,6 @@ Please note that
 the extensions for DSC Linux and Monitoring cannot be used
 together on the same machine.
  
-The future roadmap for this solution is to move to
-[Azure Policy Guest Configuration](https://aka.ms/gcpol)
-when it is capable of deploying configurations.
-Currently, Guest Configuration is only able to audit server configurations.
-Many more details including timing and migration
-will be available later in calendar year 2020.
-
 ## Supported Linux operating systems
 The following Linux operating system versions are supported by DSC for Linux. 
 - CentOS 5, 6, and 7 (x86/x64)
