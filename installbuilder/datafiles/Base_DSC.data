@@ -478,6 +478,19 @@ chown -R omsagent /opt/microsoft/${{SHORT_NAME}}/Scripts
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc keymgmtring.gpg"
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc keyring.gpg"
 
+### Reset ownership of files defined in /etc/sudoers.d/omsagent
+echo "Reset ownership of files defined in /etc/sudoers.d/omsagent"
+# Reset file ownership at /opt/microsoft/omsconfig/Scripts 
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSSysklog.post.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSRsyslog.post.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSSyslog-ng.post.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSServiceStat.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSServiceStatAll.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSYumUpdates.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSZypperUpdates.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSAptUpdates.sh
+# Reset file ownership at /opt/microsoft/omsagent/plugin 
+chown root:root /opt/microsoft/omsagent/plugin/tailfilereader.rb
 
 # Set up a dsc cron job to run the ConsistencyInvoker every 30 minutes which is default freq, this is to fix dsc github issue no 322.
 # It is a temporary workaround to create dsc DYI cron job as omsconfig upgrade removes dsc cron job.
