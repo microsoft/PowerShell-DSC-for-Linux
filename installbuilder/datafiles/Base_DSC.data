@@ -500,6 +500,7 @@ chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSServiceStatAll.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSYumUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSZypperUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSAptUpdates.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/NPMAgentBinaryCap.sh
 # Reset file ownership at /opt/microsoft/omsagent/plugin 
 chown root:root /opt/microsoft/omsagent/plugin/tailfilereader.rb
 
