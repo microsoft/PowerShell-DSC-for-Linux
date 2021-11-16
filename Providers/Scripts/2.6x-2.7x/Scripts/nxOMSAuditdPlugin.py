@@ -224,14 +224,6 @@ def Set(WorkspaceId, Ensure):
         LogStatus("Set_End", "Invalid workspace id", False)
         return [1]
 
-    if IsSudoScriptOutOfDate():
-        LG().Log(LOG_INFO, "Updating sudo script")
-        try:
-            WriteFile(SUDO_SCRIPT, ReadFile(RESOURCE_SUDO_SCRIPT))
-        except:
-            LogStatus("Set_End", "Failed to update " + SUDO_SCRIPT, True)
-            return [1]
-
     auoms_version = GetPackageVersion("auoms")
     if auoms_version is None:
         LogStatus("Set_End", "Failed to determine auoms version", True)
@@ -463,10 +455,6 @@ def Test(WorkspaceId, DesiredEnsure):
             if DesiredEnsure == "Present":
                 LogStatus("Test_End", "Auditd needs to be installed", True)
             return [0]
-
-    if IsSudoScriptOutOfDate():
-        LogStatus("Test_End", "sudo script needs to be updated", False)
-        return [-1]
 
     if OmsAgentNeedsRestart(WorkspaceId):
         LogStatus("Test_End", "omsagent needs restart", False)
