@@ -1,0 +1,13 @@
+sudo yum install make -y
+sudo yum install bison -y
+sudo yum install g++ -y
+sudo yum install rpm -y
+sudo yum install librpm-dev -y
+sudo yum install libpam0g-dev -y
+sudo yum install libssl-dev -y
+sudo yum install libmysqlclient-dev -y
+sudo yum install curl -y
+sudo yum install libcurl4-gnutls-dev -y
+sudo yum install zlib1g -y
+sudo yum install zlib1g-dev -y
+sudo yum install openssl -y
