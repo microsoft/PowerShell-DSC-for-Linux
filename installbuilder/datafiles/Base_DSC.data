@@ -500,8 +500,18 @@ chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSServiceStatAll.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSYumUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSZypperUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSAptUpdates.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMS_MetaConfigHelper.py
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/python3/OMS_MetaConfigHelper.py 
+
+
 # Reset file ownership at /opt/microsoft/omsagent/plugin 
 chown root:root /opt/microsoft/omsagent/plugin/tailfilereader.rb
+
+# Reset file ownership at /opt/microsoft/omsconfig/modules/nxOMSAutomationWorker
+chown root:root /opt/microsoft/${{SHORT_NAME}}/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/main.py 
+chown root:root /opt/microsoft/${{SHORT_NAME}}/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/worker/omsutil.py 
+chown root:root /opt/microsoft/${{SHORT_NAME}}/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker/main.py 
+chown root:root /opt/microsoft/${{SHORT_NAME}}/modules/nxOMSAutomationWorker/DSCResources/MSFT_nxOMSAutomationWorkerResource/automationworker/3.x/worker/omsutil.py 
 
 # Set up a dsc cron job to run the ConsistencyInvoker every 30 minutes which is default freq, this is to fix dsc github issue no 322.
 # It is a temporary workaround to create dsc DYI cron job as omsconfig upgrade removes dsc cron job.
