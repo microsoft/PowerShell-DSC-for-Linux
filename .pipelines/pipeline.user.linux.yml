@@ -1,18 +1,18 @@
 environment:
   host:
-    os: "linux"
-    flavor: "ubuntu"
-    version: "16.04"
+    os: 'linux'
+    flavor: 'ubuntu'
+    version: '16.04'
   runtime:
-    provider: "appcontainer"
-    image: "cdpxlinux.azurecr.io/user/geneva/oms-centos5-x64:3.0"
-    source_mode: "link"
+    provider: 'appcontainer'
+    image: 'cdpxlinux.azurecr.io/user/geneva/oms-centos5-x64:3.0'
+    source_mode: 'link'
 
 version:
   major: 1
   minor: 0
-  system: "revisioncounter"
-  name: "PowerShell-DSC-For-Linux"
+  system: 'revisioncounter'
+  name: 'PowerShell-DSC-For-Linux'
 
 workspace_options:
   force_workspace_wipe: false
@@ -23,16 +23,16 @@ static_analysis_options:
 restore:
   commands:
     - !!defaultcommand
-      name: "Restore"
-      command: "pipeline-restore.sh"
+      name: 'Restore'
+      command: 'pipeline-restore.sh'
 
 build:
   commands:
     - !!buildcommand
-      name: "Build"
-      command: "pipeline-build.sh"
+      name: 'Build'
+      command: 'pipeline-build.sh'
       artifacts:
-        - from: "omsagent/target"
-          to: "buildoutput"
+        - from: 'omsagent/target'
+          to: 'buildoutput'
           include:
-            - "**/*"
+            - '**/*'
