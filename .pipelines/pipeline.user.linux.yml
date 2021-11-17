@@ -2,7 +2,7 @@ environment:
   host:
     os: 'linux'
     flavor: 'ubuntu'
-    version: '20.04'
+    version: '16.04'
   runtime:
     provider: 'appcontainer'
     image: 'onebranch.azurecr.io/linux/ubuntu-2004:latest'
