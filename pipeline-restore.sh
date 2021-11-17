@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo apt-get install make -y
 sudo apt-get install bison -y
 sudo apt-get install g++ -y
