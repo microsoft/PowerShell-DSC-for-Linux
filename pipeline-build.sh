@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Fetch the Build-PowerShell-DSC-for-Linux repository for dependencies to build from
 git config --global 'url.https://github.com/.insteadOf' 'git@github.com:'
 git clone --recursive 'https://github.com/Microsoft/Build-PowerShell-DSC-for-Linux.git' ../bld-dsc

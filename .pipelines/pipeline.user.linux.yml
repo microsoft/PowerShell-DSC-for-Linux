@@ -24,13 +24,13 @@ restore:
   commands:
     - !!defaultcommand
       name: 'Restore'
-      command: 'chmod +x pipeline-restore.sh && ./pipeline-restore.sh'
+      command: 'pipeline-restore.sh'
 
 build:
   commands:
     - !!buildcommand
       name: 'Build'
-      command: 'chmod +x pipeline-build.sh && ./pipeline-build.sh'
+      command: 'pipeline-build.sh'
       artifacts:
         - from: 'omsagent/target'
           to: 'buildoutput'
