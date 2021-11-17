@@ -14,7 +14,7 @@ cp -R ../PowerShell-DSC-for-Linux dsc
 PS_DIR=$(cd .; pwd -P)
 DSC_DIR=$(cd ./dsc; pwd -P)
 OMI_ROOT=$(cd ./omi/Unix; pwd -P)
-  # BUILD default DSC 
+# BUILD default DSC 
 cd ${DSC_DIR}/build
 ./configure --noenable-ulinux
 make local

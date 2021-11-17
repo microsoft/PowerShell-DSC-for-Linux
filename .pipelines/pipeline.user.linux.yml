@@ -2,10 +2,10 @@ environment:
   host:
     os: 'linux'
     flavor: 'ubuntu'
-    version: '16.04'
+    version: '20.04'
   runtime:
     provider: 'appcontainer'
-    image: 'cdpxlinux.azurecr.io/user/geneva/oms-centos5-x64:3.0'
+    image: 'onebranch.azurecr.io/linux/ubuntu-2004:latest'
     source_mode: 'link'
 
 version:
