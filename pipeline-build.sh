@@ -9,21 +9,19 @@ echo $GITCOMMIT
 
 # Fetch the Build-PowerShell-DSC-for-Linux repository for dependencies to build from
 git config --global 'url.https://github.com/.insteadOf' 'git@github.com:'
-git clone --recursive 'https://github.com/Microsoft/Build-PowerShell-DSC-for-Linux.git' "$SCRIPT_DIR/../bld-dsc"
+git clone --recursive 'https://github.com/Microsoft/Build-PowerShell-DSC-for-Linux.git' "$SCRIPT_DIR/bld-dsc"
 
 echo "Changind directories"
 # Master branch for all submodules
-cd "$SCRIPT_DIR/../bld-dsc"
-pwd
+cd "$SCRIPT_DIR/bld-dsc"
 
 git submodule foreach git checkout master
 echo "Submodules checkouted"
-pwd
 
 # Patch in the version of PowerShell-DSC-for-Linux that Travis gave to us
-PS_DIR=$(cd .; pwd -P)
-DSC_DIR=$(cd ./dsc; pwd -P)
-OMI_ROOT=$(cd ./omi/Unix; pwd -P)
+PS_DIR="$SCRIPT_DIR/bld-dsc"
+DSC_DIR=$(cd $PS_DIR/dsc; pwd -P)
+OMI_ROOT=$(cd $PS_DIR/omi/Unix; pwd -P)
 
 echo $PS_DIR
 echo $DSC_DIR
