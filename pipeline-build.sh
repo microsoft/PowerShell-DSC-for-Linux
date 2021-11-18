@@ -1,21 +1,15 @@
 #!/bin/bash
 
-echo "Print current directory"
-echo $0
-
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
-SCRIPT_PARENT_DIR="$( cd "$( dirname "$SCRIPT_DIR" )" && pwd )"
-
 echo "SCRIPT_DIR $SCRIPT_DIR"
-echo "SCRIPT_PARENT_DIR $SCRIPT_PARENT_DIR"
 
 # Fetch the Build-PowerShell-DSC-for-Linux repository for dependencies to build from
 git config --global 'url.https://github.com/.insteadOf' 'git@github.com:'
-git clone --recursive 'https://github.com/Microsoft/Build-PowerShell-DSC-for-Linux.git' "$SCRIPT_PARENT_DIR/bld-dsc"
+git clone --recursive 'https://github.com/Microsoft/Build-PowerShell-DSC-for-Linux.git' "$SCRIPT_DIR/../bld-dsc"
 
 echo "Changind directories"
 # Master branch for all submodules
-cd "$SCRIPT_PARENT_DIR/bld-dsc"
+cd "$SCRIPT_DIR/../bld-dsc"
 pwd
 
 git submodule foreach git checkout master
@@ -26,7 +20,7 @@ pwd
 rm -rf dsc
 echo "Removed DSC"
 
-cp -R "$SCRIPT_PARENT_DIR/PowerShell-DSC-for-Linux" dsc
+cp -R "$SCRIPT_DIR/../PowerShell-DSC-for-Linux" dsc
 
 echo "Copied the dsc folder"
 
