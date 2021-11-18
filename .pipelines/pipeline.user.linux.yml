@@ -32,7 +32,7 @@ build:
       name: 'Build'
       command: 'pipeline-build.sh'
       artifacts:
-        - from: 'omsagent/target'
-          to: 'buildoutput'
+        - from: 'bld-dsc/dsc/release'
+          to: 'release'
           include:
             - '**/*'

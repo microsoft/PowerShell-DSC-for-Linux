@@ -46,32 +46,32 @@ sudo make reg
   # - docker run --rm -t -v ${PS_DIR}:/OMS abenbachir/oms-centos6-x64:latest /bin/sh -c "cd /OMS/omi/Unix; make -C /OMS/dsc dsckit100"
   # - docker run --rm -t -v ${PS_DIR}:/OMS abenbachir/oms-centos6-x64:latest /bin/sh -c "cd /OMS/dsc; make distclean"
 # Python tests for 2.6x-2.7x
-cd /opt/omi-*/share/dsc/Scripts/2.6x-2.7x/Scripts/Tests/
-sudo python ./test_nxProviders.py 2> /dev/null
+# cd /opt/omi-*/share/dsc/Scripts/2.6x-2.7x/Scripts/Tests/
+# sudo python ./test_nxProviders.py 2> /dev/null
 
-# Python tests for 3.x
-cd /opt/omi-*/share/dsc/Scripts/3.x/Scripts/Tests/
-sudo python3 ./test_nxProviders.py 2> /dev/null
+# # Python tests for 3.x
+# cd /opt/omi-*/share/dsc/Scripts/3.x/Scripts/Tests/
+# sudo python3 ./test_nxProviders.py 2> /dev/null
 
-# Python tests for 2.4x-2.5x
-cd /tmp
-wget -q https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz
-tar -xzf Python-2.4.6.tgz
-cd Python-2.4.6
-./configure  &> /dev/null
-sed -i "s/#zlib/zlib/" Modules/Setup
-sed -i "s/#_socket/_socket/" Modules/Setup
-sed -i "s/#_ssl _ssl/_ssl _ssl/" Modules/Setup
-sed -i "s/#\t-DUSE_SSL/\t-DUSE_SSL/" Modules/Setup
-sed -i "s/#\t-L\$(SSL)/\t-L\$(SSL)/" Modules/Setup
-sed -i "s/#md5/md5/" Modules/Setup
-sed -i "s/#sha/sha/" Modules/Setup
-make &> /dev/null
-sudo make altinstall &> /dev/null
-cd ..
-wget -q https://sourceforge.net/projects/ctypes/files/ctypes/1.0.2/ctypes-1.0.2.tar.gz
-tar -xzf ctypes-1.0.2.tar.gz
-cd ctypes-1.0.2
-sudo python2.4 ./setup.py build install &> /dev/null
-cd /opt/omi-*/share/dsc/Scripts/2.4x-2.5x/Scripts/Tests/
-sudo python2.4 ./test_nxProviders.py 2> /dev/null
+# # Python tests for 2.4x-2.5x
+# cd /tmp
+# wget -q https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz
+# tar -xzf Python-2.4.6.tgz
+# cd Python-2.4.6
+# ./configure  &> /dev/null
+# sed -i "s/#zlib/zlib/" Modules/Setup
+# sed -i "s/#_socket/_socket/" Modules/Setup
+# sed -i "s/#_ssl _ssl/_ssl _ssl/" Modules/Setup
+# sed -i "s/#\t-DUSE_SSL/\t-DUSE_SSL/" Modules/Setup
+# sed -i "s/#\t-L\$(SSL)/\t-L\$(SSL)/" Modules/Setup
+# sed -i "s/#md5/md5/" Modules/Setup
+# sed -i "s/#sha/sha/" Modules/Setup
+# make &> /dev/null
+# sudo make altinstall &> /dev/null
+# cd ..
+# wget -q https://sourceforge.net/projects/ctypes/files/ctypes/1.0.2/ctypes-1.0.2.tar.gz
+# tar -xzf ctypes-1.0.2.tar.gz
+# cd ctypes-1.0.2
+# sudo python2.4 ./setup.py build install &> /dev/null
+# cd /opt/omi-*/share/dsc/Scripts/2.4x-2.5x/Scripts/Tests/
+# sudo python2.4 ./test_nxProviders.py 2> /dev/null
