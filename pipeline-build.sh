@@ -19,8 +19,9 @@ pwd
 # Patch in the version of PowerShell-DSC-for-Linux that Travis gave to us
 rm -rf dsc
 echo "Removed DSC"
+mkdir dsc
 
-cp -R "$SCRIPT_DIR/../PowerShell-DSC-for-Linux" dsc
+cp -R $SCRIPT_DIR/../PowerShell-DSC-for-Linux/* dsc
 
 echo "Copied the dsc folder"
 
