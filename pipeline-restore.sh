@@ -13,3 +13,5 @@ sudo apt-get install libcurl4-gnutls-dev -y
 sudo apt-get install zlib1g -y
 sudo apt-get install zlib1g-dev -y
 sudo apt-get install openssl -y
+sudo apt-get install pkg-config -y
+sudo apt-get install libkrb5-dev -y
