@@ -32,9 +32,8 @@ git checkout $GITCOMMIT
 
 # BUILD default DSC 
 cd ${DSC_DIR}/build
-ln -fs ../omi/Unix ./omi-1.0.8
-./configure --enable-ulinux
-make
+./configure --noenable-ulinux
+make local
 cd ../omi*
 sudo make install
 cd ../
