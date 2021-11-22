@@ -550,6 +550,15 @@ def Get(WorkspaceId):
     return (-1, "Absent")
 
 def IsSudoScriptOutOfDate():
+    # Try to open SUDO_SCRIPT read/write to test writablility of the file
+    # If an excption is thrown, assume the file is not writable
+    # return false (as if the file is up-to-date)
+    try:
+        fd = os.open(SUDO_SCRIPT, os.O_RDWR):
+        os.close(fd)
+    except:
+        return False
+
     actual = ReadFile(SUDO_SCRIPT)
     desired = ReadFile(RESOURCE_SUDO_SCRIPT)
     return IsTextDifferent(actual, desired)
