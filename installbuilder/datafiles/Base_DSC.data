@@ -78,7 +78,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh; intermediate/Scripts/OMSZypperUpdates.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh; intermediate/Scripts/OMSAptUpdates.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh; intermediate/Scripts/NPMAgentBinaryCap.sh; 755; root; root
-/opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh; intermediate/Scripts/OMSAuditdPlugin.sh; 755; root; root; conffile
+/opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh; intermediate/Scripts/OMSAuditdPlugin.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/Scripts/python3/OMS_MetaConfigHelper.py; intermediate/Scripts/python3/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nx_1.1.zip; release/nx_1.1.zip; 755; ${{RUN_AS_USER}}; root
@@ -93,7 +93,7 @@ SHLIB_EXT: 'so'
 
 #if PFARCH == x86
 /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip; release/nxOMSAgentNPMConfig_2.2.zip; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip; release/nxOMSAuditdPlugin_1.7.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.10.zip; release/nxOMSAuditdPlugin_1.10.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip; release/nxOMSAutomationWorker_1.6.9.1.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip; release/nxOMSContainers_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
@@ -374,7 +374,7 @@ fi
 if [ "$pythonVersion" = "python3" ]; then
   echo "Running python3 python version is ", $pythonVersion
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.10.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
@@ -384,7 +384,7 @@ if [ "$pythonVersion" = "python3" ]; then
 else
   echo "Running python2 python version is ", $pythonVersion
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.7.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAuditdPlugin_1.10.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSAutomationWorker_1.6.9.1.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
