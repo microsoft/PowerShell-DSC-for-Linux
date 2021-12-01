@@ -5,7 +5,7 @@ environment:
     version: '20.04'
   runtime:
     provider: 'appcontainer'
-    image: 'onebranch.azurecr.io/linux/ubuntu-2004:latest'
+    image: 'cdpxlinux.azurecr.io/global/ubuntu-1804-all:3.0'
     source_mode: 'link'
 
 version:
