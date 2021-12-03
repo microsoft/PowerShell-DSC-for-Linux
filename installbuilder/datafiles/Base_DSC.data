@@ -510,6 +510,10 @@ ln -fs $LIBCURL_SO /opt/omi/lib/libcurl.so.4
 
 #if BUILD_OMS == 1
 chown -R omsagent /opt/microsoft/${{SHORT_NAME}}/Scripts
+
+# Reset Script dir ownership back to root
+chown root /opt/microsoft/${{SHORT_NAME}}/Scripts
+
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc keymgmtring.gpg"
 su - omsagent -c "/opt/microsoft/${{SHORT_NAME}}/Scripts/ImportGPGKey.sh /opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc keyring.gpg"
 
