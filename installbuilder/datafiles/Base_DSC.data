@@ -86,10 +86,12 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/module_packages/nxOMSSyslog_2.5.zip; release/nxOMSSyslog_2.5.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSSudoCustomLog_2.7.zip; release/nxOMSSudoCustomLog_2.7.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSKeyMgmt_1.0.zip; release/nxOMSKeyMgmt_1.0.zip; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc; LCM/keys/dscgpgkey.asc; 644; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc; LCM/keys/msgpgkey.asc; 644; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/keys/dscgpgkey.asc; LCM/keys/dscgpgkey.asc; 644; root; root
+/opt/microsoft/${{SHORT_NAME}}/keys/msgpgkey.asc; LCM/keys/msgpgkey.asc; 644; root; root
 /opt/microsoft/omsconfig/module_packages/nxFileInventory_1.4.zip; release/nxFileInventory_1.4.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip; release/nxOMSGenerateInventoryMof_1.5.zip; 755; ${{RUN_AS_USER}}; root
+
+/opt/microsoft/omsconfig/secure/secure_update.sh; installbuilder/secure_update.sh; 755; root; root
 
 #if PFARCH == x86
 /opt/microsoft/omsconfig/module_packages/nxOMSAgentNPMConfig_2.2.zip; release/nxOMSAgentNPMConfig_2.2.zip; 755; ${{RUN_AS_USER}}; root
@@ -119,14 +121,14 @@ SHLIB_EXT: 'so'
 
 %Directories
 /opt/microsoft;                                           755; root; root; sysdir
-/opt/microsoft/${{SHORT_NAME}};                           755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}};                           755; root; root
 /opt/microsoft/${{SHORT_NAME}}/etc;                       755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/mof;                       755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/lib;                       755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/bin;                       755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/modules;                   755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/module_packages;           755; ${{RUN_AS_USER}}; root
-/opt/microsoft/${{SHORT_NAME}}/keys;                      755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/keys;                      755; root; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts;                   755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/python3;                 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.4x-2.5x;         755; ${{RUN_AS_USER}}; root
@@ -135,6 +137,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/${{SHORT_NAME}}/Scripts/2.6x-2.7x/Scripts; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3.x;               755; ${{RUN_AS_USER}}; root
 /opt/microsoft/${{SHORT_NAME}}/Scripts/3.x/Scripts;       755; ${{RUN_AS_USER}}; root
+/opt/microsoft/${{SHORT_NAME}}/secure;                    755; root; root
 /etc/opt/omi/conf;                                        755; root; root; sysdir
 /etc/opt/omi/conf/${{SHORT_NAME}};                        755; ${{RUN_AS_USER}}; root
 /etc/logrotate.d;                                         755; root; root; sysdir
@@ -292,6 +295,12 @@ chown omsagent /opt/dsc/dsc_host_ready
 chgrp omsagent /opt/dsc/dsc_host_ready
 chmod 644 /opt/dsc/dsc_host_ready
 
+# Set up secure_update cache dir
+mkdir -p /var/opt/microsoft/omsconfig_secure_cache
+chown root /var/opt/microsoft/omsconfig_secure_cache
+chgrp root /var/opt/microsoft/omsconfig_secure_cache
+chmod 755 /var/opt/microsoft/omsconfig_secure_cache
+
 #endif
 
 
@@ -335,8 +344,23 @@ chown -R ${{RUN_AS_USER}} $OMI_REGISTER_DIR/root-oms
 chown -R ${{RUN_AS_USER}} /etc/opt/omi/conf/${{SHORT_NAME}}
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
 
+# Secure the /opt/microsoft/omsagent/plugin dir so that root owned files
+# cannot me modified by non-root while still allowing ${{RUN_AS_USER}} to modify
+# ${{RUN_AS_USER}} owned files
+chown root /opt/microsoft/omsagent/plugin
+chgrp omiusers /opt/microsoft/omsagent/plugin
+chmod 1775 /opt/microsoft/omsagent/plugin
+
 # If this is ever changed/removed, coordinate with nxOMSAuditdPlugin author/maintainer(s)
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
+
+# Secure the /opt/microsoft/omsconfig/Scripts dir so that root owned files
+# cannot me modified by non-root while still allowing ${{RUN_AS_USER}} to modify
+# ${{RUN_AS_USER}} owned files
+chown root /opt/microsoft/omsconfig/Scripts
+chgrp omiusers /opt/microsoft/omsconfig/Scripts
+chmod 1775 /opt/microsoft/omsconfig/Scripts
+
 
 # pythonVersion check must be repeated for each section
 if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
@@ -615,6 +639,9 @@ if pidof systemd 1> /dev/null 2> /dev/null; then
     echo "Pausing briefly for systemctl synchronization ..."
     sleep 5
 fi
+
+# Remove seure_update cache
+rm -rf /var/opt/microsoft/omsconfig_secure_cache
 
 #endif
 
