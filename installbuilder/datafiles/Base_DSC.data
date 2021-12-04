@@ -212,14 +212,18 @@ fi
 
 %Preinstall_200
 # pythonVersion check must be repeated for each section
-if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+if [ ! -z "$version" ]; then
   echo "Using python2"
   pythonVersion="python2"
-elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python3"
-  pythonVersion="python3"
 else
-  echo "Python not found."
+  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  if [ ! -z "$version" ]; then
+    echo "Using python3"
+    pythonVersion="python3"
+  else
+    echo "Python not found."
+  fi
 fi
 # Only check for ctypes if python2 is installed
 if [ "$pythonVersion" = "python2" ]; then
@@ -237,7 +241,18 @@ fi
 echo "Cleanning up existing dsc_hosts..."
 kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1) -9 2&>1 > /dev/null
 chmod -R 777 /opt/dsc
-rm -rfv /opt/dsc
+# Clean dsc directory in case of install and clean
+echo "Deployment operation type :" $1
+if [ "$1" = "1" -o "$1" = 1 -o "$1" = "install" -o "$1" = "clean" ]; then
+    echo "Cleanning directory /opt/dsc..."
+    rm -rfv /opt/dsc
+else
+  for file in `ls /opt/dsc`; do
+    if [ $file != "lib" ]; then
+      rm -rfv /opt/dsc/"$file"
+    fi
+  done
+fi
 rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
 echo "Cleaned up existing dsc_hosts..."
 
@@ -316,7 +331,7 @@ ln -fs /opt/microsoft/${{SHORT_NAME}}/bin/OMSConsistencyInvoker $OMI_HOME/bin/OM
 #else
 
 # Make OMI listen on the standard DSC port
-$OMI_HOME/bin/omiconfigeditor httpsport -a 5986 < $CONFIG_SYSCONFDIR/omiserver.conf > $CONFIG_SYSCONFDIR/omiserver.conf_temp
+$OMI_HOME/bin/omiconfigeditor httpsport -a 0 < $CONFIG_SYSCONFDIR/omiserver.conf > $CONFIG_SYSCONFDIR/omiserver.conf_temp
 mv $CONFIG_SYSCONFDIR/omiserver.conf_temp $CONFIG_SYSCONFDIR/omiserver.conf
 
 mkdir -p $OMI_REGISTER_DIR/root-Microsoft-DesiredStateConfiguration
@@ -363,14 +378,18 @@ chmod 1775 /opt/microsoft/omsconfig/Scripts
 
 
 # pythonVersion check must be repeated for each section
-if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+if [ ! -z "$version" ]; then
   echo "Using python2"
   pythonVersion="python2"
-elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python3"
-  pythonVersion="python3"
 else
-  echo "Python not found."
+  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  if [ ! -z "$version" ]; then
+    echo "Using python3"
+    pythonVersion="python3"
+  else
+    echo "Python not found."
+  fi
 fi
 
 # Set up built-in resource modules for OMS DSC
@@ -451,14 +470,18 @@ if [ -d "/etc/opt/omi/conf/omsconfig" ]; then chown -R omsagent:omiusers /etc/op
 #else
 
 # pythonVersion check must be repeated for each section
-if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+if [ ! -z "$version" ]; then
   echo "Using python2"
   pythonVersion="python2"
-elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python3"
-  pythonVersion="python3"
 else
-  echo "Python not found."
+  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  if [ ! -z "$version" ]; then
+    echo "Using python3"
+    pythonVersion="python3"
+  else
+    echo "Python not found."
+  fi
 fi
 
 # Set up built-in resource module for DIY DSC
@@ -556,14 +579,18 @@ mv /etc/crontabtmp /etc/crontab
 #if BUILD_OMS == 1
 
 # pythonVersion check must be repeated for each section
-if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+if [ ! -z "$version" ]; then
   echo "Using python2"
   pythonVersion="python2"
-elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python3"
-  pythonVersion="python3"
 else
-  echo "Python not found"
+  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  if [ ! -z "$version" ]; then
+    echo "Using python3"
+    pythonVersion="python3"
+  else
+    echo "Python not found."
+  fi
 fi
 
 # If omsadmin.conf exists, let's apply the metaconfig
@@ -587,23 +614,39 @@ chgrp omsagent /etc/opt/omi/conf/omsconfig/configuration/Inventory.mof
 echo "Cleanning up existing dsc_hosts before uninstall..."
 kill $(ps -eo pid,cmd | grep '/opt/dsc/bin/dsc_host' | grep -v grep | tr -s ' ' | sed 's/^[ \t]*//' | cut -d' ' -f1) -9 2&>1 > /dev/null
 chmod -R 777 /opt/dsc
-rm -rfv /opt/dsc
+# remove entire dsc folder incase of remove and purge
+echo "Deployment operation type :" $1 
+if [ "$1" = "0" -o "$1" = 0 -o "$1" = "remove" -o "$1" = "purge" ]; then
+    echo "Cleanning directory /opt/dsc..."
+    rm -rfv /opt/dsc
+else
+  for file in `ls /opt/dsc`; do
+    if [ $file != "lib" ]; then
+      rm -rfv /opt/dsc/"$file"
+    fi
+  done
+fi
 rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
 echo "Cleaned up existing dsc_hosts before uninstall..."
 
 %Preuninstall_999
 # pythonVersion check must be repeated for each section
-if  [ ! "$(python2 --version 2>&1 | grep 'not found')" ]; then
+version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+if [ ! -z "$version" ]; then
   echo "Using python2"
   pythonVersion="python2"
-elif [ ! "$(python3 --version 2>&1 | grep 'not found')" ]; then
-  echo "Using python3"
-  pythonVersion="python3"
 else
-  echo "Python not found"
+  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  if [ ! -z "$version" ]; then
+    echo "Using python3"
+    pythonVersion="python3"
+  else
+    echo "Python not found."
+  fi
 fi
 # if this is a package removal, not an upgrade, remove the modules
-if [ "$1" = "0" -o "$1" = "remove" -o "$1" = "purge" ]; then
+echo "Deployment operation type :" $1 
+if [ "$1" = "0" -o "$1" = 0 -o "$1" = "remove" -o "$1" = "purge" ]; then
   # Remove all DSC specific data
   if [ "$pythonVersion" = "python3" ]; then
      echo "Running python3"
