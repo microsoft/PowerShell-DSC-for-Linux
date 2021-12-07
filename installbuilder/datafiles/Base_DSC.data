@@ -246,12 +246,6 @@ echo "Deployment operation type :" $1
 if [ "$1" = "1" -o "$1" = 1 -o "$1" = "install" -o "$1" = "clean" ]; then
     echo "Cleanning directory /opt/dsc..."
     rm -rfv /opt/dsc
-else
-  for file in `ls /opt/dsc`; do
-    if [ $file != "lib" ]; then
-      rm -rfv /opt/dsc/"$file"
-    fi
-  done
 fi
 rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
 echo "Cleaned up existing dsc_hosts..."
@@ -619,12 +613,6 @@ echo "Deployment operation type :" $1
 if [ "$1" = "0" -o "$1" = 0 -o "$1" = "remove" -o "$1" = "purge" ]; then
     echo "Cleanning directory /opt/dsc..."
     rm -rfv /opt/dsc
-else
-  for file in `ls /opt/dsc`; do
-    if [ $file != "lib" ]; then
-      rm -rfv /opt/dsc/"$file"
-    fi
-  done
 fi
 rm -f /etc/opt/omi/conf/omsconfig/inventory_lock
 echo "Cleaned up existing dsc_hosts before uninstall..."
