@@ -347,9 +347,13 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsagent/plugin
 # Secure the /opt/microsoft/omsagent/plugin dir so that root owned files
 # cannot me modified by non-root while still allowing ${{RUN_AS_USER}} to modify
 # ${{RUN_AS_USER}} owned files
-chown root /opt/microsoft/omsagent/plugin
-chgrp omiusers /opt/microsoft/omsagent/plugin
-chmod 1775 /opt/microsoft/omsagent/plugin
+
+# Disable changing plugin permission because DA agent was breaking
+# chown root /opt/microsoft/omsagent/plugin
+# chgrp omiusers /opt/microsoft/omsagent/plugin
+# Disable sticky-bit folder because DA agent is breaking
+# TODO: uncomment when DA fix their issue
+# chmod 1775 /opt/microsoft/omsagent/plugin
 
 # If this is ever changed/removed, coordinate with nxOMSAuditdPlugin author/maintainer(s)
 chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
@@ -359,7 +363,9 @@ chown -R ${{RUN_AS_USER}} /opt/microsoft/omsconfig/Scripts
 # ${{RUN_AS_USER}} owned files
 chown root /opt/microsoft/omsconfig/Scripts
 chgrp omiusers /opt/microsoft/omsconfig/Scripts
-chmod 1775 /opt/microsoft/omsconfig/Scripts
+# Disable sticky-bit folder because DA agent is breaking
+# TODO: uncomment when DA fix their issue
+# chmod 1775 /opt/microsoft/omsconfig/Scripts
 
 
 # pythonVersion check must be repeated for each section
