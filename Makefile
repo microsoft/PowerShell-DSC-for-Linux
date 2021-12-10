@@ -541,7 +541,7 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.59"; \
+	VERSION="3.62"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -611,7 +611,7 @@ nxOMSAgentNPMConfig:
 
 nxOMSAuditdPlugin:
 	rm -rf output/staging; \
-	VERSION="1.9"; \
+	VERSION="1.10"; \
 	PROVIDERS="nxOMSAuditdPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
