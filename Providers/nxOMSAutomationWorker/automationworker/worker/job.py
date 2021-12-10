@@ -215,6 +215,9 @@ class Job(Thread):
                         parameter_value = ",".join(updated_list)
                         # wrap the final string array in double quotes
                         parameter_value = "\"%s\"" % parameter_value
+                    else:
+                        # wrap any other type in single quotes by default
+                        parameter_value = "\'%s\'" % parameter_value
                     parameter["Value"] = parameter_value
 
     
