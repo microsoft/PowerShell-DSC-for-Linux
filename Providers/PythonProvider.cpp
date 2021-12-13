@@ -61,7 +61,7 @@ std::string determinePythonVersion(){
     // Check for python3
     FILE* pipe = popen("python3 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
     if(!pipe) {
-    	std::cout << "Couldn't start command." << std::endl;
+        std::cout << "Couldn't start command." << std::endl;
     }
     while(fgets(buffer, 128, pipe) != NULL) {
         result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
@@ -71,7 +71,7 @@ std::string determinePythonVersion(){
     // Checking if Python version starts with 3.*.*
     if(result[0] == '3') {
         std::cout << "Found python3." << std::endl;
-	    return "python3";
+        return "python3";
     }
 
     // Look for python2
@@ -90,7 +90,7 @@ std::string determinePythonVersion(){
     // Checking if Python version starts with 2.*.*
     if(result[0] == '2') {
         std::cout << "Found python2." << std::endl;
-    	return "python2";
+        return "python2";
     }
 
     return "python";

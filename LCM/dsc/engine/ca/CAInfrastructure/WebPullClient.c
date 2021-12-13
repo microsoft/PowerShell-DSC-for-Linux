@@ -2076,7 +2076,7 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
         int isPython3 = 0;
         DSC_LOG_INFO("Assuming python2 in WebPullClient\n");
 
-	    // Look for python3
+        // Look for python3
         FILE * pipe = popen("python3 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
         fgets(data, BUFSIZ, pipe);
         if (data[0] == '3')
@@ -2100,12 +2100,12 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
       	if (isPython3 == 1)
       	{
             DSC_LOG_INFO("Calling InstallModule with python3");
-		    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/InstallModule.py", zipPath, verifyFlag, " 2>&1");
+            Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/InstallModule.py", zipPath, verifyFlag, " 2>&1");
       	}
       	else
       	{
-        	DSC_LOG_INFO("Calling InstallModule with python2");
-      		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
+            DSC_LOG_INFO("Calling InstallModule with python2");
+            Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
       	}
         DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
