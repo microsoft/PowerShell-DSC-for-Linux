@@ -212,15 +212,15 @@ fi
 
 %Preinstall_200
 # pythonVersion check must be repeated for each section
-version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
 if [ ! -z "$version" ]; then
-  echo "Using python2"
-  pythonVersion="python2"
+  echo "Using python3"
+  pythonVersion="python3"
 else
-  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
   if [ ! -z "$version" ]; then
-    echo "Using python3"
-    pythonVersion="python3"
+    echo "Using python2"
+    pythonVersion="python2"
   else
     echo "Python not found."
   fi
@@ -372,15 +372,15 @@ chmod 1775 /opt/microsoft/omsconfig/Scripts
 
 
 # pythonVersion check must be repeated for each section
-version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
 if [ ! -z "$version" ]; then
-  echo "Using python2"
-  pythonVersion="python2"
+  echo "Using python3"
+  pythonVersion="python3"
 else
-  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
   if [ ! -z "$version" ]; then
-    echo "Using python3"
-    pythonVersion="python3"
+    echo "Using python2"
+    pythonVersion="python2"
   else
     echo "Python not found."
   fi
@@ -464,15 +464,15 @@ if [ -d "/etc/opt/omi/conf/omsconfig" ]; then chown -R omsagent:omiusers /etc/op
 #else
 
 # pythonVersion check must be repeated for each section
-version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
 if [ ! -z "$version" ]; then
-  echo "Using python2"
-  pythonVersion="python2"
+  echo "Using python3"
+  pythonVersion="python3"
 else
-  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
   if [ ! -z "$version" ]; then
-    echo "Using python3"
-    pythonVersion="python3"
+    echo "Using python2"
+    pythonVersion="python2"
   else
     echo "Python not found."
   fi
@@ -573,15 +573,15 @@ mv /etc/crontabtmp /etc/crontab
 #if BUILD_OMS == 1
 
 # pythonVersion check must be repeated for each section
-version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
 if [ ! -z "$version" ]; then
-  echo "Using python2"
-  pythonVersion="python2"
+  echo "Using python3"
+  pythonVersion="python3"
 else
-  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
   if [ ! -z "$version" ]; then
-    echo "Using python3"
-    pythonVersion="python3"
+    echo "Using python2"
+    pythonVersion="python2"
   else
     echo "Python not found."
   fi
@@ -619,15 +619,15 @@ echo "Cleaned up existing dsc_hosts before uninstall..."
 
 %Preuninstall_999
 # pythonVersion check must be repeated for each section
-version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
 if [ ! -z "$version" ]; then
-  echo "Using python2"
-  pythonVersion="python2"
+  echo "Using python3"
+  pythonVersion="python3"
 else
-  version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
   if [ ! -z "$version" ]; then
-    echo "Using python3"
-    pythonVersion="python3"
+    echo "Using python2"
+    pythonVersion="python2"
   else
     echo "Python not found."
   fi

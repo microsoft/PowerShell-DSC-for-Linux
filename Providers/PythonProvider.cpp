@@ -58,8 +58,26 @@ std::string determinePythonVersion(){
     char* result = (char*)malloc(1);
     *result = 0; 
 
-    // Check for python2
-    FILE* pipe = popen("python2 --version 2>&1", "r");
+    // Check for python3
+    FILE* pipe = popen("python3 --version 2>&1", "r");
+    if(!pipe) {
+    	std::cout << "Couldn't start command." << std::endl;
+    }
+    while(fgets(buffer, 128, pipe) != NULL) {
+        result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        strcat(result,buffer);
+    }
+
+    // If python3 --version does not contain 'not found' return python3
+    if(strstr(result, "not found") == NULL) {
+        std::cout << "Found python3." << std::endl;
+	    return "python3";
+    }
+
+    // Look for python2
+    result = (char*)malloc(1);
+    *result = 0;
+    pipe = popen("python2 --version 2>&1", "r");
     if(!pipe) {
         std::cout << "Couldn't start command." << std::endl;
     }
@@ -75,23 +93,6 @@ std::string determinePythonVersion(){
     	return "python2";
     }
 
-    // Look for python3
-    result = (char*)malloc(1);
-    *result = 0;
-    pipe = popen("python3 --version 2>&1", "r");
-    if(!pipe) {
-    	std::cout << "Couldn't start command." << std::endl;
-    }
-    while(fgets(buffer, 128, pipe) != NULL) {
-        result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
-        strcat(result,buffer);
-    }
-
-    // If python3 --version does not contain 'not found' return python3
-    if(strstr(result, "not found") == NULL) {
-        std::cout << "Found python3." << std::endl;
-	    return "python3";
-    }
     return "python";
 }
 

@@ -2073,38 +2073,39 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
         }
         // Determine python version
         char data[BUFSIZ];
-        int isPython2 = 1;
+        int isPython3 = 0;
         DSC_LOG_INFO("Assuming python2 in WebPullClient\n");
 
-	// Look for python2
-        FILE * pipe = popen("python2 --version 2>&1", "r");
+	    // Look for python3
+        FILE * pipe = popen("python3 --version 2>&1", "r");
         fgets(data, BUFSIZ, pipe);
         if (!strstr(data, "not found"))
         {
-            DSC_LOG_INFO("Found python2 in WebPullClient.\n");
-                isPython2 = 1;
-            }
+            DSC_LOG_INFO("Found python3 in WebPullClient.\n");
+            isPython3 = 1;
+        }
         else
         {
-            // If python2 does not exist, look for python3
+            // If python3 does not exist, look for python2
             memset(&data[0], 0, sizeof(data));
-                pipe = popen("python3 --version 2>&1", "r");
-                fgets(data, BUFSIZ, pipe);
-            if (!strstr(data, "not found")) {
-                DSC_LOG_INFO("Found python3 in WebPullClient.\n");
-                    isPython2 = 0;
-                }
+            pipe = popen("python2 --version 2>&1", "r");
+            fgets(data, BUFSIZ, pipe);
+            if (!strstr(data, "not found")) 
+            {
+                DSC_LOG_INFO("Found python2 in WebPullClient.\n");
+                isPython3 = 0;
+            }
         }
 
-      	if (isPython2 == 1)
+      	if (isPython3 == 1)
       	{
-        	DSC_LOG_INFO("Calling InstallModule with python2");
-      		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
+            DSC_LOG_INFO("Calling InstallModule with python3");
+		    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/InstallModule.py", zipPath, verifyFlag, " 2>&1");
       	}
       	else
       	{
-		DSC_LOG_INFO("Calling InstallModule with python3");
-		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/InstallModule.py", zipPath, verifyFlag, " 2>&1");
+        	DSC_LOG_INFO("Calling InstallModule with python2");
+      		Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", DSC_SCRIPT_PATH "/InstallModule.py", zipPath, verifyFlag);
       	}
         DSC_LOG_INFO("executing '%T'\n", stringBuffer);
         retval = system(stringBuffer);
@@ -2119,15 +2120,15 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
             else
             {
                 // Attempt to remove the module as a last resort.  If it fails too, a reinstall may be necessary.
-                if (isPython2 == 1)
-                {
-                    DSC_LOG_INFO("Calling RemoveModule with python2");
-                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/RemoveModule.py", current->moduleName);
-                }
-                else
+                if (isPython3 == 1)
                 {
                     DSC_LOG_INFO("Calling RemoveModule with python3");
                     Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s %s", "/usr/bin/python3 " DSC_SCRIPT_PATH "/python3/RemoveModule.py", current->moduleName, " 2>&1");
+                }
+                else
+                {
+                    DSC_LOG_INFO("Calling RemoveModule with python2");
+                    Snprintf(stringBuffer, MAX_URL_LENGTH, "%s %s", DSC_SCRIPT_PATH "/RemoveModule.py", current->moduleName);
                 }
 
                 retval = system(stringBuffer);

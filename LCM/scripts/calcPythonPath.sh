@@ -4,17 +4,21 @@ if [ "$#" -ne 0 ]
 then
 	# Checking which python version is available 
 	# python3
-	if [[ -z $(python2 --version 2>&1 | grep 'not found') ]]
-	then
-		#echo "python exists"; 
-		pythonVer="python2"
-	elif [[ -z $(python3 --version 2>&1 | grep 'not found') ]]
+	version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+	if [ ! -z "$version" ]
 	then
 		#echo "python3 exists"; 
-		pythonVer="python3"
-	else 
-		echo "'python2' or 'python3' not found on this machine. Please install python."
-		exit 1
+		pythonVer="python3"		
+	else
+		version=$(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+  		if [ ! -z "$version" ]
+		then
+			#echo "python exists"; 
+			pythonVer="python2"
+		else
+			echo "'python2' or 'python3' not found on this machine. Please install python."
+			exit 1
+		fi		
 	fi
 
 	# Detemine file location
