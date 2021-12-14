@@ -17,6 +17,7 @@ sudo apt-get install zlib1g-dev -y
 sudo apt-get install openssl -y
 sudo apt-get install pkg-config -y
 sudo apt-get install libkrb5-dev -y
+sudo apt-get install libtry-tiny-perl -y
 
 cd /tmp
 wget -q https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz
