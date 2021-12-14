@@ -39,12 +39,12 @@ sudo make reg
   # - docker run --rm -t -v ${PS_DIR}:/OMS abenbachir/oms-centos6-x64:latest /bin/sh -c "cd /OMS/dsc; make distclean"
 
 echo "Python tests for 2.6x-2.7x"
-cd /opt/omi-*/share/dsc/Scripts/2.6x-2.7x/
-sudo python ./Scripts/Tests/test_nxProviders.py 2> /dev/null
+cd /opt/omi-*/share/dsc/Scripts/2.6x-2.7x/Scripts/Tests
+sudo python ./test_nxProviders.py
 
 echo "Python tests for 3.x"
-cd /opt/omi-*/share/dsc/Scripts/3.x/
-sudo python3 ./Scripts/Tests/test_nxProviders.py 2> /dev/null
+cd /opt/omi-*/share/dsc/Scripts/3.x/Scripts/Tests/
+sudo python3 ./test_nxProviders.py
 
 echo "Python tests for 2.4x-2.5x"
 cd /tmp
@@ -63,5 +63,5 @@ make &> /dev/null
 sudo make altinstall &> /dev/null
 cd ../ctypes-1.0.2
 sudo python2.4 ./setup.py build install &> /dev/null
-cd /opt/omi-*/share/dsc/Scripts/2.4x-2.5x/
-sudo python2.4 ./Scripts/Tests/test_nxProviders.py 2> /dev/null
+cd /opt/omi-*/share/dsc/Scripts/2.4x-2.5x//Scripts/Tests/
+sudo python2.4 ./test_nxProviders.py
