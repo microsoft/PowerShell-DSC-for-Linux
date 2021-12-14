@@ -752,12 +752,12 @@ class nxPackageTestCases(unittest2.TestCase):
             os.system('dpkg -r ' + self.pkg + ' 2> /dev/null')
             if os.path.exists('/usr/bin/dummy.sh'):
                 os.system('dpkg -r dummy 2> /dev/null')
-            self.package_path='./dummy-1.0.deb'
+            self.package_path='./Scripts/Tests/dummy-1.0.deb'
         else :
             os.system('rpm -e ' + self.pkg + ' 2> /dev/null')
             if os.path.exists('/usr/bin/dummy.sh'):
                 os.system('rpm -e dummy 2> /dev/null')
-            self.package_path='./dummy-1.0-1.x86_64.rpm'
+            self.package_path='./Scripts/Tests/dummy-1.0-1.x86_64.rpm'
         time.sleep(3)
         print self.id() + '\n'
         
