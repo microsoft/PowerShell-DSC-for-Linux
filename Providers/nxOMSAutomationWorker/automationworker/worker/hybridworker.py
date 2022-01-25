@@ -231,6 +231,8 @@ class Worker:
             if (msi_secret and msi_secret != "None"):
                 process_env_variables["MSI_SECRET"] = msi_secret
                 process_env_variables["MSI_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
+                process_env_variables["IDENTITY_HEADER"] = msi_secret
+                process_env_variables["IDENTITY_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
 
             cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
                    configuration.get_worker_configuration_file_path()]
