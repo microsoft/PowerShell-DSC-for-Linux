@@ -191,7 +191,7 @@ class Worker(object):
     @staticmethod
     def construct_jrds_msi_endpoint(sandbox_id):
         url = configuration.get_jrds_base_uri() + "/automationAccounts/" + configuration.get_account_id() + \
-              "/Sandboxes/" + sandbox_id + "/metadata/identity/oauth2/token"
+              "/sandboxes/" + sandbox_id + "/metadata/identity/oauth2/token"
         return url
 
     @safe_loop
