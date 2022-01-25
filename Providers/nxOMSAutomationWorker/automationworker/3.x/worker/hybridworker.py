@@ -233,6 +233,8 @@ class Worker(object):
             if (msi_secret and msi_secret != "None"):
                 process_env_variables["MSI_SECRET"] = msi_secret
                 process_env_variables["MSI_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
+                process_env_variables["IDENTITY_HEADER"] = msi_secret
+                process_env_variables["IDENTITY_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
 
 
             python_to_be_used = util.get_python_to_be_used()
