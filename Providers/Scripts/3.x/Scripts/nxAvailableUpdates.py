@@ -37,6 +37,7 @@ def Inventory_Marshall(Name):
         p['BuildDate'] = protocol.MI_String(p['BuildDate'])
         p['Repository'] = protocol.MI_String(p['Repository'])
         p['Version'] = protocol.MI_String(p['Version'])
+        p['Clasification'] = protocol.MI_String(p['Clasification'])
         p['Architecture'] = protocol.MI_String(p['Architecture'])
     Inventory = protocol.MI_InstanceA(pkgs)
     retd = {}
@@ -253,7 +254,7 @@ def get_yum_updates_list(yum_pkg_info_list, security_updates, Name):
         if ':' not in d['Version']:  # Add a '0:' for epoch.
             d['Version'] = '0:' + d['Version']
         d['Version'] = d['Version'].replace('(none)', '0')  # Handle the Epoch '(none)'.
-        if str(d['Name']) + "." + str(d['Architecture']) in sec:
+        if str(d['Name']) + "." + str(d['Architecture']) in security_updates:
            d['Classification'] = "Security"
         else:
            d['Classification'] = "Other"
