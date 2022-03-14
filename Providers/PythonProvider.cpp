@@ -69,7 +69,7 @@ std::string determinePythonVersion(){
     }
 
     // Checking if Python version starts with 3.*.*
-    if(result[0] == '3') {
+    if(*result != '\0' && result[0] == '3') {
         std::cout << "Found python3." << std::endl;
 	    return "python3";
     }
@@ -88,7 +88,7 @@ std::string determinePythonVersion(){
     }
 
     // Checking if Python version starts with 2.*.*
-    if(result[0] == '2') {
+    if(*result != '\0' && result[0] == '2') {
         std::cout << "Found python2." << std::endl;
     	return "python2";
     }
