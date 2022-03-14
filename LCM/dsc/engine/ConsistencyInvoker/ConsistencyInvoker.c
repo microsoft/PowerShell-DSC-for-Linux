@@ -71,7 +71,7 @@ char* getPythonProvider()
     }
 
     // Checking if Python version starts with 3.*.*
-    if(result[0] == '3') {
+    if(*result != '\0' && result[0] == '3') {
 	    return PYTHON3_COMMAND;
     }
 
@@ -88,7 +88,7 @@ char* getPythonProvider()
     }
 
     // Checking if Python version starts with 2.*.*
-    if(result[0] == '2') {
+    if(*result != '\0' && result[0] == '2') {
     	return PYTHON2_COMMAND;
     }
 
