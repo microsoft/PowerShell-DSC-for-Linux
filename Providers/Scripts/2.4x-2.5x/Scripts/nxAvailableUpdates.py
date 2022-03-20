@@ -39,7 +39,7 @@ def Inventory_Marshall(Name):
         p['BuildDate'] = protocol.MI_String(p['BuildDate'])
         p['Repository'] = protocol.MI_String(p['Repository'])
         p['Version'] = protocol.MI_String(p['Version'])
-        p['Clasification'] = protocol.MI_String(p['Clasification'])
+        p['Classification'] = protocol.MI_String(p['Classification'])
         p['Architecture'] = protocol.MI_String(p['Architecture'])
     Inventory = protocol.MI_InstanceA(pkgs)
     retd = {}
@@ -76,19 +76,21 @@ def GetAptUpdates(Name):
     prep_security_sources_list_cmd = 'sudo grep security /etc/apt/sources.list > ' + security_sources_list
     dist_upgrade_simulation_cmd_template = 'LANG=en_US.UTF8 sudo apt-get -s dist-upgrade <SOURCES> '
     # Refresh the repo
-    code, out = RunGetOutput(prep_security_sources_list_cmd,False,False)
-    security_updates_cmd = dist_upgrade_simulation_cmd_template.replace('<SOURCES>', '-oDir::Etc::Sourcelist=' + security_sources_list)
-    code,out = RunGetOutput(security_updates_cmd,False,False)
-    srch_txt = r'Inst[ ](.*?)[ ].*?[(](.*?)[ ](.*?)[ ]\[(.*?)\]'
-    srch = re.compile(srch_txt, re.M | re.S)
-    pkg_list = srch.findall(out)
-    lst = list(zip(*pkg_list))[0]
-    # Refresh the repo
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         cmd = 'sudo /opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh'
     else:
         cmd = 'apt-get -q update'
     code, out = RunGetOutput(cmd, False, False)
+    #Get Security Patches list
+    security_patch_list = []
+    code, out = RunGetOutput(prep_security_sources_list_cmd,False,False)
+    security_updates_cmd = dist_upgrade_simulation_cmd_template.replace('<SOURCES>', '-oDir::Etc::Sourcelist=' + security_sources_list)
+    code,out = RunGetOutput(security_updates_cmd,False,False)
+    srch_txt = r'Inst[ ](.*?)[ ].*?[(](.*?)[ ](.*?)[ ]\[(.*?)\]'
+    srch = re.compile(srch_txt, re.M | re.S)
+    pkg_list = srch.findall(str(out))
+    for package in pkg_list:
+        security_patch_list.append(package[0])                      
     cmd = 'LANG=en_US.UTF8 apt-get -s dist-upgrade | grep "^Inst"'
     LG().Log('DEBUG', "Retrieving update package list using cmd:" + cmd)
     code, out = RunGetOutput(cmd, False, False)
@@ -104,8 +106,8 @@ def GetAptUpdates(Name):
             continue
         d['Architecture'] = pkg[3]
         d['Version'] = pkg[1]
-        if d['Name'] in lst:
-            d['Clasification'] = "Security"
+        if d['Name'] in security_patch_list:
+            d['Classification'] = "Security"
         else:
             d['Classification'] = "Other"
         d['Repository'] = pkg[2]
@@ -194,8 +196,11 @@ def get_product_name(package_name):
 
 def get_yum_security_updates():
     d = {}
-    yum_check_security = 'sudo yum -q --security check-update'
-    install_yum_security_prerequisite()
+    if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
+        yum_check_security = 'sudo /opt/microsoft/omsconfig/Scripts/OMSYumSecurityUpdates.sh '
+    else:
+        yum_check_security = 'yum -q --security check-update '
+        install_yum_security_prerequisite()
     code, out = RunGetOutput(yum_check_security,False,False)
     security_packages, security_package_versions = extract_packages_and_versions_including_duplicates(out)
     return security_packages
@@ -255,7 +260,7 @@ def get_yum_updates_list(yum_pkg_info_list, security_updates, Name):
         if ':' not in d['Version']:  # Add a '0:' for epoch.
             d['Version'] = '0:' + d['Version']
         d['Version'] = d['Version'].replace('(none)', '0')  # Handle the Epoch '(none)'.
-        if str(d['Name']) + "." + str(d['Architecture']) in security_updates:
+        if str(d['Name']).strip() + "." + str(d['Architecture']).strip() in security_updates:
            d['Classification'] = "Security"
         else:
            d['Classification'] = "Other"
@@ -297,12 +302,13 @@ def GetZypperUpdates(Name):
 
     updates_list = []
     d = {}
-    pkg_list = ''
     # For omsagent the repo is refreshed in OMSZypperUpdates.sh.
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         zypper = 'sudo /opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh'
+        zypper_install_security_patches_simulate = 'sudo /opt/microsoft/omsconfig/Scripts/OMSZypperSecurityUpdates.sh'               
     else:
         zypper = 'zypper -q lu'
+        zypper_install_security_patches_simulate = 'zypper --non-interactive patch --category security --dry-run'      
         # Refresh the repo.
         cmd = 'zypper -qn refresh'
         LG().Log('DEBUG', "Executing cmd: " + cmd)
