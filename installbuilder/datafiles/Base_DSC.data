@@ -77,6 +77,8 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh; intermediate/Scripts/OMSYumUpdates.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh; intermediate/Scripts/OMSZypperUpdates.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh; intermediate/Scripts/OMSAptUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSYumSecurityUpdates.sh; intermediate/Scripts/OMSYumSecurityUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSZypperSecurityUpdates.sh; intermediate/Scripts/OMSZypperSecurityUpdates.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh; intermediate/Scripts/NPMAgentBinaryCap.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh; intermediate/Scripts/OMSAuditdPlugin.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
@@ -545,6 +547,8 @@ chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSServiceStatAll.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSYumUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSZypperUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSAptUpdates.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSYumSecurityUpdates.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSZypperSecurityUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSAuditdPlugin.sh
 # Reset file ownership at /opt/microsoft/omsagent/plugin 
 chown root:root /opt/microsoft/omsagent/plugin/tailfilereader.rb
