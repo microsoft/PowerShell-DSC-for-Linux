@@ -107,7 +107,7 @@ def GetAptUpdates(Name):
         d['Architecture'] = pkg[3]
         d['Version'] = pkg[1]
         if d['Name'] in security_patch_list:
-            d['Classification'] = "Security Updates"
+            d['Classification'] = "Security"
         else:
             d['Classification'] = "Others"
         d['Repository'] = pkg[2]
@@ -262,7 +262,7 @@ def get_yum_updates_list(yum_pkg_info_list, security_updates, Name):
             d['Version'] = '0:' + d['Version']
         d['Version'] = d['Version'].replace('(none)', '0')  # Handle the Epoch '(none)'.
         if str(d['Name']).strip() + "." + str(d['Architecture']).strip() in security_updates:
-           d['Classification'] = "Security Updates"
+           d['Classification'] = "Security"
         else:
            d['Classification'] = "Others"
         d['Repository'] = yum_pkg_info.group(5)
@@ -334,7 +334,7 @@ def GetZypperUpdates(Name):
         d['Architecture'] = pkg[5].strip()
         d['Version'] = "0:" + pkg[4].strip()
         if d['Name'] in packages_from_patch_data:
-           d['Classification'] = "Security Updates"
+           d['Classification'] = "Security"
         else:
            d['Classification'] = "Others"
         d['Repository'] = pkg[1].strip()
