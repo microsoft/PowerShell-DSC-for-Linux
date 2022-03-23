@@ -317,7 +317,6 @@ def GetZypperUpdates(Name):
     LG().Log('DEBUG', "Retrieving update package list using cmd:" + cmd)
     code, out = RunGetOutput(cmd, False, False)
     pkg_list = out
-    zypper_install_security_patches_simulate = 'sudo LANG=en_US.UTF8 zypper --non-interactive patch --category security --dry-run'
     # Get all security packages
     code,out = RunGetOutput(zypper_install_security_patches_simulate,False,False)
     packages_from_patch_data = extract_packages_from_patch_data(out)
