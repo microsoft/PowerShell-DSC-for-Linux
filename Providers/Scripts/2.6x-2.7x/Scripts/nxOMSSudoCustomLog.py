@@ -119,9 +119,14 @@ def Set(EnableCustomLogConfiguration, Ensure, CustomLogObjects):
     return [0]
 
 def Test(EnableCustomLogConfiguration, Ensure, CustomLogObjects):
+    LG().Log('INFO', 'Entering Test()')
+
     if EnableCustomLogConfiguration:
+        LG().Log('INFO', 'Custom Log Configuration is enabled')
+
         CurrentCustomLogObjects = ReadConf()
         if CurrentCustomLogObjects is None and CustomLogObjects is None:
+            LG().Log('INFO', 'Both are None')
             return [0]
         elif CurrentCustomLogObjects is None:
             LG().Log('INFO', 'CurrentCustomLogObjects is None')
@@ -129,9 +134,9 @@ def Test(EnableCustomLogConfiguration, Ensure, CustomLogObjects):
         elif CustomLogObjects is None:
             LG().Log('INFO', 'CustomLogObjects is None')
             return [-1]
-        
-        LG().Log('INFO', 'CurrentCustomLogObjects: ' + CurrentCustomLogObjects + ', CustomLogObjects: ' + CustomLogObjects)
-        
+
+        LG().Log('INFO', 'CurrentCustomLogObjects: {0}, CustomLogObjects: {1}'.format(CurrentCustomLogObjects, CustomLogObjects))
+
         CustomLogObjects.sort()
         for customlog in CustomLogObjects:
             customlog['FilePath'].sort()
@@ -143,12 +148,13 @@ def Test(EnableCustomLogConfiguration, Ensure, CustomLogObjects):
         if CustomLogObjects != CurrentCustomLogObjects:
             LG().Log('INFO', 'Current and goal-state custom log configuration differ')
             return [-1]
-       
+
         if Ensure == "Absent":
             LG().Log('INFO', 'Ensure custom logs are absent')
             return [-1]
-         
-    return [0] 
+
+    LG().Log('INFO', 'Done')
+    return [0]
 
 def Get(EnableCustomLogConfiguration, Ensure, CustomLogObjects):
     CurrentCustomLogObjects = ReadConf()
