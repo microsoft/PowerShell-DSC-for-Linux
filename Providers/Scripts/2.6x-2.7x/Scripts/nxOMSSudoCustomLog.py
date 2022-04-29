@@ -137,11 +137,11 @@ def Test(EnableCustomLogConfiguration, Ensure, CustomLogObjects):
 
         LG().Log('INFO', 'CurrentCustomLogObjects: {0}, CustomLogObjects: {1}'.format(CurrentCustomLogObjects, CustomLogObjects))
 
-        CustomLogObjects.sort()
+        CustomLogObjects = sorted(CustomLogObjects, key = lambda d : d['LogName'])
         for customlog in CustomLogObjects:
             customlog['FilePath'].sort()
 
-        CurrentCustomLogObjects.sort()
+        CurrentCustomLogObjects = sorted(CurrentCustomLogObjects, key = lambda d : d['LogName'])
         for customlog in CurrentCustomLogObjects:
             customlog['FilePath'].sort()
 
