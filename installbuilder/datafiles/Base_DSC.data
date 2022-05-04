@@ -77,6 +77,8 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/Scripts/OMSYumUpdates.sh; intermediate/Scripts/OMSYumUpdates.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSZypperUpdates.sh; intermediate/Scripts/OMSZypperUpdates.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh; intermediate/Scripts/OMSAptUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSYumSecurityUpdates.sh; intermediate/Scripts/OMSYumSecurityUpdates.sh; 755; root; root
+/opt/microsoft/omsconfig/Scripts/OMSZypperSecurityUpdates.sh; intermediate/Scripts/OMSZypperSecurityUpdates.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/NPMAgentBinaryCap.sh; intermediate/Scripts/NPMAgentBinaryCap.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMSAuditdPlugin.sh; intermediate/Scripts/OMSAuditdPlugin.sh; 755; root; root
 /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py; intermediate/Scripts/OMS_MetaConfigHelper.py; 755; ${{RUN_AS_USER}}; root
@@ -100,7 +102,7 @@ SHLIB_EXT: 'so'
 /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip; release/nxOMSContainers_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip; release/nxOMSCustomLog_1.0.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip; release/nxOMSGenerateInventoryMof_1.5.zip; 755; ${{RUN_AS_USER}}; root
-/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.62.zip; release/nxOMSPlugin_3.62.zip; 755; ${{RUN_AS_USER}}; root
+/opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.63.zip; release/nxOMSPlugin_3.63.zip; 755; ${{RUN_AS_USER}}; root
 /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip; release/nxOMSWLI_1.46.zip; 755; ${{RUN_AS_USER}}; root
 #endif
 
@@ -416,7 +418,7 @@ if [ "$pythonVersion" = "python3" ]; then
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.62.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.63.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/python3/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip 0"
 else
   echo "Running python2 python version is ", $pythonVersion
@@ -426,7 +428,7 @@ else
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSContainers_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSCustomLog_1.0.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSGenerateInventoryMof_1.5.zip 0"
-	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.62.zip 0"
+	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSPlugin_3.63.zip 0"
 	su - omsagent -c "/opt/microsoft/omsconfig/Scripts/InstallModule.py /opt/microsoft/omsconfig/module_packages/nxOMSWLI_1.46.zip 0"
 #endif
 
@@ -545,6 +547,8 @@ chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSServiceStatAll.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSYumUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSZypperUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSAptUpdates.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSYumSecurityUpdates.sh
+chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSZypperSecurityUpdates.sh
 chown root:root /opt/microsoft/${{SHORT_NAME}}/Scripts/OMSAuditdPlugin.sh
 # Reset file ownership at /opt/microsoft/omsagent/plugin 
 chown root:root /opt/microsoft/omsagent/plugin/tailfilereader.rb
