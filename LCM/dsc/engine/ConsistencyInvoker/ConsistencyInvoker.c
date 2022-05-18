@@ -61,7 +61,7 @@ char* getPythonProvider()
     char* result = malloc(1);
     *result = 0; 
 
-    FILE* pipe = popen("python2 --version 2>&1", "r");   
+    FILE* pipe = popen("python3 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");   
     if(!pipe) {
         printf("Cant start command.");
     }
@@ -70,15 +70,15 @@ char* getPythonProvider()
         strcat(result,buffer);
     }
 
-    // If python2 --version does not contain 'not found' return python2
-    if(strstr(result, "not found") == NULL) {
-    	return PYTHON2_COMMAND;
+    // If python3 --version exists
+    if(strstr(result, "3") != NULL) {
+    	return PYTHON3_COMMAND;
     }
 
     // Look for python3
     result = malloc(1);
     *result = 0;
-    pipe = popen("python3 --version 2>&1", "r");
+    pipe = popen("python2 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
     if(!pipe) {
     	printf("Cant start command.");
     }
@@ -87,9 +87,9 @@ char* getPythonProvider()
         strcat(result,buffer);
     }
 
-    // If python3 --version does not contain 'not found' return python3
-    if(strstr(result, "not found") == NULL) {
-	    return PYTHON3_COMMAND;
+    // If python2 --version exists
+    if(strstr(result, "2") != NULL) {
+	    return PYTHON2_COMMAND;
     }
 
     return PYTHON_COMMAND;

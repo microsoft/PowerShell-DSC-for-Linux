@@ -2077,23 +2077,20 @@ MI_Result MI_CALL Pull_GetModules(_Out_ MI_Uint32 * numModulesInstalled,
         DSC_LOG_INFO("Assuming python2 in WebPullClient\n");
 
 	// Look for python2
-        FILE * pipe = popen("python2 --version 2>&1", "r");
+        FILE * pipe = popen("python3 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
         fgets(data, BUFSIZ, pipe);
-        if (!strstr(data, "not found"))
-        {
-            DSC_LOG_INFO("Found python2 in WebPullClient.\n");
-                isPython2 = 1;
-            }
-        else
-        {
+        if (strstr(data, "3")) {
+            DSC_LOG_INFO("Found python3 in WebPullClient.\n");
+            isPython2 = 0;
+        } else {
             // If python2 does not exist, look for python3
             memset(&data[0], 0, sizeof(data));
-                pipe = popen("python3 --version 2>&1", "r");
-                fgets(data, BUFSIZ, pipe);
-            if (!strstr(data, "not found")) {
-                DSC_LOG_INFO("Found python3 in WebPullClient.\n");
-                    isPython2 = 0;
-                }
+            pipe = popen("python2 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
+            fgets(data, BUFSIZ, pipe);
+            if (strstr(data, "2")) {
+                DSC_LOG_INFO("Found python2 in WebPullClient.\n");
+                    isPython2 = 1;
+            }
         }
 
       	if (isPython2 == 1)
