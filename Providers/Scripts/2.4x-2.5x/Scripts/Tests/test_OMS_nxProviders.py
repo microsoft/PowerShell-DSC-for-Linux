@@ -653,13 +653,13 @@ if nxOMSSyslog != None:
             Setup test resources
             """
             self.workspace_id = str(uuid.uuid4())
-            os.system('/bin/echo -e "' + OMSSyslog_setup_txt + '" | sudo python')
+            os.system('/bin/echo -e "' + OMSSyslog_setup_txt + '" | sudo python2')
             
         def tearDown(self):
             """
             Remove test resources.
             """
-            os.system('/bin/echo -e "' + OMSSyslog_teardown_txt + '" | sudo python')
+            os.system('/bin/echo -e "' + OMSSyslog_teardown_txt + '" | sudo python2')
     
         def make_MI(self, retval, SyslogSource, WorkspaceID):
             d=dict()
@@ -731,7 +731,7 @@ if nxOMSCustomLog != None:
             """
             self.original_conf_path = nxOMSCustomLog.conf_path
             nxOMSCustomLog.conf_path = self.mock_conf_path
-            os.system('/bin/echo -e "' + nxOMSCustomLog_setup_txt + '" | sudo python')
+            os.system('/bin/echo -e "' + nxOMSCustomLog_setup_txt + '" | sudo python2')
     
         def tearDown(self):
             """
@@ -832,14 +832,14 @@ if nxOMSKeyMgmt != None:
         def setUpClass(cls):
             key_txt = (open('./Scripts/Tests/test_mofs/testdsckey.pub','r').read())
             sig_txt = (open('./Scripts/Tests/test_mofs/testdsckey.asc','r').read())
-            os.system('/bin/echo -e "' + nxOMSKeyMgmt_cls_setup_txt + '" | sudo python')
+            os.system('/bin/echo -e "' + nxOMSKeyMgmt_cls_setup_txt + '" | sudo python2')
             cls.keymgmt = {'KeyContents': key_txt, \
                            'KeySignature': sig_txt, 'Ensure':'present'}
             cls.conf_dir = '/etc/opt/omi/conf/omsconfig'
     
         @classmethod
         def tearDownClass(cls):
-            os.system('/bin/echo -e "' + nxOMSKeyMgmt_cls_teardown_txt + '" | sudo python')
+            os.system('/bin/echo -e "' + nxOMSKeyMgmt_cls_teardown_txt + '" | sudo python2')
             
     
         
@@ -847,7 +847,7 @@ if nxOMSKeyMgmt != None:
             """
             Setup test resources
             """
-            os.system('/bin/echo -e "' + nxOMSKeyMgmt_setup_txt + '" | sudo python')
+            os.system('/bin/echo -e "' + nxOMSKeyMgmt_setup_txt + '" | sudo python2')
             
     
         def tearDown(self):

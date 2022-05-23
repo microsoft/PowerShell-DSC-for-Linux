@@ -171,7 +171,7 @@ class Python2Runtime(Runtime):
         self.execution_alias = "python2"
 
         if get_default_python_interpreter_major_version() == 2:
-            self.execution_alias = "python"
+            self.execution_alias = "python2"
 
         self.base_cmd = [self.execution_alias]
 
