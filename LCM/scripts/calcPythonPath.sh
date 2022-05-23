@@ -4,11 +4,11 @@ if [ "$#" -ne 0 ]
 then
 	# Checking which python version is available 
 	# python3
-	if [[! -z $(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)') ]]
+	if [! -z $(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)') ]
 	then
 		#echo "python3 exists"; 
 		pythonVer="python3"
-	elif [[! -z $(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)') ]]
+	elif [! -z $(python2 -V 2>&1 | grep -Po '(?<=Python )(.+)') ]
 	then
 		#echo "python2 exists"; 
 		pythonVer="python2"

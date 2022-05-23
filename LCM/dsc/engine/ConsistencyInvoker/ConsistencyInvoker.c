@@ -71,7 +71,7 @@ char* getPythonProvider()
     }
 
     // If python3 --version exists
-    if(strstr(result, "3") != NULL) {
+    if(*result != '\0' && result[0] == '3') {
     	return PYTHON3_COMMAND;
     }
 
@@ -88,7 +88,7 @@ char* getPythonProvider()
     }
 
     // If python2 --version exists
-    if(strstr(result, "2") != NULL) {
+    if(*result != '\0' && result[0] == '2') {
 	    return PYTHON2_COMMAND;
     }
 

@@ -70,7 +70,7 @@ std::string determinePythonVersion(){
     }
 
     // If python3 --version exists
-    if(strstr(result, "3") != NULL) {
+    if(*result != '\0' && result[0] == '3') {
         std::cout << "Found python3." << std::endl;
     	return "python3";
     }
@@ -88,7 +88,7 @@ std::string determinePythonVersion(){
     }
 
     // If python2 --version exists
-    if(strstr(result, "2") != NULL) {
+    if(*result != '\0' && result[0] == '2') {
         std::cout << "Found python2." << std::endl;
 	    return "python2";
     }
