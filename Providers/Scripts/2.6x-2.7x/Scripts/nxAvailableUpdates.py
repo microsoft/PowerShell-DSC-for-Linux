@@ -156,11 +156,11 @@ def GetYumUpdates(Name):
     #LG().Log('DEBUG', "Cmd output for update list : " + pkg_list)    
 
     # Sample output from OMSYumUpdates.sh
-    #   ca-certificates.noarch
-    #   glibc.x86_64
-    #   glibc-common.x86_64
-    #   glibc-devel.x86_64
-    #   glibc-headers.x86_64
+    #   ca-certificates.noarch                                               1:1.1.0-4.el8                                            rhui-rhel-8-for-x86_64-baseos-rhui-rpms
+    #   glibc.x86_64                                                         1:1.23.0-4.el8                                           rhui-rhel-8-for-x86_64-baseos-rhui-rpms
+    #   glibc-common.x86_64                                                  1:1.45.0-4.el8                                           rhui-rhel-8-for-x86_64-baseos-rhui-rpms
+    #   glibc-devel.x86_64                                                   1:1.23.0-4.el8                                           rhui-rhel-8-for-x86_64-baseos-rhui-rpms
+    #   glibc-headers.x86_64                                                 1:1.56.0-4.el8                                           rhui-rhel-8-for-x86_64-baseos-rhui-rpms
     if validate_yum_pkg_list_output(pkg_list, retcode):
         # Remove the chatter.  Yum puts a blank line before the list.
         if pkg_list.find('\n\n') > -1:
@@ -169,11 +169,31 @@ def GetYumUpdates(Name):
         srch = re.compile(srch_str, re.M | re.S)
 
         param_list = ""
+        param_list2 = ""
         for pkg in pkg_list.splitlines():
-            if pkg == "Obsoleting":
+            line = re.split(r'\s+', pkg.strip())
+            
+            if len(line) == 0:
+                continue
+
+            if line[0] == "Obsoleting":
                 LG().Log('DEBUG', "List including obsolete packages: " + str(pkg_list))
                 break
-            param_list = param_list + " " + pkg
+
+            if len(line) == 3 and is_yum_package(line[0]):
+                pkg_and_arch = str(line[0]).split(".")
+                pkg_name = pkg_and_arch[0]
+                pkg_arch = pkg_and_arch[1]
+                pkg_version = line[1]
+
+                param_list = param_list + " " + str(pkg_name) + "-" + str(pkg_version) + "." + str(pkg_arch)
+            else:
+                LG().Log('DEBUG', "Package not in correct format: " + str(pkg.strip()))
+                param_list2 = param_list2 + " " + line[0]
+
+        if len(param_list) == 0 and len(param_list2) > 0:
+            LG().Log('DEBUG', "No valid packages found. Falling back to package_info based on the package name.")
+            param_list = param_list2
 
         cmd = "LANG=en_US.UTF8 " + yum_info + param_list
         LG().Log('DEBUG', "Retrieving individual package information from Yum using cmd: " + cmd)
@@ -195,6 +215,12 @@ def get_product_name(package_name):
         """Splits out product name and architecture - if this is changed, modify in PackageFilter also"""
         return package_name
 
+def is_yum_package(chunk):
+    package_extensions = ['.x86_64', '.noarch', '.i686']
+
+    # Using a list comprehension to determine if chunk is a package
+    return len([p for p in package_extensions if p in chunk]) == 1
+
 def get_yum_security_updates():
     d = {}
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
@@ -214,11 +240,7 @@ def extract_packages_and_versions_including_duplicates(output):
         """Returns packages and versions from given output"""
         packages = []
         versions = []
-        package_extensions = ['.x86_64', '.noarch', '.i686']
 
-        def is_package(chunk):
-            # Using a list comprehension to determine if chunk is a package
-            return len([p for p in package_extensions if p in chunk]) == 1
         print(output)
         lines = output.strip().split('\n')
 
@@ -230,16 +252,16 @@ def extract_packages_and_versions_including_duplicates(output):
                 next_line = re.split(r'\s+', lines[line_index + 1].strip())
 
             # If we run into a length of 3, we'll accept it and continue
-            if len(line) == 3 and is_package(line[0]):
+            if len(line) == 3 and is_yum_package(line[0]):
                 packages.append(get_product_name(line[0]))
                 versions.append(line[1])
             # We will handle these two edge cases where the output is on
             # two different lines and treat them as one line
-            elif len(line) == 1 and len(next_line) == 2 and is_package(line[0]):
+            elif len(line) == 1 and len(next_line) == 2 and is_yum_package(line[0]):
                 packages.append(get_product_name(line[0]))
                 versions.append(next_line[0])
                 line_index += 1
-            elif len(line) == 2 and len(next_line) == 1 and is_package(line[0]):
+            elif len(line) == 2 and len(next_line) == 1 and is_yum_package(line[0]):
                 packages.append(get_product_name(line[0]))
                 versions.append(line[1])
                 line_index += 1
