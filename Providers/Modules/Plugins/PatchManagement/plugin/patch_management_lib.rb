@@ -164,6 +164,7 @@ class LinuxUpdates
         ret["Architecture"] = availableUpdatesHash.key?("Architecture") ? availableUpdatesHash["Architecture"] : nil
         ret["PackageVersion"] = availableUpdatesHash["Version"]
         ret["Repository"] = availableUpdatesHash.key?("Repository") ? availableUpdatesHash["Repository"] : nil
+        ret["PackageClassification"] = availableUpdatesHash.key?("Classification") ? availableUpdatesHash["Classification"] : nil
         ret["Installed"] = false
         ret["UpdateState"] = "Needed"
         if (Integer(availableUpdatesHash["BuildDate"]) rescue false)
@@ -180,6 +181,7 @@ class LinuxUpdates
         ret["Architecture"] = "all"
         ret["PackageVersion"] = nil
         ret["Repository"] = nil
+        ret["PackageClassification"] = nil
         ret["Installed"] = false
         ret["UpdateState"] = "NotNeeded"        
         ret
@@ -196,6 +198,7 @@ class LinuxUpdates
         ret["PackageVersion"] = packageHash["Version"]  
         ret["Size"] = packageHash["Size"]
         ret["Repository"] = packageHash.key?("Repository") ? packageHash["Repository"] : nil
+        ret["PackageClassification"] = availableUpdatesHash.key?("Classification") ? availableUpdatesHash["Classification"] : nil
         ret["Installed"] = true
         ret["UpdateState"] = "NotNeeded"
         if (Integer(packageHash["InstalledOn"]) rescue false)
