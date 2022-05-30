@@ -243,7 +243,7 @@ class WorkerManager:
         print "worker to be started " + str(len(configuration_path_to_be_started))
 
         if len(configuration_path_to_be_started) > 0 and linuxutil.get_current_username() == NXAUTOMATION_USERNAME:
-            proc = subprocess.Popen(["sudo", "-u", NXAUTOMATION_USERNAME, "python", OMSUTIL_FILE_PATH, "--initialize"],
+            proc = subprocess.Popen(["sudo", "-u", NXAUTOMATION_USERNAME, "python2", OMSUTIL_FILE_PATH, "--initialize"],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, error = proc.communicate()
             if proc.returncode != 0:
