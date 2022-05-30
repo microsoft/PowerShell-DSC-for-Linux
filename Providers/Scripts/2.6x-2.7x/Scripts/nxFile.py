@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # ====================================
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 #  See license.txt for license information.

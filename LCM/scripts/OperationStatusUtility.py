@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 from datetime   import datetime
 from errno      import EINVAL
 from imp        import load_source

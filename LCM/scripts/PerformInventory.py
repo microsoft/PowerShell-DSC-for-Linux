@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from imp                  import load_source
 from os                   import listdir, system

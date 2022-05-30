@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #============================================================================
 # Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
 #============================================================================
@@ -1453,7 +1453,7 @@ class nxFileTestCases(unittest2.TestCase):
                [-1],'nxFile.Test(_Marshall("/tmp/Python-2.4.6.tgz",'+\
                '"https://www.python.org/ftp/python/2.4.6/Python-2.4.6.tgz", "Present", "File", "", "", "md5", "", "", "", "", 776) should return [-1]')
 
-dummy_service_file=r"""#!/usr/bin/env python2
+dummy_service_file=r"""#!/usr/bin/env python
 from __future__ import with_statement
 
 import time
@@ -1701,7 +1701,7 @@ suse_init_file = """#! /bin/sh
 # Description: Start the dummy_service
 ### END INIT INFO
 
-PYTHON=/usr/bin/python2
+PYTHON=/usr/bin/python
 WAZD_BIN=/usr/sbin/dummy_service.py
 WAZD_PIDFILE=/var/run/dummy_service.pid
 
@@ -1839,7 +1839,7 @@ After=network.target
 [Service]
 Type=simple
 PIDFile=/var/run/dummy_service.pid
-ExecStart=/usr/bin/python2 /usr/sbin/dummy_service.py
+ExecStart=/usr/bin/python /usr/sbin/dummy_service.py
 ExecStop=rm -f /var/run/dummy_service.pid
 KillMode=process
 KillSignal=SIGKILL
