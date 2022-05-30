@@ -128,7 +128,7 @@ if os.system('which dpkg 2> /dev/null') == 0:
 else:
     os.system('/bin/rpm -i ' + destpath + 'Tests/dummy-1.0-1.x86_64.rpm')
 # Call the test!
-result = os.system('su -c " python2 ' + destpath + 'Tests/test_OMS_nxProviders.py" omsagent')
+result = os.system('su -c " python ' + destpath + 'Tests/test_OMS_nxProviders.py" omsagent')
 #result = os.system('su -c " python ' + destpath + 'Tests/test_OMS_nxProviders.py &> /tmp/test_nxOMSProviders_results.txt" omsagent')
 
 # Cleanup.
