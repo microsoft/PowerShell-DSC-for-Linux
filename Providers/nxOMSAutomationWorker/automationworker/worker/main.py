@@ -66,7 +66,7 @@ class WorkerManager:
         """
         worker_and_sandbox_processes = []
         for process in process_list:
-            if "python2" in process.cmd and ("hybridworker.py" in process.cmd or "sandbox.py" in process.cmd) \
+            if ("python" in process.cmd or "python2" in process.cmd) and ("hybridworker.py" in process.cmd or "sandbox.py" in process.cmd) \
                     and "MSFT_nxOMSAutomationWorkerResource" in process.cmd:
                 worker_and_sandbox_processes.append(process)
         return worker_and_sandbox_processes
@@ -89,7 +89,7 @@ class WorkerManager:
         """
         worker_processes = []
         for process in process_list:
-            if "python2" in process.cmd and "hybridworker.py" in process.cmd \
+            if ("python" in process.cmd or "python2" in process.cmd) and "hybridworker.py" in process.cmd \
                     and "MSFT_nxOMSAutomationWorkerResource" in process.cmd:
                 worker_processes.append(process)
         return worker_processes
