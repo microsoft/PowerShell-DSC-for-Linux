@@ -48,11 +48,6 @@ def init_logger():
     default_rf_handler.setFormatter(formatter)
     default_logger.addHandler(default_rf_handler)
 
-    # Traces coming from sandbox child process and collected by the worker are already formatted, hence no formatter
-    # needed.
-    worker_sandbox_rf_handler = logging.handlers.RotatingFileHandler(file_name, maxBytes=10485760, backupCount=5)
-    sandbox_stdout.addHandler(worker_sandbox_rf_handler)
-
     # Stdout handler (Worker traces have to be formatted).
     #log_stream = logging.StreamHandler(sys.stdout)
     #log_stream.setFormatter(formatter)
@@ -61,6 +56,11 @@ def init_logger():
     # Stdout handler (traces coming from child process are already formatted).
     #sandbox_log_stream = logging.StreamHandler(sys.stdout)
     #sandbox_stdout.addHandler(sandbox_log_stream)
+
+    # Traces coming from sandbox child process and collected by the worker are already formatted, hence no formatter
+    # needed.
+    worker_sandbox_rf_handler = logging.handlers.RotatingFileHandler(file_name, maxBytes=10485760, backupCount=5)
+    sandbox_stdout.addHandler(worker_sandbox_rf_handler)
 
 
 def log_warning(message):
