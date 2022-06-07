@@ -75,7 +75,7 @@ char* getPythonProvider()
     	return PYTHON3_COMMAND;
     }
 
-    // Look for python3
+    // Look for python2
     result = malloc(1);
     *result = 0;
     pipe = popen("python2 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
@@ -93,5 +93,4 @@ char* getPythonProvider()
     }
 
     return PYTHON_COMMAND;
-
 }
