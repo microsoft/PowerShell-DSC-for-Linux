@@ -54,13 +54,13 @@ def init_logger():
     sandbox_stdout.addHandler(worker_sandbox_rf_handler)
 
     # Stdout handler (Worker traces have to be formatted).
-    log_stream = logging.StreamHandler(sys.stdout)
-    log_stream.setFormatter(formatter)
-    default_logger.addHandler(log_stream)
+    #log_stream = logging.StreamHandler(sys.stdout)
+    #log_stream.setFormatter(formatter)
+    #default_logger.addHandler(log_stream)
 
     # Stdout handler (traces coming from child process are already formatted).
-    sandbox_log_stream = logging.StreamHandler(sys.stdout)
-    sandbox_stdout.addHandler(sandbox_log_stream)
+    #sandbox_log_stream = logging.StreamHandler(sys.stdout)
+    #sandbox_stdout.addHandler(sandbox_log_stream)
 
 
 def log_warning(message):
