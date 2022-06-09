@@ -234,7 +234,7 @@ class Worker:
                 process_env_variables["IDENTITY_HEADER"] = msi_secret
                 process_env_variables["IDENTITY_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
 
-            cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
+            cmd = ["python2", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
                    configuration.get_worker_configuration_file_path()]
             tracer.log_worker_starting_sandbox(sandbox_id)
             sandbox_process = subprocessfactory.create_subprocess(cmd=cmd,

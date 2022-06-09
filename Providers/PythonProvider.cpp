@@ -58,8 +58,8 @@ std::string determinePythonVersion(){
     char* result = (char*)malloc(1);
     *result = 0; 
 
-    // Check for python2
-    FILE* pipe = popen("python2 --version 2>&1", "r");
+    // Check for python3
+    FILE* pipe = popen("python3 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
     if(!pipe) {
         std::cout << "Couldn't start command." << std::endl;
     }
@@ -69,16 +69,16 @@ std::string determinePythonVersion(){
         strcat(result,buffer);
     }
 
-    // If python2 --version does not contain 'not found' return python2
-    if(strstr(result, "not found") == NULL) {
-        std::cout << "Found python2." << std::endl;
-    	return "python2";
+    // If python3 --version exists
+    if(*result != '\0' && result[0] == '3') {
+        std::cout << "Found python3." << std::endl;
+    	return "python3";
     }
 
-    // Look for python3
+    // Look for python2
     result = (char*)malloc(1);
     *result = 0;
-    pipe = popen("python3 --version 2>&1", "r");
+    pipe = popen("python2 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
     if(!pipe) {
     	std::cout << "Couldn't start command." << std::endl;
     }
@@ -87,10 +87,10 @@ std::string determinePythonVersion(){
         strcat(result,buffer);
     }
 
-    // If python3 --version does not contain 'not found' return python3
-    if(strstr(result, "not found") == NULL) {
-        std::cout << "Found python3." << std::endl;
-	    return "python3";
+    // If python2 --version exists
+    if(*result != '\0' && result[0] == '2') {
+        std::cout << "Found python2." << std::endl;
+	    return "python2";
     }
     return "python";
 }
