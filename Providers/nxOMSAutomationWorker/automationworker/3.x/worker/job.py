@@ -139,7 +139,7 @@ class Job(Thread):
 
         # wait for runbook execution to complete
         pending_action = None
-        while stream_handler.isAlive() or self.runtime.runbook_subprocess.poll() is None:
+        while stream_handler.is_alive() or self.runtime.runbook_subprocess.poll() is None:
             try:
                 pending_action = self.msg_queue.get(block=False)
                 tracer.log_sandbox_job_pending_action_detected(self.job_id, pending_action)
