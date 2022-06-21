@@ -1229,7 +1229,7 @@ MI_Result SetGeneralCurlOptions(CURL* curl,
 {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30);
     /*
         Default curl operation timeout is infinite.
