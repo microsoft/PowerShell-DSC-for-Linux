@@ -251,7 +251,7 @@ def register(options):
             print("Cannot create directory for certs/conf. Because of the following exception : " + str(ex))
             return
     generate_self_signed_certificate(certificate_path=certificate_path, key_path=key_path)
-    issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
+    issuer, subject, thumbprint, not_before, not_after = linuxutil.get_cert_info(certificate_path)
 
     # try to extract optional metadata
     unknown = "Unknown"
@@ -280,7 +280,9 @@ def register(options):
                "OperatingSystem": 2,
                "SMBIOSAssetTag": asset_tag,
                "VirtualMachineId": vm_id,
-               "Subject": subject}
+               "Subject": subject,
+               "NotBeforeUtc": not_before,
+               "NotAfterUtc": not_after}
 
     # the signature generation is based on agent service contract
     payload_hash = sha256_digest(payload)
@@ -345,7 +347,7 @@ def deregister(options):
     if os.path.exists(certificate_path) is False or os.path.exists(key_path) is False:
         raise Exception("Unable to deregister, no worker certificate/key found on disk.")
 
-    issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
+    issuer, subject, thumbprint, not_before, not_after = linuxutil.get_cert_info(certificate_path)
 
     if os.path.exists(worker_conf_path) is False:
         raise Exception("Missing worker configuration.")
@@ -364,7 +366,9 @@ def deregister(options):
     date = datetime.datetime.utcnow().isoformat() + "0-00:00"
     payload = {"Thumbprint": thumbprint,
                "Issuer": issuer,
-               "Subject": subject}
+               "Subject": subject,
+               "NotBeforeUtc": not_before,
+               "NotAfterUtc": not_after}
 
     # the signature generation is based on agent service contract
     payload_hash = sha256_digest(payload)

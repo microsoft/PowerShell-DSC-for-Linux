@@ -2,11 +2,14 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+from datetime import datetime
 import os
 import subprocess
 import sys
 import re
 import codecs
+import traceback
+#from dateutil import parser 
 
 # workaround when unexpected environment variables are present
 # sets COLUMNS wide enough so that output of ps does not get truncated
@@ -272,7 +275,7 @@ def get_cert_info(certificate_path):
     """Gets certificate information by invoking OpenSSL (OMS agent dependency).
 
     Returns:
-        A tuple containing the certificate's issuer, subject and thumbprint.
+        A tuple containing the certificate's issuer, subject and thumbprint, start date and end date.
     """
     p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-fingerprint", "-sha1"],
                          stdout=subprocess.PIPE,
@@ -298,9 +301,27 @@ def get_cert_info(certificate_path):
     if p.poll() != 0:
         raise Exception("Unable to get certificate subject.")
 
+    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-startdate"],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    raw_not_before, e = p.communicate()
+
+    if p.poll() != 0:
+        raise Exception("Unable to get certificate start date.")
+
+    p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-enddate"],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    raw_not_after, e = p.communicate()
+
+    if p.poll() != 0:
+        raise Exception("Unable to get certificate end date.")
+
     return parse_issuer_from_openssl_output(raw_issuer), \
            parse_subject_from_openssl_output(raw_subject), \
-           parse_thumbprint_from_openssl_output(raw_fingerprint)
+           parse_thumbprint_from_openssl_output(raw_fingerprint), \
+           parse_not_before_from_openssl_output(raw_not_before.decode()), \
+           parse_not_after_from_openssl_output(raw_not_after.decode())
 
 
 def parse_thumbprint_from_openssl_output(raw_fingerprint):
@@ -350,6 +371,70 @@ def parse_subject_from_openssl_output(raw_subject):
     """
     return raw_subject.split("subject=")[1].strip()
 
+def parse_not_before_from_openssl_output(raw_not_before):
+    """Parses the not before value from the raw OpenSSL output.
+
+    For reference, openssl cmd has different format between openssl versions;
+
+    OpenSSL 1.1.x formatting:
+    
+
+    OpenSSL 1.0.x  formatting:
+    
+
+    Returns:
+        string : The certificate not before date.
+    """
+    import tracer
+    tracer.log_worker_debug("dates1")
+    tracer.log_worker_debug(raw_not_before.split("notBefore=")[1].strip())
+    #tracer.log_worker_debug(parser.parse(raw_not_before.split("notBefore=")[1].strip()))
+    #date =parser.parse(raw_not_before.split("notBefore=")[1].strip()).isoformat()
+    date=raw_not_before.split("notBefore=")[1].replace("GMT", "").strip()
+
+    try:
+        tracer.log_worker_debug("dates2")
+        datenew=datetime.strptime(date, '%b %d %H:%M:%S %Y')#  Jun 20 09:47:14 2022
+        tracer.log_worker_debug(datenew)
+        datex =datenew.isoformat()
+        tracer.log_worker_debug(datex)
+        tracer.log_worker_debug("dates3")
+    except:
+        tracer.log_worker_debug(traceback.format_exc())
+    return datex
+
+
+def parse_not_after_from_openssl_output(raw_not_after):
+    """Parses the not after value from the raw OpenSSL output.
+
+    For reference, openssl cmd has different format between openssl versions;
+
+    OpenSSL 1.1.x formatting:
+    
+
+    OpenSSL 1.0.x  formatting:
+    
+
+    Returns:
+        string : The certificate not after date.
+    """
+    import tracer
+    tracer.log_worker_debug("dates1")
+    tracer.log_worker_debug(raw_not_after.split("notAfter=")[1].strip())
+    date=raw_not_after.split("notAfter=")[1].replace("GMT", "").strip()
+
+    try:
+        tracer.log_worker_debug("dates2")
+        datenew=datetime.strptime(date, '%b %d %H:%M:%S %Y')#  Jun 20 09:47:14 2022
+        tracer.log_worker_debug(datenew)
+        datex =datenew.isoformat()
+        tracer.log_worker_debug(datex)
+        tracer.log_worker_debug("dates3")
+    except:
+        tracer.log_worker_debug(traceback.format_exc())
+    #tracer.log_worker_debug(parser.parse(raw_not_after.split("notAfter=")[1].strip()))
+    #date =parser.parse(raw_not_after.split("notAfter=")[1].strip()).isoformat()
+    return datex
 
 @posix_only
 def fork_and_exit_parent():

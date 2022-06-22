@@ -12,12 +12,18 @@ import urllib2
 
 from httpclient import *
 from workerexception import *
+import workercertificaterotation
+import workerpollingfrequency
 
 PY_MAJOR_VERSION = 0
 PY_MINOR_VERSION = 1
 PY_MICRO_VERSION = 2
 
 SSL_MODULE_NAME = "ssl"
+
+GET_SANDBOX_URL = "GetSandboxActions"
+POLLING_FREQUENCY_HEADER = "PollingFrequency"
+ROTATE_WORKER_CERTIFICATE_HEADER ="RotateWorkerCertificate"
 
 # On some system the ssl module might be missing
 try:
@@ -116,6 +122,8 @@ class Urllib2HttpClient(HttpClient):
             A RequestResponse
             :param method:
         """
+        import tracer
+
         https_handler = HttpsClientHandler(self.cert_path, self.key_path, self.insecure)
         opener = urllib2.build_opener(https_handler)
         if self.proxy_configuration is not None:
@@ -125,6 +133,47 @@ class Urllib2HttpClient(HttpClient):
         req = urllib2.Request(url, data=data, headers=headers)
         req.get_method = lambda: method
         response = opener.open(req, timeout=30)
+        
+        if(GET_SANDBOX_URL in url):
+            try:
+                tracer.log_worker_debug(response.headers)
+                tracer.log_worker_debug("Started checking get sandbox actions for cert rotation")
+                '''if (True):
+                    workercertificaterotation.set_certificate_rotation_header_value('True')
+                    tracer.log_worker_debug("2 Started checking get sandbox actions for cert rotation")'''
+                if(ROTATE_WORKER_CERTIFICATE_HEADER in response.headers):
+                    tracer.log_worker_debug("header present")
+                    workercertificaterotation.set_certificate_rotation_header_value('True')
+                else:
+                    tracer.log_worker_debug("header absent")            
+
+                #if (True):
+                    #shouldworkercertificaterotate = response.headers[ROTATE_WORKER_CERTIFICATE_HEADER]
+                    #tracer.log_worker_debug(shouldworkercertificaterotate+"shouldworkercertificaterotate")
+                    #if(eval(shouldworkercertificaterotate)):
+                    #if(shouldworkercertificaterotate=='True') or(shouldworkercertificaterotate=='true'):
+                        #tracer.log_worker_debug(shouldworkercertificaterotate+"entered")
+                    
+            except Exception:
+                formattedExceptionMessage = traceback.format_exc()
+                tracer.log_worker_debug("reached exception"+formattedExceptionMessage)
+                #pass
+
+            try:
+                tracer.log_worker_debug("Started checking get sandbox actions for polling freq")
+                if POLLING_FREQUENCY_HEADER in response.headers:
+                    pollingfrequency = response.headers[POLLING_FREQUENCY_HEADER]
+                    tracer.log_worker_debug(pollingfrequency+"pollingfrequency")
+                    workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(pollingfrequency)
+            except Exception:
+                tracer.log_worker_debug("reached exception for polling")
+            
+
+            #tracer.log_worker_debug('RotateWorkerCertificate')
+            #tracer.log_worker_debug(response.headers['RotateWorkerCertificate'])
+            #tracer.log_worker_debug('RotateWorkerCertificate')
+            
+
         opener.close()
         https_handler.close()
 
