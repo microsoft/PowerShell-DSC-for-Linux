@@ -193,7 +193,7 @@ class Worker:
     @staticmethod
     def construct_jrds_msi_endpoint(sandbox_id):
         url = configuration.get_jrds_base_uri() + "/automationAccounts/" + configuration.get_account_id() + \
-              "/Sandboxes/" + sandbox_id + "/metadata/identity/oauth2/token"
+              "/sandboxes/" + sandbox_id + "/metadata/identity/oauth2/token"
         return url
 
     @safe_loop
@@ -235,8 +235,10 @@ class Worker:
             if (msi_secret and msi_secret != "None"):
                 process_env_variables["MSI_SECRET"] = msi_secret
                 process_env_variables["MSI_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
+                process_env_variables["IDENTITY_HEADER"] = msi_secret
+                process_env_variables["IDENTITY_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
 
-            cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
+            cmd = ["python2", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
                    configuration.get_worker_configuration_file_path()]
             tracer.log_worker_starting_sandbox(sandbox_id)
             sandbox_process = subprocessfactory.create_subprocess(cmd=cmd,
