@@ -23,7 +23,8 @@ SSL_MODULE_NAME = "ssl"
 
 GET_SANDBOX_URL = "GetSandboxActions"
 POLLING_FREQUENCY_HEADER = "PollingFrequency"
-ROTATE_WORKER_CERTIFICATE_HEADER ="RotateWorkerCertificate"
+ROTATE_WORKER_CERTIFICATE_HEADER = "RotateWorkerCertificate"
+ENABLE_CERT_ROTATION_FOR_USER_HYBRID_WORKER = 'True'
 
 # On some system the ssl module might be missing
 try:
@@ -134,30 +135,21 @@ class Urllib2HttpClient(HttpClient):
         req.get_method = lambda: method
         response = opener.open(req, timeout=30)
         
-        if(GET_SANDBOX_URL in url):
+        if(configuration.get_worker_type()=="diy" and  GET_SANDBOX_URL in url):
             try:
+                tracer.log_worker_debug("configuration.get_worker_type()")
+                tracer.log_worker_debug(configuration.get_worker_type())
                 tracer.log_worker_debug(response.headers)
                 tracer.log_worker_debug("Started checking get sandbox actions for cert rotation")
-                '''if (True):
-                    workercertificaterotation.set_certificate_rotation_header_value('True')
-                    tracer.log_worker_debug("2 Started checking get sandbox actions for cert rotation")'''
                 if(ROTATE_WORKER_CERTIFICATE_HEADER in response.headers):
                     tracer.log_worker_debug("header present")
-                    workercertificaterotation.set_certificate_rotation_header_value('True')
+                    workercertificaterotation.set_certificate_rotation_header_value(ENABLE_CERT_ROTATION_FOR_USER_HYBRID_WORKER)
                 else:
                     tracer.log_worker_debug("header absent")            
-
-                #if (True):
-                    #shouldworkercertificaterotate = response.headers[ROTATE_WORKER_CERTIFICATE_HEADER]
-                    #tracer.log_worker_debug(shouldworkercertificaterotate+"shouldworkercertificaterotate")
-                    #if(eval(shouldworkercertificaterotate)):
-                    #if(shouldworkercertificaterotate=='True') or(shouldworkercertificaterotate=='true'):
-                        #tracer.log_worker_debug(shouldworkercertificaterotate+"entered")
                     
             except Exception:
                 formattedExceptionMessage = traceback.format_exc()
                 tracer.log_worker_debug("reached exception"+formattedExceptionMessage)
-                #pass
 
             try:
                 tracer.log_worker_debug("Started checking get sandbox actions for polling freq")
@@ -167,12 +159,6 @@ class Urllib2HttpClient(HttpClient):
                     workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(pollingfrequency)
             except Exception:
                 tracer.log_worker_debug("reached exception for polling")
-            
-
-            #tracer.log_worker_debug('RotateWorkerCertificate')
-            #tracer.log_worker_debug(response.headers['RotateWorkerCertificate'])
-            #tracer.log_worker_debug('RotateWorkerCertificate')
-            
 
         opener.close()
         https_handler.close()
