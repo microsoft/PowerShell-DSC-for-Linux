@@ -156,6 +156,15 @@ class Urllib3HttpClient(HttpClient):
                     formattedExceptionMessage = traceback.format_exc()
                     tracer.log_worker_debug("reached exception"+formattedExceptionMessage)
 
+                try:
+                    if(POLLING_FREQUENCY_HEADER in response.headers):
+                        workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(pollingfrequency)
+                except Exception:
+                    tracer.log_worker_debug("reached exception for polling")
+                    formattedExceptionMessage = traceback.format_exc()
+                    tracer.log_worker_debug("reached exception3 "+formattedExceptionMessage)
+
+
             opener.close()
             https_handler.close()
             return response

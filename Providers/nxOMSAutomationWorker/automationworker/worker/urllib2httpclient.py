@@ -136,13 +136,13 @@ class Urllib2HttpClient(HttpClient):
             req.get_method = lambda: method
             response = opener.open(req, timeout=30)
         
-            if(GET_SANDBOX_URL in url and configuration.get_worker_type()=="diy"):
+            if(GET_SANDBOX_URL in url):
                 try:
                     tracer.log_worker_debug("configuration.get_worker_type()")
                     tracer.log_worker_debug(configuration.get_worker_type())
                     tracer.log_worker_debug(response.headers)
                     tracer.log_worker_debug("Started checking get sandbox actions for cert rotation")
-                    if(ROTATE_WORKER_CERTIFICATE_HEADER in response.headers):
+                    if(configuration.get_worker_type()=="diy" and ROTATE_WORKER_CERTIFICATE_HEADER in response.headers):
                         tracer.log_worker_debug("header present")
                         workercertificaterotation.set_certificate_rotation_header_value(ENABLE_CERT_ROTATION_FOR_USER_HYBRID_WORKER)
                     else:
@@ -151,6 +151,14 @@ class Urllib2HttpClient(HttpClient):
                 except Exception:
                     formattedExceptionMessage = traceback.format_exc()
                     tracer.log_worker_debug("reached exception"+formattedExceptionMessage)
+
+                try:
+                    if(POLLING_FREQUENCY_HEADER in response.headers):
+                        workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(pollingfrequency)
+                except Exception:
+                    tracer.log_worker_debug("reached exception for polling")
+                    formattedExceptionMessage = traceback.format_exc()
+                    tracer.log_worker_debug("reached exception3 "+formattedExceptionMessage)
 
             opener.close()
             https_handler.close()
