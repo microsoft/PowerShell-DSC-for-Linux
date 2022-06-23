@@ -7,13 +7,18 @@
 
 from datetime import datetime
 import time
+import traceback
 
 
 import configuration3 as configuration
 import locallogger
 from workerexception import *
+import linuxutil
+import workercertificaterotation
 
 transient_status_codes = set([408, 429, 500, 502, 503, 504])
+
+DISABLE_CERT_ROTATION = 'False'
 
 class JRDSClient(object):
     def __init__(self, http_client):
@@ -68,6 +73,10 @@ class JRDSClient(object):
               "/Sandboxes/GetSandboxActions?HybridWorkerGroupName=" + self.HybridWorkerGroupName + \
               "&api-version=" + self.protocol_version
         response = self.issue_request(lambda u: self.httpClient.get(u), url)
+        import tracer
+        #tracer.log_worker_debug("debug logs are working! L72")
+        tracer.log_worker_debug("jrds75")
+        tracer.log_worker_debug(workercertificaterotation.get_certificate_rotation_header_value())
 
         if response.status_code == 200:
             try:
@@ -79,9 +88,81 @@ class JRDSClient(object):
                 return None
 
             # success path
+            try:
+                #response.raw_data = response.raw_data.decode() if isinstance(response.raw_data, bytes) else response.raw_data
+                #sandbox_response = json.loads(response.raw_data)
+                #account_id = registration_response["PollingFrequency"]
+                #before return extract the header from response, and set polling freq
+
+                #if(response.deserialized_data.headers["cert rotation"]): #parse it to bool
+                #self.worker_certificate_rotation()
+                #print(response.headers)
+                import tracer
+                #tracer.log_worker_debug("debug logs are working! L96")
+                #tracer.log_worker_debug("response")
+                #tracer.log_worker_debug(dir(response))
+                #tracer.log_worker_debug("response.deserialized_data")
+                #tracer.log_worker_debug(response.deserialized_data)
+                #tracer.log_worker_debug("sandbox_response")
+                #tracer.log_worker_debug(sandbox_response)
+                #print response.headers
+                tracer.log_worker_debug("jrds107")
+
+                #Initiate certificate rotation if Headers is set True
+                tracer.log_worker_debug(workercertificaterotation.get_certificate_rotation_header_value())
+
+                if(eval(workercertificaterotation.get_certificate_rotation_header_value())):
+                    tracer.log_worker_debug("Initiating certificate Rotation of Hybrid Worker")
+                    workercertificaterotation.set_certificate_rotation_header_value(DISABLE_CERT_ROTATION)  
+                    tracer.log_worker_debug("jrds114")
+                    tracer.log_worker_debug(workercertificaterotation.get_certificate_rotation_header_value())
+                    self.worker_certificate_rotation()
+            except Exception:
+                pass
             return response.deserialized_data["value"]
 
         raise Exception("Unable to get sandbox actions. [status=" + str(response.status_code) + "]")
+
+    def worker_certificate_rotation(self):
+        """ Rotate worker certificate. 
+        Steps includes creating new certificate and after Server returns 200, replace the old certificate with newly generated certificate.
+        """
+        import tracer
+        try:
+            temp_certificate_path, temp_key_path = workercertificaterotation.generate_cert_rotation_self_signed_certificate()
+            issuer, subject, thumbprint, not_before, not_after = linuxutil.get_cert_info(temp_certificate_path)
+
+            payload = {'Thumbprint': thumbprint,
+               'Issuer': issuer,
+               'Subject': subject,
+               'NotBefore': not_before,
+               'NotAfter': not_after}
+
+            headers = {"Content-Type": "application/json"}
+
+            url = self.base_uri + "/automationAccounts/" + self.account_id + \
+              "/hybridCertificateRotation?api-version=" + self.protocol_version
+            response = self.issue_request(lambda u: self.httpClient.post(u, headers=headers, data=payload), url)
+
+            if response.status_code == 200:
+                import tracer
+                tracer.log_worker_debug("Worker certificate successfully got rotated on the server side.")
+                workercertificaterotation.replace_self_signed_certificate_and_key(temp_certificate_path, temp_key_path, thumbprint)
+                tracer.log_worker_debug("replace_self_signed_certificate_and_key done")
+                return
+            else:
+                import tracer
+                tracer.log_worker_debug(response)
+                tracer.log_worker_debug(dir(response))
+                tracer.log_worker_debug(response.status_code)
+
+            workercertificaterotation.clean_up_certificate_and_key(temp_certificate_path, temp_key_path)
+
+        except:
+            import tracer
+            tracer.log_worker_debug(traceback.format_exc())
+
+        raise Exception("Hybrid Worker certificate rotation failed. [status=" + str(response.status_code) + "]")
 
     def get_job_actions(self, sandbox_id):
         """Gets any pending job action for the given sandbox id.
