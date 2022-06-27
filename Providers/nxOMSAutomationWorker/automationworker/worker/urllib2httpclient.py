@@ -138,8 +138,6 @@ class Urllib2HttpClient(HttpClient):
         
             if(GET_SANDBOX_URL in url):
                 try:
-                    tracer.log_worker_debug("configuration.get_worker_type()")
-                    tracer.log_worker_debug(configuration.get_worker_type())
                     tracer.log_worker_debug(response.headers)
                     tracer.log_worker_debug("Started checking get sandbox actions for cert rotation")
                     if(configuration.get_worker_type()=="diy" and ROTATE_WORKER_CERTIFICATE_HEADER in response.headers):
@@ -154,30 +152,39 @@ class Urllib2HttpClient(HttpClient):
 
                 try:
                     if(POLLING_FREQUENCY_HEADER in response.headers):
+                        pollingfrequency = ex.headers[POLLING_FREQUENCY_HEADER]
                         workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(pollingfrequency)
                 except Exception:
-                    tracer.log_worker_debug("reached exception for polling")
                     formattedExceptionMessage = traceback.format_exc()
-                    tracer.log_worker_debug("reached exception3 "+formattedExceptionMessage)
+                    tracer.log_worker_debug("reached exception for polling "+formattedExceptionMessage)
 
             opener.close()
             https_handler.close()
             return response
 
         except Exception as ex:
-            tracer.log_worker_debug("reached exception1 " + str(ex))
-            formattedExceptionMessage = traceback.format_exc()
-            tracer.log_worker_debug("ex.headers")
-            tracer.log_worker_debug(ex.headers)
-            tracer.log_worker_debug("ex.code")
-            tracer.log_worker_debug(ex.code)
-            #tracer.log_worker_debug("reached exception2 " + formattedExceptionMessage)
             if(GET_SANDBOX_URL in url):
+                tracer.log_worker_debug("reached exception1 " + str(ex))
+                formattedExceptionMessage = traceback.format_exc()
+                tracer.log_worker_debug("reached exception1 " + formattedExceptionMessage)
+                tracer.log_worker_debug(dir(ex))
+                try:
+                    tracer.log_worker_debug("ex.headers")
+                    tracer.log_worker_debug(ex.headers)
+                except:
+                    formattedExceptionMessage = traceback.format_exc()
+                    tracer.log_worker_debug("reached exception for ex.headers "+formattedExceptionMessage)
+                try:
+                    tracer.log_worker_debug("ex.code")
+                    tracer.log_worker_debug(ex.code)
+                except:
+                    formattedExceptionMessage = traceback.format_exc()
+                    tracer.log_worker_debug("reached exception for ex.headers "+formattedExceptionMessage)
                 try:
                     if(POLLING_FREQUENCY_HEADER in ex.headers and (ex.code==401 or ex.code==404)):
                         tracer.log_worker_debug("Started checking get sandbox actions for polling freq")
                         pollingfrequency = ex.headers[POLLING_FREQUENCY_HEADER]
-                        tracer.log_worker_debug(pollingfrequency+"pollingfrequency")
+                        tracer.log_worker_debug(pollingfrequency+"pollingfrequencyheadervalue")
                         workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(pollingfrequency)
                 except Exception:
                     tracer.log_worker_debug("reached exception for polling")
