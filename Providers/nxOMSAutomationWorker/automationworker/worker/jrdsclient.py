@@ -85,13 +85,12 @@ class JRDSClient:
                 return None
 
             # success path
-            try:
-                if(eval(workercertificaterotation.get_certificate_rotation_header_value())):
-                    tracer.log_debug_trace("Initiating certificate rotation of Hybrid Worker")
-                    workercertificaterotation.set_certificate_rotation_header_value(DISABLE_CERT_ROTATION)  
-                    self.worker_certificate_rotation()
-            except Exception as ex:
-                tracer.log_debug_trace("[exception=" + str(ex) + "]")
+
+            if(eval(workercertificaterotation.get_certificate_rotation_header_value())):
+                tracer.log_debug_trace("Initiating certificate rotation of Hybrid Worker")
+                workercertificaterotation.set_certificate_rotation_header_value(DISABLE_CERT_ROTATION)
+                self.worker_certificate_rotation()
+
             return response.deserialized_data["value"]
 
         raise Exception("Unable to get sandbox actions. [status=" + str(response.status_code) + "]")
@@ -124,7 +123,7 @@ class JRDSClient:
                 tracer.log_debug_trace("New worker certificate successfully added in the Database")
                 workercertificaterotation.replace_self_signed_certificate_and_key(temp_certificate_path, temp_key_path, thumbprint)
         except Exception as ex:
-                    tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
+            tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
         finally:
             workercertificaterotation.clean_up_certificate_and_key(temp_certificate_path, temp_key_path)
             return

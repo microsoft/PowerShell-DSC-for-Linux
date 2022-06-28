@@ -2,13 +2,13 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
-from datetime import datetime
 import os
 import subprocess
 import sys
 import re
 import codecs
 import traceback
+from datetime import datetime
 #from dateutil import parser 
 
 # workaround when unexpected environment variables are present
@@ -385,23 +385,10 @@ def parse_not_before_from_openssl_output(raw_not_before):
     Returns:
         string : The certificate not before date.
     """
-    import tracer
-    tracer.log_worker_debug("dates1")
-    tracer.log_worker_debug(raw_not_before.split("notBefore=")[1].strip())
-    #tracer.log_worker_debug(parser.parse(raw_not_before.split("notBefore=")[1].strip()))
-    #date =parser.parse(raw_not_before.split("notBefore=")[1].strip()).isoformat()
-    date=raw_not_before.split("notBefore=")[1].replace("GMT", "").strip()
-
-    try:
-        tracer.log_worker_debug("dates2")
-        datenew=datetime.strptime(date, '%b %d %H:%M:%S %Y')#  Jun 20 09:47:14 2022
-        tracer.log_worker_debug(datenew)
-        datex =datenew.isoformat()
-        tracer.log_worker_debug(datex)
-        tracer.log_worker_debug("dates3")
-    except:
-        tracer.log_worker_debug(traceback.format_exc())
-    return datex
+    not_before_date = raw_not_before.split("notBefore=")[1].replace("GMT", "").strip()
+    datetime_object = datetime.strptime(not_before_date, '%b %d %H:%M:%S %Y')   #  Jun 20 09:47:14 2022
+    date_iso_format = datetime_object.isoformat()
+    return date_iso_format
 
 
 def parse_not_after_from_openssl_output(raw_not_after):
@@ -418,23 +405,11 @@ def parse_not_after_from_openssl_output(raw_not_after):
     Returns:
         string : The certificate not after date.
     """
-    import tracer
-    tracer.log_worker_debug("dates1")
-    tracer.log_worker_debug(raw_not_after.split("notAfter=")[1].strip())
-    date=raw_not_after.split("notAfter=")[1].replace("GMT", "").strip()
+    not_after_date = raw_not_after.split("notAfter=")[1].replace("GMT", "").strip()
 
-    try:
-        tracer.log_worker_debug("dates2")
-        datenew=datetime.strptime(date, '%b %d %H:%M:%S %Y')#  Jun 20 09:47:14 2022
-        tracer.log_worker_debug(datenew)
-        datex =datenew.isoformat()
-        tracer.log_worker_debug(datex)
-        tracer.log_worker_debug("dates3")
-    except:
-        tracer.log_worker_debug(traceback.format_exc())
-    #tracer.log_worker_debug(parser.parse(raw_not_after.split("notAfter=")[1].strip()))
-    #date =parser.parse(raw_not_after.split("notAfter=")[1].strip()).isoformat()
-    return datex
+    datetime_object = datetime.strptime(not_after_date, '%b %d %H:%M:%S %Y')    #  Jun 20 09:47:14 2022
+    date_iso_format = datetime_object.isoformat()
+    return date_iso_format
 
 @posix_only
 def fork_and_exit_parent():
