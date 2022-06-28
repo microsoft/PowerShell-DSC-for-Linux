@@ -7,9 +7,7 @@ import subprocess
 import sys
 import re
 import codecs
-import traceback
 from datetime import datetime
-#from dateutil import parser 
 
 # workaround when unexpected environment variables are present
 # sets COLUMNS wide enough so that output of ps does not get truncated

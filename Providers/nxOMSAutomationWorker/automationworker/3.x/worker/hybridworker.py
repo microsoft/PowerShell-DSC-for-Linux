@@ -27,9 +27,6 @@ def safe_loop(func):
                 func(*args, **kwargs)
             except (JrdsAuthorizationException):
                 tracer.log_worker_safe_loop_terminal_exception(traceback.format_exc())
-                tracer.log_worker_debug("time sleep exception")
-                tracer.log_worker_debug(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq())
-                time.sleep(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()) #polling frequency as per the value received from headers of GetSandboxActions
             except (InvalidFilePermissionException,
                     FileNotFoundException,
                     SystemExit):
@@ -38,8 +35,6 @@ def safe_loop(func):
                 sys.exit(-1)
             except Exception:
                 tracer.log_worker_safe_loop_non_terminal_exception(traceback.format_exc())
-                tracer.log_worker_debug("time sleep")
-            tracer.log_worker_debug(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq())
             time.sleep(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()) #polling frequency as per the value received from headers of GetSandboxActions
 
     return decorated_func

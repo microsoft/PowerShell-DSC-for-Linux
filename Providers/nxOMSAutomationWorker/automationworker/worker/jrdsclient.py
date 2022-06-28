@@ -86,10 +86,13 @@ class JRDSClient:
 
             # success path
 
-            if(eval(workercertificaterotation.get_certificate_rotation_header_value())):
-                tracer.log_debug_trace("Initiating certificate rotation of Hybrid Worker")
-                workercertificaterotation.set_certificate_rotation_header_value(DISABLE_CERT_ROTATION)
-                self.worker_certificate_rotation()
+            try:
+                if(eval(workercertificaterotation.get_certificate_rotation_header_value())):
+                    tracer.log_debug_trace("Initiating certificate rotation of Hybrid Worker")
+                    workercertificaterotation.set_certificate_rotation_header_value(DISABLE_CERT_ROTATION)
+                    self.worker_certificate_rotation()
+            except Exception as ex:
+                tracer.log_debug_trace("[exception=" + str(ex) + "]")
 
             return response.deserialized_data["value"]
 

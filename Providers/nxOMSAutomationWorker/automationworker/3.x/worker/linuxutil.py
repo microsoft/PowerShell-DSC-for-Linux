@@ -287,7 +287,7 @@ def get_cert_info(certificate_path):
     """Gets certificate information by invoking OpenSSL (OMS agent dependency).
 
     Returns:
-        A tuple containing the certificate's issuer, subject and thumbprint.
+        A tuple containing the certificate's issuer, subject, thumbprint, start date and end date.
     """
     p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-fingerprint", "-sha1"],
                          stdout=subprocess.PIPE,
@@ -345,23 +345,10 @@ def parse_not_before_from_openssl_output(raw_not_before):
     Returns:
         string : The certificate not before date.
     """
-    import tracer
-    tracer.log_worker_debug("dates1")
-    tracer.log_worker_debug(raw_not_before.split("notBefore=")[1].strip())
-    #tracer.log_worker_debug(parser.parse(raw_not_before.split("notBefore=")[1].strip()))
-    #date =parser.parse(raw_not_before.split("notBefore=")[1].strip()).isoformat()
-    date=raw_not_before.split("notBefore=")[1].replace("GMT", "").strip()
-
-    try:
-        tracer.log_worker_debug("dates2")
-        datenew=datetime.strptime(date, '%b %d %H:%M:%S %Y')#  Jun 20 09:47:14 2022
-        tracer.log_worker_debug(datenew)
-        datex =datenew.isoformat()
-        tracer.log_worker_debug(datex)
-        tracer.log_worker_debug("dates3")
-    except:
-        tracer.log_worker_debug(traceback.format_exc())
-    return datex
+    not_before_date = raw_not_before.split("notBefore=")[1].replace("GMT", "").strip()
+    datetime_object = datetime.strptime(not_before_date, '%b %d %H:%M:%S %Y')   #  Jun 20 09:47:14 2022
+    date_iso_format = datetime_object.isoformat()
+    return date_iso_format
 
 
 def parse_not_after_from_openssl_output(raw_not_after):
@@ -374,23 +361,12 @@ def parse_not_after_from_openssl_output(raw_not_after):
     Returns:
         string : The certificate not after date.
     """
-    import tracer
-    tracer.log_worker_debug("dates1")
-    tracer.log_worker_debug(raw_not_after.split("notAfter=")[1].strip())
-    date=raw_not_after.split("notAfter=")[1].replace("GMT", "").strip()
 
-    try:
-        tracer.log_worker_debug("dates2")
-        datenew=datetime.strptime(date, '%b %d %H:%M:%S %Y')#  Jun 20 09:47:14 2022
-        tracer.log_worker_debug(datenew)
-        datex =datenew.isoformat()
-        tracer.log_worker_debug(datex)
-        tracer.log_worker_debug("dates3")
-    except:
-        tracer.log_worker_debug(traceback.format_exc())
-    #tracer.log_worker_debug(parser.parse(raw_not_after.split("notAfter=")[1].strip()))
-    #date =parser.parse(raw_not_after.split("notAfter=")[1].strip()).isoformat()
-    return datex
+    not_after_date = raw_not_after.split("notAfter=")[1].replace("GMT", "").strip()
+
+    datetime_object = datetime.strptime(not_after_date, '%b %d %H:%M:%S %Y')    #  Jun 20 09:47:14 2022
+    date_iso_format = datetime_object.isoformat()
+    return date_iso_format
 
 
 def parse_thumbprint_from_openssl_output(raw_fingerprint):

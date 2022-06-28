@@ -349,7 +349,7 @@ def deregister(options):
     if os.path.exists(certificate_path) is False or os.path.exists(key_path) is False:
         raise Exception("Unable to deregister, no worker certificate/key found on disk.")
 
-    issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
+    issuer, subject, thumbprint, not_before, not_after = linuxutil.get_cert_info(certificate_path)
 
     if os.path.exists(worker_conf_path) is False:
         raise Exception("Missing worker configuration.")
@@ -368,7 +368,9 @@ def deregister(options):
     date = datetime.datetime.utcnow().isoformat() + "0-00:00"
     payload = {"Thumbprint": thumbprint,
                "Issuer": issuer,
-               "Subject": subject}
+               "Subject": subject,
+               "NotBeforeUtc": not_before,
+               "NotAfterUtc": not_after}
 
     # the signature generation is based on agent service contract
     payload_hash = sha256_digest(payload)

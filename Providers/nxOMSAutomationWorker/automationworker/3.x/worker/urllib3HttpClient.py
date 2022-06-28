@@ -140,58 +140,48 @@ class Urllib3HttpClient(HttpClient):
             req.get_method = lambda: method
             response = opener.open(req, timeout=30)           
             
-            if(GET_SANDBOX_URL in url and configuration.get_worker_type()=="diy"):
+            if(GET_SANDBOX_URL in url):
                 try:
-                    tracer.log_worker_debug("configuration.get_worker_type()")
-                    tracer.log_worker_debug(configuration.get_worker_type())
-                    tracer.log_worker_debug(response.headers)
-                    tracer.log_worker_debug("Started checking get sandbox actions for cert rotation")
-                    if(ROTATE_WORKER_CERTIFICATE_HEADER in response.headers):
-                        tracer.log_worker_debug("header present")
-                        workercertificaterotation.set_certificate_rotation_header_value(ENABLE_CERT_ROTATION_FOR_USER_HYBRID_WORKER)
-                    else:
-                        tracer.log_worker_debug("header absent")
-
-                except Exception:
-                    formattedExceptionMessage = traceback.format_exc()
-                    tracer.log_worker_debug("reached exception"+formattedExceptionMessage)
+                   if(configuration.get_worker_type()=="diy" and ROTATE_WORKER_CERTIFICATE_HEADER in response.headers):
+                        tracer.log_debug_trace("Enabling certificate rotation for worker")
+                        workercertificaterotation.set_certificate_rotation_header_value(ENABLE_CERT_ROTATION_FOR_USER_HYBRID_WORKER)   
+                except Exception as ex:
+                    tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
 
                 try:
                     if(POLLING_FREQUENCY_HEADER in response.headers):
-                        workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(pollingfrequency)
-                except Exception:
-                    tracer.log_worker_debug("reached exception for polling")
-                    formattedExceptionMessage = traceback.format_exc()
-                    tracer.log_worker_debug("reached exception3 "+formattedExceptionMessage)
+                        newpollingfrequency = ex.headers[POLLING_FREQUENCY_HEADER]
+                        oldpollingfrequency = workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()
 
+                        if  oldpollingfrequency != newpollingfrequency:
+                            tracer.log_debug_trace("Changing polling frequency of worker from "+ oldpollingfrequency +" to "+ newpollingfrequency)
+                            workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(newpollingfrequency)
+                except Exception as ex:
+                    tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
 
             opener.close()
             https_handler.close()
+            
             return response
 
         except Exception as ex:
-            tracer.log_worker_debug("reached exception1 " + str(ex))
-            formattedExceptionMessage = traceback.format_exc()
-            tracer.log_worker_debug("ex.headers")
-            tracer.log_worker_debug(ex.headers)
-            tracer.log_worker_debug("ex.code")
-            tracer.log_worker_debug(ex.code)
-            #tracer.log_worker_debug("reached exception2 " + formattedExceptionMessage)
             if(GET_SANDBOX_URL in url):
                 try:
-                    if(POLLING_FREQUENCY_HEADER in ex.headers and (ex.code==401 or ex.code==404)):
-                        tracer.log_worker_debug("Started checking get sandbox actions for polling freq")
-                        pollingfrequency = ex.headers[POLLING_FREQUENCY_HEADER]
-                        tracer.log_worker_debug(pollingfrequency+"pollingfrequency")
-                        workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(pollingfrequency)
-                except Exception:
-                    tracer.log_worker_debug("reached exception for polling")
-                    formattedExceptionMessage = traceback.format_exc()
-                    tracer.log_worker_debug("reached exception3 "+formattedExceptionMessage)
+                    if((ex is not None) and (ex.headers is not None) and (ex.code is not None)) and (POLLING_FREQUENCY_HEADER in ex.headers and (ex.code==401 or ex.code==404)):
+                        newpollingfrequency = ex.headers[POLLING_FREQUENCY_HEADER]
+                        oldpollingfrequency = workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()
 
-        opener.close()
-        https_handler.close()
-        return ex
+                        if  oldpollingfrequency != newpollingfrequency:
+                            tracer.log_debug_trace("Changing polling frequency of worker from "+ oldpollingfrequency +" to "+ newpollingfrequency)
+                            workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(newpollingfrequency)
+                except Exception as ex:
+                    tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
+
+            opener.close()
+            https_handler.close()
+
+            return ex
+
 
     def get(self, url, headers=None):
         """Issues a GET request to the provided url and using the provided headers.
