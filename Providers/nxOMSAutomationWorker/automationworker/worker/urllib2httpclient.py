@@ -161,17 +161,16 @@ class Urllib2HttpClient(HttpClient):
 
         except Exception as ex:
             if(GET_SANDBOX_URL in url):
-                tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
                 try:
-                    if(POLLING_FREQUENCY_HEADER in ex.headers and (ex.code==401 or ex.code==404)):
+                    if((ex is not None) and (ex.headers is not None) and (ex.code is not None)) and (POLLING_FREQUENCY_HEADER in ex.headers and (ex.code==401 or ex.code==404)):
                         newpollingfrequency = ex.headers[POLLING_FREQUENCY_HEADER]
                         oldpollingfrequency = workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()
 
                         if  oldpollingfrequency != newpollingfrequency:
                             tracer.log_debug_trace("Changing polling frequency of worker from "+ oldpollingfrequency +" to "+ newpollingfrequency)
                             workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(newpollingfrequency)
-                except Exception as ex:
-                    tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
+                except Exception:
+                    pass
 
             opener.close()
             https_handler.close()
