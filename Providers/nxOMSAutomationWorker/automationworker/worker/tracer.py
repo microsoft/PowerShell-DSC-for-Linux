@@ -342,11 +342,6 @@ def log_worker_safe_loop_terminal_exception(exception):
     message = "Worker safe loop terminal exception. [exception=" + str(exception) + "]"
     trace_generic_hybrid_worker_event_async(5109, inspect.stack()[0][3], message, 1, KEYWORD_ERROR)
 
-def log_worker_debug(headers):
-    message = "Response from get Sandbox action. [headers=" + str(headers) + "]"
-    trace_generic_hybrid_worker_event_async(5110, inspect.stack()[0][3], message, 1, KEYWORD_INFO)
-
-
 # sandbox specific traces
 # traces in this section are mainly for the sandbox component
 #

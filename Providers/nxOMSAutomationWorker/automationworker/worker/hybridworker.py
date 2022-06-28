@@ -26,7 +26,6 @@ def safe_loop(func):
                 func(*args, **kwargs)
             except (JrdsAuthorizationException):
                 tracer.log_worker_safe_loop_terminal_exception(traceback.format_exc())
-                time.sleep(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()) #polling frequency as per the value received from headers of GetSandboxActions
             except (InvalidFilePermissionException,
                     FileNotFoundException,
                     SystemExit):

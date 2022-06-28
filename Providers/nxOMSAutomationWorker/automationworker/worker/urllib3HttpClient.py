@@ -176,8 +176,8 @@ class Urllib3HttpClient(HttpClient):
                         if  oldpollingfrequency != newpollingfrequency:
                             tracer.log_debug_trace("Changing polling frequency of worker from "+ oldpollingfrequency +" to "+ newpollingfrequency)
                             workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(newpollingfrequency)
-                except Exception:
-                    pass
+                except Exception as ex:
+                    tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
 
             opener.close()
             https_handler.close()
