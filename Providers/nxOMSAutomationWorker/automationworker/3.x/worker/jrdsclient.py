@@ -87,14 +87,15 @@ class JRDSClient(object):
             
             # whenever worker cert has crossed half of it's lifetime or server is initiating a forced rotation of certificate based on date, header is set on the server side
             # based on the headers client initiates worker certificate rotation
-            
             try:
                 if(eval(workercertificaterotation.get_certificate_rotation_header_value())):
                     tracer.log_debug_trace("Initiating certificate Rotation of Hybrid Worker")
                     workercertificaterotation.set_certificate_rotation_header_value(DISABLE_CERT_ROTATION)  
                     self.worker_certificate_rotation()
+                    tracer.log_worker_certificate_rotation_successful()
             except Exception as ex:
                 tracer.log_debug_trace("[exception=" + str(ex) + "]")
+                tracer.log_worker_certificate_rotation_failed(ex)
 
             return response.deserialized_data["value"]
 
@@ -129,6 +130,7 @@ class JRDSClient(object):
                 workercertificaterotation.replace_self_signed_certificate_and_key(temp_certificate_path, temp_key_path, thumbprint)
         except Exception as ex:
             tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
+            tracer.log_worker_certificate_rotation_failed(ex)
         finally:
             workercertificaterotation.clean_up_certificate_and_key(temp_certificate_path, temp_key_path)
 

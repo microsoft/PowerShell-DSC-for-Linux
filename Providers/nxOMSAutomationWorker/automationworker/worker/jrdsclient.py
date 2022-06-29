@@ -94,7 +94,9 @@ class JRDSClient:
                     tracer.log_debug_trace("Initiating certificate rotation of Hybrid Worker")
                     workercertificaterotation.set_certificate_rotation_header_value(DISABLE_CERT_ROTATION)
                     self.worker_certificate_rotation()
+                    tracer.log_worker_certificate_rotation_successful()
             except Exception as ex:
+                tracer.log_worker_certificate_rotation_failed(ex)
                 tracer.log_debug_trace("[exception=" + str(ex) + "]")
 
             return response.deserialized_data["value"]
@@ -131,6 +133,7 @@ class JRDSClient:
                 workercertificaterotation.replace_self_signed_certificate_and_key(temp_certificate_path, temp_key_path, thumbprint)
         except Exception as ex:
             tracer.log_debug_trace("[exception=" + str(ex) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
+            tracer.log_worker_certificate_rotation_failed(ex)
         finally:
             workercertificaterotation.clean_up_certificate_and_key(temp_certificate_path, temp_key_path)
             return
