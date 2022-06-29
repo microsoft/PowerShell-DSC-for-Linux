@@ -366,9 +366,7 @@ def deregister(options):
     date = datetime.datetime.utcnow().isoformat() + "0-00:00"
     payload = {"Thumbprint": thumbprint,
                "Issuer": issuer,
-               "Subject": subject,
-               "NotBeforeUtc": not_before,
-               "NotAfterUtc": not_after}
+               "Subject": subject}
 
     # the signature generation is based on agent service contract
     payload_hash = sha256_digest(payload)

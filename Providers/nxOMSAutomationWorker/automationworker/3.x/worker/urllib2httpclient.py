@@ -148,7 +148,7 @@ class Urllib2HttpClient(HttpClient):
                 try:
                     if(POLLING_FREQUENCY_HEADER in response.headers):
                         newpollingfrequency = ex.headers[POLLING_FREQUENCY_HEADER]
-                        oldpollingfrequency = workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()
+                        oldpollingfrequency = str(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq())
 
                         if  oldpollingfrequency != newpollingfrequency:
                             tracer.log_debug_trace("Changing polling frequency of worker from "+ oldpollingfrequency +" to "+ newpollingfrequency)
@@ -166,7 +166,7 @@ class Urllib2HttpClient(HttpClient):
                 try:
                     if((ex is not None) and (ex.headers is not None) and (ex.code is not None)) and (POLLING_FREQUENCY_HEADER in ex.headers and (ex.code==401 or ex.code==404)):
                         newpollingfrequency = ex.headers[POLLING_FREQUENCY_HEADER]
-                        oldpollingfrequency = workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()
+                        oldpollingfrequency = str(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq())
 
                         if  oldpollingfrequency != newpollingfrequency:
                             tracer.log_debug_trace("Changing polling frequency of worker from "+ oldpollingfrequency +" to "+ newpollingfrequency)
@@ -178,7 +178,7 @@ class Urllib2HttpClient(HttpClient):
             https_handler.close()
             return ex
 
-            
+
     def get(self, url, headers=None):
         """Issues a GET request to the provided url and using the provided headers.
 
