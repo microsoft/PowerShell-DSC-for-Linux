@@ -394,7 +394,7 @@ def parse_not_before_from_openssl_output(raw_not_before):
         datetime : The certificate not before date.
     """
     not_before_date = raw_not_before.split("notBefore=")[1].replace("GMT", "").strip()
-    datetime_object = datetime.strptime(not_before_date, '%b %d %H:%M:%S %Y')   #  Jun 20 09:47:14 2022
+    datetime_object = datetime.strptime(not_before_date, '%b %d %H:%M:%S %Y')
     date_iso_format = datetime_object.isoformat()
     return date_iso_format
 
@@ -411,7 +411,7 @@ def parse_not_after_from_openssl_output(raw_not_after):
 
     not_after_date = raw_not_after.split("notAfter=")[1].replace("GMT", "").strip()
 
-    datetime_object = datetime.strptime(not_after_date, '%b %d %H:%M:%S %Y')    #  Jun 20 09:47:14 2022
+    datetime_object = datetime.strptime(not_after_date, '%b %d %H:%M:%S %Y')
     date_iso_format = datetime_object.isoformat()
     return date_iso_format
 
