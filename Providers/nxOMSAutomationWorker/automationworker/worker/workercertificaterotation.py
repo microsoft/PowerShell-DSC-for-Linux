@@ -2,6 +2,8 @@
 #
 # Copyright (C) Microsoft Corporation, All rights reserved.
 
+""" Contains functions to rotate worker certificate """
+
 import ConfigParser
 import os
 import subprocess
@@ -14,13 +16,14 @@ DIY_STATE_PATH = diydirs.DIY_STATE_PATH
 SHOULD_WORKER_CERT_ROTATE = ['False']
 
 def generate_cert_rotation_self_signed_certificate():
-    """Creates a self-signed x509 certificate and key pair in the specified path.
+    """Creates a self-signed x509 certificate and key.
 
-    Args:
-        certificate_path    : string, the output path of the certificate
-        key_path            : string, the output path of the key
+    Returns:
+        temp_certificate_path    : string, the path of the new certificate
+        temp_key_path            : string, the path of the new key
     """
     import tracer
+
     tracer.log_debug_trace("Creating Certificate/Key")
     temp_certificate_path = os.path.join(DIY_STATE_PATH, "worker_diy_temp.crt")
     temp_key_path = os.path.join(DIY_STATE_PATH, "worker_diy_temp.key")
@@ -37,8 +40,14 @@ def generate_cert_rotation_self_signed_certificate():
 
     return temp_certificate_path, temp_key_path
 
-def clean_up_certificate_and_key(temp_certificate_path, temp_key_path):
 
+def clean_up_certificate_and_key(temp_certificate_path, temp_key_path):
+    """ Delete the temporary certificate/key
+
+    Args:
+        temp_certificate_path    : string, the path of the certificate
+        temp_key_path            : string, the path of the key
+    """ 
     import tracer
     
     tracer.log_debug_trace("Cleaning up the certificate/key generated for certificate rotation")
@@ -48,7 +57,12 @@ def clean_up_certificate_and_key(temp_certificate_path, temp_key_path):
 
 
 def replace_self_signed_certificate_and_key(temp_certificate_path, temp_key_path, thumbprint):
+    """ Replace the old certificate/key with new certificate/key and update worker.conf with latest thumbprint
 
+    Args:
+        temp_certificate_path    : string, the path of the certificate
+        temp_key_path            : string, the path of the key
+    """ 
     import tracer
 
     tracer.log_debug_trace("Replacing the old certificate/key with newly generated certificate/key")
@@ -59,7 +73,6 @@ def replace_self_signed_certificate_and_key(temp_certificate_path, temp_key_path
     tracer.log_debug_trace("Worker certificate/key is updated with the latest one.")
 
     tracer.log_debug_trace("Updating worker.conf with latest thumbprint.")
-
     worker_conf_path = os.path.join(DIY_STATE_PATH, "worker.conf")
 
     config = ConfigParser.ConfigParser()
@@ -77,8 +90,10 @@ def replace_self_signed_certificate_and_key(temp_certificate_path, temp_key_path
 
     tracer.log_debug_trace("Worker.conf is updated with newest thumbprint")
 
+
 def get_certificate_rotation_header_value():
     return SHOULD_WORKER_CERT_ROTATE[0]
+
 
 def set_certificate_rotation_header_value(shouldworkercertificaterotate):
     SHOULD_WORKER_CERT_ROTATE[0] = shouldworkercertificaterotate

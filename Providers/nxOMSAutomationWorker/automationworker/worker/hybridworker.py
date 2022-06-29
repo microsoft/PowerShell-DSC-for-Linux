@@ -36,7 +36,6 @@ def safe_loop(func):
                 tracer.log_worker_safe_loop_non_terminal_exception(traceback.format_exc())
             time.sleep(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()) #polling frequency as per the value received from headers of GetSandboxActions
 
-
     return decorated_func
 
 

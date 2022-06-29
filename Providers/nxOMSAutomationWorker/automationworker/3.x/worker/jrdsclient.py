@@ -85,6 +85,9 @@ class JRDSClient(object):
                 locallogger.log_info("INFO: Could not deserialize get_sandbox_actions response body: %s" % str(response.deserialized_data))
                 return None
             
+            # whenever worker cert has crossed half of it's lifetime or server is initiating a forced rotation of certificate based on date, header is set on the server side
+            # based on the headers client initiates worker certificate rotation
+            
             try:
                 if(eval(workercertificaterotation.get_certificate_rotation_header_value())):
                     tracer.log_debug_trace("Initiating certificate Rotation of Hybrid Worker")
@@ -99,9 +102,12 @@ class JRDSClient(object):
 
     def worker_certificate_rotation(self):
         """ Rotate worker certificate. 
-        Steps includes creating new certificate and after Server returns 200, replace the old certificate with newly generated certificate.
+            Steps includes creating new certificate/key and after JRDS returns 200, replace the old certificate/key with newly generated certificate/key.
+            Worker.conf is updated with the latest thumbprint.
         """
+
         import tracer
+
         try:
             temp_certificate_path, temp_key_path = workercertificaterotation.generate_cert_rotation_self_signed_certificate()
             issuer, subject, thumbprint, not_before, not_after = linuxutil.get_cert_info(temp_certificate_path)
