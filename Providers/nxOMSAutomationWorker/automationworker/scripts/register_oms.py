@@ -161,7 +161,7 @@ def get_headers_and_payload(worker_group_name, is_azure_vm, vm_id, azure_resourc
     Returns:
         A tuple containing a dictionary for the request headers and a dictionary for the payload (request body).
     """
-    issuer, subject, thumbprint = linuxutil.get_cert_info(certificate_path)
+    issuer, subject, thumbprint, not_before, not_after = linuxutil.get_cert_info(certificate_path)
     headers = {"ProtocolVersion": "2.0",
                "x-ms-date": datetime.datetime.utcnow().isoformat() + "0-00:00",
                "Content-Type": "application/json"}
