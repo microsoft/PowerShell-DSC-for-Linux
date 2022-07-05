@@ -1328,12 +1328,12 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 
     if (bIsHttps)
     {
-        Snprintf(actionUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Nodes(AgentId='%s')/GetDscAction", url, port, subUrl, configurationID);
+        Snprintf(actionUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Nodes(AgentId='%s')/GetDscActon", url, port, subUrl, configurationID);
 
     }
     else
     {
-        Snprintf(actionUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/GetDscAction", url, port, subUrl, configurationID);
+        Snprintf(actionUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/GetDscActon", url, port, subUrl, configurationID);
     }
 
     r = SetGeneralCurlOptions(curl, extendedError);
