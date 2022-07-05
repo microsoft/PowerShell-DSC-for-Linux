@@ -1225,12 +1225,15 @@ MI_Char *GetSystemUuid()
         }
 
 MI_Result SetGeneralCurlOptions(CURL* curl,
-				_Outptr_result_maybenull_ MI_Instance **extendedError)
+				_Outptr_result_maybenull_ MI_Instance **extendedError, File *fileStream)
 {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30);
+    if(fileStream != NULL) {
+       curl_easy_setopt(curl, CURLOPT_STDERR, fileStream); 
+    }
     /*
         Default curl operation timeout is infinite.
         If curl operation hangs for some reason, it should not block LCM forever.
@@ -1328,15 +1331,17 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 
     if (bIsHttps)
     {
-        Snprintf(actionUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Nodes(AgentId='%s')/GetDscActon", url, port, subUrl, configurationID);
+        Snprintf(actionUrl, MAX_URL_LENGTH, "https://%s:%d/%s/Nodes(AgentId='%s')/GetDscAction", url, port, subUrl, configurationID);
 
     }
     else
     {
-        Snprintf(actionUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/GetDscActon", url, port, subUrl, configurationID);
+        Snprintf(actionUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/GetDscAction", url, port, subUrl, configurationID);
     }
 
-    r = SetGeneralCurlOptions(curl, extendedError);
+    FILE *fileStream = File_OpenT("IssueGetActionRequest", MI_T("a"));
+
+    r = SetGeneralCurlOptions(curl, extendedError, fileStream);
     if (r != MI_RESULT_OK)
     {
 	DSC_free(bodyContent);
@@ -1407,6 +1412,9 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
         *getActionStatusCode = GetDscActionCommandFailure;
         free(headerChunk.data);
         free(dataChunk.data);
+        if(fileStream != NULL) {
+            File_Close(fileStream);
+        }
         curl_slist_free_all(list);
         curl_easy_cleanup(curl);
 
@@ -1429,6 +1437,9 @@ MI_Result  IssueGetActionRequest( _In_z_ const MI_Char *configurationID,
 
     free(headerChunk.data);
     free(dataChunk.data);
+    if(fileStream != NULL) {
+        File_Close(fileStream);
+    }
 
     if( getActionStatus == NULL)
     {
