@@ -1515,7 +1515,7 @@ MI_Result  IssueGetConfigurationRequest( _In_z_ const MI_Char *configurationID,
         Snprintf(configurationUrl, MAX_URL_LENGTH, "http://%s:%d/%s/Nodes(AgentId='%s')/Configurations(ConfigurationName='%s')/ConfigurationContent", url, port, subUrl, configurationID, assignedConfiguration);
     }
 
-    r = SetGeneralCurlOptions(curl, extendedError);
+    r = SetGeneralCurlOptions(curl, extendedError, NULL);
     if (r != MI_RESULT_OK)
     {
         curl_easy_cleanup(curl);
@@ -1844,7 +1844,7 @@ MI_Result  IssueGetModuleRequest( _In_z_ const MI_Char *configurationID,
     }
 
 
-    r = SetGeneralCurlOptions(curl, extendedError);
+    r = SetGeneralCurlOptions(curl, extendedError, NULL);
     if (r != MI_RESULT_OK)
     {
 	curl_easy_cleanup(curl);
@@ -2726,7 +2726,7 @@ MI_Result Pull_Register(MI_Char* serverURL,
         return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CERTOPTS_NOT_SUPPORTED);
       }
 
-    r = SetGeneralCurlOptions(curl, extendedError);
+    r = SetGeneralCurlOptions(curl, extendedError, NULL);
     if (r != MI_RESULT_OK)
     {
 	curl_easy_cleanup(curl);
@@ -2872,7 +2872,7 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
             return GetCimMIError(MI_RESULT_FAILED, extendedError, ID_PULL_CURLFAILEDTOINITIALIZE);
         }
 
-        r = SetGeneralCurlOptions(curl, extendedError);
+        r = SetGeneralCurlOptions(curl, extendedError, NULL);
         if (r != MI_RESULT_OK)
         {
             DSC_free(reportText);
