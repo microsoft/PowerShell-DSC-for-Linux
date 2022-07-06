@@ -1225,7 +1225,7 @@ MI_Char *GetSystemUuid()
         }
 
 MI_Result SetGeneralCurlOptions(CURL* curl,
-				_Outptr_result_maybenull_ MI_Instance **extendedError, File *fileStream)
+				_Outptr_result_maybenull_ MI_Instance **extendedError, FILE *fileStream)
 {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
