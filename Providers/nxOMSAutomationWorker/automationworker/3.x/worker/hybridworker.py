@@ -12,6 +12,7 @@ import sys
 import threading
 import time
 import traceback
+import workerpollingfrequency
 
 # import worker module after linuxutil.daemonize() call
 
@@ -24,8 +25,9 @@ def safe_loop(func):
             try:
                 # ensure required file / cert exists
                 func(*args, **kwargs)
-            except (JrdsAuthorizationException,
-                    InvalidFilePermissionException,
+            except (JrdsAuthorizationException):
+                tracer.log_worker_safe_loop_terminal_exception(traceback.format_exc())
+            except (InvalidFilePermissionException,
                     FileNotFoundException,
                     SystemExit):
                 tracer.log_worker_safe_loop_terminal_exception(traceback.format_exc())
@@ -33,7 +35,7 @@ def safe_loop(func):
                 sys.exit(-1)
             except Exception:
                 tracer.log_worker_safe_loop_non_terminal_exception(traceback.format_exc())
-            time.sleep(configuration.get_jrds_get_sandbox_actions_polling_freq())
+            time.sleep(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()) #polling frequency as per the value received from headers of GetSandboxActions
 
     return decorated_func
 

@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 import traceback
+import workerpollingfrequency
 
 # import worker module after linuxutil.daemonize() call
 
@@ -23,8 +24,9 @@ def safe_loop(func):
             try:
                 # ensure required file / cert exists
                 func(*args, **kwargs)
-            except (JrdsAuthorizationException,
-                    InvalidFilePermissionException,
+            except (JrdsAuthorizationException):
+                tracer.log_worker_safe_loop_terminal_exception(traceback.format_exc())
+            except (InvalidFilePermissionException,
                     FileNotFoundException,
                     SystemExit):
                 tracer.log_worker_safe_loop_terminal_exception(traceback.format_exc())
@@ -32,7 +34,7 @@ def safe_loop(func):
                 sys.exit(-1)
             except Exception:
                 tracer.log_worker_safe_loop_non_terminal_exception(traceback.format_exc())
-            time.sleep(configuration.get_jrds_get_sandbox_actions_polling_freq())
+            time.sleep(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq()) #polling frequency as per the value received from headers of GetSandboxActions
 
     return decorated_func
 
@@ -234,7 +236,7 @@ class Worker:
                 process_env_variables["IDENTITY_HEADER"] = msi_secret
                 process_env_variables["IDENTITY_ENDPOINT"] = self.construct_jrds_msi_endpoint(sandbox_id)
 
-            cmd = ["python", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
+            cmd = ["python2", os.path.join(configuration.get_source_directory_path(), "sandbox.py"),
                    configuration.get_worker_configuration_file_path()]
             tracer.log_worker_starting_sandbox(sandbox_id)
             sandbox_process = subprocessfactory.create_subprocess(cmd=cmd,
