@@ -273,6 +273,18 @@ def get_cert_info(certificate_path):
     """Gets certificate information by invoking OpenSSL (OMS agent dependency).
 
     Returns:
+        A tuple containing the certificate's issuer, subject, thumbprint.
+    """
+    issuer, subject, thumbprint, not_before, not_after = get_cert_info_with_dates(certificate_path)
+
+    return issuer, subject, thumbprint
+
+
+@posix_only
+def get_cert_info_with_dates(certificate_path):
+    """Gets certificate information by invoking OpenSSL (OMS agent dependency).
+
+    Returns:
         A tuple containing the certificate's issuer, subject and thumbprint, start date and end date.
     """
     p = subprocess.Popen(["openssl", "x509", "-noout", "-in", certificate_path, "-fingerprint", "-sha1"],

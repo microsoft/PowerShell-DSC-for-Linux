@@ -111,7 +111,7 @@ class JRDSClient(object):
 
         try:
             temp_certificate_path, temp_key_path = workercertificaterotation.generate_cert_rotation_self_signed_certificate()
-            issuer, subject, thumbprint, not_before, not_after = linuxutil.get_cert_info(temp_certificate_path)
+            issuer, subject, thumbprint, not_before, not_after = linuxutil.get_cert_info_with_dates(temp_certificate_path)
 
             payload = {'Thumbprint': thumbprint,
                'Issuer': issuer,
