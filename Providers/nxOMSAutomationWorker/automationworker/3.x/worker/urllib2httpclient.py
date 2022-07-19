@@ -172,7 +172,7 @@ class Urllib2HttpClient(HttpClient):
                         oldpollingfrequency = str(workerpollingfrequency.get_jrds_get_sandbox_actions_polling_freq())
 
                         if  oldpollingfrequency != newpollingfrequency:
-                            tracer.log_debug_trace("Changing Polling frequency of worker from "+ oldpollingfrequency +" to "+ newpollingfrequency)
+                            tracer.log_debug_trace("Changing polling frequency of worker from "+ oldpollingfrequency +" to "+ newpollingfrequency)
                             workerpollingfrequency.set_jrds_sandbox_actions_polling_freq(newpollingfrequency)
                 except Exception as e:
                     tracer.log_debug_trace("[exception=" + str(e) + "]" + "[stacktrace=" + str(traceback.format_exc()) + "]")
