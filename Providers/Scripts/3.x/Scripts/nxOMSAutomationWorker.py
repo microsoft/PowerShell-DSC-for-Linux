@@ -397,7 +397,7 @@ def is_certificate_valid(worker_conf_path, certificate_path):
         worker_conf.read(worker_conf_path)
         worker_certificate_thumbprint = worker_conf.get(SECTION_OMS_METADATA, OPTION_JRDS_CERT_THUMBPRINT)
 
-        issuer, subject, omsagent_certificate_thumbprint, not_before, not_after = linuxutil.get_cert_info(certificate_path)
+        issuer, subject, omsagent_certificate_thumbprint = linuxutil.get_cert_info(certificate_path)
 
         if worker_certificate_thumbprint == omsagent_certificate_thumbprint:
             return True
