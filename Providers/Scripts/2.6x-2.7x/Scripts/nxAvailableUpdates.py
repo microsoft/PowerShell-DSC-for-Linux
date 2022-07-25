@@ -73,8 +73,8 @@ def GetAptUpdates(Name):
     d = {}
     #Collect Security updates
     security_sources_list = '/tmp/az-update-security.list'
-    prep_security_sources_list_cmd = 'sudo grep security /etc/apt/sources.list > ' + security_sources_list
-    dist_upgrade_simulation_cmd_template = 'LANG=en_US.UTF8 sudo apt-get -s dist-upgrade <SOURCES> '
+    prep_security_sources_list_cmd = 'grep security /etc/apt/sources.list > ' + security_sources_list
+    dist_upgrade_simulation_cmd_template = 'LANG=en_US.UTF8 apt-get -s dist-upgrade <SOURCES> '
     # Refresh the repo
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
         cmd = 'sudo /opt/microsoft/omsconfig/Scripts/OMSAptUpdates.sh'
