@@ -115,14 +115,24 @@ char * BuildStringResourceErrorList(ResourceErrorList * resourceErrorList)
         added_length = strlen(current->resourceID);
         if (current->next != NULL)
         {
-            outstring = (char *) realloc(outstring, current_length + added_length + separator_length + 1);
+            char* temp = (char *) realloc(outstring, current_length + added_length + separator_length + 1);
+
+            if(NULL == temp) {
+                free(outstring);
+            }
+            outstring = temp;
             strncpy(outstring + current_length, current->resourceID, added_length);
             strncpy(outstring + current_length + added_length, separator, separator_length);
             current_length += added_length + separator_length;
         }
         else
         {
-            outstring = (char *) realloc(outstring, current_length + added_length + 1);
+            char* temp = (char *) realloc(outstring, current_length + added_length + 1);
+
+            if(NULL == temp) {
+                free(outstring);
+            }
+            outstring = temp;
             strncpy(outstring + current_length, current->resourceID, added_length);
             current_length += added_length;
         }
