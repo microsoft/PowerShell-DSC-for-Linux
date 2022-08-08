@@ -36,7 +36,12 @@ int main(int argc, char *argv[])
 
     if(strcmp(pythonCommand, PYTHON3_COMMAND) == 0)
     {
-        dscScriptPath = realloc(dscScriptPath, strlen(dscScriptPath) + strlen("/python3") + 1 );
+        char* tempDscScriptPath = realloc(dscScriptPath, strlen(dscScriptPath) + strlen("/python3") + 1 );
+
+        if(NULL == tempDscScriptPath) {
+            free(dscScriptPath);
+        }
+        dscScriptPath = tempDscScriptPath;
         dscScriptPath = strcat(dscScriptPath, "/python3");
     }
     
@@ -50,6 +55,7 @@ int main(int argc, char *argv[])
     strcat(fullCommand, PYTHON_SCRIPT_NAME);
 
     int returnValue = system(fullCommand);
+    free(dscScriptPath);
     return returnValue;
 }
 
@@ -66,7 +72,12 @@ char* getPythonProvider()
         printf("Cant start command.");
     }
     while(fgets(buffer, 128, pipe) != NULL) {
-        result = realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        char* tempResult = realloc(result, (result ? strlen(result) : 0) + buffer_length );
+
+        if(NULL == tempResult) {
+            free(result);
+        }
+        result = tempResult;
         strcat(result,buffer);
     }
 
@@ -83,7 +94,12 @@ char* getPythonProvider()
     	printf("Cant start command.");
     }
     while(fgets(buffer, 128, pipe) != NULL) {
-        result = realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        char* tempResult = realloc(result, (result ? strlen(result) : 0) + buffer_length );
+
+        if(NULL == tempResult) {
+            free(result);
+        }
+        result = tempResult;
         strcat(result,buffer);
     }
 

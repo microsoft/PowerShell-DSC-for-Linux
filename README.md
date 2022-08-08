@@ -217,7 +217,11 @@ Make sure version 1.1 or later of the DSC Linux agent is installed on the machin
 **To configure Azure Automation as a DSC Pull Server from the Linux computer:**
 
 - On each Linux machine to onboard to Azure Automation DSC, use Register.py to onboard using the PowerShell DSC Local Configuration Manager defaults:  
+
+#### For python2
 ```/opt/microsoft/dsc/Scripts/Register.py <Automation account registration key> <Automation account registration URL>  ```
+#### For python3
+```/opt/microsoft/dsc/Scripts/python3/Register.py <Automation account registration key> <Automation account registration URL>  ```
 
 - To find the registration key and registration URL for your Automation account, see the Secure Registration section below.
 - Using the Azure portal or cmdlets, check that the machines to onboard now show up as DSC nodes registered in your Azure Automation account. 
@@ -252,8 +256,13 @@ Set-DscLocalConfigurationManager -CimSession $Session –Path C:\Users\joe\Deskt
 ``` 
 - If you cannot apply the PowerShell DSC metaconfigurations remotely, for each Linux machine to onboard, copy the metaconfiguration corresponding to that machine from the folder in step 5 onto the Linux machine. Then call SetDscLocalConfigurationManager.py locally on each Linux machine to onboard to Azure Automation DSC:  
 
+#### For python2
 ```
 /opt/microsoft/dsc/Scripts/SetDscLocalConfigurationManager.py –configurationmof <path to metaconfiguration file> 
+```
+#### For python3
+```
+/opt/microsoft/dsc/Scripts/python3/SetDscLocalConfigurationManager.py –configurationmof <path to metaconfiguration file> 
 ```
 - Using the Azure portal or cmdlets, check that the machines to onboard now show up as DSC nodes registered in your Azure Automation account.  
 
@@ -261,7 +270,7 @@ Set-DscLocalConfigurationManager -CimSession $Session –Path C:\Users\joe\Deskt
 The supplied resource modules with this release (nxNetworking, nxComputerManagement) can be imported to Azure Automation for distribution with DSC configurations. To import to Azure Automation, rename the .zip files to remove the _X.Y version string from the file name. Such as: nxNetworking.zip and nxComputerManagement.zip. 
 
 ## Performing DSC Operations from the Linux Computer 
-DSC for Linux includes scripts to work with configuration from the local Linux computer. These scripts are located in `/opt/microsoft/dsc/Scripts` and include the following:
+DSC for Linux includes scripts to work with configuration from the local Linux computer. These scripts are located in `/opt/microsoft/dsc/Scripts` for python2 and `/opt/microsoft/dsc/Scripts/python3` for python3 and include the following:
 
 **GetDscConfiguration.py**
 Returns the current configuration applied to the computer. Similar to the Windows PowerShell cmdlet Get-DscConfiguration cmdlet. 
