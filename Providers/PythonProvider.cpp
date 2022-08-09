@@ -65,7 +65,13 @@ std::string determinePythonVersion(){
     }
 
     while(fgets(buffer, 128, pipe) != NULL) {
-        result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        char* temp = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        
+        if(NULL == temp) {
+            free(result);
+        }
+        
+        result = temp;
         strcat(result,buffer);
     }
 
@@ -83,7 +89,13 @@ std::string determinePythonVersion(){
     	std::cout << "Couldn't start command." << std::endl;
     }
     while(fgets(buffer, 128, pipe) != NULL) {
-        result = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+        char* temp = (char*)realloc(result, (result ? strlen(result) : 0) + buffer_length );
+
+        if(NULL == temp) {
+            free(result);
+        }
+        
+        result = temp;
         strcat(result,buffer);
     }
 

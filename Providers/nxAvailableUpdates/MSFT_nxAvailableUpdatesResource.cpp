@@ -232,6 +232,7 @@ void MI_CALL MSFT_nxAvailableUpdatesResource_Invoke_InventoryTargetResource(
 		result = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
 		if (result != MI_RESULT_OK)
 		{
+            free(clientBuffer);
 		    MI_Application_Close(&application);
 		    MI_Context_PostResult (context, result);
 		    return;
