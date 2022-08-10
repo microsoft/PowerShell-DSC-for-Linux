@@ -1824,10 +1824,11 @@ MI_Result MI_MAIN_CALL MI_Application_NewSerializer_Mof(
     {
         ExtFunctionTable* eft =
             (ExtFunctionTable*)PAL_Malloc(sizeof(ExtFunctionTable));
-        memset(eft, 0, sizeof(ExtFunctionTable));
 
         if (!eft)
             return MI_RESULT_FAILED;
+        
+        memset(eft, 0, sizeof(ExtFunctionTable));
 
         eft->ft = _Serializer_ft;
         eft->nextAliasIndex = 0;

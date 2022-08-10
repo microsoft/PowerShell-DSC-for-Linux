@@ -81,6 +81,10 @@ MI_Result AddToResourceErrorList(ResourceErrorList * resourceErrorList, const ch
         resourceErrorList->last = current;
     }
 
+    if(current == NULL) {
+        return MI_RESULT_FAILED;
+    }
+
     current->next = NULL;
     current->resourceID = (char *)calloc(length + 1, sizeof(char));
     strncpy(current->resourceID, resourceID, length);
@@ -102,6 +106,9 @@ char * BuildStringResourceErrorList(ResourceErrorList * resourceErrorList)
     }
 
     outstring = (char *) calloc(1, sizeof(char));
+    if(outstring == NULL) {
+        return NULL;
+    }
     current_length = 0;
     current = resourceErrorList->first;
 
@@ -431,6 +438,9 @@ MI_Result ResolveDependencyInternal( _In_ MI_Uint32 index,
                 const MI_Char* resourceID;
                 const MI_Char* sourceInfo;
                 resourceID = GetResourceId(instanceA->data[dwIndex]);
+                if(resourceID == NULL) {
+                    return MI_RESULT_NOT_FOUND;
+                }
                 sourceInfo = GetSourceInfo(instanceA->data[dwIndex]);
                 if(sourceInfo == NULL)
                 {
@@ -495,6 +505,9 @@ MI_Result GetInstanceIndex(_In_ MI_InstanceA *instanceA,
     }
     // If here resource was not found. Throw an error.
     currentResourceID = GetResourceId(instanceA->data[currentInstanceIndex]);
+    if(currentResourceID == NULL) {
+        return MI_RESULT_NOT_FOUND;
+    }
     currentSourceInfo = GetSourceInfo(instanceA->data[currentInstanceIndex]);
     if(currentSourceInfo == NULL)
     {
@@ -2420,6 +2433,13 @@ MI_Result MI_CALL Do_Register(
         requestBody = RunCommand(buffer);
         snprintf(buffer, c_bufferSize, headerFormatString, DSC_SCRIPT_PATH, s_ManagerInstanceNames[typeOfManagerInstance], val.string);
         header = RunCommand(buffer);
+    }
+    if(requestBody == NULL) {
+        return MI_RESULT_FAILED;
+    }
+    if(header == NULL) {
+        DSC_free(requestBody);
+        return MI_RESULT_FAILED;
     }
 
     x_ms_header = strtok_r(header, "\n", &saveptr);
