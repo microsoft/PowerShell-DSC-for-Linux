@@ -269,6 +269,9 @@ static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *us
   long key_length = 0;
   long value_length = 0;
   char *charContents = (char*)calloc(realsize, 1);
+  if(charContents == NULL) {
+    return 0;
+  }
 
   // We have to do a silly memcpy here because there's no safe version of "strstr", used below.
   memcpy(charContents, contents, realsize);
@@ -292,8 +295,18 @@ static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *us
       return realsize;
   }
 
-  chunk->headerKeys = realloc(chunk->headerKeys, (chunk->size + 1) * sizeof(char*) );
-  chunk->headerValues = realloc(chunk->headerValues, (chunk->size + 1) * sizeof(char*) );
+  char* tempHeaderKeys = realloc(chunk->headerKeys, (chunk->size + 1) * sizeof(char*) );
+  char* tempHeaderValues = realloc(chunk->headerValues, (chunk->size + 1) * sizeof(char*) );
+  if(tempHeaderKeys == NULL) {
+    free(chunk->headerKeys);
+    return 0;
+  }
+  if(tempHeaderValues == NULL) {
+    free(chunk->headerValues);
+    return 0;
+  }
+  chunk->headerKeys = tempHeaderKeys;
+  chunk->headerValues = tempHeaderValues;
 
   chunk->headerKeys[chunk->size] = malloc( key_length + 1 );
   chunk->headerValues[chunk->size] = malloc( value_length + 1);
@@ -311,9 +324,18 @@ static size_t HeaderCallback(void *contents, size_t size, size_t nmemb, void *us
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
+  //Handle size overflow due to multiplication
+  if( nmemb != 0 && (realsize / nmemb != size || (realsize % nmemb) != 0)) {
+    return 0;
+  }
   struct Chunk *mem = (struct Chunk *)userp;
 
-  mem->data = realloc(mem->data, mem->size + realsize + 1);
+  char* tempMemData = (char *)realloc(mem->data, mem->size + realsize + 1);
+  if(tempMemData == NULL) {
+    free(mem->data);
+    return 0;
+  }
+  mem->data = tempMemData;
   memcpy(&(mem->data[mem->size]), contents, realsize);
   mem->size += realsize;
   mem->data[mem->size] = 0;
@@ -2537,6 +2559,9 @@ static MI_Result GetModuleNameVersionTable(MI_Char* mofFileLocation,
 
                 // foundEntry will be a pointer to the "next" or "first" pointer that points to the ModuleTableEntry we want
                 foundEntry = ModuleTableContainsKey(table, moduleName.string);
+                if(foundEntry == NULL) {
+                    return MI_RESULT_FAILED;
+                }
                 if ( *foundEntry != NULL )
                 {
                     // Find VersionClass tuple, append new class if necessary, update version if necessary
@@ -2854,6 +2879,9 @@ MI_Result MI_CALL Pull_SendStatusReport(_In_ LCMProviderContext *lcmContext,
         }
 
         reportText = RunCommand(dataBuffer);
+        if(reportText == NULL) {
+            return MI_RESULT_FAILED;
+        }
 
         curl = curl_easy_init();
         if (!curl)
