@@ -231,13 +231,9 @@ void MI_CALL MSFT_nxUserResource_Invoke_InventoryTargetResource(
         if(clientBuffer == NULL) {
             return;
         }
+        memset(&application, 0, sizeof(MI_Application));
 		MI_Application_Initialize(0,NULL,NULL, &application);
-        if(application == NULL) {
-            free(clientBuffer);
-		    MI_Context_PostResult (context, result);
-		    return;
-        }
-		result = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
+        result = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
 		if (result != MI_RESULT_OK)
 		{
             free(clientBuffer);
