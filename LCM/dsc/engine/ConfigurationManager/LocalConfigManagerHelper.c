@@ -5540,7 +5540,7 @@ MI_Result TaskHelper(
     MI_Result r = MI_RESULT_OK;
     const MI_Instance *result;
     MI_Boolean moreResults;
-    MI_Result resultCode;
+    MI_Result resultCode = MI_RESULT_INVALID_PARAMETER;
     const MI_Char *errorMessage; 
 
     if (cimErrorDetails == NULL)

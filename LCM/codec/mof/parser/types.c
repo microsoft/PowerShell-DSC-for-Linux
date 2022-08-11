@@ -42,6 +42,8 @@
     { \
         PTR = ((TYPE##A*)Batch_Get(state->batch, \
             sizeof(TYPE##A) + sizeof(TYPE) * (SIZE))); \
+        if (PTR == NULL) \
+            break; \
         PTR->data = (TYPE*)(PTR + 1); \
         PTR->size = SIZE; \
         break; \
