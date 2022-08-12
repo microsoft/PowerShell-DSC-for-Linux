@@ -56,6 +56,9 @@ std::string determinePythonVersion(){
     int buffer_length = 128;
     char buffer[buffer_length]; 
     char* result = (char*)malloc(1);
+    if(result == NULL) {
+        return "python";
+    }
     *result = 0; 
 
     // Check for python3
@@ -83,6 +86,9 @@ std::string determinePythonVersion(){
 
     // Look for python2
     result = (char*)malloc(1);
+    if(result == NULL) {
+        return "python";
+    }
     *result = 0;
     pipe = popen("python2 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
     if(!pipe) {

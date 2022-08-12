@@ -251,6 +251,9 @@ void MI_CALL MSFT_nxUserResource_Invoke_InventoryTargetResource(
 			// Try again with a buffer given to us by the clientBufferNeeded field
 			clientBufferLength = clientBufferNeeded;
 			clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+            if(clientBuffer == NULL) {
+                return;
+            }
 			result = XmlSerializer_SerializeInstance( &serializer, 0, retInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
 		    }
 		    else

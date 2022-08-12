@@ -228,6 +228,9 @@ void MI_CALL MSFT_nxGroupResource_Invoke_InventoryTargetResource(
 		FILE *fp = NULL;
 		
 		clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+        if(clientBuffer == NULL) {
+            return;
+        }
 		MI_Application_Initialize(0,NULL,NULL, &application);
 		result = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
 		if (result != MI_RESULT_OK)
@@ -247,6 +250,9 @@ void MI_CALL MSFT_nxGroupResource_Invoke_InventoryTargetResource(
 			// Try again with a buffer given to us by the clientBufferNeeded field
 			clientBufferLength = clientBufferNeeded;
 			clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
+            if(clientBuffer == NULL) {
+                return;
+            }
 			result = XmlSerializer_SerializeInstance( &serializer, 0, retInstance, clientBuffer, clientBufferLength, &clientBufferNeeded);
 		    }
 		    else
@@ -263,12 +269,15 @@ void MI_CALL MSFT_nxGroupResource_Invoke_InventoryTargetResource(
 		if (result == MI_RESULT_OK)
 		{
 		    clientBuffer[clientBufferNeeded] = '\0';
-		    printf((char*)clientBuffer);
+		    printf("%s", (char*)clientBuffer);
 		}
 
 		
 		{
-		    char * reportTemplate = (char*)malloc(strlen(reportTemplateBase));
+		    char * reportTemplate = (char*)malloc(strlen(reportTemplateBase) + 1);
+            if(reportTemplate == NULL) {
+                return;
+            }
 		    strcpy(reportTemplate, reportTemplateBase);
 		    int fd = mkstemp(reportTemplate);
 		    if (fd == -1)
