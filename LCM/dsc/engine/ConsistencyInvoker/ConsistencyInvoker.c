@@ -30,9 +30,15 @@ int main(int argc, char *argv[])
     char * pythonCommand = PYTHON2_COMMAND;
 
     char* dscScriptPath = malloc(strlen(DSC_SCRIPT_PATH) + 1);
+    if(dscScriptPath == NULL) {
+        return 0;
+    }
     dscScriptPath = strcpy(dscScriptPath, DSC_SCRIPT_PATH);
 
     pythonCommand = getPythonProvider();
+    if(pythonCommand == NULL) {
+        return 0;
+    }
 
     if(strcmp(pythonCommand, PYTHON3_COMMAND) == 0)
     {
@@ -65,6 +71,10 @@ char* getPythonProvider()
     int buffer_length = 128;
     char buffer[buffer_length]; 
     char* result = malloc(1);
+    if(result == NULL) {
+        printf("Not enough memory to execute command.");
+        return NULL;
+    }
     *result = 0; 
 
     FILE* pipe = popen("python3 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");   
@@ -88,6 +98,10 @@ char* getPythonProvider()
 
     // Look for python2
     result = malloc(1);
+    if(result == NULL) {
+        printf("Not enough memory to execute command.");
+        return NULL;
+    }
     *result = 0;
     pipe = popen("python2 -V 2>&1 | grep -Po '(?<=Python )(.+)'", "r");
     if(!pipe) {

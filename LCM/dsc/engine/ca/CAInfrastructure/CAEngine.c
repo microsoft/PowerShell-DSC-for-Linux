@@ -87,6 +87,11 @@ MI_Result AddToResourceErrorList(ResourceErrorList * resourceErrorList, const ch
 
     current->next = NULL;
     current->resourceID = (char *)calloc(length + 1, sizeof(char));
+    
+    if(current->resourceID = NULL) {
+        free(current);
+        return MI_RESULT_FAILED;
+    }
     strncpy(current->resourceID, resourceID, length);
     return MI_RESULT_OK;
 }
@@ -1805,7 +1810,7 @@ MI_Result GetSetMethodResult(_In_ MI_Operation *operation,
     MI_Result innerR = MI_RESULT_OK;
     const MI_Instance* outInstance;
     MI_Boolean moreResults;
-    MI_Result result;
+    MI_Result result = MI_RESULT_INVALID_PARAMETER;
     const MI_Char *errorMessage;
     const MI_Instance *completionDetails = NULL;
     MI_Value value;
@@ -1862,7 +1867,7 @@ MI_Result GetTestMethodResult(_In_ MI_Operation *operation,
     MI_Result innerR = MI_RESULT_OK;
     const MI_Instance* outInstance;
     MI_Boolean moreResults;
-    MI_Result result;
+    MI_Result result = MI_RESULT_INVALID_PARAMETER;
     const MI_Char *errorMessage;
     const MI_Instance *completionDetails = NULL;
     MI_Value value;
@@ -1922,7 +1927,7 @@ MI_Result GetGetMethodResult(_In_ MI_Operation *operation,
     MI_Result innerR = MI_RESULT_OK;
     const MI_Instance* outInstance;
     MI_Boolean moreResults;
-    MI_Result result;
+    MI_Result result = MI_RESULT_INVALID_PARAMETER;
     const MI_Char *errorMessage;
     const MI_Instance *completionDetails = NULL;
     MI_Value value;
