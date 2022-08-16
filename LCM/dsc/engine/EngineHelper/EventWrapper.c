@@ -123,6 +123,10 @@ void DSCFileVPutTelemetry(
 
     JSON_Value *telemetry_root_value = NULL;
     telemetry_root_value = json_parse_file(OMSCONFIG_HOST_TELEMETRY_PATH);
+    if(telemetry_root_value == NULL) {
+        printf("Failed to parse JSON from OMS Config Host Telemetry Path");
+        return;
+    }
 
     if (json_value_get_type(telemetry_root_value) != JSONObject) {
         telemetry_root_value = json_value_init_object();
@@ -206,6 +210,10 @@ void DSCFilePutTelemetry(
 
     JSON_Value *telemetry_root_value = NULL;
     telemetry_root_value = json_parse_file(OMSCONFIG_HOST_TELEMETRY_PATH);
+    if(telemetry_root_value == NULL) {
+        printf("Failed to parse JSON from OMS Config Host Telemetry Path");
+        return;
+    }
 
     if (json_value_get_type(telemetry_root_value) != JSONObject) {
         telemetry_root_value = json_value_init_object();
