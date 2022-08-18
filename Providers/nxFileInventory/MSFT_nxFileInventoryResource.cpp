@@ -225,11 +225,11 @@ void MI_CALL MSFT_nxFileInventoryResource_Invoke_InventoryTargetResource(
 		const char * reportTemplateBase = DSC_ETC_PATH "/InventoryReports/nxFileInventory_XXXXXX";
 		
 		clientBuffer = (MI_Uint8*)malloc(clientBufferLength + 1);
-        memset(&application, 0, sizeof(MI_Application));
         if(clientBuffer == NULL) {
             return;
         }
 		MI_Application_Initialize(0,NULL,NULL, &application);
+        memset(&application, 0, sizeof(MI_Application));
 		result = XmlSerializer_Create(&application, 0, "MI_XML", &serializer);
 		if (result != MI_RESULT_OK)
 		{

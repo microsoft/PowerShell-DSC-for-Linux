@@ -331,9 +331,20 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
   if( nmemb != 0 && (realsize / nmemb != size || (realsize % nmemb) != 0)) {
     return 0;
   }
+  size_t reallocationSize = realsize;
+  //Handle size overflow due to addition
+  if(reallocationSize + 1 < reallocationSize) {
+    return 0;
+  }
+  reallocationSize = reallocationSize + 1;
+  //Handle size overflow due to addition
+  if(reallocationSize + mem->size < reallocationSize || reallocationSize + mem->size < mem->size) {
+    return 0;
+  }
+  reallocationSize = reallocationSize + mem->size;
   struct Chunk *mem = (struct Chunk *)userp;
 
-  char* tempMemData = (char *)realloc(mem->data, mem->size + realsize + 1);
+  char* tempMemData = (char *)realloc(mem->data, reallocationSize);
   if(tempMemData == NULL) {
     free(mem->data);
     return 0;
