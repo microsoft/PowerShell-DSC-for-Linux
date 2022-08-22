@@ -228,6 +228,7 @@ int main(int argc, char *argv[])
     }
 
     DSC_TELEMETRY_INFO("dsc_host starting operation '%s'", argv[2]);
+    DSC_TELEMETRY_INFO("dsc_host configuration '%s'", argv[3]);
     switch(current_operation)
     {
         case DscSupportedOperation_GetConfiguration:
