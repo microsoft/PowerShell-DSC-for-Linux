@@ -1,3 +1,4 @@
+#CodeQL [python/responsible-ai/using-python2] old python version: support still needed for older python version
 #!/usr/bin/python2
 from fcntl                import flock, LOCK_EX, LOCK_UN, LOCK_NB
 from imp                  import load_source

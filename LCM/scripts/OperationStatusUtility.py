@@ -1,3 +1,4 @@
+#CodeQL [python/responsible-ai/using-python2] old python version: support still needed for older python version
 #!/usr/bin/python2
 from datetime   import datetime
 from errno      import EINVAL

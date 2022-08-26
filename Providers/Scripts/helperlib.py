@@ -1,3 +1,4 @@
+#CodeQL [python/responsible-ai/using-python2] old python version: support still needed for older python version
 CONFIG_BINDIR="<CONFIG_BINDIR>"
 CONFIG_LIBDIR="<CONFIG_LIBDIR>"
 CONFIG_LOCALSTATEDIR="<CONFIG_LOCALSTATEDIR>"

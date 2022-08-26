@@ -1,3 +1,4 @@
+#CodeQL [python/responsible-ai/using-python2] old python version: support still needed for older python version
 NONE_ENUM_INDEX = 0
 ACTIVATE_ENUM_INDEX = 1
 ABORT_ENUM_INDEX = 2

@@ -1,3 +1,4 @@
+#CodeQL [python/responsible-ai/using-python2] old python version: support still needed for older python version
 #!/usr/bin/env python
 #============================================================================
 # Copyright (C) Microsoft Corporation, All rights reserved. 
