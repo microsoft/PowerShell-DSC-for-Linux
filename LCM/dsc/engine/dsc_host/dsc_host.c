@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
         case DscSupportedOperation_GetConfiguration:
             {
                 operation_name = DSC_OPERATION_GET_CONFIGURATION_STR;
-                result = DscLib_GetConfiguration (&operation_result_root_value, argv[3], &operation_error_root_value);
+                result = DscLib_GetConfiguration (&operation_result_root_value, argv[3], &operation_error_root_value); // CodeQL [cpp/path-injection] Safe Path: Currently only known paths are considered
                 break;
             }
         case DscSupportedOperation_TestConfiguration:
@@ -259,20 +259,20 @@ int main(int argc, char *argv[])
             {
                 operation_name = DSC_OPERATION_SEND_CONFIGURATION_STR;
                 MI_Boolean force = (Tcscasecmp(argv[4], MI_T("force")) == 0) ? MI_TRUE : MI_FALSE;
-                result = DscLib_SendConfiguration (argv[3], force, &operation_error_root_value);
+                result = DscLib_SendConfiguration (argv[3], force, &operation_error_root_value); // CodeQL [cpp/path-injection] Safe Path: Currently only known paths are considered
                 break;
             }
         case DscSupportedOperation_SendConfigurationApply:
             {
                 operation_name = DSC_OPERATION_SEND_CONFIGURATION_APPLY_STR;
                 MI_Boolean force = (Tcscasecmp(argv[4], MI_T("force")) == 0) ? MI_TRUE : MI_FALSE;
-                result = DscLib_SendConfigurationApply (argv[3], force, &operation_error_root_value);
+                result = DscLib_SendConfigurationApply (argv[3], force, &operation_error_root_value); // CodeQL [cpp/path-injection] Safe Path: Currently only known paths are considered
                 break;
             }
         case DscSupportedOperation_SendMetaConfigurationApply:
             {
                 operation_name = DSC_OPERATION_SEND_METACONFIGURATION_APPLY_STR;
-                result = DscLib_SendMetaConfigurationApply (argv[3], &operation_error_root_value);
+                result = DscLib_SendMetaConfigurationApply (argv[3], &operation_error_root_value); // CodeQL [cpp/path-injection] Safe Path: Currently only known paths are considered
                 break;
             }
         case DscSupportedOperation_GetMetaConfiguration:
