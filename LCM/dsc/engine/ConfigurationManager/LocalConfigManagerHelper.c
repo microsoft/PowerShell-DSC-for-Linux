@@ -5993,7 +5993,7 @@ MI_Result LCM_Pull_ExecuteActionPerConfiguration(
                         MI_Char* assignedConfig = NULL;
                         
                         // MI_Char* status = ((*serverAssignedConfigurations)->Details)->Status;
-                        if (serverAssignedConfigurations != NULL && *serverAssignedConfigurations != NULL && ((*serverAssignedConfigurations)->Details) != NULL)
+                        if (*serverAssignedConfigurations != NULL && ((*serverAssignedConfigurations)->Details) != NULL)
                         {
                             assignedConfig = ((*serverAssignedConfigurations)->Details)->ConfigurationName;
                         }
@@ -6779,7 +6779,7 @@ MI_Result CallPerformInventory(
         InMOF = GetInventoryFileName();
     }
 
-    if (File_ExistT(InMOF) != 0)
+    if (File_ExistT(InMOF) != 0) // CodeQL [cpp/path-injection] Safe Path: Currently only known paths are considered
     {
     SetLCMStatusReady();
     return GetCimMIError(MI_RESULT_FAILED, cimErrorDetails, ID_LCMHELPER_INVENTORY_MOF_DOESNT_EXIST);

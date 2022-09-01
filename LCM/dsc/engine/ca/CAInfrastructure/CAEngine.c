@@ -2108,7 +2108,7 @@ MI_Result PerformInventoryMethodResult(_In_ MI_Operation *operation,
     MI_Instance * tempInstance;
     MI_Instance ** outInstanceArray;
     MI_Boolean moreResults;
-    MI_Result result;
+    MI_Result result = MI_RESULT_INVALID_PARAMETER;
     const MI_Char *errorMessage;
     const MI_Instance *completionDetails = NULL;
     MI_Value value;
