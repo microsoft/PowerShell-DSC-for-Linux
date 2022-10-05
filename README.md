@@ -22,6 +22,9 @@ DSC has shifted to a cross-platform implementation that is developed in the
 [PSDesiredStateConfiguration](https://github.com/powershell/psdesiredstateconfiguration)
 repo. Unless you have specific needs that require version 1, please navigate to the new location to view the current work on version 3.
 
+For more information, please see the
+[doumentation for Desired State Configuration](https://learn.microsoft.com/powershell/dsc/overview?view=dsc-3.0).
+
 There are three solutions released from this repo:
  
 - A stand-alone installation of version 1 for Linux distros and versions
