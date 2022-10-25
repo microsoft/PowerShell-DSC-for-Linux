@@ -25,11 +25,18 @@ repo. Unless you have specific needs that require version 1, please navigate to 
 For more information, please see the
 [doumentation for Desired State Configuration](https://learn.microsoft.com/powershell/dsc/overview?view=dsc-3.0).
 
-There are three solutions released from this repo:
+**This repo has been archived and will no longer accept new issues or pull requests.**
+
+Three solutions were originally released from this repo:
  
 - A stand-alone installation of version 1 for Linux distros and versions
+  - UPDATE: The updated DSC resources for Linux are now maintained as the [nxTools module](https://www.powershellgallery.com/packages/nxtools/).
 - Microsoft Azure Linux DSC extension for virtual machines
+  - UPDATE: [Desired state configuration VM Extension for Linux, and Azure Automation DSC support for Linux, will be retired on 30 September 2023](https://azure.microsoft.com/updates/migrate-from-linux-dsc-extension-to-the-guest-configuration-feature-of-azure-policy-by-may-1-2025/)
 - Microsoft Monitoring Agent solutions on Linux virtual machines (aka OMS Linux)
+  - UPDATE: [We're retiring the Log Analytics agent in Azure Monitor on 31 August 2024](https://azure.microsoft.com/en-us/updates/were-retiring-the-log-analytics-agent-in-azure-monitor-on-31-august-2024/)
+
+---
  
 The codebase in this repo has been updated with fixes based on customer
 incidents reported for Microsoft Monitoring Agent.
