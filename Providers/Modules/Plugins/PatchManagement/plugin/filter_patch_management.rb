@@ -32,10 +32,8 @@ module Fluent
     def filter(tag, time, record)
       begin
         File.delete("/tmp/az-update-security.list")
-        @log.debug "File deleted successfully"
       rescue Exception => e
         if e.errno!=2 #except no such file or directory issue. Errno: ENOENT = 2
-          @log.debug "Caught issues in deleting /tmp/az-update-security.list file. Assessment corrupted."
           raise e
         end
       end
