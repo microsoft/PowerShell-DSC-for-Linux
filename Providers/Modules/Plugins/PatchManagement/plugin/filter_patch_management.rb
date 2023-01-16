@@ -32,6 +32,7 @@ module Fluent
     def filter(tag, time, record)
       begin
         File.delete("/tmp/az-update-security.list")
+        OMS::Log.info_once("File deleted successfully. /tmp/az-update-security.list")
       rescue Exception => e
         if e.errno!=2 #except no such file or directory issue. Errno: ENOENT = 2
           raise e
