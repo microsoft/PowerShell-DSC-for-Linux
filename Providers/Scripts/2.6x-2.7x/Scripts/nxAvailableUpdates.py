@@ -199,7 +199,6 @@ def GetYumUpdates(Name):
 
         if len(param_list) == 0 and len(param_list2) > 0:
             LG().Log('DEBUG', "No valid packages found. Falling back to package_info based on the package name.")
-            param_list = param_list2
 
         cmd = "LANG=en_US.UTF8 " + yum_info + param_list
         LG().Log('DEBUG', "Retrieving individual package information from Yum using cmd: " + cmd)
