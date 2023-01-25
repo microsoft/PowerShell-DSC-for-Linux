@@ -12,6 +12,7 @@ import copy
 import fnmatch
 import time
 import os
+import uuid
 
 protocol = imp.load_source('protocol', '../protocol.py')
 nxDSCLog = imp.load_source('nxDSCLog', '../nxDSCLog.py')
@@ -71,9 +72,11 @@ def GetAptUpdates(Name):
 
     updates_list = []
     d = {}
+    g_guid = str(uuid.uuid4())
     #Collect Security updates
-    security_sources_list = '/tmp/az-update-security.list'
+    security_sources_list = '/tmp/aumv1-oms-assess-security-{0}.list'.format(g_guid)
     prep_security_sources_list_cmd = 'grep security /etc/apt/sources.list > ' + security_sources_list
+    remove_security_sources_list_cmd = 'rm ' + '/tmp/aumv1-oms-assess-security-*.list' #to remove all files, following this pattern
     dist_upgrade_simulation_cmd_template = 'LANG=en_US.UTF8 apt-get -s dist-upgrade <SOURCES> '
     # Refresh the repo
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
@@ -112,9 +115,12 @@ def GetAptUpdates(Name):
             d['Classification'] = "Others"
         d['Repository'] = pkg[2]
         updates_list.append(copy.deepcopy(d))
+ 
+    code, out = RunGetOutput(remove_security_sources_list_cmd,False,False)
+    if code != 0:
+        LG().Log('DEBUG', out)
     LG().Log('DEBUG', "Number of packages being written to the XML: " + str(len(updates_list)))
     return updates_list
-
 
 def GetYumUpdates(Name):
     # Format:
@@ -193,7 +199,6 @@ def GetYumUpdates(Name):
 
         if len(param_list) == 0 and len(param_list2) > 0:
             LG().Log('DEBUG', "No valid packages found. Falling back to package_info based on the package name.")
-            param_list = param_list2
 
         cmd = "LANG=en_US.UTF8 " + yum_info + param_list
         LG().Log('DEBUG', "Retrieving individual package information from Yum using cmd: " + cmd)
