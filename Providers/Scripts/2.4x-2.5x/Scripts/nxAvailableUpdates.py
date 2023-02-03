@@ -93,10 +93,17 @@ def GetAptUpdates(Name):
     srch = re.compile(srch_txt, re.M | re.S)
     pkg_list = srch.findall(str(out))
     for package in pkg_list:
-        security_patch_list.append(package[0])                      
+        security_patch_list.append(package[0])
     cmd = 'LANG=en_US.UTF8 apt-get -s dist-upgrade | grep "^Inst"'
     LG().Log('DEBUG', "Retrieving update package list using cmd:" + cmd)
-    code, out = RunGetOutput(cmd, False, False)
+    if code != 0:
+        LG().Log('ERROR', "Unexpected error in running cmd {0} : {1}".format(cmd, out))
+        raise Exception("Unexpected error in running cmd {0} : {1}".format(cmd, out))
+
+    code, out = RunGetOutput(remove_security_sources_list_cmd,False,False)
+    if code != 0:
+        LG().Log('DEBUG', "Not able to delete {0}. Error: {1}".format(security_sources_list, out))
+
     if len(out) < 2:
         return updates_list
     srch_txt = r'Inst[ ](.*?)[ ].*?[(](.*?)[ ](.*?)[ ]\[(.*?)\]'
@@ -115,10 +122,7 @@ def GetAptUpdates(Name):
             d['Classification'] = "Others"
         d['Repository'] = pkg[2]
         updates_list.append(copy.deepcopy(d))
-        
-    code, out = RunGetOutput(remove_security_sources_list_cmd,False,False)
-    if code != 0:
-        LG().Log('DEBUG', out)
+
     LG().Log('DEBUG', "Number of packages being written to the XML: " + str(len(updates_list)))
     return updates_list
 
