@@ -101,9 +101,9 @@ def GetAptUpdates(Name):
         LG().Log('ERROR', "Unexpected error in running cmd {0} : {1}".format(cmd, out))
         raise Exception("Unexpected error in running cmd {0} : {1}".format(cmd, out))
 
-    code, out = RunGetOutput(remove_security_sources_list_cmd,False,False)
-    if code != 0:
-        LG().Log('DEBUG', "Not able to delete {0}. Error: {1}".format(security_sources_list, out))
+    rmcode, rmout = RunGetOutput(remove_security_sources_list_cmd,False,False)
+    if rmcode != 0:
+        LG().Log('DEBUG', "Not able to delete {0}. Error: {1}".format(security_sources_list, rmout))
 
     if len(out) < 2:
         return updates_list
