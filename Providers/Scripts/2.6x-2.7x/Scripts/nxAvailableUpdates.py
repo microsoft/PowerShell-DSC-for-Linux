@@ -95,46 +95,51 @@ def GetAptUpdates(Name):
     code, out = RunGetOutput(cmd, False, False)
     #Get Security Patches list
     security_patch_list = []
-    code, out = RunGetOutput(prep_security_sources_list_cmd,False,False)
-    security_updates_cmd = dist_upgrade_simulation_cmd_template.replace('<SOURCES>', '-oDir::Etc::Sourcelist=' + security_sources_list)
-    code,out = RunGetOutput(security_updates_cmd,False,False)
-    srch_txt = r'Inst[ ](.*?)[ ].*?[(](.*?)[ ](.*?)[ ]\[(.*?)\]'
-    srch = re.compile(srch_txt, re.M | re.S)
-    pkg_list = srch.findall(str(out))
-    for package in pkg_list:
-        security_patch_list.append(package[0])
-    cmd = 'LANG=en_US.UTF8 apt-get -s dist-upgrade | grep "^Inst"'
-    LG().Log('DEBUG', "Retrieving update package list using cmd:" + cmd)
-    code, out = RunGetOutput(cmd, False, False)
-    if code != 0:
-        LG().Log('ERROR', "Unexpected error in running cmd {0} : {1}".format(cmd, out))
-        raise Exception("Unexpected error in running cmd {0} : {1}".format(cmd, out))
+    try:
+        code, out = RunGetOutput(prep_security_sources_list_cmd,False,False)
+        if code != 0:
+            LG().Log('ERROR', "Unexpected error in running cmd {0} : {1}".format(prep_security_sources_list_cmd, out))
+            raise Exception("Unexpected error in running cmd {0} : {1}".format(prep_security_sources_list_cmd, out))
 
-    rmcode, rmout = RunGetOutput(remove_security_sources_list_cmd,False,False)
-    if rmcode != 0:
-        LG().Log('DEBUG', "Not able to delete {0}. Error: {1}".format(security_sources_list, rmout))
+        security_updates_cmd = dist_upgrade_simulation_cmd_template.replace('<SOURCES>', '-oDir::Etc::Sourcelist=' + security_sources_list)
+        code,out = RunGetOutput(security_updates_cmd,False,False)
 
-    if len(out) < 2:
+        srch_txt = r'Inst[ ](.*?)[ ].*?[(](.*?)[ ](.*?)[ ]\[(.*?)\]'
+        srch = re.compile(srch_txt, re.M | re.S)
+        pkg_list = srch.findall(str(out))
+        for package in pkg_list:
+            security_patch_list.append(package[0])
+        cmd = 'LANG=en_US.UTF8 apt-get -s dist-upgrade | grep "^Inst"'
+        LG().Log('DEBUG', "Retrieving update package list using cmd:" + cmd)
+        code, out = RunGetOutput(cmd, False, False)
+
+        if len(out) < 2:
+            return updates_list
+        srch_txt = r'Inst[ ](.*?)[ ].*?[(](.*?)[ ](.*?)[ ]\[(.*?)\]'
+        srch = re.compile(srch_txt, re.M | re.S)
+        pkg_list = srch.findall(out)
+        for pkg in pkg_list:
+            d['BuildDate'] = ''
+            d['Name'] = pkg[0]
+            if len(Name) and not fnmatch.fnmatch(d['Name'], Name):
+                continue
+            d['Architecture'] = pkg[3]
+            d['Version'] = pkg[1]
+            if d['Name'] in security_patch_list:
+                d['Classification'] = "Security Updates"
+            else:
+                d['Classification'] = "Others"
+            d['Repository'] = pkg[2]
+            updates_list.append(copy.deepcopy(d))
+
+        LG().Log('DEBUG', "Number of packages being written to the XML: " + str(len(updates_list)))
         return updates_list
-    srch_txt = r'Inst[ ](.*?)[ ].*?[(](.*?)[ ](.*?)[ ]\[(.*?)\]'
-    srch = re.compile(srch_txt, re.M | re.S)
-    pkg_list = srch.findall(out)
-    for pkg in pkg_list:
-        d['BuildDate'] = ''
-        d['Name'] = pkg[0]
-        if len(Name) and not fnmatch.fnmatch(d['Name'], Name):
-            continue
-        d['Architecture'] = pkg[3]
-        d['Version'] = pkg[1]
-        if d['Name'] in security_patch_list:
-            d['Classification'] = "Security Updates"
+    finally:
+        rmcode, rmout = RunGetOutput(remove_security_sources_list_cmd,False,False)
+        if rmcode != 0:
+            LG().Log('DEBUG', "Not able to delete {0}. Error: {1}".format(security_sources_list, rmout))
         else:
-            d['Classification'] = "Others"
-        d['Repository'] = pkg[2]
-        updates_list.append(copy.deepcopy(d))
-
-    LG().Log('DEBUG', "Number of packages being written to the XML: " + str(len(updates_list)))
-    return updates_list
+            LG().Log('DEBUG', "{0} folder cleared".format(privileged_path))
 
 def GetYumUpdates(Name):
     # Format:
