@@ -81,11 +81,11 @@ def GetAptUpdates(Name):
     LG().Log('DEBUG', 'Privileged path: ' + privileged_path)
 
     #Collect Security updates
-    security_sources_list = privileged_path + 'msft-v1-assess-security-{0}.list'.format(g_guid)
+    security_sources_list = os.path.join(privileged_path, 'msft-v1-assess-security-{0}.list'.format(g_guid))
     prep_security_sources_list_cmd = 'grep security /etc/apt/sources.list > ' + security_sources_list
 
     #to remove all files, following this pattern
-    remove_security_sources_list_cmd = 'rm ' + privileged_path + 'msft-v1-assess-security-*.list'
+    remove_security_sources_list_cmd = 'rm ' + os.path.join(privileged_path, 'msft-v1-assess-security-*.list')
     dist_upgrade_simulation_cmd_template = 'LANG=en_US.UTF8 apt-get -s dist-upgrade <SOURCES> '
     # Refresh the repo
     if helperlib.CONFIG_SYSCONFDIR_DSC == "omsconfig":
