@@ -30,8 +30,8 @@ module Fluent
     end
 
     def filter(tag, time, record)
-      # checking if rb_file_path exists. if yes, skip below check.
-      if File.exists?("/var/oms/microsoft/omsagent/tmp/rb_file_path") != True
+      # checking if rb_file_path exists. if yes, skip below check. else check.
+      if File.exists?("/var/opt/microsoft/omsagent/tmp/msft-rb-path") != true
         begin
           File.delete("/tmp/az-update-security.list")
           OMS::Log.info_once("File deleted successfully. /tmp/az-update-security.list")
@@ -41,8 +41,6 @@ module Fluent
           end
         end
       end
-
-
 
       xml_string = record['xml']
       OMS::Log.info_once("LinuxUpdates : Filtering xml size=#{xml_string.size}")
