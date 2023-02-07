@@ -272,7 +272,7 @@ providers:
 ifeq ($(BUILD_OMS),BUILD_OMS)
 nx:
 	rm -rf output/staging; \
-	VERSION="1.4"; \
+	VERSION="1.5"; \
 	PROVIDERS="nxService nxPackage nxUser nxGroup nxAvailableUpdates"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -294,7 +294,7 @@ nx:
 else
 nx:
 	rm -rf output/staging; \
-	VERSION="1.4"; \
+	VERSION="1.5"; \
 	PROVIDERS="nxFile nxScript nxUser nxGroup nxService nxPackage nxEnvironment nxSshAuthorizedKeys nxArchive nxFileLine"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \
@@ -541,7 +541,7 @@ nxOMSGenerateInventoryMof:
 
 nxOMSPlugin:
 	rm -rf output/staging; \
-	VERSION="3.70"; \
+	VERSION="3.71"; \
 	PROVIDERS="nxOMSPlugin"; \
 	STAGINGDIR="output/staging/$@/DSCResources"; \
 	cat Providers/Modules/$@.psd1 | sed "s@<MODULE_VERSION>@$${VERSION}@" > intermediate/Modules/$@.psd1; \

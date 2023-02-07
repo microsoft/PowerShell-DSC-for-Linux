@@ -75,6 +75,12 @@ def GetAptUpdates(Name):
 
     if not os.path.exists(privileged_path):
         privileged_path = "/tmp/"
+    else:
+        # creating file for ruby plugin. based on this file, ruby will ignore its check.
+        rb_file_path = os.path.join(privileged_path, 'msft-rb-path')
+        if not os.path.exists(rb_file_path):
+            with open(rb_file_path, 'w') as fp:
+                pass
 
     LG().Log('DEBUG', 'Privileged path: ' + privileged_path)
 
