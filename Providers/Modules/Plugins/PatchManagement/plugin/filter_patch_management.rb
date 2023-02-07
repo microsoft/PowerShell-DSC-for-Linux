@@ -37,6 +37,7 @@ module Fluent
           OMS::Log.info_once("File deleted successfully. /tmp/az-update-security.list")
         rescue Exception => e
           if e.errno!=2 #except no such file or directory issue. Errno: ENOENT = 2
+            OMS::Log.info_once("Please delete file: /tmp/az-update-security.list")
             raise e
           end
         end
