@@ -73,18 +73,7 @@ def GetAptUpdates(Name):
     updates_list = []
     d = {}
     g_guid = str(uuid.uuid4())
-    privileged_path = "/var/opt/microsoft/omsagent/tmp/" #omsagent omiusers
-
-    if not os.path.exists(privileged_path):
-        privileged_path = "/tmp/"
-    else:
-        # creating file for ruby plugin. based on this file, ruby will ignore its check.
-        rb_file_path = os.path.join(privileged_path, 'msft-rb-path')
-        if not os.path.exists(rb_file_path):
-            with open(rb_file_path, 'w') as fp:
-                pass
-
-    LG().Log('DEBUG', 'Privileged path: ' + privileged_path)
+    privileged_path = "/tmp/"
 
     #Collect Security updates
     security_sources_list = os.path.join(privileged_path, 'msft-v1-assess-security-{0}.list'.format(g_guid))
