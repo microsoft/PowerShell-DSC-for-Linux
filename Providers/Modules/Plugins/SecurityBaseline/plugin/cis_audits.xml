@@ -178,8 +178,8 @@
       <check distro="SLES" command="CheckMatchingLinesAll" path="/etc/pam.d/common-password" filter="password\s+(?:requisite|required)\s+pam_cracklib\.so" regex="(try_first_pass(?:\s+|$))|(minlen=(?:1[4-9]|[2-9][0-9])(?:\s+|$))|(dcredit=-1(?:\s+|$))|(ucredit=-1(?:\s+|$))|(ocredit=-1(?:\s+|$))|(lcredit=-1(?:\s+|$))"/>
       <check distro="CentOS=6|RedHat=6|Oracle=6" command="CheckMatchingLinesAll" path="/etc/pam.d/system-auth" filter="password\s+(?:requisite|required)\s+pam_cracklib\.so" regex="(try_first_pass(?:\s+|$))|(minlen=(?:1[4-9]|[2-9][0-9])(?:\s+|$))|(dcredit=-1(?:\s+|$))|(ucredit=-1(?:\s+|$))|(ocredit=-1(?:\s+|$))|(lcredit=-1(?:\s+|$))"/>
       <check distro="CentOS=6|RedHat=6|Oracle=6" command="CheckMatchingLinesAll" path="/etc/pam.d/password-auth" filter="password\s+(?:requisite|required)\s+pam_cracklib\.so" regex="(try_first_pass(?:\s+|$))|(minlen=(?:1[4-9]|[2-9][0-9])(?:\s+|$))|(dcredit=-1(?:\s+|$))|(ucredit=-1(?:\s+|$))|(ocredit=-1(?:\s+|$))|(lcredit=-1(?:\s+|$))"/>
-      <check distro="CentOS>6|RedHat>6|Oracle>6|Ubuntu|Debian|Mariner" command="CheckFileExists" path="/etc/security/pwquality.conf"/>
-      <check distro="CentOS>6|RedHat>6|Oracle>6|Ubuntu|Debian|Mariner" command="CheckPwQuality" path="/etc/security/pwquality.conf"/>
+      <check distro="CentOS>6|RedHat>6|Oracle>6|Ubuntu|Debian|Mariner|AlmaLinux|Rocky" command="CheckFileExists" path="/etc/security/pwquality.conf"/>
+      <check distro="CentOS>6|RedHat>6|Oracle>6|Ubuntu|Debian|Mariner|AlmaLinux|Rocky" command="CheckPwQuality" path="/etc/security/pwquality.conf"/>
     </audit>
 
     <audit
@@ -202,8 +202,8 @@
       <check distro="*" command="CheckUserDirs" expect="exists"/>
     </audit>
 
-    <audit 
-      description="Ensure users own their home directories" 
+    <audit
+      description="Ensure users own their home directories"
       msid="6.2.9"
       impact="Since the user is accountable for files stored in the user home directory, the user must be the owner of the directory."
       remediation="Change the ownership of any home directories that are not owned by the defined user to the correct user."
@@ -302,7 +302,7 @@
     </audit>
   </audits>
   <remediations>
-  <!--
+    <!--
     Remediations are preformed in the order they appear in this file.
     All actions in a remediation that match the distro are performed, and in the order they appear.
   -->
@@ -316,7 +316,7 @@
       <action distro="*" action="ActionEditConfig" name="fs.suid_dumpable" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-        <![CDATA[
+          <![CDATA[
 sysctl -w fs.suid_dumpable=0
         ]]>
         </script>
@@ -341,8 +341,8 @@ sysctl -w fs.suid_dumpable=0
 
     <remediation id="enable-password-requirements" msids="5.3.1" description="Ensure password creation requirements are configured">
       <action distro="Ubuntu|Debian" action="ActionInstallPackage" package="libpam-pwquality"/>
-      <action distro="CentOS>6|RedHat>6|Oracle>6|Ubuntu|Debian" action="ActionEditConfig" path="/etc/security/pwquality.conf" name="minlen" sep=" = " value="14" value-regex="[1-9][0-9]*"/>
-      <action distro="CentOS>6|RedHat>6|Oracle>6|Ubuntu|Debian" action="ActionEditConfig" path="/etc/security/pwquality.conf" name="minclass" sep=" = " value="4" value-regex="[0-4]"/>
+      <action distro="CentOS>6|RedHat>6|Oracle>6|Ubuntu|Debian|AlmaLinux|Rocky" action="ActionEditConfig" path="/etc/security/pwquality.conf" name="minlen" sep=" = " value="14" value-regex="[1-9][0-9]*"/>
+      <action distro="CentOS>6|RedHat>6|Oracle>6|Ubuntu|Debian|AlmaLinux|Rocky" action="ActionEditConfig" path="/etc/security/pwquality.conf" name="minclass" sep=" = " value="4" value-regex="[0-4]"/>
     </remediation>
 
   </remediations>
