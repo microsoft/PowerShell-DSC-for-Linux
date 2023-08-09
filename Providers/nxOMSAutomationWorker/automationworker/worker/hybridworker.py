@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 import traceback
+import util
 import workerpollingfrequency
 
 # import worker module after linuxutil.daemonize() call
@@ -187,7 +188,7 @@ class Worker:
         if proxy_conf_path != configuration.DEFAULT_PROXY_CONFIGURATION_PATH and os.path.isfile(proxy_conf_path):
             if util.assert_file_read_permission(proxy_conf_path) is False:
                 raise InvalidFilePermissionException(proxy_conf_path)
-    
+
     @staticmethod
     def construct_jrds_msi_endpoint(sandbox_id):
         url = configuration.get_jrds_base_uri() + "/automationAccounts/" + configuration.get_account_id() + \
