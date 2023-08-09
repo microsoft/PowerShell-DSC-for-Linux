@@ -94,7 +94,7 @@ def generate_hmac(str_to_sign, secret):
     secret = secret.encode('utf-8')
     cmd = ['echo -n "' + str(message.decode("utf-8")) + '" | openssl dgst -sha256 -binary -hmac "' + str(secret.decode("utf-8")) + '"']
     process, signed_message, error = linuxutil.popen_communicate(cmd, shell=True)
-    
+
     error = error.decode() if isinstance(error, bytes) else error
     if process.returncode != 0:
         raise Exception("Unable to generate signature. " + str(error))
@@ -266,17 +266,15 @@ def register(options):
     vm_id = unknown
     is_azure_vm = False
     try:
-        dmidecode = invoke_dmidecode()
-        is_azure_vm = linuxutil.is_azure_vm(dmidecode)
-        if is_azure_vm:
+        if linuxutil.is_azure_vm():
             asset_tag = linuxutil.get_azure_vm_asset_tag()
         else:
             asset_tag = False
-        vm_id = linuxutil.get_vm_unique_id_from_dmidecode(sys.byteorder, dmidecode)
+        vm_id = linuxutil.get_vm_unique_id()
     except Exception as e:
         print (str(e))
         pass
-    
+
     # generate payload for registration request
     date = datetime.datetime.utcnow().isoformat() + "0-00:00"
     payload = {'RunbookWorkerGroup': hybrid_worker_group_name,
@@ -425,4 +423,3 @@ def environment_prerequisite_validation():
     nxautomation_group_name = "nxautomation"
     if linuxutil.is_existing_group(omiusers_group_name) is False:
         raise Exception("Missing group : " + nxautomation_group_name + ".")
-

@@ -246,7 +246,7 @@ def register(options):
     if os.path.isdir(DIY_STATE_PATH) is False:
         try:
             os.makedirs(DIY_STATE_PATH)
-        except Exception, ex:            
+        except Exception, ex:
             print("Registration unsuccessful.")
             print("Cannot create directory for certs/conf. Because of the following exception : " + str(ex))
             return
@@ -259,13 +259,11 @@ def register(options):
     vm_id = unknown
     is_azure_vm = False
     try:
-        dmidecode = invoke_dmidecode()
-        is_azure_vm = linuxutil.is_azure_vm(dmidecode)
-        if is_azure_vm:
+        if linuxutil.is_azure_vm():
             asset_tag = linuxutil.get_azure_vm_asset_tag()
         else:
             asset_tag = False
-        vm_id = linuxutil.get_vm_unique_id_from_dmidecode(sys.byteorder, dmidecode)
+        vm_id = linuxutil.get_vm_unique_id()
     except Exception, e:
         print str(e)
         pass
@@ -421,5 +419,3 @@ def environment_prerequisite_validation():
     nxautomation_group_name = "nxautomation"
     if linuxutil.is_existing_group(omiusers_group_name) is False:
         raise Exception("Missing group : " + nxautomation_group_name + ".")
-
-

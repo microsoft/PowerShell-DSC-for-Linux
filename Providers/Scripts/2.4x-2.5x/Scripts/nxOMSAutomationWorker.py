@@ -347,15 +347,9 @@ def get_optional_metadata():
     vm_id = unknown
     is_azure_vm = False
     try:
-        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python2", OMS_UTIL_FILE_PATH, "--dmidecode"],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        dmidecode, error = proc.communicate()
-        if proc.returncode != 0 or not dmidecode:
-            raise Exception("Unable to invoke omsutil.py --dmidecode: %s" % error)
-        is_azure_vm = linuxutil.is_azure_vm(dmidecode)
-        if is_azure_vm:
+        if linuxutil.is_azure_vm():
             asset_tag = linuxutil.get_azure_vm_asset_tag()
-        vm_id = linuxutil.get_vm_unique_id_from_dmidecode(sys.byteorder, dmidecode)
+        vm_id = linuxutil.get_vm_unique_id()
     except Exception, e:
         log(INFO, "unable to get_optional_metadata: %s" % str(e))
 
