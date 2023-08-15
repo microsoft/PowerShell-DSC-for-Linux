@@ -202,8 +202,8 @@
       <check distro="*" command="CheckUserDirs" expect="exists"/>
     </audit>
 
-    <audit
-      description="Ensure users own their home directories"
+    <audit 
+      description="Ensure users own their home directories" 
       msid="6.2.9"
       impact="Since the user is accountable for files stored in the user home directory, the user must be the owner of the directory."
       remediation="Change the ownership of any home directories that are not owned by the defined user to the correct user."
@@ -302,7 +302,7 @@
     </audit>
   </audits>
   <remediations>
-    <!--
+  <!--
     Remediations are preformed in the order they appear in this file.
     All actions in a remediation that match the distro are performed, and in the order they appear.
   -->
@@ -316,7 +316,7 @@
       <action distro="*" action="ActionEditConfig" name="fs.suid_dumpable" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 sysctl -w fs.suid_dumpable=0
         ]]>
         </script>

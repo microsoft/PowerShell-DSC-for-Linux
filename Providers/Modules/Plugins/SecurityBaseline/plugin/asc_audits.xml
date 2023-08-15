@@ -76,12 +76,12 @@
       remediation="Run AuditD service (systemctl start auditd)"
       ruleId="c146c4a4-5eb6-4205-88da-5a71a82f2d45">
       <check distro="*" command="CheckServiceEnabled"  expect="running" service="auditd">
-        <dependency type="PackageInstalled">audit(?:d)?$</dependency>
+    	<dependency type="PackageInstalled">audit(?:d)?$</dependency>
       </check>
     </audit>
   </audits>
   <remediations>
-    <!--
+  <!--
     Remediations are preformed in the order they appear in this file.
     All actions in a remediation that match the distro are performed, and in the order they appear.
   -->
@@ -100,7 +100,7 @@
     <remediation id="fix-cron-job-allow" msids="98" description="Delete /etc/cron.deny and /etc/at.deny. Create /etc/cron.allow and /etc/at.allow.">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 if [ -f /etc/cron.deny ]; then
         echo "/etc/cron.deny file exists"
 
