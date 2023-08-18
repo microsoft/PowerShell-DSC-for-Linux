@@ -1,20 +1,20 @@
 <baseline BaselineId="SSH.Linux.1" BaseOrigId="1">
-  <audits>
+	<audits>
     <audit
       description="Ensure permissions on /etc/ssh/sshd_config are configured."
       msid="5.2.1"
       impact="The `/etc/ssh/sshd_config` file needs to be protected from unauthorized changes by non-privileged users."
       remediation="Set the owner and group of /etc/ssh/sshd_config to root and set the permissions to 0600  or run '/opt/microsoft/omsagent/plugin/omsremediate -r sshd-config-file-permissions'"
       ruleId="43119747-263c-2c92-4ce5-726e63259049">
-      <check
-        distro="*"
-        command="CheckFileStatsIfExists"
-        path="/etc/ssh/sshd_config"
-        owner="root"
-        group="root"
-        mode="600"
+      <check 
+        distro="*" 
+        command="CheckFileStatsIfExists" 
+        path="/etc/ssh/sshd_config" 
+        owner="root" 
+        group="root" 
+        mode="600" 
         allow-stricter="true"/>
-    </audit>
+    </audit> 
     <audit
       description="SSH must be configured and managed to meet best practices. - '/etc/ssh/sshd_config Protocol = 2'"
       msid="106.1"
@@ -37,11 +37,11 @@
         impact="An attacker could use flaws in the Rhosts protocol to gain access"
         remediation="Run the command '/usr/local/bin/azsecd remediate (/opt/microsoft/omsagent/plugin/omsremediate) -r enable-ssh-ignore-rhosts'. This will add the line 'IgnoreRhosts yes' to the file '/etc/ssh/sshd_config'"
         ruleId="43945588-1bdc-495c-bac8-6a71a62d30aa">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^ignorerhosts[[:space:]]+yes$"
-        exec-command="sshcheck" />
+        <check
+          distro="*"
+          command="CheckMatchingConfigValue"
+          regex="(?i)^ignorerhosts[[:space:]]+yes$"
+          exec-command="sshcheck" />
     </audit>
     <audit
         description="Ensure SSH LogLevel is set to INFO"
@@ -53,11 +53,11 @@
         LogLevel INFO
         ```"
         ruleId="31f1a912-1b98-42fd-8381-1e8d1033bfd1">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^loglevel[[:space:]]+info$"
-        exec-command="sshcheck" />
+        <check 
+          distro="*" 
+          command="CheckMatchingConfigValue"
+          regex="(?i)^loglevel[[:space:]]+info$"
+          exec-command="sshcheck" />
     </audit>
     <audit
         description="Ensure SSH MaxAuthTries is set to 6 or less"
@@ -70,11 +70,11 @@
         MaxAuthTries 6
         ```"
         ruleId="e7708534-5d98-406f-83ae-1de835b2906e">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^maxauthtries[[:space:]]+[0-6]$"
-        exec-command="sshcheck" />>
+        <check 
+          distro="*" 
+          command="CheckMatchingConfigValue"
+          regex="(?i)^maxauthtries[[:space:]]+[0-6]$"
+          exec-command="sshcheck" />>
     </audit>
     <audit
         description="Ensure SSH access is limited"
@@ -91,11 +91,11 @@
         DenyGroups 
         ```"
         ruleId="dc8da71d-aeba-4c03-8835-36fe158e372a">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^(allowusers|allowgroups|denyusers|denygroups)[[:space:]]+[[:ascii:]]"
-        exec-command="sshcheck" />
+        <check 
+          distro="*" 
+          command="CheckMatchingConfigValue"
+          regex="(?i)^(allowusers|allowgroups|denyusers|denygroups)[[:space:]]+[[:ascii:]]"
+          exec-command="sshcheck" />
     </audit>
     <audit
       description="Emulation of the rsh command through the ssh server should be disabled. - '/etc/ssh/sshd_config RhostsRSAAuthentication = no'"
@@ -119,11 +119,11 @@
         impact="An attacker could use use host-based authentication to gain access from a compromised host"
         remediation="Run the command '/opt/microsoft/omsagent/plugin/omsremediate -r disable-ssh-host-based-auth'. This will add the line 'HostbasedAuthentication no' to the file '/etc/ssh/sshd_config'"
         ruleId="66511f6b-f690-43df-9654-642260699eec">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^hostbasedauthentication[[:space:]]+no$"
-        exec-command="sshcheck" />
+        <check
+          distro="*"
+          command="CheckMatchingConfigValue"
+          regex="(?i)^hostbasedauthentication[[:space:]]+no$"
+          exec-command="sshcheck" />
     </audit>
     <audit
         description = "Root login via SSH should be disabled. - '/etc/ssh/sshd_config PermitRootLogin = no'"
@@ -133,11 +133,11 @@
         impact="An attacker could brute force the root password, or hide their command history by logging in directly as root"
         remediation="Run the command '/usr/local/bin/azsecd remediate -r disable-ssh-root-login'. This will add the line 'PermitRootLogin no' to the file '/etc/ssh/sshd_config'"
         ruleId="16511f6b-f690-43df-9654-642260699eec">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^permitrootlogin[[:space:]]+no$"
-        exec-command="sshcheck"/>
+        <check 
+          distro="*" 
+          command="CheckMatchingConfigValue"
+          regex="(?i)^permitrootlogin[[:space:]]+no$"
+          exec-command="sshcheck"/>
     </audit>
     <audit
         description="Remote connections from accounts with empty passwords should be disabled. - '/etc/ssh/sshd_config PermitEmptyPasswords = no'"
@@ -147,11 +147,11 @@
         impact="An attacker could gain access through password guessing"
         remediation="Run the command '/usr/local/bin/azsecd remediate (/opt/microsoft/omsagent/plugin/omsremediate) -r disable-ssh-empty-passwords'. This will add the line 'PermitEmptyPasswords no' to the file '/etc/ssh/sshd_config'"
         ruleId="d50c3f39-264c-4cdc-b0ba-89de8a0f6828">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^permitemptypasswords[[:space:]]+no$"
-        exec-command="sshcheck" />
+        <check
+          distro="*"
+          command="CheckMatchingConfigValue"
+          regex="(?i)^permitemptypasswords[[:space:]]+no$"
+          exec-command="sshcheck" />
     </audit>
     <audit
       description="Ensure SSH Idle Timeout Interval is configured."
@@ -159,14 +159,14 @@
       impact="Having no timeout value associated with a connection could allow an unauthorized user access to another user's ssh session. Setting a timeout value at least reduces the risk of this happening. While the recommended setting is 300 seconds (5 minutes), set this timeout value based on site policy. The recommended setting for `ClientAliveCountMax` is 0. In this case, the client session will be terminated after 5 minutes of idle time and no keepalive messages will be sent."
       remediation="Edit the /etc/ssh/sshd_config file to set the parameters according to the policy"
       ruleId="fd9f1554-6b72-8610-826e-78578e6f7811">
-      <check
-        distro="*"
+      <check 
+        distro="*" 
         command="CheckMatchingConfigValue"
         regex="(?i)^clientaliveinterval[[:space:]]+([1-9][0-9]*)$"
         exec-command="sshcheck"/>
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
+      <check 
+        distro="*" 
+        command="CheckMatchingConfigValue" 
         regex="(?i)^clientalivecountmax[[:space:]]+(0|1)$"
         exec-command="sshcheck" />
     </audit>
@@ -176,8 +176,8 @@
       impact="Setting the `LoginGraceTime` parameter to a low number will minimize the risk of successful brute force attacks to the SSH server. It will also limit the number of concurrent unauthenticated connections While the recommended setting is 60 seconds (1 Minute), set the number based on site policy."
       remediation="Edit the /etc/ssh/sshd_config file to set the parameters according to the policy  or run '/opt/microsoft/omsagent/plugin/omsremediate -r configure-login-grace-time'"
       ruleId="39aa5c2b-5b36-84a7-4022-570a53c86ff9">
-      <check
-        distro="*"
+      <check 
+        distro="*" 
         command="CheckMatchingConfigValue"
         regex="(?i)^logingracetime[[:space:]]+(60|[0-5][0-9])$"
         exec-command="sshcheck" />
@@ -202,11 +202,11 @@
         impact="Users will not be warned that their actions on the system are monitored"
         remediation="Run the command '/usr/local/bin/azsecd remediate -r configure-ssh-banner'. This will add the line 'Banner /etc/azsec/banner.txt' to the file '/etc/ssh/sshd_config'"
         ruleId="9e240540-5e0a-4b60-beb2-57421c65a0b9">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^banner[[:space:]]+[^none$]"
-        exec-command="sshcheck"/>
+        <check 
+          distro="*" 
+          command="CheckMatchingConfigValue"
+          regex="(?i)^banner[[:space:]]+[^none$]"
+          exec-command="sshcheck"/>
     </audit>
     <audit
         description="Users are not allowed to set environment options for SSH."
@@ -216,11 +216,11 @@
         impact="An attacker may be able to bypass some access restrictions over SSH"
         remediation="Remove the line 'PermitUserEnvironment yes' from the file '/etc/ssh/sshd_config'"
         ruleId="0e665978-91f4-45af-bb7b-e4090b600c8d">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^permituserenvironment[[:space:]]+no$"
-        exec-command="sshcheck" />
+        <check
+          distro="*"
+          command="CheckMatchingConfigValue"
+          regex="(?i)^permituserenvironment[[:space:]]+no$"
+          exec-command="sshcheck" />
     </audit>
     <audit
         description = "Appropriate ciphers should be used for SSH. (Ciphers aes128-ctr,aes192-ctr,aes256-ctr)"
@@ -230,11 +230,11 @@
         impact="An attacker could compromise a weakly secured SSH connection"
         remediation="Run the command '/usr/local/bin/azsecd remediate -r configure-ssh-ciphers'. This will add the line 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr' to the file '/etc/ssh/sshd_config'"
         ruleId="b07d4c69-a1d9-4c22-a486-634ec3b8c380">
-      <check
-        distro="*"
-        command="CheckMatchingConfigValue"
-        regex="(?i)^ciphers[[:space:]]+((\baes128-ctr\b|\baes256-ctr\b|\baes192-ctr\b)(?:,?))+?$"
-        exec-command="sshcheck"/>
+        <check 
+          distro="*" 
+          command="CheckMatchingConfigValue"
+          regex="(?i)^ciphers[[:space:]]+((\baes128-ctr\b|\baes256-ctr\b|\baes192-ctr\b)(?:,?))+?$"
+          exec-command="sshcheck"/>
     </audit>
     <audit
         description="Ensure system-wide crypto policy is not over-ridden."
@@ -243,11 +243,11 @@
         impact="Over-riding or opting out of the system-wide crypto policy could allow for the use of less secure Ciphers over SSH"
         remediation="Run the command '/usr/local/bin/azsecd remediate -r configure-crypto-override'. This will ensure CRYPTO_POLICY value is not set in the file '/etc/sysconfig/sshd'"
         ruleId="962a862e-ed99-4f0c-8c0e-dab620895e36">
-      <check
-        distro="AlmaLinux|Rocky|Oracle=8|RedHat=8"
-        command="CheckNoMatchingLinesIfExists"
-        regex="^\s*CRYPTO_POLICY="
-        path="/etc/sysconfig/sshd"/>
+        <check
+          distro="AlmaLinux|Rocky|Oracle=8|RedHat=8"
+          command="CheckNoMatchingLinesIfExists"
+          regex="^\s*CRYPTO_POLICY="
+          path="/etc/sysconfig/sshd"/>
     </audit>
   </audits>
   <remediations>
@@ -304,7 +304,7 @@
     <remediation id="configure-crypto-override" msids="5.2.14" description="Configure crypto policy override">
       <action distro="AlmaLinux|Rocky|Oracle=8|RedHat=8" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
     sed -ri "s/^\s*(CRYPTO_POLICY\s*=.*)$/# \1/" /etc/sysconfig/sshd
         ]]>
         </script>

@@ -6,7 +6,7 @@
       impact="Removing support for USB storage devices reduces the local attack surface of the server."
       remediation="Edit or create a file in the `/etc/modprobe.d/` directory ending in .conf and add `install usb-storage /bin/true` then unload the usb-storage module or run '/opt/microsoft/omsagent/plugin/omsremediate -r disable-unnecessary-kernel-mods'"
       ruleId="acffbbca-3e5b-9aa9-65ee-ff7b6116565f">
-      <check distro="*" command="CheckMatchingLinesInDir" regex="^install\s+usb-storage\s+/bin/true" path="/etc/modprobe.d/"/>
+     <check distro="*" command="CheckMatchingLinesInDir" regex="^install\s+usb-storage\s+/bin/true" path="/etc/modprobe.d/"/>
     </audit>
 
     <audit
@@ -533,7 +533,7 @@
       impact="If the protocol is not required, it is recommended that the drivers not be installed to reduce the potential attack surface."
       remediation="Edit or create a file in the `/etc/modprobe.d/` directory ending in .conf and add `install sctp /bin/true` then unload the sctp module or run '/opt/microsoft/omsagent/plugin/omsremediate -r disable-unnecessary-kernel-mods'"
       ruleId="78228616-15d4-33fe-0357-88e77f228f05">
-      <check distro="*" command="CheckMatchingLinesInDir" regex="^install\s+sctp\s+/bin/true" path="/etc/modprobe.d/"/>
+     <check distro="*" command="CheckMatchingLinesInDir" regex="^install\s+sctp\s+/bin/true" path="/etc/modprobe.d/"/>
     </audit>
 
     <audit
@@ -1076,7 +1076,7 @@
       severity="Important"
       impact="An attacker could use nfs to mount shares and execute/copy files."
       remediation="Disable the nfs service or run '/opt/microsoft/omsagent/plugin/omsremediate -r disable-nfs'"
-      ruleId="ee372ff3-9221-498b-b467-7406bf421168">
+      ruleId="ee372ff3-9221-498b-b467-7406bf421168"> 
       <check distro="*" command="CheckServiceDisabled" service="nfs-server" />
     </audit>
 
@@ -1358,19 +1358,19 @@ zypper remove rsh
       impact="SMB v1 has well-known, serious vulnerabilities and does not encrypt data in transit. If it must be used for business reasons, it is strongly recommended that additional steps be taken to mitigate the risks inherent to this protocol."
       remediation="If Samba is not running, remove package, otherwise there should be a line in the [global] section of /etc/samba/smb.conf: min protocol = SMB2 or run '/opt/microsoft/omsagent/plugin/omsremediate -r set-smb-min-version"
       ruleId="7624efb0-3026-4c72-8920-48d5be78a50e">
-      <check
-        distro="*"
-        command="CheckMatchingLinesSection"
-        regex="\s*min protocol\s+=\s+SMB2"
-        expect="^\s*\[global\]"
-        path="/etc/samba/smb.conf"
+      <check 
+        distro="*" 
+        command="CheckMatchingLinesSection" 
+        regex="\s*min protocol\s+=\s+SMB2" 
+        expect="^\s*\[global\]" 
+        path="/etc/samba/smb.conf" 
         key="^\s*\[.+\]">
         <dependency type="ServiceStatus">samba|running</dependency>
       </check>
     </audit>
   </audits>
   <remediations>
-    <!--
+  <!--
     Remediations are preformed in the order they appear in this file.
     All actions in a remediation that match the distro are performed, and in the order they appear.
   -->
@@ -1386,7 +1386,7 @@ zypper remove rsh
     <remediation id="fix-su-permissions" msids="21" description="Fix su permissions">
       <action distro="!SLES" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 sed -i 's/^#*\s*\(auth\s\+required\s\+pam_wheel.so\)\(\s\+use_uid\)\?$/\1 use_uid/g' /etc/pam.d/su
         ]]>
         </script>
@@ -1394,7 +1394,7 @@ sed -i 's/^#*\s*\(auth\s\+required\s\+pam_wheel.so\)\(\s\+use_uid\)\?$/\1 use_ui
       <action distro="SLES" action="ActionScript">
         <!-- This change isn't sufficient on SLES -->
         <script>
-          <![CDATA[
+        <![CDATA[
 if [ -z "$(egrep '^\s*auth\s+required\s+pam_wheel.so\s+use_uid\s*$' /etc/pam.d/su)" ]; then
     sed -i 's/\(\s*auth\s\+sufficient\s\+pam_rootok.so\s*\)$/\1\nauth required pam_wheel.so use_uid/g' /etc/pam.d/su
 fi
@@ -1406,7 +1406,7 @@ fi
     <remediation id="fix-home-dir-permissions" msids="28" description="Fix home dir permissions">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 chmod 750 /home/*
 if [ -e /var/lib/libuuid ]; then
     chmod 750 /var/lib/libuuid
@@ -1431,7 +1431,7 @@ fi
     <remediation id="set-default-user-umask" msids="29" description="Set default umask for all users to 077">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 # (Audit 29) Set default umask to 077
 sed -i 's/^\(UMASK\s\+\)[0-9]\{3\}/\1077/g' /etc/login.defs
         ]]>
@@ -1448,7 +1448,7 @@ sed -i 's/^\(UMASK\s\+\)[0-9]\{3\}/\1077/g' /etc/login.defs
       <action distro="*" action="ActionEditConfig" name="net.ipv4.tcp_syncookies" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 sysctl -w net.ipv4.tcp_syncookies=1
         ]]>
         </script>
@@ -1461,7 +1461,7 @@ sysctl -w net.ipv4.tcp_syncookies=1
       <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.rp_filter" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 for i in $(sysctl -N net.ipv4.conf 2>/dev/null | egrep '^net\.ipv4\.conf\.[^\.]+\.rp_filter')
 do
     sysctl -w $i=1
@@ -1479,7 +1479,7 @@ done
       <action distro="*" action="ActionEditConfig" name="net.ipv6.conf.all.accept_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 for i in $(sysctl -N net 2>/dev/null | egrep '^net\.ipv[46]\.conf\.[^\.]+\.accept_redirects')
 do
     sysctl -w $i=0
@@ -1494,7 +1494,7 @@ done
       <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.secure_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 for i in $(sysctl -N net 2>/dev/null | egrep '^net\.ipv4\.conf\.[^\.]+\.secure_redirects')
 do
     sysctl -w $i=0
@@ -1509,7 +1509,7 @@ done
       <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.send_redirects" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 for i in $(sysctl -N net 2>/dev/null | egrep '^net\.ipv4\.conf\.[^\.]+\.send_redirects')
 do
     sysctl -w $i=0
@@ -1526,7 +1526,7 @@ done
       <action distro="*" action="ActionEditConfig" name="net.ipv6.conf.all.accept_source_route" value="0" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 for i in $(sysctl -N net 2>/dev/null | egrep '^net\.ipv[46]\.conf\.[^\.]+\.accept_source_route')
 do
     sysctl -w $i=0
@@ -1541,7 +1541,7 @@ done
       <action distro="*" action="ActionEditConfig" name="net.ipv4.conf.all.log_martians" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 for i in $(sysctl -N net 2>/dev/null | egrep '^net\.ipv4\.conf\.[^\.]+\.log_martians')
 do
     sysctl -w $i=1
@@ -1555,7 +1555,7 @@ done
       <action distro="*" action="ActionEditConfig" name="net.ipv4.icmp_ignore_bogus_error_responses" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
         ]]>
         </script>
@@ -1566,7 +1566,7 @@ sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
       <action distro="*" action="ActionEditConfig" name="net.ipv4.icmp_echo_ignore_broadcasts" value="1" value-regex="[0-9]+" sep="=" path="/etc/sysctl.conf"/>
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
         ]]>
         </script>
@@ -1587,7 +1587,7 @@ sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
     <remediation id="configure-syslog-file-create-mode" msids="63" description="Configure rsyslog $FileCreateMode">
       <action distro="CentOS|RedHat|Oracle|AlmaLinux|Rocky" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 if [ -z "$(egrep '^\s*$FileCreateMode' /etc/rsyslog.conf 2>&1)" ]; then
     sed -i 's/^\(.*GLOBAL DIRECTIVES.*\)$/\1\n\$FileCreateMode 0640/g' /etc/rsyslog.conf
 fi
@@ -1622,13 +1622,13 @@ fi
     </remediation>
 
     <remediation id="fix-anacrontab-perms" msids="91" description="Fix anacrontab perms">
-      <action distro="*" action="ActionSetPerms" path="/etc/anacrontab" value="0600"/>
+       <action distro="*" action="ActionSetPerms" path="/etc/anacrontab" value="0600"/>
     </remediation>
 
     <remediation id="fix-cron-file-perms" msids="93,94,95,96,97" description="Fix cron file/folder permissions">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 # (Audit 93-97, 100-103) Fix Permissions on cron files/folders
 chmod 700 /etc/cron.d
 chmod 700 /etc/cron.daily
@@ -1673,7 +1673,7 @@ chmod 700 /etc/cron.weekly
     <remediation id="disable-dccp" msids="54" description="Disable DCCP Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-dccp.conf <<EOF
 install dccp /bin/true
 EOF
@@ -1687,7 +1687,7 @@ chmod 644 /etc/modprobe.d/disable-dccp.conf
     <remediation id="disable-sctp" msids="55" description="Disable SCTP Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-sctp.conf <<EOF
 install sctp /bin/true
 EOF
@@ -1701,7 +1701,7 @@ chmod 644 /etc/modprobe.d/disable-sctp.conf
     <remediation id="disable-rds" msids="56" description="Disable RDS Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-rds.conf <<EOF
 install rds /bin/true
 EOF
@@ -1715,7 +1715,7 @@ chmod 644 /etc/modprobe.d/disable-rds.conf
     <remediation id="disable-tipc" msids="57" description="Disable tipc Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-tipc.conf <<EOF
 install tipc /bin/true
 EOF
@@ -1729,7 +1729,7 @@ chmod 644 /etc/modprobe.d/disable-tipc.conf
     <remediation id="disable-cramfs" msids="6.1" description="Disable cramfs Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-cramfs.conf <<EOF
 install cramfs /bin/true
 EOF
@@ -1743,7 +1743,7 @@ chmod 644 /etc/modprobe.d/disable-cramfs.conf
     <remediation id="disable-freevxfs" msids="6.2" description="Disable freevxfs Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-freevxfs.conf <<EOF
 install freevxfs /bin/true
 EOF
@@ -1757,7 +1757,7 @@ chmod 644 /etc/modprobe.d/disable-freevxfs.conf
     <remediation id="disable-hfs" msids="6.3" description="Disable hfs Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-hfs.conf <<EOF
 install hfs /bin/true
 EOF
@@ -1771,7 +1771,7 @@ chmod 644 /etc/modprobe.d/disable-hfs.conf
     <remediation id="disable-hfsplus" msids="6.4" description="Disable hfsplus Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-hfsplus.conf <<EOF
 install hfsplus /bin/true
 EOF
@@ -1785,7 +1785,7 @@ chmod 644 /etc/modprobe.d/disable-hfsplus.conf
     <remediation id="disable-jffs2" msids="6.5" description="Disable jffs2 Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-jffs2.conf <<EOF
 install jffs2 /bin/true
 EOF
@@ -1799,7 +1799,7 @@ chmod 644 /etc/modprobe.d/disable-jffs2.conf
     <remediation id="disable-usb-storage" msids="1.1.21.1" description="Disable usb-storage Kernel Module">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 cat > /etc/modprobe.d/disable-usb-storage.conf <<EOF
 install usb-storage /bin/true
 EOF
@@ -1813,7 +1813,7 @@ chmod 644 /etc/modprobe.d/disable-usb-storage.conf
     <remediation id="configure-password-policy-max-days" msids="157.1" description="Configure PASS_MAX_DAYS in pam ">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 sed -i 's/^#*\s*\(PASS_MAX_DAYS\s\+\)[0-9]\+/\170/g' /etc/login.defs
         ]]>
         </script>
@@ -1821,8 +1821,8 @@ sed -i 's/^#*\s*\(PASS_MAX_DAYS\s\+\)[0-9]\+/\170/g' /etc/login.defs
     </remediation>
     <remediation id="configure-password-policy-warn-age" msids="157.2" description="Configure PASS_WARN_AGE in pam ">
       <action distro="*" action="ActionScript">
-        <script>
-          <![CDATA[
+       <script>
+        <![CDATA[
 sed -i 's/^#*\s*\(PASS_WARN_AGE\s\+\)[0-9]\+/\115/g' /etc/login.defs
         ]]>
         </script>
@@ -1832,7 +1832,7 @@ sed -i 's/^#*\s*\(PASS_WARN_AGE\s\+\)[0-9]\+/\115/g' /etc/login.defs
     <remediation id="configure-password-policy-history" msids="157.5" description="Configure password history in pam ">
       <action distro="Ubuntu" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 if [ -z "$(egrep '^\s*password\s+.+pam_unix.so.+remember=[0-9]' /etc/pam.d/common-password)" ]; then
     sed -i 's/^#*\s*\(password\s\+.\+pam_unix.so\s\+\)/\1remember=7 /g' /etc/pam.d/common-password
 else
@@ -1850,7 +1850,7 @@ fi
     <remediation id="remove-games-user" msids="159" description="Remove the 'games' user">
       <action distro="Ubuntu" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 if id games &>/dev/null; then
   userdel -r -f games
 fi
@@ -1862,7 +1862,7 @@ fi
     <remediation id="set-smb-min-version" msids="185" description="Disable smb v1">
       <action distro="*" action="ActionScript">
         <script>
-          <![CDATA[
+        <![CDATA[
 # Require SMB v2
 if [ -n "$(egrep '^\s*min\sprotocol\s+=\s+SMB1' /etc/samba/smb.conf)" ]; then
     sed -i 's/\(^ *min  *protocol *= *\)SMB1/\1SMB2/i' /etc/samba/smb.conf
