@@ -104,7 +104,7 @@ OPTIONS:
     --no-ssl-098                Do not build for OpenSSL 0.9.8x
     --no-ssl-100                Do not build for OpenSSL 1.0.x
 	--no-ssl-110                Do not build for OpenSSL 1.1.x
-    --no-ssl-300                Do not build for OpenSSL 3.0.0
+    --no-ssl-300                Do not build for OpenSSL 3.0.x
 
     --local                     Build without packages and for the OpenSSL installed to the system.
 EOF
@@ -151,7 +151,7 @@ if [ -d "/usr/local_ssl_0.9.8" ] || [ -d "/usr/local_ssl_1.0.0" ] || [ -d "/usr/
     fi
     if [ -d "/usr/local_ssl_3.0.0" ]; then
         if [ "`uname -m`" == "x86_64" ]; then
-            openssl300_libdir=/usr/local_ssl_3.0.0/lib
+            openssl300_libdir=/usr/local_ssl_3.0.0/lib64
         fi
         openssl300_cflags=`PKG_CONFIG_PATH=$openssl300_libdir/pkgconfig $pkgconfig --cflags openssl`
         openssl300_libs=`PKG_CONFIG_PATH=$openssl300_libdir/pkgconfig $pkgconfig --libs openssl`
