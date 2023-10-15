@@ -1,5 +1,5 @@
 <baseline BaselineId="SSH.Linux.1" BaseOrigId="1">
-	<audits>
+  <audits>
     <audit
       description="Ensure permissions on /etc/ssh/sshd_config are configured."
       msid="5.2.1"

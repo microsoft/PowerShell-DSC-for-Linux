@@ -332,7 +332,7 @@
       msid="33"
       impact="Requiring authentication in single user mode prevents an unauthorized user from rebooting the system into single user to gain root privileges without credentials."
       remediation="run the following command to set a password for the root user: `passwd root`"
-		  ruleId="13a48ca1-92bc-63a1-a4de-b984375fa332">
+      ruleId="13a48ca1-92bc-63a1-a4de-b984375fa332">
       <check distro="*" command="CheckNoMatchingLines" path="/etc/shadow" regex="^root:\s*:"/>
     </audit>
 
@@ -1207,7 +1207,7 @@
 ```
 password sufficient pam_unix.so sha512
 ```"
-	    ruleId="01ec5346-882b-485d-8960-01dedd608792">
+      ruleId="01ec5346-882b-485d-8960-01dedd608792">
       <check distro="*" command="CheckMatchingLinesInFiles" regex="sha512" filter="^password\s.*\s*pam_unix.so\s+\S+" path="/etc/pam.d/common-password|/etc/pam.d/system-auth|/etc/pam.d/system-password" />
       <check distro="*" command="CheckMatchingLines" regex="^ENCRYPT_METHOD\s+SHA512" path="/etc/login.defs" />
     </audit>
@@ -1236,7 +1236,7 @@ Modify user parameters for all users with a password set to match:
 ```
 # chage --inactive 30 
 ```"
-	    ruleId="91fbaeac-f5d0-4ac9-aa1b-52215aef1ed8">
+      ruleId="91fbaeac-f5d0-4ac9-aa1b-52215aef1ed8">
       <check distro="*" command="CheckShadowDate" key="2" expect="before" value="now" path="/etc/shadow" />
     </audit>
 
