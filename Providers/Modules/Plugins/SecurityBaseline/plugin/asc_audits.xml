@@ -76,7 +76,7 @@
       remediation="Run AuditD service (systemctl start auditd)"
       ruleId="c146c4a4-5eb6-4205-88da-5a71a82f2d45">
       <check distro="*" command="CheckServiceEnabled"  expect="running" service="auditd">
-    	<dependency type="PackageInstalled">audit(?:d)?$</dependency>
+      <dependency type="PackageInstalled">audit(?:d)?$</dependency>
       </check>
     </audit>
   </audits>
