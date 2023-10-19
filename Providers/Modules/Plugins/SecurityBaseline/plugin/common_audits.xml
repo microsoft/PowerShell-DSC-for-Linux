@@ -6,7 +6,7 @@
       impact="Removing support for USB storage devices reduces the local attack surface of the server."
       remediation="Edit or create a file in the `/etc/modprobe.d/` directory ending in .conf and add `install usb-storage /bin/true` then unload the usb-storage module or run '/opt/microsoft/omsagent/plugin/omsremediate -r disable-unnecessary-kernel-mods'"
       ruleId="acffbbca-3e5b-9aa9-65ee-ff7b6116565f">
-     <check distro="*" command="CheckMatchingLinesInDir" regex="^install\s+usb-storage\s+/bin/true" path="/etc/modprobe.d/"/>
+      <check distro="*" command="CheckMatchingLinesInDir" regex="^install\s+usb-storage\s+/bin/true" path="/etc/modprobe.d/"/>
     </audit>
 
     <audit
@@ -332,7 +332,7 @@
       msid="33"
       impact="Requiring authentication in single user mode prevents an unauthorized user from rebooting the system into single user to gain root privileges without credentials."
       remediation="run the following command to set a password for the root user: `passwd root`"
-		  ruleId="13a48ca1-92bc-63a1-a4de-b984375fa332">
+      ruleId="13a48ca1-92bc-63a1-a4de-b984375fa332">
       <check distro="*" command="CheckNoMatchingLines" path="/etc/shadow" regex="^root:\s*:"/>
     </audit>
 
@@ -533,7 +533,7 @@
       impact="If the protocol is not required, it is recommended that the drivers not be installed to reduce the potential attack surface."
       remediation="Edit or create a file in the `/etc/modprobe.d/` directory ending in .conf and add `install sctp /bin/true` then unload the sctp module or run '/opt/microsoft/omsagent/plugin/omsremediate -r disable-unnecessary-kernel-mods'"
       ruleId="78228616-15d4-33fe-0357-88e77f228f05">
-     <check distro="*" command="CheckMatchingLinesInDir" regex="^install\s+sctp\s+/bin/true" path="/etc/modprobe.d/"/>
+      <check distro="*" command="CheckMatchingLinesInDir" regex="^install\s+sctp\s+/bin/true" path="/etc/modprobe.d/"/>
     </audit>
 
     <audit
@@ -1076,7 +1076,7 @@
       severity="Important"
       impact="An attacker could use nfs to mount shares and execute/copy files."
       remediation="Disable the nfs service or run '/opt/microsoft/omsagent/plugin/omsremediate -r disable-nfs'"
-      ruleId="ee372ff3-9221-498b-b467-7406bf421168"> 
+      ruleId="ee372ff3-9221-498b-b467-7406bf421168">
       <check distro="*" command="CheckServiceDisabled" service="nfs-server" />
     </audit>
 
@@ -1207,7 +1207,7 @@
 ```
 password sufficient pam_unix.so sha512
 ```"
-	    ruleId="01ec5346-882b-485d-8960-01dedd608792">
+      ruleId="01ec5346-882b-485d-8960-01dedd608792">
       <check distro="*" command="CheckMatchingLinesInFiles" regex="sha512" filter="^password\s.*\s*pam_unix.so\s+\S+" path="/etc/pam.d/common-password|/etc/pam.d/system-auth|/etc/pam.d/system-password" />
       <check distro="*" command="CheckMatchingLines" regex="^ENCRYPT_METHOD\s+SHA512" path="/etc/login.defs" />
     </audit>
@@ -1236,7 +1236,7 @@ Modify user parameters for all users with a password set to match:
 ```
 # chage --inactive 30 
 ```"
-	    ruleId="91fbaeac-f5d0-4ac9-aa1b-52215aef1ed8">
+      ruleId="91fbaeac-f5d0-4ac9-aa1b-52215aef1ed8">
       <check distro="*" command="CheckShadowDate" key="2" expect="before" value="now" path="/etc/shadow" />
     </audit>
 
@@ -1358,12 +1358,12 @@ zypper remove rsh
       impact="SMB v1 has well-known, serious vulnerabilities and does not encrypt data in transit. If it must be used for business reasons, it is strongly recommended that additional steps be taken to mitigate the risks inherent to this protocol."
       remediation="If Samba is not running, remove package, otherwise there should be a line in the [global] section of /etc/samba/smb.conf: min protocol = SMB2 or run '/opt/microsoft/omsagent/plugin/omsremediate -r set-smb-min-version"
       ruleId="7624efb0-3026-4c72-8920-48d5be78a50e">
-      <check 
-        distro="*" 
-        command="CheckMatchingLinesSection" 
-        regex="\s*min protocol\s+=\s+SMB2" 
-        expect="^\s*\[global\]" 
-        path="/etc/samba/smb.conf" 
+      <check
+        distro="*"
+        command="CheckMatchingLinesSection"
+        regex="\s*min protocol\s+=\s+SMB2"
+        expect="^\s*\[global\]"
+        path="/etc/samba/smb.conf"
         key="^\s*\[.+\]">
         <dependency type="ServiceStatus">samba|running</dependency>
       </check>
