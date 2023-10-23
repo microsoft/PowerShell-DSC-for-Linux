@@ -124,10 +124,10 @@ def Set_Marshall(ResourceSettings):
                 proxy_conf_path = PROXY_CONF_PATH_LEGACY
 
             workspace_id = settings.workspace_id.decode() if isinstance(settings.workspace_id, bytes) else settings.workspace_id
-            
+
             agent_service_zone = settings.azure_dns_agent_svc_zone
             azure_dns_agent_svc_zone = agent_service_zone.decode() if isinstance(agent_service_zone, bytes) else agent_service_zone
-            
+
             args = ["python3", REGISTRATION_FILE_PATH, "--register", "-w", workspace_id, "-a", agent_id,
                     "-c", OMS_CERTIFICATE_PATH, "-k", OMS_CERT_KEY_PATH, "-f", WORKING_DIRECTORY_PATH, "-s",
                     WORKER_STATE_DIR, "-e", azure_dns_agent_svc_zone, "-p", proxy_conf_path, "-g",
@@ -364,16 +364,9 @@ def get_optional_metadata():
     vm_id = unknown
     is_azure_vm = False
     try:
-        proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python3", OMS_UTIL_FILE_PATH, "--dmidecode"],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        dmidecode, error = proc.communicate()
-        dmidecode = dmidecode.decode("utf-8")
-        if proc.returncode != 0 or not dmidecode:
-            raise Exception("Unable to invoke omsutil.py --dmidecode: %s" % error.decode())
-        is_azure_vm = linuxutil.is_azure_vm(dmidecode)
-        if is_azure_vm:
+        if linuxutil.is_azure_vm():
             asset_tag = linuxutil.get_azure_vm_asset_tag()
-        vm_id = linuxutil.get_vm_unique_id_from_dmidecode(sys.byteorder, dmidecode)
+        vm_id = linuxutil.get_vm_unique_id()
     except Exception as e:
         log(INFO, "unable to get_optional_metadata: %s" % str(e))
 
@@ -620,7 +613,7 @@ def config_file_to_kv_pair(filename):
 def start_worker_manager_process(workspace_id):
     """
     Start the worker_manager_process
-    :param workspace_id: 
+    :param workspace_id:
     :return: the pid of the worker manager process
     """
     proc = subprocess.Popen(["sudo", "-u", AUTOMATION_USER, "python3", WORKER_MANAGER_START_PATH, OMS_CONF_FILE_PATH,

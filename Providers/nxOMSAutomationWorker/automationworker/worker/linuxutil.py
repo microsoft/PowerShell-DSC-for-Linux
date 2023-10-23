@@ -87,40 +87,34 @@ def get_azure_vm_asset_tag():
     return "7783-7084-3265-9085-8269-3286-77"
 
 
-def is_azure_vm(dmidecode_output):
-    """Detects azure vm from dmidecode output.
-
+def is_azure_vm():
+    """Detects azure vm from /sys/devices/virtual/dmi/id/chassis_asset_tag.
     Note : is an asset tag "7783-7084-3265-9085-8269-3286-77" is present then this is an azure vm.
-
     Returns:
         bool, true if the host is an azure vm.
     """
-    asset_tags = re.findall(get_azure_vm_asset_tag(), dmidecode_output)
+    try:
+        with open('/sys/devices/virtual/dmi/id/chassis_asset_tag', 'r') as file:
+            return file.read().strip() == get_azure_vm_asset_tag()
+    except (FileNotFoundError, PermissionError):
+        print("File not found or permission denied")
+        return False
 
-    for tag in asset_tags:
-        if get_azure_vm_asset_tag() in tag:
-            return True
 
-    return False
-
-
-def get_vm_unique_id_from_dmidecode(byteorder, dmidecode_output):
+def get_vm_unique_id():
     """Extract the host UUID from dmidecode output.
 
     Returns:
         string, the host UUID.
     """
-    uuid_prefix = "UUID: "
-    uuids = re.findall(uuid_prefix + "[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}",
-                       dmidecode_output.upper())
-    if len(uuids) < 1:
+    try:
+        with open('/sys/devices/virtual/dmi/id/product_uuid', 'r') as file:
+            uuid = file.read().strip().lower()
+    except (FileNotFoundError, PermissionError):
         raise Exception("No host UUID found.")
 
-    # if multiple UUIDs are found take the first one
-    uuid = uuids[0].split(uuid_prefix)[1].strip()
-
     # azure uuids are big endian
-    if byteorder == "big":
+    if sys.byteorder == "big":
         return uuid
 
     uuid_part = uuid.split("-")
